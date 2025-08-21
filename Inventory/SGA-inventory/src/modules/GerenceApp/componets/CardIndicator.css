@@ -1,0 +1,77 @@
+
+.CardIndicator{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+    background-color: #fff;
+    border-radius: 2vh;
+    height: 22vh;
+    width: 33vh;
+    position: relative;
+}
+
+.CardIndicator .infoContainer{
+    position: absolute;
+    top: 1vh;
+    right: 1vh;
+}
+
+.CardIndicator .infoContainer i{
+    font-size: clamp(2px,2.5vh,25px);
+    color: #abb;
+    cursor: pointer;
+}
+
+.CardIndicator .infoContainer span{
+    padding: 1vh;
+    background-color: #fff;
+    position: absolute;
+    font-size: clamp(2px,2vh,20px);
+    width: 20vh;
+    border-radius: 1vh;
+    box-shadow:  0 0 1vh #3333;
+    top: 4vh;
+    right: -18vh;
+}
+
+.CardIndicator .iconContainer{
+    height: 70%;
+    width: 100%;
+    border-radius: 1vh;
+    display: flex;
+}
+
+.CardIndicator .iconContainer .loadingCardicon{
+    margin: auto;
+    font-size: clamp(5px,5vh,50px);
+    animation-name: rotateLoadIcon;
+    animation-duration: 1.5s;
+    animation-timing-function: ease;
+    animation-iteration-count: infinite;
+    transition: color 1s;
+    color: #3a63a8;
+}
+
+@keyframes rotateLoadIcon {
+    0%{
+        transform: rotateZ(0deg);
+    }
+
+    80%{
+        transform: rotateZ(350deg);
+    }
+
+    100%{
+        transform: rotateZ(360deg);
+    }
+}
+
+.CardIndicator strong{
+    margin: auto;
+    font-size: clamp(2px,2.5vh,25px);
+    font-weight: 600;
+}
+
+.CardIndicator strong i{
+    margin-right: 1vh;
+}

@@ -1,0 +1,72 @@
+
+.PreviewStore{
+    min-width: 45vh;
+    padding: 2vh 0;
+    width: 100%;
+}
+
+.PreviewStore .storeImgContainer{
+    height: 30vh;
+    width: 100%;
+    background-color: #ddd;
+    border-radius: 2vh;
+    position: relative;
+    overflow: hidden;
+}
+
+.PreviewStore .storeImgContainer .storeImgCaption{
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    padding-top: 4vh;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-image: linear-gradient(to bottom,transparent,#0005);
+}
+
+.PreviewStore .storeImgContainer .BoldTitle{
+    font-size: clamp(2.5px,3vh,30px);
+    margin-bottom: .5vh;
+    color: #fff;
+    text-shadow: 0 0 1vh #0006;
+}
+
+.PreviewStore .storeImgContainer .directionStore{
+    font-size: clamp(2.5px,2.2vh,25px);
+    font-weight: 500;
+    color: #eee;
+}
+
+.PreviewStore .AditionalStoreInfo{
+    padding: 1vh;
+}
+
+.PreviewStore .AditionalStoreInfo .zoneStore{
+    font-size: clamp(2.5px,2.5vh,25px);
+    font-weight: 600;
+    color: #555;
+}
+
+.PreviewStore .AditionalStoreInfo .cellarsContainer, .PreviewStore .usersStoreContainer{
+    display: flex;
+    flex-direction: column;
+}
+
+.PreviewStore .AditionalStoreInfo .UserCard{
+    margin: .5vh 0;
+}
+
+.PreviewStore .AditionalStoreInfo .NewElementSelect{
+    padding: 2vh;
+    border-radius: 1vh;
+}
+
+.PreviewStore .AditionalStoreInfo .NewElementSelect:hover{
+    background-color: #f0f0f0;
+}
+
+.PreviewStore .sas{
+    margin: 4vh;
+}

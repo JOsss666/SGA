@@ -1,0 +1,25 @@
+
+.FormNewProduct{
+    display: flex;
+    flex-direction: column;
+}
+
+.FormNewProduct .BoldTitle{
+    margin: auto;
+    margin-bottom: 2vh;
+}
+
+.FormNewProduct form{
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+}
+
+.FormNewProduct form .FormInput, .FormNewProduct form .SearchinList{
+    margin-bottom: 1vh;
+} 
+
+
+.FormNewProduct form .FormButton{
+    margin-top: 2vh;
+}

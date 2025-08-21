@@ -1,0 +1,39 @@
+
+.ProductTreeCard{
+    margin: 1vh 0;
+    display: flex;
+    margin-left: 6vh;
+    background-color: #fff;
+    border-radius: 1vh;
+    padding: .5vh;
+    cursor: pointer;
+    box-shadow: 0 .2vh 1vh #0002;
+    width: 18vw;
+}
+
+
+.ProductTreeCard img{
+    height: 6vh;
+    width: 6vh;
+    margin: auto 0;
+    margin-right: 1vh;
+    border-radius: .5vh;
+    background-color: #ddd;
+}
+
+.ProductTreeCard .productInfo{
+    display: flex;
+    flex-direction: column;
+}
+
+.ProductTreeCard .productInfo strong{
+    font-size: clamp(2px,2.2vh,25px);
+    font-weight: 500;
+    color: #44422E;
+}
+
+.ProductTreeCard .productInfo h6{
+    font-size: clamp(2px,2vh,25px);
+    font-weight: 500;
+    color: #777;
+}

@@ -1,0 +1,64 @@
+
+.ChatCard{
+    display: flex;
+    padding: 1vh;
+    padding-bottom: 2vh;
+    border-bottom: solid .1vh #ddd;
+    cursor: pointer;
+    border-radius: 1vh;
+}
+
+.ChatCard:hover{
+    background-color: #efefef;
+}
+
+.ChatCard .chatInfo{
+    display: flex;
+    flex-direction: column;
+    width: 65%;
+    margin: auto 1vh;
+}
+
+.ChatCard .chatInfo strong{
+    font-size: clamp(1px,2.5vh,18px);
+    font-weight: 600;
+    text-wrap: nowrap;
+    white-space: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    color: #00022E;
+}
+
+.ChatCard .chatInfo span{
+    margin-top: .5vh;
+    font-size: clamp(1px,2vh,16px);
+    text-wrap: nowrap;
+    white-space: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    color: #747474;
+}
+
+.ChatCard .chatAditionalData{
+    margin: auto 1vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.ChatCard .chatAditionalData span{
+    font-size: clamp(1px,1.6vh,26px);
+    font-weight: 500;
+    color: #747474;
+}
+
+.ChatCard .newMessages{
+    text-align: center;
+    width: fit-content;
+    padding: .25vh 1vh;
+    border-radius: 2vh;
+    margin: 0 auto;
+    margin-top: 1vh;
+    background-color: #FB2A0C;
+    color: #fff;
+    font-size: clamp(1px,2vh,20px);
+}

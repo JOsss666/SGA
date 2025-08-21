@@ -1,0 +1,121 @@
+.GerenceUsers .SectionTitle{
+    margin: 2vh;
+}
+
+.GerenceUsers .gridGerenceUsers{
+    display: flex;
+    flex-wrap: wrap;
+    height: 80vh;
+}
+
+.GerenceUsers .gridGerenceUsers .usersOptions{
+    display: flex;
+    flex-wrap: wrap;
+    height: fit-content;
+    width: 35%;
+    padding:0 1vh;
+    overflow-y: hidden;
+}
+
+.GerenceUsers .gridGerenceUsers .usersOptions .NormalCard{
+    margin-bottom:3vh;
+    margin-right:3vh;
+}
+
+.GerenceUsers .gridGerenceUsers .usersOptions .NormalCard:nth-child(2){
+    animation-delay: .2s;
+}
+
+.GerenceUsers .gridGerenceUsers .usersOptions .NormalCard:nth-child(3){
+    animation-delay: .3s;
+}
+
+.GerenceUsers .gridGerenceUsers .usersOptions .NormalCard:nth-child(4){
+    animation-delay: .4s;
+}
+
+.GerenceUsers .gridGerenceUsers .usersOptions .NormalCard:nth-child(5){
+    animation-delay: .5s;
+}
+
+.GerenceUsers .gridGerenceUsers .usersListContainer{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+    background-color: #fff;
+    outline: solid 1vh #fff7;
+    border-radius: 1vh;
+    width: 25%;
+    height: 80vh;
+    margin: auto;
+}
+
+.GerenceUsers .gridGerenceUsers .usersListContainer .SubSectionTitle{
+    position: absolute;
+    top: -6vh;
+    left: 1vh;
+}
+
+.GerenceUsers .gridGerenceUsers .usersListContainer .usersContainer{
+    margin-top: 2vh;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 90%;
+}
+
+.GerenceUsers .gridGerenceUsers .usersListContainer .usersContainer .UserCard{
+    width: 100%;
+    padding-bottom: 1.5vh;
+    border-bottom: solid .1vh #ddd;
+}
+
+.GerenceUsers .gridGerenceUsers .usersMovements{
+    height: 100%;
+    width: 32%;
+    border-radius: 1vh;
+    margin: auto;
+    background-color: #fff;
+    outline: solid 1vh #fff7;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.GerenceUsers .gridGerenceUsers .usersMovements .SubSectionTitle{
+    position: absolute;
+    top: -6vh;
+    left: 1vh;
+}
+
+.GerenceUsers .gridGerenceUsers .usersMovements .movementsUsersContainer{
+    display: flex;
+    flex-direction: column;
+    height: 90%;
+    width: 100%;
+    padding: 1vh 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+}
+
+.GerenceUsers .gridGerenceUsers .usersMovements .movementsUsersContainer .MovementCard{
+    padding-bottom: 1.5vh;
+    border-bottom: solid .1vh #ddd;
+}
+
+.GerenceUsers .gridGerenceUsers .usersMovements .movementsUsersContainer .MovementCard:hover{
+    background-color: #fff;
+    box-shadow: 0 .4vh 2vh #0003;
+    z-index: 3;
+    margin-left: 1vh;
+}
+
+.GerenceUsers .gridGerenceUsers .usersMovements .movementsUsersContainer .MovementCard:hover .iconContainer{
+    box-shadow: 0 0 2vh #0004;
+}
+
+.GerenceUsers .gridGerenceUsers .usersMovements .ActionButton{
+    margin: auto;
+}

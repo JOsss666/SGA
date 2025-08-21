@@ -1,0 +1,6 @@
+
+.BigTitle{
+    font-size: clamp(5px,4vh,50px);
+    font-weight: 500;
+    color: #4A4848;
+}

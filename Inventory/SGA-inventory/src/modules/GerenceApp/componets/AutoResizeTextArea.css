@@ -1,0 +1,19 @@
+.AutoResizeTextArea{
+    width: 100%;
+    padding: 1.5vh 2vh;
+    font-size: clamp(1px,2vh,20px);
+    border-radius: 1vh;
+    border: hidden;
+    outline: solid .1vh #ccc;
+    color: #888;
+    background-color: #fafafa;
+    padding-right: 7.5vh;
+    width: 100%;
+    min-height: 40px;
+    box-sizing: border-box;
+    max-height: 30vh;
+}
+
+.AutoResizeTextArea:focus{
+    color: #00022E;
+}

@@ -1,0 +1,43 @@
+
+.RowTransactionReport{
+    width: fit-content;
+    display: flex;
+}
+
+.RowTransactionReport span{
+    border-right: dashed .2vh #ddd;
+    border-bottom: dashed .2vh #ddd;
+    background-color: #fff;
+    backdrop-filter: blur(1vh);
+    padding: 1.5vh;
+    padding-left: 2vh;
+    margin: 0;
+    font-weight: 400;
+    font-size: clamp(2.2px,2.2vh,23px);
+    color: #777;
+    white-space: nowrap;    
+    text-overflow: ellipsis;    
+    width: 18.24vh;
+}
+
+.RowTransactionReport span:nth-child(1){
+    width: 10vh;
+}
+
+.RowTransactionReport span:nth-child(5){
+    width: 12vh;
+    text-align: right;
+}
+
+.RowTransactionReport span:nth-child(6){
+    text-align: right;
+}
+
+
+.RowTransactionReport span:nth-child(9){
+    width: 6vh;
+}
+
+.RowTransactionReport span:nth-child(10){
+    width: 6vh;
+}

@@ -1,0 +1,18 @@
+
+.NotificationsApp{
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    z-index: 20;
+    top: 12vh;
+    right: 2vh;
+    width: fit-content;
+    overflow-x: hidden;
+    padding-top: .1vh;
+}
+
+.NotificationsApp .NotificationCard{
+    margin:0 .5vh;
+    margin-bottom: 2vh;
+    margin-left: 2vh;
+}

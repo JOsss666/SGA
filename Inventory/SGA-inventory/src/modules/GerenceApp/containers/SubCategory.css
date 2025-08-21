@@ -1,0 +1,66 @@
+
+.SubCategory{
+    margin-top:2vh;
+    position: relative;
+    width: fit-content;
+}
+
+.SubCategory .contentSub{
+    display: flex;
+    position: relative;
+}
+
+.SubCategory .borderTreeIndicator{
+    position: absolute;
+    width: 2vh;
+    border-left: solid .3vh #747474;
+    border-bottom: solid .3vh #747474;
+    border-bottom-left-radius: 1vh;
+    left: .5vh;
+    top: -1.5vh;
+    height: 100%;
+}
+
+.SubCategory .actualSubCategory span{
+    margin-left: 2.5vh;
+    font-size: clamp(2px,2.5vh,25px);
+    color: #00022E;
+    padding: .5vh 1vh ;
+    border-radius: 1vh;
+    outline:none;
+    cursor: pointer;
+    display: flex;
+    width: fit-content;
+}
+
+.SubCategory .actualSubCategory span .tagColor{
+    height: 1.5vh;
+    width: 1.5vh;
+    border-radius: 100%;
+    background-color: #ccc;
+    margin: auto 0;
+    margin-right: 1vh;
+}
+
+.SubCategory .actualSubCategory span:hover{
+    background-color: #fff;
+    outline: solid .5vh #fff7;
+    box-shadow: 0 .4vh 2vh #3337;
+}
+
+.SubCategory .actualSubCategory span i{
+    margin: auto 1vh;
+    color: #747474;
+}
+
+.SubCategory .actualSubCategory span i:hover{
+    color: #00022E;
+}
+
+.SubCategory .ChildrenContainer .SubCategory{
+    margin-left: 4vh;
+}
+
+.SubCategory .ChildrenContainer .CreateNewProduct{
+    margin-top: 1vh;
+}

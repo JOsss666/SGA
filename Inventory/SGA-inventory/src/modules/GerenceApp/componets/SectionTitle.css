@@ -1,0 +1,6 @@
+
+.SectionTitle{
+    font-size: clamp(4px,4vh,30px);
+    font-weight: 600;
+    color: #00022E;
+}

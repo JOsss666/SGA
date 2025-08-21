@@ -1,0 +1,111 @@
+
+.Analytics{
+    display: grid;
+    grid-template-columns: 66dvw 25dvw;
+    grid-template-rows: 8dvh 80dvh;
+    grid-gap: 0 3vh;
+}
+
+.Analytics .headAnalytics{
+    grid-row-start:1;
+    grid-column-start: span 2;
+    padding: 1vh;
+    height: 100%;
+    width: 100%;
+    display: flex;
+}
+
+.Analytics .headAnalytics .SectionTitle{
+    margin: auto 1vh;
+    margin-right: 3vh;
+}
+
+.Analytics .headAnalytics .SelectOptions{
+    margin: auto 2vh;
+}
+
+.Analytics .headAnalytics .RangeDateInput{
+    margin: auto 1vh;
+}
+
+.Analytics .valuesAnalytics{
+    display: flex;
+    grid-column-start: 1;
+    grid-row-start: 2;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.Analytics .valuesAnalytics .documentsAnalytics{
+    height: 20%;
+    width: 100%;
+    display: flex;
+    padding: 1vh;
+}
+
+.Analytics .valuesAnalytics .documentsAnalytics .ValueAnalytic{
+    margin: auto;
+}
+
+.Analytics .valuesAnalytics .chartsValues{
+    height: 45%;
+    width: 100%;
+}
+
+.Analytics .valuesAnalytics .secondaryValues{
+    height: 35%;
+    width: 100%;
+    padding: 1vh;
+    display: flex;
+}
+
+.Analytics .valuesAnalytics .secondaryValues .DetailChart{
+    margin: auto;
+}
+
+.Analytics .valuesAnalytics .chartsValues{
+    display: flex;
+    padding: 1vh;
+}
+
+.Analytics .valuesAnalytics .chartsValues .ChartIndicator{
+    margin: auto;
+}
+
+.Analytics .productsAnalitics{
+    padding: 1vh;
+    grid-column-start: 2;
+    grid-row-start: 2;
+    position: relative;
+}
+
+.Analytics .productsAnalitics .SubSectionTitle{
+    margin-bottom: 1vh;
+    position: absolute;
+    top: -5vh;
+    left: 2vh;
+}
+
+.Analytics .productsAnalitics .searhProductC{
+    padding: 1vh;
+    outline: solid 1vh #fff7;
+    border-radius: 2vh;
+    background-color: #fff;
+    height: 100%;
+    width: 100%;
+}
+
+.Analytics .productsAnalitics .searhProductC .SearchBar{
+    margin: 1vh auto;
+}
+
+.Analytics .productsAnalitics .searhProductC .productsGrid{
+    width: 100%;
+    height: 90%;
+    margin-top: 2vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-radius: 1vh;
+}

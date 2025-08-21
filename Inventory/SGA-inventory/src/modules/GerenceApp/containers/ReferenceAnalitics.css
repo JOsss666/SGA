@@ -1,0 +1,134 @@
+
+.ReferenceAnalitics{
+    display: flex;
+    flex-direction: column;
+    padding: 0 1vh;
+}
+
+.ReferenceAnalitics .SectionTitle{
+    margin: 2vh 1vh;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference{
+    height: fit-content;
+    width: 100%;
+    margin-top: 2vh;
+    display: flex;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .PreviewProduct{
+    width: 25vw;
+    background-color: #fff;
+    padding: 1vh;
+    border-radius: 3vh;
+    padding-bottom: 3vh;
+}
+
+
+.ReferenceAnalitics .bodyAnaliticReference .movementsReference{
+    width: 66vw;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.ReferenceAnalitics .bodyAnaliticReference .movementsReference .menuFiltersTransactions{
+    height: 4vh;
+    width: 100%;
+    margin: 0 auto;
+    margin-bottom: 2vh;
+    background-color: #fff;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .movementsReference .TableMovments .bodyTableMov{
+    max-height: 50vh;
+    height: 50vh;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .movementsReference .TableMovments .headTableMovements{
+    width: fit-content;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .movementsReference .TableMovments .headTableMovements span{
+    width: 18.24vh;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .movementsReference .TableMovments .headTableMovements span:nth-child(1){
+    width: 10vh;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .movementsReference .TableMovments .headTableMovements span:nth-child(5){
+    width: 12vh;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .movementsReference .TableMovments .headTableMovements span:nth-child(9){
+    width: 6vh;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .movementsReference .TableMovments .headTableMovements span:nth-child(10){
+    width: 6vh;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .menuFilterTable{
+    display: flex;
+    margin-bottom: 2vh;
+    justify-content: right;
+    z-index: 6;
+    position: relative;
+}
+
+
+.ReferenceAnalitics .bodyAnaliticReference .menuFilterTable .FormInput{
+    min-width: 5vw;
+    width: 10vw;
+    margin: auto 1vh;
+    padding: 0;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .menuFilterTable .FormInput label{
+    position: absolute;
+    top: -4vh;
+    font-weight: 400;
+    color: #555;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .menuFilterTable .SearchBar{
+    width: 20vw;
+    margin: auto 0;
+    box-shadow: 0 0 2vh #3333;
+    margin-left: 6vh;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .menuFilterTable .SearchBar input{
+    background-color: #fff;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .menuFilterTable .SelectOptions{
+    margin: auto 0;
+    margin-left: 2vh;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .movementsReference .secondaryIndicators{
+    display: flex;
+    margin-top: 2vh;
+    color: #333;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .movementsReference .secondaryIndicators .CardIndicator{
+    margin: auto 0;
+    margin-right: 3vh;
+}
+
+
+.ReferenceAnalitics .bodyAnaliticReference .movementsReference .secondaryIndicators .inficRot{
+    margin: auto;
+}
+
+.ReferenceAnalitics .bodyAnaliticReference .movementsReference .secondaryIndicators .inficRot h6{
+    text-shadow: 0 .4vh 1vh #2253;
+    text-align: center;
+    padding: 3vh 0;
+    font-size: clamp(5px,6vh,60px);
+    color: #001960;
+}

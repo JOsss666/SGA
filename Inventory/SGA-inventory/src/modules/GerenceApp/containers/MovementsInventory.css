@@ -1,0 +1,81 @@
+
+.MovementsInventory{
+    padding: 1vh;
+}
+
+.MovementsInventory .SectionTitle{
+    margin: 0 2vh;
+    margin-bottom: 2vh;
+}
+
+
+.MovementsInventory .contentMovements{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.MovementsInventory .contentMovements .optionsMovements{
+    display: flex;
+    flex-wrap: wrap;
+    width: 31vw;
+    height: fit-content;
+}
+
+.MovementsInventory .contentMovements .optionsMovements .NormalCard{
+    margin: 1.5vh;
+}
+
+.MovementsInventory .contentMovements .optionsMovements .NormalCard:nth-child(1){animation-delay: .1s;}
+.MovementsInventory .contentMovements .optionsMovements .NormalCard:nth-child(2){animation-delay: .2s;}
+.MovementsInventory .contentMovements .optionsMovements .NormalCard:nth-child(3){animation-delay: .3s;}
+.MovementsInventory .contentMovements .optionsMovements .NormalCard:nth-child(4){animation-delay: .4s;}
+.MovementsInventory .contentMovements .optionsMovements .NormalCard:nth-child(5){animation-delay: .5s;}
+
+.MovementsInventory .contentMovements .historyMovements{
+    width: 26vw;
+    margin: 0 auto;
+    padding: 1vh;
+    background-color: #fff;
+    border-radius: 2vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.MovementsInventory .historyMovements .movementsContainer{
+    display: flex;
+    flex-direction: column;
+    height: 90%;
+}
+
+.MovementsInventory .contentMovements .historyMovements .SubSectionTitle{
+    position: absolute;
+    z-index: 3;
+    top: -6vh;
+    left: 3vh;
+}
+
+.MovementsInventory .contentMovements .historyMovements .FormButton{
+    margin: 2vh auto;
+    width: 70%;
+}
+
+.MovementsInventory .contentMovements .analyticsMovements{
+    width: 33vw;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.MovementsInventory .contentMovements .analyticsMovements .SubSectionTitle{
+    position: absolute;
+    z-index: 3;
+    top: -6vh;
+    left: 3vh;
+}
+
+.MovementsInventory .contentMovements .analyticsMovements .ChartIndicator{
+    margin: 0 auto;
+    margin-bottom: 1vh;
+}

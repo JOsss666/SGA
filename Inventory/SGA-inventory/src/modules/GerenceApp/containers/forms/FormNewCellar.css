@@ -1,0 +1,25 @@
+
+.FormNewCellar{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+    min-width: 45vh;
+}
+
+.FormNewCellar .BoldTitle{
+    margin: 1vh auto;
+}
+
+.FormNewCellar form{
+    margin-top: 1vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.FormNewCellar form .FormInput, .FormNewCellar .SearchinList{
+    margin: .5vh auto;
+}
+
+.FormNewCellar form .FormButton{
+    margin: 2vh auto;
+}

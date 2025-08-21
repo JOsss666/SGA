@@ -1,0 +1,19 @@
+
+.TagIndicator{
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.TagIndicator .colorTag{
+    height: 1vh;
+    width: 1vh;
+    background-color: #888;
+    border-radius: 100%;
+    margin: auto 0;
+}
+
+.TagIndicator b{
+    margin: auto 1vh;
+    font-weight: 500;
+}

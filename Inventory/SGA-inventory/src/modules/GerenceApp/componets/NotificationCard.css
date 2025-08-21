@@ -1,0 +1,65 @@
+
+
+.NotificationCard{
+    display: flex;
+    padding: 1.5vh 1vh;
+    width: 100%;
+    background-color: #EEEEEE;
+    border-radius: 1vh;
+    transition: .3s;
+    cursor: pointer;
+}
+
+.NotificationCard:hover{
+    transform: scale(.99);
+}
+
+.NotificationCard .notificationIcon{
+    margin: auto 1vh;
+    font-size: clamp(1px,3vh,20px);
+    margin-right: 3vh;
+    color: #444;
+}
+
+.NotificationCard .detaislNoti{
+    display: flex;
+    flex-direction: column;
+    margin: auto 0;
+    width: 60%;
+    overflow: hidden;     
+}
+
+.NotificationCard .detaislNoti strong{
+    font-size: clamp(1px,2.2vh,20px);
+    font-weight: 600;
+    color: #00022E;
+    text-overflow: ellipsis;
+    white-space: nowrap;     
+    overflow: hidden;      
+}
+
+.NotificationCard .detaislNoti span{
+    font-size: clamp(1px,2vh,20px);
+    font-weight: 500;
+    color: #747474;
+    text-overflow: ellipsis;
+    white-space: nowrap;     
+    overflow: hidden;      
+}
+
+.NotificationCard .optionsNoti{
+    display: flex;
+    margin: auto 1vh;
+}
+
+.NotificationCard .optionsNoti i{
+    margin: auto 1.5vh;
+    color: #747474;
+    cursor: pointer;
+    transition: .3s;
+    font-size: clamp(1px,2.5vh,30px);
+}
+
+.NotificationCard .optionsNoti i:hover:nth-child(1){
+    transform: rotateZ(-10deg) scale(1.1);
+}

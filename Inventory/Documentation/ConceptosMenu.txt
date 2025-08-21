@@ -1,0 +1,76 @@
+
+- Gerente
+	- Administracion Todas las Tiendas.
+	- Mapa general
+	- Usuarios.
+		- Creacion y gestion usuarios
+	- Estadisticas Generales.
+	- Lista de precios todas las tiendas.
+		- Crear Lista de Precios.
+	- Informes por cada tienda.
+	- Busqueda Producto
+
+- Adminsitrador
+	- Mapa clientes y Proveedores
+	- Administración de Tienda.
+		- Usuarios.
+		- Movimientos Tienda.
+		- Lista de Precios.
+		- Lista de Productos.
+		- Lista de Categorias.
+	- Adminsitración de bodegas.
+	- Adminsitración de secciónes.
+	- Administración usuarios Tienda.
+		- Creación de usuarios.
+		- Administracion permisos usuarios
+		- Informe usuarios.
+	- Estadisticas Productos tienda.
+	- Notificaciónes.
+	- Busqueda Productos
+	- Creación Bodegas
+		- Creación Secciones
+
+- Operador (Usuarios tiendas)
+	- Busqueda Producto (Codigo de barras).
+	- UserAdmin
+		- Generación (Ajuste, Devoluciónes y Costeo)
+	- UserCorriente
+		- Generación (Compras,Ventas,Translados)
+	- Estadisticas Usuario
+		- mis movimientos
+		- Mis responsabilidades.
+	- Notificaciones
+	- Creación Cliente, Creación Proveedor
+
+
+dominio/Empresa/:GerenceKey/:userKey --> Gerente
+	/logIn
+	/GeneralMap
+	/users
+		/newUser
+	/Analytics
+	/PricingLists
+	/Reports
+	/SearchProduct
+
+dominio/Empresa/Stores/:StoreKey/:AdminKey ---> Admin
+	/LogIn
+	/GeneralMap
+	/users
+		/newUser
+	/Analytics
+	/PricingLists
+	/Products
+	/Report
+	/cellars
+		/createNewCellar
+	/notifications
+	/SearchProduct
+
+dominio/Empresa/Operator/:StoreKey/:OperatorKey --> Operador
+
+
+Distintas lista de precios a distintas tiendas
+- Traer Lista de precios de la anterior a la nueva y solo modificar los registros nuevos.
+- ADministrador separa los productos que le tocan a cada quien.
+

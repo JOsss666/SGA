@@ -1,0 +1,65 @@
+
+.MenuList{
+    padding: 1.5vh .5vh;
+    margin-top: 1vh;
+    border-top: solid .3vh #E4E4E4;
+    display: flex;
+    flex-direction: column;
+}
+
+.MenuList li{
+    display: flex;
+    padding:  1vh;
+    border-radius: 1vh;
+    cursor: pointer;
+    margin: .5vh auto;
+    width: 100%;
+}
+
+.MenuList .activeLi{
+    background-image: linear-gradient(to right, #FB2A0C,#FE9F5D);
+    animation-name: selectedMenu;
+    animation-duration: .25s;
+    animation-fill-mode: both;
+    animation-timing-function: ease-in;
+}
+
+.MenuList .activeLi i{
+    color: #fff;
+}
+
+.MenuList .activeLi span{
+    color: #fff;
+}
+
+.MenuList li:hover{
+    background-color:  #eee;
+    transition: .3s;
+}
+
+.MenuList li i{
+    font-size: clamp(1px,2.5vh,20px);
+    margin: auto 0;
+    margin-right: 1vh;
+    color: #999;
+}
+
+.MenuList li span{
+    font-size:clamp(1px,2.5vh,20px);
+    font-weight: 400;
+    color: #b7b7b7;
+    margin: auto 1vh;
+}
+
+
+@keyframes selectedMenu {
+    
+    50%{
+        transform: scale(0.9);
+    }
+
+    100%{
+        transform: scale(1.0);
+    }
+    
+}

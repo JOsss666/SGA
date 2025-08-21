@@ -1,0 +1,79 @@
+
+.ProductInfoCard{
+    width: 100%;
+    height: 19vh;
+    display: flex;
+    padding: 1.5vh 1vh;
+    border-radius: 1vh;
+    cursor: pointer;
+    transition: .3s;
+    position: relative;
+}
+
+.ProductInfoCard:hover{
+    left:.3vh;
+    background-color: #f7f7f7;
+}
+
+
+.ProductInfoCard img{
+    width: 35%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 1vh;
+    background-color: #ccc;
+    outline: solid .1vh #ddd;
+}
+
+.ProductInfoCard .infoProducts{
+    width: 55%;
+    height: 100%;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.ProductInfoCard .infoProducts h6{
+    font-size: clamp(1px,2.5vh,25px);
+    font-weight: 600;
+    margin-bottom: .5vh;
+    color: #00022E;
+    white-space: nowrap;        
+    overflow: hidden;           
+    text-overflow: ellipsis;
+}
+
+.ProductInfoCard .detailProduct{
+    display: flex;
+    margin: .2vh 0;
+    width: 100%;
+}
+
+.ProductInfoCard .detPdes{
+    max-height: 30%;
+}
+
+.ProductInfoCard .detailProduct span{
+    font-size: clamp(1px,1.9vh,20px);
+    font-weight: 500;
+    margin: 0;
+    color: #747474;
+    min-width: 25%;
+}
+
+.ProductInfoCard .detailProduct strong{
+    font-size: clamp(1px,2vh,20px);
+    font-weight: 500;
+    margin-left: 1vh;
+    color: #333;
+    text-align: left;
+    white-space: nowrap;        
+    overflow: hidden;           
+    text-overflow: ellipsis;
+}
+
+.ProductInfoCard .detPdes strong{ 
+    white-space: wrap;     
+    overflow: hidden;           
+    text-overflow: ellipsis;
+}

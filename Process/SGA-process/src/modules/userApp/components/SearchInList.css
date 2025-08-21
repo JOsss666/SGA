@@ -1,0 +1,81 @@
+
+.SearchinList{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh 0;
+}
+
+.SearchinList label{
+    margin-bottom: 1.5vh;
+    font-size: clamp(1px,2.5vh,20px);
+    font-weight: 500;
+}
+
+.SearchinList .SlistC{
+    display: flex;
+    width: 100%;
+    position: relative;
+}
+
+.SearchinList .SlistC input{
+    width:100%;
+    padding: 1vh 2vh;
+    border-radius: .5vh;
+    border: hidden;
+    outline: solid .1vh #ddd;
+    box-shadow: 0 .4vh 1vh #d5d5d5;
+    color: #aaa;
+    z-index: 5;
+}
+
+.SearchinList .SlistC .listElementsContainer{
+    position: absolute;
+    top: 4.8vh;
+    left: 0;
+    list-style: none;
+    background-color: #f1f1f1;
+    outline: solid .1vh #eaeaea;
+    backdrop-filter: blur(1vh);
+    z-index: 8;
+    width: 100%;
+    border-bottom-left-radius: 1vh;
+    border-bottom-right-radius: 1vh;
+    box-shadow: 0 .4vh 1vh #3335;
+    max-height: 20vh;
+    overflow: auto;
+    overflow-x: hidden;
+    animation-name: appearList;
+    animation-duration: .3s;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+}
+
+.SearchinList .SlistC .listElementsContainer li{
+    padding: 1vh 2vh;
+    font-size: clamp(1px,2.2vh,20px);
+    cursor: pointer;
+    color: #333;
+    transition: .3s;
+}
+
+.SearchinList .SlistC .listElementsContainer li:hover{
+    background-color: #ddd;
+    padding-left: 3vh;
+}
+
+
+@keyframes appearList {
+    0%{
+        top: 0;
+        z-index: 4;
+    }
+
+    40%{
+        z-index: 4;
+    }
+
+    100%{
+        top: 4.8vh;
+        z-index: 8;
+    }
+}

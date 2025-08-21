@@ -1,0 +1,25 @@
+
+.PricesListDetails{
+    display: flex;
+    flex-direction: column;
+}
+
+.PricesListDetails .SectionTitle{
+    margin: 2vh;
+}
+
+.PricesListDetails .contentDetailsList{
+    width: 100%;
+    height: 75vh;
+    display: flex;
+    padding: 1vh;
+}
+
+.PricesListDetails .contentDetailsList .containerMainList{
+    height: 100%;
+    width: 80%;
+    background-color: #fff;
+    border-radius: 2vh;
+    outline: solid 1vh #fff9;
+    box-shadow: 0 0 2vh #ccc8;
+}

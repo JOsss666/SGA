@@ -1,0 +1,22 @@
+
+.SubSectionTitle{
+    display: flex;
+    position: relative;
+    width: fit-content;
+}
+
+.SubSectionTitle h3{
+    font-size: clamp(2px,3vh,20px);
+    font-weight: 600;
+    color: #00022E;
+}
+
+.SubSectionTitle .decorationDot{
+    position: absolute;
+    height: 1.5vh;
+    width: 1.5vh;
+    border-radius: 100%;
+    background-color: #FB2A0C;
+    right: -2.5vh;
+    top: 0vh;
+}

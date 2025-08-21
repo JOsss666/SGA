@@ -1,0 +1,101 @@
+
+
+.Stores{
+    padding: 1vh;
+}
+
+.Stores .bodyStores{
+    display: flex;
+    width: 100%;
+    margin-top: 2vh;
+    position: relative;
+}
+
+.Stores .bodyStores .optionsStores{
+    display: flex;
+    flex-wrap: wrap;
+    width: 35%;
+    height: fit-content;
+}
+
+.Stores .bodyStores .optionsStores .NormalCard{
+    margin-top: 3vh;
+    margin-right: 3vh;
+}
+
+.Stores .bodyStores .optionsStores .NormalCard:nth-child(1){animation-delay: .1s;}
+.Stores .bodyStores .optionsStores .NormalCard:nth-child(2){animation-delay: .2s;}
+.Stores .bodyStores .optionsStores .NormalCard:nth-child(3){animation-delay: .3s;}
+.Stores .bodyStores .optionsStores .NormalCard:nth-child(4){animation-delay: .4s;}
+.Stores .bodyStores .optionsStores .NormalCard:nth-child(5){animation-delay: .5s;}
+
+
+.Stores .bodyStores .mapStores{
+    display: flex;
+    flex-direction: column;
+    width: 55%;
+    margin: 0 auto;
+}
+
+.Stores .bodyStores .mapStores .SubSectionTitle{
+    position: absolute;
+    top: -6vh;
+    padding-left: 1vh;
+}
+
+.Stores .bodyStores .mapStores .mapContainer{
+    height: 55vh;
+    width: 100%;
+    background-color: #ddd;
+    border-radius: 1vh;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 2vh #0001;
+    border: solid .1vh #ccc;
+}
+
+
+.Stores .bodyStores .mapStores .mapContainer .menuMap{
+    position: absolute;
+    top: 0vh;
+    padding:2vh 1vh;
+    right: 1vh;
+    display: flex;
+    width: 100%;
+    background-image: linear-gradient(to bottom,#0002,transparent);
+    padding-left: 25vh;
+}
+
+.Stores .bodyStores .mapStores .mapContainer .menuMap .subMenuMap{
+    display: flex;
+}
+
+.Stores .bodyStores .mapStores .mapContainer .menuMap .subMenuMap .BoldButton{
+    margin: auto .5vh;
+    background-color: #fff;
+}
+
+.Stores .bodyStores .mapStores .mapContainer .menuMap .SearchBar{
+    width: 22vw;
+}
+
+.Stores .bodyStores .mapStores .mapContainer .menuMap .SearchBar input{
+    border-radius: 2vh;
+    box-shadow: 0 0 2vh #0003;
+}
+
+.Stores .bodyStores .mapStores .mapContainer .menuMap .SelectOptions{
+    margin: auto 1vh;
+    margin-left: auto;
+}
+
+.Stores .bodyStores .mapStores .stores{
+    display: flex;
+    padding: 1vh 0;
+    margin-top: 2vh;
+}
+
+.Stores .bodyStores .mapStores .stores .StoreCard{
+    margin: auto 0;
+    margin-right: 2vh;
+}

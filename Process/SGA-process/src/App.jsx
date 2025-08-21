@@ -1,0 +1,31 @@
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import './App.css'
+import { UserApp } from './modules/userApp/containers/UserApp';
+import { AlertProvider, AppInfoProvider, NotificationsProvider } from './context/context';
+
+export const urlSer = 'http://localhost:3000';
+
+function App() {
+  return (
+    <NotificationsProvider>
+      <div className="appSpace">
+        <Router>
+                <Routes>
+                    <Route path="" element={<><span>LandingPage Proceso</span></>}/>
+                    <Route path="/aboutUs" element={<><span>SGA_procesos - Sobre Nosotros</span></>}/>
+                    <Route path='/404' element={<span>404 Not found</span>}/>
+                    <Route path='/SGA_process/:company_key/:user_key/*' element={<>
+                      <AlertProvider>
+                          <AppInfoProvider>
+                            <UserApp/>
+                          </AppInfoProvider>
+                      </AlertProvider>
+                    </>} />
+                </Routes>
+              </Router>
+      </div>
+    </NotificationsProvider>
+  )
+}
+
+export default App

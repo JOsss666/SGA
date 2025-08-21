@@ -1,0 +1,45 @@
+
+.ValueAnalytic{
+    background-color: #fff;
+    padding: 1vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 1vh;
+    width: 12vw;
+    height: 100%;
+    position: relative;
+    outline: solid .1vh #dedede;
+}
+
+.ValueAnalytic h6{
+    margin: 1vh;
+    font-size: clamp(1px,2.2vh,20px);
+    font-weight: 500;
+    color:#565252;
+}
+
+.ValueAnalytic strong{
+    margin: 0 1vh;
+    font-size: clamp(1px,2.6vh,30px);
+    font-weight: 600;
+    color: #00022E;
+}
+
+.ValueAnalytic span{
+    font-size: clamp(1px,2vh,20px);
+    margin: 1vh;
+    font-weight: 500;
+    color: #747474;
+}
+
+.ValueAnalytic .percetnIndicator{
+    position: absolute;
+    top: 1vh;
+    right: 1vh;
+    font-size: clamp(1px,1.6vh,20px);
+    background-color: #2EA98C;
+    border-radius: .5vh;
+    padding: .5vh;
+    font-weight: 600;
+    color: #fff;
+}

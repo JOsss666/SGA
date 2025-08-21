@@ -1,0 +1,46 @@
+
+.AlertsApp{
+    position: absolute;
+    width: fit-content;
+    height: 100%;
+    background-color: #fff;
+    backdrop-filter: blur(.5vh);
+    top: 0;
+    right: 0;
+    z-index: 10;
+    display: flex;
+    overflow-y: hidden;
+    box-shadow: -.4vh 0 2vh #0002;
+    animation-name: slideAlertC;
+    animation-duration: .3s;
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+}
+
+.AlertsApp b{
+    display: none;
+}
+
+.AlertsApp .spaceActualAlert{
+    margin: 0 auto;
+    position: relative;
+}
+
+.AlertsApp .spaceActualAlert .superiorAlert{
+    position: absolute;
+    left: 0;
+    top: 0;
+    min-height: 100dvh;
+}
+
+@keyframes slideAlertC {
+    0%{
+        opacity: 0;
+        right: -50%;
+    }
+
+    100%{
+        opacity: 100%;
+        right: 0;
+    }
+}

@@ -1,0 +1,37 @@
+
+.DateInput{
+    padding: 0 1vh;
+    background-color: #fff;
+    border-radius: 1vh;
+    height: fit-content;
+}
+
+.DateInput input{
+    padding-right: 0;
+    color: #747474;
+    border: hidden;
+    border-radius: .5vh;
+    padding: 1vh;
+    font-size: clamp(1px,2.2vh,18px);
+}
+
+.DateInput i{
+    margin: auto 0;
+    cursor: pointer;
+    color: #888;
+}
+
+.DateInput i:hover{
+    color: #333;
+}
+
+.DateInput input:focus{
+    outline: solid .3vh #FB2A0C;   
+    color: #555;
+}
+
+.DateInput input::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+}
+

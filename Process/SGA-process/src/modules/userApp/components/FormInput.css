@@ -1,0 +1,50 @@
+
+.FormInput{
+    padding: 1vh 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 20vw;
+}
+
+.FormInput label{
+    margin-bottom: 1.5vh;
+    font-weight: 500;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: #00022E;
+}
+
+.FormInput .inputContainer{
+    display: flex;
+    width: 100%;
+    position: relative;
+}
+
+.FormInput .inputContainer .moneFHolder{
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background-color: #ffff;
+    padding: 1vh 2vh;
+    color: #00022E;
+    border-radius: .5vh;
+    font-size: clamp(2.5px,2.5vh,25px);
+}
+
+.FormInput .inputContainer input, .FormInput .inputContainer textarea{
+    width:100%;
+    padding: 1vh 2vh;
+    border-radius: .5vh;
+    border: hidden;
+    outline: solid .1vh #ddd;
+    box-shadow: 0 .4vh 1vh #d5d5d5;
+    color: #aaa;
+}
+
+.FormInput .inputContainer textarea{
+    height: 15vh;
+}
+
+.FormInput .inputContainer input:focus, .FormInput .inputContainer textarea:focus{
+    color: #00022E;
+}

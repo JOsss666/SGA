@@ -1,0 +1,27 @@
+
+.CreateNewSubSection{
+    display: flex;
+    margin-top:2vh;
+    margin-left: 7vh;
+    position: relative;
+    width: fit-content;
+}
+
+.CreateNewSubSection .borderTreeIndicator{
+    position: absolute;
+    left: -2.5vh;
+    border-left: solid .3vh #424949;
+    border-bottom: solid .3vh #424949;
+}
+
+.CreateNewSubSection strong{
+    padding: .5vh 1vh;
+    font-size: clamp(2px,2.2vh,25px);
+    font-weight: 500;
+    cursor: pointer;
+    color: #424949;
+}
+
+.CreateNewSubSection strong i{
+    margin-right: 1vh;
+}

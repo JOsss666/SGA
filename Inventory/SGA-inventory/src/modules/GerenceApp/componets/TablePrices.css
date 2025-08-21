@@ -1,0 +1,46 @@
+
+.TablePrices{
+    width: fit-content;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: .1vh;
+}
+
+.TablePrices .headPrices{
+    width: 100%;
+    padding: 1vh;
+    display: flex;
+    background-color: #F9FBFC;
+    border-radius: .5vh;
+    outline: solid .1vh #E3E3E3;
+    box-shadow: 0 .2vh 1vh #0003;
+    z-index: 1;
+}
+
+.TablePrices .headPrices span{
+    color: #747474;
+    font-size: clamp(1px,2vh,20px);
+    font-weight: 500;
+    width: 25vh;
+    padding-left: 1vh;
+}
+
+.TablePrices .headPrices span:nth-child(1){
+    width: 18vh;
+}
+
+.TablePrices .headPrices span:nth-child(2){
+    width: 30vh;
+}
+
+.TablePrices .headPrices span:nth-child(3){
+    width: 30vh;
+}
+
+.TablePrices .rowsContainer{
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 100%;
+}

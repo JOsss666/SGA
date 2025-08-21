@@ -1,0 +1,60 @@
+
+.Notifications{
+    height: 100%;
+    width: 100%;
+    padding: 1vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.Notifications .headNotifications{
+    margin: 1vh auto;
+    display: flex;
+    margin-bottom: 3vh;
+}
+
+.Notifications .SearchBar{
+    width: 100%;
+    margin: 0 auto;
+}
+
+.Notifications .headNotifications strong{
+    font-size: clamp(1px,2.5vh,20px);
+    font-weight: 500;
+    color: #666;
+    margin: auto 0;
+    margin-right: 6vh;
+}
+
+.Notifications .headNotifications .clearNotifications{
+    position: absolute;
+    height: 4.5vh;
+    width: 4.5vh;
+    max-height: 40px;
+    max-width: 40px;
+    border-radius: 100%;
+    border: hidden;
+    top: 2.2vh;
+    right: 4vh;
+    cursor: pointer;
+    display: flex;
+    background-color: #eee;
+}
+
+.Notifications .headNotifications .clearNotifications i{
+    margin: auto;
+    font-size: clamp(1px,2vh,20px);
+    color: #666;
+}
+
+.Notifications .NotiGrid{
+    display: flex;
+    flex-direction: column;
+    max-height: 60vh;
+    overflow-y: auto;
+    margin-top: 2vh;
+}
+
+.Notifications .NotiGrid .NotificationCard{
+    margin: 1vh auto;
+}

@@ -1,0 +1,105 @@
+
+.ListPriceProducts{
+    height: 100%;
+    width: 100%;
+    padding: 1vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.ListPriceProducts .headDataLsit{
+    display: flex;
+    width: 100%;
+    z-index: 6;
+    position: relative;
+}
+
+.ListPriceProducts .headDataLsit .informationList{
+    width: 60%;
+    max-width: 25vw;
+    display: flex;
+    flex-wrap: wrap;
+    max-height: 10vh;
+    overflow: auto;
+}
+
+.ListPriceProducts .headDataLsit .informationList span{
+    font-size: clamp(2px,1.8vh,20px);
+    color: #747474;
+    font-weight: 500;
+    padding: 1vh;
+    width: 50%;
+    text-wrap: nowrap;
+    white-space: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 12vw;
+}
+
+.ListPriceProducts .headDataLsit .informationList strong{
+    margin-left: 1vh 2vh;
+    font-weight: 600;
+    color: #00022E;
+}
+
+.ListPriceProducts .actionsList{
+    padding: 1vh;
+    width: fit-content;
+    max-width: 35%;
+    position: absolute;
+    right: 2vh;
+    top: 1vh;
+}
+
+.ListPriceProducts .filtersList{
+    display: flex;
+    width: 100%;
+    padding: 1vh;
+    margin-top: 1vh;
+    position: relative;
+}
+
+.ListPriceProducts .filtersList .clearFilters{
+    height: 5vh;
+    width: 5vh;
+    display: flex;
+    border-radius: 100%;
+    cursor: pointer;
+    margin: auto 1vh;
+    transition: .3s;
+}
+
+.ListPriceProducts .filtersList .SearchBar{
+    width: 36vh;
+    margin: auto 1vh;
+    margin-left: 0;
+}
+
+.ListPriceProducts .filtersList .SelectOptions{
+    margin: auto 1vh;
+}
+
+
+.ListPriceProducts .filtersList .clearFilters:hover{
+    background-color: #dfdfdf;
+}
+
+.ListPriceProducts .filtersList .clearFilters:hover i{
+    color: #444;
+}
+
+.ListPriceProducts .filtersList .clearFilters i{
+    margin: auto;
+    font-size: clamp(1px,2.5vh,20px);
+    color: #888;
+    transition: .3s;
+}
+
+.ListPriceProducts .tablePrices{
+    margin-top: 2vh;
+    width: 100%;
+    height: 100%;
+    border-radius: 1vh;
+    overflow-x: auto;
+    padding: .1vh;
+}

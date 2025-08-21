@@ -1,0 +1,73 @@
+
+
+.ListCard{
+    height: 25vh;
+    width: 30vh;
+    background-color: #FEDF68;
+    border-radius: 2vh;
+    padding: 1vh 2vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: .3s;
+    position: relative;
+    box-shadow: 0 .2vh 2vh #3333;
+}
+
+.ListCard:hover{
+    transform: scale(0.95);
+}
+
+.ListCard h3{
+    font-size: clamp(1px,2.5vh,20px);
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;            
+    text-overflow: ellipsis; 
+}
+
+.ListCard strong{
+    font-size: clamp(1px,4vh,30px);
+    margin: 1.5vh 0;
+}
+
+.ListCard strong i{
+    margin-right: 1vh;
+}
+
+.ListCard span{
+    font-size: clamp(1px,2.2vh,20px);
+    font-weight: 500;
+    color: #333;
+    height: 8vh;
+    overflow: hidden;            /* Oculta el texto que se desborda */
+    text-overflow: ellipsis; 
+}
+
+.ListCard b{
+    font-size: clamp(1px,2.2vh,20px);
+    font-weight: 700;
+    margin: auto 0;
+}
+
+.ListCard b i{
+    margin-right: 1vh;
+}
+
+.ListCard .downloadList{
+    position: absolute;
+    height: 4.5vh;
+    width: 4.5vh;
+    border-radius: 1vh;
+    top: 1vh;
+    right: 1vh;
+    background-color: #0002;
+    display: flex;
+}
+
+.ListCard .downloadList i{
+    font-size: 3vh;
+    margin: auto;
+    color: #fff;
+}

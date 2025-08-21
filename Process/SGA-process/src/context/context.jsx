@@ -1,0 +1,146 @@
+import { createContext, useContext, useEffect, useState } from 'react';
+import { postInfo } from '../utils/functions';
+
+const AppInfo = createContext();
+const AppNotifications = createContext();
+const AppAlerts = createContext();
+
+export function useAppInfo(){
+    return useContext(AppInfo);
+}
+
+export function useNotifications(){
+    return useContext(AppNotifications);
+}
+
+export function useAlert(){
+    return useContext(AppAlerts);
+}
+
+export function NotificationsProvider({children}){
+    const [notifications,setNotifications] = useState([]);
+    
+    const addNotification = (newNotification)=>{
+        let C = []
+        notifications.map((element)=>{
+            C.push(element)
+        })
+        C.push(newNotification)
+        setNotifications(C);
+    }
+
+    const deleteNotification = (indexDel)=>{
+        let C = []
+        notifications.map((element,index)=>{
+            if(index != indexDel){
+                C.push(element)
+            }
+        })
+        setNotifications(C);
+    }
+
+    const value = {
+        notifications,
+        addNotification,
+        deleteNotification
+    }
+
+    useEffect(()=>{
+        console.log(notifications);
+    },[notifications])
+
+    return(
+        <AppNotifications.Provider value={value}>
+            {children}  
+        </AppNotifications.Provider>
+    )
+}
+
+
+export function AlertProvider({ children }) {
+    const [openAlert, setOpenAlert] = useState(false);
+    const [tailAlerts, setTailAlerts] = useState([]);
+    
+    const popInAlert = (child) => {
+        setTailAlerts(prev => [...prev, child]);
+        if(!openAlert){
+            setOpenAlert(true);
+        }
+    }
+
+    const popOutAlert = () => {
+        if(tailAlerts.length >1){
+            let C = []
+            tailAlerts.map((element,index)=>{
+                if(index != tailAlerts.length -1){
+                    C.push(element);
+                }
+            });
+            setTailAlerts(C);
+        }else{
+        setOpenAlert(false)
+        setTailAlerts([])
+        }
+    }
+
+    const value = {
+        openAlert,
+        setOpenAlert,
+        tailAlerts,
+        setTailAlerts,
+        popInAlert,
+        popOutAlert
+    };
+
+    useEffect(()=>{
+        if(openAlert == false){
+            setTailAlerts([])
+        }
+    },[openAlert])
+
+    return (
+        <AppAlerts.Provider value={value}>
+        {children}
+        </AppAlerts.Provider>
+    );
+}
+
+export function AppInfoProvider({children}){
+    const [appInfo,setAppInfo] = useState({});
+    const [userInfo,setUserInfo] = useState({});
+    const [loadingAppData,setLoadingAppData] = useState(true);
+
+    const getAppData = async()=>{
+        setLoadingAppData(true);
+        let appI = await postInfo('/getCompanyInfo',1);
+        if(appI[0]){
+            console.log(appI)
+            setAppInfo(appI[1][0]);
+        }
+        let userI = await postInfo('/getUserInfo',1);
+        if(userI[0]){
+            setUserInfo(userI[1][0])
+        }
+        setLoadingAppData(false);
+    }
+
+    useEffect(()=>{
+        getAppData();
+    },[])
+
+        const value = {
+        appInfo,
+        setAppInfo,
+        userInfo,
+        setUserInfo,
+        loadingAppData,
+        setLoadingAppData,
+        getAppData
+    }
+
+    return(
+        <AppInfo.Provider value={value}>
+        {children}
+        </AppInfo.Provider>
+    )
+}

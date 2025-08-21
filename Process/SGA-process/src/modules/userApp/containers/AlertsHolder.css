@@ -1,0 +1,35 @@
+
+.AlertsHolder{
+    position: absolute;
+    height: 100dvh;
+    background-color: #fff;
+    box-shadow: -.5vh 0 2vh #0002;
+    z-index: 31;
+    top: 0;
+    right: 0;
+    animation-name: AlertsHolder;
+    animation-duration: .4s;
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+    display: grid;
+    place-items: start;
+    overflow: hidden;
+}
+
+.AlertsHolder .AlertContainer{
+    grid-area: 1 / 1;
+}
+
+.AlertsHolder .AlertContainer:nth-child(1){
+    animation-delay: .5s;
+}
+
+@keyframes AlertsHolder {
+    0%{
+        right: -120%;
+    }
+
+    100%{
+        right: 0;
+    }
+}

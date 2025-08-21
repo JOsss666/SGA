@@ -1,0 +1,57 @@
+
+.NormalCard{
+    padding: 1vh 2vh;
+    position: relative;
+    height: 20vh;
+    width: 30vh;
+    background-color: #fff;
+    border-radius: 2.5vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: .3s;
+    animation-name: appearCard;
+    animation-duration: .5s;
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+    outline: solid .6vh #fff7;
+}
+
+.NormalCard:hover {
+    border-radius: 1vh;
+}
+
+.NormalCard:hover strong{
+    margin-top:20%;
+    margin-bottom: 1vh;
+}
+
+.NormalCard  strong{
+    font-size: clamp(1px,2,5vh,25px);
+    font-weight: 600;
+    margin-bottom: 20%;
+    margin-top: 52%;
+    transition: .3s;
+    color: #00022E;
+}
+
+.NormalCard  span{
+    font-size: clamp(1px,2.2vh,20px);
+    font-weight: 500;
+    margin-bottom: .5vh;
+    color: #747474;
+}
+
+@keyframes appearCard {
+    0%{
+        top: 30vh;
+        transform: scale(.9);
+        opacity: 10;
+    }
+    100%{
+        top: 0;
+        transform: scale(1);
+        opacity: 100;
+    }
+}

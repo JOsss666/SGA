@@ -1,0 +1,16 @@
+
+
+.RangeDateInput{
+    display: flex;
+    background-color: #fff;
+    padding: 0 1vh;
+    height: fit-content;
+    border-radius: 1vh;
+    border: solid .1vh #eee;
+}
+
+.RangeDateInput span{
+    margin: auto 0;
+    margin-left: 1vh;
+    color: #788;
+}

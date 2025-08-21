@@ -1,0 +1,83 @@
+.VoiceAsistat{
+    width: 100%;
+    height: 100%;
+    padding: 1vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.VoiceAsistat .logosContainer{
+    display: flex;
+    flex-direction: column;
+}
+
+.VoiceAsistat .logosContainer .SGALogo{
+    display: flex;
+    height: 5vh;
+    height: fit-content;
+    width: fit-content;
+    margin: 1vh auto;
+}
+
+.VoiceAsistat .logosContainer .SGALogo img{
+    width: 10vh;
+    height: auto;
+    object-fit: cover;
+    margin: auto 0;
+}
+
+.VoiceAsistat .logosContainer .SGALogo strong{
+    margin: auto 0;
+    font-weight: 700;
+    font-size: clamp(1px,2.5vh,20px);
+    color: #FB2A0C;
+}
+
+.VoiceAsistat .logosContainer span{
+    margin:0 auto;
+    font-size: 2vh;
+    color: #888;
+}
+
+.VoiceAsistat .logosContainer span a{
+    color: #4D6BFE;
+    text-decoration: none;
+}
+
+.VoiceAsistat .chatInput{
+    position: absolute;
+    left: 0;
+    bottom: 1vh;
+    width: 100%;
+    padding: 1vh;
+}
+
+.VoiceAsistat .chatInput button{
+    position: absolute;
+    bottom: 3.5vh;
+    right: 2vh;
+    height: 5vh;
+    width: 5vh;
+    border-radius: 100%;
+    display: flex;
+    border: hidden;
+    background-color: #ccc;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.VoiceAsistat .chatInput button i{
+    margin: auto;
+    font-size: clamp(1px,2.5vh,20px);
+    color: #444;
+}
+
+.VoiceAsistat .chatInput button:hover{
+    transform: scale(1.05);
+    background-color: #FB2A0C;
+}
+
+.VoiceAsistat .chatInput button:hover i{
+    color: #fff;
+}

@@ -1,0 +1,30 @@
+
+.EditCostValueList{
+    display: flex;
+    flex-direction: column;
+    margin-top: 2vh;
+    min-width: 45vh;
+    width: 100%;
+}
+
+.EditCostValueList .BoldTitle{
+    max-width: 35vh;
+    text-align: center;
+    margin: auto;
+    margin-bottom: 2vh;
+}
+
+.EditCostValueList form{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+}
+
+.EditCostValueList form .FormInput{
+    margin: 0 auto;
+    margin-bottom: 2vh;
+}
+
+.EditCostValueList form .FormButton{
+    margin: 1vh auto;
+}

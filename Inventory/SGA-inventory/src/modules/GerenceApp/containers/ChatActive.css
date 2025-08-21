@@ -1,0 +1,95 @@
+.ChatActive{
+    position: relative;
+    height: 100%;
+    border-radius: 2vh;
+    overflow: hidden;
+    animation-name: appearChat;
+    animation-duration: .5s;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+}
+
+.ChatActive .headChat{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 1vh;
+    display: flex;
+    background-color: #ddd9;
+    backdrop-filter: blur(.3vh);
+}
+
+.ChatActive .headChat .exitChat{
+    padding: 1vh;
+    border-radius: 100%;
+    margin: auto 1vh;
+    cursor: pointer;
+    color: #00022E;
+}
+
+.ChatActive .headChat .exitChat:hover{
+    background-color: #ccc;
+}
+
+.ChatActive .headChat strong{
+    margin: auto 1vh;
+    font-size: clamp(1px,2.5vh,20px);
+    font-weight: 600;
+    color: #00022E;
+}
+
+.ChatActive .contentChat{
+    padding: 1vh;
+    height: 90%;
+    overflow-y: auto;
+    background-color: #fff;
+}
+
+.ChatActive .chatToogles{
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    padding: 0 .5vh;
+}
+.ChatActive .AutoResizeTextArea{
+    max-height: 20vh;
+}
+
+.ChatActive .sendMessage{
+    position: absolute;
+    width: 5vh;
+    height: 5vh;
+    bottom: 2.25vh;
+    right: 2vh;
+    border-radius: 100%;
+    border: hidden;
+    display: flex;
+    background-color: #ddd;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.ChatActive .sendMessage i{
+    margin: auto;
+    transition: .3s;
+    color: #888;
+}
+
+.ChatActive .sendMessage:hover{
+    transform: scale(.9);
+    background-color: #FB2A0C;
+}
+
+.ChatActive .sendMessage:hover i{
+    color: #fff;
+}
+
+@keyframes appearChat {
+    0%{
+        left: -50vh;
+    }
+
+    100%{left: 0;}
+}

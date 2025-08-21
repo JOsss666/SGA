@@ -1,0 +1,16 @@
+
+.DetailChart{
+    width: 32vh;
+    border-radius: 1vh;
+    background-color: #fff;
+    height: 25vh;
+    display: flex;
+}
+
+.DetailChart strong{
+    margin: 1vh;
+    margin-left: 2vh;
+    font-size: clamp(1px,2.5vh,25px);
+    font-weight: 600;
+    color: #00022E;
+}

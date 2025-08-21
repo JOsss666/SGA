@@ -1,0 +1,68 @@
+
+.RowMovement{
+    display: flex;
+    width: inherit;
+}
+
+.RowMovement:hover{
+    box-shadow:  0 .2vh 1vh #2223;
+    z-index: 3;
+}
+
+.RowMovement span{
+    border-right: dashed .2vh #ddd;
+    border-bottom: dashed .2vh #ddd;
+    width: 20vh;
+    background-color: #fff;
+    backdrop-filter: blur(1vh);
+    padding: 1.5vh;
+    padding-left: 2vh;
+    margin: 0;
+    font-weight: 400;
+    font-size: clamp(2.2px,2.2vh,23px);
+    color: #777;
+    white-space: nowrap;    
+    text-overflow: ellipsis;    
+}
+
+.RowMovement span .SelectOptionMov{
+    font-weight: 500;
+    text-decoration: underline;
+    cursor: pointer;
+    color: #3498db;
+    text-underline-offset: .5vh;
+}
+
+
+.RowMovement span:nth-child(1){
+    width: 8vh;
+}
+
+.RowMovement span:nth-child(2){
+    width: 15vh;
+}
+
+.RowMovement span:nth-child(3){
+    text-align: right;
+}
+
+.RowMovement span:nth-child(9){
+    width: 30vh;
+}
+
+
+.RowMovement span:nth-child(11){
+    width: 6vh;
+    display: flex;
+}
+
+.RowMovement span:nth-child(12){
+    width: 6vh;
+    display: flex;
+}
+
+.RowMovement span:nth-child(11) i, .RowMovement span:nth-child(12) i{
+    cursor: pointer;
+    margin: auto;
+    font-size: 2vh;
+}

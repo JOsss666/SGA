@@ -1,0 +1,20 @@
+
+.TagIndicator{
+    padding: .5vh 1.5vh;
+    outline: solid .1vh #ccc;
+    border-radius: 2vh;
+    display: flex;
+    background-color: #eee;
+}
+
+.TagIndicator h5{
+    font-size: clamp(2.2px,2vh,22px);
+    font-weight: 400;
+}
+
+.TagIndicator i{
+    font-size: clamp(2px,2vh,20px);
+    margin: auto;
+    margin-left: .7vh;
+    cursor: pointer;
+}

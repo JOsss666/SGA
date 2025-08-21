@@ -1,0 +1,28 @@
+
+
+.BoldButton{
+    display: flex;
+    height: 4vh;
+    width: 4vh;
+    border-radius: 1vh;
+    background-color: #eee;
+    cursor: pointer;
+    box-shadow: 0 0 1vh #0005;
+    transition: .3s;
+}
+
+.BoldButton:hover{
+    background-color: #fff;
+    transform: scale(.95);
+}
+
+.BoldButton:hover i{
+    color: #000;
+}
+
+.BoldButton i{
+    margin: auto;
+    font-size: clamp(2px,2.5vh,20px);
+    transition: .3s;
+    color: #515a5a;
+}

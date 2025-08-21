@@ -1,0 +1,59 @@
+
+.TableMovments{
+    position: relative;
+    background-color: #fff;
+}
+
+.TableMovments .headTableMovements{
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;    
+    width: 100%;
+    z-index: 5;
+}
+
+.TableMovments .headTableMovements span{
+    border-right: solid .1vh #ccc;
+    border-bottom: solid .2vh #ccc;
+    width: 20vh;
+    background-color: #fffc;
+    backdrop-filter: blur(.5vh);
+    padding: 1vh;
+    padding-left: 2vh;
+    margin: 0;
+    font-weight: 400;
+    font-size: clamp(2.2px,2.2vh,23px);
+    color: #555;
+}
+
+.TableMovments .headTableMovements span:nth-child(1){
+    width: 8vh;
+}
+
+.TableMovments .headTableMovements span:nth-child(2){
+    width: 15vh;
+}
+
+.TableMovments .headTableMovements span:nth-child(9){
+    width: 30vh;
+}
+
+
+.TableMovments .headTableMovements span:nth-child(11){
+    width: 6vh;
+}
+
+.TableMovments .headTableMovements span:nth-child(12){
+    width: 6vh;
+}
+
+
+.TableMovments .bodyTableMov{
+    padding-top: 5vh;
+    display: flex;
+    flex-direction: column;
+    max-height: 70vh;
+    width: 100%;
+    overflow: auto;
+}

@@ -1,0 +1,40 @@
+
+.StoreCard{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+    border-radius: 1vh;
+    background-color: #fff;
+    width: 25vh;
+    cursor: pointer;
+    height: 20vh;
+    box-shadow: 0 .4vh 2vh #0001;
+}
+
+.StoreCard img{
+    height: 10vh;
+    width: 100%;
+    border-radius: 1vh;
+    background-color: #ccc;
+    margin: 0 auto;
+    margin-bottom: 1vh;
+    object-fit: cover;
+    outline: solid .1vh #ddd;
+}
+
+.StoreCard .StoreInfo{
+    display: flex;
+    flex-direction: column;
+    padding: 0 1vh;
+}
+
+.StoreCard .StoreInfo strong{
+    font-size: clamp(2px,2.2vh,25px);
+    margin-bottom: .5vh;
+}
+
+.StoreCard .StoreInfo span{
+    font-size: clamp(2px,2vh,22px);
+    margin-bottom: 1vh;
+    color: #666;
+}

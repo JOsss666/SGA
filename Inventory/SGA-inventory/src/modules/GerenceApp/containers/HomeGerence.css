@@ -1,0 +1,84 @@
+
+.HomeGerence{
+    display: grid;
+    grid-template-columns: 45% 30% 20%;
+    grid-template-rows:80% 20%;
+    padding: 1vh;
+    min-height: 90.5dvh;
+    grid-gap: 1vh;
+}
+
+.HomeGerence .newsHome{
+    grid-column-start: 1;
+    grid-row-start: 1;
+    padding: 1vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.HomeGerence .newsHome .SectionTitle{
+    margin-bottom: 2vh;
+}
+
+.HomeGerence .newsHome .spaceNews{
+    height: 90%;
+    width: 100%;
+    margin: 1vh auto;
+    background-color: #fff;
+    border-radius: 2vh;
+    outline: solid 1vh #fff7;
+}
+
+
+.HomeGerence .NotificationsPanel{
+    grid-column-start: 2;
+    grid-row-start: 1;
+    padding: 1vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.HomeGerence .NotificationsPanel .SubSectionTitle{
+    margin: 2vh 1vh;
+    margin-bottom: 3vh;
+}
+
+.HomeGerence .NotificationsPanel .Notifications{
+    background-color: #fff;
+    border-radius: 2vh;
+    outline: solid 1vh #fff9;
+    height:  86%;
+}
+
+.HomeGerence .NotificationsPanel .Notifications .NotiGrid{
+    margin-top: 0;
+}
+
+.HomeGerence .chatDisplay{
+    display: flex;
+    flex-direction: column;
+    grid-column-start: 3;
+    grid-row-start: 1;
+    margin-left: 2vh;
+    max-height: 71vh;
+}
+
+.HomeGerence .chatDisplay .SubSectionTitle{
+    margin: 3vh 0;
+}
+
+.HomeGerence .chatDisplay .ChatDisplay{
+    height: 84%;
+    width: 100%;
+}
+
+.HomeGerence .quickStadistics{
+    grid-column-start:span 3;
+    grid-row-start: 2;
+    padding: 1vh;
+    height: 100%;
+    width: 100%;
+    background-color: #fff;
+    border-radius: 2vh;
+    outline: solid 1vh #fff7;
+}

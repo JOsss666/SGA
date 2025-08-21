@@ -1,0 +1,35 @@
+
+.RecordMovents{
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.RecordMovents .SectionTitle{
+    margin: 2vh 1vh;
+    margin-bottom: 4vh;
+}
+
+.RecordMovents .menuFilterTable{
+    position: absolute;
+    width: fit-content;
+    top: 8vh;
+    right: 1vh;
+    display: flex;
+    z-index: 7;
+}
+
+.RecordMovents .menuFilterTable .SearchBar{
+    width: 25vw;
+    margin: auto 1vh;
+    box-shadow: 0 0 1vh #0003;
+}
+
+.RecordMovents .menuFilterTable .SearchBar input{
+    background-color: #fff;
+}
+
+.RecordMovents .menuFilterTable .SelectOptions{
+    margin: auto 0;
+    margin-left: 2vh;
+}

@@ -1,0 +1,80 @@
+
+.PreviewCellar{
+    display: flex;
+    flex-direction: column;
+    min-width: 45vh;
+    width: 100%;
+    margin-top: 2vh;
+}
+
+.PreviewCellar .headPrevCellar{
+    display: flex;
+    margin-bottom: 4vh;
+    width: 100%;
+}
+
+.PreviewCellar .inconCellarC{
+    display: flex;
+    width: 7vh;
+    height: 7vh;
+    border-radius: 2vh;
+    background-color: #DAD9D8;
+    margin: auto 0;
+    margin-right: 2vh;
+}
+
+.PreviewCellar .inconCellarC i{
+    font-size: clamp(4px,3.5vh,40px);
+    margin: auto;
+    color: #58534e;
+}
+
+.PreviewCellar .infoCellar{
+    display: flex;
+    flex-direction: column;
+}
+
+.PreviewCellar .infoCellar .BoldTitle{
+    font-size: clamp(4px,3vh,40px);
+    margin-bottom: .5vh;
+}
+
+.PreviewCellar .infoCellar span{
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 500;
+    color: #58534e;
+}
+
+.PreviewCellar .headPrevCellar .menuCellar{
+    display: flex;
+    margin: auto 0; 
+    position: relative;
+    right: -8vh;
+}
+
+.PreviewCellar .headPrevCellar .menuCellar .BoldButton{
+    margin: auto 1vh;
+}
+
+.PreviewCellar .bodyCellar{
+    display: flex;
+    flex-direction: column;
+}
+
+.PreviewCellar .bodyCellar .TitleValue{
+    margin: 1vh 0;
+}
+
+.PreviewCellar .SectionsContainer, .PreviewCellar .productsContainer{
+    display: flex;
+    flex-direction: column;
+}
+
+.PreviewCellar .NewElementSelect{
+    padding: 2vh;
+    border-radius: 1vh;
+}
+
+.PreviewCellar  .NewElementSelect:hover{
+    background-color: #f0f0f0;
+}

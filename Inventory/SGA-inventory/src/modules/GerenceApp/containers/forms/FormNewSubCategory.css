@@ -1,0 +1,25 @@
+
+.FormNewSubCategory{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+}
+
+.FormNewSubCategory .BoldTitle{
+    margin: 0 auto;
+    margin-bottom: 2vh;
+    max-width: 20vw;
+    text-align: center;
+}
+
+.FormNewSubCategory .FormButton{
+    margin-top: 2vh;
+}
+
+.FormNewSubCategory span{
+    margin-top: 2vh;
+    text-align: center;
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 400;
+    color: #888;
+}

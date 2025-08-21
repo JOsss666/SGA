@@ -1,0 +1,28 @@
+
+.CreateStore{
+    padding: 1vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: 2vh;
+    min-width: 45vh;
+    width: 100%;
+}
+
+.CreateStore .BoldTitle{
+    margin: auto 0;
+    margin-bottom: 2vh;
+    text-align: center;
+}
+
+.CreateStore form{
+    display: flex;
+    flex-direction: column;
+}
+
+.CreateStore form .FormInput{
+    margin-bottom: 1vh;
+}
+
+.CreateStore form .FormButton{
+    margin-top: 2vh;
+}

@@ -1,0 +1,87 @@
+
+.ActionButton{
+    display: flex;
+    border-radius: 1vh;
+    background-color: #00022E;
+    width: fit-content;
+    max-width: 27vh;
+    height: 5vh;
+    cursor: pointer;
+    position: relative;
+}
+
+.ActionButton:hover i{
+    transform: scale(.95);
+    color: #fff;
+}
+
+.ActionButton .contentButton{
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background-color: #00022E;
+    z-index: 3;
+    padding: 0 1vh;
+    border-radius: 1vh;
+    box-shadow: 0 .2vh 1vh #0003;
+}
+
+.ActionButton button:hover{
+    background-color: #444;
+}
+
+.ActionButton button{
+    border-radius: 1vh;
+    background-color: #00022E;
+    color: #fff;
+    border: hidden;
+    outline: none;
+    padding: 1vh ;
+    text-align: center;
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+    cursor: pointer;
+    transition: .3s;
+    text-wrap: nowrap;
+    white-space: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.ActionButton i{
+    color: #aaa;
+    margin: auto 1vh;
+    cursor: pointer;
+    transition: .3s;
+    z-index: 3;
+}
+
+.ActionButton .optionsBUtton{
+    position: absolute;
+    top:4vh;
+    padding-top: 1vh;
+    left: 0;
+    width: 100%;
+    background-color: #fff9;
+    backdrop-filter: blur(.4vh);
+    list-style: none;
+    border-bottom-left-radius: 1vh;
+    border-bottom-right-radius: 1vh;
+    box-shadow: 0 .4vh 1vh #ccc8;
+    overflow: hidden;
+    outline: solid .1vh #ddd;
+}
+
+.ActionButton .optionsBUtton li{
+    padding-left: 2vh;
+    padding: 1vh;
+    font-size: clamp(1px,2vh,20px);
+    font-weight: 500;
+    transition: .3s;
+}
+
+.ActionButton .optionsBUtton li:hover{
+    background-color: #ccc7;
+    box-shadow: 0 .4vh 1vh #0003;
+    padding-left: 2.5vh;
+}

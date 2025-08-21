@@ -1,0 +1,21 @@
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'inter';
+}
+
+.appSpace{
+  position: relative;
+  box-sizing: border-box;
+  height: 100dvh;
+  width: 100dvw;
+  overflow-x: hidden;
+}
+
+.appSpace .appSection{
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
