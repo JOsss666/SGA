@@ -1,6 +1,6 @@
 
 .BigTitle{
-    font-size: clamp(5px,4vh,50px);
+    font-size: clamp(4px,4vh,40px);
     font-weight: 500;
     color: #4A4848;
 }
