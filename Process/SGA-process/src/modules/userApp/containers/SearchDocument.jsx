@@ -9,6 +9,7 @@ import { SelectOptions } from "../components/SelectOptions";
 import { FormInput } from "../components/FormInput";
 import { postInfo } from "../../../utils/functions";
 import { OpCard } from "../components/OpCard";
+import { OcSimpleCard } from "../components/OcSimpleCard";
 
 export function SearchDocument({}){
 
@@ -133,6 +134,8 @@ export function SearchDocument({}){
                             <div className="contentPrevElement">
                                 {selectedDoc.type == 'OP' && (
                                     <OpCard data={selectedDoc} />
+                                )}{selectedDoc.type != 'OP' && (
+                                    <OcSimpleCard info={selectedDoc}/>
                                 )}
                             </div>
                         )}
