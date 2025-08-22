@@ -12,9 +12,7 @@ import { OpCard } from "../components/OpCard";
 import { OcSimpleCard } from "../components/OcSimpleCard";
 
 export function SearchDocument({}){
-
-
-    // 
+    
     const [searchVal,setSearchVal] = useState('');
     const [types,setTypes] = useState(['OP','OC','DC','FV','CI'])
     const [initialDate,setInitialDate] = useState();
