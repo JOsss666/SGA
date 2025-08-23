@@ -17,6 +17,7 @@ import { AlertsHolder } from './AlertsHolder';
 import { AcountsPlan } from './AcountsPlan';
 import { TutorialAccountsPlan } from './tutorials/TutorialAccountsPlan';
 import { SearchDocument } from './SearchDocument';
+import { Reports } from './Reports';
 
 export function UserApp(){
 
@@ -103,6 +104,7 @@ export function UserApp(){
                             <Route path='/newDocument' element={<CreateDocument/>} />
                             <Route path='/users' element={appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
                             <Route path='/searchDocument' element={<SearchDocument/>} />
+                            <Route path='/reports' element={<Reports/>} />
                     </Routes>
                 </main>
                 <NotificationsApp/>

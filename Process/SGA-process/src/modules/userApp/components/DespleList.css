@@ -1,0 +1,64 @@
+
+.DespleList{
+    background-color: #fff7;
+    backdrop-filter: blur(1vh);
+    height: fit-content;
+    width: fit-content;
+    padding: 1vh;
+    border-radius: 1vh;
+    outline: solid .3vh #F0F9FF;
+}
+
+.DespleList h6{
+    font-size: clamp(2.2px,2.2vh,22px);
+    margin-bottom: 1vh;
+    font-weight: 600;
+    margin-left: .5vh;
+}
+
+.DespleList .childrenSpan h6:hover{
+    color: #9810FA;
+}
+
+.DespleList h6 i{
+    margin: 0 1vh;
+    cursor: pointer;
+}
+
+.DespleList h6 i:nth-child(2){
+    margin-left: 2vh;
+}
+
+.DespleList .childrenSpan{
+    padding-left: 2vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.DespleList .childrenSpan span{
+    margin-bottom: 1vh;
+    cursor: pointer;
+    width: fit-content;
+    transition: .3s;
+    font-size: clamp(2.2px,2.2vh,22px);
+    padding: .5vh 1.5vh;
+    border-radius: .5vh;
+}
+
+.DespleList .childrenSpan .DespleList{
+    background-color: none;
+    backdrop-filter: none;
+    outline: none;
+}
+
+.DespleList .childrenSpan span i{
+    margin-right: 1vh;
+}
+
+.DespleList .childrenSpan span:hover{
+    text-decoration: underline;
+    text-underline-offset: .5vh;
+    color: #9810FA;
+    margin-left: .5vh;
+    background-color: #FAF5FF;
+}

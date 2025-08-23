@@ -1,0 +1,15 @@
+
+.Reports{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+}
+
+.Reports .spaceSelectReports{
+    display: flex;
+    padding: 1vh;
+}
+
+.Reports .spaceSelectReports .DespleList{
+    margin-right: 2vh;
+}
