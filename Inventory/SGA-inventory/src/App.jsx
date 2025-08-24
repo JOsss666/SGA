@@ -13,7 +13,7 @@ function App() {
           <AppInfoProvider>
             <Router>
               <Routes>
-                  +<Route path='/SGA_Inventarios/*' element={<LandingPage/>}/>
+                  <Route path='/SGA_Inventarios/*' element={<LandingPage/>}/>
                   <Route path="/SGA_INVENTORY" element={<><span>LandingPage Inventario</span></>}/>
                   <Route path="/SGA_INVENTORY/aboutUs" element={<><span>SGA - Sobre Nosotros</span></>}/>
                   <Route path='/SGA_INVENTORY/404' element={<span>404 Not found</span>}/>
