@@ -1,0 +1,30 @@
+
+.FooterSugerence{
+    display: flex;
+    flex-direction: column;
+}
+
+.FooterSugerence strong{
+    font-weight: 400;
+    margin-bottom: 1vh;
+    color: #757575;
+    font-size: clamp(1.8px,1.8vh,18px);
+}
+
+.FooterSugerence .gridOptions{
+    display: flex;
+    flex-direction: column;
+}
+
+.FooterSugerence .gridOptions span{
+    font-size: clamp(2px,1.8vh,20px);
+    cursor: pointer;
+    color: #4A4848;
+    width: fit-content;
+    margin-bottom: 1vh;
+    transition: .3s;
+}
+
+.FooterSugerence .gridOptions span:hover{
+    color: #888;
+}
