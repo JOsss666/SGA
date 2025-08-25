@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation } from
 import './LandingPage.css'
 import { Home } from './Home';
 import { Titles } from '../components/Titles';
+import { AboutUs } from './AboutUs';
 
 
 export function LandingPage(){
@@ -35,7 +36,7 @@ export function LandingPage(){
             <div className="ContentLandingPage">
                 <Routes>
                     <Route path='/' element={<Home/>}/>
-                    <Route path='/aboutus' element={<Titles text={'Sobre Nosotros'}/>}/>
+                    <Route path='/aboutus' element={<AboutUs/>}/>
                     <Route path='/contact' element={<span><h2>Contacto</h2></span>}/>
                     <Route path='/help' element={<span>Ayuda</span>}/>
                     <Route path='/logIn' element={<span>Inicio de sesión</span>}/>
