@@ -48,7 +48,6 @@ processController.getOp = (req,res)=>{
                 ${info.user_id != null? ` AND sga_process.OPS.user_id = ${info.user_id} `:''}
                 ${info.op_id != null? ` AND sga_process.OPS.op_id = ${info.op_id} `:''}
                 ${info.limint != null? ` LIMIT ${info.limint}`:''}
-
                 ORDER BY sga_process.OPS.op_id DESC
             ;
         `
@@ -57,6 +56,47 @@ processController.getOp = (req,res)=>{
         res.end(JSON.stringify(consulta));
     })
     req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+processController.getDocuments = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            SELECT
+                sga_process.${info.type}S.*,
+                sga_ecosystem.users.user_name,
+                sga_ecosystem.thirdParties.names
+            FROM
+                sga_process.${info.type}S
+            LEFT JOIN
+                sga_ecosystem.users
+            ON
+                sga_process.${info.type}S.user_id = sga_ecosystem.users.user_id
+            LEFT JOIN
+                sga_ecosystem.thirdParties
+            ON
+                sga_process.${info.type}S.thirdParty_id = sga_ecosystem.thirdParties.id
+            WHERE
+                sga_process.${info.type}S.company_id = ${info.company_id}
+                ${info.user_id != null? ` AND sga_process.${info.type}S.user_id = ${info.user_id} `:''}
+                ${info.id != null? ` AND sga_process.${info.type}S.id = ${info.op_id} `:''}
+                ${info.limint != null? ` LIMIT ${info.limint}`:''}
+                ${(info.initialDate!= null && info.finalDate != null)? ` AND DATE(sga_process.${info.type}S.created_at) BETWEEN '${info.initialDate}' AND '${info.finalDate} '   `:''}
+                ORDER BY sga_process.${info.type}S.op_id DESC
+            ;
+        `;
+        let consulta = await useDataBase(sentence,[],1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+        req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
