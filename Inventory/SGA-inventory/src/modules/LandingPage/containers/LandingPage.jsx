@@ -1,9 +1,13 @@
-import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import {SearchBar} from '../../GerenceApp/componets/SearchBar'
+import {BoldTitle} from '../../GerenceApp/componets/BoldTitle'
+import {FormButton} from '../../GerenceApp/componets/FormButton'
 import './LandingPage.css'
 import { Home } from './Home';
 import { Titles } from '../components/Titles';
 import { AboutUs } from './AboutUs';
-
+import { FooterSugerence } from '../components/FooterSugerence';
+import { MediaHandler } from '../../../../media/MediaHandler';
 
 export function LandingPage(){
 
@@ -17,14 +21,14 @@ export function LandingPage(){
         {name:'Inicio',path:''},
         {name:'Sobre Nosotros',path:'aboutUs'},
         {name:'Contacto',path:'contact'},
-        {name:'Ayuda',path:'help'},
-        {name:'Iniciar Sesión',path:'logIn'},
-        {name:'Registro',path:'signup'}
+        {name:'Iniciar Sesión',path:'logIn'}
     ]
 
     return(
         <div className="LandingPage">
-            <div className="NavegationMenu">
+            <header className="NavegationMenu">
+                <BoldTitle children={<span>SGA - </span>} text={'Inventarios'}/>
+                <SearchBar placeholder={'Buscar en SGA - Inventarios'}/>
                 {menuOptions.map((element,index)=>(
                     <span onClick={()=>{
                         handleNavigate(element.path)
@@ -32,7 +36,8 @@ export function LandingPage(){
                         {element.name}
                     </span>
                 ))}
-            </div>
+                <FormButton text={'Registro'}/>
+            </header>
             <div className="ContentLandingPage">
                 <Routes>
                     <Route path='/' element={<Home/>}/>
@@ -43,6 +48,34 @@ export function LandingPage(){
                     <Route path='/signup' element={<span>Registro</span>}/>
                 </Routes>
             </div>
+            <footer>
+                <MediaHandler name={'oso5'}/>
+                <BoldTitle text={'SGA - Inventarios'}/>
+                <div className="girdSugerences">
+                    <FooterSugerence title={'Información'} options={[
+                        {text:'¿Como Empezar?',path:'newStart'},
+                        {text:'Servicios',path:'Services'},
+                        {text:'Planes',path:'Plans'}
+                    ]}/>
+                    <FooterSugerence title={'Más de SGA - Inventarios'} options={[
+                        {text:'Sobre Nosotros',path:'newStart'},
+                        {text:'Contacto',path:'Contact'},
+                        {text:'Sobre Nosotros',path:'AboutUs'}
+                    ]}/>
+                    <FooterSugerence title={'Ayuda y Contacto'} options={[
+                        {text:'Soporte técnico',path:'tecnicalSupport'},
+                        {text:'correo@gmail.com'},
+                        {text:'+51 123 456'}
+                    ]}/>
+                    <FooterSugerence title={'Más de SGA'} options={[
+                        {text:'SGA - HomePage',path:'newStart'},
+                        {text:'SGA - Contabilidad',path:'Services'},
+                        {text:'SGA - Facturación',path:'Plans'},
+                        {text:'SGA - Procesos',path:'Plans'},
+                        {text:'SGA - Tesoreria',path:'Plans'}
+                    ]}/>
+                </div>
+            </footer>
         </div>
     )
 }
