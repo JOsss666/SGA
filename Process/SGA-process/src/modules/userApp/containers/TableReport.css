@@ -1,0 +1,37 @@
+
+.TableReport{
+    height: 100%;
+    max-width: 100%;
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.TableReport .headTable{
+    display: flex;
+    padding: 1vh;
+    background-color: #F7F7F7;
+    border-radius: .5vh;
+    box-shadow: 0 .4vh .5vh #ccc5;
+    outline: solid .1vh #eee;
+    z-index: 1;
+}
+
+.TableReport .headTable .headColumn{
+    font-size: clamp(2px,2vh,20px);
+    margin: auto 0;
+    min-width: 2vw;
+    width: 10vw;
+    padding: 1vh;
+    overflow: hidden;
+    white-space: none;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 400;
+    color: #555;
+}
+
+.TableReport .headTable .headColumn:nth-child(2){
+    width: 4vw;
+}

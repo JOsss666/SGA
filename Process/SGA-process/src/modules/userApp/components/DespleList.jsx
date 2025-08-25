@@ -1,13 +1,15 @@
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './DespleList.css'
 
 export function DespleList({options,father,children}){
 
     const [visibleChildren,setVisibleChildren] = useState(false);
 
+    const mainC = useRef();
+
     return(
-        <div className="DespleList">
+        <div ref={mainC} className="DespleList">
             <h6>
                 {children}
                 {father.title}{options.length>0 && (
@@ -18,7 +20,11 @@ export function DespleList({options,father,children}){
                     {options.length > 0 && options.map((element,index)=>(
                         <>
                             {element.options ==  null && (
-                                <span onClick={()=>{alert('Redirigiendo ')}} key={index}>{element.children}{element.title}</span>
+                                <span onClick={()=>{
+                                    if(element.action != undefined){
+                                        element.action(element.path);
+                                    }
+                                }} key={index}>{element.children}{element.title}</span>
                             )}
                             {element.options != null && (
                                 <DespleList father={element} options={element.options} children={element.children} />

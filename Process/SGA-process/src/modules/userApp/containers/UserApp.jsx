@@ -102,9 +102,9 @@ export function UserApp(){
                     <Routes>
                             <Route path='/' element={<HomeProcess/>} />
                             <Route path='/newDocument' element={<CreateDocument/>} />
-                            <Route path='/users' element={appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
+                            <Route path='/users' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
                             <Route path='/searchDocument' element={<SearchDocument/>} />
-                            <Route path='/reports' element={<Reports/>} />
+                            <Route path='/reports/*' element={<Reports/>} />
                     </Routes>
                 </main>
                 <NotificationsApp/>
