@@ -16,6 +16,6 @@ export function MediaHandler({name}){
     }
 
     return(
-        <img src={arrayFiles[name]} alt="" />
+        <img className='MediaHandler' src={arrayFiles[name]} alt="" />
     )
 }

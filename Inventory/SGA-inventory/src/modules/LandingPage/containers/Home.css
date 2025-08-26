@@ -1,5 +1,5 @@
 
-/*  
-    ancho en dvw
-    alto en dvh
-*/
+.Home{
+    display: flex;
+    flex-direction: column;
+}

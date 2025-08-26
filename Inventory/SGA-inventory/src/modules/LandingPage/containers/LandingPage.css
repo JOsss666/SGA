@@ -79,10 +79,10 @@
 /* Estilo Contenedor Principal */
 
 .LandingPage .ContentLandingPage{
-    padding: 2vh;
-    padding-top: 10vh;
+    padding-top: 5vh;
     position: relative;
     min-height: 76.5dvh;
+    background-color: #fff;
 }
 
 
