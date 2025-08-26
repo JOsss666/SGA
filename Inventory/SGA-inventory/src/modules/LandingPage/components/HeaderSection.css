@@ -1,0 +1,78 @@
+/* ESTILO CONTAINER */
+.Header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2dvw;
+  padding: 2dvw;
+}
+
+.Header .text {
+  flex: 1 1 auto;
+}
+
+
+
+/* ESTILO TITULO PRINCIPAL */
+.headerTitle {
+  text-align: left;
+  margin: 0;
+  padding: 0;
+  width: 50dvw;
+  font-weight: 900;
+  font-size: clamp(2.5rem, 4vw + 1rem, 5rem); 
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+  margin: 0.25em 0;
+  color: #000; 
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+}
+
+.headerTitle h1 {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.headerTitle .highlight {
+  color: #f57c00; 
+  font-weight: 900;
+}
+
+
+.headerImage {
+    position: absolute;
+    height: 50dvh;
+    width: 50dvw;
+    top: -10vh;
+    right: 10vw;
+}
+
+/* ESTILO ESTADISTICAS */
+.headerStats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5dvw;
+  padding: 1.5dvw 2dvw;
+  margin-top: -2dvh; 
+  background: linear-gradient(to top, rgba(0,0,0,0.25), rgba(0,0,0,0.05) 60%), #3a2a1f;
+  color: #ffffff;
+  align-items: center;
+}
+.headerStats .stat {
+  text-align: center;
+}
+.headerStats .stat .value {
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+.headerStats .stat .label {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: #f3f3f3;
+  opacity: 0.95;
+}
+
