@@ -1,8 +1,8 @@
 
-import imgOso1 from './oso5.png'
-import imgOso2 from './oso5.png'
-import imgOso3 from './oso5.png'
-import imgOso4 from './oso5.png'
+import imgOso1 from './oso1.png'
+import imgOso2 from './oso2.png'
+import imgOso3 from './oso3.png'
+import imgOso4 from './oso4.png'
 import imgOso5 from './oso5.png'
 
 export function MediaHandler({name}){
