@@ -1,5 +1,5 @@
 
-import './ComponentsCard.css';
+import './ComponentsCart.css';
 
 
 export function ComponentsCard (icon, title, text, color){
