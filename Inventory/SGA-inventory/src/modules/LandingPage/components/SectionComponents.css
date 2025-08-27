@@ -1,16 +1,28 @@
 
 .SectionComponents{
-    padding: 4rem 0;            
     display: flex;
-    justify-content: center;    
-    align-items: center;        
-    text-align: center;           
-    width: 100%; 
-    background-color: #fff;
+    flex-direction: column;
+    gap: 3dvh;
+    padding: 4dvw 20dvh;           
+    text-align: center;  
+    width: 80dvw;
+    margin: 0 10dvw;
+    justify-content: center;
 }
 
-.section-sectionComponentsText {
-    max-width: 900px;
+.SectionComponents .sectionComponentsText {
+    max-width: 90dvw;
     width: 100%;
     justify-items: center;
+}
+
+.SectionComponents .SectionComponentsCards{
+    display: flex;
+    flex-wrap: wrap;
+    align-content: start;
+    gap: 6dvh 8dvw;
+    justify-content: start;
+
+    margin: 1vh;
+    padding: 1dvw;
 }

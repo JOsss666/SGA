@@ -7,15 +7,25 @@
 }
 
 
+.SectionServices .sectionServicesImage .MediaHandler{
+  height: 30dvh;
+}
+
+.SectionServices .sectionServicesImage{
+  position: absolute;
+    right: 12vw;
+    top: 55vw;
+}
+
 /* Grid (2 columnas) */
-.sectionServicesIcons {
+.SectionServices .sectionServicesIcons {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.6dvw;                     
   align-items: start;
 }
 
-.Icon{
+.SectionServices .Icon{
   display: flex;
   align-items: center;
   gap: 0.9dvw;                     
@@ -27,7 +37,7 @@
   box-shadow: 0 0 0 rgba(0,0,0,0);    
 }
 
-.Icon .icon {
+.SectionServices .Icon .icon {
   width: 2.6rem;
   height: 2.6rem;
   display: inline-flex;
