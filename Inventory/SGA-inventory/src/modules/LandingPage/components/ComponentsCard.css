@@ -1,0 +1,45 @@
+
+.ComponentsCard{
+    display: flex;
+    flex-direction: column;
+    width: 12dvw;
+}
+
+.ComponentsCard .cardContent{
+    display: flex;
+    flex-direction: row;
+    width: 12dvw;
+    height: 6dvh;
+}
+
+.ComponentsCard .cardModulo{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+.ComponentsCard .cardContentImage{
+    width: 10dvw;
+    height: 10dvh;
+}
+
+.ComponentsCard .cardTitle{
+    font-size: 2.4dvh;
+    font-weight: bold;
+}
+
+.ComponentsCard .cardTitle .color{
+    color: #007bff;   
+}
+
+.ComponentsCard .cardSubTitle{
+    font-size: 1dvw;
+    font-weight: 700;
+}
+
+
+.ComponentsCard .cardText {
+    font-size: 1.1dvw;
+    margin-top: 1dvh;
+    text-align: start;
+}

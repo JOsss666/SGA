@@ -2,8 +2,8 @@
 
 import { Titles } from './Titles'
 import { Paragraph } from './Paragraph'
+import { ComponentsCard } from './ComponentsCard'
 import './SectionComponents.css'
-import { ComponentsCard } from './ComponentsCart'
 
 export function SectionComponents(){
     return (
@@ -16,7 +16,11 @@ export function SectionComponents(){
             </div>
             <div className="SectionComponentsCards">
                 <>
-                    
+                <ComponentsCard/>
+                <ComponentsCard/>
+                <ComponentsCard/>
+                <ComponentsCard/>
+                <ComponentsCard/>
                 </>
             </div>
         </section>
