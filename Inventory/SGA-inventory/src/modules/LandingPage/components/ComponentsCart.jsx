@@ -1,6 +1,9 @@
 
 import './ComponentsCart.css';
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/test
 
 export function ComponentsCard (icon, title, text, color){
     return (

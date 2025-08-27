@@ -8,7 +8,6 @@ import { Titles } from '../components/Titles';
 import { AboutUs } from './AboutUs';
 import { FooterSugerence } from '../components/FooterSugerence';
 import { MediaHandler } from '../../../../media/MediaHandler';
-
 export function LandingPage(){
 
     const navigate = useNavigate();

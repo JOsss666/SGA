@@ -1,27 +1,34 @@
 /* ESTILO CONTAINER */
+
+.HeaderSection{
+  display: flex;
+  flex-direction: column;
+}
+
 .Header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 2dvw;
   padding: 2dvw;
+  position: relative;
+  overflow: hidden;
+  height: 74dvh;
 }
 
 .Header .text {
-  flex: 1 1 auto;
+  display: flex;
+  margin: auto;
+  margin-left: 20vh;
 }
 
-
-
 /* ESTILO TITULO PRINCIPAL */
+
 .headerTitle {
   text-align: left;
-  margin: 0;
+  margin: auto;
   padding: 0;
   width: 50dvw;
-  font-weight: 900;
-  font-size: clamp(2.5rem, 4vw + 1rem, 5rem); 
-  line-height: 1.05;
+  font-weight: 600;
+  font-size: clamp(2.5rem,10vh, 1000px); 
   letter-spacing: -0.5px;
   margin: 0.25em 0;
   color: #000; 
@@ -37,42 +44,69 @@
 
 .headerTitle .highlight {
   color: #f57c00; 
-  font-weight: 900;
 }
 
 
 .headerImage {
     position: absolute;
-    height: 50dvh;
-    width: 50dvw;
-    top: -10vh;
-    right: 10vw;
+    bottom: -30vh;
+    right: 12vw;
+    z-index: 4;
+}
+
+.headerImage .MediaHandler{
+    height: 85dvh;
 }
 
 /* ESTILO ESTADISTICAS */
 .headerStats {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 1.5dvw;
-  padding: 1.5dvw 2dvw;
-  margin-top: -2dvh; 
-  background: linear-gradient(to top, rgba(0,0,0,0.25), rgba(0,0,0,0.05) 60%), #3a2a1f;
-  color: #ffffff;
-  align-items: center;
+  display: flex;
+  z-index: 3;
+  height: 21vh;
+  background-color: #000;
+  position: relative;
 }
+
+.headerStats .backGroundStats{
+  width: 100%;
+  height: 100%;
+}
+
+.headerStats .backGroundStats img{
+  opacity: 60%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.headerStats .contentHeaderStats{
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 3vh 10%;
+}
+
+
 .headerStats .stat {
-  text-align: center;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  color: #ffffff;
 }
 .headerStats .stat .value {
-  font-size: 1.6rem;
-  font-weight: 900;
+  font-size: clamp(2.5px,4.5vh,45px);
+  font-weight: 600;
   letter-spacing: 0.5px;
+  margin: 0 auto;
   margin-bottom: 0.25rem;
 }
 .headerStats .stat .label {
-  font-size: 0.75rem;
-  line-height: 1.2;
-  color: #f3f3f3;
-  opacity: 0.95;
+  font-size: clamp(2.5px,2vh,45px);
+  color: #ddd;
+  margin: auto;
+  text-align: center;
 }
 
