@@ -483,4 +483,28 @@ processController.searchDocument = (req,res)=>{
     })
 }
 
+processController.deleteDocument =(req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            DELETE FROM
+                sga_process.${info.type}S
+            WHERE
+                ${info.type == 'OP' && `op_id = ${info.id}`}
+                ${info.type != 'OP' && `id = ${info.type}`}
+        ;`;
+        let consulta = await useDataBase(sentence,[],1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.in('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err))
+    })
+}
+
 export default processController;
