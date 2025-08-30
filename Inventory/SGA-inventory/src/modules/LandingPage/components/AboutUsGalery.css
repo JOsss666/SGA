@@ -1,0 +1,299 @@
+
+/* ESTILO GENERAL */
+.AboutUs .AboutUsGalery{
+    width: 100%;
+    height: 81vh;
+    display: flex;
+    align-items: stretch;
+}
+
+/* ESTILOS DE LOS CONTENEDORES */
+.AboutUs .AboutUsGaleryContainer{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
+}
+
+
+/* ESTILO CONTENEDOR 1 */
+.AboutUs .Container1{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+}
+
+.AboutUs .Container1Galery{
+    width: 100%;
+    height: 60%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.AboutUs .GaleryContainer1Grid1{
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.AboutUs .GaleryContainer1Grid1 .text{
+    width: 80%;
+    height: 30%;
+    font-size: 1.2vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1vh;
+    text-align: center;
+}
+
+.AboutUs .GaleryContainer1Grid1 .text h1{
+    font-size: 3vh;
+    font-weight: bold;
+}
+
+.AboutUs .GaleryContainer1Grid1 .text p{
+    font-size: 1.5vh;
+    font-weight: 500;
+}
+
+.AboutUs .GaleryContainer1Grid1 .image{
+    width: 80%;
+    height: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80");
+    background-size: cover;
+    background-position: center;
+    border-radius: 2vh;
+}
+
+
+.AboutUs .GaleryContainer1Grid2{
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.AboutUs .GaleryContainer1Grid2 .image{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.AboutUs .GaleryContainer1Grid2 .image .image1{
+    width: 80%;
+    height: 20%;
+    margin-bottom: 5%;
+    background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80");
+    background-size: cover;
+    background-position: center;
+    border-radius: 2vh;
+}
+
+.AboutUs .GaleryContainer1Grid2 .image .image2{
+    width: 80%;
+    height: 50%;
+    background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80");
+    background-size: cover;
+    background-position: center;
+    border-radius: 2vh;
+}
+
+.AboutUs .Container1ImageBackground{
+    width: 100%;
+    height: 40%;
+    background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80");
+    background-size: cover;
+    background-position: center;
+}
+
+
+/* ESTILO CONTENEDOR 2 */
+.AboutUs .Container2{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.AboutUs .Container2 .image{
+    width: 80%;
+    height: 50%;
+    background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80");
+    background-size: cover;
+    background-position: center;
+    border-radius: 2vh;
+}
+
+
+/* FALTA COLOCAR EL DESPLEGABLE */
+.AboutUs .Container2 .btnMision{
+    width: 80%;
+    height: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5vh;
+    font-weight: bold;
+    cursor: pointer;
+    list-style: none;
+}
+
+.AboutUs .Container2 .btnMision .btnMisionTitle{
+    text-decoration: none;
+    color: #000;
+    padding: 1vh 15vh;
+    border: .2vh solid #000;
+    border-radius: 5vh;
+}
+
+.AboutUs .Container2 .btnMision li{
+    position: relative;
+}
+
+.AboutUs .Container2 .btnMision li:hover ul{
+    display: block;
+}
+
+.AboutUs .Container2 .btnMision ul{
+    list-style: none;
+    display: none;
+    position: absolute;
+}
+
+.AboutUs .Container2 .btnMision ul li{
+    text-decoration: none;
+}
+
+.AboutUs .Container2 .btnMision ul li a{
+    display: block;
+    padding: .5vh;
+    text-decoration: none;
+    color: #000;
+}
+
+
+/* ESTILO CONTENEDOR 3 */
+.AboutUs .Container3{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}   
+
+.AboutUs .Container3Galery{
+    width: 100%;
+    height: 60%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.AboutUs .GaleryContainer3Grid1{
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.AboutUs .GaleryContainer3Grid1 .imageTop{
+    width: 80%;
+    height: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80");
+    background-size: cover;
+    background-position: center;
+    
+}
+
+
+.AboutUs .GaleryContainer3Grid1 .image{
+    width: 80%;
+    height: 40%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80");
+    background-size: cover;
+    background-position: center;
+    border-radius: 2vh;
+}
+
+
+.AboutUs .GaleryContainer3Grid2{
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.AboutUs .GaleryContainer3Grid2 .image{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.AboutUs .GaleryContainer3Grid2 .image .image1{
+    width: 80%;
+    height: 20%;
+    margin-bottom: 5%;
+    background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80");
+    background-size: cover;
+    background-position: center;
+    border-radius: 2vh;
+}
+
+.AboutUs .GaleryContainer3Grid2 .image .image2{
+    width: 80%;
+    height: 50%;
+    background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80");
+    background-size: cover;
+    background-position: center;
+    border-radius: 2vh;
+}
+
+.AboutUs .Container3Text{
+    width: 100%;
+    height: 40%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 2vh;
+}
+
+.AboutUs .Container3Text .text{
+    width: 80%;
+    font-size: 2vh;
+    justify-content: center;
+    font-weight: 500;
+}
