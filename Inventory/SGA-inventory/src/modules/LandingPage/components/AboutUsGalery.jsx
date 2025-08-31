@@ -30,12 +30,12 @@ export function AboutUsGalery(){
             <div className="AboutUsGaleryContainer Container2">
                 <div className="image">Imagen</div>
                 <div className="btnMision">
-                    <li><a href="#" className="btnMisionTitle">Mision</a>
+                    <li><a href="#" className="btnMisionTitle">Nuestra Mision</a>
                         <ul className="btnMisionOptions">
-                            <li><a href="#">Op1</a></li>
-                            <li><a href="#">Op2</a></li>
-                            <li><a href="#">Op3</a></li>
-                            <li><a href="#">Op4</a></li>
+                            <li><a href="#">Opcion 1</a></li>
+                            <li><a href="#">Opcion 2</a></li>
+                            <li><a href="#">Opcion 3</a></li>
+                            <li><a href="#">Opcion 4</a></li>
                         </ul>
                     </li>
                 </div>
