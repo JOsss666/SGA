@@ -9,14 +9,13 @@
 
 .btnStartSection {
   display: inline-block;
-  padding: 0.9rem 1.8rem;
-  border-radius: 999px;
+  padding: 1.5vh 2vh;
+  border-radius: 4vh;
   border: 2px solid #e0e0e0;         
-  color: #3a3a3a;                    
-  background: #ffffff;               
+  color: #3a3a3a;             
   text-decoration: none;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.8vh;
   transition: transform .15s ease, box-shadow .2s ease;
   box-shadow: none;                    
 }
