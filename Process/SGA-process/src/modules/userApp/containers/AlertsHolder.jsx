@@ -10,7 +10,9 @@ export function AlertsHolder({}){
     return(
         <div className="AlertsHolder">
             {tailAlerts.length>0 && tailAlerts.map((element,index)=>(
-                <AlertContainer children={element} key={index}/>
+                <AlertContainer fullScale={element.fullScale} key={index}>
+                    {element.alert} 
+                </AlertContainer>
             ))}
         </div>
     )

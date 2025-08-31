@@ -2,12 +2,12 @@ import { moneyFormat } from "../../../utils/functions"
 import { CheckSquare } from "./CheckSquare"
 import { UserCard } from "./UserCard"
 import './RowTableReport.css'
+import { useAlert } from "../../../context/context"
+import { DocumentPreview } from "../containers/Alerts/DocumentPreview"
 
 export function RowTableReport({columns,info,type}){
 
-    console.log(columns)
-    console.log(info)
-
+    const {popInAlert} = useAlert();
     const dictionaryElementsColum = {
         "ID":<span className="Redirect"># {type == 'OP'? info.op_id:info.id}</span>,
         "OP":<span className="Redirect idHolder">OP# {info.op_id}</span>,

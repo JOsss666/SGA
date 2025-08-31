@@ -18,6 +18,7 @@ import { AcountsPlan } from './AcountsPlan';
 import { TutorialAccountsPlan } from './tutorials/TutorialAccountsPlan';
 import { SearchDocument } from './SearchDocument';
 import { Reports } from './Reports';
+import { DocumentPreview } from './Alerts/DocumentPreview';
 
 export function UserApp(){
 
@@ -107,6 +108,7 @@ export function UserApp(){
                             <Route path='/reports/*' element={<Reports/>} />
                     </Routes>
                 </main>
+                
                 <NotificationsApp/>
                 {openAlert && (
                     <AlertsHolder/>

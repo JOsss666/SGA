@@ -62,7 +62,7 @@ export function AlertProvider({ children }) {
     const [tailAlerts, setTailAlerts] = useState([]);
     
     const popInAlert = (child) => {
-        setTailAlerts(prev => [...prev, child]);
+        setTailAlerts(prev => [...prev, {alert:child}]);
         if(!openAlert){
             setOpenAlert(true);
         }
