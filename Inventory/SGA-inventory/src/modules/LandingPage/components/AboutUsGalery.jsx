@@ -1,5 +1,6 @@
 
 
+import { MediaHandler } from '../../../../media/MediaHandler';
 import './AboutUsGalery.css';
 
 export function AboutUsGalery(){
@@ -9,8 +10,9 @@ export function AboutUsGalery(){
                 <div className="Container1Galery">
                     <div className="GaleryContainer1Grid1">
                         <div className="text">
-                            <h3>Texto AI</h3>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laudantium, sunt! Sapiente saepe inventore tenetur adipisci vel minus, quidem voluptas optio incidunt maiores deleniti?</p>
+                            <img src="https://freelogopng.com/images/all_img/1681142315open-ai-logo.png" alt="" />
+                            <h3>Opinión generada por IA</h3>
+                            <p>“ Impulsado por IA, conectado con todo tu equipo, un inventario en tiempo real como nunca antes. ”</p>
                         </div>
                         <div className="image">
                             <div className="imagen1">imagen1</div>
@@ -23,9 +25,7 @@ export function AboutUsGalery(){
                         </div>
                     </div>
                 </div>
-                <div className="Container1ImageBackground">
-                    <div className="imageBackground">Imagen Background</div>
-                </div>
+                <MediaHandler name={'Boxes'}/>
             </div>
             <div className="AboutUsGaleryContainer Container2">
                 <div className="image">Imagen</div>
@@ -49,16 +49,16 @@ export function AboutUsGalery(){
                         </div>
                     </div>
                     <div className="GaleryContainer3Grid1">
-                        <div className="imageTop">
-                            <div className="imagenTop">imagen1</div>
+                        <div className="BoxesTools">
+                            <MediaHandler name={'BoxTools'}/>
                         </div>
                         <div className="image">
-                            <div className="imagen1">imagen1</div>
+                            <MediaHandler name={'TabletUseApp'}/>
                         </div>
                     </div>
                 </div>
                 <div className="Container3Text">
-                    <div className="text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis id, quis vel autem dolores, accusamus debitis libero non eveniet labore maxime, tempore eligendi corporis provident ullam? Tempore totam reiciendis nam.</div>
+                    <p className="text">" Creamos el módulo de Inventarios para que tu empresa controle productos, insumos y stock en tiempo real."</p>
                     <a href="#">Vér más reseñas y opicniones</a>
                 </div>
             </div>

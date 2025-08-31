@@ -2,26 +2,25 @@
 .AboutUs{
   width: 100%;
   height: 100vh;
-  margin-bottom: 2vh;
+  margin-bottom: 25vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .AboutUs .AboutUsTitle{
-  justify-items: center;
-}
-
-.AboutUs .AboutUsTitle {
-  margin: auto;
-  padding-top: 6vh;
   width: 100%;
   font-weight: 400;
-  font-size: clamp(2.5rem,10vh, 1000px); 
   letter-spacing: -0.5px;
-  margin: 0.25em 0;
+  margin: 5vh 0;
+  margin-bottom: 3vh;
+  display: flex;
   color: #000; 
 }
 
 .AboutUs .AboutUsTitle h1 {
+  margin: 0 auto;
   font-size: 8vh;
+  font-size: clamp(10px,7vh, 100px); 
   font-weight: 400;
 }
 
@@ -29,12 +28,3 @@
   color: #f57c00; 
 }
 
-
-
-/* PENDIENTE SI SE REALIZA DE ESTA FORMA, POR LO QUE SE TOCA EL FOOTER */
-.AboutUs .MediaHandler{
-  position: absolute;
-  height: 200vh;
-  top: -36vh;
-  right: 36vw;
-}
