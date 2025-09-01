@@ -29,16 +29,6 @@ export function AboutUsGalery(){
             </div>
             <div className="AboutUsGaleryContainer Container2">
                 <div className="image">Imagen</div>
-                <div className="btnMision">
-                    <li><a href="#" className="btnMisionTitle">Nuestra Mision</a>
-                        <ul className="btnMisionOptions">
-                            <li><a href="#">Opcion 1</a></li>
-                            <li><a href="#">Opcion 2</a></li>
-                            <li><a href="#">Opcion 3</a></li>
-                            <li><a href="#">Opcion 4</a></li>
-                        </ul>
-                    </li>
-                </div>
             </div>
             <div className="AboutUsGaleryContainer Container3">
                 <div className="Container3Galery">

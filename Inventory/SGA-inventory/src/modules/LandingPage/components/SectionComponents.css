@@ -22,7 +22,14 @@
     align-content: start;
     gap: 6dvh 8dvw;
     justify-content: start;
-
     margin: 1vh;
     padding: 1dvw;
+}
+
+.SectionComponents .ComponentsCard:nth-child(1) .cardTitle{
+    color: #f00;
+}
+
+.SectionComponents .ComponentsCard:nth-child(2) .cardTitle{
+    color: #00f;
 }

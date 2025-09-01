@@ -16,11 +16,11 @@ export function SectionComponents(){
             </div>
             <div className="SectionComponentsCards">
                 <>
-                <ComponentsCard/>
-                <ComponentsCard/>
-                <ComponentsCard/>
-                <ComponentsCard/>
-                <ComponentsCard/>
+                <ComponentsCard title={'Open AI'} children={<i className="fa-solid fa-frog"/>} />
+                <ComponentsCard title={'Contabilidad'} description={'Hola mundo'} children={<i className="fa-solid fa-frog"/>}/>
+                <ComponentsCard title={'Procesos'} children={<i className="fa-solid fa-frog"/>}/>
+                <ComponentsCard title={'Tesoretía'} children={<i className="fa-solid fa-frog"/>}/>
+                <ComponentsCard title={'Facturación'} children={<i className="fa-solid fa-frog"/>}/>
                 </>
             </div>
         </section>

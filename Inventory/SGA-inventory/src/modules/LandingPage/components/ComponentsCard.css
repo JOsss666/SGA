@@ -9,7 +9,7 @@
     display: flex;
     flex-direction: row;
     width: 12dvw;
-    height: 6dvh;
+    height: fit-content;
 }
 
 .ComponentsCard .cardModulo{
@@ -19,8 +19,15 @@
 }
 
 .ComponentsCard .cardContentImage{
-    width: 10dvw;
+    width: 10dvh;
     height: 10dvh;
+    display: flex;
+    margin-right: 2vh;
+}
+
+.ComponentsCard .cardContentImage i{
+    margin: auto;
+    font-size: clamp(4px,4vh,40px);
 }
 
 .ComponentsCard .cardTitle{
@@ -28,9 +35,6 @@
     font-weight: bold;
 }
 
-.ComponentsCard .cardTitle .color{
-    color: #007bff;   
-}
 
 .ComponentsCard .cardSubTitle{
     font-size: 1dvw;

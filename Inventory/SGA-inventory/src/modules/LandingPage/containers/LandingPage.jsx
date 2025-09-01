@@ -40,7 +40,7 @@ export function LandingPage(){
             <div className="ContentLandingPage">
                 <Routes>
                     <Route path='/' element={<Home/>}/>
-                    <Route path='/aboutus' element={<AboutUs/>}/>
+                    <Route path='/aboutus' element={<AboutUs />}/>
                     <Route path='/contact' element={<span><h2>Contacto</h2></span>}/>
                     <Route path='/help' element={<span>Ayuda</span>}/>
                     <Route path='/logIn' element={<span>Inicio de sesión</span>}/>
