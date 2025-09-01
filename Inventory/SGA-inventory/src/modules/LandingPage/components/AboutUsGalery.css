@@ -149,57 +149,6 @@
 }
 
 
-/* FALTA COLOCAR EL DESPLEGABLE */
-.AboutUs .Container2 .btnMision{
-    width: 95%;
-    height: fit-content;
-    margin: auto;
-    margin-top: 3vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.5vh;
-    font-weight: bold;
-    cursor: pointer;
-    list-style: none;
-}
-
-.AboutUs .Container2 .btnMision .btnMisionTitle{
-    text-decoration: none;
-    color: #3a3a3a;
-    padding: 1vh 15vh;
-    border-radius: 0.8vh;
-    box-shadow: #3a3a3a 0.1vh 0.1vh 0.3vh;
-
-}
-
-.AboutUs .Container2 .btnMision li{
-    position: relative;
-    padding-top: 1vh;
-}
-
-.AboutUs .Container2 .btnMision li:hover ul{
-    display: block;
-}
-
-.AboutUs .Container2 .btnMision ul{
-    list-style: none;
-    display: none;
-    position: absolute;
-}
-
-.AboutUs .Container2 .btnMision ul li{
-    text-decoration: none;
-}
-
-.AboutUs .Container2 .btnMision ul li a{
-    display: block;
-    padding: .5vh;
-    text-decoration: none;
-    color: #000;
-}
-
 
 /* ESTILO CONTENEDOR 3 */
 .AboutUs .Container3{

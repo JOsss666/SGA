@@ -1,0 +1,19 @@
+
+.AboutUsBtn {
+    display: flex;
+    color: #757575;
+    border: none;
+    padding: 1vh 10vh;
+    text-align: center;
+    text-decoration: none;
+    font-size: 2.3vh;
+    cursor: pointer;
+    border-radius: .5vh;
+    box-shadow: 0 0 .5vh #3a3a3a60;
+    background-color: #fff;
+}
+
+.AboutUsBtn i{
+    margin: auto 0;
+    margin-left: 1vh;
+}
