@@ -1,6 +1,7 @@
 
 
 import { MediaHandler } from '../../../../media/MediaHandler';
+import { AboutUsBtn } from './AboutUsBtn';
 import './AboutUsGalery.css';
 
 export function AboutUsGalery(){
@@ -29,6 +30,7 @@ export function AboutUsGalery(){
             </div>
             <div className="AboutUsGaleryContainer Container2">
                 <div className="image">Imagen</div>
+                <AboutUsBtn text={'Nuestra Mision'}/>
             </div>
             <div className="AboutUsGaleryContainer Container3">
                 <div className="Container3Galery">
