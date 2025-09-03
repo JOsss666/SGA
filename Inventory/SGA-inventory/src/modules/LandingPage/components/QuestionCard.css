@@ -1,0 +1,56 @@
+
+.QuestionCard {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    width: 120vh;
+    transition: transform 0.2s;
+}
+.QuestionCard .VisibleContent{
+    display: flex;
+    width: 100%;
+}
+
+.QuestionCard .VisibleContent .icon {
+    padding: 1.5vh;
+    border-radius: .5vh;
+    box-shadow: 0 0 .5vh #3a3a3a80;
+    font-size: 4.5vh;
+}
+
+.QuestionCard .title {
+    margin: auto 0;
+    font-size: 3.6vh;
+    margin-left: 3vh;
+    font-weight: 600;
+}
+
+.QuestionCard .iconDefault{
+    margin: auto;
+    margin-right: 1vh;
+}
+
+.QuestionCard .HiddenContent {
+    padding: 4vh 8vh;
+    width: fit-content;
+    animation-name: appear;
+    animation-duration: .5s;
+    animation-fill-mode: both;
+}
+
+@keyframes appear {
+    0% { transform: scale(0); }
+    100% {transform: scale(1.0);}  
+}
+
+.QuestionCard .HiddenContent .QuestionText{
+    margin: auto;
+    padding-bottom: 2vh;
+    text-align: left;
+    font-size: 3vh;
+}
+
+.QuestionCard .HiddenContent a{
+    color: #545657;
+
+}

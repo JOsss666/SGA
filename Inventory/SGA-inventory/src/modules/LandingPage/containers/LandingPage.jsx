@@ -8,6 +8,7 @@ import { Titles } from '../components/Titles';
 import { AboutUs } from './AboutUs';
 import { FooterSugerence } from '../components/FooterSugerence';
 import { MediaHandler } from '../../../../media/MediaHandler';
+import { Contact } from './Contact';
 export function LandingPage(){
 
     const navigate = useNavigate();
@@ -41,7 +42,7 @@ export function LandingPage(){
                 <Routes>
                     <Route path='/' element={<Home/>}/>
                     <Route path='/aboutus' element={<AboutUs />}/>
-                    <Route path='/contact' element={<span><h2>Contacto</h2></span>}/>
+                    <Route path='/contact' element={<Contact/>}/>
                     <Route path='/help' element={<span>Ayuda</span>}/>
                     <Route path='/logIn' element={<span>Inicio de sesión</span>}/>
                     <Route path='/signup' element={<span>Registro</span>}/>
