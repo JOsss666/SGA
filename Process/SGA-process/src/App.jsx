@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css'
 import { UserApp } from './modules/userApp/containers/UserApp';
-import { AlertProvider, AppInfoProvider, NotificationsProvider } from './context/context';
+import { AlertProvider, AppInfoProvider, NotificationsProvider, PreviewProvider } from './context/context';
 
 export const urlSer = 'http://localhost:3000';
 
@@ -17,7 +17,9 @@ function App() {
                     <Route path='/SGA_process/:company_key/:user_key/*' element={<>
                       <AlertProvider>
                           <AppInfoProvider>
-                            <UserApp/>
+                            <PreviewProvider>
+                              <UserApp/>
+                            </PreviewProvider>
                           </AppInfoProvider>
                       </AlertProvider>
                     </>} />

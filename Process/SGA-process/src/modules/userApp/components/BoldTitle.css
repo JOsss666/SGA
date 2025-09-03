@@ -7,5 +7,5 @@
 
 .BoldTitle i{
     font-size: clamp(3.5px,3.5vh,35px);
-    margin-right: 1vh;
+    margin-left: 1vh;
 }

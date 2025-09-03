@@ -2,15 +2,20 @@ import { moneyFormat } from "../../../utils/functions"
 import { CheckSquare } from "./CheckSquare"
 import { UserCard } from "./UserCard"
 import './RowTableReport.css'
-import { useAlert } from "../../../context/context"
+import { useAlert, usePreview } from "../../../context/context"
 import { DocumentPreview } from "../containers/Alerts/DocumentPreview"
 
 export function RowTableReport({columns,info,type}){
 
     const {popInAlert} = useAlert();
+    const {setOpenPreview,setPreviewInfo} = usePreview();
     const dictionaryElementsColum = {
         "ID":<span className="Redirect"># {type == 'OP'? info.op_id:info.id}</span>,
-        "OP":<span className="Redirect idHolder">OP# {info.op_id}</span>,
+        "OP":<span className="Redirect idHolder" onClick={()=>{
+            info.type = 'Document'
+            setPreviewInfo(info);
+            setOpenPreview(true)
+        }}>OP# {info.op_id}</span>,
         "Movmiento Inventario":<span className="Redirect idHolder"># {info.movement_id}</span>,
         "Tienda":<span className="Redirect">{info.store_name}Tienda 1</span>,
         "Creada por":<UserCard name={info.user_name}/>,

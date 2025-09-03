@@ -70,6 +70,7 @@ processController.getDocuments = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             SELECT
+                '${info.type}' AS docType,
                 sga_process.${info.type}S.*,
                 sga_ecosystem.users.user_name,
                 sga_ecosystem.thirdParties.names

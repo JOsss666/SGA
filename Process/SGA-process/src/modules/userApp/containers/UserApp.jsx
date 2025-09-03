@@ -5,7 +5,7 @@ import { SearchBar } from '../components/SearchBar';
 import { ButtonMenu } from '../components/ButtonMenu';
 import { UserCard } from '../components/UserCard';
 import { MenuApp } from './MenuApp';
-import { useAlert, useAppInfo } from '../../../context/context';
+import { useAlert, useAppInfo, usePreview } from '../../../context/context';
 import { useEffect, useRef, useState } from 'react';
 import { ServiceSgaCard } from '../components/ServiceSgaCard';
 import { LoadingAppDataPage } from './LoadingAppDataPage';
@@ -19,11 +19,16 @@ import { TutorialAccountsPlan } from './tutorials/TutorialAccountsPlan';
 import { SearchDocument } from './SearchDocument';
 import { Reports } from './Reports';
 import { DocumentPreview } from './Alerts/DocumentPreview';
+import { ConcenptsPlan } from './ConceptsPlan';
 
 export function UserApp(){
 
-    const {tailAlerts,openAlert,popOutAlert} = useAlert();
+    // Context Info
     const {appInfo,userInfo,loadingAppData} = useAppInfo();
+    const {previewInfo,openPreview,setOpenPreview} = usePreview();
+    const {tailAlerts,openAlert,popOutAlert} = useAlert();
+
+    // Container Params
     const [visibleMenu,setVisibleMenu] = useState(false);
     const asideMenuC = useRef();
     const [visibleApps,setVisibleApps] = useState(false);
@@ -60,7 +65,12 @@ export function UserApp(){
 
     window.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
-            popOutAlert();
+            if(openAlert){
+                popOutAlert();
+            }
+            if(openPreview){
+                setOpenPreview(false);
+            }
         }
     });
 
@@ -104,11 +114,14 @@ export function UserApp(){
                             <Route path='/' element={<HomeProcess/>} />
                             <Route path='/newDocument' element={<CreateDocument/>} />
                             <Route path='/users' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
+                            <Route path='/analytics' element={<ConcenptsPlan/>} />
                             <Route path='/searchDocument' element={<SearchDocument/>} />
                             <Route path='/reports/*' element={<Reports/>} />
                     </Routes>
                 </main>
-                
+                {openPreview && (
+                    <DocumentPreview/>
+                )}
                 <NotificationsApp/>
                 {openAlert && (
                     <AlertsHolder/>
