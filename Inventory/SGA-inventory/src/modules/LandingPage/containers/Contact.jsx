@@ -1,6 +1,6 @@
 
 
-import { ConcatCard } from '../components/ConcatCard';
+import { ContactCard } from '../components/ContactCard';
 import { QuestionCard } from '../components/QuestionCard';
 import { Titles } from '../components/Titles';
 import './Contact.css';
@@ -11,13 +11,13 @@ export function Contact(){
             <div className="ContactContainer">
                 <div className="ContactTitle">
                     <Titles text={'Contacta nuestro equipo'}/>
+                    <h2>Si tienes alguna duda aquí para ayudarte</h2>
                 </div>
                 <div className="ContactContainerCard">
-                    <ConcatCard icon={<i className="fa-regular fa-message icon"/>} title={'¿Cómo puedo crear una cuenta?'} description={'Para crear una cuenta, haz clic en el botón de registro en la esquina superior derecha y completa el formulario con tus datos.'} onClick={()=>window.location='tel:+1234567890'} children={'Comunicarme por este medio'}/>
-                    <ConcatCard icon={<i className="fa-regular fa-message icon"/>} title={'¿Cómo puedo crear una cuenta?'} description={'Para crear una cuenta, haz clic en el botón de registro en la esquina superior derecha y completa el formulario con tus datos.'} onClick={()=>window.location='tel:+1234567890'} children={'Comunicarme por este medio'}/>
-                    <ConcatCard icon={<i className="fa-regular fa-message icon"/>} title={'¿Cómo puedo crear una cuenta?'} description={'Para crear una cuenta, haz clic en el botón de registro en la esquina superior derecha y completa el formulario con tus datos.'} onClick={()=>window.location='tel:+1234567890'} children={'Comunicarme por este medio'}/>
-                    <ConcatCard icon={<i className="fa-regular fa-message icon"/>} title={'¿Cómo puedo crear una cuenta?'} description={'Para crear una cuenta, haz clic en el botón de registro en la esquina superior derecha y completa el formulario con tus datos.'} onClick={()=>window.location='tel:+1234567890'} children={'Comunicarme por este medio'}/>
-                    <ConcatCard icon={<i className="fa-regular fa-message icon"/>} title={'¿Cómo puedo crear una cuenta?'} description={'Para crear una cuenta, haz clic en el botón de registro en la esquina superior derecha y completa el formulario con tus datos.'} onClick={()=>window.location='tel:+1234567890'} children={'Comunicarme por este medio'}/>
+                    <ContactCard icon={<i className="fa-regular fa-message Icon"/>} title={'Chat Soporte Técnico'} description={'Atención L-V 6AM - 10PM'}  children={'Comunicarme por este medio'}/>
+                    <ContactCard icon={<i className="fa-regular fa-message Icon"/>} title={'Chat Soporte Técnico'} description={'Atención L-V 6AM - 10PM'}  children={'Comunicarme por este medio'}/>
+                    <ContactCard icon={<i className="fa-regular fa-message Icon"/>} title={'Chat Soporte Técnico'} description={'Atención L-V 6AM - 10PM'}  children={'Comunicarme por este medio'}/>
+                    <ContactCard icon={<i className="fa-regular fa-message Icon"/>} title={'Asistente AI'} description={'Atención 24/7'}  children={'Comunicarme por este medio'}/>
                 </div>
             </div>
             <div className="ContactQuestion">

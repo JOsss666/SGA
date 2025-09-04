@@ -1,0 +1,49 @@
+
+.ContactCard {
+    display: flex;
+    flex-direction: column;
+    margin: 2vh;
+    padding: 1vh 2vh 2vh 2vh;
+    width: 38vh;
+    box-shadow: 0 0 .5vh #3a3a3a60;
+    border-radius: 1.5vh;
+}
+
+.ContactCard .IconInfo{
+    color: #545657;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.ContactCard .Icon{
+    color: #000;
+    padding-bottom: 1vh;
+    font-size: 6vh;
+}
+
+.ContactCard .Description{
+    font-size: 2.2vh;
+    color: #6A6A6A;
+}
+
+.ContactCard .Question{
+    font-size: 2.5vh;
+    color: #545657;
+    padding-bottom: 1vh;
+}
+
+.ContactCard .Link{
+    padding-top: 1vh;
+    text-align: left;
+    font-size: 2.5vh;
+    font-weight: 300;
+    color: #545657;
+}
+
+
+.ContactCard .Link a{
+    color: #545657;
+}
+
+
+
