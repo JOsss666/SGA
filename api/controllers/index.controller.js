@@ -113,8 +113,8 @@ controller.logIn = (req,res)=>{
             FROM    
                 sga_ecosystem.users
             WHERE
-                user_mail = ${info.mail}
-                AND user_password = ${info.pass}
+                user_mail = '${info.mail}'
+                AND user_password = '${info.pass}'
             LIMIT 1;
         `
         let consulta = await useDataBase(sentence,[],1);

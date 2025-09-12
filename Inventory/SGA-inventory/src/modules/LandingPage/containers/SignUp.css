@@ -1,9 +1,8 @@
-.SingUp{
+.SignUp{
     padding: 8vh 0;
 }
 
-
-.SingUp .Card{
+.SignUp .Card{
     display: flex;
     flex-direction: column;
     text-align: center;
@@ -14,37 +13,37 @@
     border-radius: 1.5vh;
 }
 
-.SingUp .CardTitle{
+.SignUp .CardTitle{
     flex-direction: column;
 }
 
-.SingUp .CardTitle .Titles{
+.SignUp .CardTitle .Titles{
     margin: 0;
     font-size: 5dvh;
 }
 
 
 
-.SingUp .Form{
+.SignUp .Form{
     display: flex;
     flex-direction: column;
     padding: 2vh 1vh;
 }
 
-.SingUp .Form .fields{
+.SignUp .Form .fields{
     display: flex;
     flex-direction: column;
     align-items: start;
     gap: 1vh;
 }
 
-.SingUp .Form label{
+.SignUp .Form label{
     font-size: 2.5vh; 
     color:#757575; 
     margin: 0;
 }
 
-.SingUp .Form input{
+.SignUp .Form input{
     margin-bottom: 2vh;
     padding: 1.5vh 2vh;
     width: 100%;
@@ -53,7 +52,7 @@
     border: none;
 }
 
-.SingUp .Form .btn{
+.SignUp .Form .btn{
     margin: 2vh 0;
     padding: 1.5vh 2vh;
     width: 100%;
@@ -64,12 +63,12 @@
     border: none;
 }
 
-.SingUp .Form a{
+.SignUp .Form a{
     text-decoration: none;
     font-size: 2vh;
 }
 
-.SingUp .SingUpAccounts{
+.SignUp .SingUpAccounts{
     padding: 2vh 0;
     margin: 1vh 0;
     display: flex;
@@ -77,7 +76,7 @@
     justify-content: space-between;
 }
 
-.SingUp .SingUpAccounts .btnAccounts{
+.SignUp .SingUpAccounts .btnAccounts{
     background-color: #fff;
     display: flex;
     flex-direction: row;
@@ -92,20 +91,20 @@
     border: none;
 }
 
-.SingUp .SingUpAccounts .btnAccounts .btnIcon{
+.SignUp .SingUpAccounts .btnAccounts .btnIcon{
     font-size: 2.5vh;
 }
 
-.SingUp .SingUpAccounts .btnAccounts .btnText{
+.SignUp .SingUpAccounts .btnAccounts .btnText{
     font-size: 2vh;
     font-weight: 400;
 }
 
-.SingUp .singUp{
+.SignUp .singUp{
     font-size: 2vh;
     color: #757575;
 }
 
-.SingUp .singUp a{
+.SignUp .singUp a{
     text-decoration: none;
 }

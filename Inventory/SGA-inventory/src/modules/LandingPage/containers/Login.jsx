@@ -1,7 +1,7 @@
 import { Titles } from '../components/Titles';
 import './Login.css';
 import React, { useState } from 'react';
-import { postInfo } from '../../../../../../SGA/Inventory/SGA-inventory/src/utils/functions';
+import {postInfo} from '../../../utils/functions'
 
 export function Login() {
     const [loading, setLoading] = useState(false);

@@ -10,6 +10,8 @@ import { FooterSugerence } from '../components/FooterSugerence';
 import { MediaHandler } from '../../../../media/MediaHandler';
 import { Contact } from './Contact';
 import { Login } from './Login';
+import {SignUp} from './SingUp'
+
 export function LandingPage(){
 
     const navigate = useNavigate();
@@ -37,7 +39,9 @@ export function LandingPage(){
                         {element.name}
                     </span>
                 ))}
-                <FormButton text={'Registro'}/>
+                <FormButton text={'Registro'} onClick={()=>{
+                    handleNavigate('signUp')
+                }}/>
             </header>
             <div className="ContentLandingPage">
                 <Routes>
@@ -46,7 +50,7 @@ export function LandingPage(){
                     <Route path='/contact' element={<Contact/>}/>
                     <Route path='/help' element={<span>Ayuda</span>}/>
                     <Route path='/logIn' element={<Login/>}/>
-                    <Route path='/signup' element={<span>Registro</span>}/>
+                    <Route path='/signup' element={<SignUp/>}/>
                 </Routes>
             </div>
             <footer>

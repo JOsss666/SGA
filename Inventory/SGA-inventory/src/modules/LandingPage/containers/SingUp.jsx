@@ -1,10 +1,10 @@
 import { Titles } from '../components/Titles';
-import './SingUp.css';
+import './SignUp.css';
 import React, { useState } from 'react';
-import { postInfo } from '../../../../../../SGA/Inventory/SGA-inventory/src/utils/functions.js';
+import { postInfo } from '../../../utils/functions';
 
-export function SingUp() {
-    {/*
+export function SignUp(){
+    
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -46,10 +46,9 @@ export function SingUp() {
         setLoading(false);
         }
     };
-    */}
 
     return (
-        <div className="SingUp">
+        <div className="SignUp">
         <div className="Card">
             <div className="CardTitle">
             <Titles text={'Registro'} />
@@ -58,6 +57,16 @@ export function SingUp() {
             {/* 👇 el onSubmit maneja el POST */}
             <form className="Form" id="SingUpForm" autoComplete="off" onSubmit={handleSubmit}>
             <div className="fields">
+
+                <label htmlFor="text">Nombre</label>
+                <input
+                type="email"
+                id="name"
+                name="name"
+                placeholder="tu nombre"
+                required
+                />
+
                 <label htmlFor="email">Email</label>
                 <input
                 type="email"
