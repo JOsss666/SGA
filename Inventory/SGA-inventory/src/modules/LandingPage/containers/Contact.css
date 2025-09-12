@@ -4,11 +4,19 @@
 
 .Contact .ContactContainer .ContactTitle{
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: .2vh;
+    padding-bottom: 4vh;
 }
 
+.Contact .ContactContainer .ContactTitle h2{
+    font-size: 2.8vh;
+    font-weight: 400;
+    color: #757575;
+}
 
-.Contact .ConcatCard{
+.Contact .ConactCard{
     width: 40vh;
 }
 
