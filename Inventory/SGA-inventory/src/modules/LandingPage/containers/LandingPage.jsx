@@ -9,6 +9,7 @@ import { AboutUs } from './AboutUs';
 import { FooterSugerence } from '../components/FooterSugerence';
 import { MediaHandler } from '../../../../media/MediaHandler';
 import { Contact } from './Contact';
+import { Login } from './Login';
 export function LandingPage(){
 
     const navigate = useNavigate();
@@ -44,7 +45,7 @@ export function LandingPage(){
                     <Route path='/aboutus' element={<AboutUs />}/>
                     <Route path='/contact' element={<Contact/>}/>
                     <Route path='/help' element={<span>Ayuda</span>}/>
-                    <Route path='/logIn' element={<span>Inicio de sesión</span>}/>
+                    <Route path='/logIn' element={<Login/>}/>
                     <Route path='/signup' element={<span>Registro</span>}/>
                 </Routes>
             </div>
