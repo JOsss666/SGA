@@ -1,15 +1,16 @@
-import { useAppInfo } from "../../../../context/context";
+import { useAppInfo, useNotifications } from "../../../../context/context";
 import { BoldTitle } from "../../components/BoldTitle";
 import { CardTitleLogo } from "../../components/CardTitleLogo";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
 import { SearchBar } from "../../components/SearchBar";
 import { ServiceBubble } from "../../components/ServiceBubble";
-import { ServiceSgaCard } from "../../components/ServiceSgaCard";
+import { copyToClipBoard } from "../../../../utils/functions";
 import './ShareDocument.css'
 
 export function ShareDocuments({info}){
 
     const {appInfo} = useAppInfo();
+    const {addNotification} = useNotifications();
 
     return(
         <div className="ShareDocuments">
@@ -32,13 +33,37 @@ export function ShareDocuments({info}){
             </div>
             <div className="quickShare">
                 <div className="quickShareOptions">
-                    <CardTitleLogo title={'Copiar Link de Visualización'}>
+                    <CardTitleLogo onClick={()=>{
+                        copyToClipBoard('link_visualizacion');
+                        addNotification({
+                            type:'info',
+                            title:'Copiado al portapapeles',
+                            description:`Se copio "link_visualizacion" al portapapeles.`
+                        }
+                        )
+                    }} title={'Copiar Link de Visualización'}>
                         <i className="fa-regular fa-copy"/>
                     </CardTitleLogo>
-                    <CardTitleLogo title={'Copiar Link de Descarga'}>
+                    <CardTitleLogo onClick={()=>{
+                        copyToClipBoard('link_descarga');
+                        addNotification({
+                            type:'info',
+                            title:'Copiado al portapapeles',
+                            description:`Se copio "link_descarga" al portapapeles.`
+                        }
+                        )
+                    }} title={'Copiar Link de Descarga'}>
                         <i className="fa-regular fa-copy"/>
                     </CardTitleLogo>
-                    <CardTitleLogo title={'Copiar imágen'}>
+                    <CardTitleLogo onClick={()=>{
+                        copyToClipBoard(`${info.docType}#${info.id}`);
+                        addNotification({
+                            type:'info',
+                            title:'Imágen copiada al portapapeles',
+                            description:`Se copío "${info.docType}#${info.id}.jpg" al portapapeles.`
+                        }
+                        )
+                    }} title={'Copiar imágen'}>
                         <i className="fa-regular fa-copy"/>
                     </CardTitleLogo>
                 </div>

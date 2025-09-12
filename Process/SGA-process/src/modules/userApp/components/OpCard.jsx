@@ -34,6 +34,9 @@ export function OpCard({data}){
     }
 
     useEffect(()=>{
+        if(info.user_id == undefined){
+            reloadInfo();
+        }
         if(info.op_id != undefined){
             getAttachedDocuments();
         }

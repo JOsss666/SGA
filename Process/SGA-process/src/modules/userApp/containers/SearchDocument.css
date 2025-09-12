@@ -122,6 +122,9 @@
     cursor: pointer;
 }
 
+.SearchDocument .InputBarChat{
+    width: 50vw;
+}
 
 .SearchDocument .contentPrevElement{
     display: flex;
@@ -136,5 +139,9 @@
     height: fit-content;
     width: 35vw;
     max-height: fit-content;
+    margin: 0 auto;
+}
+
+.SearchDocument .contentPrevElement .DocumentCard{
     margin: 0 auto;
 }

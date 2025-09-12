@@ -1,0 +1,80 @@
+
+.DocumentCard{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+    background-color: #fff;
+    width: 25vw;
+    min-height: 60vh;
+    border-radius: 3vh;
+    outline: solid .1vh #ddd;
+    box-shadow: 0 0 1vh #ccc9;
+}
+
+.DocumentCard .headCard{
+    display: flex;
+    padding: 1vh;
+}
+
+.DocumentCard .headCard .BoldTitle{
+    margin: auto 1vh;
+}
+
+.DocumentCard .SwitchOption{
+    margin: auto;
+    margin-right: 1vh;
+}
+
+.DocumentCard .contentCard{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh 2vh;
+}
+
+.DocumentCard .contentCard .infoCardContainer{
+    display: flex;
+    flex-direction: column;
+}
+
+.DocumentCard .contentCard .infoCardContainer .thirdpartyC{
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 1vh;
+    border-bottom: solid .1vh #ddd;
+}
+
+.DocumentCard .contentCard .infoCardContainer .mainDes{
+    margin-bottom: 1vh;
+    margin-left: .5vh;
+    font-size: clamp(2.2px,2.5vh,25px);
+    color: #7B7B7B;
+}
+
+.DocumentCard .contentCard .infoCardContainer .thirdpartyC .UserCard{
+    cursor: pointer;
+    transition: .3s;
+    border-radius: 1vh;
+}
+
+.DocumentCard .contentCard .infoCardContainer .descOCc{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+}
+
+.DocumentCard .contentCard .infoCardContainer .descOCc strong{
+    font-size: clamp(2.2px,2.5vh,25px);
+    font-weight: 500;
+}
+
+.DocumentCard .contentCard .infoCardContainer .thirdpartyC .UserCard:hover{
+    background-color: #EFF6FF;
+}
+
+.DocumentCard .contentCard .infoCardContainer .LabelValue span{
+    width: 60%;
+}
+
+.DocumentCard .contentCard .infoCardContainer .LabelValue strong{
+    text-align: right;
+}

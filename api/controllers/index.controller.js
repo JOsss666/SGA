@@ -1,7 +1,8 @@
 
-import { calcWeightedAverage, useDataBase } from "../app.js";
+import { calcWeightedAverage, isRelevanPrompt, useDataBase } from "../app.js";
 import fs from "fs";
 import path from "path";
+import { send_API_AI } from "../ApiFunctions.js";
 const controller = {};
 
 controller.uploadChunk = (req, res) => {
@@ -92,6 +93,60 @@ controller.createAccountsPlan = (req,res)=>{
     let consulta = await useDataBase(sentence,[],2);
     res.writeHead(200,{'Content-Type':'text/plain'})
     res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+controller.logIn = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            SELECT
+                *
+            FROM    
+                sga_ecosystem.users
+            WHERE
+                user_mail = ${info.mail}
+                AND user_password = ${info.pass}
+            LIMIT 1;
+        `
+        let consulta = await useDataBase(sentence,[],1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+controller.signUp = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            INSERT
+            INTO   
+                sga_ecosystem.users(
+                    user_name,
+                    user_mail,
+                    user_password
+                )
+            VALUES(?,?,?,?);
+        `;
+        let consulta = await useDataBase(sentence,[info.user_name,info.mail,info.pass],2);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
     })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
@@ -997,6 +1052,31 @@ controller.getRotation = (req,res)=>{
         let ttlValEntries = await useDataBase(svalEntries,[],1); 
         res.writeHead(200,{'Content-Type':'text/plain'});
         res.end(JSON.stringify([initialBalance[1][0].initialStock,finalBalance[1][0].finalStock,ttlSellunits[1][0].ttlSellunits,ttlSellunits[1][0].totalDepartureCost,ttlValEntries[1][0].totalEntriesCost]));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+
+
+// Ai_asistant Actions
+
+controller.processAiRequest= (req,res)=>{
+    let data = ''
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let validatePrompt = await isRelevanPrompt(info.text);
+        if(validatePrompt.relevant){
+            let newRes = await send_API_AI(info.text,info.userInfo,[])
+            validatePrompt.AI_response = newRes;
+        }
+        res.writeHead(200,{'Content-Type':'text/plain'});
+        res.end(JSON.stringify(validatePrompt));
     })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})

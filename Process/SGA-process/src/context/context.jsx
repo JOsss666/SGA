@@ -5,6 +5,7 @@ const AppInfo = createContext();
 const AppNotifications = createContext();
 const AppAlerts = createContext();
 const PreviewDocs = createContext();
+const AiAssistant = createContext();
 
 export function useAppInfo(){
     return useContext(AppInfo);
@@ -20,6 +21,10 @@ export function useAlert(){
 
 export function usePreview(){
     return useContext(PreviewDocs);
+}
+
+export function useAiAssistant(){
+    return useContext(AiAssistant);
 }
 
 export function NotificationsProvider({children}){
@@ -61,6 +66,33 @@ export function NotificationsProvider({children}){
     )
 }
 
+export function AiAssistanProvider({children}){
+
+    const [usedTokens,setUsedTokens] = useState(0);
+    const [chat,setChat] = useState([]);
+
+    const addMessage = (newMessage) => {
+        setChat(prev => [...prev, newMessage]);
+    };
+
+    const value = {
+        chat,
+        usedTokens,
+        addMessage,
+        setChat,
+        setUsedTokens
+    }
+
+    useEffect(()=>{
+        console.log(chat)
+    },[chat])
+
+    return (
+        <AiAssistant.Provider value={value}>
+        {children}
+        </AiAssistant.Provider>
+    );
+}
 
 export function AlertProvider({ children }) {
     const [openAlert, setOpenAlert] = useState(false);

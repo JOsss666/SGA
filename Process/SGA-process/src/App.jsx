@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css'
 import { UserApp } from './modules/userApp/containers/UserApp';
-import { AlertProvider, AppInfoProvider, NotificationsProvider, PreviewProvider } from './context/context';
+import { AiAssistanProvider, AlertProvider, AppInfoProvider, NotificationsProvider, PreviewProvider } from './context/context';
 
 export const urlSer = 'http://localhost:3000';
 
@@ -18,7 +18,9 @@ function App() {
                       <AlertProvider>
                           <AppInfoProvider>
                             <PreviewProvider>
-                              <UserApp/>
+                              <AiAssistanProvider>
+                                  <UserApp/>
+                              </AiAssistanProvider>
                             </PreviewProvider>
                           </AppInfoProvider>
                       </AlertProvider>

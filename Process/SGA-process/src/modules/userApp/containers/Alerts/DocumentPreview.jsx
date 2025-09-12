@@ -1,19 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNotifications, usePreview } from "../../../../context/context";
 import { BoldTitle } from "../../components/BoldTitle";
 import { ButtonMenu } from "../../components/ButtonMenu";
 import './DocumentPreview.css'
 import { ShareDocuments } from "./ShareDocument";
 import { ChatSpace } from "../ChatSpace";
+import { OpCard } from "../../components/OpCard";
+import { DocumentCard } from "../../components/DocumentCard";
 
 export function DocumentPreview({children}){
-
     const [openTools,setOpenTools] = useState(false);
     const [activeTool, setActiveTool] = useState('Share')
     const {addNotification} = useNotifications();
     const {previewInfo,setOpenPreview} = usePreview();
 
     let info = previewInfo;
+
+    const messageTest = {
+        user_name:'Nombre Usuario1',
+        text:'Este es el contenido del mensaje',
+        user_id:0
+    }
+
+    const messageTest2 = {
+        user_name:'Nombre Usuario2',
+        text:'Este es un mensaje própio ',
+        user_id:1
+    }
+
+    const messages = [messageTest,messageTest2,messageTest,messageTest,messageTest2,messageTest];
 
     const handleToolChange = (tool)=>{
         if(openTools){
@@ -26,19 +41,23 @@ export function DocumentPreview({children}){
         setActiveTool(tool);
     }
 
+    useEffect(()=>{
+        console.log(previewInfo)
+    },[previewInfo])
+
     return(
         <div className="DocumentPreview">
             <header>
-                <div className="CloseDocPrev">
-                    <i class="fa-solid fa-xmark" onClick={()=>{
+                <div className="CloseDocPrev" onClick={()=>{
                         setOpenPreview(false)
-                    }}/>
+                    }}>
+                    <i className="fa-solid fa-xmark" />
                 </div>
                 <div className="docInfo">
                     {info.type == 'Document' && (
                         <>
                             <i class="fa-solid fa-file-code "/>
-                            <strong>{info.docType}# {info.id}</strong>
+                            <strong>{info.docType}#{info.id}</strong>
                         </>
                     )}
                 </div>
@@ -56,7 +75,7 @@ export function DocumentPreview({children}){
                         {activeTool == 'Share' && (
                             <ShareDocuments info={info}/>
                         )}{activeTool == 'Comments' && (
-                            <ChatSpace chatInfo={{
+                            <ChatSpace messages={messages} chatInfo={{
                                 name:`Comentarios Documento`,
                                 chatImg:'',
                                 otherOptions:false
@@ -65,6 +84,18 @@ export function DocumentPreview({children}){
                     </div>
                 )}
             </header>
+            <div className="spaceDoc">
+                {info.type == 'Document' && (
+                    <>
+                        {info.docType == 'OP' && (
+                            <OpCard data={info} />
+                        )}
+                        {info.docType != 'OP' && (
+                            <DocumentCard data={info}/>
+                        )}
+                    </>
+                )}
+            </div>
         </div>
     )
 }

@@ -10,10 +10,17 @@ export function RowTableReport({columns,info,type}){
     const {popInAlert} = useAlert();
     const {setOpenPreview,setPreviewInfo} = usePreview();
     const dictionaryElementsColum = {
-        "ID":<span className="Redirect"># {type == 'OP'? info.op_id:info.id}</span>,
-        "OP":<span className="Redirect idHolder" onClick={()=>{
+        "ID":<span className="Redirect" onClick={()=>{
             info.type = 'Document'
             setPreviewInfo(info);
+            setOpenPreview(true)
+        }} >{info.docType}# {type == 'OP'? info.op_id:info.id}</span>,
+        "OP":<span className="Redirect idHolder" onClick={()=>{
+            setPreviewInfo({
+                op_id:info.op_id,
+                docType:'OP',
+                type:'Document'
+            });
             setOpenPreview(true)
         }}>OP# {info.op_id}</span>,
         "Movmiento Inventario":<span className="Redirect idHolder"># {info.movement_id}</span>,

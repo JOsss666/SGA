@@ -5,7 +5,7 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import multer from 'multer';
-import { Console } from 'console';
+import * as transformers from "@xenova/transformers";
 
 // Cargar las variables de entorno
 dotenv.config();
@@ -34,23 +34,77 @@ const pool = mysql.createPool({
     connectionLimit: 10, 
     queueLimit: 0
 });
-
+    
 const poolPromise = pool.promise();
 
-
 async function testDBConnection() {
-  try {
-    const connection = await poolPromise.getConnection();
-    console.log('✅ Conexión a MySQL establecida correctamente.');
-    connection.release(); // Muy importante liberar la conexión
-  } catch (err) {
-    console.error('❌ Error al conectar a MySQL:', err);
-    process.exit(1); // Opcional: termina el servidor si la DB falla
-  }
+    try {
+        const connection = await poolPromise.getConnection();
+        console.log('✅ Conexión a MySQL establecida correctamente.');
+        connection.release(); // Muy importante liberar la conexión
+    } catch (err) {
+        console.error('❌ Error al conectar a MySQL:', err);
+        process.exit(1); // Opcional: termina el servidor si la DB falla
+    }
 }
 
 testDBConnection();
 
+// PROCES IA - PRE_API CONFIG
+let calsificatorAI;
+const {pipeline} = transformers;
+const API_AI_Categories = [
+    "Inventarios: productos: insumos: stock: existencias: entradas: salidas: kardex: bodegas: almacén: lote: reposición: control de mercancía: codificación: referencias: unidades disponibles: rotación: clasificación de productos: ajuste de inventario",
+    "Contabilidad: registros: asientos contables: balances: estado de resultados: estados financieros: libro diario: libro mayor: plan de cuentas: conciliación: auditoría: depreciación: impuestos: retenciones: causación: provisiones: obligaciones fiscales: cierres contables",
+    "Facturación: facturas: ventas: comprobantes: recibos: notas crédito: notas débito: clientes: pedidos: cotizaciones: remisiones: orden de compra: número de factura: facturación electrónica: detalle de venta: impuestos en facturas",
+    "Tesorería: pagos: bancos: flujo de caja: transferencias: conciliación bancaria: cuentas por pagar: cuentas por cobrar: recaudos: movimientos bancarios: cheques: consignaciones: desembolsos: control financiero: gestión de caja: recaudo de clientes: egresos: ingresos",
+    "Procesos: tareas: actividades: flujo de trabajo: productividad: eficiencia: indicadores: reportes de gestión: tiempos: asignación de tareas: seguimiento: procesos internos: coordinación: automatización: planeación: gestión de usuarios: órdenes de producción: cronogramas"
+];
+
+
+async function initAiClasificator(){
+    calsificatorAI = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+    console.log("Clasificador AI cargado ✅");
+}
+
+await initAiClasificator();
+
+// Función para calcular similitud coseno
+function cosineSimilarity(vecA, vecB) {
+  const dot = vecA.reduce((sum, a, i) => sum + a * vecB[i], 0);
+  const magA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
+  const magB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
+  return dot / (magA * magB);
+}
+
+// Precalcula embeddings de las categorías
+const categoryEmbeddings = {};
+for (let cat of API_AI_Categories) {
+    const emb = await calsificatorAI(cat, { pooling: "mean", normalize: true });
+    categoryEmbeddings[cat] = emb.data;
+}
+
+// Función que evalúa la petición API - AI
+export async function isRelevanPrompt(prompt){
+    console.log(`Evaluando : ${prompt}`)
+    const textEmb = await calsificatorAI(prompt, { pooling: "mean", normalize: true });
+    let mejorCategoria = null;
+    let mejorScore = -1;
+
+    for (let cat of API_AI_Categories) {
+        const score = cosineSimilarity(textEmb.data, categoryEmbeddings[cat]);
+        if (score > mejorScore) {
+        mejorScore = score;
+        mejorCategoria = cat;
+        }
+    }
+
+    return {
+        relevant: mejorScore > 0.5, // umbral configurable
+        category: mejorCategoria,
+        score: mejorScore,
+    }
+}
 
 
 export const actualDate = new Date();

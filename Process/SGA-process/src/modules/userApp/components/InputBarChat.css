@@ -1,8 +1,7 @@
 
 .InputBarChat{
     display: flex;
-    background-color: #afa;
-    width: 50vw;
+    width: 100%;
     border-radius: 4vh;
     outline: solid .1vh #ddd;
     background-color: #F5F5F5;
@@ -15,10 +14,14 @@
     border: hidden;
     background-color: #F5F5F5;
     outline: none;
+    border-radius: 4vh;
+    padding: 0 1vh;
+    padding-left: 4vh;
 }
 
 .InputBarChat .ButtonMenu{
-    margin: auto;
+    margin: auto 0vh !important;
+    margin-right: .5vh !important;
 }
 
 .InputBarChat .ButtonMenu:hover{

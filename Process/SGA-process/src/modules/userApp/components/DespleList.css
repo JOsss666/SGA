@@ -17,7 +17,7 @@
 }
 
 .DespleList .childrenSpan h6:hover{
-    color: #9810FA;
+    color: #3C83F7;
 }
 
 .DespleList h6 i{
@@ -58,7 +58,7 @@
 .DespleList .childrenSpan span:hover{
     text-decoration: underline;
     text-underline-offset: .5vh;
-    color: #9810FA;
+    color: #3C83F7;
     margin-left: .5vh;
-    background-color: #FAF5FF;
+    background-color: #EFF6FF;
 }

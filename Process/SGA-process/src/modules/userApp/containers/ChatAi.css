@@ -1,0 +1,279 @@
+
+.ChatAi{
+    position: absolute;
+    width: 35vw;
+    height: 89vh;
+    top: 10vh;
+    right: 0;
+    z-index: 29;
+    background-color: #1E1E1E;
+    border-top-left-radius: 4vh;
+    border-bottom-left-radius: 4vh;
+    box-shadow: -.4vh 0 1vh #0003;
+    overflow: hidden;
+    padding-bottom: 10vh;
+}
+
+.ChatAi .headChat{
+    width: 35vw;
+    position: sticky;
+    display: flex;
+    padding: 1vh;
+    background-color: #1E1E1E;
+    box-shadow: 0 .4vh 2vh #0004;
+    border-bottom: solid .1vh #333;
+}
+
+.ChatAi .headChat .modelAi{
+    display: flex;
+    margin: auto 1vh;
+}
+
+.ChatAi .headChat .modelAi span{
+    margin: auto;
+    color: #eee;
+    font-size: clamp(2.2px,2.2vh,22px);
+}
+
+.ChatAi .headChat .modelAi svg{
+    height: 4vh;
+    width: 4vh;
+    fill: #fff;
+    margin: auto 1vh;
+}
+
+.ChatAi .headChat .BoldTitle{
+    color: #fff;
+    margin: auto 1vh;
+    margin-left: 3vh;
+    font-weight: 500;
+    border-right: solid .1vh #666;
+    padding-right: 3vh;
+    font-size: clamp(3px,3vh,30px);
+    background: linear-gradient(90deg, #38D5BE, #21BCFF, #F4A8FF); /* gradiente */
+    -webkit-background-clip: text; /* para Chrome, Safari */
+    -webkit-text-fill-color: transparent; /* para mostrar gradiente */
+    background-clip: text; /* estándar */
+    color: transparent; /* oculta color sólido */
+}
+
+.ChatAi .headChat .ButtonMenu{
+    margin:auto;
+    margin-right: 1vh;
+}
+
+.ChatAi .headChat .ButtonMenu i{
+    color: #838383;
+}
+
+.ChatAi .spaceChatAi{
+    display: flex;
+    flex-direction: column;
+    padding: 3vh 1vh;
+    margin-top: 1vh;
+    height: 69vh;
+    width: 100%;
+    overflow-y: auto;
+}
+
+.ChatAi .spaceChatAi .ChatMessage{
+    box-shadow: none;
+    background-image: linear-gradient(75deg,#5C5C5C,#4D4D4D);
+    outline: none;
+    border-radius: 2vh;
+}
+
+.ChatAi .spaceChatAi .ChatMessage span{
+    color: #eee;
+    font-weight: 400;
+}
+
+.ChatAi .spaceChatAi .OwnMessage{
+    background-image: linear-gradient(75deg,#fff,#F0F9FF);
+}
+
+.ChatAi .spaceChatAi .OwnMessage .messageContent span{
+    color: #303030;
+}
+
+
+.ChatAi .spaceChatAi .ChatMessage strong{
+    display: none;
+}
+
+.ChatAi .chatAiInput{
+    width: 100%;
+    display: flex;
+    padding: 2vh 1vh;
+    background-color: #1E1E1E;
+    box-shadow: 0 -.4vh 2vh #0004;
+}
+
+.ChatAi .chatAiInput .ButtonMenu {
+    margin: auto 1vh;
+    background-color: #303030;
+}
+
+.ChatAi .chatAiInput .ButtonMenu i{
+    color: #aaa;
+}
+
+.ChatAi .chatAiInput .InputBarChat{
+    width: 90%;
+    margin: auto;
+    background-color: #303030;
+    outline: none;
+}
+
+.ChatAi .chatAiInput .InputBarChat .ButtonMenu:nth-child(3){
+    background-color: #fff;
+}
+
+.ChatAi .chatAiInput .InputBarChat .ButtonMenu:nth-child(3) i{
+    color: #1E1E1E;
+}
+
+.ChatAi .chatAiInput .InputBarChat input{
+    background-color: #303030;
+    color: #fff;
+}
+
+.ChatAi .addOptions{
+    position: absolute;
+    min-height: 30%;
+    width: 100%;
+    background-color: #303030;
+    bottom: 0;
+    left: 0;
+    border-top-left-radius:3vh;
+    border-top-right-radius: 3vh;
+    padding: 2vh 1vh;
+    box-shadow: 0 -.4vh 1vh #0005;
+    animation-name: appearAddOptions;
+    animation-duration: .5s;
+    animation-fill-mode: both;
+}
+
+.ChatAi .addOptions .closeAddOp{
+    position: absolute;
+    top: 2vh;
+    right: 2vh;
+    background-color: #838383;
+    height: 3.5vh;
+    width: 3.5vh;
+    display: flex;
+    border-radius: 100%;
+}
+
+.ChatAi .addOptions .closeAddOp i{
+    margin: auto;
+    font-size: clamp(2.5px,2.5vh,25px);
+    cursor: pointer;
+}
+
+.ChatAi .addOptions ul{
+    display: flex;
+    flex-direction: column;
+}
+
+.ChatAi .addOptions .DespleList{
+    background-color: #303030;
+    outline: none;
+    color: #fff;
+    width: 100%;
+    padding: 1vh 0;
+    padding-bottom: 0;
+}
+
+.ChatAi .addOptions .DespleList:hover{
+    background-color: #444;
+}
+
+.ChatAi .addOptions .DespleList h6{
+    font-weight: 400;
+    font-size: clamp(2.5px,2.5vh,25px);
+}
+
+.ChatAi .addOptions .DespleList h6 i{
+    margin-right: 3vh;
+}
+
+.ChatAi .addOptions .DespleList span{
+    font-size: clamp(2.5px,2.5vh,25px);
+    margin-top: .5vh;
+}
+
+.ChatAi .addOptions .DespleList span:hover{
+    background-color: #444;
+}
+
+.ChatAi .CardTitleLogo{
+    padding: 1vh;
+    padding-left: 7vh;
+    cursor: pointer;
+    color: #fff;
+    border-radius: 1vh;
+}
+
+.ChatAi .CardTitleLogo:hover{
+    background-color: #444;
+}
+
+.ChatAi .CardTitleLogo i{
+    position: absolute;
+    left: 2.5vh;
+}
+
+
+
+
+.appearChatAi{
+    animation-name: appearChatAi;
+    animation-duration: .5s;
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+}
+
+.desapearChatAi{
+    animation-name: desapearChatAi;
+    animation-duration: 1s;
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+}
+
+.ChatAi .ButtonMenu:hover{
+    background-color: #fff;
+}
+
+.ChatAi .ButtonMenu:hover i{
+    color: #1E1E1E;
+}
+
+@keyframes appearChatAi {
+    0%{
+        right: -120%;
+    }
+    100%{
+        right: 0%;
+    }
+}
+
+@keyframes desapearChatAi {
+
+    0%{
+        right: 0%;
+    }
+
+    100%{
+        right: -120%;
+    }
+}
+
+@keyframes appearAddOptions {
+    0%{
+        bottom: -50%;
+    }
+    100%{
+        bottom: 0%;
+    }
+}

@@ -1,7 +1,7 @@
 import { ButtonMenu } from "./ButtonMenu";
 import './InputBarChat.css'
 
-export function InputBarChat({settings,searchAction,sendAction,files,placeholder,disabled,loading}){
+export function InputBarChat({value,settings,searchAction,sendAction,files,placeholder,disabled,loading}){
     return(
         <div className="InputBarChat">
             {settings != undefined && (
@@ -11,7 +11,7 @@ export function InputBarChat({settings,searchAction,sendAction,files,placeholder
                     }
                 }} title={'Ajustar parametros de busqueda'} noRotate={true} children={<i className="fa-solid fa-sliders"/>}/>
             )}
-            <input onChange={(e)=>{
+            <input value={value} onChange={(e)=>{
                 if(searchAction != undefined){
                     searchAction(e.target.value);
                 }

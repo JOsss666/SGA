@@ -10,6 +10,7 @@ import { FormInput } from "../components/FormInput";
 import { postInfo } from "../../../utils/functions";
 import { OpCard } from "../components/OpCard";
 import { OcSimpleCard } from "../components/OcSimpleCard";
+import { DocumentCard } from "../components/DocumentCard";
 
 export function SearchDocument({}){
     
@@ -112,7 +113,8 @@ export function SearchDocument({}){
                                 <div className="gridResults">
                                     {results.map((element,index)=>(
                                         <span onClick={()=>{
-                                            setSelectedDoc(element),
+                                            element['docType'] = element.type;
+                                            setSelectedDoc(element);
                                             setVisiblePreviewElement(true);
                                         }} key={index}>{element.type}#{element.id}</span>
                                     ))}
@@ -135,7 +137,7 @@ export function SearchDocument({}){
                                 {selectedDoc.type == 'OP' && (
                                     <OpCard data={selectedDoc} />
                                 )}{selectedDoc.type != 'OP' && (
-                                    <OcSimpleCard info={selectedDoc}/>
+                                    <DocumentCard data={selectedDoc} />
                                 )}
                             </div>
                         )}

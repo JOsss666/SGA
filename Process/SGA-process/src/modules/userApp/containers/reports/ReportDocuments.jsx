@@ -80,15 +80,6 @@ export function ReportDocuments({type}){
         type
     }
 
-
-    // Functions Report
-    const GetOps = async()=>{
-        let res = await postInfo('/process/getOp',settingsReport);
-        if(res[0]){
-            setInfo(res[1])
-        }
-    }
-
     const GetDocuments = async()=>{
         let res = await postInfo('/process/getDocuments',settingsReport);
         if(res[0]){
@@ -97,11 +88,7 @@ export function ReportDocuments({type}){
     }
 
     useEffect(()=>{
-        if(type == 'OP'){
-            GetOps();
-        }else{
-            GetDocuments();
-        }
+        GetDocuments();
     },[])
 
     return(

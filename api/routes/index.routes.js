@@ -20,6 +20,12 @@ const upload = multer({ dest: CHUNKS_DIR });
 
     router.post("/merge-chunks", controller.mergeChunks);
 
+    router.post('/processAiRequest',controller.processAiRequest);
+
+    router.post('/logIn',controller.logIn);
+
+    router.post('/signUp',controller.signUp);
+
 router.post('/getCompanyInfo',controller.getCompanyInfo);
 
 router.post('/getUserInfo',controller.getUserInfo);

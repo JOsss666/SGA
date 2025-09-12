@@ -7,6 +7,7 @@
     width: 100dvw;
     z-index: 29;
     top: 10dvh;
+    display: flex;
 }
 
 .DocumentPreview header{
@@ -87,8 +88,12 @@
     position: absolute;
     top: 8vh;
     right: 2vh;
-    padding: 2vh;
     border-radius: 1vh;
-    padding: 1vh;
     background-color: #fff;
+    overflow: hidden;
+}
+
+.DocumentPreview .spaceDoc{
+    min-height: 70vh;
+    margin: auto;
 }

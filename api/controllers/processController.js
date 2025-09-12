@@ -68,6 +68,7 @@ processController.getDocuments = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        console.log(info.type)
         let sentence = `
             SELECT
                 '${info.type}' AS docType,
@@ -87,7 +88,8 @@ processController.getDocuments = (req,res)=>{
             WHERE
                 sga_process.${info.type}S.company_id = ${info.company_id}
                 ${info.user_id != null? ` AND sga_process.${info.type}S.user_id = ${info.user_id} `:''}
-                ${info.id != null? ` AND sga_process.${info.type}S.id = ${info.op_id} `:''}
+                ${info.id != null? ` AND sga_process.${info.type}S.id = ${info.id} `:''}
+                ${info.op_id != null? ` AND sga_process.${info.type}S.id = ${info.op_id} `:''}
                 ${info.limint != null? ` LIMIT ${info.limint}`:''}
                 ${(info.initialDate!= null && info.finalDate != null)? ` AND DATE(sga_process.${info.type}S.created_at) BETWEEN '${info.initialDate}' AND '${info.finalDate} '   `:''}
                 ORDER BY sga_process.${info.type}S.op_id DESC
