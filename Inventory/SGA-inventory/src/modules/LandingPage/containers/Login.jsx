@@ -7,6 +7,17 @@ export function Login() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+
+    const sendLogIn = async()=>{
+        const res = await postInfo("/login", formInfo);
+        if(res[0]){
+            alert(`Bienvenido ${res[1].user_name}`);
+        }else{
+            alert('Contraseña o usuario incorrecta');
+        }
+    }
+
+
     const handleSubmit = async (e) => {
         e.preventDefault(); // evita recargar la página
 
@@ -46,6 +57,8 @@ export function Login() {
         }
     };
 
+    // newSubmit function
+
     return (
         <div className="Login">
         <div className="Card">
@@ -55,7 +68,9 @@ export function Login() {
             </div>
 
             {/* 👇 el onSubmit maneja el POST */}
-            <form className="Form" id="loginForm" autoComplete="off" onSubmit={handleSubmit}>
+            <form className="Form" id="loginForm" autoComplete="off" onSubmit={()=>{
+                sendLogIn();
+            }}>
             <div className="fields">
                 <label htmlFor="email">Email</label>
                 <input
