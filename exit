@@ -1,0 +1,49 @@
+[1mdiff --git a/Inventory/SGA-inventory/src/modules/LandingPage/containers/Login.jsx b/Inventory/SGA-inventory/src/modules/LandingPage/containers/Login.jsx[m
+[1mindex 9cf1ef0..3fc81ee 100644[m
+[1m--- a/Inventory/SGA-inventory/src/modules/LandingPage/containers/Login.jsx[m
+[1m+++ b/Inventory/SGA-inventory/src/modules/LandingPage/containers/Login.jsx[m
+[36m@@ -7,6 +7,17 @@[m [mexport function Login() {[m
+     const [loading, setLoading] = useState(false);[m
+     const [error, setError] = useState(null);[m
+ [m
+[32m+[m
+[32m+[m[32m    const sendLogIn = async()=>{[m
+[32m+[m[32m        const res = await postInfo("/login", formInfo);[m
+[32m+[m[32m        if(res[0]){[m
+[32m+[m[32m            alert(`Bienvenido ${res[1].user_name}`);[m
+[32m+[m[32m        }else{[m
+[32m+[m[32m            alert('Contraseña o usuario incorrecta');[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m
+     const handleSubmit = async (e) => {[m
+         e.preventDefault(); // evita recargar la página[m
+ [m
+[36m@@ -46,6 +57,8 @@[m [mexport function Login() {[m
+         }[m
+     };[m
+ [m
+[32m+[m[32m    // newSubmit function[m
+[32m+[m
+     return ([m
+         <div className="Login">[m
+         <div className="Card">[m
+[36m@@ -55,7 +68,9 @@[m [mexport function Login() {[m
+             </div>[m
+ [m
+             {/* 👇 el onSubmit maneja el POST */}[m
+[31m-            <form className="Form" id="loginForm" autoComplete="off" onSubmit={handleSubmit}>[m
+[32m+[m[32m            <form className="Form" id="loginForm" autoComplete="off" onSubmit={()=>{[m
+[32m+[m[32m                sendLogIn();[m
+[32m+[m[32m            }}>[m
+             <div className="fields">[m
+                 <label htmlFor="email">Email</label>[m
+                 <input[m
+[1mdiff --git a/SGA b/SGA[m
+[1mdeleted file mode 160000[m
+[1mindex 9429dbf..0000000[m
+[1m--- a/SGA[m
+[1m+++ /dev/null[m
+[36m@@ -1 +0,0 @@[m
+[31m-Subproject commit 9429dbfbd2e98c0b47cd3ef625762adf3f2e82ca[m
