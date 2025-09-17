@@ -20,6 +20,9 @@ export function FormNewDC({info,reloadFun}){
     const [description,setDescription] = useState('');
     const [value,setValue] = useState(0);
     const [loading,setLoading] = useState(false);
+
+    const [name,setName] = useState('');
+
     const [disabled,setDisabled] = useState(false);
 
     const formInfo = {
@@ -31,11 +34,13 @@ export function FormNewDC({info,reloadFun}){
         description,
         value:value != '' ? JSON.parse(value):0
     }
+    
 
     const createDC = async()=>{
         setDisabled(true);
         setLoading(true);
         let res = await postInfo('/process/createDC',formInfo);
+
         if(typeof res === 'number'){
             addNotification({
                 title:`DC#${res} creado`,
@@ -94,7 +99,6 @@ export function FormNewDC({info,reloadFun}){
     useEffect(()=>{
         getFormOptions();
     },[])
-
 
     return(
         <div className="FormNewDC">

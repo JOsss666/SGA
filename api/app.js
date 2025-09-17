@@ -210,7 +210,7 @@ export function calcWeightedAverage(prevTotal,prevUnits,total,units){
 
 
 
-export function readCSV(path){
+export function readCSV(path,type){
     fs.readFile(path, 'utf8', (err, data) => {
     if (err) {
         console.error('Error al leer el archivo:', err);
@@ -220,14 +220,17 @@ export function readCSV(path){
     // Separar líneas
     const rows = data.split('\r\n').map(linea => linea.split(','));
     console.log(rows)
-    createNUC(rows);
+    if(type == 'PUC'){
+        //createPUC(rows);
+    }else if(type == 'TAX'){
+        //createTax(rows)
+    }
     return(rows)
     });
 }
 
-/*
-
-async function createNUC(rows){
+async function createPUC(rows){
+    let errors = [];
     let sentence = `
         INSERT INTO
             sga_ecosystem.account_templates_PUC
@@ -252,17 +255,59 @@ async function createNUC(rows){
                 values[0].length,
                 values[2],
                 `${values[0]}`,
-            ],2); 
-            if(!res){
-                console.log(`Error en la ${valuescode}`)
+            ],2);
+            console.log(res);
+            if(!res[0]){
+                errors.push[[values]];
             }
             return res;
     })
     );
     console.log(results);
+    console.log('Errores ----> ',errors.length);
+    console.log(errors);
 }
 
-*/
+async function createTax(rows){
+    let sentence = `
+        INSERT INTO
+            sga_ecosystem.taxes
+        (
+            company_id,
+            account_id,
+            code,
+            rate,
+            base
+        )
+        VALUES(?,?,?,?,?);
+    `;
+    let errors = [];
+    const results = await Promise.all(
+    rows.map(async (element, index) => {
+            if(index == 0){
+                console.log('---> head <----- ',element);
+            }
+            if(index != 0){
+                let values = element[0].split(';');
+                console.log(values);
+                let res = await useDataBase(sentence,[
+                    parseInt(values[0]),
+                    values[1],
+                    values[2],
+                    values[3],
+                    values[4],
+                ],2); 
+                if(res != true){
+                    errors.push(element)
+                }
+                return res;
+            }
+    })
+    );
+    console.log(results);
+    console.log('Errores ----> ',errors.length);
+    console.log(errors);
+}
 
 
 export{

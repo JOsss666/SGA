@@ -1,0 +1,62 @@
+
+
+.MoreOptions{
+    position: relative;
+}
+
+.MoreOptions .options{
+    position: absolute;
+    top: 105%;
+    right: 0;
+    list-style: none;
+    border-radius:3vh;
+    overflow: hidden;
+    box-shadow: 0 .4vh 2vh #0002;
+    outline: solid .1vh #CCCCCC;
+    background-color: #E7E9ED;
+    animation-name: appearOptionsMore;
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+    width: 15vw;
+    animation-duration: .25s;
+    z-index: 10;
+}
+
+.MoreOptions .options li{
+    padding: 1.2vh 3vh;
+    background-color: #E7E9ED;
+    color: #00022E;
+    font-size: clamp(2.2px,2.2vh,22px);
+    cursor: pointer;
+    border-bottom: solid .1vh #CCCCCC;
+    transition: .3s;
+    border-radius: .5vh;
+    display: flex;
+}
+
+.MoreOptions .options li i{
+    margin: auto 0;
+    margin-right: 1.5vh;
+}
+
+.MoreOptions .options li:hover{
+    padding-left: 4vh;
+    background-color: #fff7;
+}
+
+.MoreOptions .options li:last-child{
+    border-bottom: none;
+}
+
+
+@keyframes appearOptionsMore {
+    0%{
+        opacity: 60%;
+        transform: scale(0.8);
+    }
+
+    100%{
+        opacity: 100%;
+        transform: scale(1.0);
+    }
+}

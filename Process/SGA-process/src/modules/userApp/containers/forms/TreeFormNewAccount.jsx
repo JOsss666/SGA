@@ -6,9 +6,9 @@ import { postInfo } from '../../../../utils/functions';
 import { useAppInfo, useNotifications } from '../../../../context/context';
 
 export function TreeFormNewAccount({fatherInfo,reloadINfo}){
-
-    const [name,setName] = useState('');
+    
     const {appInfo} = useAppInfo();
+    const [name,setName] = useState('');
     const [type,setType] = useState('DB')
     const [subNacc,setsubNacc] = useState(0);
     const {addNotification} = useNotifications();
@@ -17,7 +17,8 @@ export function TreeFormNewAccount({fatherInfo,reloadINfo}){
         name,
         type,
         company_id:appInfo.company_id,
-        code:`${fatherInfo.code}${subNacc}`
+        code:`${fatherInfo.code}${subNacc}`,
+        typePlanAccount:appInfo.accountPlanType
     }
 
     const createAccount = async()=>{
@@ -27,7 +28,7 @@ export function TreeFormNewAccount({fatherInfo,reloadINfo}){
             addNotification({
                 type:'aproved',
                 title:`Cuenta ${fatherInfo.code}${subNacc} creada`,
-                description:`La cuenta ${fatherInfo.code}${subNacc} fue creada exitosamente.`
+                description:`La cuenta ${fatherInfo.code}${subNacc} fue creada exitosamente.`,
             })
             if(reloadINfo != undefined){
                 reloadINfo();

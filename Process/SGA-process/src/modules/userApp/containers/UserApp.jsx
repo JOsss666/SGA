@@ -19,7 +19,7 @@ import { TutorialAccountsPlan } from './tutorials/TutorialAccountsPlan';
 import { SearchDocument } from './SearchDocument';
 import { Reports } from './Reports';
 import { DocumentPreview } from './Alerts/DocumentPreview';
-import { ConcenptsPlan } from './ConceptsPlan';
+import { ConceptsPlan } from './ConceptsPlan';
 import { ChatAi } from './ChatAi';
 
 export function UserApp(){
@@ -41,6 +41,7 @@ export function UserApp(){
         {text:'Buscar Documento',path:'searchDocument',icon:<i className="fa-solid fa-file-import"/>},
         {text:'Informes',path:'reports',icon:<i className="fa-solid fa-table-cells"/>},
         {text:'Estadisticas',path:'analytics',icon:<i className="fa-solid fa-chart-pie"/>},
+        {text:'Conceptos e impuestos',path:'concepts',icon:<i className="fa-solid fa-chart-pie"/>},
         {text:'Usuarios',path:'users',icon:<i className="fa-solid fa-users"/>}
     ]
 
@@ -116,7 +117,8 @@ export function UserApp(){
                             <Route path='/' element={<HomeProcess/>} />
                             <Route path='/newDocument' element={<CreateDocument/>} />
                             <Route path='/users' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
-                            <Route path='/analytics' element={<ConcenptsPlan/>} />
+                            <Route path='/concepts' element={<ConceptsPlan/>} />
+                            <Route path='/analytics' element={<ConceptsPlan/>} />
                             <Route path='/searchDocument' element={<SearchDocument/>} />
                             <Route path='/reports/*' element={<Reports/>} />
                     </Routes>

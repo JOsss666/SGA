@@ -46,6 +46,16 @@ router.post('/getAccountsPlan',controller.getAccountsPlan);
 
 router.post('/insertNewAccount',controller.insertNewAccount);
 
+router.post('/createTax',controller.createTax);
+
+router.post('/getTaxes',controller.getTaxes);
+
+router.post('/createConcept',controller.createConcept);
+
+router.post('/getConcepts',controller.getConcepts);
+
+router.post('/getPaymentMethods',controller.getPaymentMethods);
+
 
 // SGA - Inventory
 

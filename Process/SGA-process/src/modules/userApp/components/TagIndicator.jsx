@@ -1,12 +1,8 @@
 import './TagIndicator.css'
 
-export function TagIndicator({title,color,children}){
+export function TagIndicator({title,type,children,classN}){
     return(
-        <div style={{
-            backgroundColor:color.length == 4? `${color}3`:`${color}30`,
-            color:color,
-            outline:`solid .1vh ${color.length == 4? `${color}7`:`${color}70`}`
-        }} className="TagIndicator">
+        <div className={`TagIndicator ${type}_color ${classN}`}>
             <h5>{title}</h5>
             {children}
         </div>

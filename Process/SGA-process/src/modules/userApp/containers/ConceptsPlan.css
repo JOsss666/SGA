@@ -1,0 +1,42 @@
+
+.ConcenptsPlan{
+    display: flex;
+    flex-direction: column;
+}
+
+.ConcenptsPlan .headSection{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    position: relative;
+}
+
+.ConcenptsPlan .headSection .DescriptionSpan{
+    margin-top: .5vh;
+}
+
+.ConcenptsPlan .menuConcepts{
+    position: absolute;
+    top: 4vh;
+    display: flex;
+    right: 4vh;
+}
+
+.ConcenptsPlan .FormNewConcept{
+    position: absolute;
+    top: 12vh;
+    right: 4vh;
+    max-height: 76vh;
+    overflow-y: auto;
+}
+
+.ConcenptsPlan .spaceConcepts{
+    display: flex;
+}
+
+.ConcenptsPlan .spaceConcepts .conceptsSpaceC{
+    width: 35%;
+    margin-left: 2vh;
+    height: 75vh;
+    overflow-y: auto;
+}

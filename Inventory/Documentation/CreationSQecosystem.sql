@@ -140,11 +140,25 @@ CREATE TABLE sga_ecosystem.account_templates_PUC (
     active BOOLEAN DEFAULT TRUE
 );
 
-DELETE FROM sga_ecosystem.account_templates_PUC;
+INSERT INTO
+    sga_ecosystem.account_templates_PUC(company_id,code,name,level,type,account_path)
+VALUES(
+    1,
+    '23651501',
+    'RTE RENTA HONORARIOS - 3,5%',
+    8,
+    'DB',
+    '23651501'
+);
 
-SELECT * 
-FROM sga_ecosystem.account_templates_PUC
-ORDER BY account_path ASC;
+SELECT
+    id,
+    code
+FROM
+    sga_ecosystem.account_templates_PUC;
+
+SELECT COUNT(*)
+FROM sga_ecosystem.account_templates_PUC;
 
 SELECT *
 FROM sga_ecosystem.account_templates_PUC
@@ -170,9 +184,8 @@ CREATE TABLE sga_ecosystem.contable_accounts(
     FOREIGN KEY (company_id) REFERENCES companies(company_id)
 );
 
-SELECT * 
-FROM sga_ecosystem.contable_accounts
-ORDER BY account_path ASC;
+DELETE
+FROM sga_ecosystem.contable_accounts;
 
 SELECT COUNT(*) AS total_filas
 FROM sga_ecosystem.account_templates_PUC;
@@ -212,3 +225,83 @@ DROP TABLE sga_ecosystem.contable_accounts;
 
 INSERT INTO services(company_id) VALUES (1);
 
+
+CREATE TABLE sga_ecosystem.concepts(
+    company_id INT NOT NULL,
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(200) NOT NULL,
+    account_id INT NOT NULL,
+    status VARCHAR(100) DEFAULT 'active',
+    payment_method INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT(NOW()),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE sga_ecosystem.taxes(
+    company_id INT NOT NULL,
+    account_id INT NOT NULL,
+    id SERIAL PRIMARY KEY,
+    code VARCHAR(100),
+    rate FLOAT NOT NULL DEFAULT 0,
+    base FLOAT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT(NOW()),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+DELETE  FROM sga_ecosystem.concepts;
+
+SELECT * FROM sga_ecosystem.concept_taxes;
+
+CREATE TABLE sga_ecosystem.concept_taxes(
+    id SERIAL PRIMARY KEY,
+    concept_id BIGINT UNSIGNED NOT NULL,
+    tax_id BIGINT UNSIGNED NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (concept_id) REFERENCES sga_ecosystem.concepts(id) ON DELETE CASCADE,
+    FOREIGN KEY (tax_id) REFERENCES sga_ecosystem.taxes(id) ON DELETE CASCADE,
+    UNIQUE (concept_id, tax_id)
+);
+
+
+CREATE TABLE sga_ecosystem.payment_methods(
+    company_id INT NOT NULL,
+    id SERIAL PRIMARY KEY,
+    code VARCHAR(100),
+    name VARCHAR(400) NOT NULL,
+    type ENUM ('cash','bank_transfer','debit_card','credit_card','digital_wallet','check','cash_onDelivery','crypto_currency'),
+    state ENUM ('active','suspended','blocked','disabled') DEFAULT 'active',
+    currency VARCHAR(100),
+    created_at TIMESTAMP NOT NULL DEFAULT(NOW()),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+INSERT INTO sga_ecosystem.payment_methods(
+    company_id,
+    code,
+    name,
+    type,
+    currency
+)VALUES(
+    1,
+    '04 - Pagos Internacionales',
+    'Wire - Transfer',
+    'credit_card',
+    'USD'
+);
+
+SELECT * FROM sga_ecosystem.payment_methods;
+
+
+DROP TABLE sga_ecosystem.taxes;
+
+DELETE FROM sga_ecosystem.taxes;
+
+INSERT INTO sga_ecosystem.taxes(company_id,name,code,rate,account_id) VALUES(
+    1,
+    'RTE RENTA - ART 383 - HONORARIOS',
+    'A1',
+    19,
+    236601
+);

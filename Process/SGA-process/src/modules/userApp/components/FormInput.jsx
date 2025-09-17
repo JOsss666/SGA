@@ -30,7 +30,6 @@ export function FormInput({action,title,placeholder,children,type,disabled,textA
                 )}
                 {!textArea && (
                     <input min={min} max={max} ref={inRef} onChange={()=>{
-                        console.log(inRef.current.value)
                         if(action != null){
                             action(inRef.current.value)
                         }
