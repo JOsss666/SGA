@@ -36,26 +36,26 @@ export function SignUp(){
 
     return (
         <div className="SignUp">
-        <div className="Card">
-            <div className="CardTitle">
-            <Titles text={'Registro'} />
+            <div className="Card">
+                <div className="CardTitle">
+                <Titles text={'Registro'} />
+                </div>
+
+                {/* el onSubmit maneja el POST */}
+                <form className="Form" id="SignUpForm" autoComplete="off" onSubmit={sendSignUp}>
+                <div className="fields">
+                    <FormInput title={"Nombre"} placeholder={"Tu nombre"} type={"text"} value={user_name} action={setUserName}/>
+                    <FormInput title={"Email"} placeholder={"Correo@gmail.com"} type={"email"} value={mail} action={setMail}/>
+                    <FormInput title={"Contraseña"} placeholder={"****"} type={"password"} value={pass} action={setPass}/>
+                </div>
+                <FormButton text={"Registrar"} loading={loading}/>
+
+                {error && <div className="error" role="alert">{error}</div>}
+                {/* Opcional: podrías mostrar un mensaje de éxito si lo prefieres */}
+                {/* {success && <div className="success" role="status">{success}</div>} */}
+
+                </form>
             </div>
-
-            {/* el onSubmit maneja el POST */}
-            <form className="Form" id="SignUpForm" autoComplete="off" onSubmit={sendSignUp}>
-            <div className="fields">
-                <FormInput title={"Nombre"} placeholder={"Tu nombre"} type={"text"} value={user_name} onChange={(e) => setUserName(e.target.value)}/>
-                <FormInput title={"Email"} placeholder={"Correo@gmail.com"} type={"email"} value={mail} onChange={(e) => setUserName(e.target.value)}/>
-                <FormInput title={"Contraseña"} placeholder={"****"} type={"password"} value={pass} onChange={(e) => setUserName(e.target.value)}/>
-            </div>
-            <FormButton text={"Registrar"} loading={loading}/>
-
-            {error && <div className="error" role="alert">{error}</div>}
-            {/* Opcional: podrías mostrar un mensaje de éxito si lo prefieres */}
-            {/* {success && <div className="success" role="status">{success}</div>} */}
-
-            </form>
-        </div>
         </div>
     );
 }

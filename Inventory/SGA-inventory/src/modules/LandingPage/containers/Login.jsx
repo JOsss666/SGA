@@ -12,7 +12,7 @@ export function Login() {
     const [mail, setMail] = useState('');
     const [pass, setPass] = useState('');
 
-
+    /*
     const sendLogIn = async(event)=>{
         event.preventDefault();
         setLoading(true);
@@ -22,15 +22,39 @@ export function Login() {
             mail,
             pass
         };
+        console.log(`FormInfo: ${formInfo}`)
 
         const res = await postInfo("/login", formInfo);
-        console.log(res);
+        console.log(`Respuesta Backend:  ${res}`);
         if(res[0]){
             alert(`Bienvenido ${res[1][0].user_name}`);
         }else{
             setError('Contraseña o usuario incorrecta');
         }
     }
+*/
+
+    const sendLogIn = async(event) => {
+        event.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        const formInfo = { mail, pass };
+
+        console.log("FormInfo:", formInfo); 
+        // o: console.log("FormInfo:", JSON.stringify(formInfo));
+
+        const res = await postInfo("/login", formInfo);
+
+        console.log("Respuesta Backend:", res);
+        // o: console.log("Respuesta Backend:", JSON.stringify(res));
+
+        if (Array.isArray(res) && res[0]) {
+            alert(`Bienvenido ${res[1][0].user_name}`);
+        } else {
+            setError("Contraseña o usuario incorrecta");
+        }
+    };
 
 
     return (
@@ -44,8 +68,8 @@ export function Login() {
             {/* el onSubmit maneja el POST */}
             <form className="Form" id="loginForm" autoComplete="off" onSubmit={sendLogIn}>
                 <div className="fields">
-                    <FormInput title={"Email"} placeholder={"Correo@gmail.com"} type={"email"} value={mail} onChange={(e) => setUserName(e.target.value)}/>
-                    <FormInput title={"Contraseña"} placeholder={"****"} type={"password"} value={pass} onChange={(e) => setUserName(e.target.value)}/>
+                    <FormInput title={"Email"} placeholder={"Correo@gmail.com"} type={"email"} value={mail} action={setMail}/>
+                    <FormInput title={"Contraseña"} placeholder={"****"} type={"password"} value={pass} action={setPass}/>
                 </div>
                 <FormButton text={"Iniciar Sesión"} loading={loading}/>
 
