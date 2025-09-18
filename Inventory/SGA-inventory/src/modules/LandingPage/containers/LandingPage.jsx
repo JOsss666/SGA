@@ -10,7 +10,7 @@ import { FooterSugerence } from '../components/FooterSugerence';
 import { MediaHandler } from '../../../../media/MediaHandler';
 import { Contact } from './Contact';
 import { Login } from './Login';
-import {SignUp} from './SingUp'
+import {SignUp} from './SignUp'
 
 export function LandingPage(){
 

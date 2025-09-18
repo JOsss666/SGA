@@ -25,7 +25,7 @@
 
 
 .Login .Card h2{
-    font-size: 3vh;
+    font-size: 2.8vh;
     font-weight: 400;
     color: #757575;
 }
@@ -40,17 +40,23 @@
 .Login .Form .fields{
     display: flex;
     flex-direction: column;
-    align-items: start;
     gap: 1vh;
 }
 
-.Login .Form label{
-    font-size: 2.5vh; 
-    color:#757575; 
-    margin: 0;
+.Login .Form .FormInput{
+    padding: 0;
+    align-items: start;
 }
 
-.Login .Form input{
+
+
+.Login .Form .FormInput label{
+    font-size: 2.5vh; 
+    color:#757575; 
+    margin: 1vh 2vh;
+}
+
+.Login .Form .FormInput input{
     margin-bottom: 2vh;
     padding: 1.5vh 2vh;
     width: 100%;
@@ -59,7 +65,7 @@
     border: none;
 }
 
-.Login .Form .btn{
+.Login .Form .FormButton{
     margin: 2vh 0;
     padding: 1.5vh 2vh;
     width: 100%;
@@ -70,11 +76,6 @@
     border: none;
 }
 
-.Login .Form a{
-    text-decoration: none;
-    font-size: 2vh;
-}
-
 .Login .LoginAccounts{
     padding: 2vh 0;
     margin: 1vh 0;
@@ -83,28 +84,10 @@
     justify-content: space-between;
 }
 
-.Login .LoginAccounts .btnAccounts{
-    background-color: #fff;
-    display: flex;
-    flex-direction: row;
-    gap: 1.5vh;
-    margin: auto;
-    align-items: center;
-    justify-content: space-around;
-    padding: 1vh 2vh;
-    width: auto;
-    border-radius: 1.5vh;
-    box-shadow: 0 0 .2vh #757575;
-    border: none;
-}
-
-.Login .LoginAccounts .btnAccounts .btnIcon{
-    font-size: 2.5vh;
-}
-
-.Login .LoginAccounts .btnAccounts .btnText{
+.Login .Form a{
+    text-decoration: none;
     font-size: 2vh;
-    font-weight: 400;
+    color: #007AFF;
 }
 
 .Login .singUp{
@@ -114,4 +97,5 @@
 
 .Login .singUp a{
     text-decoration: none;
+    color: #007AFF;
 }
