@@ -12,12 +12,13 @@ import { MoreOptions } from "../components/MoreOptions";
 import { ConceptCard } from "../components/ConceptCard";
 import { SearchBar } from "../components/SearchBar";
 import { TaxCard } from "../components/TaxCard";
+import { LoadingSpace } from "./LoadingSpace";
 
 export function ConceptsPlan(){
 
     // Prev info
     const {appInfo} = useAppInfo();
-    const [loading,setLoading] = useState(false);
+    const [loading,setLoading] = useState(true);
     const [concepts,setConcepts] = useState([]);
     const [taxes,setTaxes] = useState([]);
     const [searchValCon,setSearchValCon] = useState('');
@@ -116,7 +117,7 @@ export function ConceptsPlan(){
                             <ConceptCard hidden={!handleSearchConcept(element)} info={element} key={index}/>
                         ))}
                         {loading && (
-                            <span>Cargando conceptos...</span>
+                            <LoadingSpace title={'Cargando Conceptos'} description={'Esto no debe tardar mucho...'}/>
                         )}
                     </div>
                 </div>
@@ -128,7 +129,7 @@ export function ConceptsPlan(){
                             <TaxCard hidden={!handleSearchTax(element.value)} info={element.value} key={index}/>
                         ))}
                         {loading && (
-                            <span>Cargando Impuestos...</span>
+                            <LoadingSpace title={'Cargando Impuestos'} description={'Esto no debe tardar mucho...'}/>
                         )}
                     </div>
                 </div>
