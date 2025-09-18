@@ -18,12 +18,17 @@
     margin: auto 0;
 }
 
+.ConceptCard .TagIndicator h5{
+    font-size: clamp(2.2px,1.8vh,22px);
+}
+
 .ConceptCard h6{
     margin: auto 1vh;
     font-size: clamp(2.2px,2.2vh,22px);
     font-weight: 400;
     margin-left: 2vh;
     color: #333;
+    max-width: 40%;
 }
 
 .ConceptCard .bodyConceptCard{
@@ -53,10 +58,13 @@
     text-underline-offset: .5vh;
 }
 
+.ConceptCard .textVal{
+    margin-bottom: 2vh;
+}
+
 .ConceptCard .bodyConceptCard .taxesHolder{
     display: flex;
     flex-direction: column;   
-    margin-top: 1.5vh;
 }
 
 .ConceptCard .bodyConceptCard .taxesHolder .topicBody{
@@ -78,3 +86,4 @@
 .ConceptCard .bodyConceptCard .taxesHolder .tax .TagIndicator{
     margin: auto 0;
 }
+

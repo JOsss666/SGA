@@ -8,6 +8,7 @@
     display: flex;
     flex-direction: column;
     padding: 2vh;
+    padding-left: 3vh;
     position: relative;
 }
 
@@ -26,17 +27,50 @@
     position: absolute;
     top: 12vh;
     right: 4vh;
+    z-index: 15;
     max-height: 76vh;
     overflow-y: auto;
 }
 
-.ConcenptsPlan .spaceConcepts{
+.ConcenptsPlan .spaceCards{
     display: flex;
+    padding: 1vh 2vh;
 }
 
-.ConcenptsPlan .spaceConcepts .conceptsSpaceC{
-    width: 35%;
+.ConcenptsPlan .spaceCards .conceptsSpaceC, .ConcenptsPlan .spaceCards .taxesSpaceC{
+    position: relative;
+    display: flex;
+    flex-direction: column;
     margin-left: 2vh;
     height: 75vh;
+    padding: 1vh;
+    margin:auto 0;
+}
+
+.ConcenptsPlan .spaceCards .conceptsSpaceC h3, .ConcenptsPlan .spaceCards .taxesSpaceC h3{
+    margin-bottom: 2vh;
+    font-weight: 500;
+    font-size: clamp(2.5px,3vh,30px);
+    color: #555;
+}
+
+.ConcenptsPlan .spaceCards .conceptsSpaceC{
+    width: 35%;
+}
+
+.ConcenptsPlan .spaceCards .taxesSpaceC{
+    width: 50%;
+    margin: auto auto;
+}
+
+.ConcenptsPlan .spaceCards .taxesSpaceC .taxesC, .ConcenptsPlan .spaceCards .conceptsSpaceC .conceptsC{
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
+    height: 100%;
+}
+
+.ConcenptsPlan .spaceCards .SearchBar{
+    margin-bottom: 1vh;
+    z-index: 11; 
 }

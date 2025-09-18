@@ -19,7 +19,7 @@
     animation-timing-function: ease;
     width: 15vw;
     animation-duration: .25s;
-    z-index: 10;
+    z-index: 15;
 }
 
 .MoreOptions .options li{

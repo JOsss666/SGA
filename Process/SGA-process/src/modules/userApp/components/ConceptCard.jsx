@@ -7,7 +7,8 @@ import './ConceptCard.css'
 import { useAlert, useAppInfo } from "../../../context/context";
 import { FormNewConcept } from "../containers/forms/FormNewConcept";
 
-export function ConceptCard({info}){    
+export function ConceptCard({info,hidden}){    
+
     const {popInAlert} = useAlert();
     const {appInfo} = useAppInfo();
     const [visibleConceptData,setVisibleConceptData] = useState(false);
@@ -44,41 +45,47 @@ export function ConceptCard({info}){
         }
     },[visibleConceptData])
 
-    return(
-        <div className="ConceptCard">
-            <div className="headConceptCard">
-                <TagIndicator title={`# ${info.id}`} type={'indicator'}/>
-                <h6>{info.name}</h6>
-                <TagIndicator title={info.status} type={info.status}/>
-                <ButtonMenu onClick={()=>{
-                    setVisibleConceptData(!visibleConceptData)
-                }} noRotate={true} title={'Mostrar más información'}>
-                    <i className={`fa-solid fa-angle-${visibleConceptData? 'up':'down'}`}></i>
-                </ButtonMenu>
-                <MoreOptions options={[
-                    {text:'Editar',icon:<i className="fa-solid fa-pencil"/>,action:editConcept},
-                    {text:'Eliminar',icon:<i class="fa-solid fa-trash"></i>},
-                    {text:'Ver estadisticas',icon:<i className="fa-solid fa-chart-column"/>},
-                    {text:'Ver movimientos',icon:<i className="fa-solid fa-eye"/>}
-                ]}/>
-            </div>
-            {visibleConceptData && (
-                <div className="bodyConceptCard">
-                    <div className="AccountN">
-                        <span className="topicBody">Cuenta contable</span>
-                        <strong className="account_Concept">{info.code} - {info.account_name}</strong>
-                    </div>
-                    <div className="taxesHolder">
-                        <span className="topicBody">Impuestos seleccionados</span>
-                        {attachetTaxes.map((element,index)=>(   
-                            <div className="tax" key={index}>
-                                <span>#{element.code} {element.name}</span>
-                                <TagIndicator title={`${element.rate}%`}/>
-                            </div>
-                        ))}
-                    </div>
+    if(!hidden){
+        return(
+            <div className="ConceptCard">
+                <div className="headConceptCard">
+                    <TagIndicator title={`SGA#${info.id}`} type={'indicator'}/>
+                    <h6>{info.name}</h6>
+                    <TagIndicator title={info.status} type={info.status}/>
+                    <ButtonMenu onClick={()=>{
+                        setVisibleConceptData(!visibleConceptData)
+                    }} noRotate={true} title={'Mostrar más información'}>
+                        <i className={`fa-solid fa-angle-${visibleConceptData? 'up':'down'}`}></i>
+                    </ButtonMenu>
+                    <MoreOptions options={[
+                        {text:'Editar',icon:<i className="fa-solid fa-pencil"/>,action:editConcept},
+                        {text:'Eliminar',icon:<i class="fa-solid fa-trash"></i>},
+                        {text:'Ver estadisticas',icon:<i className="fa-solid fa-chart-column"/>},
+                        {text:'Ver movimientos',icon:<i className="fa-solid fa-eye"/>}
+                    ]}/>
                 </div>
-            )}
-        </div>
-    )
+                {visibleConceptData && (
+                    <div className="bodyConceptCard">
+                        <div className="textVal">
+                            <span className="topicBody">Cuenta contable</span>
+                            <strong className="account_Concept">{info.code} - {info.account_name}</strong>
+                        </div>
+                        <div className="textVal">
+                            <span className="topicBody">Metodo de págo</span>
+                            <strong className="account_Concept">{info.paymentMethodName}</strong>
+                        </div>
+                        <div className="taxesHolder">
+                            <span className="topicBody">Impuestos seleccionados</span>
+                            {attachetTaxes.map((element,index)=>(   
+                                <div className="tax" key={index}>
+                                    <span>#{element.code} {element.name}</span>
+                                    <TagIndicator title={`${element.rate}%`}/>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        )
+    }
 }

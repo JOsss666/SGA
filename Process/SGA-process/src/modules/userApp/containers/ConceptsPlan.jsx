@@ -10,15 +10,20 @@ import { ButtonMenu } from "../components/ButtonMenu";
 import { FormNewConcept } from "./forms/FormNewConcept";
 import { MoreOptions } from "../components/MoreOptions";
 import { ConceptCard } from "../components/ConceptCard";
+import { SearchBar } from "../components/SearchBar";
+import { TaxCard } from "../components/TaxCard";
 
 export function ConceptsPlan(){
 
     // Prev info
     const {appInfo} = useAppInfo();
-
+    const [loading,setLoading] = useState(false);
     const [concepts,setConcepts] = useState([]);
     const [taxes,setTaxes] = useState([]);
-
+    const [searchValCon,setSearchValCon] = useState('');
+    const [searchValTax,setSearchValTax] = useState('');
+    const searchValConLowerCase = searchValCon.toLowerCase();
+    const searchValTaxLowerCase = searchValTax.toLowerCase();
     const [visibleFormConc,setVisibleFormConc] = useState(false);
 
 
@@ -41,12 +46,11 @@ export function ConceptsPlan(){
         if(res[0]){
             let C = []
             res[1].forEach(element => {
+                element.text = element.name,
+                element.value = element.tax_id
                 C.push({
                     text:element.name,
-                    value:{
-                        text:element.name,
-                        value:element.tax_id
-                    }
+                    value:element
                 })
             });
             setTaxes(C);
@@ -55,10 +59,30 @@ export function ConceptsPlan(){
         }
     }
 
+    const getInfo = async()=>{
+        setLoading(true);
+        await getConcepts();
+        await getTaxes();
+        setLoading(false)
+    }
+
     useEffect(()=>{
-        getConcepts();
-        getTaxes();
+        getInfo();
     },[]);
+
+    const handleSearchConcept = (element) =>{
+        return searchValConLowerCase === '' 
+            ? true 
+            : JSON.stringify(element.id).includes(searchValConLowerCase) ||   
+            element.name.toLowerCase().includes(searchValConLowerCase);
+    }
+
+    const handleSearchTax = (element) =>{
+        return searchValTaxLowerCase === '' 
+            ? true 
+            : JSON.stringify(element.id).includes(searchValTaxLowerCase) ||   
+            element.name.toLowerCase().includes(searchValTaxLowerCase);
+    }
 
     return(
         <div className="ConcenptsPlan">
@@ -80,16 +104,34 @@ export function ConceptsPlan(){
                     ]}/>
                 </div>
                 {visibleFormConc && (
-                    <FormNewConcept setOpenForm={setVisibleFormConc} accounts={accounts} taxes={taxes}/>
+                    <FormNewConcept setOpenForm={setVisibleFormConc} />
                 )}
             </div>
-            <div className="spaceConcepts">
+            <div className="spaceCards">
                 <div className="conceptsSpaceC">
-                    {concepts.map((element,index)=>(
-                        <ConceptCard info={element} key={index}/>
-                    ))}
+                    <h3>Conceptos de bienes, servicios y compras</h3>
+                    <SearchBar action={setSearchValCon} placeholder={'Buscar Concepto'}/>
+                    <div className="conceptsC">
+                        {!loading && concepts.map((element,index)=>(
+                            <ConceptCard hidden={!handleSearchConcept(element)} info={element} key={index}/>
+                        ))}
+                        {loading && (
+                            <span>Cargando conceptos...</span>
+                        )}
+                    </div>
                 </div>
-                <div className="taxesSpaceC"></div>
+                <div className="taxesSpaceC">
+                    <h3>Impuestos en plan de cuentas</h3>
+                    <SearchBar action={setSearchValTax} placeholder={'Buscar impuesto'}/>
+                    <div className="taxesC">
+                        {!loading && taxes.map((element,index)=>(
+                            <TaxCard hidden={!handleSearchTax(element.value)} info={element.value} key={index}/>
+                        ))}
+                        {loading && (
+                            <span>Cargando Impuestos...</span>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     )

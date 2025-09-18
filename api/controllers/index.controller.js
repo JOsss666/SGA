@@ -405,6 +405,7 @@ controller.getConcepts = (req,res)=>{
         let sentence = `
             SELECT
                 sga_ecosystem.concepts.*,
+                sga_ecosystem.payment_methods.name AS paymentMethodName,
                 sga_ecosystem.${tableAcc}.id AS account_id,
                 sga_ecosystem.${tableAcc}.code,
                 sga_ecosystem.${tableAcc}.name AS account_name
@@ -414,6 +415,10 @@ controller.getConcepts = (req,res)=>{
                 sga_ecosystem.${tableAcc}
             ON
                 sga_ecosystem.concepts.account_id = sga_ecosystem.${tableAcc}.id
+            LEFT JOIN
+                sga_ecosystem.payment_methods
+            ON
+                sga_ecosystem.concepts.payment_method = sga_ecosystem.payment_methods.id
             WHERE
                 sga_ecosystem.concepts.company_id = ${info.company_id};
         `;
