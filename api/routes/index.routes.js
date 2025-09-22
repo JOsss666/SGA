@@ -89,7 +89,7 @@ router.post('/newMovement',controller.newMovement);
 
 router.post('/getMovements',controller.getMovements);
 
-router.post('/getTransactions',controller.getTransactions);
+router.post('/getDepartures',controller.getDepartures);
 
 router.post('/getRotation',controller.getRotation);
 

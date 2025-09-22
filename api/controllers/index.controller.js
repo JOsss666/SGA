@@ -641,7 +641,7 @@ controller.getProducts = (req,res)=>{
                     products.*,
                     pricesProducts.list_id,
                     pricesProducts.unit_value,
-                    ${info.storeDetails? 'stores.store_name,':''}
+                    ${info.storeDetails? 'sga_ecosystem.stores.name,':''}
                     pricesProducts.min_stock,
                     pricesProducts.unit_cost,
                     pricesProducts.price_id,
@@ -649,9 +649,7 @@ controller.getProducts = (req,res)=>{
                     stocks.stock_id,
                     stocks.cellar_id,
                     stocks.stock AS storeStock  
-
                     FROM products
-
                     ${info.priceRequired? 'INNER':'LEFT'} JOIN pricesProducts 
                     ON products.product_id = pricesProducts.product_id
                     AND pricesProducts.price_state = 'active'
@@ -664,10 +662,10 @@ controller.getProducts = (req,res)=>{
                     AND stocks.company_id = products.company_id
 
                     ${info.storeDetails ?
-                    'LEFT JOIN stores ON stocks.store_id = stores.store_id '
+                    'LEFT JOIN sga_ecosystem.stores ON sga_process.stocks.store_id = sga_ecosystem.stores.store_id '
                     :''}
 
-                    WHERE products.company_id = ? ${info.requiredStock? 'AND stocks.stock > 0 ':''}  ${info.product_id != null? 'AND products.product_id = ? ':' '};
+                    WHERE sga_process.products.company_id = ? ${info.requiredStock? 'AND sga_process.stocks.stock > 0 ':''}  ${info.product_id != null? 'AND sga_process.products.product_id = ? ':' '};
                 `;
                 let values;
                 console.log(info);
@@ -749,7 +747,7 @@ controller.createStore = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `INSERT INTO stores (company_id,store_name,store_zone,store_city,store_location) VALUES(?,?,?,?,?);`;
+        let sentence = `INSERT INTO sga_ecosystem.stores (company_id,name,zone,city,location) VALUES(?,?,?,?,?);`;
         let consulta = await useDataBase(sentence,[info.company_id,info.store_name,info.store_zone,info.store_city,info.store_location],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -767,7 +765,7 @@ controller.getStores = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `SELECT * FROM stores WHERE company_id = ? ; `
+        let sentence = `SELECT * FROM sga_ecosystem.stores WHERE company_id = ? ; `
         let consulta = await useDataBase(sentence,[info],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -845,7 +843,7 @@ controller.getPricesList = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `SELECT pricesList.*, stores.store_id,stores.store_name FROM pricesList LEFT JOIN stores ON pricesList.store_id = stores.store_id WHERE pricesList.company_id = ? `
+        let sentence = `SELECT pricesList.*, sga_ecosystem.stores.id,sga_ecosystem.stores.name FROM sga_process.pricesList LEFT JOIN sga_ecosystem.stores ON sga_ecosystem.pricesList.store_id = sga_ecosystem.stores.id WHERE sga_process.pricesList.company_id = ? `
         if(info.store_id != undefined){
             sentence += `AND store_id = ? `
         }
@@ -1108,9 +1106,9 @@ controller.getMovements = (req,res)=>{
                 inventoryMovements.* ,
                 sga_ecosystem.users.user_name,
                 ${info.cellar_name? 'cellars.cellar_name,':''}
-                stores.store_name
-            FROM inventoryMovements LEFT JOIN stores
-            ON inventoryMovements.store_id = stores.store_id
+                sga_ecosystem.stores.name
+            FROM inventoryMovements LEFT JOIN sga_ecosystem.stores
+            ON inventoryMovements.store_id = sga_ecosystem.stores.id
 
             LEFT JOIN sga_ecosystem.users
             ON inventoryMovements.user_id = users.user_id
@@ -1133,7 +1131,7 @@ controller.getMovements = (req,res)=>{
     })
 }
 
-controller.getTransactions = (req,res)=>{
+controller.getDepartures = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
         data += chunk;

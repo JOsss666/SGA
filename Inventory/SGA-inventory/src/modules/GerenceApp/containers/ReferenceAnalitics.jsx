@@ -33,7 +33,7 @@ export function ReferenceAnalitics({}){
 
     const getTransactions = async()=>{
         setLoading(true);
-        let res = await postInfo('/getTransactions',{company_id:appInfo.company_id,product_id:info.product_id});
+        let res = await postInfo('/getDepartures',{company_id:appInfo.company_id,product_id:info.product_id});
         console.log(res);
         if(res[0]){
             setTransactions(res[1]);

@@ -47,7 +47,16 @@ CREATE TABLE companies(
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-
+CREATE TABLE stores(
+	id SERIAL PRIMARY KEY,
+    company_id BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(100),
+    zone VARCHAR(100),
+    city VARCHAR(100),
+    location VARCHAR(200),
+	created_at TIMESTAMP NOT NULL DEFAULT(NOW()),
+    FOREIGN KEY (company_id) REFERENCES sga_ecosystem.companies(company_id),
+);
 
 ALTER TABLE companies DROP COLUMN email;
 
@@ -238,6 +247,7 @@ CREATE TABLE sga_ecosystem.concepts(
 );
 
 
+
 CREATE TABLE sga_ecosystem.taxes(
     company_id INT NOT NULL,
     account_id INT NOT NULL,
@@ -272,9 +282,13 @@ CREATE TABLE sga_ecosystem.payment_methods(
     type ENUM ('cash','bank_transfer','debit_card','credit_card','digital_wallet','check','cash_onDelivery','crypto_currency'),
     state ENUM ('active','suspended','blocked','disabled') DEFAULT 'active',
     currency VARCHAR(100),
+    variable BOOLEAN DEFAULT 0
     created_at TIMESTAMP NOT NULL DEFAULT(NOW()),
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+ALTER TABLE sga_ecosystem.payment_methods ADD COLUMN variable BOOLEAN DEFAULT 0;
+
 
 
 INSERT INTO sga_ecosystem.payment_methods(
@@ -305,3 +319,36 @@ INSERT INTO sga_ecosystem.taxes(company_id,name,code,rate,account_id) VALUES(
     19,
     236601
 );
+
+CREATE TABLE transactions(
+    id SERIAL PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    company_id BIGINT UNSIGNED NOT NULL,
+    store_id BIGINT UNSIGNED NOT NULL,
+    concept_id BIGINT UNSIGNED NOT NULL,
+    doc_date DATE NOT NULL,
+    doc_type ENUM('DC','FV','FE','OC','NC','ND'),
+    doc_id INT NOT NULL,
+    subtotal FLOAT NOT NULL,
+    total FLOAT NOT NULL,
+    status ENUM('draft','posted','cancelled','pendingPayment') DEFAULT 'draft',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES sga_ecosystem.users(id),
+    FOREIGN KEY (company_id) REFERENCES sga_ecosystem.companies(company_id),
+    FOREIGN KEY (store_id) REFERENCES sga_ecosystem.stores(store_id),
+    FOREIGN KEY (concept_id) REFERENCES sga_ecosystem.concepts(id)
+)
+
+
+CREATE TABLE transaction_detail(
+    id SERIAL PRIMARY KEY,
+    transaction_id BIGINT UNSIGNED NOT NULL,
+    type ENUM('tax','withholding','discount','operation'),
+    subtotal FLOAT NOT NULL,
+    total FLOAT NOT NULL,
+    status ENUM('draft','posted','cancelled','pendingPayment') DEFAULT 'draft',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (transaction_id) REFERENCES sga_ecosystem.transactions(id)
+)
