@@ -27,7 +27,6 @@ export function ConceptsPlan(){
     const searchValTaxLowerCase = searchValTax.toLowerCase();
     const [visibleFormConc,setVisibleFormConc] = useState(false);
 
-
     const getConcepts = async()=>{
         let res = await postInfo('/getConcepts',{
             company_id:appInfo.company_id,

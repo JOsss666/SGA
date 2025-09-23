@@ -420,7 +420,9 @@ controller.getConcepts = (req,res)=>{
             ON
                 sga_ecosystem.concepts.payment_method = sga_ecosystem.payment_methods.id
             WHERE
-                sga_ecosystem.concepts.company_id = ${info.company_id};
+                sga_ecosystem.concepts.company_id = ${info.company_id}
+                ${info.id != null? `AND sga_ecosystem.concepts.id = ${info.id}`:''}
+                ;
         `;
         let consulta = await useDataBase(sentence,[],1);
         res.writeHead(200,{'Content-Type':'text/plain'})

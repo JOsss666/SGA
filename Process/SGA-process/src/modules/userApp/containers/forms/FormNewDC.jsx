@@ -6,15 +6,19 @@ import { FormInput } from "../../components/FormInput";
 import { SearchinList } from "../../components/SearchInList";
 import { postInfo } from "../../../../utils/functions";
 import './FormNewDC.css'
+import { LoadingSpace } from "../LoadingSpace";
+import { FormNewOperation } from "./FormNewOperation";
 
 export function FormNewDC({info,reloadFun}){
 
-    const {popOutAlert} = useAlert();
+    const {popOutAlert,popInAlert,setOpenAlert} = useAlert();
     const {appInfo,userInfo} = useAppInfo();
     const {addNotification} = useNotifications();
     const [thirdParties,setTirdParties] = useState([]);
     const [OPS,setOPS] = useState([]);
     const [store_id,setStore_id] = useState();
+    const [concept_id,setConceptId] = useState();
+    const [concepts,setConcepts] = useState([]);
     const [op_id,setOp_id] = useState();
     const [thirdParty_id,setTirdParty] = useState();
     const [description,setDescription] = useState('');
@@ -32,9 +36,44 @@ export function FormNewDC({info,reloadFun}){
         op_id,
         thirdParty_id,
         description,
+        concept_id,
         value:value != '' ? JSON.parse(value):0
     }
     
+    const getConcepts = async()=>{
+        let res = await postInfo('/getConcepts',{
+            company_id:appInfo.company_id,
+            typePlanAccount:appInfo.accountPlanType
+        })
+        console.log(res)
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:`SGA#${element.id} ${element.name}`,
+                    value:element.id
+                })
+                setConcepts(C)
+            });
+        }else{
+            setConcepts([])
+        }
+    }
+
+    const getThirdParties = async()=>{
+        let res = await postInfo('/getThirdParties',{company_id:appInfo.company_id});
+        console.log(thirdParties)
+        if(res[0]){
+            let C = [];
+            res[1].forEach(element => {
+                C.push({
+                    text:`${element.names}  ${element.indentification_type}_${element.indentification_number}`,
+                    value:element.id
+                })
+            });
+            setTirdParties(C);
+        }
+    }
 
     const createDC = async()=>{
         setDisabled(true);
@@ -47,7 +86,9 @@ export function FormNewDC({info,reloadFun}){
                 description:`Se ha añadido el documento de compra (DC#${res}) correctamente a la orden de producción (OP#${op_id})`,
                 type:'aproved'
             })
-            popOutAlert();
+            await popOutAlert();
+            formInfo.doc_type = 'DC',
+            formInfo.doc_id = res;
             if(reloadFun != undefined){
                 reloadFun();
             }
@@ -61,9 +102,15 @@ export function FormNewDC({info,reloadFun}){
         }
         setLoading(false);
         setDisabled(false);
+        if(typeof res === 'number'){
+            await popInAlert(<FormNewOperation info={formInfo}/>)
+        }
     }
 
     const getFormOptions = async()=>{
+        setLoading(true);
+        await getThirdParties();
+        await getConcepts();
         if(info.op_id == undefined){
             let getOps = await postInfo('/process/getOp',{company_id:appInfo.company_id});
             if(getOps[0]){
@@ -79,43 +126,37 @@ export function FormNewDC({info,reloadFun}){
         }else{
             setOp_id(info.op_id);
         }
-        if(info.thirdParty_id == undefined){
-            let getThirdParties = await postInfo('/getThirdParties',{company_id:appInfo.company_id});
-            if(getThirdParties[0]){
-                let C = [];
-                getThirdParties[1].forEach(element => {
-                    C.push({
-                        text:`${element.names}  ${element.indentification_type}_${element.indentification_number}`,
-                        value:element.id
-                    })
-                });
-                setTirdParties(C);
-            }
-        }else{
-            setTirdParty(info.thirdParty_id);
-        }
+        setLoading(false)
     }
 
     useEffect(()=>{
         getFormOptions();
     },[])
 
-    return(
-        <div className="FormNewDC">
-            <BoldTitle text={'Nuevo Documento de Compra'}/>
-            <form  onSubmit={(e) => {
-                if (!e.target.checkValidity()) return;
-                    e.preventDefault();
-                    createDC();
-                }} >
-                {info.op_id == undefined &&(
-                    <SearchinList disabled={disabled} action={setOp_id} title={'Orden de produccíon'} placeHolder={'Seleccione la OP a la que pertenece'} list={OPS}/>
-                )}
-                <SearchinList disabled={disabled} action={setTirdParty} title={'Provedor'} placeHolder={'Seleccione el proveedor'} list={thirdParties}/>
-                <FormInput disabled={disabled} action={setDescription} title={'Descripción'} placeholder={'Descripción de la nueva orden de cliente'} textArea={true}/>
-                <FormInput disabled={disabled} action={setValue} title={'Valor documento'} moneyF={true} placeholder={'Descripción de la nueva orden de cliente'} />
-                <FormButton disabled={disabled} text={'Añadir orden del cliente'} loading={loading}/>
-            </form>
-        </div>
-    )
+    if(!loading){
+        return(
+            <div className="FormNewDC">
+                <BoldTitle text={'Nuevo Documento de Compra'}/>
+                <form  onSubmit={(e) => {
+                    if (!e.target.checkValidity()) return;
+                        e.preventDefault();
+                        createDC();
+                    }} >
+                    {info.op_id == undefined &&(
+                        <SearchinList disabled={disabled} action={setOp_id} title={'Orden de produccíon'} placeHolder={'Seleccione la OP a la que pertenece'} list={OPS}/>
+                    )}
+                    <SearchinList disabled={disabled} action={setTirdParty} title={'Provedor'} placeHolder={'Seleccione el proveedor'} list={thirdParties}/>
+                    <SearchinList action={setConceptId} title={'Concepto del documento'} placeHolder={'Seleccione el concepto del documento'} list={concepts}/>
+                    <FormInput disabled={disabled} action={setDescription} title={'Descripción'} placeholder={'Descripción de la nueva orden de cliente'} textArea={true}/>
+                    <FormInput disabled={disabled} action={setValue} title={'Valor documento'} moneyF={true} placeholder={'Descripción de la nueva orden de cliente'} />
+                    <FormButton disabled={disabled} text={'Continuar'} loading={loading}/>
+                </form>
+            </div>
+        )
+    }
+    else{
+        return(
+                <LoadingSpace title={'Cargando datos'} description={'Esto no debe tardar mucho...'}/>
+        )
+    }
 }

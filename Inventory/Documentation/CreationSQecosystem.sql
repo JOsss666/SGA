@@ -47,7 +47,7 @@ CREATE TABLE companies(
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE stores(
+CREATE TABLE sga_ecosystem.stores(
 	id SERIAL PRIMARY KEY,
     company_id BIGINT UNSIGNED NOT NULL,
     name VARCHAR(100),
@@ -55,7 +55,7 @@ CREATE TABLE stores(
     city VARCHAR(100),
     location VARCHAR(200),
 	created_at TIMESTAMP NOT NULL DEFAULT(NOW()),
-    FOREIGN KEY (company_id) REFERENCES sga_ecosystem.companies(company_id),
+    FOREIGN KEY (company_id) REFERENCES sga_ecosystem.companies(company_id)
 );
 
 ALTER TABLE companies DROP COLUMN email;
@@ -261,7 +261,7 @@ CREATE TABLE sga_ecosystem.taxes(
 
 DELETE  FROM sga_ecosystem.concepts;
 
-SELECT * FROM sga_ecosystem.concept_taxes;
+SELECT * FROM sga_ecosystem.taxes;
 
 CREATE TABLE sga_ecosystem.concept_taxes(
     id SERIAL PRIMARY KEY,

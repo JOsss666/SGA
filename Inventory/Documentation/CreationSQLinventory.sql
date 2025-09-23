@@ -1,55 +1,4 @@
-SELECT * FROM certificados.suppliers;
 
-
-USE sga_inventory;
-
-DROP TABLE sga_inventory.users;
-
-INSERT INTO users(
-    user_name,user_mail,user_pass,company_id,user_session,user_role
-) VALUES (
-    "José Murillo","murillojose.nvc@gmail.com","123",1,1,"Gerente"
-);
-
-
-CREATE TABLE suppliers(
-	supplier_id INT NOT NULL UNIQUE auto_increment,
-    company_id INT NOT NULL,
-    supplier_name VARCHAR(100) NOT NULL,
-    supplier_mail VARCHAR(200) NOT NULL,
-    supplier_nit INT NOT NULL UNIQUE,
-    supplier_phone VARCHAR(100) NOT NULL,
-	supplier_location VARCHAR(200),
-    supplier_tags VARCHAR(200),
-	created_at TIMESTAMP NOT NULL DEFAULT(NOW()),
-    PRIMARY KEY(supplier_id)
-);
-
-CREATE TABLE clients(
-	client_id INT NOT NULL UNIQUE auto_increment,
-    company_id INT NOT NULL,
-    client_name VARCHAR(200) NOT NULL,
-    client_nit VARCHAR(100) NOT NULL,
-	client_mail VARCHAR(200) NOT NULL,
-    client_phone VARCHAR(100) NOT NULL,
-    client_location VARCHAR(300) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT(NOW()),
-    PRIMARY KEY(client_id)
-);
-
-CREATE TABLE stores(
-	store_id INT NOT NULL UNIQUE auto_increment,
-    company_id INT NOT NULL,
-    store_name VARCHAR(100),
-    store_zone VARCHAR(100),
-    store_city VARCHAR(100),
-    store_location VARCHAR(200),
-	created_at TIMESTAMP NOT NULL DEFAULT(NOW()),
-    PRIMARY KEY(store_id)
-);
-
-
-DROP TABLE stores;
 
 CREATE TABLE cellars(
 	cellar_id INT NOT NULL UNIQUE auto_increment,
@@ -264,32 +213,6 @@ INSERT INTO subCategories(category_id,father_id,subCategory_name,subCategory_des
     "Neveras",
     "Neveras de 2 a 3 metros cubicos"
 );
-
-
-CREATE TABLE suppliers(
-	supplier_id INT NOT NULL UNIQUE auto_increment,
-    company_id INT NOT NULL,
-    supplier_name VARCHAR(100) NOT NULL,
-    supplier_mail VARCHAR(200) NOT NULL,
-    supplier_nit INT NOT NULL UNIQUE,
-    supplier_phone VARCHAR(100) NOT NULL,
-	supplier_location VARCHAR(200),
-    supplier_tags VARCHAR(200),
-	created_at TIMESTAMP NOT NULL DEFAULT(NOW()),
-    PRIMARY KEY(supplier_id)
-);
-
-INSERT INTO suppliers(company_id,supplier_name,supplier_mail,supplier_nit,supplier_phone,supplier_location,supplier_tags) VALUES(
-    1,
-    "Proveedor 1",
-    "murillojose.nvc@gmail.com",
-    1034517196,
-    "3026034563",
-    "Cll 147C 101 53",
-    "Papeleria:Impresiones:Proveedor"
-);
-
-DELETE FROM subCategories;
 
 
 DROP TABLE products;

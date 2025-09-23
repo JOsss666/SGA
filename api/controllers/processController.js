@@ -274,9 +274,10 @@ processController.createDC = (req,res)=>{
             op_id,
             thirdParty_id,
             description,
-            value
+            value,
+            status
         )
-            VALUES(?,?,?,?,?,?,?);
+            VALUES(?,?,?,?,?,?,?,?);
         `
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -285,7 +286,8 @@ processController.createDC = (req,res)=>{
             info.op_id,
             info.thirdParty_id,
             info.description,
-            info.value
+            info.value,
+            'draft'
         ],4);
         if(typeof consulta === "number"){
             let sentence = `
