@@ -591,8 +591,34 @@ controller.getTransactions = (req,res)=>{
             SELECT
                 sga_ecosystem.transactions.*,
                 sga_ecosystem.users.user_name,
-                sga_ecosystem.stores.name AS store_name
+                sga_ecosystem.stores.name AS store_name,
+                sga_ecosystem.concepts.name AS concept_name,
+                'TR' AS docType
+            FROM
+                sga_ecosystem.transactions
+            LEFT JOIN
+                sga_ecosystem.users
+            ON
+                sga_ecosystem.transactions.user_id = sga_ecosystem.users.user_id
+            LEFT JOIN
+                sga_ecosystem.stores
+            ON
+                sga_ecosystem.transactions.store_id = sga_ecosystem.stores.id
+            LEFT JOIN
+                sga_ecosystem.concepts
+            ON
+                sga_ecosystem.transactions.concept_id = sga_ecosystem.concepts.id
+            WHERE
+                sga_ecosystem.transactions.company_id = ${info.company_id}
+            ORDER BY sga_ecosystem.transactions.created_at DESC;
         `;
+        let consulta = await useDataBase(sentence,[],1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
     })
 }
 

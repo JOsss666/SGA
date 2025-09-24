@@ -190,10 +190,10 @@ export function FormNewOperation({info}){
                         </section>
                         <section className="FormSec submitSec">
                             <LabelValue title={'Total'} value={`$ ${moneyFormat(total)}`}/>
-                            <FormButton onClick={()=>{
+                            <FormButton disabled={disabled} onClick={()=>{
                                 updateStateTransasction('posted');
                             }} text={'Guardar Documento'}/>
-                            <FormButton onClick={()=>{
+                            <FormButton disabled={disabled} onClick={()=>{
                                 updateStateTransasction('cancelled');
                             }} negative={true} text={'Cancelar'}/>
                         </section>

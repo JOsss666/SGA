@@ -74,7 +74,8 @@ processController.getDocuments = (req,res)=>{
                 '${info.type}' AS docType,
                 sga_process.${info.type}S.*,
                 sga_ecosystem.users.user_name,
-                sga_ecosystem.thirdParties.names
+                sga_ecosystem.thirdParties.names,
+                sga_ecosystem.stores.name AS store_name
             FROM
                 sga_process.${info.type}S
             LEFT JOIN
@@ -85,6 +86,10 @@ processController.getDocuments = (req,res)=>{
                 sga_ecosystem.thirdParties
             ON
                 sga_process.${info.type}S.thirdParty_id = sga_ecosystem.thirdParties.id
+            LEFT JOIN
+                sga_ecosystem.stores
+            ON
+                sga_process.${info.type}S.store_id = sga_ecosystem.stores.id
             WHERE
                 sga_process.${info.type}S.company_id = ${info.company_id}
                 ${info.user_id != null? ` AND sga_process.${info.type}S.user_id = ${info.user_id} `:''}

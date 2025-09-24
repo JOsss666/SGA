@@ -60,6 +60,7 @@ router.post('/createTransaction',controller.createTransaction);
 
 router.post('/updateTransactionState',controller.updateTransactionState);
 
+router.post('/getTransactions',controller.getTransactions);
 
 // SGA - Inventory
 

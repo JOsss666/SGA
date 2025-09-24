@@ -11,12 +11,16 @@ import { SearchBar } from "../../components/SearchBar";
 import { SelectOptions } from "../../components/SelectOptions";
 import { TableReport } from "../TableReport";
 import './ReportDocuments.css'
+import { LoadingSpace } from "../LoadingSpace";
 
 export function ReportDocuments({type}){
 
     // Prev Info
     const [info,setInfo] = useState([]);
     const {appInfo} = useAppInfo();
+
+    // Actions Page
+    const [loading,setLoading] = useState(false);
 
     // Settings Report
 
@@ -69,12 +73,12 @@ export function ReportDocuments({type}){
 
     const columsTr = [
         "ID",
-        "OP",
+        "Concepto",
         "Tienda",
         "Creada por",
-        "Cliente",
-        "Descripción",
-        'Valor',
+        "Fecha Documento",
+        'Sub Total',
+        'Total',
         'Fecha creación',
         'Estado'
     ]
@@ -95,10 +99,19 @@ export function ReportDocuments({type}){
     }
 
     const GetDocuments = async()=>{
-        let res = await postInfo('/process/getDocuments',settingsReport);
-        if(res[0]){
-            setInfo(res[1])
+        setLoading(true)
+        if(type != 'TR'){
+            let res = await postInfo('/process/getDocuments',settingsReport);
+            if(res[0]){
+                setInfo(res[1])
+            }
+        }else{
+            let res = await postInfo('/getTransactions',settingsReport);
+            if(res[0]){
+                setInfo(res[1])
+            }
         }
+        setLoading(false)
     }
 
     useEffect(()=>{
@@ -130,7 +143,11 @@ export function ReportDocuments({type}){
                 <FormButton text={'Descargar informe'}/>
             </div>
             <div className="SpaceReport">
-                <TableReport columns={settingsReport.columns} info={info} type={type}/>
+                {!loading && (
+                    <TableReport columns={settingsReport.columns} info={info} type={type}/>
+                )}{loading && (
+                    <LoadingSpace title={'Cargando información'} description={'Esto no debe tardar mucho...'}/>
+                )}
             </div>
         </div>
     )

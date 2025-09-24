@@ -33,27 +33,31 @@ export function copyToClipBoard(text){
 
 
 export function moneyFormat(number){
-    let n = JSON.stringify(number);
-    let data = ''
-    let counter = 1;
-    for(let i = n.length -1;i >= 0;i--){
-        if(n[i] != '.'){
-            data += n[i];
-            if(counter%3 == 0 && i != 0){
-                data += '.'
+    if(number != undefined){
+        let n = JSON.stringify(number);
+        let data = ''
+        let counter = 1;
+        for(let i = n.length -1;i >= 0;i--){
+            if(n[i] != '.'){
+                data += n[i];
+                if(counter%3 == 0 && i != 0){
+                    data += '.'
+                }
+                counter ++;
             }
-            counter ++;
+            if(n[i] == '.'){
+                data += ','
+                counter = 1;
+            }
         }
-        if(n[i] == '.'){
-            data += ','
-            counter = 1;
+        let x = '';
+        for(let i = data.length -1;i >= 0;i--){
+            x += data[i];
         }
+        return(x)
+    }else{
+        return('0')
     }
-    let x = '';
-    for(let i = data.length -1;i >= 0;i--){
-        x += data[i];
-    }
-    return(x)
 }
 
 export async function uploadFileInChunks(file,setAdvancePercent){
