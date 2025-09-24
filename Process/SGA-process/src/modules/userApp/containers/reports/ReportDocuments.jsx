@@ -25,7 +25,8 @@ export function ReportDocuments({type}){
         'OP':'Ordenes de Producción',
         'DC':'Documentos de Compra',
         'CI':'Consumos de inventario',
-        'FV':'Facturas de venta'
+        'FV':'Facturas de venta',
+        'TR':'Transacciónes'
     }
 
     const columnsOp = [
@@ -66,12 +67,25 @@ export function ReportDocuments({type}){
         'Estado'
     ]
 
+    const columsTr = [
+        "ID",
+        "OP",
+        "Tienda",
+        "Creada por",
+        "Cliente",
+        "Descripción",
+        'Valor',
+        'Fecha creación',
+        'Estado'
+    ]
+
     const columsDictionary = {
         'OP':columnsOp,
         'OC':columnsOc,
         'DC':columnsDc,
         'FV':columnsDc,
         'CI':columnsDc,
+        'TR':columsTr
     }
 
     const settingsReport = {

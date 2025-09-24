@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAppInfo } from "../../../../context/context";
+import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { moneyFormat, postInfo } from "../../../../utils/functions";
 import { BoldTitle } from "../../components/BoldTitle";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
@@ -11,14 +11,18 @@ import './FormNewOperation.css'
 import { LoadingSpace } from "../LoadingSpace";
 
 export function FormNewOperation({info}){
-
+    const {addNotification} = useNotifications();
+    const {popOutAlert} = useAlert();
     const {appInfo,userInfo} = useAppInfo();
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
-    const [taxes,setTaxes] = useState([]);
+    const [transaction_id,setTransId] = useState()
+    const [taxes,setTaxes] = useState([false]);
     const [total,setTotal] = useState(0)
-    const [doc_date,setdocDate] = useState('')
+    const [transactionDetails,setTransactionDetails] = useState([]);
+    const [doc_date,setdocDate] = useState('2025/09/23')
     const [conceptInfo,setConceptinfo] = useState({});
+    const [authNewTran,setAuthNewtran] = useState(false);
 
     const formInfo = {
             user_id:userInfo.user_id,
@@ -26,6 +30,7 @@ export function FormNewOperation({info}){
             store_id:1,
             concept_id:info.concept_id,
             doc_date,
+            transactionDetails,
             doc_type:info.doc_type,
             doc_id:info.doc_id,
             subtotal:info.value,
@@ -33,11 +38,10 @@ export function FormNewOperation({info}){
     }
 
     const getConceptInfo = async()=>{
-        setLoading(true);
-        setDisabled(true);
         let res  = await postInfo('/getConcepts',{
             id:info.concept_id,
-            company_id:appInfo.company_id
+            company_id:appInfo.company_id,
+            typePlanAccount:appInfo.accountPlanType
         })
         console.log(res);
         if(res[0]){
@@ -45,8 +49,6 @@ export function FormNewOperation({info}){
         }else{
             setConceptinfo({})
         }
-        setDisabled(false);
-        setLoading(false);
     }
 
     const getAttachedTaxes = async()=>{
@@ -57,7 +59,6 @@ export function FormNewOperation({info}){
             typePlanAccount:appInfo.account_type,
             concept_id:info.concept_id
         })
-        console.log(res)
         if(res[0]){
             setTaxes(res[1])
         }else{
@@ -65,18 +66,98 @@ export function FormNewOperation({info}){
         }
     }
 
+    const createTransaction = async()=>{
+        setDisabled(true);
+        console.log('Creando nueva transacción',formInfo);
+        let res = await postInfo('/createTransaction',formInfo);
+        if(res[0]){
+            setTransId(res[1])
+            setDisabled(false);
+        }
+        setLoading(false);
+    }
+
+    const pushDetailsTrans = ()=>{
+        let newTransDetails = [];
+        console.log(info)
+        console.log(taxes)
+        console.log(conceptInfo)
+        newTransDetails.push({
+                account_id:conceptInfo.account_id,
+                account_type:appInfo.accountPlanType,
+                type:'operation',
+                subtotal:info.value,
+                total:info.value
+        })
+        taxes.forEach(element => {
+                newTransDetails.push({
+                account_id:element.account_id,
+                account_type:appInfo.accountPlanType,
+                type:'tax',
+                subtotal:info.value,
+                total: info.value * Number((1 + (element.rate/100)).toFixed(2))
+            })
+        });
+        setTransactionDetails(newTransDetails);
+    }
+
     const getFormData = async()=>{
+        setLoading(true);
+        setDisabled(true);
         getConceptInfo();
-        getAttachedTaxes();
+        await getAttachedTaxes();
+    }
+
+    const updateStateTransasction = async(newStatus)=>{
+        setDisabled(true);
+        setLoading(true);
+        let res = await postInfo('/updateTransactionState',{
+            status:newStatus,
+            transaction_id
+        })
+        if(res[0] && res[1]){
+            if(newStatus != 'cancelled'){
+                addNotification({
+                    type:'aproved',
+                    title:`Transacción TR#${transaction_id} aprovada`,
+                    description:`La transacción TR#${transaction_id} por un valor de $ ${moneyFormat(formInfo.total)} fue guardada exitosamente.`
+                })
+            }else{
+                addNotification({
+                    type:'error',
+                    title:`Transacción TR#${transaction_id} cancelada`,
+                    description:`Se cancelo la transacción TR#${transaction_id} por un valor de $ ${moneyFormat(formInfo.total)}.`
+                })
+            }
+            popOutAlert();
+        }else{
+            addNotification({
+                type:'error',
+                title:`Error al aprovar Transacción TR#${transaction_id} `,
+                description:`No se puedo aprovar la transacción TR#${transaction_id} por un valor de $ ${moneyFormat(formInfo.total)}, actualmente es un borrador, intentelo de nuevo.`
+            })
+        }
+        setLoading(false)
+        setDisabled(false)
     }
 
     useEffect(()=>{
-        let newTotal = info.value;
-        taxes.forEach(element => {
-            newTotal += info.value * (element.rate/100).toFixed(2)
-        });
-        setTotal(newTotal);
+        if(taxes[0] != false){
+            let newTotal = info.value;
+            taxes.forEach(element => {
+                newTotal += info.value * Number((element.rate/100).toFixed(2));
+            });
+            pushDetailsTrans();
+            setTotal(newTotal);
+            setAuthNewtran(true);
+        }
     },[taxes])
+
+    useEffect(()=>{
+        if(authNewTran && transactionDetails.length >0){
+            createTransaction();
+        }
+    },[authNewTran,transactionDetails])
 
     useEffect(()=>{
         getFormData();
@@ -103,14 +184,18 @@ export function FormNewOperation({info}){
                         <section className="FormSec ">
                             <h4 className="secFormTtl">Información movimiento</h4>
                             <LabelValue title={'Sub Total'} value={`$ ${moneyFormat(info.value)}`}/>
-                            {taxes.map((element,index)=>(
+                            {taxes[0] != false && taxes.map((element,index)=>(
                                 <LabelValue title={element.name} value={`$ ${moneyFormat((info.value * (element.rate/100).toFixed(2)))}`} key={index}/>
                             ))}
                         </section>
                         <section className="FormSec submitSec">
                             <LabelValue title={'Total'} value={`$ ${moneyFormat(total)}`}/>
-                            <FormButton text={'Guardar Documento'}/>
-                            <FormButton negative={true} text={'Cancelar'}/>
+                            <FormButton onClick={()=>{
+                                updateStateTransasction('posted');
+                            }} text={'Guardar Documento'}/>
+                            <FormButton onClick={()=>{
+                                updateStateTransasction('cancelled');
+                            }} negative={true} text={'Cancelar'}/>
                         </section>
                     </div>
                 </div>

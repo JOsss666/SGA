@@ -465,6 +465,173 @@ controller.getPaymentMethods = (req,res)=>{
 }
 
 
+controller.createTransaction = (req,res)=>{
+    let data = ''
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        console.log('----> :',info.transactionDetails);
+        let sentence = `
+            INSERT INTO
+                sga_ecosystem.transactions
+                (
+                    user_id,
+                    company_id,
+                    store_id,
+                    concept_id,
+                    doc_date,
+                    doc_type,
+                    doc_id,
+                    subtotal,
+                    total
+                )
+            VALUES
+                (?,?,?,?,?,?,?,?,?);
+        `;
+        let consulta = await useDataBase(sentence,[
+            info.user_id,
+            info.company_id,
+            info.store_id,
+            info.concept_id,
+            info.doc_date,
+            info.doc_type,
+            info.doc_id,
+            info.subtotal,
+            info.total
+        ],6)
+        if(consulta[0]){
+            let resultDetails = [];
+            for(const element of info.transactionDetails){
+                let sentence = `
+                    INSERT INTO
+                        sga_ecosystem.transaction_detail
+                        (
+                            transaction_id,
+                            account_id,
+                            account_type,
+                            type,
+                            subtotal,
+                            total
+                        )
+                    VALUES
+                    (?,?,?,?,?,?)
+                `
+                let postConsulta = await useDataBase(sentence,[
+                    consulta[1],
+                    element.account_id,
+                    element.account_type,
+                    element.type,
+                    element.subtotal,
+                    element.total
+                ],2);
+                resultDetails.push([postConsulta]);
+            }
+            consulta.push(resultDetails)
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(consulta));
+        }else{
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(false));
+        }
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+controller.createTransactionDetail = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            INSERT INTO
+                sga_ecosystem.transaction_detail
+                (
+                    transaction_id,
+                    account_id,
+                    account_type,
+                    type,
+                    subtotal,
+                    total
+                )
+            VALUES
+            (?,?,?,?,?,?)
+        `
+        let consulta = await useDataBase(sentence,[
+            info.transaction_id,
+            info.account_id,
+            info.account_type,
+            info.type,
+            info.subtotal,
+            info.total
+        ],2);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+controller.getTransactions = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            SELECT
+                sga_ecosystem.transactions.*,
+                sga_ecosystem.users.user_name,
+                sga_ecosystem.stores.name AS store_name
+        `;
+    })
+}
+
+
+controller.updateTransactionState = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence1 = `
+            UPDATE
+                sga_ecosystem.transactions
+            SET
+                status = '${info.status}'
+            WHERE
+                id = ${info.transaction_id} ;
+        `
+        let consulta1 = await useDataBase(sentence1,[],2);
+        if(consulta1){
+            let sentence2 = `
+                UPDATE
+                    sga_ecosystem.transaction_detail
+                SET
+                    status = '${info.status}'
+                WHERE
+                    transaction_id = ${info.transaction_id} ;
+            `
+            let consulta2 = await useDataBase(sentence2,[],2);
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify([consulta1,consulta2]));
+        }else{
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(consulta1));
+        }
+    })
+}
+
 
 // SGA - Inventory (Cambiar de archivo despues)
 

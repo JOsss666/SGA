@@ -341,9 +341,11 @@ CREATE TABLE transactions(
 )
 
 
-CREATE TABLE transaction_detail(
+CREATE TABLE sga_ecosystem.transaction_detail(
     id SERIAL PRIMARY KEY,
     transaction_id BIGINT UNSIGNED NOT NULL,
+    account_id INT NOT NULL,
+    account_type ENUM('PUC','Personalized'),
     type ENUM('tax','withholding','discount','operation'),
     subtotal FLOAT NOT NULL,
     total FLOAT NOT NULL,

@@ -56,6 +56,10 @@ router.post('/getConcepts',controller.getConcepts);
 
 router.post('/getPaymentMethods',controller.getPaymentMethods);
 
+router.post('/createTransaction',controller.createTransaction);
+
+router.post('/updateTransactionState',controller.updateTransactionState);
+
 
 // SGA - Inventory
 

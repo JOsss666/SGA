@@ -132,6 +132,8 @@ const useDataBase = async (sentence, values, typeConsult) => {
                 return results.insertId;
             case 5:
                 return [true, results[0].total];
+            case 6:
+                return [true,results.insertId]
             default:
                 throw new Error("Tipo de consulta no válido");
         }
