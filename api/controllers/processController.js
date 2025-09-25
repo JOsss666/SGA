@@ -96,6 +96,7 @@ processController.getDocuments = (req,res)=>{
                 ${info.id != null? ` AND sga_process.${info.type}S.id = ${info.id} `:''}
                 ${info.op_id != null? ` AND sga_process.${info.type}S.id = ${info.op_id} `:''}
                 ${info.limint != null? ` LIMIT ${info.limint}`:''}
+                ${info.status != null? `AND sga_process.${info.type}S.status '${info.stauts}'`:''}
                 ${(info.initialDate!= null && info.finalDate != null)? ` AND DATE(sga_process.${info.type}S.created_at) BETWEEN '${info.initialDate}' AND '${info.finalDate} '   `:''}
                 ORDER BY sga_process.${info.type}S.op_id DESC
             ;

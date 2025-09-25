@@ -42,22 +42,23 @@ export function ChatAi({visible}){
             text:searchVal,
             user_id:userInfo.user_id,
         })
-        setAttached([]);
-        setSearchVal('');
-        await addMessage({
+/*       await addMessage({
             text:`Procesando...`,
             user_id:0
-        })
+        })*/
         let res = await postInfo('/processAiRequest',{
             text:searchVal,
             userInfo,
             attached
         });
+        setAttached([]);
+        setSearchVal('');
         console.log(res)
+        console.log(typeof res)
         if(res.relevant){
             if(res.AI_response[0]){
                 addMessage({
-                    text:res.AI_response[1],
+                    children:JSON.parse(res.AI_response[1]),
                     user_id:0
                 })
             }else{

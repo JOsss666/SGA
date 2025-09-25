@@ -1490,7 +1490,7 @@ controller.processAiRequest= (req,res)=>{
         let info = JSON.parse(data);
         let validatePrompt = await isRelevanPrompt(info.text);
         if(validatePrompt.relevant){
-            let newRes = await send_API_AI(info.text,info.userInfo,[])
+            let newRes = await send_API_AI(info.text,info.userInfo,info.attached)
             validatePrompt.AI_response = newRes;
         }
         res.writeHead(200,{'Content-Type':'text/plain'});

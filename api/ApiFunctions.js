@@ -13,9 +13,24 @@ export async function send_API_AI(prompt,userInfo,attached) {
             messages: [
             { role: "system", content: `
                 Eres un asistente de una APP de gestion Administrativa
-                y respondes a un usuario con el nombre 
-                    ${userInfo.user_name}.` },
-            { role: "user", content: prompt }
+                y respondes a un usuario con el nombre ${userInfo.user_name}. de forma amable
+                Responde SIEMPRE y unicamente en formato JSON sin información adicional basandote en esta estructura:
+                    [
+                        {type:"MainTitle",content:"..."},
+                        {type:"SubTitle",content:"..."},
+                        {type:"TextPlain",content"..."}
+                    ]
+                IMPORTANTE no coloques texto afuera del formato ej:json porque no sirve el parse,
+                puedes crear multiples Subtitle y textPlain si es necesario lo importante es que se
+                solucione la dua.
+                ` },
+            { role: "user", content: prompt },
+            ...(attached
+            ? [{
+                role: "user",
+                content: `Adjunto la siguiente información:\n\n${JSON.stringify(attached)}`
+            }]
+            : [])
             ]
         },
         {
@@ -35,3 +50,4 @@ export async function send_API_AI(prompt,userInfo,attached) {
         return([false,''])
     }
 }
+
