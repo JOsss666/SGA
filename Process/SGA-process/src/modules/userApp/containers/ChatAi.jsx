@@ -1,23 +1,25 @@
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ButtonMenu } from '../components/ButtonMenu'
 import { InputBarChat } from '../components/InputBarChat'
 import './ChatAi.css'
 import { DespleList } from '../components/DespleList';
 import { CardTitleLogo } from '../components/CardTitleLogo';
-import {postInfo} from '../../../utils/functions'
+import {getAttached, postInfo} from '../../../utils/functions'
 import { useAiAssistant, useAppInfo } from '../../../context/context';
 import { ChatMessage } from '../components/ChatMessage';
 import { BoldTitle } from '../components/BoldTitle';
+import { AttachedCard } from '../components/AttachedCard';
 
 
 export function ChatAi({visible}){
     const {chat,addMessage} = useAiAssistant();
-    const {userInfo} = useAppInfo();
+    const {userInfo,appInfo} = useAppInfo();
     const fileInput = useRef();
     const [visibleAddOptions,setVisibleAddOptions] = useState(false);
     const [disabled,setDisable] = useState(false);
     const [loading,setLoading] = useState(false);
+    const [loadingAttached,setLoadingAttached] = useState(false);
     const [attached,setAttached] = useState([]);
 
     // Search Options
@@ -38,15 +40,18 @@ export function ChatAi({visible}){
         setLoading(true);
         await addMessage({
             text:searchVal,
-            user_id:userInfo.user_id
+            user_id:userInfo.user_id,
         })
+        setAttached([]);
+        setSearchVal('');
         await addMessage({
             text:`Procesando...`,
             user_id:0
         })
         let res = await postInfo('/processAiRequest',{
             text:searchVal,
-            userInfo
+            userInfo,
+            attached
         });
         console.log(res)
         if(res.relevant){
@@ -69,11 +74,51 @@ export function ChatAi({visible}){
                 user_name:'Asistente AI'
             })
         }
-        console.log(res);
         setLoading(false);
         setDisable(false);
-        setSearchVal('');
     }
+
+    const dictinaryPathType = {
+        'reportOPS':'report',
+        'reportOCS':'report',
+        'reportDCS':'report',
+        'reportFVS':'report',
+        'reportCIS':'report',
+    }
+
+    let chatAppInfo = {
+        company_id:appInfo.company_id,
+        user_id:appInfo.user_id,
+        user_name:appInfo.user_name
+    }
+
+    const handleAddAttahced = async(path)=>{
+        setVisibleAddOptions(false); 
+        setDisable(true)
+        const exists = attached.some(el => el.name === path);
+        if (!exists) {
+            let newAttachedElement = await getAttached(dictinaryPathType[path], path, chatAppInfo);
+            setAttached(prev => [
+                ...prev,
+                { name: path, type: dictinaryPathType[path], content: newAttachedElement }
+            ]);
+        }
+        setDisable(false)
+    }
+
+    const deleteAttached = (nameDelete)=>{
+        let C = []
+        attached.forEach(element => {
+            if(element.name != nameDelete){
+                C.push(element)
+            }
+        });
+        setAttached(C);
+    }
+
+    useEffect(()=>{
+        console.log(attached)
+    },[attached])
 
     return(
         <div className={`ChatAi ${visible? 'appearChatAi':'desapearChatAi'}`}>
@@ -85,19 +130,19 @@ export function ChatAi({visible}){
                 </span>
                 <ButtonMenu title={'Como usar Asistente AI'}><i className="fa-solid fa-question"/></ButtonMenu>
             </div>
-            <div className="spaceChatAi">
+            <div className={`spaceChatAi`}>
                 {chat.map((element,index)=>(
                     <ChatMessage info={element} key={index}/>
                 ))}
             </div>
-            <div className="chatAiInput">
+            <div className={`chatAiInput ${attached.length >0? 'activeAttachedSpace':''}`}>
                 <ButtonMenu onClick={()=>{setVisibleAddOptions(!visibleAddOptions)}} noRotate={true} title={'Agregar'}><i className="fa-solid fa-plus"/></ButtonMenu>
                 <InputBarChat sendAction={sendAiPrompt} loading={loading} disabled={disabled} value={searchVal} searchAction={setSearchVal} placeholder={'Pregunta lo que necesites'}/>
             </div>
             {visibleAddOptions && (
                 <div className="addOptions">
                     <div onClick={()=>{setVisibleAddOptions(false)}} className="closeAddOp">
-                        <i class="fa-solid fa-xmark"/>
+                        <i className="fa-solid fa-xmark"/>
                     </div>
                     <ul>
                         <CardTitleLogo onClick={()=>{loadFiles(false,"image/*")}} title={'Imágen'}><i className="fa-solid fa-image"/></CardTitleLogo>
@@ -107,7 +152,11 @@ export function ChatAi({visible}){
                             title:'Informes'
                             }} options={[
                                 {title:'Documentos reportados',children:<i className="fa-solid fa-book"/>},
-                                {title:'Estado Ordenes de producción',children:<i className="fa-solid fa-file-lines"/>},
+                                {title:'Ordenes de producción',children:<i className="fa-solid fa-file-lines"/>,action:handleAddAttahced,path:'reportOps'},
+                                {title:'Ordenes de cliente',children:<i className="fa-solid fa-file-lines"/>,action:handleAddAttahced,path:'reportOCS'},
+                                {title:'Documentos de compra',children:<i className="fa-solid fa-file-lines"/>,action:handleAddAttahced,path:'reportDCS'},
+                                {title:'Facturas de venta',children:<i className="fa-solid fa-file-lines"/>,action:handleAddAttahced,path:'reportFVS'},
+                                {title:'Consumos de inventario',children:<i className="fa-solid fa-file-lines"/>,action:handleAddAttahced,path:'reportCIS'},
                                 {title:'Volumen ordenes de clientes',children:<i className="fa-solid fa-file-lines"/>},
                         ]}/>
                         <DespleList children={<i className="fa-solid fa-chart-pie"></i>} father={{
@@ -119,6 +168,13 @@ export function ChatAi({visible}){
                         ]}/>
                     </ul>
                     <input type="file" hidden ref={fileInput}/>
+                </div>
+            )}
+            {attached.length >0 && (
+                <div className="attachedHolder">
+                    {attached.map((element,index)=>(
+                        <AttachedCard info={element} key={index} deleteAct={deleteAttached}/>
+                    ))}
                 </div>
             )}
         </div>

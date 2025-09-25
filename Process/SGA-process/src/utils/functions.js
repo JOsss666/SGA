@@ -96,3 +96,36 @@ export async function uploadFileInChunks(file,setAdvancePercent){
 
     return await finalizeRes.json();
 }
+
+
+export async function getAttached(type,attached,paramsDB) {
+
+    const dictionatyRoutes = {
+        'reportOPS':'/process/getOp',
+        'reportOCS':'/process/getDocuments',
+        'reportDCS':'/process/getDocuments',
+        'reportFVS':'/process/getDocuments',
+        'reportCIS':'/process/getDocuments'
+    }
+    
+    async function getFromDataBase(){
+        let typeDoc = (attached.split('report')[1]).substring(0,2);
+        paramsDB.type = typeDoc
+        let res = await postInfo(dictionatyRoutes[attached],paramsDB);
+        if(res[0]){
+            return({
+                [attached]:res[1]
+            })
+        }
+    }
+
+    switch (type){
+        case 'report':
+            return(await getFromDataBase())
+        case 'analytics':
+            return(await getFromDataBase())
+        case 'report':
+            return(await getFromDataBase())
+    }
+
+}

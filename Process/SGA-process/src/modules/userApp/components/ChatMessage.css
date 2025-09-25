@@ -6,7 +6,7 @@
     background-color: #fff;
     border-radius: .5vh;
     outline: solid .1vh #eee;
-    width: 60%;
+    width: 80%;
     padding: 1.5vh 2vh;
     box-shadow: 0 .2vh .5vh #ccc;
     margin: 1vh 0;
@@ -22,7 +22,7 @@
 .OwnMessage{
     background-color: #3C83F7;
     outline: none;
-    margin-left: 40%;
+    margin-left: 20%;
     border-bottom-left-radius: 1vh;
     border-bottom-right-radius: 0;
 }
@@ -40,6 +40,11 @@
     color: #3C4150;
 }
 
+.ChatMessage .messageContent .childrenMess{
+    padding: 1vh;
+    margin-top: 1vh;
+}
+
 .OwnMessage .messageContent{
     color: #fafafa;
 }
@@ -51,6 +56,8 @@
     width: 90%;
     left: 5%;
     padding-top: .5vh;
+    border-radius: 2vh;
+    overflow: hidden;
 }
 
 .ChatMessage .optionsMessage ul{

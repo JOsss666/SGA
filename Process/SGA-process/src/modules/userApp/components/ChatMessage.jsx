@@ -10,6 +10,8 @@ export function ChatMessage({info}){
     const [visibleOptions,setVisibleOptions] = useState(false);
     const messageBox = useRef()
 
+    console.log(info)
+
     useEffect(()=>{
         if(messageBox.current != undefined){
             messageBox.current.addEventListener("mousedown", () => {
@@ -29,6 +31,9 @@ export function ChatMessage({info}){
             )}
             <div className="messageContent">
                 <span>{info.text}</span>
+                {info.children != undefined && (
+                    <div className="childrenMess">{info.children}</div>
+                )}
             </div>
             {visibleOptions &&(
                 <div className="optionsMessage">
