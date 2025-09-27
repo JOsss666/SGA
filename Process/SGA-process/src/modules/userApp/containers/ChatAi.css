@@ -57,6 +57,30 @@
     color: transparent; /* oculta color sólido */
 }
 
+
+.ChatAi .noChatIMg{
+    height: 89%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.ChatAi .noChatIMg img{
+    height: 100%;
+    margin: auto;
+    mask-image: linear-gradient(#000 60%,transparent);
+}
+
+.ChatAi .noChatIMg .MainTitleAi{
+    position: absolute;
+    top: 70%;
+    width: 70%;
+    left: 15%;
+    text-align: center;
+    font-size: clamp(5px,5vh,50px);
+}
+
 .ChatAi .headChat .ButtonMenu{
     margin:auto;
     margin-right: 1vh;

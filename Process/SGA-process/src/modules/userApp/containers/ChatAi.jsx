@@ -10,6 +10,7 @@ import { useAiAssistant, useAppInfo } from '../../../context/context';
 import { ChatMessage } from '../components/ChatMessage';
 import { BoldTitle } from '../components/BoldTitle';
 import { AttachedCard } from '../components/AttachedCard';
+import { MainTitleAi } from '../components/ChatAiComponents/MainTitleAi';
 
 
 export function ChatAi({visible}){
@@ -131,11 +132,20 @@ export function ChatAi({visible}){
                 </span>
                 <ButtonMenu title={'Como usar Asistente AI'}><i className="fa-solid fa-question"/></ButtonMenu>
             </div>
-            <div className={`spaceChatAi`}>
-                {chat.map((element,index)=>(
-                    <ChatMessage info={element} key={index}/>
-                ))}
-            </div>
+            {chat.length >0 && (
+                <div className={`spaceChatAi`}>
+                    {chat.map((element,index)=>(
+                        <ChatMessage info={element} key={index}/>
+                    ))}
+                </div>
+            )}
+            {chat.length == 0 && (
+                <div className="noChatIMg">
+                    <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1758896152/ChatGPT_Image_25_sept_2025_10_50_03_sz7rno.png" alt="" />
+                    <MainTitleAi text={`Hola ${userInfo.user_name}, ¿Listo para empezar?`}/>
+                </div>
+            )}
+            
             <div className={`chatAiInput ${attached.length >0? 'activeAttachedSpace':''}`}>
                 <ButtonMenu onClick={()=>{setVisibleAddOptions(!visibleAddOptions)}} noRotate={true} title={'Agregar'}><i className="fa-solid fa-plus"/></ButtonMenu>
                 <InputBarChat sendAction={sendAiPrompt} loading={loading} disabled={disabled} value={searchVal} searchAction={setSearchVal} placeholder={'Pregunta lo que necesites'}/>

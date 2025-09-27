@@ -1,0 +1,52 @@
+
+LISTA DE REQERIMIENTOS SGA-PROCESOS/ANALYTICS
+
+* De acuerdo al diseño UI de figma crear el aparatado de estadisticas que
+contendra la siguiente información - funcionalidades.
+
+
+1. Ventas (ingresos)
+
+	Ventas totales en un período (día, mes, año).
+
+	Ventas por cliente (ranking de mejores clientes).
+
+	Ventas por producto/servicio.
+
+	Ventas por canal o tipo de pedido (ej. online, presencial).
+
+	Tasa de crecimiento de ventas (comparar contra mes/año anterior).
+
+	Facturas pendientes de cobro / cuentas por cobrar.
+
+2. Compras y gastos
+
+	Total de gastos en un período.
+
+	Gastos por proveedor.
+
+	Clasificación de gastos por tipo (materia prima, servicios, logística, etc.).
+
+	Comparativa de gastos vs. presupuesto.
+
+	Facturas de compra pendientes de pago / cuentas por pagar.
+
+3. Rentabilidad
+
+	Margen bruto = Ventas – Costo de ventas.
+
+	Margen neto = Ingresos – (Costos + Gastos).
+
+	Rentabilidad por producto o categoría.
+
+	Rentabilidad por cliente o segmento.
+
+4. Procesos / productividad
+
+	Número de órdenes generadas vs. completadas.
+
+	Tiempo promedio de procesamiento de una orden.
+
+	Órdenes retrasadas o pendientes.
+
+	Eficiencia: relación entre consumo de inventario y ventas generadas.
