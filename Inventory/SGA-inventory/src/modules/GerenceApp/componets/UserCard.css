@@ -1,45 +1,37 @@
 
 .UserCard{
     display: flex;
-    padding: 1vh;
-    border-radius: 1vh;
-    cursor: pointer;
-    transition: .3s;
+    padding: .5vh;
+    height: fit-content;
 }
 
-.UserCard:hover{
-    background-color: #f2f2f2;
-}
-
-.UserCard img, .UserCard .iconContainer{
-    width: 5vh;
-    height: 5vh;
-    border-radius: 100%;
-    background-color: #ddd;
-    margin: auto 0;
+.UserCard img{
+    height: 6.5vh;
+    width: 6.5vh;
+    border-radius: .5vh;
+    background-color: #eee;
     margin-right: 1vh;
-    display: flex;
+    object-fit: cover;
+    border: solid .1vh #ddd;
 }
 
-.UserCard .iconContainer i{
-    font-size: clamp(3px, 2.5vh,30px);
-    margin: auto;
-    color: #555;
-}
-
-.UserCard .userCardInfo{
+.UserCard .infoUser{
     display: flex;
     flex-direction: column;
-    margin: auto 1vh;
+    height: fit-content;
+    margin: auto 0;
 }
 
-.UserCard .userCardInfo strong{
-    font-size: clamp(1px,2.2vh,20px);
+.UserCard .infoUser strong{
+    font-size: clamp(2.5px,2.4vh,25px);
     font-weight: 600;
-    color: #565252;
+    color: #4A4848;
+    margin-bottom: .2vh;
 }
 
-.UserCard .userCardInfo span{
-    font-size: clamp(1px,1.8vh,20px);
-    color: #747474;
+
+.UserCard .infoUser span{
+    font-size: clamp(2.5px,2vh,25px);
+    font-weight: 400;
+    color: #666;
 }

@@ -9,7 +9,7 @@ import { DetailChart } from "../componets/DetailChart";
 import { SearchBar } from "../componets/SearchBar";
 import { SubSectionTitle } from "../componets/SubSectionTitle";
 import { ProductInfoCard } from "../componets/ProductInfoCard";
-import {useAppinfo} from '../../../context/context'
+import {useAppInfo} from '../../../context/context'
 import {postInfo} from '../../../utils/functions'
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -21,7 +21,7 @@ export function Analytics(){
     const [departures,setDepartures] = useState([]);
     const [consuption,setConsuption] = useState([]);
     const [transfers,setTransfers] = useState([]);
-    const {appInfo} = useAppinfo();
+    const {appInfo} = useAppInfo();
 
     const handleNavigate = (path,data)=>{
         console.log(location)

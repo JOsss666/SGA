@@ -3,14 +3,14 @@ import { BoldTitle } from "../../componets/BoldTitle";
 import { FormInput } from "../../componets/FormInput";
 import { SearchinList } from "../../componets/SearchInList";
 import { FormButton } from "../../componets/FormButton";
-import { useAppinfo } from "../../../../context/context";
+import { useAppInfo } from "../../../../context/context";
 import {postInfo} from "../../../../utils/functions"
 import './FormNewCellar.css'
 
 export function FormNewCellar({storeId,store_name,reloadFun}){
 
     const [disabled,setDisabled] = useState(false);
-    const {appInfo} = useAppinfo();
+    const {appInfo} = useAppInfo();
     const [cellar_name,setCellarName] = useState("");
     const [cellar_location,setCellarLocation] = useState("");
     const [store_id,setStoreId] = useState(storeId != undefined? storeId:"");

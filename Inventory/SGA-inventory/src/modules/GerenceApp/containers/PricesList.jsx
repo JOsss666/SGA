@@ -8,7 +8,7 @@ import { ListPriceProducts } from './ListPriceProducts'
 import { useEffect, useState } from 'react'
 import { postInfo } from '../../../utils/functions'
 import { useAlert } from '../../../context/context'
-import { useAppinfo } from '../../../context/context'
+import { useAppInfo } from '../../../context/context'
 import './PricesList.css'
 import { CreatePricesList } from './forms/CreatePricesList'
 
@@ -18,7 +18,7 @@ export function PricesList({setActualist}){
     const navigate = useNavigate();
     const {popInAlert,setOpenAlert} = useAlert();
     const [listPrices,setListPrices] = useState([]);
-    const {appInfo} = useAppinfo();
+    const {appInfo} = useAppInfo();
     const getPricesLists = async()=>{
         let res = await postInfo('/getPricesNameList',{
             company_id:appInfo.company_id,

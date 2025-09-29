@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react'
 import { RowPricesList } from './RowPricesList'
 import './TablePrices.css'
 import { postInfo } from '../../../utils/functions';
-import { useAppinfo } from '../../../context/context';
+import { useAppInfo } from '../../../context/context';
 
 export function TablePrices({columns,info}){
-    const {appInfo} = useAppinfo();
+    const {appInfo} = useAppInfo();
     console.log(info)
     const [products,setProducts] = useState([]);
 

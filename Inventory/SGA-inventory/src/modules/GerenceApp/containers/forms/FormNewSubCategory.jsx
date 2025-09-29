@@ -4,14 +4,14 @@ import { FormInput } from "../../componets/FormInput"
 import { useEffect, useState } from "react"
 import { postInfo } from "../../../../utils/functions"
 import { useAlert } from "../../../../context/context"
-import { useAppinfo } from "../../../../context/context"
+import { useAppInfo } from "../../../../context/context"
 import './FormNewSubCategory.css'
 import { SearchinList } from "../../componets/SearchInList"
 
 
 export function FormNewSubCategory({reoladFunction}){
 
-    const {appInfo} = useAppinfo();
+    const {appInfo} = useAppInfo();
     const {setOpenAlert,popOutAlert} = useAlert();
     const [categories,setCategories] = useState();
     const [category_name,setName] = useState('');

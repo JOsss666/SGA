@@ -11,7 +11,7 @@ import { FormNewEntry } from "./forms/FormNewEntry";
 import { FormNewDeparture } from "./forms/FormNewDeparture";
 import { FormNewDocument } from "./forms/FormNewDocument";
 import { postInfo } from "../../../utils/functions";
-import { useAppinfo } from "../../../context/context";
+import { useAppInfo } from "../../../context/context";
 import { useEffect, useState } from "react";
 import { WarningForm } from "../componets/WarningForm";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -21,7 +21,7 @@ export function MovementsInventory(){
 
     const navigate = useNavigate();
     const location = useLocation()
-    const {appInfo} = useAppinfo();
+    const {appInfo} = useAppInfo();
     const {popInAlert,setOpenAlert} = useAlert();
     const [movements,setMovements] = useState([]);
 

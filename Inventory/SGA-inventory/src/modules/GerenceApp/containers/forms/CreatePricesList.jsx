@@ -1,6 +1,6 @@
 import { BoldTitle } from "../../componets/BoldTitle";
 import { FormInput } from "../../componets/FormInput";
-import { useAppinfo } from "../../../../context/context";
+import { useAppInfo } from "../../../../context/context";
 import './CreatePricesList.css'
 import { SearchinList } from "../../componets/SearchInList";
 import { useEffect, useState } from "react";
@@ -9,7 +9,7 @@ import { FormButton } from "../../componets/FormButton";
 
 export function CreatePricesList({Store}){
 
-    const {appInfo} = useAppinfo();
+    const {appInfo} = useAppInfo();
     const [stores,setStores] = useState([])
     const [store_id,setStoreId] = useState(Store!= undefined? Store:'');
     const [list_name,setListName] = useState("");

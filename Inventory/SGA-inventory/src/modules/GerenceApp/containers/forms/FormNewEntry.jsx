@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { BoldTitle } from "../../componets/BoldTitle";
 import { FormButton } from "../../componets/FormButton";
 import { FormInput } from "../../componets/FormInput";
-import { useAppinfo } from "../../../../context/context";
+import { useAppInfo } from "../../../../context/context";
 import { SearchinList } from "../../componets/SearchInList";
 import { useAlert } from "../../../../context/context";
 import './FormNewEntry.css'
@@ -13,7 +13,7 @@ import { FormNewProduct } from "./FormNewProduct";
 export function FormNewEntry(){
 
     const {popInAlert,setOPenAlert} = useAlert();
-    const {appInfo,userInfo} = useAppinfo();
+    const {appInfo,userInfo} = useAppInfo();
     const [store_id,setStoreId] = useState();
     const [cellar_id,setCellarId] = useState();
     const [product_id,setProductId] = useState();

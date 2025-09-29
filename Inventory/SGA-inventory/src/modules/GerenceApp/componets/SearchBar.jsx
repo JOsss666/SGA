@@ -14,6 +14,7 @@ export function SearchBar({ placeholder, action, searchAction }) {
 
     return (
         <div>
+            
         <div className="SearchBar">
             <input
             ref={inRefSearch}

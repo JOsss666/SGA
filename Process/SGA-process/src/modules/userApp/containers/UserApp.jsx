@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './UserApp.css'
-import { BigTitle } from '../components/BigTitle';
+import {BigTitle} from './../components/BigTitle'
 import { SearchBar } from '../components/SearchBar';
 import { ButtonMenu } from '../components/ButtonMenu';
 import { UserCard } from '../components/UserCard';

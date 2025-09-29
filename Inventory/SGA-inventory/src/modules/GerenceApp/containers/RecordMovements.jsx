@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { postInfo } from "../../../utils/functions";
 import { SectionTitle } from "../componets/SectionTitle";
-import { useAppinfo } from "../../../context/context";
+import { useAppInfo } from "../../../context/context";
 import { PathLocation } from "../componets/PathLocation";
 import { TableMovements } from "./TableMovements";
 import './RecordMovements.css'
@@ -11,7 +11,7 @@ import { SelectOptions } from "../componets/SelectOptions";
 export function RecordMovents({info}){
 
     const [movements,setMovements] = useState([]);
-    const {appInfo} = useAppinfo();
+    const {appInfo} = useAppInfo();
 
     const getMovements = async()=>{
         let res = await postInfo('/getMovements',{company_id:appInfo.company_id,cellar_name:true})

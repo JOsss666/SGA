@@ -1,20 +1,13 @@
 
 import './UserCard.css'
 
-export function UserCard({img,icon,name,roll,onClick}){
+export function UserCard({name,desc,imgSrc}){
     return(
-        <div className="UserCard" onClick={onClick}>
-            {icon == undefined && (
-                <img src="" alt="" />
-            )}
-            {icon != undefined && img == undefined && (
-                <div className="iconContainer">
-                    {icon}
-                </div>
-            )}
-            <div className="userCardInfo">
+        <div className="UserCard">
+            <img src={imgSrc} alt="" />
+            <div className="infoUser">
                 <strong>{name}</strong>
-                <span>{roll}</span>
+                <span>{desc}</span>
             </div>
         </div>
     )

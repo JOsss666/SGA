@@ -1,58 +1,38 @@
 
 .AlertContainer{
-    padding: 2vh;
+    height: inherit;
+    padding: 1vh;
+    width: fit-content;
     background-color: #fff;
-    border-radius: 1vh;
     position: relative;
-    top: 0;
-    left: 0;
-    display: flex;
-    padding-top: 5vh;
-    box-shadow: 0 .4vh 2vh #0001;
+    box-shadow: 0 -.2vh 1vh #0002;
+    overflow: auto;
     animation-name: appearAlert;
-    animation-duration: .5s;
-    animation-timing-function: ease;
+    animation-duration:1s;
     animation-fill-mode: both;
-    animation-delay: .3s;
+    animation-timing-function: ease;
+    border: solid .1vh #ddd;
     width: 100%;
-    max-height: 100dvh;
-    overflow-y: auto;
-    overflow-x: auto;
 }
 
-.AlertContainer .closeAlert{
-    height: 4vh;
-    width: 4vh;
-    background-color: #D9D9D9;  
-    display: flex;
-    border-radius: 100%;
-    cursor: pointer;
+.AlertContainer .optionsAlert{
     position: absolute;
-    top: 1vh;
-    right: 1vh;
+    padding: 1vh;
+    top: 2vh;
+    right: 2vh;
 }
 
-.AlertContainer .closeAlert:hover{
-    box-shadow: 0 0 2vh #0003;
-    outline: solid .1vh #ccc;
+.AlertContainer .optionsAlert i{
+    cursor: pointer;
+    font-size: clamp(3.5px,3vh,350px);
 }
 
-.AlertContainer .closeAlert i{
-    color: #000;
-    margin: auto;
-}
-
-.AlertContainer span, b{
-    margin-right: 1vh;
-}
-
-@keyframes appearAlert{
+@keyframes appearAlert {
     0%{
         top: 100%;
     }
 
     100%{
         top: 0;
-        opacity: 100%;
     }
 }

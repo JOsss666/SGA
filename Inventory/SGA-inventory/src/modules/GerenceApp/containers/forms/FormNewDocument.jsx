@@ -5,7 +5,7 @@ import { FormInput } from "../../componets/FormInput";
 import { InputFiles } from "../../componets/InputFiles";
 import { SearchinList } from "../../componets/SearchInList";
 import { TableTransactions } from "../TableTransactions";
-import { useAppinfo } from "../../../../context/context";
+import { useAppInfo } from "../../../../context/context";
 import { useAlert } from "../../../../context/context";
 import { useEffect, useState } from "react";
 import './FormNewDocument.css'
@@ -26,7 +26,7 @@ export function FormNewDocument({type}){
 
     // Aditional Data
     const {popOutAlert,setOpenAlert} = useAlert();
-    const {appInfo,userInfo} = useAppinfo();
+    const {appInfo,userInfo} = useAppInfo();
     // Component Info
     const [stores,setStores] = useState([]);
     const [cellars,setCellars] = useState([]);
@@ -83,11 +83,10 @@ export function FormNewDocument({type}){
             let C = []
             res[1].forEach(element => {
                 C.push({
-                    text:element.store_name,
-                    value:element.store_id
+                    text:element.name,
+                    value:element.id
                 })
             });
-            console.log(C)
             setStores(C);
         }
         console.log(res);

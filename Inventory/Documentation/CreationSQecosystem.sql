@@ -247,6 +247,9 @@ CREATE TABLE sga_ecosystem.concepts(
 );
 
 
+SELECT * FROM sga_ecosystem.concepts;
+SELECT id,name FROM sga_ecosystem.account_templates_PUC;
+
 
 CREATE TABLE sga_ecosystem.taxes(
     company_id INT NOT NULL,
@@ -320,7 +323,7 @@ INSERT INTO sga_ecosystem.taxes(company_id,name,code,rate,account_id) VALUES(
     236601
 );
 
-CREATE TABLE transactions(
+CREATE TABLE sga_ecosystem.transactions(
     id SERIAL PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,
     company_id BIGINT UNSIGNED NOT NULL,
@@ -334,11 +337,13 @@ CREATE TABLE transactions(
     status ENUM('draft','posted','cancelled','pendingPayment') DEFAULT 'draft',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES sga_ecosystem.users(id),
+    FOREIGN KEY (user_id) REFERENCES sga_ecosystem.users(user_id),
     FOREIGN KEY (company_id) REFERENCES sga_ecosystem.companies(company_id),
-    FOREIGN KEY (store_id) REFERENCES sga_ecosystem.stores(store_id),
+    FOREIGN KEY (store_id) REFERENCES sga_ecosystem.stores(id),
     FOREIGN KEY (concept_id) REFERENCES sga_ecosystem.concepts(id)
 )
+
+SELECT * FROM sga_ecosystem.transactions;
 
 
 CREATE TABLE sga_ecosystem.transaction_detail(
@@ -352,5 +357,7 @@ CREATE TABLE sga_ecosystem.transaction_detail(
     status ENUM('draft','posted','cancelled','pendingPayment') DEFAULT 'draft',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (transaction_id) REFERENCES sga_ecosystem.transactions(id)
+    FOREIGN KEY (transaction_id) REFERENCES sga_ecosystem.transactions(id) ON DELETE CASCADE
 )
+
+SELECT * FROM sga_ecosystem.transaction_detail;

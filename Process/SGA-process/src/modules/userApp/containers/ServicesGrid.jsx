@@ -34,7 +34,7 @@ export function ServicesGrid(){
                 <span>Tesoreria</span>
             </div>
             <div className="serviceBubble">
-                <img src={certiLogo} alt="" />
+                <img src={'https://res.cloudinary.com/djjxugmni/image/upload/v1759160717/logo_certicloud-_perfil_azul_2_ljka0q.png'} alt="" />
                 <span>CertiCloud</span>
             </div>
         </div>

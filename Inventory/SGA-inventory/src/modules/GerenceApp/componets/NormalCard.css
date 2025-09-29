@@ -5,7 +5,7 @@
     height: 20vh;
     width: 30vh;
     background-color: #fff;
-    border-radius: 2.5vh;
+    border-radius: 3vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -15,11 +15,12 @@
     animation-duration: .5s;
     animation-fill-mode: both;
     animation-timing-function: ease;
-    outline: solid .6vh #fff7;
+    outline: solid .1vh #eee;
+    box-shadow: 0 .2vh 1vh #ccc7;
 }
 
 .NormalCard:hover {
-    border-radius: 1vh;
+    border-radius: 2vh;
 }
 
 .NormalCard:hover strong{
