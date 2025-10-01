@@ -12,6 +12,7 @@ import { SelectOptions } from "../../components/SelectOptions";
 import { TableReport } from "../TableReport";
 import './ReportDocuments.css'
 import { LoadingSpace } from "../LoadingSpace";
+import { ButtonDownload } from "../../components/ButtonDownload";
 
 export function ReportDocuments({type}){
 
@@ -140,7 +141,7 @@ export function ReportDocuments({type}){
                 ]} title={'Orden'}/>
                 <ButtonMenu title={'Mas Ajustes'} children={<i className="fa-solid fa-sliders"/>} noRotate={true}/>
                 <ButtonMenu title={'Agregar a favoritos'} children={<i className="fa-regular fa-star"/>} noRotate={true}/>
-                <FormButton text={'Descargar informe'}/>
+                <ButtonDownload />
             </div>
             <div className="SpaceReport">
                 {!loading && (
