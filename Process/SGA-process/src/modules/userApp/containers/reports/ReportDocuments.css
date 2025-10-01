@@ -63,6 +63,14 @@
     padding: 1vh 2vh;
 }
 
+.ReportDocument .settingsReport .ButtonDownload{
+    margin: auto;
+    margin-right: 1vh;
+    font-size: clamp(2.2px,1.8vh,22px) !important;
+    width: fit-content;
+    padding: 1vh 2vh;
+}
+
 .ReportDocument .SpaceReport{
     margin-top: 2vh;
     max-width: 100%;

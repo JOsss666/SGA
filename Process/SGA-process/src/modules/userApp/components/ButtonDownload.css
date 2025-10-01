@@ -1,0 +1,68 @@
+.ButtonDownload {
+    display: inline-block;
+    width: 100%;
+}
+
+.buttonDownloadDefault, .buttonDownloadLoading, .buttonDownloadSuccess {
+    width: 100%;
+    color: #fff;
+    padding: 1.2vh 1.8vh;
+    border: none;
+    border-radius: .5vh;                 
+    font-size: clamp(2px, 2.2vh, 25px);  
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 1vh;
+    box-shadow: 0 .4vh 2vh #0002;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.buttonDownloadDefault {
+    background-color: #000000;
+}
+
+.buttonDownloadLoading {
+    background-color: #2563eb;
+}
+
+.buttonDownloadSuccess {
+    background-color: #22c55e;
+}
+
+/** MENÚ OPCIONES DE FORMATOS **/
+.ButtonDownload {
+    position: relative;
+    display: inline-block;
+    width: fit-content;
+}
+
+
+.downloadMenu {
+    position: absolute;
+    padding: 1.2vh 1.8vh;
+    left: 0;
+    margin-top: 0.5vh;
+    z-index: 10;
+    width: 100%;
+}
+
+.downloadMenu button {
+    width: 100%;           
+    background: #fff;
+    border: none;
+    padding: 1vh 2vh;
+    text-align: left;
+    cursor: pointer;
+    font-size: clamp(2px, 2.2vh, 25px);
+    display: flex;
+    align-items: center;
+    gap: 1vh;
+    transition: background 0.2s ease;
+}
+
+.downloadMenu button:hover {
+    background: #F7F7F7;
+}
+
