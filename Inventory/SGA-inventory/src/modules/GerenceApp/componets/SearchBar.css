@@ -1,22 +1,22 @@
 .SearchBar{
     position: relative;
     width: 100%;
-    height: 100%;
+    height: fit-content;
 }
 
 .SearchBar input{
     width: 100%;
-    border-radius: .5vh;
+    border-radius: 1vh;
     height: 100%;
     font-size: clamp(1px,2vh,20px);
     font-family: 'Inter',sans-serif;
-    padding: 1vh;
+    padding: 1.5vh 2vh;
     padding-left: 6vh;
     border: hidden;
     outline: none;
     color: #888;
-    outline: solid .1vh #E8E8E8;
-    background-color: #F9FAFE;
+    outline: solid .1vh #ddd;
+    background-color: #fff;
     transition: .3s;
 }
 
@@ -26,8 +26,8 @@
 
 .SearchBar i{
     position: absolute;
-    top: 35%;
+    top: 30%;
     left: 2vh;
-    color: #888;
-    font-size: 2vh;
+    color: #777;
+    font-size: 2.5vh;
 }

@@ -20,6 +20,12 @@ const upload = multer({ dest: CHUNKS_DIR });
 
     router.post("/merge-chunks", controller.mergeChunks);
 
+    router.post('/processAiRequest',controller.processAiRequest);
+
+    router.post('/logIn',controller.logIn);
+
+    router.post('/signUp',controller.signUp);
+
 router.post('/getCompanyInfo',controller.getCompanyInfo);
 
 router.post('/getUserInfo',controller.getUserInfo);
@@ -40,6 +46,21 @@ router.post('/getAccountsPlan',controller.getAccountsPlan);
 
 router.post('/insertNewAccount',controller.insertNewAccount);
 
+router.post('/createTax',controller.createTax);
+
+router.post('/getTaxes',controller.getTaxes);
+
+router.post('/createConcept',controller.createConcept);
+
+router.post('/getConcepts',controller.getConcepts);
+
+router.post('/getPaymentMethods',controller.getPaymentMethods);
+
+router.post('/createTransaction',controller.createTransaction);
+
+router.post('/updateTransactionState',controller.updateTransactionState);
+
+router.post('/getTransactions',controller.getTransactions);
 
 // SGA - Inventory
 
@@ -73,7 +94,7 @@ router.post('/newMovement',controller.newMovement);
 
 router.post('/getMovements',controller.getMovements);
 
-router.post('/getTransactions',controller.getTransactions);
+router.post('/getDepartures',controller.getDepartures);
 
 router.post('/getRotation',controller.getRotation);
 
@@ -98,3 +119,4 @@ router.post('/process/createFV',processController.createFV);
 router.post('/process/searchDocument',processController.searchDocument);
 
 export default router;
+

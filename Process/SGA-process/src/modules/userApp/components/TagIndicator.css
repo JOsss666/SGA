@@ -1,15 +1,38 @@
 
 .TagIndicator{
     padding: .5vh 1.5vh;
-    outline: solid .1vh #ccc;
     border-radius: 2vh;
     display: flex;
-    background-color: #eee;
+    background-color: #DEE5E5;
+    width: fit-content;
+    height: fit-content;
 }
 
 .TagIndicator h5{
     font-size: clamp(2.2px,2vh,22px);
-    font-weight: 400;
+    font-weight: 500;
+    color: #00022E;
+}
+
+.active_color{
+    background-color: #B4F9DF;
+}
+
+.disabled_color{
+    background-color: #FFBBAD;
+}
+
+.suspended_color{
+    background-color: #FBF5B9;
+}
+
+.indicator_color{
+    background-color: #B2D4FC;
+}
+
+
+.category_color{
+    background-color: #BFB6F3;
 }
 
 .TagIndicator i{

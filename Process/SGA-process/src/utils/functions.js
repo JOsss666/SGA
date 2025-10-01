@@ -33,27 +33,31 @@ export function copyToClipBoard(text){
 
 
 export function moneyFormat(number){
-    let n = JSON.stringify(number);
-    let data = ''
-    let counter = 1;
-    for(let i = n.length -1;i >= 0;i--){
-        if(n[i] != '.'){
-            data += n[i];
-            if(counter%3 == 0 && i != 0){
-                data += '.'
+    if(number != undefined){
+        let n = JSON.stringify(number);
+        let data = ''
+        let counter = 1;
+        for(let i = n.length -1;i >= 0;i--){
+            if(n[i] != '.'){
+                data += n[i];
+                if(counter%3 == 0 && i != 0){
+                    data += '.'
+                }
+                counter ++;
             }
-            counter ++;
+            if(n[i] == '.'){
+                data += ','
+                counter = 1;
+            }
         }
-        if(n[i] == '.'){
-            data += ','
-            counter = 1;
+        let x = '';
+        for(let i = data.length -1;i >= 0;i--){
+            x += data[i];
         }
+        return(x)
+    }else{
+        return('0')
     }
-    let x = '';
-    for(let i = data.length -1;i >= 0;i--){
-        x += data[i];
-    }
-    return(x)
 }
 
 export async function uploadFileInChunks(file,setAdvancePercent){
@@ -91,4 +95,37 @@ export async function uploadFileInChunks(file,setAdvancePercent){
     });
 
     return await finalizeRes.json();
+}
+
+
+export async function getAttached(type,attached,paramsDB) {
+
+    const dictionatyRoutes = {
+        'reportOPS':'/process/getOp',
+        'reportOCS':'/process/getDocuments',
+        'reportDCS':'/process/getDocuments',
+        'reportFVS':'/process/getDocuments',
+        'reportCIS':'/process/getDocuments'
+    }
+    
+    async function getFromDataBase(){
+        let typeDoc = (attached.split('report')[1]).substring(0,2);
+        paramsDB.type = typeDoc
+        let res = await postInfo(dictionatyRoutes[attached],paramsDB);
+        if(res[0]){
+            return({
+                [attached]:res[1]
+            })
+        }
+    }
+
+    switch (type){
+        case 'report':
+            return(await getFromDataBase())
+        case 'analytics':
+            return(await getFromDataBase())
+        case 'report':
+            return(await getFromDataBase())
+    }
+
 }

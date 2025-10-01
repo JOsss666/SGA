@@ -26,6 +26,7 @@
     box-shadow: 0 .4vh 1vh #d5d5d5;
     color: #aaa;
     z-index: 5;
+    font-size: clamp(2.2px,2.2vh,22px);
 }
 
 .SearchinList .SlistC .listElementsContainer{

@@ -1,7 +1,7 @@
 import {BoldTitle} from '../../componets/BoldTitle'
 import {FormInput} from '../../componets/FormInput'
 import {FormButton} from '../../componets/FormButton'
-import { useAppinfo } from '../../../../context/context'
+import { useAppInfo } from '../../../../context/context'
 import { useAlert } from '../../../../context/context'
 import {postInfo} from  '../../../../utils/functions'
 import './CreateStore.css'
@@ -9,7 +9,7 @@ import { useState } from 'react'
 
 export function CreateStore({reloadFun}){
     const {setOpenAlert} = useAlert();
-    const {appInfo} = useAppinfo();
+    const {appInfo} = useAppInfo();
     const [disabled,setDisabled] = useState(false);
     const [store_name,setStoreName] = useState("");
     const [store_zone,setStoreZone] = useState("");

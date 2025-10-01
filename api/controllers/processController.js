@@ -68,11 +68,14 @@ processController.getDocuments = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        console.log(info.type)
         let sentence = `
             SELECT
+                '${info.type}' AS docType,
                 sga_process.${info.type}S.*,
                 sga_ecosystem.users.user_name,
-                sga_ecosystem.thirdParties.names
+                sga_ecosystem.thirdParties.names,
+                sga_ecosystem.stores.name AS store_name
             FROM
                 sga_process.${info.type}S
             LEFT JOIN
@@ -83,11 +86,17 @@ processController.getDocuments = (req,res)=>{
                 sga_ecosystem.thirdParties
             ON
                 sga_process.${info.type}S.thirdParty_id = sga_ecosystem.thirdParties.id
+            LEFT JOIN
+                sga_ecosystem.stores
+            ON
+                sga_process.${info.type}S.store_id = sga_ecosystem.stores.id
             WHERE
                 sga_process.${info.type}S.company_id = ${info.company_id}
                 ${info.user_id != null? ` AND sga_process.${info.type}S.user_id = ${info.user_id} `:''}
-                ${info.id != null? ` AND sga_process.${info.type}S.id = ${info.op_id} `:''}
+                ${info.id != null? ` AND sga_process.${info.type}S.id = ${info.id} `:''}
+                ${info.op_id != null? ` AND sga_process.${info.type}S.id = ${info.op_id} `:''}
                 ${info.limint != null? ` LIMIT ${info.limint}`:''}
+                ${info.status != null? `AND sga_process.${info.type}S.status '${info.stauts}'`:''}
                 ${(info.initialDate!= null && info.finalDate != null)? ` AND DATE(sga_process.${info.type}S.created_at) BETWEEN '${info.initialDate}' AND '${info.finalDate} '   `:''}
                 ORDER BY sga_process.${info.type}S.op_id DESC
             ;
@@ -271,9 +280,10 @@ processController.createDC = (req,res)=>{
             op_id,
             thirdParty_id,
             description,
-            value
+            value,
+            status
         )
-            VALUES(?,?,?,?,?,?,?);
+            VALUES(?,?,?,?,?,?,?,?);
         `
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -282,7 +292,8 @@ processController.createDC = (req,res)=>{
             info.op_id,
             info.thirdParty_id,
             info.description,
-            info.value
+            info.value,
+            'draft'
         ],4);
         if(typeof consulta === "number"){
             let sentence = `
@@ -480,6 +491,30 @@ processController.searchDocument = (req,res)=>{
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
+    })
+}
+
+processController.deleteDocument =(req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            DELETE FROM
+                sga_process.${info.type}S
+            WHERE
+                ${info.type == 'OP' && `op_id = ${info.id}`}
+                ${info.type != 'OP' && `id = ${info.type}`}
+        ;`;
+        let consulta = await useDataBase(sentence,[],1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.in('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err))
     })
 }
 

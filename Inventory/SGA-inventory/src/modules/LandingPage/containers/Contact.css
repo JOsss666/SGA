@@ -1,0 +1,61 @@
+.Contact{
+    padding-top: 6vh;
+}
+
+.Contact .ContactContainer .ContactTitle{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .2vh;
+    padding-bottom: 4vh;
+}
+
+.Contact .ContactContainer .ContactTitle h2{
+    font-size: 2.8vh;
+    font-weight: 400;
+    color: #757575;
+}
+
+.Contact .ConactCard{
+    width: 40vh;
+}
+
+.Contact .ContactContainerCard{
+    display: flex;
+    flex-wrap: wrap;
+    align-content: start;
+    justify-content: start;
+    padding: 1dvh;
+    margin: 1dvw 30dvh;
+    gap: 1vh;
+}
+
+
+.Contact .Subtitle{
+    display: flex;
+    justify-content: center;
+    padding-top: 2vh;
+}
+
+.Contact .Subtitle .Titles{
+    font-size: 5vh;
+}
+
+.Contact .ContactQuestionCard{
+    display: flex;
+    flex-direction: column;
+    padding-top: 2vh;
+    font-size: 3dvh;
+
+}
+
+.Contact .ContactQuestionCard .QuestionCard{
+    margin: 2vh auto;
+}
+
+
+.Contact .ContactHelp .ContactTitle{
+    display: flex;
+    justify-content: center;
+    padding-top: 4vh;
+}

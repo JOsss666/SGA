@@ -1,0 +1,49 @@
+
+.ComponentsCard{
+    display: flex;
+    flex-direction: column;
+    width: 12dvw;
+}
+
+.ComponentsCard .cardContent{
+    display: flex;
+    flex-direction: row;
+    width: 12dvw;
+    height: fit-content;
+}
+
+.ComponentsCard .cardModulo{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+.ComponentsCard .cardContentImage{
+    width: 10dvh;
+    height: 10dvh;
+    display: flex;
+    margin-right: 2vh;
+}
+
+.ComponentsCard .cardContentImage i{
+    margin: auto;
+    font-size: clamp(4px,4vh,40px);
+}
+
+.ComponentsCard .cardTitle{
+    font-size: 2.4dvh;
+    font-weight: bold;
+}
+
+
+.ComponentsCard .cardSubTitle{
+    font-size: 1dvw;
+    font-weight: 700;
+}
+
+
+.ComponentsCard .cardText {
+    font-size: 1.1dvw;
+    margin-top: 1dvh;
+    text-align: start;
+}

@@ -2,14 +2,17 @@
 import { useAlert } from '../../../context/context'
 import './AlertContainer.css'
 
-export function AlertContainer({children,index}){
+export function AlertContainer({children}){
+
     const {popOutAlert} = useAlert();
     return(
-        <div style={{
-            zIndex:`${15 + index}`
-        }} className={`AlertContainer ${index > 0 && "superiorAlert"}`} key={index}>
-            <div className="closeAlert" onClick={()=>{popOutAlert(1)}}><i className="fa-solid fa-xmark"/></div>
-            {children} <b>{`No. ${index}`}</b>
+        <div className="AlertContainer">
+            <div className="optionsAlert">
+                <i title='Cerrar' onClick={()=>{
+                    popOutAlert();
+                }} className="fa-solid fa-xmark"/>
+            </div>
+            {children}
         </div>
     )
 }

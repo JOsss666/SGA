@@ -4,6 +4,8 @@ import { postInfo } from '../utils/functions';
 const AppInfo = createContext();
 const AppNotifications = createContext();
 const AppAlerts = createContext();
+const PreviewDocs = createContext();
+const AiAssistant = createContext();
 
 export function useAppInfo(){
     return useContext(AppInfo);
@@ -15,6 +17,14 @@ export function useNotifications(){
 
 export function useAlert(){
     return useContext(AppAlerts);
+}
+
+export function usePreview(){
+    return useContext(PreviewDocs);
+}
+
+export function useAiAssistant(){
+    return useContext(AiAssistant);
 }
 
 export function NotificationsProvider({children}){
@@ -56,16 +66,42 @@ export function NotificationsProvider({children}){
     )
 }
 
+export function AiAssistanProvider({children}){
+
+    const [usedTokens,setUsedTokens] = useState(0);
+    const [chat,setChat] = useState([]);
+
+    const addMessage = (newMessage) => {
+        setChat(prev => [...prev, newMessage]);
+    };
+
+    const value = {
+        chat,
+        usedTokens,
+        addMessage,
+        setChat,
+        setUsedTokens
+    }
+
+    useEffect(()=>{
+        console.log(chat)
+    },[chat])
+
+    return (
+        <AiAssistant.Provider value={value}>
+        {children}
+        </AiAssistant.Provider>
+    );
+}
 
 export function AlertProvider({ children }) {
     const [openAlert, setOpenAlert] = useState(false);
     const [tailAlerts, setTailAlerts] = useState([]);
     
     const popInAlert = (child) => {
-        setTailAlerts(prev => [...prev, child]);
-        if(!openAlert){
-            setOpenAlert(true);
-        }
+        console.log('Abriendo alerta')
+        setTailAlerts(prev => [...prev, {alert:child}]);
+        setOpenAlert(true);
     }
 
     const popOutAlert = () => {
@@ -104,6 +140,26 @@ export function AlertProvider({ children }) {
         </AppAlerts.Provider>
     );
 }
+
+export function PreviewProvider({children}){
+
+    const [openPreview,setOpenPreview] = useState(false);
+    const [previewInfo,setPreviewInfo] = useState({});
+
+    const value = {
+        openPreview,
+        setOpenPreview,
+        previewInfo,
+        setPreviewInfo
+    }
+
+    return(
+        <PreviewDocs.Provider value={value}>
+        {children}
+        </PreviewDocs.Provider>
+    )
+}
+
 
 export function AppInfoProvider({children}){
     const [appInfo,setAppInfo] = useState({});

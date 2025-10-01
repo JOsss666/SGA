@@ -11,12 +11,17 @@ import { SearchBar } from "../../components/SearchBar";
 import { SelectOptions } from "../../components/SelectOptions";
 import { TableReport } from "../TableReport";
 import './ReportDocuments.css'
+import { LoadingSpace } from "../LoadingSpace";
+import { ButtonDownload } from "../../components/ButtonDownload";
 
 export function ReportDocuments({type}){
 
     // Prev Info
     const [info,setInfo] = useState([]);
     const {appInfo} = useAppInfo();
+
+    // Actions Page
+    const [loading,setLoading] = useState(false);
 
     // Settings Report
 
@@ -25,7 +30,8 @@ export function ReportDocuments({type}){
         'OP':'Ordenes de Producción',
         'DC':'Documentos de Compra',
         'CI':'Consumos de inventario',
-        'FV':'Facturas de venta'
+        'FV':'Facturas de venta',
+        'TR':'Transacciónes'
     }
 
     const columnsOp = [
@@ -66,12 +72,25 @@ export function ReportDocuments({type}){
         'Estado'
     ]
 
+    const columsTr = [
+        "ID",
+        "Concepto",
+        "Tienda",
+        "Creada por",
+        "Fecha Documento",
+        'Sub Total',
+        'Total',
+        'Fecha creación',
+        'Estado'
+    ]
+
     const columsDictionary = {
         'OP':columnsOp,
         'OC':columnsOc,
         'DC':columnsDc,
         'FV':columnsDc,
         'CI':columnsDc,
+        'TR':columsTr
     }
 
     const settingsReport = {
@@ -80,28 +99,24 @@ export function ReportDocuments({type}){
         type
     }
 
-
-    // Functions Report
-    const GetOps = async()=>{
-        let res = await postInfo('/process/getOp',settingsReport);
-        if(res[0]){
-            setInfo(res[1])
-        }
-    }
-
     const GetDocuments = async()=>{
-        let res = await postInfo('/process/getDocuments',settingsReport);
-        if(res[0]){
-            setInfo(res[1])
+        setLoading(true)
+        if(type != 'TR'){
+            let res = await postInfo('/process/getDocuments',settingsReport);
+            if(res[0]){
+                setInfo(res[1])
+            }
+        }else{
+            let res = await postInfo('/getTransactions',settingsReport);
+            if(res[0]){
+                setInfo(res[1])
+            }
         }
+        setLoading(false)
     }
 
     useEffect(()=>{
-        if(type == 'OP'){
-            GetOps();
-        }else{
-            GetDocuments();
-        }
+        GetDocuments();
     },[])
 
     return(
@@ -126,10 +141,14 @@ export function ReportDocuments({type}){
                 ]} title={'Orden'}/>
                 <ButtonMenu title={'Mas Ajustes'} children={<i className="fa-solid fa-sliders"/>} noRotate={true}/>
                 <ButtonMenu title={'Agregar a favoritos'} children={<i className="fa-regular fa-star"/>} noRotate={true}/>
-                <FormButton text={'Descargar informe'}/>
+                <ButtonDownload />
             </div>
             <div className="SpaceReport">
-                <TableReport columns={settingsReport.columns} info={info} type={type}/>
+                {!loading && (
+                    <TableReport columns={settingsReport.columns} info={info} type={type}/>
+                )}{loading && (
+                    <LoadingSpace title={'Cargando información'} description={'Esto no debe tardar mucho...'}/>
+                )}
             </div>
         </div>
     )

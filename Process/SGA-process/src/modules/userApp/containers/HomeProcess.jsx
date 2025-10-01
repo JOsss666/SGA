@@ -2,6 +2,7 @@
 import { useAppInfo } from "../../../context/context"
 import { BoldTitle } from "../components/BoldTitle";
 import { DescriptionSpan } from "../components/DescriptionSpan";
+import { FormNewOperation } from "./forms/FormNewOperation";
 
 export function HomeProcess(){
 

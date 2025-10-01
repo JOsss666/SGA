@@ -4,7 +4,7 @@ import { BoldTitle } from '../../componets/BoldTitle'
 import { FormInput } from '../../componets/FormInput'
 import {FormButton} from '../../componets/FormButton'
 import {postInfo} from '../../../../utils/functions'
-import { useAppinfo } from '../../../../context/context'
+import { useAppInfo } from '../../../../context/context'
 import { useAlert } from '../../../../context/context'
 import './FormNewProduct.css'
 import { SearchinList } from '../../componets/SearchInList'
@@ -16,7 +16,7 @@ export function FormNewProduct({father,reloadFun}){
     if(father == undefined){
         father = {};
     }
-    const {appInfo} = useAppinfo();
+    const {appInfo} = useAppInfo();
 
     const {popInAlert} = useAlert();
     const [typeUnits,setTypeUnits] = useState();

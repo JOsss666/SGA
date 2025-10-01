@@ -1,0 +1,273 @@
+
+/* ESTILO GENERAL */
+.AboutUs .AboutUsGalery{
+    width: 100%;
+    height: 81vh;
+    display: flex;
+    align-items: stretch;
+    padding: 0 2.5vh;
+}
+
+/* ESTILOS DE LOS CONTENEDORES */
+.AboutUs .AboutUsGaleryContainer{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+
+/* ESTILO CONTENEDOR 1 */
+.AboutUs .Container1{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 80%;
+    margin: 0 auto;
+    position: relative;
+}
+
+.AboutUs .Container1 .MediaHandler{
+    position: absolute;
+    bottom: -12vh;
+    left: -2vh;
+    height: 25vh;
+    width: fit-content;
+    margin: auto;
+}
+
+.AboutUs .Container1Galery{
+    width: 100%;
+    height: 70vh;
+    display: flex;
+}
+
+.AboutUs .GaleryContainer1Grid1{
+    width: 50%;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.AboutUs .GaleryContainer1Grid1 .text{
+    width: 95%;
+    height: 30%;
+    font-size: 2vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1vh;
+    text-align: left;
+}
+
+.AboutUs .GaleryContainer1Grid1 .text img{
+    height: 4vh;
+    width: fit-content;
+    margin-bottom: .5vh;
+}
+
+.AboutUs .GaleryContainer1Grid1 .text h3{
+    font-size: clamp(2.5px,2vh,25px);
+    font-weight: 500;
+    color: #838383;
+}
+
+.AboutUs .GaleryContainer1Grid1 .text p{
+    font-size: 1.8vh;
+    font-weight: 500;
+}
+
+.AboutUs .GaleryContainer1Grid1 .image{
+    width: 95%;
+    height: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80");
+    background-size: cover;
+    background-position: center;
+    border-radius: 2vh;
+}
+
+
+.AboutUs .GaleryContainer1Grid2{
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.AboutUs .GaleryContainer1Grid2 .image{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.AboutUs .GaleryContainer1Grid2 .image .image1{
+    width: 95%;
+    height: 30%;
+    margin-bottom: 5%;
+    background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80");
+    background-size: cover;
+    background-position: center;
+    border-radius: 2vh;
+}
+
+.AboutUs .GaleryContainer1Grid2 .image .image2{
+    width: 95%;
+    height: 60%;
+    background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80");
+    background-size: cover;
+    background-position: center;
+    border-radius: 2vh;
+}
+
+
+/* ESTILO CONTENEDOR 2 */
+.AboutUs .Container2{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.AboutUs .Container2 .image{
+    width: 90%;
+    height: 85%;
+    background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80");
+    background-size: cover;
+    background-position: center;
+    border-radius: 2vh;
+}
+
+
+
+/* ESTILO CONTENEDOR 3 */
+.AboutUs .Container3{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}   
+
+.AboutUs .Container3Galery{
+    width: 100%;
+    height: 90%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.AboutUs .GaleryContainer3Grid1{
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    position: relative;
+}
+
+.AboutUs .GaleryContainer3Grid1 .BoxesTools .MediaHandler{
+    width: fit-content;
+    height: 5%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    position: absolute;
+    height: 35vh;
+    top: -15vh;
+    right: -20vh;
+    transform: rotateZ(-20deg);
+}
+
+.AboutUs .GaleryContainer3Grid1 .image{
+    width: 95%;
+    height: 55%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    border-radius: 2vh;
+    z-index: 5;
+    overflow: hidden;
+}
+
+.AboutUs .GaleryContainer3Grid1 .image .MediaHandler{
+    height: 110%;
+    width: 110%;
+    object-fit: cover;
+}
+
+
+.AboutUs .GaleryContainer3Grid2{
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.AboutUs .GaleryContainer3Grid2 .image{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.AboutUs .GaleryContainer3Grid2 .image .image1{
+    width: 95%;
+    height: 30%;
+    margin-bottom: 5%;
+    background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80");
+    background-size: cover;
+    background-position: center;
+    border-radius: 2vh;
+}
+
+.AboutUs .GaleryContainer3Grid2 .image .image2{
+    width: 95%;
+    height: 60%;
+    background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80");
+    background-size: cover;
+    background-position: center;
+    border-radius: 2vh;
+}
+
+.AboutUs .Container3Text{
+    width: 100%;
+    height: 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    padding-left: 1vh;
+    gap: 2vh;
+}
+
+.AboutUs .Container3Text .text{
+    width: 95%;
+    font-size: 2.2vh;
+    justify-content: center;
+    font-weight: 500;
+}
+
+.AboutUs .Container3Text a{
+    text-decoration: none;
+    color: #3a3a3a;
+    font-size: 1.8vh;
+}

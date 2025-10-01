@@ -5,11 +5,11 @@ import './FormNewDeparture.css'
 import { FormButton } from "../../componets/FormButton";
 import { postInfo } from "../../../../utils/functions";
 import { useEffect, useState } from "react";
-import { useAppinfo } from "../../../../context/context";
+import { useAppInfo } from "../../../../context/context";
 
 export function FormNewDeparture(){
 
-    const {appInfo,userInfo} = useAppinfo();
+    const {appInfo,userInfo} = useAppInfo();
     const [store_id,setStoreId] = useState();
     const [cellar_id,setCellarId] = useState();
     const [product_id,setProductId] = useState();

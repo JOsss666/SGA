@@ -21,15 +21,38 @@ export function FormNewFV({info,reloadFun}){
     const [value,setValue] = useState(0);
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
+    const [concepts,setConcepts] = useState([])
+    const [concept_id,setConceptId] = useState();
 
     const formInfo = {
         company_id:appInfo.company_id,
         user_id:userInfo.user_id,
         store_id:1,
         op_id,
+        concept_id,
         thirdParty_id,
         description,
         value:value != '' ? JSON.parse(value):0
+    }
+
+     const getConcepts = async()=>{
+        let res = await postInfo('/getConcepts',{
+            company_id:appInfo.company_id,
+            typePlanAccount:appInfo.accountPlanType
+        })
+        console.log(res)
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:`SGA#${element.id} ${element.name}`,
+                    value:element.id
+                })
+                setConcepts(C)
+            });
+        }else{
+            setConcepts([])
+        }
     }
 
     const createDC = async()=>{
@@ -59,6 +82,7 @@ export function FormNewFV({info,reloadFun}){
     }
 
     const getFormOptions = async()=>{
+        getConcepts();
         if(info.op_id == undefined){
             let getOps = await postInfo('/process/getOp',{company_id:appInfo.company_id});
             if(getOps[0]){
@@ -110,6 +134,7 @@ export function FormNewFV({info,reloadFun}){
                 {info.thirdParty_id == undefined &&(
                     <SearchinList disabled={disabled} action={setTirdParty} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdParties}/>
                 )}
+                <SearchinList disabled={disabled} action={setConceptId} title={'Concepto de venta'} placeHolder={'Seleccione el concepto de la venta'} list={concepts}/>
                 <FormInput disabled={disabled} action={setDescription} title={'Descripción'} placeholder={'Descripción de la nueva orden de cliente'} textArea={true}/>
                 <FormInput disabled={disabled} action={setValue} title={'Valor factura'} moneyF={true} placeholder={'Descripción de la nueva orden de cliente'} />
                 <FormButton disabled={disabled} text={'Añadir orden del cliente'} loading={loading}/>

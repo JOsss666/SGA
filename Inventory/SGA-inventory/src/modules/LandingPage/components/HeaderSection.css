@@ -1,0 +1,112 @@
+/* ESTILO CONTAINER */
+
+.HeaderSection{
+  display: flex;
+  flex-direction: column;
+}
+
+.Header {
+  display: flex;
+  gap: 2dvw;
+  padding: 2dvw;
+  position: relative;
+  overflow: hidden;
+  height: 74dvh;
+}
+
+.Header .text {
+  display: flex;
+  margin: auto;
+  margin-left: 20vh;
+}
+
+/* ESTILO TITULO PRINCIPAL */
+
+.headerTitle {
+  text-align: left;
+  margin: auto;
+  padding: 0;
+  width: 50dvw;
+  font-weight: 600;
+  font-size: clamp(2.5rem,10vh, 1000px); 
+  letter-spacing: -0.5px;
+  margin: 0.25em 0;
+  color: #000; 
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+}
+
+.headerTitle h1 {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.headerTitle .highlight {
+  color: #f57c00; 
+}
+
+
+.headerImage {
+    position: absolute;
+    bottom: -30vh;
+    right: 12vw;
+    z-index: 4;
+}
+
+.headerImage .MediaHandler{
+    height: 85dvh;
+}
+
+/* ESTILO ESTADISTICAS */
+.headerStats {
+  display: flex;
+  z-index: 3;
+  height: 21vh;
+  background-color: #000;
+  position: relative;
+}
+
+.headerStats .backGroundStats{
+  width: 100%;
+  height: 100%;
+}
+
+.headerStats .backGroundStats img{
+  opacity: 60%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.headerStats .contentHeaderStats{
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 3vh 10%;
+}
+
+
+.headerStats .stat {
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  color: #ffffff;
+}
+.headerStats .stat .value {
+  font-size: clamp(2.5px,4.5vh,45px);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin: 0 auto;
+  margin-bottom: 0.25rem;
+}
+.headerStats .stat .label {
+  font-size: clamp(2.5px,2vh,45px);
+  color: #ddd;
+  margin: auto;
+  text-align: center;
+}
+

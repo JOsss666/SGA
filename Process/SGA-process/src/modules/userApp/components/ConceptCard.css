@@ -1,0 +1,89 @@
+
+.ConceptCard{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+}
+
+.ConceptCard .headConceptCard{
+    display: flex;
+}
+
+.ConceptCard .headConceptCard .ButtonMenu{
+    margin: auto;
+    margin-right: 2vh;
+}
+
+.ConceptCard .TagIndicator{
+    margin: auto 0;
+}
+
+.ConceptCard .TagIndicator h5{
+    font-size: clamp(2.2px,1.8vh,22px);
+}
+
+.ConceptCard h6{
+    margin: auto 1vh;
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 400;
+    margin-left: 2vh;
+    color: #333;
+    max-width: 40%;
+}
+
+.ConceptCard .bodyConceptCard{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+    padding-left: 7.5vh;
+}
+
+.ConceptCard .bodyConceptCard .topicBody{
+    font-size: clamp(2.2px,2.2vh,22px);
+    color: #555;
+    margin-right: 2vh;
+}
+
+.ConceptCard .bodyConceptCard .account_Concept{
+    font-weight: 500;
+    font-size: clamp(2.2px,2.2vh,22px);
+    cursor: pointer;
+    transition: .3s;
+    color: #00022E;
+}
+
+.ConceptCard .bodyConceptCard .account_Concept:hover{
+    color: #007AFF;
+    text-decoration: underline;
+    text-underline-offset: .5vh;
+}
+
+.ConceptCard .textVal{
+    margin-bottom: 2vh;
+}
+
+.ConceptCard .bodyConceptCard .taxesHolder{
+    display: flex;
+    flex-direction: column;   
+}
+
+.ConceptCard .bodyConceptCard .taxesHolder .topicBody{
+    margin-bottom: 1vh;
+}
+
+.ConceptCard .bodyConceptCard .taxesHolder .tax{
+    display: flex;
+    margin: 1vh 0;
+}
+
+.ConceptCard .bodyConceptCard .taxesHolder .tax span{
+    font-size: clamp(2.2px,2.2vh,22px);
+    color: #00022E;
+    margin: auto 0;
+    margin-right: 2vh;
+}
+
+.ConceptCard .bodyConceptCard .taxesHolder .tax .TagIndicator{
+    margin: auto 0;
+}
+

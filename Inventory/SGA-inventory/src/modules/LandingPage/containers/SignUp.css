@@ -1,0 +1,71 @@
+.SignUp{
+    padding: 8vh 0;
+}
+
+.SignUp .Card{
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    padding: 4vh 2vh;
+    width: 60vh;
+    box-shadow: 0 0 .5vh #3a3a3a60;
+    border-radius: 1.5vh;
+}
+
+.SignUp .CardTitle{
+    flex-direction: column;
+}
+
+.SignUp .CardTitle .Titles{
+    margin: 0;
+    font-size: 5dvh;
+    padding: 0vh 3vh;
+    font-weight: 600;
+}
+
+
+
+.SignUp .Form{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh 1vh;
+}
+
+.SignUp .Form .fields{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+.SignUp .Form .FormInput{
+    padding: 0;
+}
+
+
+
+.SignUp .Form .FormInput label{
+    font-size: 2.5vh; 
+    color:#757575; 
+    margin: 1vh 2vh;
+}
+
+.SignUp .Form .FormInput input{
+    margin-bottom: 2vh;
+    padding: 1.5vh 2vh;
+    width: 100%;
+    box-shadow: 0 0 .2vh #757575;
+    border-radius: 1.5vh;
+    border: none;
+}
+
+.SignUp .Form .FormButton{
+    margin: 2vh 0;
+    padding: 1.5vh 2vh;
+    width: 100%;
+    background-color: #4070ED;
+    color: #fff;
+    font-size: 2.5vh;
+    border-radius: 1.5vh;
+    border: none;
+}
+

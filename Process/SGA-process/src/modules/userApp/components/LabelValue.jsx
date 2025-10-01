@@ -1,10 +1,11 @@
 import './LabelValue.css'
 
-export function LabelValue({title,value}){
+export function LabelValue({title,value,children}){
     return(
         <div className="LabelValue">
-            <span>{title}</span>
-            <strong>{value}</strong>
+            <span className='lab'>{title}</span>
+            <strong className='val'>{value}</strong>
+            {children}
         </div>
     )
 }

@@ -1,0 +1,51 @@
+
+.SectionServices {
+  padding: 4dvw 4dvw;          
+  display: block;
+  background: #ffffff;           
+  color: #1f1f1f;                 
+}
+
+
+.SectionServices .sectionServicesImage .MediaHandler{
+  height: 30dvh;
+}
+
+.SectionServices .sectionServicesImage{
+  position: absolute;
+    right: 12vw;
+    top: 55vw;
+}
+
+/* Grid (2 columnas) */
+.SectionServices .sectionServicesIcons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.6dvw;                     
+  align-items: start;
+}
+
+.SectionServices .Icon{
+  display: flex;
+  align-items: center;
+  gap: 0.9dvw;                     
+  padding: 0.8dvw 0.6dvw;
+  border-radius: 8px;
+  color: #f57c00;                   
+  font-weight: 700;
+  font-size: 1rem;              
+  box-shadow: 0 0 0 rgba(0,0,0,0);    
+}
+
+.SectionServices .Icon .icon {
+  width: 2.6rem;
+  height: 2.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffe0b0;                
+  border-radius: 6px;
+  color: #f57c00;
+  font-size: 1.1rem;
+}
+

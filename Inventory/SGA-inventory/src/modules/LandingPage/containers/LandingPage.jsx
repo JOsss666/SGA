@@ -8,6 +8,9 @@ import { Titles } from '../components/Titles';
 import { AboutUs } from './AboutUs';
 import { FooterSugerence } from '../components/FooterSugerence';
 import { MediaHandler } from '../../../../media/MediaHandler';
+import { Contact } from './Contact';
+import { Login } from './Login';
+import {SignUp} from './SignUp'
 
 export function LandingPage(){
 
@@ -36,16 +39,18 @@ export function LandingPage(){
                         {element.name}
                     </span>
                 ))}
-                <FormButton text={'Registro'}/>
+                <FormButton text={'Registro'} onClick={()=>{
+                    handleNavigate('signUp')
+                }}/>
             </header>
             <div className="ContentLandingPage">
                 <Routes>
                     <Route path='/' element={<Home/>}/>
-                    <Route path='/aboutus' element={<AboutUs/>}/>
-                    <Route path='/contact' element={<span><h2>Contacto</h2></span>}/>
+                    <Route path='/aboutus' element={<AboutUs />}/>
+                    <Route path='/contact' element={<Contact/>}/>
                     <Route path='/help' element={<span>Ayuda</span>}/>
-                    <Route path='/logIn' element={<span>Inicio de sesión</span>}/>
-                    <Route path='/signup' element={<span>Registro</span>}/>
+                    <Route path='/logIn' element={<Login/>}/>
+                    <Route path='/signup' element={<SignUp/>}/>
                 </Routes>
             </div>
             <footer>

@@ -20,6 +20,10 @@
     position: relative;
 }
 
+.FormInput .inputContainer input{
+    font-size: clamp(2.2px,2.2vh,22px);
+}
+
 .FormInput .inputContainer .moneFHolder{
     position: absolute;
     height: 100%;

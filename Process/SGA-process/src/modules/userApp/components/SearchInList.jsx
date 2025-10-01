@@ -22,11 +22,11 @@ export function SearchinList({title,placeHolder,list,disabled,action,children,sp
         }
     },[inRef])
 
-    const filterOptions = (value)=>{
-        return(
-            searchValue != ''? true:(value.toLowerCase()).includes((searchValue.toLowerCase()))
-        )
+    const filterOptions = (value) => {
+        if (!searchValue) return true; 
+            return value.toLowerCase().includes(searchValue.toLowerCase());
     }
+
 
     useEffect(()=>{
         if(action != undefined){
@@ -41,12 +41,13 @@ export function SearchinList({title,placeHolder,list,disabled,action,children,sp
             )}
             <div className="SlistC">
                 <input ref={inRef} type="text" placeholder={placeHolder} disabled={disabled} onChange={()=>{
+                    setSearchValue(inRef.current.value)
                     setSelectedOption('')
                 }}/>
                 <ul ref={listE} hidden={visibleList} className="listElementsContainer">
                     {specialOption}
                     {list.length > 0 && list.map((element,index)=>(
-                        <li onClick={()=>{
+                        <li hidden={!filterOptions(element.text)} onClick={()=>{
                             if(!noActVal){
                                 inRef.current.value = element.text
                                 if(element.value != undefined){

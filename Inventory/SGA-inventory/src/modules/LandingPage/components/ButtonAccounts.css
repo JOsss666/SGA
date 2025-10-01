@@ -1,0 +1,24 @@
+
+.ButtonAccounts .btnAccounts{
+    background-color: #fff;
+    display: flex;
+    flex-direction: row;
+    gap: 1.5vh;
+    margin: auto;
+    align-items: center;
+    justify-content: space-around;
+    padding: 1vh 2vh;
+    width: auto;
+    border-radius: 1.5vh;
+    box-shadow: 0 0 .2vh #757575;
+    border: none;
+}
+
+.ButtonAccounts .btnAccounts .btnIcon{
+    font-size: 2.5vh;
+}
+
+.ButtonAccounts .btnAccounts .btnText{
+    font-size: 2vh;
+    font-weight: 400;
+}

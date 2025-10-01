@@ -2,7 +2,7 @@ import { useLocation, useParams } from "react-router-dom"
 import { PathLocation } from "../componets/PathLocation";
 import { SectionTitle } from "../componets/SectionTitle";
 import { useEffect, useState } from "react";
-import { useAppinfo } from "../../../context/context";
+import { useAppInfo } from "../../../context/context";
 import { postInfo } from "../../../utils/functions";
 import { PreviewProduct } from "./alerts/PreviewProduct";
 import './ReferenceAnalitics.css'
@@ -16,7 +16,7 @@ import { WarningForm } from "../componets/WarningForm";
 
 export function ReferenceAnalitics({}){
 
-    const {appInfo} = useAppinfo();
+    const {appInfo} = useAppInfo();
     const location = useLocation();
     const [transactions,setTransactions] = useState([])
     const [loading,setLoading] = useState(false);
@@ -33,7 +33,7 @@ export function ReferenceAnalitics({}){
 
     const getTransactions = async()=>{
         setLoading(true);
-        let res = await postInfo('/getTransactions',{company_id:appInfo.company_id,product_id:info.product_id});
+        let res = await postInfo('/getDepartures',{company_id:appInfo.company_id,product_id:info.product_id});
         console.log(res);
         if(res[0]){
             setTransactions(res[1]);

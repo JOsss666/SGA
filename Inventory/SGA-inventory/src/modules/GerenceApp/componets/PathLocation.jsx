@@ -3,9 +3,11 @@ import { useLocation, useNavigate } from "react-router-dom"
 import './PathLocation.css'
 
 export function PathLocation(){
+
+    // PathLocation Element
     const location = useLocation();
     const navigate = useNavigate();
-    const filterRoute = location.pathname.split('/SGA/');
+    const filterRoute = location.pathname.split('/SGA_INVENTORY/');
     const pathSections = filterRoute[1].split('/')
 
     const handlePathMovement = (path)=>{
@@ -19,9 +21,17 @@ export function PathLocation(){
     return(
         <div className="PathLocation">
             {pathSections.map((element,index)=>(
-                <>{index != 0 ? '/':''}<span onClick={()=>{
-                    handlePathMovement(element)
-                }} key={index}>{element}</span></>
+                <>
+                    {index > 1 && (
+                        <>
+                            {index != 2 ? <i className="fa-solid fa-angle-right"/>:''}
+                            <span onClick={()=>{
+                                handlePathMovement(element)
+                                }} key={index}>{element}
+                            </span>
+                        </>
+                    )}
+                </>
             ))}
         </div>
     )

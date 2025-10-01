@@ -32,6 +32,7 @@ export function Reports(){
                                 {title:'Documentos de compra (DC)',children:<i className="fa-solid fa-file-lines"/>,action:handleNavigate,path:'DCS'},
                                 {title:'Consumos de inventario (CI)',children:<i className="fa-solid fa-file-lines"/>,action:handleNavigate,path:'CIS'},
                                 {title:'Facturas de venta (FV)',children:<i className="fa-solid fa-file-invoice"/>,action:handleNavigate,path:'FVS'},
+                                {title:'Transacciones (TR)',children:<i className="fa-solid fa-magnifying-glass-chart"/>,action:handleNavigate,path:'TRS'},
                                 {title:'Informes adicionales',options:[
                                     {title:'Informe Costos Operativos',children:<i className="fa-solid fa-book"/>}
                                 ]}
@@ -61,6 +62,7 @@ export function Reports(){
                 <Route path='/DCS' element={<ReportDocuments type={'DC'}/>} />
                 <Route path='/CIS' element={<ReportDocuments type={'CI'}/>} />
                 <Route path='/FVS' element={<ReportDocuments type={'FV'}/>} />
+                <Route path='/TRS' element={<ReportDocuments type={'TR'}/>} />
             </Routes>
         </div>
     )

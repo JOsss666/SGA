@@ -1,4 +1,30 @@
 
 .AboutUs{
-    background-color: aquamarine;
+  width: 100%;
+  height: 100vh;
+  margin-bottom: 25vh;
+  display: flex;
+  flex-direction: column;
 }
+
+.AboutUs .AboutUsTitle{
+  width: 100%;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  margin: 5vh 0;
+  margin-bottom: 3vh;
+  display: flex;
+  color: #000; 
+}
+
+.AboutUs .AboutUsTitle h1 {
+  margin: 0 auto;
+  font-size: 8vh;
+  font-size: clamp(10px,7vh, 100px); 
+  font-weight: 400;
+}
+
+.AboutUs .AboutUsTitle .highlight {
+  color: #f57c00; 
+}
+

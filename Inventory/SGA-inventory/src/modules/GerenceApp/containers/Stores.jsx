@@ -7,7 +7,7 @@ import {BoldButton} from '../componets/BoldButton'
 import { StoreCard } from "../componets/StoreCard";
 import {useAlert} from "../../../context/context"
 import { CreateStore } from "./forms/CreateStore";
-import { useAppinfo } from "../../../context/context";
+import { useAppInfo } from "../../../context/context";
 
 import "./Stores.css"
 import { useEffect, useState } from "react";
@@ -17,7 +17,7 @@ import { PreviewStore } from "./alerts/PreviewStore";
 
 export function Stores(){
 
-    const {appInfo} = useAppinfo();
+    const {appInfo} = useAppInfo();
     const [stores,setStores] = useState([]);
     const {setOpenAlert,popInAlert} = useAlert();
 
