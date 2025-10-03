@@ -622,6 +622,37 @@ controller.getTransactions = (req,res)=>{
     })
 }
 
+controller.getTransactionDetails = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let tableAcc = info.typePlanAccount == 'PUC'? 'account_templates_PUC':'contable_accounts';
+        let sentence = `
+            SELECT
+                sga_ecosystem.transaction_detail.*,
+                sga_ecosystem.${tableAcc}.name
+            FROM
+                sga_ecosystem.transaction_detail
+            LEFT JOIN
+                sga_ecosystem.${tableAcc}
+            ON 
+                sga_ecosystem.transaction_detail.account_id = sga_ecosystem.${tableAcc}.id
+            WHERE
+                sga_ecosystem.transaction_detail.transaction_id = ? ;
+        `;
+        let consulta = await useDataBase(sentence,[info.transaction_id],1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 
 controller.updateTransactionState = (req,res)=>{
     let data = '';
@@ -655,6 +686,10 @@ controller.updateTransactionState = (req,res)=>{
             res.writeHead(200,{'Content-Type':'text/plain'})
             res.end(JSON.stringify(consulta1));
         }
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
     })
 }
 

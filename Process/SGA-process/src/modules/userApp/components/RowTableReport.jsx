@@ -4,8 +4,17 @@ import { UserCard } from "./UserCard"
 import './RowTableReport.css'
 import { useAlert, usePreview } from "../../../context/context"
 import { DocumentPreview } from "../containers/Alerts/DocumentPreview"
+import { useLocation, useNavigate } from "react-router-dom"
 
 export function RowTableReport({columns,info,type}){
+
+    const navigate = useNavigate();
+    const loaction = useLocation();
+
+    const handleNavigate = (path)=>{
+        navigate(`${loaction.pathname}/${path}`);
+    }
+
     const {popInAlert} = useAlert();
     const {setOpenPreview,setPreviewInfo} = usePreview();
     const dictionaryElementsColum = {
@@ -40,7 +49,7 @@ export function RowTableReport({columns,info,type}){
         'Total':<span>{`$ ${moneyFormat(info.total)}`}</span>,
         'Fecha de entrega':<span>{(info.created_at).substring(0,10)}</span>,
         'Fecha creación':<span>{(info.created_at).substring(0,10)}</span>,
-        "Ver Destalles": <span onClick={() => navigate(`/detalles/${info.id}`)}> Ver Detalles </span>
+        "Ver Destalles": <span className="Redirect" onClick={() => handleNavigate(`detalles/${info.id}`)}> Ver Detalles </span>
     }
 
     return(
