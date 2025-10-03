@@ -168,7 +168,7 @@ export function FormNewOperation({info}){
                 <div className="FormNewOperation">
                     <div className="headForm">
                         <BoldTitle text={'COMPROBANTE'}/>
-                        <TagIndicator title={'#3016'} type={'indicator'}/>
+                        <TagIndicator title={`#${transaction_id}`} type={'indicator'}/>
                         <span className="dateDoc">22/09/2025</span>
                     </div>
                     <div className="bodyForm">
@@ -177,7 +177,7 @@ export function FormNewOperation({info}){
                             <LabelValue title={'Cliente / Proveedor'} value={
                                 <UserCard name={'José murillo'} desc={'Cliente'} />
                             }/>
-                            <LabelValue title={'Tipo Documento'} value={'Compra (DC)'}/>
+                            <LabelValue title={'Tipo Documento'} value={`Compra (${info.doc_type})`}/>
                             <LabelValue title={'Estado'} value={'Pendiente de aprovación'}/>
                             <LabelValue title={'Concepto'} value={`SGA#${conceptInfo.id} - ${conceptInfo.name}`}/>
                         </section>

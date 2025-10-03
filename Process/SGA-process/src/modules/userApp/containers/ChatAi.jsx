@@ -141,7 +141,7 @@ export function ChatAi({visible}){
             )}
             {chat.length == 0 && (
                 <div className="noChatIMg">
-                    <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1758896152/ChatGPT_Image_25_sept_2025_10_50_03_sz7rno.png" alt="" />
+                    <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1759180939/ChatGPT_Image_29_sept_2025_16_21_31_shjyfv.png" alt="" />
                     <MainTitleAi text={`Hola ${userInfo.user_name}, ¿Listo para empezar?`}/>
                 </div>
             )}

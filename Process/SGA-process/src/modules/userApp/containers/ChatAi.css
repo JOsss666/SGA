@@ -67,14 +67,14 @@
 }
 
 .ChatAi .noChatIMg img{
-    height: 100%;
+    width: 100%;
     margin: auto;
-    mask-image: linear-gradient(#000 60%,transparent);
+    mask-image: linear-gradient(#000 40%,transparent);
 }
 
 .ChatAi .noChatIMg .MainTitleAi{
     position: absolute;
-    top: 70%;
+    top: 75%;
     width: 70%;
     left: 15%;
     text-align: center;

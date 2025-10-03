@@ -110,7 +110,7 @@ export function GerenceApp(){
                 </header>
                 <aside ref={asideMenuC}  className='asideMenuApp'>
                     <div className={`menusHolder ${visibleMenu? 'activeMenusHolder':''}`}>
-                        <ServiceSgaCard imgRef={'https://i.pinimg.com/1200x/4d/6f/05/4d6f05603e71b923d19f78206b51f1af.jpg'} visbleInfo={visibleMenu} title={'Inventarios'} desc={'SGA - Desarrollos'} />
+                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1759182004/ChatGPT_Image_29_sept_2025_16_39_52_osso5g.png'} visbleInfo={visibleMenu} title={'Inventarios'} desc={'SGA - Desarrollos'} />
                         <MenuApp visibleMenu={visibleMenu} title={'General'} options={optionsMenu}/>
                         <MenuApp visibleMenu={visibleMenu} title={'Ajustes'} options={setingsPage}/>
                     </div>

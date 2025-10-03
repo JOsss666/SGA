@@ -107,7 +107,7 @@ export function UserApp(){
                 </header>
                 <aside ref={asideMenuC}  className='asideMenuApp'>
                     <div className={`menusHolder ${visibleMenu? 'activeMenusHolder':''}`}>
-                        <ServiceSgaCard imgRef={'https://i.pinimg.com/1200x/4d/6f/05/4d6f05603e71b923d19f78206b51f1af.jpg'} visbleInfo={visibleMenu} title={'Procesos'} desc={'SGA - Desarrollos'} />
+                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1759181339/ChatGPT_Image_7_sept_2025_13_29_09_v2xl9a.png'} visbleInfo={visibleMenu} title={'Procesos'} desc={'SGA - Desarrollos'} />
                         <MenuApp visibleMenu={visibleMenu} title={'General'} options={optionsMenu}/>
                         <MenuApp visibleMenu={visibleMenu} title={'Ajustes'} options={setingsPage}/>
                     </div>
