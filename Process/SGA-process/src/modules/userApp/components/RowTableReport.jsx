@@ -39,7 +39,8 @@ export function RowTableReport({columns,info,type}){
         'Sub Total':<span>{`$ ${moneyFormat(info.subtotal)}`}</span>,
         'Total':<span>{`$ ${moneyFormat(info.total)}`}</span>,
         'Fecha de entrega':<span>{(info.created_at).substring(0,10)}</span>,
-        'Fecha creación':<span>{(info.created_at).substring(0,10)}</span>
+        'Fecha creación':<span>{(info.created_at).substring(0,10)}</span>,
+        "Ver Destalles": <span onClick={() => navigate(`/detalles/${info.id}`)}> Ver Detalles </span>
     }
 
     return(

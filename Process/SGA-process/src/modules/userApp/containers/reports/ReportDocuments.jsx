@@ -81,7 +81,8 @@ export function ReportDocuments({type}){
         'Sub Total',
         'Total',
         'Fecha creación',
-        'Estado'
+        'Estado',
+        'Ver Destalles'
     ]
 
     const columsDictionary = {
