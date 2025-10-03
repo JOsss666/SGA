@@ -10,6 +10,7 @@
     width: 15vh;
     height: fit-content;
     cursor: pointer;
+    text-align: center;
 }
 
 .DocsSimpleCard:hover{

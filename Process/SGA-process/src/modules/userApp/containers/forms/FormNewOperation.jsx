@@ -22,7 +22,7 @@ export function FormNewOperation({info}){
     const [transactionDetails,setTransactionDetails] = useState([]);
     const [doc_date,setdocDate] = useState('2025/09/23')
     const [conceptInfo,setConceptinfo] = useState({});
-    const [authNewTran,setAuthNewtran] = useState(false);
+    const [loadingCractionTransaction,setloadingCractionTransaction] = useState(false);
 
     const formInfo = {
             user_id:userInfo.user_id,
@@ -67,6 +67,8 @@ export function FormNewOperation({info}){
     }
 
     const createTransaction = async()=>{
+        console.log('Creando transacción -->')
+        setloadingCractionTransaction(true)
         setDisabled(true);
         console.log('Creando nueva transacción',formInfo);
         let res = await postInfo('/createTransaction',formInfo);
@@ -74,6 +76,7 @@ export function FormNewOperation({info}){
             setTransId(res[1])
             setDisabled(false);
         }
+        setloadingCractionTransaction(true)
         setLoading(false);
     }
 
@@ -149,15 +152,14 @@ export function FormNewOperation({info}){
             });
             pushDetailsTrans();
             setTotal(newTotal);
-            setAuthNewtran(true);
         }
     },[taxes])
 
     useEffect(()=>{
-        if(authNewTran && transactionDetails.length >0){
+        if(transactionDetails.length >0 && !loadingCractionTransaction){
             createTransaction();
         }
-    },[authNewTran,transactionDetails])
+    },[transactionDetails])
 
     useEffect(()=>{
         getFormData();

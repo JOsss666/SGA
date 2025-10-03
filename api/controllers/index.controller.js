@@ -472,7 +472,6 @@ controller.createTransaction = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        console.log('----> :',info.transactionDetails);
         let sentence = `
             INSERT INTO
                 sga_ecosystem.transactions
@@ -501,6 +500,7 @@ controller.createTransaction = (req,res)=>{
             info.subtotal,
             info.total
         ],6)
+        console.log('Transacción Creada correctamente No: ',consulta);
         if(consulta[0]){
             let resultDetails = [];
             for(const element of info.transactionDetails){
@@ -561,7 +561,7 @@ controller.createTransactionDetail = (req,res)=>{
                     total
                 )
             VALUES
-            (?,?,?,?,?,?)
+            (?,?,?,?,?,?);
         `
         let consulta = await useDataBase(sentence,[
             info.transaction_id,
@@ -661,6 +661,8 @@ controller.updateTransactionState = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        console.log('Transacción a actualizar: ');
+        console.log(info);
         let sentence1 = `
             UPDATE
                 sga_ecosystem.transactions
