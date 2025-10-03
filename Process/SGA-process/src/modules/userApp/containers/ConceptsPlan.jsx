@@ -3,9 +3,7 @@ import { BoldTitle } from "../components/BoldTitle";
 import { DescriptionSpan } from "../components/DescriptionSpan";
 import './ConceptsPlan.css'
 import { postInfo } from "../../../utils/functions";
-import { useAppInfo } from "../../../context/context";
-import { SearchinList } from "../components/SearchInList";
-import { FormInput } from "../components/FormInput";
+import { useAlert, useAppInfo } from "../../../context/context";
 import { ButtonMenu } from "../components/ButtonMenu";
 import { FormNewConcept } from "./forms/FormNewConcept";
 import { MoreOptions } from "../components/MoreOptions";
@@ -18,6 +16,7 @@ export function ConceptsPlan(){
 
     // Prev info
     const {appInfo} = useAppInfo();
+    const {popInAlert} = useAlert();
     const [loading,setLoading] = useState(true);
     const [concepts,setConcepts] = useState([]);
     const [taxes,setTaxes] = useState([]);
@@ -84,6 +83,10 @@ export function ConceptsPlan(){
             element.name.toLowerCase().includes(searchValTaxLowerCase);
     }
 
+    const createNewConcept = ()=>{
+        popInAlert(<FormNewConcept reloadInfo={getInfo}/>)
+    }
+
     return(
         <div className="ConcenptsPlan">
             <div className="headSection">
@@ -91,10 +94,15 @@ export function ConceptsPlan(){
                 <DescriptionSpan text={'Lista de conceptos de compra y venta.'}/>
                 <div className="menuConcepts">
                     <ButtonMenu title={'Buscar y filtrar'} children={<i className="fa-solid fa-magnifying-glass"/>}/>
-                    <ButtonMenu title={'Volver a cargar'} children={<i className="fa-solid fa-rotate-right"/>}/>
                     <ButtonMenu onClick={()=>{
-                        setVisibleFormConc(!visibleFormConc)
-                    }} title={'Crear nuevo concepto'} children={<i className="fa-solid fa-plus"/>}/>
+                        getInfo();
+                    }} title={'Volver a cargar'} children={<i className="fa-solid fa-rotate-right"/>}/>
+                    <MoreOptions options={[
+                        {text:'Crear concepto',icon:<i className="fa-solid fa-cash-register"/>,action:createNewConcept},
+                        {text:'Crear impuesto',icon:<i className="fa-solid fa-sack-dollar"/>}
+                    ]}>
+                        <i className="fa-solid fa-plus"/>
+                    </MoreOptions>
                     <ButtonMenu title={'Eliminar concepto o inmpuesto'} children={<i className="fa-solid fa-trash-can"/>}/>
                     <MoreOptions options={[
                         {text:'Descargar conceptos',icon:<i className="fa-solid fa-arrow-down-long"/>},
@@ -103,9 +111,6 @@ export function ConceptsPlan(){
                         {text:'Ver movimientos',icon:<i className="fa-solid fa-eye"/>}
                     ]}/>
                 </div>
-                {visibleFormConc && (
-                    <FormNewConcept setOpenForm={setVisibleFormConc} />
-                )}
             </div>
             <div className="spaceCards">
                 <div className="conceptsSpaceC">

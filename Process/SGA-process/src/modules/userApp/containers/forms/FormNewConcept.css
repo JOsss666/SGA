@@ -4,8 +4,6 @@
     flex-direction: column;
     width: 30vw;
     background-color: #fff;
-    outline: solid .1vh #ddd;
-    box-shadow: 0 .2vh 2vh #0003;
     padding: 3vh;
     border-radius: 2vh;
 }
