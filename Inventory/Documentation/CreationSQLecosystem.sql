@@ -162,3 +162,76 @@ CREATE TABLE transaction_detail(
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
 );
+
+CREATE TABLE account_templates_puc (
+    company_id BIGINT UNSIGNED NOT NULL,
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(20) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    level INT NOT NULL,
+    type ENUM('DB','CR') NOT NULL,
+    account_path VARCHAR(300) NOT NULL,
+    active TINYINT(1) DEFAULT '1',
+    UNIQUE KEY (id),
+    FOREIGN KEY (company_id) REFERENCES companies(company_id)
+);
+
+CREATE TABLE acount_plans (
+    company_id BIGINT UNSIGNED NOT NULL,
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    type ENUM('PUC','Personalized') DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY (id),
+    KEY company_id (company_id),
+    CONSTRAINT acount_plans_ibfk_1 FOREIGN KEY (company_id) REFERENCES companies(company_id)
+);
+
+CREATE TABLE contable_accounts (
+    company_id BIGINT UNSIGNED NOT NULL,
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(20) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    level INT NOT NULL,
+    type ENUM('DB','CR') NOT NULL,
+    account_path VARCHAR(300) NOT NULL,
+    active TINYINT(1) DEFAULT '1',
+    UNIQUE KEY (id),
+    KEY company_id (company_id),
+    CONSTRAINT contable_accounts_ibfk_1 FOREIGN KEY (company_id) REFERENCES companies(company_id)
+);
+
+CREATE TABLE puc (
+    company_id BIGINT UNSIGNED NOT NULL,
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    code VARCHAR(20) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    level INT NOT NULL,
+    type ENUM('D','C') NOT NULL,
+    acount_path VARCHAR(300) NOT NULL,
+    active TINYINT(1) DEFAULT '1',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY id (id),
+    KEY company_id (company_id),
+    CONSTRAINT puc_ibfk_1 FOREIGN KEY (company_id) REFERENCES companies(company_id)
+);
+
+
+CREATE TABLE services (
+    company_id BIGINT UNSIGNED NOT NULL,
+    sga_inventory VARCHAR(100) DEFAULT 'none',
+    sga_process VARCHAR(100) DEFAULT 'none',
+    sga_certicloud VARCHAR(100) DEFAULT 'none',
+    sga_contability VARCHAR(100) DEFAULT 'none',
+    sga_facturation VARCHAR(100) DEFAULT 'none',
+    state VARCHAR(100) DEFAULT 'active',
+    start_date DATE DEFAULT NULL,
+    expiration_date DATE DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY company_id (company_id),
+    CONSTRAINT services_ibfk_1 FOREIGN KEY (company_id) REFERENCES companies(company_id)
+);
