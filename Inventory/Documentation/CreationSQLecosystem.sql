@@ -202,6 +202,24 @@ CREATE TABLE contable_accounts (
     CONSTRAINT contable_accounts_ibfk_1 FOREIGN KEY (company_id) REFERENCES companies(company_id)
 );
 
+CREATE TABLE puc (
+    company_id BIGINT UNSIGNED NOT NULL,
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    code VARCHAR(20) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    level INT NOT NULL,
+    type ENUM('D','C') NOT NULL,
+    acount_path VARCHAR(300) NOT NULL,
+    active TINYINT(1) DEFAULT '1',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY id (id),
+    KEY company_id (company_id),
+    CONSTRAINT puc_ibfk_1 FOREIGN KEY (company_id) REFERENCES companies(company_id)
+);
+
+
 CREATE TABLE services (
     company_id BIGINT UNSIGNED NOT NULL,
     sga_inventory VARCHAR(100) DEFAULT 'none',
