@@ -94,6 +94,10 @@ export function ReportDocuments({type}){
         'TR':columsTr
     }
 
+    // Crear las columnas para Tr_details
+
+    
+
     const settingsReport = {
         columns:columsDictionary[type],
         company_id:appInfo.company_id,
@@ -107,7 +111,8 @@ export function ReportDocuments({type}){
             if(res[0]){
                 setInfo(res[1])
             }
-        }else{
+        }
+        else{
             let res = await postInfo('/getTransactions',settingsReport);
             if(res[0]){
                 setInfo(res[1])

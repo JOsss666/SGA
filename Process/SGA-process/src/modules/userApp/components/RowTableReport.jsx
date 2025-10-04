@@ -49,7 +49,7 @@ export function RowTableReport({columns,info,type}){
         'Total':<span>{`$ ${moneyFormat(info.total)}`}</span>,
         'Fecha de entrega':<span>{(info.created_at).substring(0,10)}</span>,
         'Fecha creación':<span>{(info.created_at).substring(0,10)}</span>,
-        "Ver Destalles": <span className="Redirect" onClick={() => handleNavigate(`detalles/${info.id}`)}> Ver Detalles </span>
+        "Ver Destalles": <span className="Redirect" onClick={() => handleNavigate(`${info.id}`)}> Ver Detalles </span>
     }
 
     return(
