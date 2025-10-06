@@ -51,7 +51,7 @@
     margin-bottom: 2vh;
     font-weight: 500;
     font-size: clamp(2.5px,3vh,30px);
-    color: #555;
+    color: var(--sectionTitle);
 }
 
 .ConcenptsPlan .spaceCards .conceptsSpaceC{

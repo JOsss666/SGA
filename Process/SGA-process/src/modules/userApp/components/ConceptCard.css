@@ -1,8 +1,14 @@
+@import '../containers/UserApp.css';
 
 .ConceptCard{
     display: flex;
     flex-direction: column;
     padding: 1vh;
+    border-radius: 1vh;
+}
+
+.ConceptCard:hover{
+    background-color: var(--cardHover);
 }
 
 .ConceptCard .headConceptCard{
@@ -27,7 +33,7 @@
     font-size: clamp(2.2px,2.2vh,22px);
     font-weight: 400;
     margin-left: 2vh;
-    color: #333;
+    color: var(--mainText);
     max-width: 40%;
 }
 
@@ -40,7 +46,7 @@
 
 .ConceptCard .bodyConceptCard .topicBody{
     font-size: clamp(2.2px,2.2vh,22px);
-    color: #555;
+    color: var(--descriptionText);
     margin-right: 2vh;
 }
 
@@ -49,7 +55,7 @@
     font-size: clamp(2.2px,2.2vh,22px);
     cursor: pointer;
     transition: .3s;
-    color: #00022E;
+    color: var(--mainText);
 }
 
 .ConceptCard .bodyConceptCard .account_Concept:hover{
@@ -78,9 +84,10 @@
 
 .ConceptCard .bodyConceptCard .taxesHolder .tax span{
     font-size: clamp(2.2px,2.2vh,22px);
-    color: #00022E;
+    color: #007AFF;
     margin: auto 0;
     margin-right: 2vh;
+    cursor: pointer;
 }
 
 .ConceptCard .bodyConceptCard .taxesHolder .tax .TagIndicator{

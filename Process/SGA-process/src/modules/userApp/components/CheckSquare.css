@@ -1,4 +1,6 @@
 
+@import '../containers/UserApp.css';
+
 .CheckSquare{
     display: flex;
     padding: 1vh;
@@ -18,9 +20,9 @@
 
 
 .normalSquare{
-    background-color: #fff ;
+    background-color: var(--inputsBg) ;
     color: #aaa;
-    outline: solid .1vh #aaa;
+    outline: solid .1vh var(--inputBorder);
 }
 
 .CheckSquare i{

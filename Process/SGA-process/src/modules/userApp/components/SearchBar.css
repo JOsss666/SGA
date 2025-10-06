@@ -1,3 +1,5 @@
+@import '../containers/UserApp.css';
+
 .SearchBar{
     position: relative;
     width: 100%;
@@ -14,14 +16,14 @@
     padding-left: 6vh;
     border: hidden;
     outline: none;
-    color: #888;
-    outline: solid .1vh #ddd;
-    background-color: #fff;
+    color: var(--descriptionText);
+    outline: solid .1vh var(--inputsBorder);
+    background-color: var(--inputsBg);
     transition: .3s;
 }
 
 .SearchBar input:focus{
-    color: #1B222C;
+    color: var(--mainText);
 }
 
 .SearchBar i{

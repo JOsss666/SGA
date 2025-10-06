@@ -1,3 +1,4 @@
+@import '../containers/UserApp.css';
 
 .ServiceSgaCard{
     display: flex;
@@ -8,7 +9,7 @@
 }
 
 .ServiceSgaCard:hover{
-    background-color: #DFF2FE;
+    background-color: var(--iconHover);
 }
 
 .ServiceSgaCard img{
@@ -28,7 +29,7 @@
     font-size: clamp(3px,3vh,30px);
     font-weight: 600;
     margin-bottom: .25vh;
-    color: #1E1E1E;
+    color: var(--mainText);
 }
 
 .ServiceSgaCard .serviceInfo span{

@@ -163,6 +163,7 @@ export function PreviewProvider({children}){
 
 export function AppInfoProvider({children}){
     const [appInfo,setAppInfo] = useState({});
+    const [darkMode,setDarkMode] = useState(false);
     const [userInfo,setUserInfo] = useState({});
     const [loadingAppData,setLoadingAppData] = useState(true);
 
@@ -189,6 +190,8 @@ export function AppInfoProvider({children}){
         setAppInfo,
         userInfo,
         setUserInfo,
+        darkMode,
+        setDarkMode,
         loadingAppData,
         setLoadingAppData,
         getAppData

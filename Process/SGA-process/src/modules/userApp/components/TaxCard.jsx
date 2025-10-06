@@ -7,7 +7,7 @@ export function TaxCard({hidden,info}){
     if(!hidden){
         return(
             <div className="TaxCard">
-                <TagIndicator title={`# ${info.id}`} type={'indicator'}/>
+                <TagIndicator title={`# ${info.tax_id}`} type={'indicator'}/>
                 <strong>{info.name}</strong>
                 <TagIndicator title={`${info.rate}%`} type={'active'} desc={`Tasa de impuesto: ${info.rate}%`}/>
                 <TagIndicator title={`$ ${moneyFormat(info.base)}`} desc={`Base de cobro del impuesto: $ ${moneyFormat(info.base)}`}/>

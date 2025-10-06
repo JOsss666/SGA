@@ -9,6 +9,7 @@ import { useAlert, useAppInfo } from "../../../context/context";
 import { FormNewOc } from "../containers/forms/FormNewOc";
 import { FormNewDC } from "../containers/forms/FormNewDC";
 import { SelectTpeNewDoc } from "../containers/forms/SelectTypeNewDoc";
+import { MoreOptions } from "./MoreOptions";
 
 export function OpCard({data}){
 
@@ -53,7 +54,13 @@ export function OpCard({data}){
             <div className="headOP">
                 <h3 onClick={()=>{reloadInfo()}}>OP#{info.op_id}</h3>
                 <SwitchOption action={setVisibleInfo} state1={'Información'} state2={'Adjuntos'}/>
-                <i className="fa-solid fa-ellipsis-vertical optionsOpButton"/>
+                <MoreOptions options={[
+                    {text:'Descargar',icon:<i className="fa-solid fa-arrow-down"/>},
+                    {text:'Compartir',icon:<i className="fa-solid fa-share-nodes"/>},
+                    {text:'Bloquear',icon:<i className="fa-solid fa-lock"/>},
+                    {text:'Ver actividad',icon:<i className="fa-solid fa-eye"/>},
+                    {text:'Estadisticas',icon:<i className="fa-solid fa-chart-simple"/>},
+                ]} />
             </div>
             {!visibleInfo && (
                 <div className="bodyOP">

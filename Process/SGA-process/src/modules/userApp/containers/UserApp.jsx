@@ -21,13 +21,14 @@ import { Reports } from './Reports';
 import { DocumentPreview } from './Alerts/DocumentPreview';
 import { ConceptsPlan } from './ConceptsPlan';
 import { ChatAi } from './ChatAi';
+import { SwitchColorMode } from '../components/SwitchColorMode';
 
 export function UserApp(){
 
     // Context Info
-    const {appInfo,userInfo,loadingAppData} = useAppInfo();
-    const {previewInfo,openPreview,setOpenPreview} = usePreview();
-    const {tailAlerts,openAlert,popOutAlert} = useAlert();
+    const {appInfo,userInfo,loadingAppData,darkMode} = useAppInfo();
+    const {openPreview,setOpenPreview} = usePreview();
+    const {openAlert,popOutAlert} = useAlert();
     const [visibleChatAi,setVisibleChatAi] = useState(false);
 
     // Container Params
@@ -77,9 +78,15 @@ export function UserApp(){
         }
     });
 
+    useEffect(() => {
+        const root = document.documentElement; // <html>
+        if (darkMode) root.classList.add('dark');
+        else root.classList.remove('dark');
+    }, [darkMode]);
+
 
     return(
-        <div className="UserApp">
+        <div className={`UserApp`}>
             {!loadingAppData && (
                 <>
                     <header className='headApp'>
@@ -104,6 +111,7 @@ export function UserApp(){
                         <ServicesGrid/>
                     )}
                     <UserCard name={userInfo.user_name} imgSrc={'https://i.pinimg.com/736x/fc/55/78/fc557891f4587e03e4eaaea18a4bc9c3.jpg'} desc={userInfo.user_roll} />
+                    <SwitchColorMode/>
                 </header>
                 <aside ref={asideMenuC}  className='asideMenuApp'>
                     <div className={`menusHolder ${visibleMenu? 'activeMenusHolder':''}`}>

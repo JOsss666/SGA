@@ -1,10 +1,11 @@
 
+@import '../containers/UserApp.css';
+
 .RowTableReport{
     display: flex;
-    background-color: #fff;
-    border-bottom: dashed .1vh #eee;
+    background-color: var(--bg);
+    border-bottom: dashed .1vh var(--inputsBorder);
 }
-
 
 
 .RowTableReport .ElementRow{
@@ -25,7 +26,7 @@
 
 .RowTableReport span{
     font-size: clamp(2px,1.8vh,20px);
-    color: #777;
+    color: var(--descriptionText);
     margin: auto 0;
     margin-left: .5vh;
 }

@@ -1,3 +1,5 @@
+@import './UserApp.css';
+
 
 .TableReport{
     height: 100%;
@@ -6,15 +8,16 @@
     display: flex;
     flex-direction: column;
     position: relative;
+    padding: .1vh;
 }
 
 .TableReport .headTable{
     display: flex;
     padding: 1vh;
-    background-color: #F7F7F7;
+    background-color: var(--menuAside);
     border-radius: .5vh;
-    box-shadow: 0 .4vh .5vh #ccc5;
-    outline: solid .1vh #eee;
+    box-shadow: 0 .4vh .5vh var(--translucidMenu);
+    outline: solid .1vh var(--inputsBorder);
     z-index: 1;
 }
 
@@ -29,7 +32,7 @@
     text-wrap: nowrap;
     text-overflow: ellipsis;
     font-weight: 400;
-    color: #555;
+    color: var(--mainText);
 }
 
 .TableReport .headTable .headColumn:nth-child(2){

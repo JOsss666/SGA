@@ -1,11 +1,11 @@
-
+@import '../containers/UserApp.css';
 
 .DocsSimpleCard{
     display: flex;
     flex-direction: column;
     padding: 1vh 1.5vh;
-    background-color: #fff;
-    outline: solid .1vh #eaeaea;
+    background-color: var(--bg);
+    outline: solid .1vh var(--inputsBorder);
     border-radius: 1vh;
     width: 15vh;
     height: fit-content;
@@ -20,6 +20,7 @@
 .DocsSimpleCard h4{
     font-size: clamp(2.2px,2.1vh,22px);
     margin: .2vh auto;
+    color: var(--mainText);
 }
 
 .DocsSimpleCard strong{
@@ -28,12 +29,13 @@
     white-space: nowrap;        /* No saltar de línea */
     overflow: hidden;           /* Ocultar el exceso */
     text-overflow: ellipsis;    /* Mostrar "..." */
-    display: inline-block;      /* Necesario para que funcione con width */               
+    display: inline-block;      /* Necesario para que funcione con width */           
+    color: var(--mainText);
 }
 
 .DocsSimpleCard span{
     font-size: clamp(2.2px,1.9vh,22px);
     margin: .5vh auto;
     font-weight: 500;
-    color: #777;
+    color: var(--descriptionText);
 }

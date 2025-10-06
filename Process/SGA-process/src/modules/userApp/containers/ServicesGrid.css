@@ -1,9 +1,10 @@
 
+@import '../containers/UserApp.css';
 
 .ServicesGrid{
     display: flex;
-    background-color: #F8FAFD;
-    border: solid .5vh #E9EEF6;
+    background-color: var(--menuAside);
+    border: solid .5vh var(--iconHover);
     border-radius: 2vh;
     max-width: 24vw;
     height: fit-content;
@@ -15,6 +16,7 @@
     animation-fill-mode: both;
     animation-timing-function: ease;
     box-shadow: 0 .2vh 1vh #4473;
+    transition: .3s;
 }
 
 .ServicesGrid .serviceBubble{
@@ -46,7 +48,7 @@
 
 
 .ServicesGrid .serviceBubble:hover{
-    background-color: #E9EEF6;
+    background-color: var(--iconHover);
 }
 
 .ServicesGrid .serviceBubble img{
@@ -64,7 +66,7 @@
     margin: 0 auto;
     margin-top: 1.5vh;
     font-size: clamp(2.2px,2vh,22px);
-    color: #567;
+    color: var(--sectionTitle);
     font-weight: 400;
 }
 

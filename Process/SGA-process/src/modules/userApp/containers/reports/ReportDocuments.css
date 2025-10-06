@@ -14,15 +14,20 @@
 }
 
 .ReportDocument .settingsReport .SearchBar{
-    margin: auto 0 !important;
     height: 4.5vh;
     width: 20vw;
-    margin-top: .5vh !important;
+    margin-top: 1vh;
+    height: 5vh;
+    margin-right: 3vh;
 }
 
 .ReportDocument .settingsReport .SelectOptions{
     margin: auto 2vh;
 } 
+
+.ReportDocument .settingsReport .ButtonMenu{
+    margin: auto 1vh;
+}
 
 .ReportDocument .settingsReport .SelectOptions .contentOptions{
     box-shadow: none ;
@@ -30,6 +35,7 @@
 
 .ReportDocument .settingsReport .rangeInput{
     display: flex;
+    margin: auto 0;
 }
 
 .ReportDocument .settingsReport .rangeInput span{

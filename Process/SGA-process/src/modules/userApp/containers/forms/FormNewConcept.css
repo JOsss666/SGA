@@ -1,9 +1,11 @@
 
+@import '../UserApp.css';
+
 .FormNewConcept{
     display: flex;
     flex-direction: column;
     width: 30vw;
-    background-color: #fff;
+    background-color:var(--bg);
     padding: 3vh;
     border-radius: 2vh;
 }
@@ -37,7 +39,7 @@
     margin-bottom: 1vh;
     font-size: clamp(2.5px,2.5vh,25px);
     font-weight: 400;
-    color: #7B7B7B;
+    color: var(--sectionTitle);
 }
 
 .FormNewConcept .selectedTaxesC .excepMess{
@@ -52,10 +54,16 @@
     margin: .5vh auto;
 }
 
+.FormNewConcept .selectedTaxesC .CardTitleLogo:hover{
+    background-color: var(--iconHover);
+}
+
 .FormNewConcept .selectedTaxesC .CardTitleLogo i{
     font-size: clamp(2.2px,2.2vh,22px);
+    color: var(--mainText);
 }
 
 .FormNewConcept .selectedTaxesC .CardTitleLogo h4{
     font-size: clamp(2.2px,2.2vh,22px);
+    color: var(--mainText);
 }
