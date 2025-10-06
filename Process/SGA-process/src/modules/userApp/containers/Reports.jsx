@@ -4,6 +4,7 @@ import { DescriptionSpan } from "../components/DescriptionSpan";
 import { DespleList } from "../components/DespleList";
 import './Reports.css'
 import { ReportDocuments } from './reports/ReportDocuments';
+import { ReportTransactionDetails } from '../components/ReportTransactionDetails';
 
 export function Reports(){
 
@@ -64,7 +65,7 @@ export function Reports(){
                 <Route path='/CIS' element={<ReportDocuments type={'CI'}/>} />
                 <Route path='/FVS' element={<ReportDocuments type={'FV'}/>} />
                 <Route path='/TRS' element={<ReportDocuments type={'TR'}/>} />
-                <Route path='/TRS/:transaction_id' element={<ReportDocuments type={'TR'}/>} />
+                <Route path='/TRS/:transaction_id' element={<ReportTransactionDetails />} />
             </Routes>
         </div>
     )

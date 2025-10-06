@@ -9,10 +9,10 @@ import { useLocation, useNavigate } from "react-router-dom"
 export function RowTableReport({columns,info,type}){
 
     const navigate = useNavigate();
-    const loaction = useLocation();
+    const location = useLocation();
 
     const handleNavigate = (path)=>{
-        navigate(`${loaction.pathname}/${path}`);
+        navigate(`${location.pathname}/${path}`);
     }
 
     const {popInAlert} = useAlert();
