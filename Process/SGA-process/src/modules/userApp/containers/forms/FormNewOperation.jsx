@@ -98,9 +98,10 @@ export function FormNewOperation({info}){
                 account_type:appInfo.accountPlanType,
                 type:'tax',
                 subtotal:info.value,
-                total: info.value * Number((1 + (element.rate/100)).toFixed(2))
+                total: info.value * Number(((element.rate/100)).toFixed(2))
             })
         });
+        console.log(newTransDetails);
         setTransactionDetails(newTransDetails);
     }
 

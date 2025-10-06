@@ -19,6 +19,11 @@
     border-radius: 4vh;
     padding: 0 1vh;
     padding-left: 4vh;
+    color: var(--descriptionText);
+}
+
+.InputBarChat input:focus{
+    color: var(--mainText);
 }
 
 .InputBarChat .ButtonMenu{

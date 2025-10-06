@@ -27,7 +27,7 @@ export function ReportTransactionDetails() {
         "Transacción",
         "Concepto",
         "Fecha Documento",
-        "Sub Total",
+        "Base",
         "Total",
         "Fecha creación",
         "Estado"

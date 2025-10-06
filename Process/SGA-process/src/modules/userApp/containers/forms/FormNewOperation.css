@@ -1,9 +1,10 @@
 
+@import '../UserApp.css';
 
 .FormNewOperation{
     padding: 1vh;
     border-radius: 2vh;
-    background-color: #fff;
+    background-color: var(--bg);
     display: flex;
     flex-direction: column;
     margin: 4vh;
@@ -14,14 +15,12 @@
 .FormNewOperation .headForm{
     display: flex;
     padding: 2vh;
-
 }
-
 
 .FormNewOperation .headForm .BoldTitle{
     margin: auto 0;
     margin-right: 2vh;
-    color: #4A4848;
+    color: var(--mainText);
 }
 
 .FormNewOperation .headForm .TagIndicator{
@@ -37,7 +36,7 @@
     margin: auto;
     margin-right: 1vh;
     font-size: clamp(2px,2.8vh,28px);
-    color: #757575;
+    color: var(--descriptionText);
 }
 
 .FormNewOperation .bodyForm{
@@ -57,7 +56,7 @@
     font-size: clamp(2px,3vh,30px);
     font-weight: 500;
     margin-left: 1vh;
-    color: #757575;
+    color: var(--sectionTitle);
 }
 
 .FormNewOperation .bodyForm .FormSec .LabelValue{
