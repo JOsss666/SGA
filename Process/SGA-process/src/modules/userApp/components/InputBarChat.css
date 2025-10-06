@@ -1,10 +1,12 @@
 
+@import '../containers/UserApp.css';
+
 .InputBarChat{
     display: flex;
     width: 100%;
     border-radius: 4vh;
-    outline: solid .1vh #ddd;
-    background-color: #F5F5F5;
+    outline: solid .1vh var(--inputsBorder);
+    background-color: var(--inputsBg);
 }
 
 .InputBarChat input{
@@ -12,7 +14,7 @@
     margin: auto;
     height: 7vh;
     border: hidden;
-    background-color: #F5F5F5;
+    background-color: var(--inputsBg);
     outline: none;
     border-radius: 4vh;
     padding: 0 1vh;
@@ -25,5 +27,5 @@
 }
 
 .InputBarChat .ButtonMenu:hover{
-    background-color: #ddd;
+    background-color: var(--cardHover);
 }

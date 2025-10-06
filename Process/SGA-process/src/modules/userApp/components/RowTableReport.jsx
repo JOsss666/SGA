@@ -23,6 +23,11 @@ export function RowTableReport({columns,info,type}){
             setPreviewInfo(info);
             setOpenPreview(true)
         }} >{info.docType}# {type == 'OP'? info.op_id:info.id}</span>,
+        "Transacción":<span className="Redirect" onClick={()=>{
+            info.type = 'Document'
+            setPreviewInfo(info);
+            setOpenPreview(true)
+        }} >{info.docType}TR# {info.transaction_id}</span>,
         "OP":<span className="Redirect idHolder" onClick={()=>{
             setPreviewInfo({
                 op_id:info.op_id,
@@ -44,13 +49,15 @@ export function RowTableReport({columns,info,type}){
         'Valor':<span>$ {info.value != undefined? moneyFormat(info.value):0}</span>,
         'Fecha de entrega':<span>{info.doc_date != undefined? (info.doc_date).substring(0,10):''}</span>,
         'Fecha Documento':<span>{(info.created_at).substring(0,10)}</span>,
-        'Concepto':<span>{info.concept_name}</span>,
+        'Concepto':<span onClick={()=>{console.log(info)}}>{info.concept_name}</span>,
         'Sub Total':<span>{`$ ${moneyFormat(info.subtotal)}`}</span>,
         'Total':<span>{`$ ${moneyFormat(info.total)}`}</span>,
         'Fecha de entrega':<span>{(info.created_at).substring(0,10)}</span>,
         'Fecha creación':<span>{(info.created_at).substring(0,10)}</span>,
         "Ver Destalles": <span className="Redirect" onClick={() => handleNavigate(`${info.id}`)}> Ver Detalles </span>
     }
+
+    console.log(info)
 
     return(
         <div className="RowTableReport">

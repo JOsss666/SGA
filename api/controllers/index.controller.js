@@ -633,7 +633,7 @@ controller.getTransactionDetails = (req,res)=>{
         let sentence = `
             SELECT
                 sga_ecosystem.transaction_detail.*,
-                sga_ecosystem.${tableAcc}.name
+                sga_ecosystem.${tableAcc}.name AS concept_name
             FROM
                 sga_ecosystem.transaction_detail
             LEFT JOIN

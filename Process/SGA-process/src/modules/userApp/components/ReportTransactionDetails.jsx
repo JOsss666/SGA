@@ -24,12 +24,13 @@ export function ReportTransactionDetails() {
 
     const columns = [
         "ID",
+        "Transacción",
         "Concepto",
-        "Creada por",
         "Fecha Documento",
         "Sub Total",
         "Total",
         "Fecha creación",
+        "Estado"
     ];
 
     const documentTypes = {
@@ -39,6 +40,7 @@ export function ReportTransactionDetails() {
     const settingsReport = {
         columns,
         transaction_id,
+        typePlanAccount:appInfo.accountPlanType,
         company_id: appInfo.company_id,
         type,
     };
@@ -84,6 +86,9 @@ export function ReportTransactionDetails() {
                 />
                 <ButtonMenu title="Mas Ajustes" children={<i className="fa-solid fa-sliders" />} noRotate={true} />
                 <ButtonMenu title="Agregar a favoritos" children={<i className="fa-regular fa-star" />} noRotate={true} />
+                <ButtonMenu title="Refrescar Información" children={<i className="fa-solid fa-rotate-right"/>} noRotate={true} onClick={()=>{
+                    GetTransactionDetails();
+                }}/>
                 <ButtonDownload />
             </div>
 
