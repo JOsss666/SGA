@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { postInfo } from '../utils/functions';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 const AppInfo = createContext();
 const AppNotifications = createContext();
@@ -166,17 +167,27 @@ export function AppInfoProvider({children}){
     const [darkMode,setDarkMode] = useState(false);
     const [userInfo,setUserInfo] = useState({});
     const [loadingAppData,setLoadingAppData] = useState(true);
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    const handleRedirect = ()=>{
+        navigate('/SGA_process/logIn')
+    }
 
     const getAppData = async()=>{
+        let data = location.pathname.split('/')
         setLoadingAppData(true);
-        let appI = await postInfo('/getCompanyInfo',1);
+        let appI = await postInfo('/getCompanyInfo',data[2]);
         if(appI[0]){
-            console.log(appI)
             setAppInfo(appI[1][0]);
+        }else{
+            handleRedirect();
         }
-        let userI = await postInfo('/getUserInfo',1);
+        let userI = await postInfo('/getUserInfo',data[3]);
         if(userI[0]){
             setUserInfo(userI[1][0])
+        }else{
+            handleRedirect();
         }
         setLoadingAppData(false);
     }

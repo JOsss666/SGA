@@ -10,6 +10,7 @@
     margin: 4vh;
     width: 40vw;
     overflow: auto;
+    transition: .3s;
 }
 
 .FormNewOperation .headForm{

@@ -19,6 +19,8 @@
     box-shadow: 0 .4vh .5vh var(--translucidMenu);
     outline: solid .1vh var(--inputsBorder);
     z-index: 1;
+    transition: .3s
+    ;
 }
 
 .TableReport .headTable .headColumn{

@@ -17,6 +17,7 @@
     --inputsBorder:#ddd;
     --translucidMenu:#fff9;
     --cardHover:#fafafa;
+    --bgImage: url('https://i.pinimg.com/1200x/1d/e1/a0/1de1a036689f0b9cf6836eeb11a551a1.jpg');
 }
 
 :root.dark {
@@ -35,6 +36,7 @@
     --inputsBorder:#5a5a5a;
     --translucidMenu:#20202090;
     --cardHover:#444;
+    --bgImage: url('https://i.pinimg.com/1200x/80/d1/bd/80d1bd8f8c9777a8ff1a8b4ed534418e.jpg');
 }
 
 .UserApp{
@@ -42,6 +44,7 @@
     width: 100%;
     position: relative;
     display:flex;
+    background-image: var(--bgImage);
     background-color: var(--menuAside);
     transition: .3s;
 }
@@ -131,6 +134,8 @@
     width: 94.5vw;
     border-radius: 4vh;
     box-shadow:  0 0 2vh #5553;
-    background-color: var(--bg);
+    /*background-color: var(--bg);*/
+    background-color: #00000005;
+    backdrop-filter: blur(.2vh);
     transition: .3s;
 }

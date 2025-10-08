@@ -3,14 +3,16 @@ CREATE DATABASE IF NOT EXISTS sga_ecosystem;
 USE sga_ecosystem;
 
 CREATE TABLE users(
+    company_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_name VARCHAR(200) NOT NULL,
     user_mail VARCHAR(300) NOT NULL UNIQUE,
     user_password VARCHAR(100) NOT NULL,
-    user_key VARCHAR(100) NOT NULL UNIQUE DEFAULT('-'),
+    user_key VARCHAR(100) NOT NULL UNIQUE,
     status VARCHAR(100) NOT NULL DEFAULT 'active',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    FOREIGN KEY (company_id) REFERENCES companies(company_id)
 );
 
 
@@ -34,7 +36,7 @@ CREATE TABLE companies(
     indentification_type ENUM('CC','NIT','CE','PAS'),
     indentification_number VARCHAR(100) NOT NULL UNIQUE,
     company_mail VARCHAR(100) NOT NULL,
-    company_key VARCHAR(100) NOT NULL UNIQUE DEFAULT('-'),
+    company_key VARCHAR(100) NOT NULL UNIQUE,
     phone VARCHAR(50),
     country VARCHAR(100),
     city VARCHAR(100),

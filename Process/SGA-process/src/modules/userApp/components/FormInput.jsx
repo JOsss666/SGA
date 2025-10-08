@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react'
 import './FormInput.css'
 import { moneyFormat } from '../../../utils/functions';
 
-export function FormInput({action,title,placeholder,children,type,disabled,textArea,value,moneyF,min,max}){
+export function FormInput({action,title,placeholder,children,type,disabled,textArea,value,moneyF,min,max,required}){
 
     const inRef = useRef();
     const moneyFspan = useRef();
@@ -29,7 +29,7 @@ export function FormInput({action,title,placeholder,children,type,disabled,textA
                     }} ref={moneyFspan} className='moneFHolder'>$ {moneyFormat(JSON.parse(inRef.current!= undefined? inRef.current.value != ""?inRef.current.value:0:0))}</span>
                 )}
                 {!textArea && (
-                    <input min={min} max={max} ref={inRef} onChange={()=>{
+                    <input required={required != undefined? required:false} min={min} max={max} ref={inRef} onChange={()=>{
                         if(action != null){
                             action(inRef.current.value)
                         }

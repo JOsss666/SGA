@@ -1,5 +1,5 @@
 
-import { calcWeightedAverage, isRelevanPrompt, useDataBase } from "../app.js";
+import { calcWeightedAverage, encrypt, isRelevanPrompt, useDataBase, actualDate } from "../app.js";
 import fs from "fs";
 import path from "path";
 import { send_API_AI } from "../ApiFunctions.js";
@@ -41,6 +41,55 @@ controller.mergeChunks = (req, res) => {
     res.json({ message: "Archivo ensamblado correctamente", path: finalPath });
 };
 
+
+controller.createCompany = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            INSERT INTO
+                sga_ecosystem.companies(
+                    legal_name,
+                    trade_name,
+                    indentification_type,
+                    indentification_number,
+                    company_mail,
+                    company_key,
+                    phone,
+                    country,
+                    city,
+                    address
+                )
+            VALUES(?,?,?,?,?,?,?,?,?,?);
+        `;
+        let newompany_key = encrypt(`
+            ${info.trade_name}*_${info.indentification_number}SGA_ab26212caa96090eacaebbf1${info.phone}_${actualDate.toISOString()}
+        `);
+        let consulta = await useDataBase(sentence,[
+            legal_name,
+                info.trade_name,
+                info.indentification_type,
+                info.indentification_number,
+                info.company_mail,
+                newompany_key,
+                info.phone,
+                info.country,
+                info.city,
+                info.address
+        ],2);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+
 controller.getCompanyInfo = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
@@ -59,7 +108,7 @@ controller.getCompanyInfo = (req,res)=>{
                 sga_ecosystem.acount_plans
             ON
                 sga_ecosystem.companies.company_id = sga_ecosystem.acount_plans.company_id
-            WHERE sga_ecosystem.companies.company_id = ? ;`
+            WHERE sga_ecosystem.companies.company_key = ? ;`
         let consulta = await useDataBase(sentence,[info],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -111,15 +160,25 @@ controller.logIn = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             SELECT
-                *
+                sga_ecosystem.users.*,
+                sga_ecosystem.companies.company_key
             FROM    
                 sga_ecosystem.users
+            LEFT JOIN
+                sga_ecosystem.companies
+            ON
+                sga_ecosystem.users.company_id = sga_ecosystem.companies.company_id
             WHERE
-                user_mail = ${info.mail}
-                AND user_password = ${info.pass}
+                user_mail = '${info.mail}'
+                AND user_password = '${encrypt(info.pass)}'
             LIMIT 1;
         `
         let consulta = await useDataBase(sentence,[],1);
+        if(consulta[0]){
+            let info  = consulta[1][0];
+            let newUserKey = encrypt(`${info.user_name.slice(1,info.user_name.length -1)}${info.user_mail.split('@')[0]}|SGA_ab26212caa96090eacaebbf1**_${info.pass}${actualDate.toISOString()}`);
+            console.log(newUserKey);
+        }
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -142,11 +201,13 @@ controller.signUp = (req,res)=>{
                 sga_ecosystem.users(
                     user_name,
                     user_mail,
-                    user_password
+                    user_password,
+                    user_key
                 )
             VALUES(?,?,?,?);
         `;
-        let consulta = await useDataBase(sentence,[info.user_name,info.mail,info.pass],2);
+        let newUserKey = encrypt(`${info.user_name.slice(1,info.user_name.length -1)}${info.mail.split('@')[0]}|SGA_ab26212caa96090eacaebbf1**_${info.pass}${actualDate.toISOString()}`);
+        let consulta = await useDataBase(sentence,[info.user_name,info.mail,info.pass,newUserKey],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -704,6 +765,7 @@ controller.getUserInfo = (req,res)=>{
         data += chunk;
     })
     req.on('end',async()=>{
+        console.log(data)
         let info = JSON.parse(data);
         let sentence = `
             SELECT
@@ -713,7 +775,7 @@ controller.getUserInfo = (req,res)=>{
             ON
                 sga_ecosystem.users.user_id = sga_ecosystem.users_access.user_id 
             WHERE
-                sga_ecosystem.users.user_id = ? ;`
+                sga_ecosystem.users.user_key = ? ;`
         let consulta = await useDataBase(sentence,[info],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));

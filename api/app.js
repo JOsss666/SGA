@@ -312,6 +312,8 @@ async function createTax(rows){
 }
 
 
+console.log(encrypt('123'))
+
 export{
     cloudinary,
     encrypt,
