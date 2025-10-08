@@ -120,5 +120,8 @@ router.post('/process/createFV',processController.createFV);
 
 router.post('/process/searchDocument',processController.searchDocument);
 
+router.post('/process/getSalesData', controller.getSalesData);
+
+
 export default router;
 

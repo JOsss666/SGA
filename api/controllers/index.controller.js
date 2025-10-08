@@ -1539,4 +1539,35 @@ controller.processAiRequest= (req,res)=>{
     })
 }
 
+
+
+
+controller.getSalesData = async (req, res) => {
+    try {
+        const sentence = `
+            SELECT 
+                MONTHNAME(MIN(created_at)) AS mes,
+                SUM(total) AS ventas
+            FROM 
+                sga_ecosystem.transaction_detail
+            GROUP BY 
+                MONTH(created_at)
+            ORDER BY 
+                MONTH(created_at);
+        `;
+        const consulta = await useDataBase(sentence, [], 1);
+        res.status(200).json(consulta[1] || consulta);
+    } catch (err) {
+        console.error("❌ Error SQL:", err);
+        res.status(500).json(err);
+    }
+};
+
+
+
+
+
+
+
+
 export default controller;
