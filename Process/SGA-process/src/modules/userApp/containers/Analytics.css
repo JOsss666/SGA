@@ -12,7 +12,7 @@
     gap: 1vh;
     margin: 2vh;
     width: 183vh;
-    height: 50vh;
+    height: 58vh;
 }
 
 .Analytics .ContainerAnalitycs .Graph{
@@ -36,7 +36,7 @@
 .Analytics .Ranking{
     margin: 2vh;
     width: 183vh;
-    height: 26vh;
+    height: 20vh;
 }
 
 .Analytics .gridOptionsDocuments{

@@ -8,10 +8,10 @@ export const LightChart = () => {
   const loadData = async () => {
     console.log("🟡 Enviando solicitud al backend...");
     try {
-      const response = await postInfo("getSalesData", {});
+      // Llamada correcta con GET y la barra inicial
+      const response = await postInfo("/getSalesData?period=month", {}, "GET");
       console.log("🟢 Respuesta backend completa:", response);
 
-      // Validar estructura
       if (Array.isArray(response) && response.length > 0) {
         setData(response);
       } else {
@@ -31,16 +31,30 @@ export const LightChart = () => {
       {data.length > 0 ? (
         <ResponsiveContainer>
           <LineChart data={data}>
+            {/* 🏷️ Título centrado arriba del gráfico */}
+            <text
+              x="50%"
+              y={20}
+              textAnchor="middle"
+              dominantBaseline="central"
+              style={{ fontSize: 18, fontWeight: "bold", fill: "#333" }}
+            >
+              Reporte de ventas por periodo
+            </text>
+
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="mes" />
+            <XAxis dataKey="label" />
             <YAxis />
             <Tooltip />
-            <Line type="monotone" dataKey="ventas" stroke="#8884d8" strokeWidth={2} />
+            <Line type="monotone" dataKey="total" stroke="#8884d8" strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
       ) : (
-        <p style={{ textAlign: "center" }}>Cargando datos o sin información disponible...</p>
+        <p style={{ textAlign: "center" }}>
+          Cargando datos o sin información disponible...
+        </p>
       )}
     </div>
-  );
+);
+
 };

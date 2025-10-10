@@ -5,8 +5,8 @@
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
-    width: 18vw;
-    height: 25vh;
+    width: 16vw;
+    height: 20vh;
     border-radius: 2vh;
     padding: 2vh 3vh;
     background-image: linear-gradient(45deg, var(--lightGradient1), var(--lightGradient3), var(--lightGradient4));
