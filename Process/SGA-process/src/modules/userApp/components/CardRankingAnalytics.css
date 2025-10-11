@@ -12,6 +12,7 @@
     background-image: linear-gradient(45deg, var(--lightGradient1), var(--lightGradient3), var(--lightGradient4));
     box-shadow: 0 .2vh 1vh var(--inputsBg);
     outline: solid .1vh var(--inputsBorder);
+    position: relative;
 }
 
 .CardRankingAnalytics .icon {

@@ -17,6 +17,7 @@
     --inputsBorder:#ddd;
     --translucidMenu:#fff9;
     --cardHover:#fafafa;
+    --bgOpacity:#ffffff50;
     --bgImage: url('https://i.pinimg.com/1200x/1d/e1/a0/1de1a036689f0b9cf6836eeb11a551a1.jpg');
 }
 
@@ -36,6 +37,7 @@
     --inputsBorder:#5a5a5a;
     --translucidMenu:#20202090;
     --cardHover:#444;
+    --bgOpacity:#00000050;
     --bgImage: url('https://i.pinimg.com/1200x/80/d1/bd/80d1bd8f8c9777a8ff1a8b4ed534418e.jpg');
 }
 
@@ -45,7 +47,8 @@
     position: relative;
     display:flex;
     background-image: var(--bgImage);
-    background-color: var(--menuAside);
+    /*background-color: var(--menuAside);*/
+    background-size: 100dvw 100dvh;
     transition: .3s;
 }
 
@@ -135,7 +138,7 @@
     border-radius: 4vh;
     box-shadow:  0 0 2vh #5553;
     /*background-color: var(--bg);*/
-    background-color: #00000005;
-    backdrop-filter: blur(.2vh);
+    background-color:var(--bgOpacity);
+    backdrop-filter: blur(1vh);
     transition: .3s;
 }

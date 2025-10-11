@@ -1,8 +1,12 @@
 
+
 .Analytics {
     display: flex;
     flex-direction: column;
-    margin: 2vh;
+    padding: 2vh;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
 }
 
 .Analytics .ContainerAnalitycs{
@@ -25,13 +29,15 @@
 .Analytics .ContainerAnalitycs .Search{
     display: flex;
     flex-direction: column;
-    gap: 2vh;
-    margin: .5vh;
+    margin: 1vh auto;
     width: auto;
+    padding: 0 1vh;
     align-content: center;
 }
 
-
+.Analytics .ContainerAnalitycs .spaceSelectReports{
+    margin-top: 2vh;
+}
 
 .Analytics .Ranking{
     margin: 2vh;

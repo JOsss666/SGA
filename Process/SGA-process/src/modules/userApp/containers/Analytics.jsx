@@ -2,13 +2,15 @@
 import "./Analytics.css";
 import { LightChart } from "./LightChart";
 import { DespleList } from "../components/DespleList";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { SearchBar } from "../components/SearchBar";
 import { CardRankingAnalytics } from "../components/CardRankingAnalytics";
 import { useEffect } from "react";
+import { PathLocation } from "../components/PathLocation";
 
 export function Analytics() {
     const navigate = useNavigate();
+    const location = useLocation();
 
     // 🔍 Depuración: ver si el componente se monta correctamente
     useEffect(() => {
@@ -17,7 +19,7 @@ export function Analytics() {
 
     const handleNavigate = (path) => {
         console.log("📍 Navegando a:", path);
-        navigate(`/userApp/${path}`);
+        navigate(`${location.pathname}/${path}`);
     };
 
     const loadLastOp = () => {
@@ -34,14 +36,15 @@ export function Analytics() {
         <div className="Analytics">
             <div className="ContainerAnalitycs">
                 <div className="Graph">
-                    <LightChart />
+                    <LightChart info={{
+                        title:'Compras',
+                        doc_type:'DC',
+                    }} />
                 </div>
-
                 <div className="Search">
                     <SearchBar placeholder={"Buscar"} />
-
                     <div className="spaceSelectReports">
-                        <DespleList children={<i className="fa-solid fa-book" />} father={{title: "Informes de Documentos",}}
+                        <DespleList children={<i className="fa-solid fa-book" />} father={{title: "Documentos",}}
                             options={[
                                 {
                                     title: "Ordenes de cliente (OC)",
@@ -96,10 +99,11 @@ export function Analytics() {
 
             <div className="Ranking">
                 <div className="gridOptionsDocuments">
-                    <CardRankingAnalytics title={"Pedidos"} value={5200} text={"+50% VS el mes pasado"} icon={<i className="fa-regular fa-ranking-star"/>}/>
-                    <CardRankingAnalytics title={"Compras"} value={5200} text={"+50% VS el mes pasado"} icon={<i className="fa-regular fa-ranking-star"/>}/>
-                    <CardRankingAnalytics title={"Ventas"} value={5200} text={"+50% VS el mes pasado"} icon={<i className="fa-regular fa-ranking-star"/>}/>
-                    <CardRankingAnalytics title={"Consumo"} value={5200} text={"+50% VS el mes pasado"} icon={<i className="fa-regular fa-ranking-star"/>}/>
+                    <CardRankingAnalytics title={"Pedidos"} value={5200} text={"+50% VS el mes pasado"} icon={<i className="fa-solid fa-ranking-star"/>}/>
+                    <CardRankingAnalytics title={"Compras"} value={5200} text={"+50% VS el mes pasado"} icon={<i className="fa-solid fa-ranking-star"/>}/>
+                    <CardRankingAnalytics title={"Ventas"} value={5200} text={"+50% VS el mes pasado"} icon={<i className="fa-solid fa-ranking-star"/>}/>
+                    <CardRankingAnalytics title={"Consumo"} value={5200} text={"+50% VS el mes pasado"} icon={<i className="fa-solid fa-ranking-star"/>}/>
+                    <CardRankingAnalytics title={"Consumo"} value={5200} text={"+50% VS el mes pasado"} icon={<i className="fa-solid fa-ranking-star"/>}/>
                 </div>
             </div>
         </div>

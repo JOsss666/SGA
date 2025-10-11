@@ -23,6 +23,7 @@ import { ConceptsPlan } from './ConceptsPlan';
 import { ChatAi } from './ChatAi';
 import { SwitchColorMode } from '../components/SwitchColorMode';
 import { Analytics } from './Analytics'; 
+import { AnalyticDocDetail } from './AnalyticDocDetail';
 
 export function UserApp(){
 
@@ -128,6 +129,7 @@ export function UserApp(){
                             <Route path='/users' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
                             <Route path='/concepts' element={<ConceptsPlan/>} />
                             <Route path='/analytics' element={<Analytics/>} />
+                            <Route path='/analytics/*' element={<AnalyticDocDetail/>} />
                             <Route path='/searchDocument' element={<SearchDocument/>} />
                             <Route path='/reports/*' element={<Reports/>} />
                     </Routes>

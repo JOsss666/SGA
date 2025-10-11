@@ -1601,42 +1601,38 @@ controller.processAiRequest= (req,res)=>{
     })
 }
 
-
-
-
-controller.getSalesData = async (req, res) => {
-    try {
+controller.getTransactionsData = async (req, res) => {
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
         const period = (req.query.period || "MONTH").toUpperCase();
-
         let format;
         if (period === "DAY") format = "%Y-%m-%d";
         else if (period === "YEAR") format = "%Y";
         else format = "%Y-%m";
-
         const sentence = `
-        SELECT 
+        SELECT
             DATE_FORMAT(created_at, '${format}') AS label,
-            SUM(total) AS total
-        FROM sga_ecosystem.transaction_detail
+            SUM(subtotal) AS total
+        FROM sga_ecosystem.transactions
+        ${info.doc_type != null ? `
+        WHERE
+            sga_ecosystem.transactions.doc_type = '${info.doc_type}'
+        `:''}
         GROUP BY DATE_FORMAT(created_at, '${format}')
         ORDER BY DATE_FORMAT(created_at, '${format}') ASC;
         `;
-
         const consulta = await useDataBase(sentence, [], 1);
-
-        if (!consulta || !consulta[1] || !Array.isArray(consulta[1])) {
-        throw new Error("Respuesta inválida de la base de datos");
-        }
-
-        res.status(200).json(consulta[1]);
-    } catch (err) {
-        console.error("❌ Error getSalesData:", err);
-        res.status(500).json([
-        { label: "2025-06", total: 12000 },
-        { label: "2025-07", total: 15000 },
-        { label: "2025-08", total: 18000 }
-        ]);
-    }
+        res.writeHead(200,{'Content-Type':'text/plain'});
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
 };
 
 
