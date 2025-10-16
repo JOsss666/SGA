@@ -19,6 +19,7 @@ CREATE TABLE users(
 CREATE TABLE users_access(
     user_id BIGINT UNSIGNED NOT NULL,
     user_roll VARCHAR(200) NOT NULL DEFAULT 'operator',
+    user_session BOOLEAN NOT NULL DEFAULT(0);
     sga_inventory_access TEXT,
     sga_process_access TEXT,
     sga_contability_access TEXT,

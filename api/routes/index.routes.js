@@ -24,6 +24,8 @@ const upload = multer({ dest: CHUNKS_DIR });
 
     router.post('/logIn',controller.logIn);
 
+    router.post('/logOut',controller.logOut);
+
     router.post('/signUp',controller.signUp);
 
 router.post('/getCompanyInfo',controller.getCompanyInfo);
