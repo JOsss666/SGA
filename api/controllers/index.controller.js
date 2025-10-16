@@ -1,8 +1,7 @@
 
-import { calcWeightedAverage, encrypt, isRelevanPrompt, useDataBase, actualDate } from "../app.js";
+import { calcWeightedAverage, useDataBase } from "../app.js";
 import fs from "fs";
 import path from "path";
-import { send_API_AI } from "../ApiFunctions.js";
 const controller = {};
 
 controller.uploadChunk = (req, res) => {
@@ -41,55 +40,6 @@ controller.mergeChunks = (req, res) => {
     res.json({ message: "Archivo ensamblado correctamente", path: finalPath });
 };
 
-
-controller.createCompany = (req,res)=>{
-    let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            INSERT INTO
-                sga_ecosystem.companies(
-                    legal_name,
-                    trade_name,
-                    indentification_type,
-                    indentification_number,
-                    company_mail,
-                    company_key,
-                    phone,
-                    country,
-                    city,
-                    address
-                )
-            VALUES(?,?,?,?,?,?,?,?,?,?);
-        `;
-        let newompany_key = encrypt(`
-            ${info.trade_name}*_${info.indentification_number}SGA_ab26212caa96090eacaebbf1${info.phone}_${actualDate.toISOString()}
-        `);
-        let consulta = await useDataBase(sentence,[
-            legal_name,
-                info.trade_name,
-                info.indentification_type,
-                info.indentification_number,
-                info.company_mail,
-                newompany_key,
-                info.phone,
-                info.country,
-                info.city,
-                info.address
-        ],2);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
-
 controller.getCompanyInfo = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
@@ -100,15 +50,14 @@ controller.getCompanyInfo = (req,res)=>{
         let sentence = `
             SELECT 
                 sga_ecosystem.companies.*,
-                sga_ecosystem.acount_plans.id AS accountPlanId,
-                sga_ecosystem.acount_plans.type AS accountPlanType
+                sga_ecosystem.acount_plans.id AS accountPlanId
             FROM
                 sga_ecosystem.companies 
             LEFT JOIN
                 sga_ecosystem.acount_plans
             ON
                 sga_ecosystem.companies.company_id = sga_ecosystem.acount_plans.company_id
-            WHERE sga_ecosystem.companies.company_key = ? ;`
+            WHERE sga_ecosystem.companies.company_id = ? ;`
         let consulta = await useDataBase(sentence,[info],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -150,6 +99,7 @@ controller.createAccountsPlan = (req,res)=>{
     })
 }
 
+<<<<<<< HEAD
 
 controller.logIn = (req,res)=>{
     let data = '';
@@ -217,6 +167,8 @@ controller.signUp = (req,res)=>{
     })
 }
 
+=======
+>>>>>>> dc9370c (Merge Document Analytics  except index controller)
 controller.insertNewAccount = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
@@ -224,10 +176,9 @@ controller.insertNewAccount = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let tableAcc = info.typePlanAccount == 'PUC'? 'account_templates_PUC':'contable_accounts';
         let sentence = `
             INSERT INTO
-                sga_ecosystem.${tableAcc}
+                sga_ecosystem.contable_accounts
             (
                 company_id,
                 code,
@@ -274,13 +225,11 @@ controller.getAccountsPlan = (req,res)=>{
             let sentence = `
                 SELECT * FROM (
                     SELECT 
-                        'PUC' as type,
                         id,code,name,level,account_path
                     FROM sga_ecosystem.account_templates_PUC
                     UNION ALL
 
                     SELECT 
-                        'personalized',
                         id,code,name,level,account_path
                     FROM sga_ecosystem.contable_accounts
                     WHERE 
@@ -305,6 +254,7 @@ controller.getAccountsPlan = (req,res)=>{
     
 }
 
+<<<<<<< HEAD
 controller.createTax = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
@@ -792,6 +742,8 @@ controller.updateTransactionState = (req,res)=>{
 }
 
 
+=======
+>>>>>>> dc9370c (Merge Document Analytics  except index controller)
 // SGA - Inventory (Cambiar de archivo despues)
 
 controller.getUserInfo = (req,res)=>{
@@ -800,7 +752,6 @@ controller.getUserInfo = (req,res)=>{
         data += chunk;
     })
     req.on('end',async()=>{
-        console.log(data)
         let info = JSON.parse(data);
         let sentence = `
             SELECT
@@ -810,7 +761,7 @@ controller.getUserInfo = (req,res)=>{
             ON
                 sga_ecosystem.users.user_id = sga_ecosystem.users_access.user_id 
             WHERE
-                sga_ecosystem.users.user_key = ? ;`
+                sga_ecosystem.users.user_id = ? ;`
         let consulta = await useDataBase(sentence,[info],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -970,7 +921,7 @@ controller.getProducts = (req,res)=>{
                     products.*,
                     pricesProducts.list_id,
                     pricesProducts.unit_value,
-                    ${info.storeDetails? 'sga_ecosystem.stores.name,':''}
+                    ${info.storeDetails? 'stores.store_name,':''}
                     pricesProducts.min_stock,
                     pricesProducts.unit_cost,
                     pricesProducts.price_id,
@@ -978,7 +929,9 @@ controller.getProducts = (req,res)=>{
                     stocks.stock_id,
                     stocks.cellar_id,
                     stocks.stock AS storeStock  
+
                     FROM products
+
                     ${info.priceRequired? 'INNER':'LEFT'} JOIN pricesProducts 
                     ON products.product_id = pricesProducts.product_id
                     AND pricesProducts.price_state = 'active'
@@ -991,10 +944,10 @@ controller.getProducts = (req,res)=>{
                     AND stocks.company_id = products.company_id
 
                     ${info.storeDetails ?
-                    'LEFT JOIN sga_ecosystem.stores ON sga_process.stocks.store_id = sga_ecosystem.stores.store_id '
+                    'LEFT JOIN stores ON stocks.store_id = stores.store_id '
                     :''}
 
-                    WHERE sga_process.products.company_id = ? ${info.requiredStock? 'AND sga_process.stocks.stock > 0 ':''}  ${info.product_id != null? 'AND sga_process.products.product_id = ? ':' '};
+                    WHERE products.company_id = ? ${info.requiredStock? 'AND stocks.stock > 0 ':''}  ${info.product_id != null? 'AND products.product_id = ? ':' '};
                 `;
                 let values;
                 console.log(info);
@@ -1076,7 +1029,7 @@ controller.createStore = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `INSERT INTO sga_ecosystem.stores (company_id,name,zone,city,location) VALUES(?,?,?,?,?);`;
+        let sentence = `INSERT INTO stores (company_id,store_name,store_zone,store_city,store_location) VALUES(?,?,?,?,?);`;
         let consulta = await useDataBase(sentence,[info.company_id,info.store_name,info.store_zone,info.store_city,info.store_location],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -1094,7 +1047,7 @@ controller.getStores = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `SELECT * FROM sga_ecosystem.stores WHERE company_id = ? ; `
+        let sentence = `SELECT * FROM stores WHERE company_id = ? ; `
         let consulta = await useDataBase(sentence,[info],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -1172,7 +1125,7 @@ controller.getPricesList = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `SELECT pricesList.*, sga_ecosystem.stores.id,sga_ecosystem.stores.name FROM sga_process.pricesList LEFT JOIN sga_ecosystem.stores ON sga_ecosystem.pricesList.store_id = sga_ecosystem.stores.id WHERE sga_process.pricesList.company_id = ? `
+        let sentence = `SELECT pricesList.*, stores.store_id,stores.store_name FROM pricesList LEFT JOIN stores ON pricesList.store_id = stores.store_id WHERE pricesList.company_id = ? `
         if(info.store_id != undefined){
             sentence += `AND store_id = ? `
         }
@@ -1435,9 +1388,9 @@ controller.getMovements = (req,res)=>{
                 inventoryMovements.* ,
                 sga_ecosystem.users.user_name,
                 ${info.cellar_name? 'cellars.cellar_name,':''}
-                sga_ecosystem.stores.name
-            FROM inventoryMovements LEFT JOIN sga_ecosystem.stores
-            ON inventoryMovements.store_id = sga_ecosystem.stores.id
+                stores.store_name
+            FROM inventoryMovements LEFT JOIN stores
+            ON inventoryMovements.store_id = stores.store_id
 
             LEFT JOIN sga_ecosystem.users
             ON inventoryMovements.user_id = users.user_id
@@ -1460,7 +1413,7 @@ controller.getMovements = (req,res)=>{
     })
 }
 
-controller.getDepartures = (req,res)=>{
+controller.getTransactions = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
         data += chunk;
@@ -1611,6 +1564,7 @@ controller.getRotation = (req,res)=>{
     })
 }
 
+<<<<<<< HEAD
 
 
 // Ai_asistant Actions
@@ -1754,4 +1708,6 @@ controller.getDocumentData = async (req, res) => {
 
 
 
+=======
+>>>>>>> dc9370c (Merge Document Analytics  except index controller)
 export default controller;
