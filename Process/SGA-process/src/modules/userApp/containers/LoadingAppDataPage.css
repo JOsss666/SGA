@@ -4,10 +4,10 @@
     flex-direction: column;
     height: 100%;
     width: 100%;
+    background-color: var(--bg);
 }
 
 .LoadingAppDataPage img{
-    width: 40vw;
     height: 40vh;
     object-fit: cover;
     padding: 1vh;
@@ -18,7 +18,6 @@
 .LoadingAppDataPage .searchServiceAnimal{
     padding: 1vh 2vh;
     border-radius: 1vh;
-    background-color: #FCE6FA;
     width: fit-content;
     margin: 1vh auto;
     cursor: pointer;
@@ -27,6 +26,16 @@
 .LoadingAppDataPage .searchServiceAnimal span{
     font-size: clamp(2.2px,2.2vh,22px);
     font-weight: 400;
+    color: var(--descriptionText);
+    transition: .3s;
+}
+
+.LoadingAppDataPage .searchServiceAnimal span:hover{
+    color: #ED6AFF;
+}
+
+.LoadingAppDataPage .searchServiceAnimal span i{
+    margin-left: 1vh;
 }
 
 .LoadingAppDataPage .loadingDotsA{
@@ -37,10 +46,10 @@
 }
 
 .LoadingAppDataPage .loadingDotsA .loadingDot{
-    height: 2vh;
-    width: 2vh;
+    height: 1.5vh;
+    width: 1.5vh;
     border-radius: 100%;
-    background-color: #0B4F4A;
+    background-color: #FDA5D5;
     margin: auto 1vh;
     position: relative;
     animation-name: dotLoading;
@@ -79,17 +88,17 @@
 @keyframes dotLoading {
     0%{
         bottom: 0;
-        background-color: #075F5A;
+        background-color: #ED6AFF;
     }
 
     60%{
         bottom: 4vh;
-        background-color: #38D5BE;
+        background-color: #F4A8FF;
     }
 
     90%{
         bottom: 0;
-        background-color: #ECFDF5;
+        background-color: #FDF4FF;
     }
 
 

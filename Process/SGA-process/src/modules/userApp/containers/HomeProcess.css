@@ -1,0 +1,68 @@
+
+.HomeProcess{
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background-image: var(--bgImage);
+    background-size: 100% 100%;
+    transition: .3s;
+}
+
+.HomeProcess .bottomBarC{
+    position: absolute;
+    bottom: 4vh;
+    width: 100%;
+    display: flex;
+}
+
+.HomeProcess .appsBar{
+    width: fit-content;
+    margin: auto;
+    padding: 1vh 0;
+    border-radius: 2vh;
+    background-color: #D2EAFB30;
+    backdrop-filter: blur(.5vh);
+    display: flex;
+    overflow: hidden;
+}
+
+.HomeProcess .appsBar .AppIcon{
+    margin: auto 1.5vh;
+}
+
+.HomeProcess .appsBar .AppIcon:nth-child(2){
+    animation-delay: .1s;
+}
+
+.HomeProcess .appsBar .AppIcon:nth-child(3){
+    animation-delay: .15s;
+}
+
+.HomeProcess .appsBar .AppIcon:nth-child(3){
+    animation-delay: .2s;
+}
+
+.HomeProcess .appsBar .AppIcon:nth-child(4){
+    animation-delay: .25s;
+}
+
+.HomeProcess .appsBar .AppIcon:nth-child(5){
+    animation-delay: .3s;
+}
+
+.HomeProcess .appsBar .AppIcon:nth-child(6){
+    animation-delay: .35s;
+}
+
+.HomeProcess .appsBar .AppIcon:nth-child(7){
+    animation-delay: .4s;
+}
+
+.HomeProcess .appsBar .AppIcon:nth-child(8){
+    animation-delay: .45s;
+}
+
+.HomeProcess .HomeSearch{
+    position: absolute;
+    left: 32.5%;
+}

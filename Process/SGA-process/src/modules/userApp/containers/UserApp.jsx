@@ -24,11 +24,14 @@ import { ChatAi } from './ChatAi';
 import { SwitchColorMode } from '../components/SwitchColorMode';
 import { Analytics } from './Analytics'; 
 import { AnalyticDocDetail } from './AnalyticDocDetail';
+import { postInfo } from '../../../utils/functions';
+import { LoadingSpace } from './LoadingSpace';
+import { LogOut } from '../../Login/LogOut';
 
 export function UserApp(){
 
     // Context Info
-    const {appInfo,userInfo,loadingAppData,darkMode} = useAppInfo();
+    const {appInfo,userInfo,loadingAppData,darkMode,getAppData} = useAppInfo();
     const {openPreview,setOpenPreview} = usePreview();
     const {openAlert,popOutAlert} = useAlert();
     const [visibleChatAi,setVisibleChatAi] = useState(false);
@@ -44,15 +47,20 @@ export function UserApp(){
         {text:'Buscar Documento',path:'searchDocument',icon:<i className="fa-solid fa-file-import"/>},
         {text:'Informes',path:'reports',icon:<i className="fa-solid fa-table-cells"/>},
         {text:'Estadisticas',path:'analytics',icon:<i className="fa-solid fa-chart-pie"/>},
-        {text:'Conceptos e impuestos',path:'concepts',icon:<i className="fa-solid fa-chart-pie"/>},
+        {text:'Conceptos e impuestos',path:'concepts',icon:<i className="fa-solid fa-list-check"/>},
         {text:'Usuarios',path:'users',icon:<i className="fa-solid fa-users"/>}
     ]
 
     const setingsPage = [
         {text:'Ayuda',path:'help',icon:<i className="fa-solid fa-question"/>},
         {text:'Configuración',path:'settings',icon:<i className="fa-solid fa-gear"/>},
-        {text:'Cerrar Sesión',path:'../../logIn',icon:<i className="fa-solid fa-arrow-right-from-bracket"/>}
+        {text:'Cerrar Sesión',path:'logOut',icon:<i className="fa-solid fa-arrow-right-from-bracket"/>},
+        {text:'Registro',path:'../../signUp',icon:<i className="fa-solid fa-user-plus"/>},
     ]
+
+    useEffect(()=>{
+        getAppData();
+    },[])
 
     useEffect(()=>{
         if(asideMenuC.current != null){
@@ -132,6 +140,7 @@ export function UserApp(){
                             <Route path='/analytics/*' element={<AnalyticDocDetail/>} />
                             <Route path='/searchDocument' element={<SearchDocument/>} />
                             <Route path='/reports/*' element={<Reports/>} />
+                            <Route path='/logOut' element={<LogOut/>} />
                     </Routes>
                 </main>
                 {openPreview && (

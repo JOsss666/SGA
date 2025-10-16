@@ -184,7 +184,8 @@ export function AppInfoProvider({children}){
             handleRedirect();
         }
         let userI = await postInfo('/getUserInfo',data[3]);
-        if(userI[0]){
+        console.log(userI);
+        if(userI[0] && userI[1][0].user_session == 1){
             setUserInfo(userI[1][0])
         }else{
             handleRedirect();
@@ -193,7 +194,9 @@ export function AppInfoProvider({children}){
     }
 
     useEffect(()=>{
-        getAppData();
+        if(location.pathname != '/SGA_process/logIn' && location.pathname != '/SGA_process/SignUp'){
+            getAppData();
+        }
     },[])
 
         const value = {

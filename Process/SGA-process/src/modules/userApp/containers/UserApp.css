@@ -18,7 +18,7 @@
     --translucidMenu:#fff9;
     --cardHover:#fafafa;
     --bgOpacity:#ffffff50;
-    --bgImage: url('https://i.pinimg.com/1200x/1d/e1/a0/1de1a036689f0b9cf6836eeb11a551a1.jpg');
+    --bgImage: url('https://i.pinimg.com/1200x/23/5f/8d/235f8df39cf98153029b9cc09495f390.jpg');
 }
 
 :root.dark {
@@ -46,9 +46,7 @@
     width: 100%;
     position: relative;
     display:flex;
-    background-image: var(--bgImage);
-    /*background-color: var(--menuAside);*/
-    background-size: 100dvw 100dvh;
+    background-color: var(--menuAside);
     transition: .3s;
 }
 
@@ -137,8 +135,7 @@
     width: 94.5vw;
     border-radius: 4vh;
     box-shadow:  0 0 2vh #5553;
-    /*background-color: var(--bg);*/
-    background-color:var(--bgOpacity);
-    backdrop-filter: blur(1vh);
+    background-color: var(--bg);
     transition: .3s;
+    overflow: hidden;
 }
