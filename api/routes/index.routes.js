@@ -122,6 +122,8 @@ router.post('/process/searchDocument',processController.searchDocument);
 
 router.post('/getTransactionsData', controller.getTransactionsData);
 
+router.post('/getDocumentData', controller.getDocumentData);
+
 
 export default router;
 

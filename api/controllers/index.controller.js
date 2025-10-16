@@ -170,7 +170,7 @@ controller.logIn = (req,res)=>{
                 sga_ecosystem.users.company_id = sga_ecosystem.companies.company_id
             WHERE
                 user_mail = '${info.mail}'
-                AND user_password = '${encrypt(info.pass)}'
+                AND user_password = SHA2('${info.pass}', 256)
             LIMIT 1;
         `
         let consulta = await useDataBase(sentence,[],1);
@@ -713,6 +713,41 @@ controller.getTransactionDetails = (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
+
+/**     CONSULTAS PARA LAS ESTADISTICAS      **/
+controller.getTransactionDetails = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let tableAcc = info.typePlanAccount == 'PUC'? 'account_templates_PUC':'contable_accounts';
+        let sentence = `
+            SELECT
+                sga_ecosystem.transaction_detail.*,
+                sga_ecosystem.${tableAcc}.name AS concept_name
+            FROM
+                sga_ecosystem.transaction_detail
+            LEFT JOIN
+                sga_ecosystem.${tableAcc}
+            ON 
+                sga_ecosystem.transaction_detail.account_id = sga_ecosystem.${tableAcc}.id
+            WHERE
+                sga_ecosystem.transaction_detail.transaction_id = ? ;
+        `;
+        let consulta = await useDataBase(sentence,[info.transaction_id],1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+
+
 
 
 controller.updateTransactionState = (req,res)=>{
@@ -1633,6 +1668,81 @@ controller.getTransactionsData = async (req, res) => {
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
+};
+
+controller.getDocumentData = async (req, res) => {
+    try {
+        console.log("📥 Iniciando getDocumentData...");
+
+        // --- Capturar datos del cuerpo de la petición ---
+        let data = '';
+        req.on('data', chunk => {
+            data += chunk;
+        });
+
+        req.on('end', async () => {
+            try {
+                console.log("🧩 Datos recibidos:", data);
+
+                // --- Validar y parsear el JSON ---
+                let info;
+                try {
+                    info = JSON.parse(data || '{}');
+                } catch (parseError) {
+                    console.error("❌ Error al parsear JSON:", parseError);
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ error: "JSON inválido en la solicitud" }));
+                }
+
+                if (!info.type) {
+                    console.warn("⚠️ 'type' no recibido en el cuerpo de la solicitud");
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ error: "'type' es requerido" }));
+                }
+
+                // --- Obtener el periodo ---
+                const period = (req.query.period || "MONTH").toUpperCase();
+                let format;
+                if (period === "DAY") format = "%Y-%m-%d";
+                else if (period === "YEAR") format = "%Y";
+                else format = "%Y-%m";
+
+                console.log("📅 Periodo:", period, " | Formato:", format);
+
+                // --- Construir la sentencia SQL ---
+                const tableName = `sga_process.${info.type.toLowerCase()}s`;
+                const sentence = `SELECT COUNT(*) AS total_registros FROM ${tableName};`;
+
+                console.log("🧾 Sentencia SQL:", sentence);
+
+                // --- Ejecutar consulta ---
+                const consulta = await useDataBase(sentence, [], 1);
+
+                console.log("✅ Resultado de la consulta:", consulta);
+
+                // --- Responder al cliente ---
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, data: consulta }));
+
+            } catch (internalError) {
+                console.error("🔥 Error interno en 'end' handler:", internalError);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: "Error interno del servidor", detail: internalError.message }));
+            }
+        });
+
+        // --- Manejar errores de transmisión ---
+        req.on('error', (err) => {
+            console.error("⚠️ Error en la recepción de datos:", err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: "Error en la recepción de datos", detail: err.message }));
+        });
+
+    } catch (outerError) {
+        console.error("💥 Error global en getDocumentData:", outerError);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: "Error general", detail: outerError.message }));
+    }
 };
 
 

@@ -36,10 +36,11 @@ export function Analytics() {
         <div className="Analytics">
             <div className="ContainerAnalitycs">
                 <div className="Graph">
-                    <LightChart info={{
-                        title:'Compras',
-                        doc_type:'DC',
-                    }} />
+                    <LightChart 
+                        title="Compras" 
+                        doc_type="DC" 
+                        type="DC" 
+                    />
                 </div>
                 <div className="Search">
                     <SearchBar placeholder={"Buscar"} />
