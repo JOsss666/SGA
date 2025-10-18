@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LabelValue } from "./LabelValue";
 import './OpCard.css'
 import { SwitchOption } from "./SwitchOption";
-import { moneyFormat, postInfo } from "../../../utils/functions";
+import { moneyFormat, postInfo, ScreenShotElement } from "../../../utils/functions";
 import { OcSimpleCard } from "./OcSimpleCard";
 import { DocsSimpleCard } from "./DocsSimpleCard";
 import { useAlert, useAppInfo } from "../../../context/context";
@@ -10,9 +10,11 @@ import { FormNewOc } from "../containers/forms/FormNewOc";
 import { FormNewDC } from "../containers/forms/FormNewDC";
 import { SelectTpeNewDoc } from "../containers/forms/SelectTypeNewDoc";
 import { MoreOptions } from "./MoreOptions";
+import { AiButton } from "./ChatAiComponents/AiButton";
 
 export function OpCard({data}){
 
+    const container = useRef()
     const [info,setInfo] = useState(data);
     const {appInfo} = useAppInfo();
     const {popInAlert} = useAlert();
@@ -49,13 +51,22 @@ export function OpCard({data}){
         }
     },[])
 
+    const donwloadElement = async()=>{
+        await ScreenShotElement(container.current,`Orden de Producción #${info.op_id}.png`);
+    }
+
     return(
-        <div className="OpCard">
+        <div ref={container} className="OpCard">
             <div className="headOP">
                 <h3 onClick={()=>{reloadInfo()}}>OP#{info.op_id}</h3>
                 <SwitchOption action={setVisibleInfo} state1={'Información'} state2={'Adjuntos'}/>
+                <AiButton attached={{info,attachedDocs}} sugerence={[
+                {text:'Resume el estado de esta orden de producción',context:`Procesos - Orden de producción ${info.op_id}`},
+                {text:'Realiza un analisis de este informe',context:`Procesos - Orden de producción ${info.op_id}`},
+                {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Orden de producción ${info.op_id}`}
+            ]}/>
                 <MoreOptions options={[
-                    {text:'Descargar',icon:<i className="fa-solid fa-arrow-down"/>},
+                    {text:'Descargar',icon:<i className="fa-solid fa-arrow-down"/>,action:donwloadElement},
                     {text:'Compartir',icon:<i className="fa-solid fa-share-nodes"/>},
                     {text:'Bloquear',icon:<i className="fa-solid fa-lock"/>},
                     {text:'Ver actividad',icon:<i className="fa-solid fa-eye"/>},

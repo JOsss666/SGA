@@ -5,6 +5,7 @@ import controller from '../controllers/index.controller.js';
 import processController from '../controllers/processController.js';
 import multer from "multer";
 import path from "path";
+import contabiltyController from '../controllers/contabilityController.js';
 const router = express.Router();
 
 // temporal folder for chunks
@@ -66,6 +67,10 @@ router.post('/getTransactions',controller.getTransactions);
 
 router.post('/getTransactionDetails',controller.getTransactionDetails);
 
+router.post('/getTransactionsData', controller.getTransactionsData);
+
+router.post('/getDocumentData', controller.getDocumentData);
+
 // SGA - Inventory
 
 router.post('/getSubCategories',controller.getSubCategories);
@@ -122,10 +127,10 @@ router.post('/process/createFV',processController.createFV);
 
 router.post('/process/searchDocument',processController.searchDocument);
 
-router.post('/getTransactionsData', controller.getTransactionsData);
 
-router.post('/getDocumentData', controller.getDocumentData);
+// SGA contability
 
+router.post('/contability/contabiltyController', contabiltyController.getBalance);
 
 export default router;
 

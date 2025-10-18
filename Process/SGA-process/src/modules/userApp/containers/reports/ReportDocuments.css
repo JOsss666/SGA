@@ -29,6 +29,10 @@
     margin: auto 1vh;
 }
 
+.ReportDocument .settingsReport .AiButton{
+    margin: auto 1vh;
+}
+
 .ReportDocument .settingsReport .SelectOptions .contentOptions{
     box-shadow: none ;
 }

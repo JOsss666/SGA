@@ -14,7 +14,7 @@ export function HomeProcess(){
         <div className="HomeProcess">
             <div className="bottomBarC">
                 <div className="appsBar">
-                    <AppIcon title={'Buscar'} imgUrl={'https://cdn-icons-png.flaticon.com/512/5968/5968517.png'}/>
+                    <AppIcon title={'Documentos'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760644907/ChatGPT_Image_16_oct_2025_15_01_00_jyacqf.png'}/>
                     <AppIcon title={'Archivos'} imgUrl={'https://icons.iconarchive.com/icons/custom-icon-design/flatastic-1/512/folder-icon.png'}/>
                     <AppIcon onClick={()=>{setVisibleSearch(!visibleSearch)}} title={'Buscar'} imgUrl={'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Search_Icon.svg/1200px-Search_Icon.svg.png'}/>
                     <AppIcon title={'Informes'} imgUrl={'https://cdn-icons-png.freepik.com/512/8276/8276278.png'}/>

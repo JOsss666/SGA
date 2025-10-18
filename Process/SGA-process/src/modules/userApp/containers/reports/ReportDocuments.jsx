@@ -13,6 +13,7 @@ import { TableReport } from "../TableReport";
 import "./ReportDocuments.css";
 import { LoadingSpace } from "../LoadingSpace";
 import { ButtonDownload } from "../../components/ButtonDownload";
+import { AiButton } from "../../components/ChatAiComponents/AiButton";
 
 export function ReportDocuments({ type }) {
 
@@ -74,15 +75,16 @@ export function ReportDocuments({ type }) {
 
     const columsTr = [
         "ID",
+        "Fecha Documento",
+        "Tipo Doc",
         "Concepto",
         "Tienda",
-        "Creada por",
-        "Fecha Documento",
         "Sub Total",
-        "Total",
-        "Fecha creación",
+        "Valor ",
         "Estado",
-        "Ver Destalles",
+        "Creada por",
+        "Fecha creación",
+        "Ver Detalles"
     ];
 
     const columsTr_details = [
@@ -91,7 +93,7 @@ export function ReportDocuments({ type }) {
         "Creada por",
         "Fecha Documento",
         "Sub Total",
-        "Total",
+        "Valor ",
         "Fecha creación",
     ];
 
@@ -163,6 +165,11 @@ export function ReportDocuments({ type }) {
             />
             <ButtonMenu title={"Mas Ajustes"} children={<i className="fa-solid fa-sliders" />} noRotate={true} />
             <ButtonMenu title={"Agregar a favoritos"} children={<i className="fa-regular fa-star" />} noRotate={true} />
+            <AiButton attached={info} sugerence={[
+                {text:'¿Que representa este informe?',context:`Procesos - Informe - ${documentTypes[type]}`},
+                {text:'Realiza un analisis de este informe',context:`Procesos - Informe - ${documentTypes[type]}`},
+                {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Informe - ${documentTypes[type]}`}
+            ]}/>
             <ButtonDownload />
         </div>
         <div className="SpaceReport">

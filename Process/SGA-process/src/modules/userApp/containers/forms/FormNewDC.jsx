@@ -17,6 +17,8 @@ export function FormNewDC({info,reloadFun}){
     const [thirdParties,setTirdParties] = useState([]);
     const [OPS,setOPS] = useState([]);
     const [store_id,setStore_id] = useState();
+    const [paymentMethods,setPaymentMethods] = useState([]);
+    const [paymentMethod,setPaymentMethod] = useState();
     const [concept_id,setConceptId] = useState();
     const [concepts,setConcepts] = useState([]);
     const [op_id,setOp_id] = useState();
@@ -24,9 +26,6 @@ export function FormNewDC({info,reloadFun}){
     const [description,setDescription] = useState('');
     const [value,setValue] = useState(0);
     const [loading,setLoading] = useState(false);
-
-    const [name,setName] = useState('');
-
     const [disabled,setDisabled] = useState(false);
 
     const formInfo = {
@@ -35,6 +34,7 @@ export function FormNewDC({info,reloadFun}){
         store_id:1,
         op_id,
         thirdParty_id,
+        paymentMethod,
         description,
         concept_id,
         value:value != '' ? JSON.parse(value):0
@@ -99,6 +99,7 @@ export function FormNewDC({info,reloadFun}){
                 type:'error',
                 fixed:true
             })
+            popOutAlert();
         }
         setLoading(false);
         setDisabled(false);
@@ -107,10 +108,29 @@ export function FormNewDC({info,reloadFun}){
         }
     }
 
+    const getPaymentMethods = async()=>{
+        let res = await postInfo('/getPaymentMethods',{
+            company_id:appInfo.company_id,
+            typePlanAccount:appInfo.accountPlanType
+        })
+        console.log(res)
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:element.name,
+                    value:element
+                })
+            });
+            setPaymentMethods(C);
+        }
+    }
+
     const getFormOptions = async()=>{
         setLoading(true);
         await getThirdParties();
         await getConcepts();
+        await getPaymentMethods();
         if(info.op_id == undefined){
             let getOps = await postInfo('/process/getOp',{company_id:appInfo.company_id});
             if(getOps[0]){
@@ -146,8 +166,9 @@ export function FormNewDC({info,reloadFun}){
                         <SearchinList disabled={disabled} action={setOp_id} title={'Orden de produccíon'} placeHolder={'Seleccione la OP a la que pertenece'} list={OPS}/>
                     )}
                     <SearchinList disabled={disabled} action={setTirdParty} title={'Provedor'} placeHolder={'Seleccione el proveedor'} list={thirdParties}/>
-                    <SearchinList action={setConceptId} title={'Concepto del documento'} placeHolder={'Seleccione el concepto del documento'} list={concepts}/>
+                    <SearchinList disabled={disabled} action={setConceptId} title={'Concepto del documento'} placeHolder={'Seleccione el concepto del documento'} list={concepts}/>
                     <FormInput disabled={disabled} action={setDescription} title={'Descripción'} placeholder={'Descripción de la nueva orden de cliente'} textArea={true}/>
+                    <SearchinList disabled={disabled} action={setPaymentMethod} title={'Metodo de pago'} placeHolder={'Seleccione el metodo de pago'} list={paymentMethods}/>
                     <FormInput disabled={disabled} action={setValue} title={'Valor documento'} moneyF={true} placeholder={'Descripción de la nueva orden de cliente'} />
                     <FormButton disabled={disabled} text={'Continuar'} loading={loading}/>
                 </form>

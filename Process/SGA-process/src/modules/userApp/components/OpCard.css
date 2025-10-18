@@ -22,13 +22,13 @@
     margin: auto 0;
     margin-left: 1vh;
     font-weight: 600;
-    width: 40%;
-    font-size: clamp(3.5px,3.5vh,35px);
+    width: 20%;
+    font-size: clamp(3px,3vh,30px);
     color: var(--mainText);
 }
 
 .OpCard .headOP .SwitchOption{
-    width: 57%;
+    width: 48%;
     margin: auto 2vh;
 }
 

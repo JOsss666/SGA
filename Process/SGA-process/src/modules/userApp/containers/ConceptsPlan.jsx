@@ -42,6 +42,7 @@ export function ConceptsPlan(){
         let res = await postInfo('/getTaxes',{
             company_id:appInfo.company_id,
         })
+        console.log(res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {

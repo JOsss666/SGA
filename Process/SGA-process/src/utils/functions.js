@@ -1,5 +1,6 @@
 
 import { urlSer } from "../App";
+import domtoimage from "dom-to-image-more";
 
 export async function postInfo(route,informacion){
     console.log('Funcion post');
@@ -128,4 +129,18 @@ export async function getAttached(type,attached,paramsDB) {
             return(await getFromDataBase())
     }
 
+}
+
+
+export async function ScreenShotElement(elemet,name){
+    domtoimage.toPng(elemet)
+    .then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = name != undefined? name:'captura.png';
+        link.href = dataUrl;
+        link.click();
+    })
+    .catch((error) => {
+        console.error('Error al generar la imagen:', error);
+    });
 }

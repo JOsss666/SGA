@@ -181,82 +181,7 @@ controller.createAccountsPlan = (req,res)=>{
     })
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-
 controller.logIn = (req,res)=>{
-    let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            SELECT
-                sga_ecosystem.users.*,
-                sga_ecosystem.companies.company_key
-            FROM    
-                sga_ecosystem.users
-            LEFT JOIN
-                sga_ecosystem.companies
-            ON
-                sga_ecosystem.users.company_id = sga_ecosystem.companies.company_id
-            WHERE
-                user_mail = '${info.mail}'
-                AND user_password = SHA2('${info.pass}', 256)
-            LIMIT 1;
-        `
-        let consulta = await useDataBase(sentence,[],1);
-        if(consulta[0]){
-            let info  = consulta[1][0];
-            let newUserKey = encrypt(`${info.user_name.slice(1,info.user_name.length -1)}${info.user_mail.split('@')[0]}|SGA_ab26212caa96090eacaebbf1**_${info.pass}${actualDate.toISOString()}`);
-            console.log(newUserKey);
-        }
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
-controller.signUp = (req,res)=>{
-    let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            INSERT
-            INTO   
-                sga_ecosystem.users(
-                    user_name,
-                    user_mail,
-                    user_password,
-                    user_key
-                )
-            VALUES(?,?,?,?);
-        `;
-        let newUserKey = encrypt(`${info.user_name.slice(1,info.user_name.length -1)}${info.mail.split('@')[0]}|SGA_ab26212caa96090eacaebbf1**_${info.pass}${actualDate.toISOString()}`);
-        let consulta = await useDataBase(sentence,[info.user_name,info.mail,info.pass,newUserKey],2);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
-=======
->>>>>>> dc9370c (Merge Document Analytics  except index controller)
-controller.insertNewAccount = (req,res)=>{
-=======
-
-controller.logIn = (req,res)=>{
->>>>>>> 9bf7fa8 (Update Home and ecnrypt)
     let data = '';
     req.on('data',chunk=>{
         data += chunk;
@@ -434,7 +359,6 @@ controller.getAccountsPlan = (req,res)=>{
                         id,code,name,level,account_path
                     FROM sga_ecosystem.account_templates_PUC
                     UNION ALL
-
                     SELECT 
                         'personalized',
                         id,code,name,level,account_path
@@ -461,8 +385,6 @@ controller.getAccountsPlan = (req,res)=>{
     
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 controller.createTax = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
@@ -871,542 +793,6 @@ controller.getTransactionDetails = (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
-
-/**     CONSULTAS PARA LAS ESTADISTICAS      **/
-controller.getTransactionDetails = (req,res)=>{
-    let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let tableAcc = info.typePlanAccount == 'PUC'? 'account_templates_PUC':'contable_accounts';
-        let sentence = `
-            SELECT
-                sga_ecosystem.transaction_detail.*,
-                sga_ecosystem.${tableAcc}.name AS concept_name
-            FROM
-                sga_ecosystem.transaction_detail
-            LEFT JOIN
-                sga_ecosystem.${tableAcc}
-            ON 
-                sga_ecosystem.transaction_detail.account_id = sga_ecosystem.${tableAcc}.id
-            WHERE
-                sga_ecosystem.transaction_detail.transaction_id = ? ;
-        `;
-        let consulta = await useDataBase(sentence,[info.transaction_id],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
-
-
-
-
-controller.updateTransactionState = (req,res)=>{
-    let data = '';
-    req.on('data',chunk=>{
-        data += chunk
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        console.log('Transacción a actualizar: ');
-        console.log(info);
-        let sentence1 = `
-            UPDATE
-                sga_ecosystem.transactions
-            SET
-                status = '${info.status}'
-            WHERE
-                id = ${info.transaction_id} ;
-        `
-        let consulta1 = await useDataBase(sentence1,[],2);
-        if(consulta1){
-            let sentence2 = `
-                UPDATE
-                    sga_ecosystem.transaction_detail
-                SET
-                    status = '${info.status}'
-                WHERE
-                    transaction_id = ${info.transaction_id} ;
-            `
-            let consulta2 = await useDataBase(sentence2,[],2);
-            res.writeHead(200,{'Content-Type':'text/plain'})
-            res.end(JSON.stringify([consulta1,consulta2]));
-        }else{
-            res.writeHead(200,{'Content-Type':'text/plain'})
-            res.end(JSON.stringify(consulta1));
-        }
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
-
-=======
->>>>>>> dc9370c (Merge Document Analytics  except index controller)
-// SGA - Inventory (Cambiar de archivo despues)
-
-controller.getUserInfo = (req,res)=>{
-    let data = ''
-=======
-controller.createTax = (req,res)=>{
-    let data = '';
->>>>>>> 9bf7fa8 (Update Home and ecnrypt)
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            INSERT INTO
-                sga_ecosystem.taxes(
-                    company_id,
-                    name,
-                    code,
-                    rate,
-                    account_id
-                )
-            VALUES(?,?,?,?,?);
-        `;
-        let consulta = await useDataBase(sentence,[
-            info.company_id,
-            info.name,
-            info.code,
-            info.rate,
-            info.account_id
-        ],2);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
-controller.getTaxes = (req,res)=>{
-    let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence;
-        let tableAcc = info.typePlanAccount == 'PUC'? 'contable_accounts':'account_templates_PUC';
-        if(info.attached == undefined){
-            sentence = `
-            SELECT
-                sga_ecosystem.taxes.id AS tax_id,
-                sga_ecosystem.taxes.code,
-                sga_ecosystem.taxes.rate,
-                sga_ecosystem.taxes.base,
-                sga_ecosystem.${tableAcc}.*
-            FROM
-                sga_ecosystem.taxes
-            LEFT JOIN
-                sga_ecosystem.${tableAcc}
-            ON
-                sga_ecosystem.taxes.account_id = sga_ecosystem.${tableAcc}.id
-            WHERE
-                sga_ecosystem.taxes.company_id = ${info.company_id}
-                ${info.id != null?`AND sga_ecosystem.taxes.id = ${info.id}`:''}
-                ${info.limit != null? `LIMIT ${info.limit}`:''}
-                ORDER BY sga_ecosystem.taxes.account_id ASC;
-            ;`;
-        }else{
-            sentence = `
-                SELECT
-                    sga_ecosystem.concept_taxes.id,
-                    sga_ecosystem.taxes.id AS tax_id,
-                    sga_ecosystem.taxes.account_id,
-                    sga_ecosystem.taxes.rate,
-                    sga_ecosystem.taxes.base,
-                    sga_ecosystem.taxes.code,
-                    sga_ecosystem.${tableAcc}.name
-                FROM
-                    sga_ecosystem.concept_taxes
-                LEFT JOIN 
-                    sga_ecosystem.taxes
-                ON
-                    sga_ecosystem.concept_taxes.tax_id = sga_ecosystem.taxes.id
-                LEFT JOIN
-                    sga_ecosystem.${tableAcc}
-                ON
-                    sga_ecosystem.taxes.account_id = sga_ecosystem.${tableAcc}.id
-                WHERE
-                    sga_ecosystem.concept_taxes.concept_id = ${info.concept_id}
-                ORDER BY sga_ecosystem.${tableAcc}.name ASC ; 
-            `
-        }
-        let consulta = await useDataBase(sentence,[],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
-controller.createConcept = (req,res)=>{
-    let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            INSERT INTO
-                sga_ecosystem.concepts
-                (
-                    company_id,
-                    name,
-                    account_id,
-                    payment_method
-                )
-            VALUES (?,?,?,?);
-        `;
-        let newConcept = await useDataBase(sentence,[
-            info.company_id,
-            info.name,
-            info.account_id,
-            info.payment_method
-        ],4);
-        if(newConcept){
-            let sen2 = `
-                INSERT INTO
-                    sga_ecosystem.concept_taxes
-                    (
-                        concept_id,
-                        tax_id
-                    )
-                VALUES
-                    ${info.selectedTaxes.map((element) => 
-                        `(${newConcept},${element.value})`
-                    ).join(',')}
-            ;`;
-            let consulta = await useDataBase(sen2,[],2);
-            res.writeHead(200,{'Content-Type':'text/plain'})
-            res.end(JSON.stringify(consulta));
-        }else{
-            res.writeHead(200,{'Content-Type':'text/plain'})
-            res.end(JSON.stringify([false,`Error al crear nuevo concepto`]));
-        }
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
-
-controller.getConcepts = (req,res)=>{
-    let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let tableAcc = info.typePlanAccount == 'PUC'? 'account_templates_PUC':'contable_accounts';
-        let sentence = `
-            SELECT
-                sga_ecosystem.concepts.*,
-                sga_ecosystem.payment_methods.name AS paymentMethodName,
-                sga_ecosystem.${tableAcc}.id AS account_id,
-                sga_ecosystem.${tableAcc}.code,
-                sga_ecosystem.${tableAcc}.name AS account_name
-            FROM
-                sga_ecosystem.concepts
-            LEFT JOIN
-                sga_ecosystem.${tableAcc}
-            ON
-                sga_ecosystem.concepts.account_id = sga_ecosystem.${tableAcc}.id
-            LEFT JOIN
-                sga_ecosystem.payment_methods
-            ON
-                sga_ecosystem.concepts.payment_method = sga_ecosystem.payment_methods.id
-            WHERE
-                sga_ecosystem.concepts.company_id = ${info.company_id}
-                ${info.id != null? `AND sga_ecosystem.concepts.id = ${info.id}`:''}
-                ;
-        `;
-        let consulta = await useDataBase(sentence,[],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
-controller.getPaymentMethods = (req,res)=>{
-    let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            SELECT
-                id,
-                code,
-                name,
-                currency,
-                state
-            FROM
-                sga_ecosystem.payment_methods
-            WHERE
-                company_id = ${info.company_id}
-            ORDER BY name ASC;
-        `;
-        let consulta = await useDataBase(sentence,[],1);;
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
-
-controller.createTransaction = (req,res)=>{
-    let data = ''
-    req.on('data',chunk=>{
-        data += chunk
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            INSERT INTO
-                sga_ecosystem.transactions
-                (
-                    user_id,
-                    company_id,
-                    store_id,
-                    concept_id,
-                    doc_date,
-                    doc_type,
-                    doc_id,
-                    subtotal,
-                    total
-                )
-            VALUES
-                (?,?,?,?,?,?,?,?,?);
-        `;
-        let consulta = await useDataBase(sentence,[
-            info.user_id,
-            info.company_id,
-            info.store_id,
-            info.concept_id,
-            info.doc_date,
-            info.doc_type,
-            info.doc_id,
-            info.subtotal,
-            info.total
-        ],6)
-        console.log('Transacción Creada correctamente No: ',consulta);
-        if(consulta[0]){
-            let resultDetails = [];
-            for(const element of info.transactionDetails){
-                let sentence = `
-                    INSERT INTO
-                        sga_ecosystem.transaction_detail
-                        (
-                            transaction_id,
-                            account_id,
-                            account_type,
-                            type,
-                            subtotal,
-                            total
-                        )
-                    VALUES
-                    (?,?,?,?,?,?)
-                `
-                let postConsulta = await useDataBase(sentence,[
-                    consulta[1],
-                    element.account_id,
-                    element.account_type,
-                    element.type,
-                    element.subtotal,
-                    element.total
-                ],2);
-                resultDetails.push([postConsulta]);
-            }
-            consulta.push(resultDetails)
-            res.writeHead(200,{'Content-Type':'text/plain'})
-            res.end(JSON.stringify(consulta));
-        }else{
-            res.writeHead(200,{'Content-Type':'text/plain'})
-            res.end(JSON.stringify(false));
-        }
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
-controller.createTransactionDetail = (req,res)=>{
-    let data = '';
-    req.on('data',chunk=>{
-        data += chunk
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            INSERT INTO
-                sga_ecosystem.transaction_detail
-                (
-                    transaction_id,
-                    account_id,
-                    account_type,
-                    type,
-                    subtotal,
-                    total
-                )
-            VALUES
-            (?,?,?,?,?,?);
-        `
-        let consulta = await useDataBase(sentence,[
-            info.transaction_id,
-            info.account_id,
-            info.account_type,
-            info.type,
-            info.subtotal,
-            info.total
-        ],2);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
-controller.getTransactions = (req,res)=>{
-    let data = '';
-    req.on('data',chunk=>{
-        data += chunk
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            SELECT
-                sga_ecosystem.transactions.*,
-                sga_ecosystem.users.user_name,
-                sga_ecosystem.stores.name AS store_name,
-                sga_ecosystem.concepts.name AS concept_name,
-                'TR' AS docType
-            FROM
-                sga_ecosystem.transactions
-            LEFT JOIN
-                sga_ecosystem.users
-            ON
-                sga_ecosystem.transactions.user_id = sga_ecosystem.users.user_id
-            LEFT JOIN
-                sga_ecosystem.stores
-            ON
-                sga_ecosystem.transactions.store_id = sga_ecosystem.stores.id
-            LEFT JOIN
-                sga_ecosystem.concepts
-            ON
-                sga_ecosystem.transactions.concept_id = sga_ecosystem.concepts.id
-            WHERE
-                sga_ecosystem.transactions.company_id = ${info.company_id}
-            ORDER BY sga_ecosystem.transactions.created_at DESC;
-        `;
-        let consulta = await useDataBase(sentence,[],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
-controller.getTransactionDetails = (req,res)=>{
-    let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let tableAcc = info.typePlanAccount == 'PUC'? 'account_templates_PUC':'contable_accounts';
-        let sentence = `
-            SELECT
-                sga_ecosystem.transaction_detail.*,
-                sga_ecosystem.${tableAcc}.name AS concept_name
-            FROM
-                sga_ecosystem.transaction_detail
-            LEFT JOIN
-                sga_ecosystem.${tableAcc}
-            ON 
-                sga_ecosystem.transaction_detail.account_id = sga_ecosystem.${tableAcc}.id
-            WHERE
-                sga_ecosystem.transaction_detail.transaction_id = ? ;
-        `;
-        let consulta = await useDataBase(sentence,[info.transaction_id],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
-controller.getDocumentData = async (req, res) => {
-        let data = '';
-        req.on('data', chunk => {
-            data += chunk;
-        });
-
-        req.on('end', async () => {
-                let info;
-                try {
-                    info = JSON.parse(data || '{}');
-                } catch (parseError) {
-                    console.error("❌ Error al parsear JSON:", parseError);
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ error: "JSON inválido en la solicitud" }));
-                }
-                if (!info.type) {
-                    console.warn("⚠️ 'type' no recibido en el cuerpo de la solicitud");
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ error: "'type' es requerido" }));
-                }
-                const period = (req.query.period || "MONTH").toUpperCase();
-                let format;
-                if (period === "DAY") format = "%Y-%m-%d";
-                else if (period === "YEAR") format = "%Y";
-                else format = "%Y-%m";
-                const tableName = `sga_process.${info.type.toLowerCase()}s`;
-                const sentence = `SELECT COUNT(*) AS total_registros FROM ${tableName};`;
-                const consulta = await useDataBase(sentence, [], 1);
-                console.log("✅ Resultado de la consulta:", consulta);
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(consulta));
-        });
-        req.on('error', (err) => {
-            console.error("⚠️ Error en la recepción de datos:", err);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: "Error en la recepción de datos", detail: err.message }));
-        });
-};
-
-
 
 controller.updateTransactionState = (req,res)=>{
     let data = '';
@@ -2242,12 +1628,6 @@ controller.getRotation = (req,res)=>{
     })
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 9bf7fa8 (Update Home and ecnrypt)
-
-
 // Ai_asistant Actions
 
 controller.processAiRequest= (req,res)=>{
@@ -2305,96 +1685,44 @@ controller.getTransactionsData = async (req, res) => {
     })
 };
 
-<<<<<<< HEAD
-controller.getDocumentData = async (req, res) => {
-    try {
-        console.log("📥 Iniciando getDocumentData...");
 
-        // --- Capturar datos del cuerpo de la petición ---
+//getDocAnalyticDOcNumber --> Nombre de la funcion
+
+controller.getDocumentData = async (req, res) => {
         let data = '';
         req.on('data', chunk => {
             data += chunk;
         });
-
         req.on('end', async () => {
-            try {
-                console.log("🧩 Datos recibidos:", data);
-
-                // --- Validar y parsear el JSON ---
-                let info;
-                try {
-                    info = JSON.parse(data || '{}');
-                } catch (parseError) {
-                    console.error("❌ Error al parsear JSON:", parseError);
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ error: "JSON inválido en la solicitud" }));
-                }
-
+                let info = JSON.parse(data)
                 if (!info.type) {
                     console.warn("⚠️ 'type' no recibido en el cuerpo de la solicitud");
                     res.writeHead(400, { 'Content-Type': 'application/json' });
                     return res.end(JSON.stringify({ error: "'type' es requerido" }));
                 }
-
-                // --- Obtener el periodo ---
                 const period = (req.query.period || "MONTH").toUpperCase();
                 let format;
                 if (period === "DAY") format = "%Y-%m-%d";
                 else if (period === "YEAR") format = "%Y";
                 else format = "%Y-%m";
-
-                console.log("📅 Periodo:", period, " | Formato:", format);
-
-                // --- Construir la sentencia SQL ---
-                const tableName = `sga_process.${info.type.toLowerCase()}s`;
-                const sentence = `SELECT COUNT(*) AS total_registros FROM ${tableName};`;
-
-                console.log("🧾 Sentencia SQL:", sentence);
-
-                // --- Ejecutar consulta ---
+                const tableName = `sga_process.${info.doc_type}`;
+                const sentence = `
+                SELECT
+                    DATE_FORMAT(created_at, '${format}') AS label , COUNT(*) AS total
+                FROM ${tableName}
+                GROUP BY DATE_FORMAT(created_at, '${format}')
+                ORDER BY DATE_FORMAT(created_at, '${format}') ASC;
+                `;
                 const consulta = await useDataBase(sentence, [], 1);
-
-                console.log("✅ Resultado de la consulta:", consulta);
-
-                // --- Responder al cliente ---
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: true, data: consulta }));
-
-            } catch (internalError) {
-                console.error("🔥 Error interno en 'end' handler:", internalError);
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: "Error interno del servidor", detail: internalError.message }));
-            }
+                res.end(JSON.stringify(consulta));
         });
 
-        // --- Manejar errores de transmisión ---
         req.on('error', (err) => {
             console.error("⚠️ Error en la recepción de datos:", err);
             res.writeHead(500, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: "Error en la recepción de datos", detail: err.message }));
         });
-
-    } catch (outerError) {
-        console.error("💥 Error global en getDocumentData:", outerError);
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: "Error general", detail: outerError.message }));
-    }
 };
-=======
->>>>>>> 9bf7fa8 (Update Home and ecnrypt)
 
-
-
-
-
-
-
-
-
-<<<<<<< HEAD
-
-=======
->>>>>>> dc9370c (Merge Document Analytics  except index controller)
-=======
->>>>>>> 9bf7fa8 (Update Home and ecnrypt)
 export default controller;

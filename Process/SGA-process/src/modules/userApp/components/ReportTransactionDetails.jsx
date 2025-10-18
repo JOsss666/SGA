@@ -13,6 +13,7 @@ import { SelectOptions } from "./SelectOptions";
 import { ButtonMenu } from "./ButtonMenu";
 import { ButtonDownload } from "./ButtonDownload";
 import "./ReportTransactionDetails.css";
+import { AiButton } from "./ChatAiComponents/AiButton";
 
 export function ReportTransactionDetails() {
     const { transaction_id } = useParams();
@@ -25,11 +26,11 @@ export function ReportTransactionDetails() {
     const columns = [
         "ID",
         "Transacción",
-        "Concepto",
         "Fecha Documento",
-        "Base",
-        "Total",
-        "Fecha creación",
+        "Cuenta",
+        "Concepto",
+        "Naturaleza",
+        "Valor ",
         "Estado"
     ];
 
@@ -69,7 +70,7 @@ export function ReportTransactionDetails() {
         <div className="ReportDocument">
             <PathLocation />
             <div className="headReport">
-                <BoldTitle text={`Detalle de Transacción #${transaction_id}`} />
+                <BoldTitle text={`Detalle de Transacción #${transaction_id} - Nombre del tercero`} />
                 <DescriptionSpan text={`Vista detallada de la transacción seleccionada.`} />
             </div>
 
@@ -89,6 +90,11 @@ export function ReportTransactionDetails() {
                 <ButtonMenu title="Refrescar Información" children={<i className="fa-solid fa-rotate-right"/>} noRotate={true} onClick={()=>{
                     GetTransactionDetails();
                 }}/>
+                <AiButton attached={info} sugerence={[
+                {text:'Resume el contenido de esta documento',context:`Procesos - Informe - ${documentTypes[type]}`},
+                {text:'Verifica el contenido de este documento',context:`Procesos - Informe - ${documentTypes[type]}`},
+                {text:'¿Que acciones me recomiendas basado en este documento?',context:`Procesos - Informe - ${documentTypes[type]}`}
+            ]}/>
                 <ButtonDownload />
             </div>
 

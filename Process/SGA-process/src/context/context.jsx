@@ -68,20 +68,55 @@ export function NotificationsProvider({children}){
 }
 
 export function AiAssistanProvider({children}){
-
+    const [visibleChatAi,setVisibleChatAi] = useState(false);
+    const [loading,setLoading] = useState();
     const [usedTokens,setUsedTokens] = useState(0);
+    const {userInfo} = useAppInfo();
     const [chat,setChat] = useState([]);
 
     const addMessage = (newMessage) => {
         setChat(prev => [...prev, newMessage]);
     };
 
+    const sendPrompt = async(text,attached)=>{
+        setLoading(true)
+        setVisibleChatAi(true);
+        addMessage({
+            text:text,
+            user_id:userInfo.user_id,
+            user_name:userInfo.user_name
+        })
+        let res = await postInfo('/processAiRequest',{
+            text:text,
+            attached,
+            userInfo
+        })
+        if(res.AI_response[0]){
+            addMessage({
+                children:JSON.parse(res.AI_response[1]),
+                user_id:0
+                })
+            }else{
+                addMessage({
+                    text:`❌ Error, hubo un problema al intentar procesar tu solicitud, intentalo de nuevo.`,
+                    user_id:0,
+                    user_name:'Asistente AI'
+                })
+        }
+        setLoading(false)
+    }
+
     const value = {
         chat,
         usedTokens,
         addMessage,
         setChat,
-        setUsedTokens
+        setUsedTokens,
+        sendPrompt,
+        visibleChatAi,
+        setVisibleChatAi,
+        loading,
+        setLoading
     }
 
     useEffect(()=>{

@@ -81,6 +81,7 @@ CREATE TABLE thirdParties(
 CREATE TABLE payment_methods(
     company_id BIGINT UNSIGNED NOT NULL,
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    account_id INT NOT NULL DEFAULT 1,
     code VARCHAR(100),
     name VARCHAR(400) NOT NULL,
     type ENUM('cash','bank_transfer','debit_card','credit_card','digital_wallet','check','cash_onDelivery','crypto_currency'),
@@ -91,7 +92,6 @@ CREATE TABLE payment_methods(
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (company_id) REFERENCES companies(company_id)
 );
-
 
 CREATE TABLE taxes(
     company_id BIGINT UNSIGNED NOT NULL,
@@ -152,15 +152,17 @@ CREATE TABLE transactions(
 );
 
 
-CREATE TABLE transaction_detail(
+
+CREATE TABLE sga_ecosystem.transaction_detail(
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     transaction_id BIGINT UNSIGNED NOT NULL,
     account_id BIGINT UNSIGNED NOT NULL,
     account_type ENUM('PUC','Personalized'),
-    type ENUM('tax','withholding','discount','operation'),
+    type ENUM('tax', 'withholding', 'discount', 'operation', 'adjustment','payment'),
     subtotal FLOAT NOT NULL,
     total FLOAT NOT NULL,
     status ENUM('draft','posted','cancelled','pendingPayment') DEFAULT 'draft',
+    nature ENUM('DB','CR') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE

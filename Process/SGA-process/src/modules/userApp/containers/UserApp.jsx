@@ -5,7 +5,7 @@ import { SearchBar } from '../components/SearchBar';
 import { ButtonMenu } from '../components/ButtonMenu';
 import { UserCard } from '../components/UserCard';
 import { MenuApp } from './MenuApp';
-import { useAlert, useAppInfo, usePreview } from '../../../context/context';
+import { useAiAssistant, useAlert, useAppInfo, usePreview } from '../../../context/context';
 import { useEffect, useRef, useState } from 'react';
 import { ServiceSgaCard } from '../components/ServiceSgaCard';
 import { LoadingAppDataPage } from './LoadingAppDataPage';
@@ -34,7 +34,7 @@ export function UserApp(){
     const {appInfo,userInfo,loadingAppData,darkMode,getAppData} = useAppInfo();
     const {openPreview,setOpenPreview} = usePreview();
     const {openAlert,popOutAlert} = useAlert();
-    const [visibleChatAi,setVisibleChatAi] = useState(false);
+    const {visibleChatAi,setVisibleChatAi} = useAiAssistant();
 
     // Container Params
     const [visibleMenu,setVisibleMenu] = useState(false);

@@ -19,7 +19,7 @@ export function ChatAi({visible}){
     const fileInput = useRef();
     const [visibleAddOptions,setVisibleAddOptions] = useState(false);
     const [disabled,setDisable] = useState(false);
-    const [loading,setLoading] = useState(false);
+    const {loading,setLoading} = useAiAssistant();
     const [loadingAttached,setLoadingAttached] = useState(false);
     const [attached,setAttached] = useState([]);
 
