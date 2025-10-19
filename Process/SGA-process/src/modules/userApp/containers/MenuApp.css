@@ -44,12 +44,18 @@
     transition: .3s;
     cursor: pointer;
     position: relative;
+    display: flex;
 }
 
 .HiddenMenu .listOptions li{
     padding: 1vh 1vh;
     margin: 0 auto ;
     margin-bottom: 1vh;
+}
+
+.MenuApp .listOptions li img{
+    height: 3.5vh;
+    width: 3.5vh;
 }
 
 .MenuApp .listOptions li:hover{
@@ -67,7 +73,15 @@
     color: var(--sectionTitle);
 }
 
+.MenuApp .listOptions li span{
+    margin: auto 0;
+}
+
 
 .HiddenMenu .listOptions li i{
     margin-right: 0;
+}
+
+.visibleMenu .listOptions li img{
+    margin-right: 2vh;
 }

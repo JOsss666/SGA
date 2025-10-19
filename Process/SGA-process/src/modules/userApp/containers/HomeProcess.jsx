@@ -14,14 +14,17 @@ export function HomeProcess(){
         <div className="HomeProcess">
             <div className="bottomBarC">
                 <div className="appsBar">
-                    <AppIcon title={'Documentos'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760644907/ChatGPT_Image_16_oct_2025_15_01_00_jyacqf.png'}/>
-                    <AppIcon title={'Archivos'} imgUrl={'https://icons.iconarchive.com/icons/custom-icon-design/flatastic-1/512/folder-icon.png'}/>
-                    <AppIcon onClick={()=>{setVisibleSearch(!visibleSearch)}} title={'Buscar'} imgUrl={'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Search_Icon.svg/1200px-Search_Icon.svg.png'}/>
-                    <AppIcon title={'Informes'} imgUrl={'https://cdn-icons-png.freepik.com/512/8276/8276278.png'}/>
-                    <AppIcon title={'Estadisticas'} imgUrl={'https://cdn-icons-png.freepik.com/512/15197/15197517.png'}/>
-                    <AppIcon title={'Asistente IA'} imgUrl={'https://us1.discourse-cdn.com/openai1/original/4X/3/2/1/321a1ba297482d3d4060d114860de1aa5610f8a9.png'}/>
-                    <AppIcon title={'Ajustes'} imgUrl={'https://icons.iconarchive.com/icons/graphicloads/100-flat-2/256/settings-icon.png'}/>
-                    <AppIcon title={'Ayuda'} imgUrl={'https://icon-library.com/images/info-icon-svg/info-icon-svg-5.jpg'}/>
+                    <AppIcon title={'Documentos'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760913629/DocumentosLogo_fuofdc.png'}/>
+                    <AppIcon title={'Archivos'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760911292/CarpetaLogo1_zzjnut.png'}/>
+                    <AppIcon title={'Informes'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'}/>
+                    <AppIcon title={'Estadisticas'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'}/>
+                    <AppIcon onClick={()=>{setVisibleSearch(!visibleSearch)}} title={'Buscar'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760909160/BuscarLogo1_jf8ij8.png'}/>
+                    <AppIcon title={'Cuenta'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png'}/>
+                    <AppIcon title={'Mensajes'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760910097/MensajesLogo1_rhku5p.png'}/>
+                    <AppIcon title={'Asistente IA'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760911291/AiLogo1_qg2zvm.png'}/>
+                    <AppIcon title={'Calendario'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760913184/LogoCalendario1_ig0avt.png'}/>
+                    <AppIcon title={'Ajustes'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760908821/AjustesLogo1_zfyoil.png'}/>
+                    <AppIcon title={'Ayuda'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760911291/AyudaLogo1_v362of.png'}/>
                 </div>
             </div>
             {visibleSearch && (

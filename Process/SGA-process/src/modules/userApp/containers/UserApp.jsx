@@ -42,20 +42,22 @@ export function UserApp(){
     const [visibleApps,setVisibleApps] = useState(false);
 
     const optionsMenu = [
-        {text:'Inicio',path:'',icon:<i className="fa-solid fa-chalkboard"/>},
-        {text:'Crear Documento',path:'newDocument',icon:<i className="fa-solid fa-file-circle-plus"/>},
-        {text:'Buscar Documento',path:'searchDocument',icon:<i className="fa-solid fa-file-import"/>},
-        {text:'Informes',path:'reports',icon:<i className="fa-solid fa-table-cells"/>},
-        {text:'Estadisticas',path:'analytics',icon:<i className="fa-solid fa-chart-pie"/>},
-        {text:'Conceptos e impuestos',path:'concepts',icon:<i className="fa-solid fa-list-check"/>},
-        {text:'Usuarios',path:'users',icon:<i className="fa-solid fa-users"/>}
+        {text:'Inicio',path:'',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914614/LogoInicio1_nsuzaj.png' />},
+        {text:'Crear Documento',path:'newDocument',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914611/LogoCrearDoc_vqirqo.png'/>},
+        {text:'Buscar Documento',path:'searchDocument',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760909160/BuscarLogo1_jf8ij8.png'/>},
+        {text:'Informes',path:'reports',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>},
+        {text:'Estadisticas',path:'analytics',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>},
+        {text:'Conceptos e impuestos',path:'concepts',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914608/LogoConceptosImpuestos_w0klzj.png'/>},
+        {text:'Usuarios',path:'users',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png'/>}
     ]
 
+    //<img src=''/>
+
     const setingsPage = [
-        {text:'Ayuda',path:'help',icon:<i className="fa-solid fa-question"/>},
-        {text:'Configuración',path:'settings',icon:<i className="fa-solid fa-gear"/>},
-        {text:'Cerrar Sesión',path:'logOut',icon:<i className="fa-solid fa-arrow-right-from-bracket"/>},
-        {text:'Registro',path:'../../signUp',icon:<i className="fa-solid fa-user-plus"/>},
+        {text:'Ayuda',path:'help',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760911291/AyudaLogo1_v362of.png'/>},
+        {text:'Configuración',path:'settings',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908821/AjustesLogo1_zfyoil.png'/>},
+        {text:'Cerrar Sesión',path:'logOut',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760911296/CerrarSesionLogo1_moghr7.png'/>},
+        //{text:'Registro',path:'../../signUp',icon:<i className="fa-solid fa-user-plus"/>},
     ]
 
     useEffect(()=>{
