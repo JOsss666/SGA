@@ -1,0 +1,97 @@
+[33ma9267e6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtest[m[33m, [m[1;31morigin/test[m[33m)[m Update Home and ecnrypt
+[33m9c60bc1[m Merge Document Analytics  except index controller
+[33m92ba024[m  Encrypt and Home Update
+[33m63c32a2[m Merge pull request #19 from JOsss666/workMiguel
+[33m4909350[m[33m ([m[1;31morigin/workMiguel[m[33m)[m Agregando estadisticas por tipo de documento
+[33ma5c9e7e[m Charts and Analytics Update
+[33m985d188[m Merge pull request #18 from JOsss666/workMiguel
+[33mb29de8d[m Se agrego el grafico con un reporte en la seccion de estadisticas
+[33m1fdb4dd[m   Encrypt and darkMode background update
+[33m84b3706[m Se implemento la estructura de la seccion de estadisticas para el modulo de process
+[33m78311ab[m  Edit transactions totals and dark mode for formNewOperation
+[33m8ebe774[m  Adjustment of transaction detailReports and darkMode Components Styling
+[33mccf8653[m Merge remote-tracking branch 'origin/test' into test
+[33m6f31282[m Merge pull request #17 from JOsss666/workMiguel
+[33ma45bde7[m  DarkMode Styling and functionality for Process Module
+[33m31a8911[m Se agrego la opcion de ver detalles de la transaccion en la seccion de informes
+[33m2173fb8[m Merge pull request #16 from JOsss666/workMiguel
+[33mdd013af[m  Update and preparation for transaction_details report
+[33m9b0431c[m Se agrego la tabla PUC faltante en sga_ecosystem
+[33ma9dbc47[m Se Agregaron las tablas faltantes a la DB sga_ecosystem
+[33m0ac1d54[m  Fixed Double creation of transactions (states update issue)
+[33m37100c5[m  Creation Options new concept / tax and reload after action
+[33mcd86e5c[m  Creation consult for transaction_details and fix handleNavigate from RowTableReport
+[33me9f2efb[m Merge remote-tracking branch 'origin/test' into test
+[33m685217e[m Merge pull request #15 from JOsss666/workMiguel
+[33m45a8faa[m First Styling inventory components
+[33ma59cdce[m Se creo el Informe de detalles transacciones / procesos, agregando la columna con sus especificaciones
+[33m56eee9b[m Merge pull request #14 from JOsss666/workMiguel
+[33mf9f404e[m Se creo el ButtonDownload como componente y se agrego a los reportes
+[33mfadc200[m Refactorizar Creations SQL;
+[33m910bf2d[m Migration to modules standard of inventory
+[33m41008df[m Stylig no Chat AiChat img
+[33m25f91ca[m  Creation parameters and styling chatAi
+[33m2de7f99[m  Update Chat Ai, new funcionality, attach reports from database
+[33me2f5182[m  Creation Report transactions
+[33m7168baa[m  Finished FormNewOperation transactions/details
+[33mbfe40fc[m  Creation Transaction Form
+[33m7ea5871[m  Update Routes from stores inventory/process
+[33m878c096[m Creartion Loader
+[33m8b457c9[m Merge remote-tracking branch 'origin/test' into test
+[33m211e071[m Styling and update info from conceptCard and conceptPlan
+[33mc4c3e3a[m Merge pull request #13 from JOsss666/workMiguel
+[33me6489be[m  Change Method creation Accounts, taxes and concepts
+[33m2d74d6f[m Corrección para capturar los datos del usurio en LogIn y SignUp
+[33m19a3323[m Se realizaron los ajustes de diseño y se separo por componentes la estructura del LogIn y del SignUp
+[33m03cbbbd[m New LoginFunction
+[33m872bd4c[m Corrections import and names logIn and SignUp andingPage Inventory
+[33meeb9b18[m Merge remote-tracking branch 'origin/test' into test
+[33m886f122[m Merge pull request #11 from JOsss666/workMiguel
+[33m439af53[m first Ai-Chat Version
+[33m5dd5b5c[m Se agrego la seccion de Login y SingUp para que envie los deatos del formulario al postInfo
+[33m966ff07[m Se ajusto el diseño de la QuestionCard
+[33mbcf2eac[m Merge remote-tracking branch 'origin/test' into test
+[33meb4b59a[m Update Prewview Element
+[33m6e37a36[m Merge pull request #10 from JOsss666/workMiguel
+[33mdf0bf2a[m Se realizo el landing de Contact, se aplicaron las NormalCard y QuestionCard
+[33m1065ea6[m Merge pull request #9 from JOsss666/workMiguel
+[33mcd7b861[m Correccion diseño btn landing AboutUs
+[33m6c5daee[m  Update Components
+[33m88d8357[m Corrections P1.0 Inventory/LanfingPage/AboutUs
+[33mdc9cf03[m Update Branch test
+[33ma935d00[m Creation Preview Docs and Components
+[33me498e2a[m Merge pull request #8 from JOsss666/workMiguel
+[33m14f890f[m Se realizo las correcciones de diseño del landing AboutUs
+[33m27cce1f[m Merge pull request #7 from JOsss666/workMiguel
+[33m0d3b3bd[m Ajustando bordes de la galeria de imagenes y la lista desplegable
+[33m5ca5225[m Se realizo la estructura del landing para la seccion AboutUs
+[33m9b6e602[m Creation DelDoc
+[33m1187639[m Merge pull request #6 from JOsss666/workMiguel
+[33m30e979b[m Se agregaron las cards y las imagens faltantes y se corrigieron los errores del LandingPage
+[33m5f2b5bd[m Actualizando documento ComponentsCart.jsx en mi repo local
+[33m5e2fbab[m Modification Style and components Landing Page SGA/Inventory
+[33m8b5028e[m Merge pull request #5 from JOsss666/workMiguel
+[33m89e095a[m Enviando cambios a rama test
+[33m9412db1[m Creacion de algunas secciones del landing, falta agregar y corregir las cards e imagenes
+[33mb027931[m Merge pull request #4 from JOsss666/test
+[33m40281cd[m Styling Menu And Footer Landing Page Inventoty
+[33m9be069e[m[33m ([m[1;32mmain[m[33m)[m Creation and Update Routes
+[33m3b41bf5[m Creation Document Reports
+[33mf2978d5[m Merge pull request #3 from JOsss666/workMiguel
+[33m4d37d08[m Se agrego el componente y contenedor de AboutUs
+[33mc249c29[m Merge pull request #2 from JOsss666/workMiguel
+[33m01c7c10[m Se agrego el componente y el contenedor para estructurar parrafos
+[33m1803dd7[m Creation Title and home section
+[33m9429dbf[m  Inventory Landing Page Creation
+[33mdb1dd74[m Merge branch 'main' of https://github.com/JOsss666/SGA
+[33m9ce77bb[m First advance Process - Reports
+[33me29f339[m Merge pull request #1 from JOsss666/feature-Readme
+[33m8f91149[m[33m ([m[1;31morigin/feature-Readme[m[33m)[m Readme license
+[33m8090d5a[m Creation README
+[33m236210a[m DowebnMerge branch 'main' of https://github.com/KXA-Solutions/SGA
+[33m2d70ab2[m Update Owner Test
+[33m3223a44[m test company workflow
+[33m9cf8504[m First Team Commit
+[33m6ac7876[m Size Bold title
+[33mec8ff48[m Change Documents Preview SearchDocument
+[33m4d5d151[m Proyect git - github initialization

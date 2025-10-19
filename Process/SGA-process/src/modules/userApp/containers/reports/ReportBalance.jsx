@@ -20,6 +20,7 @@ export function ReportBalance({}) {
     // Prev Info
     const [info, setInfo] = useState([]);
     const { appInfo } = useAppInfo();
+    const [searchValue,setSearchValue] = useState();
 
     // Actions Page
     const [loading, setLoading] = useState(false);
@@ -62,7 +63,7 @@ export function ReportBalance({}) {
             <DescriptionSpan text={`Balance de cuentas contables.`} />
         </div>
         <div className="settingsReport">
-            <SearchBar placeholder={"Buscar"} />
+            <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
             <div className="rangeInput">
             <FormInput type={"date"} title={"Fecha Inicial"} />
             <span>-</span>
@@ -88,7 +89,7 @@ export function ReportBalance({}) {
         </div>
         <div className="SpaceReport">
             {!loading && (
-                <TableReport columns={settingsReport.columns} info={info} type={''} />
+                <TableReport columns={settingsReport.columns} info={info} type={''} searchValue={searchValue}/>
             )}
             {loading && (
             <LoadingSpace title={"Cargando información"} description={"Esto no debe tardar mucho..."} />

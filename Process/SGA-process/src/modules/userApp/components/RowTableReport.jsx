@@ -6,7 +6,7 @@ import { useAlert, usePreview } from "../../../context/context"
 import { DocumentPreview } from "../containers/Alerts/DocumentPreview"
 import { useLocation, useNavigate } from "react-router-dom"
 
-export function RowTableReport({columns,info,type}){
+export function RowTableReport({columns,info,type,hidden}){
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -65,16 +65,16 @@ export function RowTableReport({columns,info,type}){
         "Ver Detalles": <span className="Redirect" onClick={() => handleNavigate(`${info.id}`)}> Ver Detalles </span>
     }
 
-    console.log(info)
-
-    return(
-        <div className="RowTableReport">
-            <CheckSquare/>
-            {columns.map((element,index)=>(
-                <div key={index} className="ElementRow">
-                    {dictionaryElementsColum[element]}
-                </div>
-            ))}
-        </div>
-    )
+    if(!hidden){
+        return(
+            <div className="RowTableReport">
+                <CheckSquare/>
+                {columns.map((element,index)=>(
+                    <div key={index} className="ElementRow">
+                        {dictionaryElementsColum[element]}
+                    </div>
+                ))}
+            </div>
+        )
+    }
 }

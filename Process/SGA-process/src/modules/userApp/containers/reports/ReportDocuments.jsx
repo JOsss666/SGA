@@ -20,6 +20,7 @@ export function ReportDocuments({ type }) {
     // Prev Info
     const [info, setInfo] = useState([]);
     const { appInfo } = useAppInfo();
+    const [searchValue,setSearchValue] = useState("");
 
     // Actions Page
     const [loading, setLoading] = useState(false);
@@ -148,7 +149,7 @@ export function ReportDocuments({ type }) {
             <DescriptionSpan text={`Informe del estado de todos los documentos (${type}).`} />
         </div>
         <div className="settingsReport">
-            <SearchBar placeholder={"Buscar"} />
+            <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
             <div className="rangeInput">
             <FormInput type={"date"} title={"Fecha Inicial"} />
             <span>-</span>
@@ -174,10 +175,10 @@ export function ReportDocuments({ type }) {
         </div>
         <div className="SpaceReport">
             {!loading && (
-            <TableReport columns={settingsReport.columns} info={info} type={type} />
+                <TableReport columns={settingsReport.columns} info={info} type={type} searchValue={searchValue}/>
             )}
             {loading && (
-            <LoadingSpace title={"Cargando información"} description={"Esto no debe tardar mucho..."} />
+                <LoadingSpace title={"Cargando información"} description={"Esto no debe tardar mucho..."} />
             )}
         </div>
         </div>
