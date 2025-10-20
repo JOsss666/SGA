@@ -62,6 +62,26 @@
     animation-delay: .45s;
 }
 
+
+.HomeProcess .appsBar .AppIcon:nth-child(9){
+    animation-delay: .55s;
+}
+
+
+.HomeProcess .appsBar .AppIcon:nth-child(10){
+    animation-delay: .60s;
+}
+
+
+.HomeProcess .appsBar .AppIcon:nth-child(11){
+    animation-delay: .65s;
+}
+
+
+.HomeProcess .appsBar .AppIcon:nth-child(12){
+    animation-delay: .70s;
+}
+
 .HomeProcess .HomeSearch{
     position: absolute;
     left: 32.5%;

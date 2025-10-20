@@ -2,12 +2,15 @@
 .AppIcon{
     position: relative;
     display: flex;
-    flex-direction: column;
     cursor: pointer;
     animation-name: apperIconApp;
     animation-duration: .3s;
     animation-timing-function: ease;
     animation-fill-mode: both;
+}
+
+.onlyAppIcon{
+    flex-direction: column;
 }
 
 .AppIcon .IconButton{
@@ -20,12 +23,12 @@
     padding: .25vh;
     transition: .3s;
     margin: 0 auto;
-    
     cursor: pointer;
 }
 
-.AppIcon:hover .IconButton{
-    background-color: #ffffff45;
+.AppIcon:hover{
+    background-color: #ffffff75;
+    border-radius: 1vh;
 }
 
 
@@ -51,6 +54,27 @@
     white-space: none;
     text-overflow: ellipsis;
     text-wrap: nowrap;
+}
+
+
+.horizontalAppIcon{
+    flex-direction: flex;
+    width: 100%;
+    border-radius: 1vh;
+    transition: .3s;
+}
+
+.horizontalAppIcon .IconButton{
+    margin: 0 1vh;
+}
+
+.horizontalAppIcon:hover .IconButton{
+    background-color: none !important;
+}
+
+.horizontalAppIcon span{
+    margin: auto 0;
+    max-width: max-content;
 }
 
 @keyframes apperIconApp {

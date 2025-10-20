@@ -25,13 +25,14 @@
     margin: 0 auto;
     margin-top: 2vh;
     display: flex;
-    flex-wrap: wrap;
-    width: fit-content;
+    flex-direction: column;
+    width: 100%;
     padding: 1vh 0;
+    overflow: hidden;
 }
 
 .HomeSearch .resultsContainer .AppIcon{
-    margin: auto 2vh;
+    margin: 1vh auto;
 }
 
 @keyframes appearSearcHome {

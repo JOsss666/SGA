@@ -82,6 +82,28 @@
     border: .24vh solid transparent;
 }
 
+.UserApp .headApp .resultsQuickSerch{
+    position: absolute;
+    width: 32vw;
+    max-height: 30vh;
+    overflow: hidden;
+    background-color: #D2EAFB90;
+    backdrop-filter: blur(3vh);
+    top: 10vh;
+    left: 29vw;
+    border-radius: 2vh;
+}
+
+.UserApp .headApp .resultsQuickSerch .AppIcon img{
+    height: 3vh;
+    width: 3vh;
+    margin: auto 0;
+}
+
+.UserApp .headApp .resultsQuickSerch .AppIcon span{
+    margin-left: 0;
+}
+
 .UserApp .headApp .SearchBar input{
     border-radius: 3vh;
 }
