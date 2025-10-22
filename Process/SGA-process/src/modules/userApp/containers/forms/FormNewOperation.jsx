@@ -82,6 +82,7 @@ export function FormNewOperation({info}){
     }
 
     const pushDetailsTrans = ()=>{
+        let newSubTtl = 0;
         const dicNatureDocs = {'DC':'DB','FV':'CR','FE':'CR','NC':'CR','ND':'DB'}
         let newTransDetails = [];
         console.log(info)
@@ -95,6 +96,7 @@ export function FormNewOperation({info}){
                 total:info.value,
                 nature:dicNatureDocs[info.doc_type]
         })
+        newSubTtl += info.value;
         taxes.forEach(element => {
                 newTransDetails.push({
                 account_id:element.account_id,
@@ -104,6 +106,7 @@ export function FormNewOperation({info}){
                 total: info.value * Number(((element.rate/100)).toFixed(2)),
                 nature:element.nature
             })
+            newSubTtl += info.value * Number(((element.rate/100)).toFixed(2))
         });
         let paymentMethod = info.paymentMethod;
         newTransDetails.push({
@@ -111,7 +114,7 @@ export function FormNewOperation({info}){
             account_type:appInfo.accountPlanType,
             type:'payment',
             subtotal:info.value,
-            total:total,
+            total:newSubTtl,
             nature:paymentMethod.nature == 'D' || paymentMethod.nature == 'DB' ? 'DB':'CR'
         })
         console.log(newTransDetails);
