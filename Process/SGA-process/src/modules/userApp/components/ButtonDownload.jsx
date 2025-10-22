@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import './ButtonDownload.css';
+import { parseToCsv, parseToXlsx } from '../../../utils/functions';
 
-export function ButtonDownload() {
+export function ButtonDownload({info,columns,formats,title}) {
     const [status, setStatus] = useState("default");
     const [showMenu, setShowMenu] = useState(false);
 
@@ -28,16 +29,20 @@ export function ButtonDownload() {
 
     const current = states.find((s) => s.key === status);
 
-    const handleFormatClick = (format) => {
-        setStatus("loading");
-        setShowMenu(false);
-
-        console.log(`Descargando archivo en formato: ${format}`);
-
-        setTimeout(() => {
+    const handleFormatClick = async(format) => {
+        if(info != undefined){
+            setStatus("loading");
+            setShowMenu(false);
+            console.log(`Descargando archivo en formato: ${format}`);
+            switch (format){
+                case "csv": await parseToCsv(info,true,title); break;
+                case "xlsx": await parseToXlsx(info,true,null,title);break;
+            }
             setStatus("success");
-            setTimeout(() => setStatus("default"), 2000); 
-        }, 2000);
+            setTimeout(() => {
+                setStatus("default");
+            }, 2000);
+        }
     };
 
     return (

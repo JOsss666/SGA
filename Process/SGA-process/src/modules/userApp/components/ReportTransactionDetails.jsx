@@ -95,7 +95,7 @@ export function ReportTransactionDetails() {
                 {text:'Verifica el contenido de este documento',context:`Procesos - Informe - ${documentTypes[type]}`},
                 {text:'¿Que acciones me recomiendas basado en este documento?',context:`Procesos - Informe - ${documentTypes[type]}`}
             ]}/>
-                <ButtonDownload />
+                <ButtonDownload info={info} title={`Detalle de Transacción #${transaction_id} - Nombre del tercero`} />
             </div>
 
             <div className="SpaceReport">

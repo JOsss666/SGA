@@ -171,7 +171,7 @@ export function ReportDocuments({ type }) {
                 {text:'Realiza un analisis de este informe',context:`Procesos - Informe - ${documentTypes[type]}`},
                 {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Informe - ${documentTypes[type]}`}
             ]}/>
-            <ButtonDownload />
+            <ButtonDownload info={info} title={`Informe ${documentTypes[type]}`} />
         </div>
         <div className="SpaceReport">
             {!loading && (

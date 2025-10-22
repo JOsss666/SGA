@@ -1,6 +1,8 @@
 
 import { urlSer } from "../App";
 import domtoimage from "dom-to-image-more";
+import Papa from 'papaparse';
+import ExcelJs from 'exceljs';
 
 export async function postInfo(route,informacion){
     console.log('Funcion post');
@@ -24,6 +26,55 @@ export async function postInfo(route,informacion){
         })
     })
 }
+
+import ExcelJS from "exceljs";
+
+export async function parseToXlsx(info, download, columns, name) {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(name || "Hoja 1");
+    if (columns && Array.isArray(columns)) {
+        worksheet.columns = columns;
+        worksheet.addRows(info);
+    } else {
+        // Si no hay columnas, inferir encabezados automáticamente
+        if (info.length > 0 && typeof info[0] === "object") {
+        const headers = Object.keys(info[0]);
+        worksheet.addRow(headers);
+        info.forEach(obj => worksheet.addRow(Object.values(obj)));
+        } else {
+        worksheet.addRows(info);
+        }
+    }
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", name ? `${name}.xlsx` : "descarga.xlsx");
+    if (download) {
+        link.click();
+    } else {
+        return link;
+    }
+}
+
+
+export  async function parseToCsv(info,download,name){
+    const newCsv = Papa.unparse(info);
+    const blob = new Blob([newCsv],{type:"text/csv;charset=utf-8;"})
+    let blobUrl = URL.createObjectURL(blob)
+    let newLinkDownload = document.createElement("a");
+    newLinkDownload.href = blobUrl;
+    newLinkDownload.setAttribute("download",name? name:"SGA - descarga.csv");
+    if(download){
+        newLinkDownload.click();
+    }else{
+        return newLinkDownload;
+    }
+}
+
 
 export function copyToClipBoard(text){
     navigator.clipboard.writeText(text)
