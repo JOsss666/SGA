@@ -229,6 +229,7 @@ controller.logIn = (req,res)=>{
     })
 }
 
+
 controller.logOut = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
@@ -1688,7 +1689,7 @@ controller.getTransactionsData = async (req, res) => {
 
 //getDocAnalyticDOcNumber --> Nombre de la funcion
 
-controller.getDocumentData = async (req, res) => {
+controller.getDocAnalyticDocNumber = async (req, res) => {
         let data = '';
         req.on('data', chunk => {
             data += chunk;
