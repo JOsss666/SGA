@@ -4,6 +4,8 @@ import { DescriptionSpan } from "../components/DescriptionSpan";
 import { DespleList } from "../components/DespleList";
 import './Reports.css'
 import { ReportDocuments } from './reports/ReportDocuments';
+import { ReportTransactionDetails } from '../components/ReportTransactionDetails';
+import { ReportBalance } from './reports/ReportBalance';
 
 export function Reports(){
 
@@ -34,7 +36,8 @@ export function Reports(){
                                 {title:'Facturas de venta (FV)',children:<i className="fa-solid fa-file-invoice"/>,action:handleNavigate,path:'FVS'},
                                 {title:'Transacciones (TR)',children:<i className="fa-solid fa-magnifying-glass-chart"/>,action:handleNavigate,path:'TRS'},
                                 {title:'Informes adicionales',options:[
-                                    {title:'Informe Costos Operativos',children:<i className="fa-solid fa-book"/>}
+                                    {title:'Informe Costos Operativos',children:<i className="fa-solid fa-book"/>},
+                                    {title:'Balance de prueba',children:<i className="fa-solid fa-book"/>,action:handleNavigate,path:'Balance'}
                                 ]}
                             ]}/>
                             <DespleList children={<i className="fa-solid fa-book"/>} father={{
@@ -57,12 +60,15 @@ export function Reports(){
                         </div>
                     </>
                 }/>
+                // http://localhost:5173/SGA_process/:company_key/:user_key/reports/OPS
                 <Route path='/OCS' element={<ReportDocuments type={'OC'}/>} />
                 <Route path='/OPS' element={<ReportDocuments type={'OP'}/>} />
                 <Route path='/DCS' element={<ReportDocuments type={'DC'}/>} />
                 <Route path='/CIS' element={<ReportDocuments type={'CI'}/>} />
                 <Route path='/FVS' element={<ReportDocuments type={'FV'}/>} />
                 <Route path='/TRS' element={<ReportDocuments type={'TR'}/>} />
+                <Route path='/TRS/:transaction_id' element={<ReportTransactionDetails />} />
+                <Route path='/Balance' element={<ReportBalance/>}/>
             </Routes>
         </div>
     )

@@ -4,9 +4,9 @@ import './LoadingAppDataPage.css'
 export function LoadingAppDataPage(){
     return(
         <div className="LoadingAppDataPage">
-            <img src="https://i.pinimg.com/1200x/4d/6f/05/4d6f05603e71b923d19f78206b51f1af.jpg" />
+            <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1759181339/ChatGPT_Image_7_sept_2025_13_29_09_v2xl9a.png" />
             <div className="searchServiceAnimal">
-                <span>Oso Hormiguero Andino</span>
+                <span>Orquidea Morada <i className="fa-solid fa-share-from-square"/></span>
             </div>
             <div className="loadingDotsA">
                 <div className="loadingDot"></div>
@@ -19,7 +19,7 @@ export function LoadingAppDataPage(){
                 <div className="loadingDot"></div>
             </div>
             <h6>Cargando el contenido de su aplicación...</h6>
-            <strong>SGA - Proceso</strong>
+            <strong>SGA - Procesos</strong>
         </div>
     )
 }

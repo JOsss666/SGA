@@ -1,3 +1,4 @@
+@import '../containers/UserApp.css';
 
 .LabelValue{
     display: flex;
@@ -9,10 +10,11 @@
 .LabelValue .lab{
     width: 50%;
     margin-right: 1vh;
-    color: #556;
+    color: var(--descriptionText);
 }
 
 .LabelValue .val{
     font-weight: 500;
     width: 50%;
+    color: var(--mainText);
 }

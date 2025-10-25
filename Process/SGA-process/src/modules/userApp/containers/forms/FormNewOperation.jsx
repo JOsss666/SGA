@@ -22,7 +22,7 @@ export function FormNewOperation({info}){
     const [transactionDetails,setTransactionDetails] = useState([]);
     const [doc_date,setdocDate] = useState('2025/09/23')
     const [conceptInfo,setConceptinfo] = useState({});
-    const [authNewTran,setAuthNewtran] = useState(false);
+    const [loadingCractionTransaction,setloadingCractionTransaction] = useState(false);
 
     const formInfo = {
             user_id:userInfo.user_id,
@@ -59,6 +59,7 @@ export function FormNewOperation({info}){
             typePlanAccount:appInfo.account_type,
             concept_id:info.concept_id
         })
+        console.log(res);
         if(res[0]){
             setTaxes(res[1])
         }else{
@@ -67,6 +68,8 @@ export function FormNewOperation({info}){
     }
 
     const createTransaction = async()=>{
+        console.log('Creando transacción -->')
+        setloadingCractionTransaction(true)
         setDisabled(true);
         console.log('Creando nueva transacción',formInfo);
         let res = await postInfo('/createTransaction',formInfo);
@@ -74,10 +77,13 @@ export function FormNewOperation({info}){
             setTransId(res[1])
             setDisabled(false);
         }
+        setloadingCractionTransaction(true)
         setLoading(false);
     }
 
     const pushDetailsTrans = ()=>{
+        let newSubTtl = 0;
+        const dicNatureDocs = {'DC':'DB','FV':'CR','FE':'CR','NC':'CR','ND':'DB'}
         let newTransDetails = [];
         console.log(info)
         console.log(taxes)
@@ -87,17 +93,31 @@ export function FormNewOperation({info}){
                 account_type:appInfo.accountPlanType,
                 type:'operation',
                 subtotal:info.value,
-                total:info.value
+                total:info.value,
+                nature:dicNatureDocs[info.doc_type]
         })
+        newSubTtl += info.value;
         taxes.forEach(element => {
                 newTransDetails.push({
                 account_id:element.account_id,
                 account_type:appInfo.accountPlanType,
                 type:'tax',
                 subtotal:info.value,
-                total: info.value * Number((1 + (element.rate/100)).toFixed(2))
+                total: info.value * Number(((element.rate/100)).toFixed(2)),
+                nature:element.nature
             })
+            newSubTtl += info.value * Number(((element.rate/100)).toFixed(2))
         });
+        let paymentMethod = info.paymentMethod;
+        newTransDetails.push({
+            account_id:paymentMethod.account_id,
+            account_type:appInfo.accountPlanType,
+            type:'payment',
+            subtotal:info.value,
+            total:newSubTtl,
+            nature:paymentMethod.nature == 'D' || paymentMethod.nature == 'DB' ? 'DB':'CR'
+        })
+        console.log(newTransDetails);
         setTransactionDetails(newTransDetails);
     }
 
@@ -149,15 +169,14 @@ export function FormNewOperation({info}){
             });
             pushDetailsTrans();
             setTotal(newTotal);
-            setAuthNewtran(true);
         }
     },[taxes])
 
     useEffect(()=>{
-        if(authNewTran && transactionDetails.length >0){
+        if(transactionDetails.length >0 && !loadingCractionTransaction){
             createTransaction();
         }
-    },[authNewTran,transactionDetails])
+    },[transactionDetails])
 
     useEffect(()=>{
         getFormData();
@@ -168,7 +187,7 @@ export function FormNewOperation({info}){
                 <div className="FormNewOperation">
                     <div className="headForm">
                         <BoldTitle text={'COMPROBANTE'}/>
-                        <TagIndicator title={'#3016'} type={'indicator'}/>
+                        <TagIndicator title={`#${transaction_id}`} type={'indicator'}/>
                         <span className="dateDoc">22/09/2025</span>
                     </div>
                     <div className="bodyForm">
@@ -177,7 +196,7 @@ export function FormNewOperation({info}){
                             <LabelValue title={'Cliente / Proveedor'} value={
                                 <UserCard name={'José murillo'} desc={'Cliente'} />
                             }/>
-                            <LabelValue title={'Tipo Documento'} value={'Compra (DC)'}/>
+                            <LabelValue title={'Tipo Documento'} value={`Compra (${info.doc_type})`}/>
                             <LabelValue title={'Estado'} value={'Pendiente de aprovación'}/>
                             <LabelValue title={'Concepto'} value={`SGA#${conceptInfo.id} - ${conceptInfo.name}`}/>
                         </section>

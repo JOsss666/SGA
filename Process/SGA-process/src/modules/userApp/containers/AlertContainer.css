@@ -1,9 +1,10 @@
+@import './UserApp.css';
 
 .AlertContainer{
     height: inherit;
     padding: 1vh;
     width: fit-content;
-    background-color: #fff;
+    background-color: var(--bg);
     position: relative;
     box-shadow: 0 -.2vh 1vh #0002;
     overflow: auto;
@@ -11,7 +12,6 @@
     animation-duration:1s;
     animation-fill-mode: both;
     animation-timing-function: ease;
-    border: solid .1vh #ddd;
     width: 100%;
 }
 
@@ -25,6 +25,7 @@
 .AlertContainer .optionsAlert i{
     cursor: pointer;
     font-size: clamp(3.5px,3vh,350px);
+    color: var(--mainText);
 }
 
 @keyframes appearAlert {

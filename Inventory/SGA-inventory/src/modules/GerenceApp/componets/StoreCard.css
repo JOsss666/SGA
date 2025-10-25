@@ -4,11 +4,12 @@
     flex-direction: column;
     padding: 1vh;
     border-radius: 1vh;
-    background-color: #fff;
+    
     width: 25vh;
     cursor: pointer;
+    outline: solid .1vh #ddd;
     height: 20vh;
-    box-shadow: 0 .4vh 2vh #0001;
+    box-shadow: 0 .4vh 2vh #ccc7;
 }
 
 .StoreCard img{

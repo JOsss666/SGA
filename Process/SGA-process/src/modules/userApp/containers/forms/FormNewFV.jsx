@@ -6,10 +6,11 @@ import { FormButton } from "../../components/FormButton";
 import { FormInput } from "../../components/FormInput";
 import { SearchinList } from "../../components/SearchInList";
 import './FormNewFV.css'
+import { FormNewOperation } from "./FormNewOperation";
 
 export function FormNewFV({info,reloadFun}){
 
-    const {popOutAlert} = useAlert();
+    const {popOutAlert,popInAlert} = useAlert();
     const {appInfo,userInfo} = useAppInfo();
     const {addNotification} = useNotifications();
     const [thirdParties,setTirdParties] = useState([]);
@@ -35,7 +36,7 @@ export function FormNewFV({info,reloadFun}){
         value:value != '' ? JSON.parse(value):0
     }
 
-     const getConcepts = async()=>{
+    const getConcepts = async()=>{
         let res = await postInfo('/getConcepts',{
             company_id:appInfo.company_id,
             typePlanAccount:appInfo.accountPlanType
@@ -55,7 +56,7 @@ export function FormNewFV({info,reloadFun}){
         }
     }
 
-    const createDC = async()=>{
+    const createFV = async()=>{
         setDisabled(true);
         setLoading(true);
         let res = await postInfo('/process/createFV',formInfo);
@@ -65,6 +66,8 @@ export function FormNewFV({info,reloadFun}){
                 description:`Se ha añadido la factura de venta (FV#${res}) correctamente a la orden de producción (OP#${op_id})`,
                 type:'aproved'
             })
+            formInfo.doc_type = 'FV',
+            formInfo.doc_id = res;
             popOutAlert();
             if(reloadFun != undefined){
                 reloadFun();
@@ -76,6 +79,9 @@ export function FormNewFV({info,reloadFun}){
                 type:'error',
                 fixed:true
             })
+        }
+        if(typeof res === 'number'){
+            await popInAlert(<FormNewOperation info={formInfo}/>)
         }
         setLoading(false);
         setDisabled(false);
@@ -126,7 +132,7 @@ export function FormNewFV({info,reloadFun}){
             <form  onSubmit={(e) => {
                 if (!e.target.checkValidity()) return;
                     e.preventDefault();
-                    createDC();
+                    createFV();
                 }} >
                 {info.op_id == undefined &&(
                     <SearchinList disabled={disabled} action={setOp_id} title={'Orden de produccíon'} placeHolder={'Seleccione la OP a la que pertenece'} list={OPS}/>

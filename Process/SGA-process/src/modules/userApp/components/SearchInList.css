@@ -1,3 +1,4 @@
+@import '../containers/UserApp.css';
 
 .SearchinList{
     display: flex;
@@ -9,6 +10,7 @@
     margin-bottom: 1.5vh;
     font-size: clamp(1px,2.5vh,20px);
     font-weight: 500;
+    color: var(--mainText);
 }
 
 .SearchinList .SlistC{
@@ -22,9 +24,10 @@
     padding: 1vh 2vh;
     border-radius: .5vh;
     border: hidden;
-    outline: solid .1vh #ddd;
-    box-shadow: 0 .4vh 1vh #d5d5d5;
-    color: #aaa;
+    outline: solid .1vh var(--inputsBorder);
+    box-shadow: 0 .4vh 1vh var(--translucidMenu);
+    color: var(--descriptionText);
+    background-color: var(--inputsBg);
     z-index: 5;
     font-size: clamp(2.2px,2.2vh,22px);
 }
@@ -34,8 +37,8 @@
     top: 4.8vh;
     left: 0;
     list-style: none;
-    background-color: #f1f1f1;
-    outline: solid .1vh #eaeaea;
+    background-color: var(--translucidMenu);
+    outline: solid .1vh var(--inputsBg);
     backdrop-filter: blur(1vh);
     z-index: 8;
     width: 100%;
@@ -55,13 +58,14 @@
     padding: 1vh 2vh;
     font-size: clamp(1px,2.2vh,20px);
     cursor: pointer;
-    color: #333;
+    color: var(--descriptionText);
     transition: .3s;
 }
 
 .SearchinList .SlistC .listElementsContainer li:hover{
-    background-color: #ddd;
+    background-color: var(--iconHover);
     padding-left: 3vh;
+    color: var(--mainText);
 }
 
 

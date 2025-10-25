@@ -18,7 +18,11 @@ export function MenuApp({visibleMenu,title,options}){
             )}
             <ul className='listOptions'>
                 {options.length > 0 && options.map((element,index)=>(
-                    <li onClick={()=>{handleNavigate(element.path)}} key={index}>{element.icon}{visibleMenu? element.text:''}{element.subSections != undefined? <i className="fa-solid fa-angle-down despleSiubMe"/>:''}</li>
+                    <li onClick={()=>{handleNavigate(element.path)}} key={index}>
+                        {element.icon}
+                        <span>{visibleMenu? element.text:''}</span>
+                        {element.subSections != undefined? <i className="fa-solid fa-angle-down despleSiubMe"/>:''}
+                    </li>
                 ))}
             </ul>
         </div>

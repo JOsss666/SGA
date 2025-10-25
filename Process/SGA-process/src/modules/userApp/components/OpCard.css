@@ -1,13 +1,14 @@
+@import '../containers/UserApp.css';
 
 .OpCard{
     display: flex;
     flex-direction: column;
-    background-image: linear-gradient(45deg,#EEF2FF,#F7FAFF,#F8FAFD,#FEF2F2);
+    background-image: linear-gradient(45deg,var(--lightGradient1),var(--lightGradient2),var(--lightGradient3),var(--lightGradient4));
     width: 27vw;
     height: 70vh;
     border-radius: 2vh;
     /*box-shadow: 0 .2vh 2vh #aaa5;*/
-    outline: solid .1vh #ddd;
+    outline: solid .1vh var(--inputsBorder);
     padding: 1vh;
     overflow-y: auto;
 }
@@ -21,12 +22,13 @@
     margin: auto 0;
     margin-left: 1vh;
     font-weight: 600;
-    width: 40%;
-    font-size: clamp(3.5px,3.5vh,35px);
+    width: 20%;
+    font-size: clamp(3px,3vh,30px);
+    color: var(--mainText);
 }
 
 .OpCard .headOP .SwitchOption{
-    width: 57%;
+    width: 48%;
     margin: auto 2vh;
 }
 
@@ -57,19 +59,20 @@
 .OpCard .attachedDocuments{
     display: flex;
     flex-direction: column;
-    padding: 1vh 2vh;
+    padding: 1vh;
 }
 
 .OpCard .attachedDocuments h4{
     font-size: clamp(2.2px,2.2vh,22px);
     font-weight: 500;
-    color: #565D6A;
+    color: var(--descriptionText);
     margin-bottom: 1vh;
 }
 
 .OpCard .attachedDocuments .ocsContainer{
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .OpCard .attachedDocuments .ocsContainer .gridOcs{
@@ -79,6 +82,7 @@
     margin-bottom: 2vh;
     width: 100%;
     overflow: auto;
+    padding: .1vh;
 }
 
 .OpCard .attachedDocuments  .newOcCD{
@@ -94,8 +98,14 @@
     color: #708BE6;
 }
 
+.OpCard .ocsContainer h4 strong{
+    font-weight: 600;
+    color: #708BE6;
+    cursor: pointer;
+}
+
 .OpCard .attachedDocuments  .newOcCD:hover{
-    background-color:#DFF2FE;
+    background-color:var(--iconHover);
 }
 
 .OpCard .attachedDocuments  .newOcCD i{

@@ -1,5 +1,5 @@
 
-import { calcWeightedAverage, isRelevanPrompt, useDataBase } from "../app.js";
+import { calcWeightedAverage, encrypt, isRelevanPrompt, useDataBase, actualDate } from "../app.js";
 import fs from "fs";
 import path from "path";
 import { send_API_AI } from "../ApiFunctions.js";
@@ -41,6 +41,86 @@ controller.mergeChunks = (req, res) => {
     res.json({ message: "Archivo ensamblado correctamente", path: finalPath });
 };
 
+
+controller.createCompany = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            INSERT INTO
+                sga_ecosystem.companies(
+                    legal_name,
+                    trade_name,
+                    indentification_type,
+                    indentification_number,
+                    company_mail,
+                    company_key,
+                    phone,
+                    country,
+                    city,
+                    address
+                )
+            VALUES(?,?,?,?,?,?,?,?,?,?);
+        `;
+        let newompany_key = encrypt(`
+            ${info.trade_name}*_${info.indentification_number}SGA_ab26212caa96090eacaebbf1${info.phone}_${actualDate.toISOString()}
+        `);
+        let consulta = await useDataBase(sentence,[
+            legal_name,
+                info.trade_name,
+                info.indentification_type,
+                info.indentification_number,
+                info.company_mail,
+                newompany_key,
+                info.phone,
+                info.country,
+                info.city,
+                info.address
+        ],2);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+controller.getUserInfo = (req,res)=>{
+    let data = ''
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        if(data != ''){
+            let info = JSON.parse(data);
+            let sentence = `
+                SELECT
+                    sga_ecosystem.users.* , sga_ecosystem.users_access.* 
+                FROM 
+                    sga_ecosystem.users LEFT JOIN sga_ecosystem.users_access
+                ON
+                    sga_ecosystem.users.user_id = sga_ecosystem.users_access.user_id 
+                WHERE
+                    sga_ecosystem.users.user_key = ? ;`
+            let consulta = await useDataBase(sentence,[info],1);
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(consulta));
+        }else{
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(false));
+        }
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+
 controller.getCompanyInfo = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
@@ -59,7 +139,7 @@ controller.getCompanyInfo = (req,res)=>{
                 sga_ecosystem.acount_plans
             ON
                 sga_ecosystem.companies.company_id = sga_ecosystem.acount_plans.company_id
-            WHERE sga_ecosystem.companies.company_id = ? ;`
+            WHERE sga_ecosystem.companies.company_key = ? ;`
         let consulta = await useDataBase(sentence,[info],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -101,7 +181,6 @@ controller.createAccountsPlan = (req,res)=>{
     })
 }
 
-
 controller.logIn = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
@@ -111,15 +190,59 @@ controller.logIn = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             SELECT
-                *
+                sga_ecosystem.users.*,
+                sga_ecosystem.companies.company_key
             FROM    
                 sga_ecosystem.users
+            LEFT JOIN
+                sga_ecosystem.companies
+            ON
+                sga_ecosystem.users.company_id = sga_ecosystem.companies.company_id
             WHERE
-                user_mail = ${info.mail}
-                AND user_password = ${info.pass}
+                user_mail = '${info.mail}'
+                AND user_password = '${encrypt(info.pass)}'
             LIMIT 1;
         `
         let consulta = await useDataBase(sentence,[],1);
+        if(consulta[0]){
+            let postSen = `
+                UPDATE sga_ecosystem.users_access
+                SET user_session = 1
+                WHERE user_id = ?
+            `;
+            let postConsul = await useDataBase(postSen,[consulta[1][0].user_id],2);
+            if(postConsul){
+                res.writeHead(200,{'Content-Type':'text/plain'})
+                res.end(JSON.stringify(consulta));
+            }else{
+                res.writeHead(200,{'Content-Type':'text/plain'})
+                res.end(JSON.stringify([false,[]]));
+            }
+        }else{
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(consulta));
+        }
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+controller.logOut = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+        UPDATE sga_ecosystem.users_access
+        SET user_session = 0 
+        WHERE user_id = ?
+        ;
+        `;
+        let consulta = await useDataBase(sentence,[info.user_id],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -140,15 +263,34 @@ controller.signUp = (req,res)=>{
             INSERT
             INTO   
                 sga_ecosystem.users(
+                    company_id,
                     user_name,
                     user_mail,
-                    user_password
+                    user_password,
+                    user_key
                 )
-            VALUES(?,?,?,?);
+            VALUES(?,?,?,?,?);
         `;
-        let consulta = await useDataBase(sentence,[info.user_name,info.mail,info.pass],2);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
+        let newUserKey = encrypt(`${info.name.slice(1,info.name.length -1)}${info.mail.split('@')[0]}|SGA_ab26212caa96090eacaebbf1**_${info.pass}${actualDate.toISOString()}`);
+        let consulta = await useDataBase(sentence,[info.company_id,info.name,info.mail,encrypt(info.pass),newUserKey],4);
+        if(typeof(consulta) == 'number'){
+            let posSen = `
+                INSERT INTO 
+                    sga_ecosystem.users_access (user_id)
+                VALUES(?);
+            `;
+            let posCon = await useDataBase(posSen,[consulta],2);
+            if(posCon){
+                res.writeHead(200,{'Content-Type':'text/plain'})
+                res.end(JSON.stringify(true));
+            }else{
+                res.writeHead(200,{'Content-Type':'text/plain'})
+                res.end(JSON.stringify(false));
+            }
+        }else{
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(false));
+        }
     })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
@@ -217,7 +359,6 @@ controller.getAccountsPlan = (req,res)=>{
                         id,code,name,level,account_path
                     FROM sga_ecosystem.account_templates_PUC
                     UNION ALL
-
                     SELECT 
                         'personalized',
                         id,code,name,level,account_path
@@ -447,7 +588,8 @@ controller.getPaymentMethods = (req,res)=>{
                 code,
                 name,
                 currency,
-                state
+                state,
+                account_id
             FROM
                 sga_ecosystem.payment_methods
             WHERE
@@ -472,7 +614,6 @@ controller.createTransaction = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        console.log('----> :',info.transactionDetails);
         let sentence = `
             INSERT INTO
                 sga_ecosystem.transactions
@@ -501,6 +642,7 @@ controller.createTransaction = (req,res)=>{
             info.subtotal,
             info.total
         ],6)
+        console.log('Transacción Creada correctamente No: ',consulta);
         if(consulta[0]){
             let resultDetails = [];
             for(const element of info.transactionDetails){
@@ -561,7 +703,7 @@ controller.createTransactionDetail = (req,res)=>{
                     total
                 )
             VALUES
-            (?,?,?,?,?,?)
+            (?,?,?,?,?,?);
         `
         let consulta = await useDataBase(sentence,[
             info.transaction_id,
@@ -622,6 +764,42 @@ controller.getTransactions = (req,res)=>{
     })
 }
 
+controller.getTransactionDetails = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let tableAcc = info.typePlanAccount == 'PUC'? 'account_templates_PUC':'contable_accounts';
+        let sentence = `
+            SELECT
+                sga_ecosystem.transaction_detail.*,
+                sga_ecosystem.${tableAcc}.name AS concept_name,
+                sga_ecosystem.${tableAcc}.code AS account_code,
+                sga_ecosystem.payment_methods.name AS payment_name
+            FROM
+                sga_ecosystem.transaction_detail
+            LEFT JOIN
+                sga_ecosystem.${tableAcc}
+            ON 
+                sga_ecosystem.transaction_detail.account_id = sga_ecosystem.${tableAcc}.id
+            LEFT JOIN
+                sga_ecosystem.payment_methods
+            ON 
+                sga_ecosystem.${tableAcc}.id = sga_ecosystem.payment_methods.id
+            WHERE
+                sga_ecosystem.transaction_detail.transaction_id = ? ;
+        `;
+        let consulta = await useDataBase(sentence,[info.transaction_id],1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
 
 controller.updateTransactionState = (req,res)=>{
     let data = '';
@@ -630,6 +808,8 @@ controller.updateTransactionState = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        console.log('Transacción a actualizar: ');
+        console.log(info);
         let sentence1 = `
             UPDATE
                 sga_ecosystem.transactions
@@ -656,36 +836,14 @@ controller.updateTransactionState = (req,res)=>{
             res.end(JSON.stringify(consulta1));
         }
     })
-}
-
-
-// SGA - Inventory (Cambiar de archivo despues)
-
-controller.getUserInfo = (req,res)=>{
-    let data = ''
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            SELECT
-                sga_ecosystem.users.* , sga_ecosystem.users_access.* 
-            FROM 
-                sga_ecosystem.users LEFT JOIN sga_ecosystem.users_access
-            ON
-                sga_ecosystem.users.user_id = sga_ecosystem.users_access.user_id 
-            WHERE
-                sga_ecosystem.users.user_id = ? ;`
-        let consulta = await useDataBase(sentence,[info],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
 }
+
+
+// SGA - Inventory (Cambiar de archivo despues)
 
 controller.getSalute = (req,res)=>{
     console.log('Recibido')
@@ -1477,8 +1635,6 @@ controller.getRotation = (req,res)=>{
     })
 }
 
-
-
 // Ai_asistant Actions
 
 controller.processAiRequest= (req,res)=>{
@@ -1501,5 +1657,79 @@ controller.processAiRequest= (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
+
+controller.getTransactionsData = async (req, res) => {
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        const period = (req.query.period || "MONTH").toUpperCase();
+        let format;
+        if (period === "DAY") format = "%Y-%m-%d";
+        else if (period === "YEAR") format = "%Y";
+        else format = "%Y-%m";
+        const sentence = `
+        SELECT
+            DATE_FORMAT(created_at, '${format}') AS label,
+            SUM(subtotal) AS total
+        FROM sga_ecosystem.transactions
+        ${info.doc_type != null ? `
+        WHERE
+            sga_ecosystem.transactions.doc_type = '${info.doc_type}'
+        `:''}
+        GROUP BY DATE_FORMAT(created_at, '${format}')
+        ORDER BY DATE_FORMAT(created_at, '${format}') ASC;
+        `;
+        const consulta = await useDataBase(sentence, [], 1);
+        res.writeHead(200,{'Content-Type':'text/plain'});
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+};
+
+
+//getDocAnalyticDOcNumber --> Nombre de la funcion
+
+controller.getDocumentData = async (req, res) => {
+        let data = '';
+        req.on('data', chunk => {
+            data += chunk;
+        });
+        req.on('end', async () => {
+                let info = JSON.parse(data)
+                if (!info.type) {
+                    console.warn("⚠️ 'type' no recibido en el cuerpo de la solicitud");
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ error: "'type' es requerido" }));
+                }
+                const period = (req.query.period || "MONTH").toUpperCase();
+                let format;
+                if (period === "DAY") format = "%Y-%m-%d";
+                else if (period === "YEAR") format = "%Y";
+                else format = "%Y-%m";
+                const tableName = `sga_process.${info.doc_type}`;
+                const sentence = `
+                SELECT
+                    DATE_FORMAT(created_at, '${format}') AS label , COUNT(*) AS total
+                FROM ${tableName}
+                GROUP BY DATE_FORMAT(created_at, '${format}')
+                ORDER BY DATE_FORMAT(created_at, '${format}') ASC;
+                `;
+                const consulta = await useDataBase(sentence, [], 1);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(consulta));
+        });
+
+        req.on('error', (err) => {
+            console.error("⚠️ Error en la recepción de datos:", err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: "Error en la recepción de datos", detail: err.message }));
+        });
+};
 
 export default controller;

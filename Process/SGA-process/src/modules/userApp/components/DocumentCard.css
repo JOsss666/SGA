@@ -1,9 +1,11 @@
 
+@import '../containers/UserApp.css';
+
 .DocumentCard{
     display: flex;
     flex-direction: column;
     padding: 1vh;
-    background-color: #fff;
+    background-color: var(--bg);
     width: 25vw;
     min-height: 60vh;
     border-radius: 3vh;

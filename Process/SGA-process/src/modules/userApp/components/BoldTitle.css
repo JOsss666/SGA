@@ -1,8 +1,11 @@
+@import '../containers/UserApp.css';
+
 
 .BoldTitle{
     font-weight: 500;
     font-size: clamp(4px,4vh,40px);
-    color:#1E1E1E ;
+    color:var(--mainText) ;
+    transition: .3s;
 }
 
 .BoldTitle i{

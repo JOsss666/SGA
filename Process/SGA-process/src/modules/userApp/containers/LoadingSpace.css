@@ -1,10 +1,11 @@
+@import './UserApp.css';
 
 .LoadingSpace{
     display: flex;
     flex-direction: column;
     height: 100%;
     width: 100%;
-    background-color: #fff7;
+    background-color: var(--translucidMenu);
     padding: 1vh;
     border-radius: 2vh;
     backdrop-filter: blur(1vh   );
@@ -31,7 +32,7 @@
     margin-top: 3vh;
     font-size: clamp(3px,3vh,30px);
     font-weight: 500;
-    background: linear-gradient(45deg, #000 20%, #000022 20%, #fff 10%, #555 5%, #000); /* Degradado */
+    background: linear-gradient(45deg, var(--mainText) 20%, var(--descriptionText) 20%, #fff 10%, #555 5%, var(--sectionTitle)); /* Degradado */
     background-size:400% 100%;
     -webkit-background-clip: text;  /* Para que el degradado se recorte al texto */
     -webkit-text-fill-color: transparent; /* Hace transparente el relleno del texto */
@@ -48,7 +49,7 @@
     margin: auto;
     margin-top: .5vh;
     font-size: clamp(2.2px,2.2vh,22px);
-    color: #777;
+    color: var(--descriptionText);
 }
 
 @keyframes rotateLoader {

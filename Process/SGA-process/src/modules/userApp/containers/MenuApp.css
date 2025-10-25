@@ -1,4 +1,6 @@
 
+@import './UserApp.css';
+
 .MenuApp{
     padding: 1vh 2vh;
     display: flex;
@@ -25,7 +27,7 @@
     display: flex;
     flex-direction: column;
     list-style: none;
-    padding-left: 1.5vh;
+    padding-left: 1vh;
 }
 
 .HiddenMenu .listOptions{
@@ -36,12 +38,13 @@
     margin-bottom: 1vh;
     font-size: clamp(2px,2.5vh,30px);
     font-weight: 400;
-    color: #4A4848;
+    color: var(--descriptionText);
     padding: 1vh 1.5vh;
     border-radius: .5vh;
     transition: .3s;
     cursor: pointer;
     position: relative;
+    display: flex;
 }
 
 .HiddenMenu .listOptions li{
@@ -50,8 +53,13 @@
     margin-bottom: 1vh;
 }
 
+.MenuApp .listOptions li img{
+    height: 3vh;
+    width: 3vh;
+}
+
 .MenuApp .listOptions li:hover{
-    background-color: #DFF2FE;
+    background-color: var(--iconHover);
 }
 
 .MenuApp .listOptions li .despleSiubMe{
@@ -62,10 +70,18 @@
 
 .MenuApp .listOptions li i{
     margin-right: 1.5vh;
-    color: #717171;
+    color: var(--sectionTitle);
+}
+
+.MenuApp .listOptions li span{
+    margin: auto 0;
 }
 
 
 .HiddenMenu .listOptions li i{
     margin-right: 0;
+}
+
+.visibleMenu .listOptions li img{
+    margin-right: 2vh;
 }

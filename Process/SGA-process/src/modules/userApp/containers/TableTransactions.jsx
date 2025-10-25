@@ -4,13 +4,18 @@ import {RowTransaction} from  '../components/RowTransaction'
 import './TableTransactions.css'
 import { useEffect, useState } from 'react';
 
-export function TableTransactions({setLoading,setTotalBill,docInfo,aplyTransactions,type,reloadFun}){
+export function TableTransactions({setLoading,setTotalBill,docInfo,aplyTransactions,type,reloadFun,searchValue}){
     // InfoPrevia
     const columns = ["","#","Producto / Servicio","Codigo","Descripción","Unidades",`${type == 'sell'? 'Valor Venta':'Costo'}`,"Total","",""]
     const [products,setProducts] = useState([]);
     const [productsServ,setProductsServ] = useState([]);
     const [disabledRows,setDisabledRows] = useState(false);
     const {addNotification} = useNotifications();
+
+    if(searchValue == undefined){
+        searchValue = '';
+    }
+
     // functions
     const getProducts = async()=>{
         let infoLine = {
@@ -204,6 +209,15 @@ export function TableTransactions({setLoading,setTotalBill,docInfo,aplyTransacti
         }
     },[aplyTransactions])
 
+    const filterOptions = (value) => {
+        if (!searchValue) return true; 
+            return value.toLowerCase().includes(searchValue.toLowerCase());
+    }
+
+    useEffect(()=>{
+        console.log(searchValue)
+    },[searchValue])
+
     return(
         <div className="TableTransactions">
             <div className="headTable">
@@ -213,9 +227,8 @@ export function TableTransactions({setLoading,setTotalBill,docInfo,aplyTransacti
             </div>
             <div className="bodyTable">
                 {productsServ.length > 0 && productsServ.map((element,index)=>(
-                    <RowTransaction disabled={disabledRows} type={type} updateTotal={calcTotal} delP={deleteProduct} index={index} info={element} key={element.product_id} products={[]}/>
+                    <RowTransaction hidden={filterOptions(JSON.stringify(element))} disabled={disabledRows} type={type} updateTotal={calcTotal} delP={deleteProduct} index={index} info={element} key={element.product_id} products={[]}/>
                 ))}
-                <RowTransaction disabled={disabledRows} addP={addProduct} products={products}/>
             </div>
         </div>
     )

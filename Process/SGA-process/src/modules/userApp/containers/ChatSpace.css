@@ -1,16 +1,21 @@
 
+@import '../containers/UserApp.css';
+
 .ChatSpace{
     display: flex;
     flex-direction: column;
     position: relative;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 1vh;
+    overflow: hidden;
 }
 
 .ChatSpace .headChat{
     position: absolute;
     top: 0;
     width: 100%;
-    background-color: #fff;
-    box-shadow: 0 .2vh 1vh #ccc7;
+    background-color: var(--menuAside);
+    border-bottom: solid .1vh var(--inputsBorder);
     border-radius: .5vh;
     z-index: 4;
 }
@@ -19,7 +24,7 @@
     padding: 11vh 2vh;
     height: 75vh;
     width: 30vw;
-    background-color: #ECF1F4;
+    background-color: var(--bg);
     overflow-y: auto;
 }
 
@@ -39,11 +44,12 @@
 .ChatSpace .infoChat .descChat strong{
     font-size: clamP(2.2px,3vh,30px);
     font-weight: 500;
+    color: var(--mainText);
 }
 
 .ChatSpace .infoChat .descChat span{
     font-size: clamP(2.2px,2.2vh,22px);
-    color: #666;
+    color:var(--descriptionText);
 }
 
 .ChatSpace .logoContainer{
@@ -75,11 +81,11 @@
     bottom: 0;
     left: 0;
     padding: 2vh 1vh;
-    background-color: #fff;
+    background-color: var(--menuAside);
     z-index: 4;
     border-top-left-radius: 3vh;
     border-top-right-radius: 3vh;
-    box-shadow: 0 -.2vh 1vh #ccc7;
+    box-shadow: 0 -.2vh 1vh var(--translucidMenu);
     width: 100%;
 }
 

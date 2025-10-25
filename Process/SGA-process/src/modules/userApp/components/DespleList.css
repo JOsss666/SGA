@@ -1,19 +1,21 @@
 
+@import '../containers/UserApp.css';
+
 .DespleList{
-    background-color: #fff9;
+    background-color: var(--translucidMenu);
     backdrop-filter: blur(1vh);
     height: fit-content;
     width: fit-content;
     padding: 1vh;
     border-radius: 1vh;
-    outline: solid .3vh #F0F9FF;
 }
 
 .DespleList h6{
     font-size: clamp(2.2px,2.2vh,22px);
     margin-bottom: 1vh;
-    font-weight: 600;
+    font-weight: 500;
     margin-left: .5vh;
+    color: var(--mainText);
 }
 
 .DespleList .childrenSpan h6:hover{
@@ -43,6 +45,7 @@
     font-size: clamp(2.2px,2.2vh,22px);
     padding: .5vh 1.5vh;
     border-radius: .5vh;
+    color: var(--descriptionText);
 }
 
 .DespleList .childrenSpan .DespleList{
@@ -56,9 +59,7 @@
 }
 
 .DespleList .childrenSpan span:hover{
-    text-decoration: underline;
-    text-underline-offset: .5vh;
     color: #3C83F7;
     margin-left: .5vh;
-    background-color: #EFF6FF;
+    background-color: var(--iconHover);
 }

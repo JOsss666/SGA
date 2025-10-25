@@ -1,0 +1,16 @@
+
+.AnalyticDocDetail{
+    padding: 2vh;
+    position: relative;
+}
+
+.AnalyticDocDetail .Graph{
+    width: 70%;
+    height: 50vh;
+}
+
+.AnalyticDocDetail .AiButton{
+    position: absolute;
+    top: 2vh;
+    right: 4vh;
+}

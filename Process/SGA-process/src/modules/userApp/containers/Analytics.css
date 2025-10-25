@@ -1,0 +1,54 @@
+
+
+.Analytics {
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+.Analytics .ContainerAnalitycs{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 1vh;
+    margin: 2vh;
+    width: 183vh;
+    height: 58vh;
+}
+
+.Analytics .ContainerAnalitycs .Graph{
+    width: 140vh;
+    margin: .5vh;
+    align-content: center;
+    box-shadow: 0 .4vh 2vh #0002;
+}
+
+.Analytics .ContainerAnalitycs .Search{
+    display: flex;
+    flex-direction: column;
+    margin: 1vh auto;
+    width: auto;
+    padding: 0 1vh;
+    align-content: center;
+}
+
+.Analytics .ContainerAnalitycs .spaceSelectReports{
+    margin-top: 2vh;
+}
+
+.Analytics .Ranking{
+    margin: 2vh;
+    width: 183vh;
+    height: 20vh;
+}
+
+.Analytics .gridOptionsDocuments{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    gap: 2vh;
+    width: auto;
+}

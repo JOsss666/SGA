@@ -7,9 +7,9 @@ import './FormNewConcept.css'
 import {NewElementSelect} from '../../components/NewElementSelect'
 import { CardTitleLogo } from "../../components/CardTitleLogo";
 import { postInfo } from "../../../../utils/functions";
-import { useAppInfo, useNotifications } from "../../../../context/context";
+import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 
-export function FormNewConcept({setOpenForm}){
+export function FormNewConcept({reloadInfo}){
 
     const {addNotification} = useNotifications();
     const {appInfo} = useAppInfo();
@@ -22,7 +22,7 @@ export function FormNewConcept({setOpenForm}){
     const [loading,setLoading] = useState(false);
     const [accounts,setAccounts] = useState([]);
     const [taxes,setTaxes] = useState([]);
-
+    const {popOutAlert} = useAlert();
 
     const getAccounts = async()=>{
         let res = await postInfo('/getAccountsPlan',{
@@ -123,8 +123,9 @@ export function FormNewConcept({setOpenForm}){
                 title:'Nuevo Concepto creado',
                 description:`El concepto "${name}" ha sido creado correctamente.`
             })
-            if(setOpenForm != undefined){
-                setOpenForm(false)
+            popOutAlert();
+            if(reloadInfo != undefined){
+                reloadInfo();
             }
         }else{
             addNotification({

@@ -1,3 +1,5 @@
+@import '../containers/UserApp.css';
+
 .PathLocation{
     display: flex;
     padding: .5vh;
@@ -12,10 +14,12 @@
     font-size: clamp(2px,2.5vh,20px);
     transition: .3s;
     display: flex;
+    color: var(--descriptionText);
 }
 
 .PathLocation i{
     margin: auto .5vh;
+    color: var(--mainText);
 }
 
 .PathLocation span:hover{
