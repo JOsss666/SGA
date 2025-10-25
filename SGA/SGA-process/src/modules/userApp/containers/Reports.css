@@ -1,0 +1,23 @@
+
+.Reports{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    position: relative;
+}
+
+.Reports .headSection{
+    margin-left: 2vh;
+    margin-bottom: 2vh;
+}
+
+.Reports .spaceSelectReports{
+    display: flex;
+    padding: 1vh;
+    position: absolute;
+    top: 12vh;
+}
+
+.Reports .spaceSelectReports .DespleList{
+    margin-right: 2vh;
+}

@@ -1,0 +1,100 @@
+
+@import '../containers/UserApp.css';
+
+.ChatSpace{
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 1vh;
+    overflow: hidden;
+}
+
+.ChatSpace .headChat{
+    position: absolute;
+    top: 0;
+    width: 100%;
+    background-color: var(--menuAside);
+    border-bottom: solid .1vh var(--inputsBorder);
+    border-radius: .5vh;
+    z-index: 4;
+}
+
+.ChatSpace .spaceChatText{
+    padding: 11vh 2vh;
+    height: 75vh;
+    width: 30vw;
+    background-color: var(--bg);
+    overflow-y: auto;
+}
+
+.ChatSpace .infoChat{
+    display: flex;
+    padding: 1vh;
+}
+
+.ChatSpace .infoChat .descChat{
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+    margin: auto 1vh;
+    padding: 1vh 0;
+}
+
+.ChatSpace .infoChat .descChat strong{
+    font-size: clamP(2.2px,3vh,30px);
+    font-weight: 500;
+    color: var(--mainText);
+}
+
+.ChatSpace .infoChat .descChat span{
+    font-size: clamP(2.2px,2.2vh,22px);
+    color:var(--descriptionText);
+}
+
+.ChatSpace .logoContainer{
+    height: 6.5vh;
+    width: 6.5vh;
+    border-radius: 100%;
+    background-color: #8EC5FF;
+    display: flex;
+    outline: solid .1vh #51A2FF;
+    margin: auto 1vh;
+}
+
+.ChatSpace .spaceChatText .ChatMessage{
+    margin-top: 5.5vh;
+}
+
+.ChatSpace .spaceChatText .OwnMessage{
+    margin-top: 2.5vh;
+}
+
+.ChatSpace .logoContainer i{
+    margin: auto;
+    font-size: clamp(3px,3vh,30px);
+    color: #372AAC;
+}
+
+.ChatSpace .inputChat{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: 2vh 1vh;
+    background-color: var(--menuAside);
+    z-index: 4;
+    border-top-left-radius: 3vh;
+    border-top-right-radius: 3vh;
+    box-shadow: 0 -.2vh 1vh var(--translucidMenu);
+    width: 100%;
+}
+
+.ChatSpace .inputChat .InputBarChat{
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+}
+
+.ChatSpace .inputChat .InputBarChat input{
+    padding-left: 4vh;
+}

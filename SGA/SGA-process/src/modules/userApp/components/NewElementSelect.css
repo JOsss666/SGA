@@ -1,0 +1,27 @@
+
+.NewElementSelect{
+    display: flex;
+    padding: 1vh;
+    font-size: clamp(2px,2.2vh,20px);
+    width: 100%;
+    padding-left: 2vh;
+    cursor: pointer;
+    color: #3498db;
+    transition: .3s;
+}
+
+.NewElementSelect:hover{
+    padding-left: 3vh;
+    background-color: #ddd;
+    color: #2874a6;
+}
+
+.NewElementSelect i{
+    margin: auto 0;
+    margin-right: 1vh;
+}
+
+.NewElementSelect strong{
+    margin: auto 0;
+    font-weight: 500;
+}
