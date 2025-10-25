@@ -38,6 +38,7 @@ const pool = mysql.createPool({
 const poolPromise = pool.promise();
 
 async function testDBConnection() {
+    console.log(mySQL_user)
     try {
         const connection = await poolPromise.getConnection();
         console.log('✅ Conexión a MySQL establecida correctamente.');
