@@ -69,6 +69,10 @@
     margin-right: 2vh;
 }
 
+.DocumentPreview header .MenuPreviewOptions .MoreOptions .options{
+    width: fit-content;
+}
+
 .DocumentPreview header .MenuPreviewOptions .ButtonMenu{
     height: 4.5vh;
     width: 4.5vh;

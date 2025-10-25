@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppInfo } from "../../../../context/context";
 import { postInfo } from "../../../../utils/functions";
 import { BoldTitle } from "../../components/BoldTitle";
@@ -21,6 +21,7 @@ export function ReportBalance({}) {
     const [info, setInfo] = useState([]);
     const { appInfo } = useAppInfo();
     const [searchValue,setSearchValue] = useState();
+    const reportT = useRef();
 
     // Actions Page
     const [loading, setLoading] = useState(false);
@@ -85,9 +86,9 @@ export function ReportBalance({}) {
                 {text:'Realiza un analisis de este informe',context:`Procesos - Balance - Cuentas contables - Saldo`},
                 {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Balance - Cuentas contables - Saldo`}
             ]}/>
-            <ButtonDownload info={info} title={`Balance de Prueba`} />
+            <ButtonDownload info={info} title={`Balance de Prueba`} component={reportT.current}/>
         </div>
-        <div className="SpaceReport">
+        <div className="SpaceReport" ref={reportT}>
             {!loading && (
                 <TableReport columns={settingsReport.columns} info={info} type={''} searchValue={searchValue}/>
             )}

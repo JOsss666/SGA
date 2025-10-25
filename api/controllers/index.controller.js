@@ -588,7 +588,8 @@ controller.getPaymentMethods = (req,res)=>{
                 code,
                 name,
                 currency,
-                state
+                state,
+                account_id
             FROM
                 sga_ecosystem.payment_methods
             WHERE
@@ -774,13 +775,19 @@ controller.getTransactionDetails = (req,res)=>{
         let sentence = `
             SELECT
                 sga_ecosystem.transaction_detail.*,
-                sga_ecosystem.${tableAcc}.name AS concept_name
+                sga_ecosystem.${tableAcc}.name AS concept_name,
+                sga_ecosystem.${tableAcc}.code AS account_code,
+                sga_ecosystem.payment_methods.name AS payment_name
             FROM
                 sga_ecosystem.transaction_detail
             LEFT JOIN
                 sga_ecosystem.${tableAcc}
             ON 
                 sga_ecosystem.transaction_detail.account_id = sga_ecosystem.${tableAcc}.id
+            LEFT JOIN
+                sga_ecosystem.payment_methods
+            ON 
+                sga_ecosystem.${tableAcc}.id = sga_ecosystem.payment_methods.id
             WHERE
                 sga_ecosystem.transaction_detail.transaction_id = ? ;
         `;

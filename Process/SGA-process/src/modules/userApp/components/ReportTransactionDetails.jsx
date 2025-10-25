@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAppInfo } from "../../../context/context";
 import { postInfo } from "../../../utils/functions";
@@ -19,6 +19,7 @@ export function ReportTransactionDetails() {
     const { transaction_id } = useParams();
     const { appInfo } = useAppInfo();
     const [info, setInfo] = useState([]);
+    const tableR = useRef();
     const [loading, setLoading] = useState(false);
 
     const type = "TR_details";
@@ -95,10 +96,10 @@ export function ReportTransactionDetails() {
                 {text:'Verifica el contenido de este documento',context:`Procesos - Informe - ${documentTypes[type]}`},
                 {text:'¿Que acciones me recomiendas basado en este documento?',context:`Procesos - Informe - ${documentTypes[type]}`}
             ]}/>
-                <ButtonDownload info={info} title={`Detalle de Transacción #${transaction_id} - Nombre del tercero`} />
+                <ButtonDownload info={info} title={`Detalle de Transacción #${transaction_id} - Nombre del tercero`} component={tableR.current}/>
             </div>
 
-            <div className="SpaceReport">
+            <div className="SpaceReport" ref={tableR}>
                 {loading ? (
                     <LoadingSpace title="Cargando detalles" description="Esto no debe tardar mucho..." />
                 ) : (

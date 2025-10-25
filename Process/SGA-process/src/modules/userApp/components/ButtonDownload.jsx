@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import './ButtonDownload.css';
-import { parseToCsv, parseToXlsx } from '../../../utils/functions';
+import { componentToPdf, parseToCsv, parseToXlsx,ScreenShotElement } from '../../../utils/functions';
 
-export function ButtonDownload({info,columns,formats,title}) {
+export function ButtonDownload({info,columns,formats,title,component}) {
     const [status, setStatus] = useState("default");
     const [showMenu, setShowMenu] = useState(false);
 
@@ -37,6 +37,8 @@ export function ButtonDownload({info,columns,formats,title}) {
             switch (format){
                 case "csv": await parseToCsv(info,true,title); break;
                 case "xlsx": await parseToXlsx(info,true,null,title);break;
+                case "pdf": await componentToPdf(component,true,{},title);break;
+                case "jpg": await ScreenShotElement(component,title);
             }
             setStatus("success");
             setTimeout(() => {
@@ -51,8 +53,10 @@ export function ButtonDownload({info,columns,formats,title}) {
 
             {showMenu && status === "default" && (
                 <div className="downloadMenu">
-                    <button onClick={() => handleFormatClick("xlsx")}><i className="fa-regular fa-file"/> XLSX</button>
-                    <button onClick={() => handleFormatClick("csv")}><i className="fa-regular fa-file"/> CSV</button>
+                    <button className='xlsxFormat' onClick={() => handleFormatClick("xlsx")}><i className="fa-regular fa-file-excel"/> XLSX</button>
+                    <button className="csvFormat" onClick={() => handleFormatClick("csv")}><i className="fa-solid fa-file-csv"/> CSV</button>
+                    <button className="pdfFormat" onClick={() => handleFormatClick("pdf")}><i className="fa-regular fa-file-pdf"/> PDF</button>
+                    <button className="jpgFormat" onClick={() => handleFormatClick("jpg")}><i className="fa-solid fa-image"/>JPG</button>
                 </div>
             )}
         </div>

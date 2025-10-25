@@ -3,6 +3,8 @@ import { urlSer } from "../App";
 import domtoimage from "dom-to-image-more";
 import Papa from 'papaparse';
 import ExcelJs from 'exceljs';
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 export async function postInfo(route,informacion){
     console.log('Funcion post');
@@ -27,10 +29,8 @@ export async function postInfo(route,informacion){
     })
 }
 
-import ExcelJS from "exceljs";
-
 export async function parseToXlsx(info, download, columns, name) {
-    const workbook = new ExcelJS.Workbook();
+    const workbook = new ExcelJs.Workbook();
     const worksheet = workbook.addWorksheet(name || "Hoja 1");
     if (columns && Array.isArray(columns)) {
         worksheet.columns = columns;
@@ -74,6 +74,83 @@ export  async function parseToCsv(info,download,name){
         return newLinkDownload;
     }
 }
+
+export async function componentToPdf(component,download = true,options = {},name = "SGA-descarga.pdf") {
+    const { title = "", scale = 2 } = options;
+
+    // Asegurar que todas las imágenes dentro del componente estén cargadas
+    await Promise.all(
+        Array.from(component.getElementsByTagName("img")).map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+        });
+        })
+    );
+
+    // Guardar estilos originales
+    const originalOverflow = component.style.overflow;
+    const originalHeight = component.style.height;
+
+    // Expandir el componente para capturar todo (en caso de scroll)
+    component.style.overflow = "visible";
+    component.style.height = "auto";
+
+    // Capturar el contenido
+    const canvas = await html2canvas(component, {
+        scale,
+        useCORS: true,
+        scrollY: 0,
+        logging: false,
+        backgroundColor: "#ffffff",
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // Si hay título, lo añadimos al inicio
+    if (title) {
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(16);
+        const textWidth = pdf.getTextWidth(title);
+        pdf.text(title, (pageWidth - textWidth) / 2, 15); // centrado
+        position = 25; // espacio para el título
+    }
+
+    // Añadir imagen (primera página)
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // Agregar páginas adicionales si es necesario
+    while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+    }
+
+    // Restaurar estilos originales
+    component.style.overflow = originalOverflow;
+    component.style.height = originalHeight;
+
+    // Descargar o retornar el PDF
+    if (download) {
+        pdf.save(name);
+    } else {
+        return pdf;
+    }
+}
+
+
 
 
 export function copyToClipBoard(text){
@@ -183,15 +260,44 @@ export async function getAttached(type,attached,paramsDB) {
 }
 
 
-export async function ScreenShotElement(elemet,name){
-    domtoimage.toPng(elemet)
-    .then((dataUrl) => {
-        const link = document.createElement('a');
-        link.download = name != undefined? name:'captura.png';
+export async function ScreenShotElement(element, name = "captura.png") {
+    if (!element) {
+        console.error("Elemento no encontrado para capturar.");
+        return;
+    }
+
+    // Guardar estilos originales
+    const originalOverflow = element.style.overflow;
+    const originalHeight = element.style.height;
+
+    try {
+        // Expandir el elemento para mostrar todo su contenido
+        element.style.overflow = "visible";
+        element.style.height = "auto";
+
+        // Esperar un pequeño tiempo para que el DOM se actualice visualmente
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        // Capturar el elemento completo
+        const dataUrl = await domtoimage.toPng(element, {
+        quality: 1,
+        bgcolor: "#ffffff",
+        cacheBust: true,
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+        });
+
+        // Crear y activar la descarga
+        const link = document.createElement("a");
+        link.download = name;
         link.href = dataUrl;
         link.click();
-    })
-    .catch((error) => {
-        console.error('Error al generar la imagen:', error);
-    });
+
+    } catch (error) {
+        console.error("Error al generar la imagen:", error);
+    } finally {
+        // Restaurar estilos originales
+        element.style.overflow = originalOverflow;
+        element.style.height = originalHeight;
+    }
 }

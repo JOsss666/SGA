@@ -5,6 +5,8 @@
     padding: 1vh 2vh;
     display: flex;
     flex-direction: column;
+    background-color: var(--menuAside);
+    box-shadow: -2vh 0 2vh var(--text);
 }
 
 .ShareDocuments .headShare{
@@ -25,7 +27,7 @@
     display: flex;
     flex-direction: column;
     border-radius: 2vh;
-    outline: solid .1vh #ddd;
+    outline: solid .1vh var(--inputsBorder);
 }
 
 .ShareDocuments .MembersShare .headMemberShares{
@@ -68,6 +70,11 @@
 
 .ShareDocuments .quickShareOptions .CardTitleLogo{
     margin: .25vh 0;
+    color:var(--text);
+}
+
+.ShareDocuments .quickShareOptions .CardTitleLogo:hover{
+    background-color: var(--iconHover);
 }
 
 .ShareDocuments .gridBubbleOptions{
@@ -79,6 +86,10 @@
 .ShareDocuments .gridBubbleOptions .ServiceBubble{
     margin: auto 0;
     margin-right: 1vh;
+}
+
+.ShareDocuments .gridBubbleOptions .ServiceBubble:hover{
+    background-color: var(--iconHover);
 }
 
 .ShareDocuments .gridBubbleOptions .ServiceBubble:nth-child(1){

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNotifications, usePreview } from "../../../../context/context";
 import { BoldTitle } from "../../components/BoldTitle";
 import { ButtonMenu } from "../../components/ButtonMenu";
@@ -7,13 +7,16 @@ import { ShareDocuments } from "./ShareDocument";
 import { ChatSpace } from "../ChatSpace";
 import { OpCard } from "../../components/OpCard";
 import { DocumentCard } from "../../components/DocumentCard";
+import { parseToCsv, parseToXlsx, componentToPdf, ScreenShotElement } from "../../../../utils/functions";
+import { MoreOptions } from "../../components/MoreOptions";
 
 export function DocumentPreview({children}){
     const [openTools,setOpenTools] = useState(false);
     const [activeTool, setActiveTool] = useState('Share')
     const {addNotification} = useNotifications();
     const {previewInfo,setOpenPreview} = usePreview();
-
+    const spaceDoc = useRef();
+    
     let info = previewInfo;
 
     const messageTest = {
@@ -27,6 +30,19 @@ export function DocumentPreview({children}){
         text:'Este es un mensaje própio ',
         user_id:1
     }
+
+    const handleFormatClick = async(format) => {
+        console.log(`descargando en ${format}`)
+        if(info != undefined){
+            setActiveTool(false);
+            switch (format){
+                case "CSV": await parseToCsv(info,true,undefined); break;
+                case "XLSX": await parseToXlsx(info,true,null,undefined);break;
+                case "PDF": await componentToPdf(spaceDoc.current,true,{},undefined);break;
+                case "JPG": await ScreenShotElement(spaceDoc.current,undefined);
+            }
+        }
+    };
 
     const messages = [messageTest,messageTest2,messageTest,messageTest,messageTest2,messageTest];
 
@@ -63,7 +79,12 @@ export function DocumentPreview({children}){
                 </div>
                 <div className="MenuPreviewOptions">
                     <ButtonMenu title={'Guardar'}><i className="fa-solid fa-floppy-disk"/></ButtonMenu>
-                    <ButtonMenu title={'Descargar'}><i className="fa-solid fa-cloud-arrow-down"/></ButtonMenu>
+                    <MoreOptions title={'Descargar'} options={[
+                        {text:"PDF",icon:<i className="fa-regular fa-file-pdf"/>,action:handleFormatClick},
+                        {text:"JPG",icon:<i className="fa-regular fa-file-pdf"/>,action:handleFormatClick},
+                        //{text:"CSV",icon:<i className="fa-regular fa-file-pdf"/>,action:handleFormatClick},
+                        //{text:"XLSX",icon:<i className="fa-regular fa-file-pdf"/>,action:handleFormatClick},
+                    ]}><i className="fa-solid fa-cloud-arrow-down"/></MoreOptions>
                     <ButtonMenu title={'Imprimir'}><i className="fa-solid fa-print"/></ButtonMenu>
                     <ButtonMenu noRotate={true} onClick={()=>{handleToolChange('Share')}}  title={'Compartir'}><i className="fa-solid fa-share-nodes"/></ButtonMenu>
                     <ButtonMenu noRotate={true} onClick={()=>{handleToolChange('Comments')}} title={'Comentarios'}><i className="fa-regular fa-comments"/></ButtonMenu>
@@ -80,11 +101,15 @@ export function DocumentPreview({children}){
                                 chatImg:'',
                                 otherOptions:false
                             }} icon={<i className="fa-regular fa-comments"/>} />
+                        )}{activeTool == 'DownloadMenu' && (
+                            <div className="DownloadMenu">
+                                
+                            </div>
                         )}
                     </div>
                 )}
             </header>
-            <div className="spaceDoc">
+            <div className="spaceDoc" ref={spaceDoc}>
                 {info.type == 'Document' && (
                     <>
                         {info.docType == 'OP' && (
