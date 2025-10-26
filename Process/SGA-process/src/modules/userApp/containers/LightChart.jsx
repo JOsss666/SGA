@@ -37,7 +37,7 @@
         }else{
             response = await postInfo(`/getTransactionsData?period=${period}`, info);
         }
-        console.log(response)
+        
         if (response[0]) {
             setData(response[1]);
         } else {
