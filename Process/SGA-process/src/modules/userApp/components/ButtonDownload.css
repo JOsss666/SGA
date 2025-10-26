@@ -1,6 +1,6 @@
 .ButtonDownload {
     display: inline-block;
-    width: 100%;
+    width: fit-content;
 }
 
 .buttonDownloadDefault, .buttonDownloadLoading, .buttonDownloadSuccess {
@@ -12,8 +12,7 @@
     font-size: clamp(2px, 2.2vh, 25px);  
     font-weight: 500;
     cursor: pointer;
-    display: flex;
-    align-items: center;
+    text-align: center;
     gap: 1vh;
     box-shadow: 0 .4vh 2vh #0002;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
@@ -34,35 +33,70 @@
 /** MENÚ OPCIONES DE FORMATOS **/
 .ButtonDownload {
     position: relative;
-    display: inline-block;
-    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
-
 
 .downloadMenu {
     position: absolute;
-    padding: 1.2vh 1.8vh;
-    left: 0;
+    left: 10%;
+    top: 6vh;
     margin-top: 0.5vh;
     z-index: 10;
-    width: 100%;
+    width: 80%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    box-shadow: 0 0 2vh var(--inputsBorder);
+    border-radius: 1vh;
 }
 
 .downloadMenu button {
     width: 100%;           
-    background: #fff;
     border: none;
-    padding: 1vh 2vh;
-    text-align: left;
+    padding: 1vh;
     cursor: pointer;
     font-size: clamp(2px, 2.2vh, 25px);
-    display: flex;
-    align-items: center;
     gap: 1vh;
-    transition: background 0.2s ease;
+    text-align: center;
+    background: #fff;
 }
 
-.downloadMenu button:hover {
-    background: #F7F7F7;
+.downloadMenu button i{
+    margin-right: 1vh;
+    width: 2vh;
+}
+
+.downloadMenu button:nth-child(1){
+    border-top-left-radius: 1vh;
+    border-top-right-radius: 1vh;
+}
+
+.downloadMenu button:last-child{
+    border-bottom-left-radius: 1vh;
+    border-bottom-right-radius: 1vh;
+}
+
+
+.downloadMenu .xlsxFormat:hover{
+    background-color: #2D9966;
+    color: #fff;
+}
+
+.downloadMenu .csvFormat:hover{
+    background-color: #05DF72;
+    color: #fff;
+}
+
+.downloadMenu .pdfFormat:hover{
+    background-color: #E7180B;
+    color: #fff;
+}
+
+.downloadMenu .jpgFormat:hover{
+    background-color: #51A2FF;
+    color: #fff;
 }
 
