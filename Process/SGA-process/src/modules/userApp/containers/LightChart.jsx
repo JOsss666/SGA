@@ -33,11 +33,11 @@
         const info = { title, doc_type, type };
         let response;
         if(type == 'number'){
-            response = await postInfo(`/getDocumentData?period=${period}`, info);
+            response = await postInfo(`/getDocAnalyticDocNumber?period=${period}`, info);
         }else{
             response = await postInfo(`/getTransactionsData?period=${period}`, info);
         }
-        console.log(response)
+        
         if (response[0]) {
             setData(response[1]);
         } else {

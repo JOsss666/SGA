@@ -69,7 +69,7 @@ router.post('/getTransactionDetails',controller.getTransactionDetails);
 
 router.post('/getTransactionsData', controller.getTransactionsData);
 
-router.post('/getDocumentData', controller.getDocumentData);
+router.post('/getDocAnalyticDocNumber', controller.getDocAnalyticDocNumber);
 
 // SGA - Inventory
 

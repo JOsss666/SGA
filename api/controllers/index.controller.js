@@ -229,6 +229,7 @@ controller.logIn = (req,res)=>{
     })
 }
 
+
 controller.logOut = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
@@ -1695,7 +1696,7 @@ controller.getTransactionsData = async (req, res) => {
 
 //getDocAnalyticDOcNumber --> Nombre de la funcion
 
-controller.getDocumentData = async (req, res) => {
+controller.getDocAnalyticDocNumber = async (req, res) => {
         let data = '';
         req.on('data', chunk => {
             data += chunk;
@@ -1712,14 +1713,28 @@ controller.getDocumentData = async (req, res) => {
                 if (period === "DAY") format = "%Y-%m-%d";
                 else if (period === "YEAR") format = "%Y";
                 else format = "%Y-%m";
-                const tableName = `sga_process.${info.doc_type}`;
-                const sentence = `
-                SELECT
-                    DATE_FORMAT(created_at, '${format}') AS label , COUNT(*) AS total
-                FROM ${tableName}
-                GROUP BY DATE_FORMAT(created_at, '${format}')
-                ORDER BY DATE_FORMAT(created_at, '${format}') ASC;
-                `;
+
+                let sentence =` `;
+
+                if(info.doc_type === 'TRS'){
+                    sentence = `
+                    SELECT
+                        DATE_FORMAT(created_at, '${format}') AS label , COUNT(*) AS total
+                    FROM sga_ecosystem.transaction_detail
+                    GROUP BY DATE_FORMAT(created_at, '${format}')
+                    ORDER BY DATE_FORMAT(created_at, '${format}') ASC;
+                    `;
+                }else{
+                    const tableName = `sga_process.${info.doc_type}`;
+                    sentence = `
+                    SELECT
+                        DATE_FORMAT(created_at, '${format}') AS label , COUNT(*) AS total
+                    FROM ${tableName}
+                    GROUP BY DATE_FORMAT(created_at, '${format}')
+                    ORDER BY DATE_FORMAT(created_at, '${format}') ASC;
+                    `;
+                }
+
                 const consulta = await useDataBase(sentence, [], 1);
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify(consulta));

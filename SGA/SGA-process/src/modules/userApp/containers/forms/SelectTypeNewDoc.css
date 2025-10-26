@@ -1,0 +1,59 @@
+
+.SelectTpeNewDoc{
+    display: flex;
+    flex-direction: column;
+    width: 30vw;
+    margin-top: 4vh;
+}
+
+.SelectTpeNewDoc .BoldTitle{
+    margin: 2vh auto;
+}
+
+.SelectTpeNewDoc .gridTypes{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh 2vh;
+}
+
+.SelectTpeNewDoc .gridTypes .typeDoc{
+    display: flex;
+    width: 100%;
+    padding: 1vh;
+    background-image: linear-gradient(45deg,#EEF2FF,#F7FAFF,#F8FAFD,#FEF2F2);
+    outline: solid .1vh #eee;
+    border-radius: 1vh;
+    cursor: pointer;
+    margin: 1vh auto;
+}
+
+.SelectTpeNewDoc .gridTypes .typeDoc:hover{
+    box-shadow: 0 .2vh 1vh #0003;
+}
+
+.SelectTpeNewDoc .gridTypes img{
+    height: 8vh;
+    width: 8vh;
+    margin: auto 1vh;
+    border-radius: .5vh;
+    background-color: #eee;
+}
+
+.SelectTpeNewDoc .gridTypes .infoContaier{
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+    margin: auto 2vh;
+}
+
+.SelectTpeNewDoc .gridTypes .infoContaier strong{
+    font-size: clamp(3px,3vh,30px);
+    font-weight: 500;
+    margin-bottom: .5vh;
+}
+
+.SelectTpeNewDoc .gridTypes .infoContaier span{
+    font-size: clamp(3px,2.2vh,30px);
+    font-weight: 400;
+    color: #555;
+}

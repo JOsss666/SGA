@@ -1,0 +1,18 @@
+@import '../UserApp.css';
+
+.FormNewOc{
+    display: flex;
+    flex-direction: column;
+    min-width: 30vw;
+    margin-top: 2vh;
+}
+
+.FormNewOc .BoldTitle{
+    margin: 2vh auto;
+}
+
+.FormNewOc form{
+    padding: 0 2vh;
+    display: flex;
+    flex-direction: column;
+}
