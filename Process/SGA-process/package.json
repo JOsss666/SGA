@@ -12,6 +12,8 @@
   "dependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-virtualized-auto-sizer": "^1.0.26",
+    "react-window": "^2.2.1",
     "recharts": "^3.2.1"
   },
   "devDependencies": {

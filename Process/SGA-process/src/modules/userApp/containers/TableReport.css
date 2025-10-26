@@ -11,7 +11,7 @@
     padding: .1vh;
 }
 
-.TableReport .headTable{
+.TableReport .headTable{ 
     display: flex;
     padding: 1vh;
     background-color: var(--menuAside);
@@ -39,4 +39,13 @@
 
 .TableReport .headTable .headColumn:nth-child(2){
     width: 5vw;
+}
+
+.TableReport .bodyTable{
+    overflow: auto;
+    height: 90%;
+}
+
+.TableReport .bodyTable .RowTableReport{
+    margin-bottom: 1vh;
 }

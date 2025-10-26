@@ -33,6 +33,8 @@
     "react-dom": "^19.0.0",
     "react-pdf": "^10.2.0",
     "react-router-dom": "^7.4.0",
+    "react-virtualized-auto-sizer": "^1.0.26",
+    "react-window": "^2.2.1",
     "recharts": "^3.2.1",
     "xlsx": "^0.18.5"
   },

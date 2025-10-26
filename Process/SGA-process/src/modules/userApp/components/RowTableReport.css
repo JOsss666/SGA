@@ -41,6 +41,12 @@
     color: #3C83F7;
 }
 
+.RowTableReport span{
+     white-space: nowrap;        /* 🔹 evita el salto de línea */
+    overflow: hidden;           /* 🔹 oculta el texto que se sale del contenedor */
+    text-overflow: ellipsis;    /* 🔹 agrega los puntos suspensivos */
+    display: block;   
+}
 
 .RowTableReport .UserCard img{
     height: 3.5vh;
