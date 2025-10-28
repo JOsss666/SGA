@@ -3,9 +3,13 @@
     width: 100%;
     height: 100%;
     position: relative;
-    background-image: var(--bgImage);
+    background-color: transparent;
     background-size: 100% 100%;
     transition: .3s;
+    background-image: var(--bgImage);
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 .HomeProcess .bottomBarC{

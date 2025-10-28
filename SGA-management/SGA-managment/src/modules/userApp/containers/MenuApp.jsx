@@ -8,7 +8,7 @@ export function MenuApp({visibleMenu,title,options}){
     const params = useParams();
 
     const handleNavigate = (path)=>{
-        navigate(`/SGA_process/${params.company_key}/${params.user_key}/` + path);
+        navigate(`/SGA_management/${params.company_key}/${params.user_key}/` + path);
     }
 
     return(

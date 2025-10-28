@@ -112,7 +112,6 @@ export function UserApp(){
             {!loadingAppData && (
                 <>
                     <header className='headApp'>
-                    <BigTitle title={appInfo.legal_name}/>
                     <SearchBar placeholder={"Buscar en SGA - Procesos"} action={setQuickSearch}/>
                     {visibleResultsSearch && (
                         <div className="resultsQuickSerch">
@@ -152,7 +151,7 @@ export function UserApp(){
                 </header>
                 <aside ref={asideMenuC}  className='asideMenuApp'>
                     <div className={`menusHolder ${visibleMenu? 'activeMenusHolder':''}`}>
-                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1759181339/ChatGPT_Image_7_sept_2025_13_29_09_v2xl9a.png'} visbleInfo={visibleMenu} title={'Procesos'} desc={'SGA - Desarrollos'} />
+                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1761514001/ChatGPT_Image_26_oct_2025_16_24_57_hgpkmn.png'} visbleInfo={visibleMenu} title={'Administración'} desc={'SGA - Desarrollos'} />
                         <MenuApp visibleMenu={visibleMenu} title={'General'} options={optionsMenu}/>
                         <MenuApp visibleMenu={visibleMenu} title={'Ajustes'} options={secondOptionsMenu}/>
                     </div>
@@ -160,24 +159,24 @@ export function UserApp(){
                 <main className='bodyApp'>
                     <Routes>
                             <Route path='/' element={<HomeProcess/>} />
-                            <Route path='/company/' element={<span>company</span>}/>
+                            <Route path='/myBussines/' element={<span>Mi empresa</span>}/>
                             <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
-                            <Route path='/reports/*' element={<span>Reportes</span>} />
+                            <Route path='/modules/*' element={<span></span>}/>
+                            <Route path='/services' element={<span>Servicios</span>}/>
+                            <Route path='/billing' element={<span>Facturación</span>}/>
                             <Route path='/messages/*' element={<span>messages</span>} />
-                            
-                            <Route path='/analytics' element={<span>analytics</span>} />
-                            <Route path='/analytics/*' element={<span>analytics</span>} />
-
-                            <Route path='/users' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
-                            <Route path='/modules/*' element={<span>modules</span>} />
-                            <Route path='/billing/*' element={<span>billing</span>} />
-                            
-                            <Route path='/concepts' element={<span>concepts</span>} />
-
+                            <Route path='/thirdparties' element={<span>Terceros</span>} />
+                            <Route path='/users/*' element={<span>Usuarios</span>} />
+                            <Route path='/reports/*' element={<Reports/>} />
+                            <Route path='/analytics' element={<Analytics/>} />
+                            <Route path='/analytics/*' element={<AnalyticDocDetail/>} />
+                            <Route path='/calendar' element={<span>Calendario</span>} />
+                            <Route path='/concepts' element={<ConceptsPlan/>} />
+                            <Route path='/accounts' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
                             <Route path='/settings' element={<span>settings</span>} />
                             <Route path='/tutorials' element={<span>tutorials</span>} />
                             <Route path='/help' element={<span>help</span>} />
-                            <Route path='/logOut' element={<span>logOut</span>} />
+                            <Route path='/logOut' element={<LogOut/>} />
                     </Routes>
                 </main>
                 {openPreview && (

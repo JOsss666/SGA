@@ -207,34 +207,48 @@ export function AppInfoProvider({children}){
     const navigate = useNavigate();
 
     const handleRedirect = ()=>{
-        navigate('/SGA_process/logIn')
+        navigate('/SGA_management/logIn')
     }
 
     const handleNavigate = (path)=>{
-        navigate(`/SGA_process/${params.company_key}/${params.user_key}/${path}`)
+        navigate(`/SGA_management/${params.company_key}/${params.user_key}/${path}`)
     }
 
     const optionsMenu = [
         {text:'Inicio',path:'',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914614/LogoInicio1_nsuzaj.png' />,action:handleNavigate},
-        {text:'Crear Documento',path:'newDocument',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914611/LogoCrearDoc_vqirqo.png'/>,action:handleNavigate},
-        {text:'Buscar Documento',path:'searchDocument',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760909160/BuscarLogo1_jf8ij8.png'/>,action:handleNavigate},
+        {text:'Mi empresa',path:'myBussines',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515331/Grupo5logos_1_ypuddp.png'/>,action:handleNavigate},
+        {text:'Panel de control',path:'controlPanel',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515365/Grupo5logos_2_kjgapy.png'/>,action:handleNavigate},
+        {text:'Modulos',path:'modules',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515340/Grupo5logos_3_qp85tn.png'/>,action:handleNavigate},
+        {text:'Servicios',path:'services',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761514434/descarga_1_ih8bdx.png'/>,action:handleNavigate},
+        {text:'Facturación',path:'billing',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761514282/descarga_dot8uw.png'/>,action:handleNavigate},
+        {text:'Mensajes',path:'messages',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913446/MensajesLogo2_y4fjoa.png'/>,action:handleNavigate},
+        {text:'Terceros',path:'thirdparties',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Usuarios',path:'users',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png'/>,action:handleNavigate},
         {text:'Informes',path:'reports',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
-        {text:'Estadisticas',path:'analytics',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate},
+        {text:'Estadisticas',path:'analytics',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579216/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.png'/>,action:handleNavigate},
+        {text:'Calendario',path:'calendar',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913184/LogoCalendario1_ig0avt.png'/>,action:handleNavigate},
         {text:'Conceptos e impuestos',path:'concepts',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914608/LogoConceptosImpuestos_w0klzj.png'/>,action:handleNavigate},
-        {text:'Usuarios',path:'users',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png'/>,action:handleNavigate}
+        {text:'PLan de Cuentas',path:'accounts',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914607/LogoBuscarDOc_bpleiw.png'/>,action:handleNavigate},
     ]
 
     const secondOptionsMenu = [
+        {text:'Configuración',path:'settings',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579057/ChatGPT_Image_27_oct_2025_10_28_59_1_vfix8g.png'/>,action:handleNavigate},
+        {text:'Tutoriales',path:'tutorials',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515342/Grupo5logos_4_rhapbp.png'/>,action:handleNavigate},
         {text:'Ayuda',path:'help',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760911291/AyudaLogo1_v362of.png'/>,action:handleNavigate},
-        {text:'Configuración',path:'settings',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908821/AjustesLogo1_zfyoil.png'/>,action:handleNavigate},
         {text:'Cerrar Sesión',path:'logOut',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760911296/CerrarSesionLogo1_moghr7.png'/>,action:handleNavigate},
         //{text:'Registro',path:'../../signUp',icon:<i className="fa-solid fa-user-plus"/>},
     ]
 
     const routesApp = [
         {text:'Inicio',path:'',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914614/LogoInicio1_nsuzaj.png' />,action:handleNavigate},
-        {text:'Crear Documento',path:'newDocument',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914611/LogoCrearDoc_vqirqo.png'/>,action:handleNavigate},
-        {text:'Buscar Documento',path:'searchDocument',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760909160/BuscarLogo1_jf8ij8.png'/>,action:handleNavigate},
+        {text:'Mi empresa',path:'myBussines',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515331/Grupo5logos_1_ypuddp.png'/>,action:handleNavigate},
+        {text:'Panel de control',path:'controlPanel',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515365/Grupo5logos_2_kjgapy.png'/>,action:handleNavigate},
+        {text:'Modulos',path:'modules',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515340/Grupo5logos_3_qp85tn.png'/>,action:handleNavigate},
+        {text:'Servicios',path:'services',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761514434/descarga_1_ih8bdx.png'/>,action:handleNavigate},
+        {text:'Facturación',path:'billing',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761514282/descarga_dot8uw.png'/>,action:handleNavigate},
+        {text:'Mensajes',path:'messages',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913446/MensajesLogo2_y4fjoa.png'/>,action:handleNavigate},
+        {text:'Usuarios',path:'users',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png'/>,action:handleNavigate},
+        {text:'Terceros',path:'users',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
         {text:'Informes',path:'reports',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
             {text:'Informe Ordenes de Cliente',path:'reports/OCS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
             {text:'Informe Ordenes de Producción',path:'reports/OPS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
@@ -242,14 +256,16 @@ export function AppInfoProvider({children}){
             {text:'Informe Facturas de Venta',path:'reports/FVS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
             {text:'Informe Consumos de Inventario',path:'reports/CIS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
             {text:'Informe Transacciónes',path:'reports/TRS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
-        {text:'Estadisticas',path:'analytics',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate},
-            {text:'Estadisticas Ordenes de Cliente (OCS)',path:'analytics/OCS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate},
-            {text:'Estadisticas Ordenes de Producción (OPS)',path:'analytics/OPS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate},
-            {text:'Estadisticas Documentos de Compra (DCS)',path:'analytics/DCS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate},
-            {text:'Estadisticas Facturas de Venta (FVS)',path:'analytics/FVS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate},
-            {text:'Estadisticas  Consumos de inventarios (CIS)',path:'analytics/CIS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate},
+        {text:'Estadisticas',path:'analytics',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579216/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.png'/>,action:handleNavigate},
+            {text:'Estadisticas Ordenes de Cliente (OCS)',path:'analytics/OCS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579216/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.png'/>,action:handleNavigate},
+            {text:'Estadisticas Ordenes de Producción (OPS)',path:'analytics/OPS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579216/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.png'/>,action:handleNavigate},
+            {text:'Estadisticas Documentos de Compra (DCS)',path:'analytics/DCS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579216/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.png'/>,action:handleNavigate},
+            {text:'Estadisticas Facturas de Venta (FVS)',path:'analytics/FVS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579216/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.png'/>,action:handleNavigate},
+            {text:'Estadisticas  Consumos de inventarios (CIS)',path:'analytics/CIS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579216/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.png'/>,action:handleNavigate},
         {text:'Conceptos e impuestos',path:'concepts',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914608/LogoConceptosImpuestos_w0klzj.png'/>,action:handleNavigate},
-        {text:'Usuarios',path:'users',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png'/>,action:handleNavigate}
+        {text:'Calendario',path:'calendar',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913184/LogoCalendario1_ig0avt.png'/>,action:handleNavigate},
+        {text:'Conceptos e impuestos',path:'concepts',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914608/LogoConceptosImpuestos_w0klzj.png'/>,action:handleNavigate},
+        {text:'Plan de Cuentas',path:'accounts',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914607/LogoBuscarDOc_bpleiw.png'/>,action:handleNavigate},
     ]
 
 

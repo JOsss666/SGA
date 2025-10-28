@@ -35,7 +35,7 @@
     --iconHover:#303030;
     --inputsBg:#303030;
     --inputsBorder:#5a5a5a;
-    --translucidMenu:#20202090;
+    --translucidMenu:#20202099;
     --cardHover:#444;
     --bgOpacity:#00000050;
     --bgImage: url('https://i.pinimg.com/1200x/80/d1/bd/80d1bd8f8c9777a8ff1a8b4ed534418e.jpg');
@@ -46,8 +46,8 @@
     width: 100%;
     position: relative;
     display:flex;
-    background-color: var(--menuAside);
     transition: .3s;
+    background-color: var(--bg);
 }
 
 .UserApp .headApp{
@@ -55,10 +55,11 @@
     z-index: 30;
     width: 100%;
     height: 10vh;
-    background-color: var(--menuAside);
+    background-color: transparent;
     display: flex;
     padding: 0 2vh;
     transition: .3s;
+    padding-left: 7vw;
 }
 
 .UserApp .headApp .ServicesGrid{
@@ -78,19 +79,19 @@
 
 .UserApp .headApp .SearchBar{
     margin: 2vh 0;
-    width: 35vw;
+    width: 25vw;
     border: .24vh solid transparent;
 }
 
 .UserApp .headApp .resultsQuickSerch{
     position: absolute;
-    width: 32vw;
+    width: 25vw;
     max-height: 30vh;
     overflow: hidden;
     background-color: #D2EAFB90;
     backdrop-filter: blur(3vh);
     top: 10vh;
-    left: 29vw;
+    left: 7vw;
     border-radius: 2vh;
 }
 
@@ -111,8 +112,8 @@
 
 .UserApp .headApp .subMenuHeader{
     display: flex;
-    margin: auto 2vh;
-    margin-left: 6vh;
+    margin: auto;
+    margin-right: 0;
 }
 
 .UserApp .headApp .subMenuHeader .ButtonMenu{
@@ -120,44 +121,77 @@
 }
 
 .UserApp .headApp .SwitchColorMode{
-    margin: auto;
+    margin: auto 3vw;
 }
 
 
 .UserApp .asideMenuApp{
-    width: 5vw;
+    width: fit-content;
     height: 100%;
-    background-color: var(--menuAside);
     transition: .3s;
 }
 
 .UserApp .asideMenuApp .menusHolder{
     position: absolute;
-    height: 90vh;
+    height: 100%;
     width: fit-content;
-    background-color: var(--menuAside);
-    border-radius: 2vh;
+    background-color: var(--translucidMenu);
+    backdrop-filter: blur(1vh);
     z-index: 29;
-    margin-top: 10vh;
+    z-index: 40;
     transition: .3s;
+    overflow-y: auto;
+    border-top-right-radius: 3vh;
+    border-bottom-right-radius: 3vh;
+    scrollbar-width:none;
 }
+
+/* ancho del scrollbar */
+.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar {
+    width: 10px;           /* vertical */
+    height:50%;          /* horizontal */
+}
+
+.UserApp .asideMenuApp .menusHolder:hover {
+  scrollbar-width: auto; /* Firefox */
+}
+
+
+/* fondo del track */
+.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar-track {
+    background: var((var(--inputsBg)));
+    border-radius: 8px;
+}
+
+/* thumb (la "barrita" que se mueve) */
+.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    border: .1vh solid var(--inputsBg);
+}
+
+
 
 .UserApp .asideMenuApp .ServiceSgaCard{
     margin: 1vh;
     margin-bottom: 2vh;
+    /*background-color: var(--menuAside);*/
+    
+    z-index: 10;
+    padding-top: 1vh;
 }
 
 .UserApp .asideMenuApp .activeMenusHolder{
     box-shadow: 0 .4vh 1vh #3333;
+    min-width: 18vw;
 }
 
 .UserApp .bodyApp{
-    height: 89.5vh;
-    margin-top: 10vh;
-    width: 94.5vw;
+    height: 100dvh;
+    width: 100dvw;
+    padding-left: 5dvw;
     border-radius: 4vh;
-    box-shadow:  0 0 2vh #5553;
-    background-color: var(--bg);
+    padding-top: 10vh;
     transition: .3s;
+    background-color: var(--bg);
     overflow: hidden;
 }

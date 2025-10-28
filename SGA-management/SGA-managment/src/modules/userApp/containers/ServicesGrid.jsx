@@ -10,15 +10,15 @@ export function ServicesGrid(){
                 <span>Cuenta</span>
             </div>
             <div className="serviceBubble">
-                <img src="https://i.pinimg.com/736x/d5/a6/de/d5a6decbe101b77eedb640cd1cc04255.jpg" alt="" />
+                <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png" alt="" />
                 <span>SGA</span>
             </div>
             <div className="serviceBubble">
-                <img src="https://i.pinimg.com/1200x/7a/3e/d6/7a3ed6703f8bde43539b68bb39754dde.jpg" alt="" />
+                <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1759181476/ChatGPT_Image_25_ago_2025_15_43_35_s9jwrf.png" alt="" />
                 <span>Inventario</span>
             </div>
             <div className="serviceBubble">
-                <img src="https://i.pinimg.com/1200x/4d/6f/05/4d6f05603e71b923d19f78206b51f1af.jpg" alt="" />
+                <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1759181339/ChatGPT_Image_7_sept_2025_13_29_09_v2xl9a.png" alt="" />
                 <span>Procesos</span>
             </div>
             <div className="serviceBubble">
@@ -26,7 +26,7 @@ export function ServicesGrid(){
                 <span>Contabilidad</span>
             </div>
             <div className="serviceBubble">
-                <img src="https://i.pinimg.com/736x/d9/62/d6/d962d6da21e49cd40d94d4fa244d153e.jpg" alt="" />
+                <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png" alt="" />
                 <span>Facturación</span>
             </div>
             <div className="serviceBubble">

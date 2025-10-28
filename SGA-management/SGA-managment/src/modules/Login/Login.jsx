@@ -16,7 +16,7 @@ export function Login() {
     const navigate = useNavigate();
 
     const handleRedirect = (info)=>{
-        navigate(`/SGA_process/${info.company_key}/${info.user_key}/`)
+        navigate(`/SGA_management/${info.company_key}/${info.user_key}/`)
     }
 
     const sendLogIn = async(event) => {
