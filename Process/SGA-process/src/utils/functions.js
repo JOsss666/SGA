@@ -301,3 +301,17 @@ export async function ScreenShotElement(element, name = "captura.png") {
         element.style.height = originalHeight;
     }
 }
+
+
+//Funciones estadisticas
+
+
+//media (promedio)
+export function media(datos) {
+// Validar si no hay datos
+if (!datos || datos.length === 0) return 0;
+// Recorre los datos sumando cada numero al acumulador
+const suma = datos.reduce((acum, valor) => acum + valor, 0);
+return suma / datos.length;
+}
+
