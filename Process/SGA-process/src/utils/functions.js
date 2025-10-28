@@ -433,3 +433,13 @@ export function desviacionEstandar(datos) {
     if (!datos || datos.length === 0) return 0;
     return Math.sqrt(varianza(datos));
 }
+
+
+//coeficiente de variación
+export function CoefVari(datos) {
+    if (!datos || datos.length === 0) return 0;
+        const mediaVal = media(datos);
+        if (mediaVal === 0) return 0;
+        const desviacion = desviacionEstandar(datos);
+    return (desviacion / mediaVal) * 100;
+}
