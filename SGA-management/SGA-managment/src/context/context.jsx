@@ -78,30 +78,44 @@ export function AiAssistanProvider({children}){
         setChat(prev => [...prev, newMessage]);
     };
 
-    const sendPrompt = async(text,attached)=>{
+    const sendPrompt = async(text,attached,onlyResponse)=>{
         setLoading(true)
-        setVisibleChatAi(true);
-        addMessage({
-            text:text,
-            user_id:userInfo.user_id,
-            user_name:userInfo.user_name
-        })
-        let res = await postInfo('/processAiRequest',{
-            text:text,
-            attached,
-            userInfo
-        })
-        if(res.AI_response[0]){
-            addMessage({
-                children:JSON.parse(res.AI_response[1]),
-                user_id:0
-                })
-            }else{
+        if(!onlyResponse){
+            setVisibleChatAi(true);
                 addMessage({
-                    text:`❌ Error, hubo un problema al intentar procesar tu solicitud, intentalo de nuevo.`,
-                    user_id:0,
-                    user_name:'Asistente AI'
+                    text:text,
+                    user_id:userInfo.user_id,
+                    user_name:userInfo.user_name
                 })
+                let res = await postInfo('/processAiRequest',{
+                    text:text,
+                    attached,
+                    userInfo
+                })
+                if(res.AI_response[0]){
+                    addMessage({
+                        children:JSON.parse(res.AI_response[1]),
+                        user_id:0
+                        })
+                    }else{
+                        addMessage({
+                            text:`❌ Error, hubo un problema al intentar procesar tu solicitud, intentalo de nuevo.`,
+                            user_id:0,
+                            user_name:'Asistente AI'
+                        })
+                }
+        }else{
+            let res = await postInfo('/processAiRequest',{
+                text:text,
+                attached,
+                userInfo
+            })
+            console.log(res.AI_response)
+            if(res.AI_response[0]){
+                return([true,JSON.parse(res.AI_response[1])])
+            }else{
+                return([false,[]])
+            }
         }
         setLoading(false)
     }

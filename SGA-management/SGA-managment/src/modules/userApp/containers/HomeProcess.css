@@ -19,6 +19,15 @@
     display: flex;
 }
 
+.HomeProcess .widgetsSpace{
+    position: absolute;
+    right: 2vh;
+    width: fit-content;
+    height: 80dvh;
+    top: 10dvh;
+    padding: 1vh;
+}
+
 .HomeProcess .appsBar{
     width: fit-content;
     margin: auto;

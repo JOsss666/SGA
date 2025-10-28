@@ -5,6 +5,7 @@ import { DescriptionSpan } from "../components/DescriptionSpan";
 import './HomeProcess.css'
 import { HomeSearch } from "./HomeSearch";
 import { AppIcon } from "../components/AppIcon";
+import { AiResume } from "../components/AiResume";
 
 export function HomeProcess(){
 
@@ -12,6 +13,9 @@ export function HomeProcess(){
 
     return(
         <div className="HomeProcess">
+            <div className="widgetsSpace">
+                <AiResume/>
+            </div>
             <div className="bottomBarC">
                 <div className="appsBar">
                     <AppIcon title={'Documentos'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760913629/DocumentosLogo_fuofdc.png'}/>
