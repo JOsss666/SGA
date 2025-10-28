@@ -313,3 +313,23 @@ export function media(datos) {
         const suma = datos.reduce((acum, valor) => acum + valor, 0);
     return suma / datos.length;
 }
+
+
+//mediana
+export function mediana(datos){
+    if (!datos || datos.length === 0)return 0;
+    
+    //copia de los datos ordenados para no editar el orden original
+    const orden = [...datos].sort ((a,b) => a - b);
+
+    const mitad = Math.floor(orden.length / 2)
+
+    //Si es par hacer el promedio de los dos valores del centro
+    if(orden.length % 2 === 0){
+        return(orden[mitad - 1] + orden[mitad]) / 2;
+    } else {
+        //Si es impar tomar el valor central
+            return orden[mitad];
+    }        
+}
+
