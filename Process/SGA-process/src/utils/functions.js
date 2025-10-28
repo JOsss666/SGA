@@ -375,3 +375,38 @@ export function rango(datos) {
 
     return max - min;
 }
+
+
+//definir funcion percentil (metodo 6) 
+export function percentil(datos , p){
+
+    //validar si hay datos
+    if (!datos || datos.length === 0) return 0;
+
+        //percentil entre 0 y 100
+        if (p < 0 || p > 100) throw new error ("percentil entre 0 y 100")
+            const orden = [...datos].sort((a,b) => a-b);
+            const n = orden.length;
+
+            //metodo 6
+            const posicion = (n + 1) * (p / 100);
+
+            if (posicion <= 1) return orden[0];
+            if (posicion >= n) return orden[n - 1];
+    
+            const partEnt = Math.floor(posicion) - 1;
+            const partDeci = posicion - Math.floor(posicion);
+    
+        return orden[partEnt] + partDeci * (orden[partEnt + 1] - orden[partEnt]);
+}
+
+//rango
+export function ric(datos){
+    if (!datos || datos.length === 0) return 0;
+    
+        const q1 = percentil(datos , 25);
+        const q3 = percentil(datos , 75);
+    return q1 - q3;
+}
+
+
