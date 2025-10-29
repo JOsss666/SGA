@@ -362,3 +362,13 @@ export function moda(datos){
     return modass;
 }
 
+//Rango
+export function rango(datos) {
+    if (!datos || datos.length === 0) return 0;
+    
+    const max = Math.max(...datos);
+    const min = Math.min(...datos);
+
+    return max - min;
+}
+
