@@ -406,3 +406,27 @@ export function ric(datos){
 }
 
 
+//varianza
+export function varianza(datos, poblacional = true) {
+    if (!datos || datos.length === 0) return 0;
+    
+        //Si solo hay un elemento, no hay variación
+        if (datos.length === 1) return 0;
+    
+            const promedio = media(datos);
+    
+            //suma de las diferencias al cuadrado
+            const sumCuadrados = datos.reduce((suma, valor) => {
+        return suma + Math.pow(valor - promedio, 2);
+        }, 0);
+
+    return sumCuadrados / datos.length;
+}
+
+
+//desviacion estandar
+export function desviacionEstandar(datos) {
+    if (!datos || datos.length === 0) return 0;
+    return Math.sqrt(varianza(datos));
+}
+
