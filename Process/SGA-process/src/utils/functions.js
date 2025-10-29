@@ -331,3 +331,34 @@ export function mediana(datos){
     } 
 }
 
+//moda
+export function moda(datos){
+    //retornamos datos si no hay moda
+    if(!datos || datos.length === 0) return [];
+
+    const frecuencia = {};
+    let maxF = 0;
+    const modass = []
+
+    //contar frecuencias de cada valor
+    datos.forEach(valor => {
+        frecuencia[valor] = (frecuencia[valor] || 0) + 1;
+        if (frecuencia[valor] > maxF) {
+            maxF = frecuencia[valor]
+        }
+    });
+
+    // Si la frecuencia máxima es 1 y hay más de un elemento, no hay moda
+    if (maxF === 1 && datos.length > 1) {
+        return [];
+    }
+
+    //valores con maxima frecuencia
+    Object.keys(frecuencia).forEach(valor => {
+        if (frecuencia[valor] === maxF){
+            modass.push(Number(valor));
+        }
+    });
+    return modass;
+}
+
