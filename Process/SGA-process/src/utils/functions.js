@@ -430,3 +430,22 @@ export function desviacionEstandar(datos) {
     return Math.sqrt(varianza(datos));
 }
 
+
+//coeficiente de variación
+export function CoefVari(datos) {
+    if (!datos || datos.length === 0) return 0;
+        const mediaVal = media(datos);
+        if (mediaVal === 0) return 0;
+        const desviacion = desviacionEstandar(datos);
+    return (desviacion / mediaVal) * 100;
+}
+
+//Z-score
+export function zscore(valor, datos) {
+    if (!datos || datos.length === 0) return 0;
+    const mediaVal = media(datos);
+    const desviacion = desviacionEstandar(datos);
+    if (desviacion === 0) return 0;
+    return (valor - mediaVal) / desviacion;
+}
+
