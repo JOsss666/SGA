@@ -1747,4 +1747,52 @@ controller.getDocAnalyticDocNumber = async (req, res) => {
         });
 };
 
+
+controller.getDocAnalyticDocNumberTable = async (req, res) => {
+        let data = '';
+        req.on('data', chunk => {
+            data += chunk;
+        });
+        req.on('end', async () => {
+                let info = JSON.parse(data)
+                if (!info.type) {
+                    console.warn("⚠️ 'type' no recibido en el cuerpo de la solicitud");
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ error: "'type' es requerido" }));
+                }
+                const period = (req.query.period || "MONTH").toUpperCase();
+                let format;
+                if (period === "DAY") format = "%Y-%m-%d";
+                else if (period === "YEAR") format = "%Y";
+                else format = "%Y-%m";
+
+                let sentence =` `;
+
+                if(info.doc_type === 'TRS'){
+                    sentence = `
+                    SELECT
+                        *
+                    FROM sga_ecosystem.transaction_detail;
+                    `;
+                }else{
+                    const tableName = `sga_process.${info.doc_type}`;
+                    sentence = `
+                    SELECT
+                        *
+                    FROM ${tableName};
+                    `;
+                }
+
+                const consulta = await useDataBase(sentence, [], 1);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(consulta));
+        });
+
+        req.on('error', (err) => {
+            console.error("⚠️ Error en la recepción de datos:", err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: "Error en la recepción de datos", detail: err.message }));
+        });
+};
+
 export default controller;

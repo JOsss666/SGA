@@ -14,7 +14,7 @@ function App() {
           <Router>
                 <Routes>
                     <Route path="" element={<><span>LandingPage Proceso</span></>}/>
-                    <Route path="/SGA_management/logIn" element={
+                    <Route path="/SGA_management/login" element={
                       <AppInfoProvider>
                         <Login/>
                       </AppInfoProvider>
