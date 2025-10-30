@@ -2,10 +2,12 @@
 .AnalyticDocDetail{
     padding: 2vh;
     position: relative;
+    height: 100%;
 }
 
 .AnalyticDocDetail .HeaderAnalytics{
     margin: 1vh .2vh;
+
 }
 
 .AnalyticDocDetail .AiButton{
@@ -15,7 +17,6 @@
 }
 
 .AnalyticDocDetail .Graph{
-    width: 140vh;
     margin: .5vh;
     align-content: center;
     box-shadow: 0 .4vh 2vh #0002;
@@ -24,10 +25,12 @@
 .AnalyticDocDetail .Search{
     display: flex;
     flex-direction: column;
-    margin: 1vh auto;
-    width: auto;
-    padding: 0 1vh;
-    align-content: center;
+    justify-content: space-between;
+    margin: 2vh;
+    border-radius: 2vh;
+    padding: 2vh 1vh;
+    background-image: linear-gradient(45deg, var(--lightGradient1), var(--lightGradient3), var(--lightGradient4));
+    outline: solid .1vh var(--inputsBorder);
 }
 
 
@@ -35,22 +38,62 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    height: 80vh;
+}
+
+.AnalyticDocDetail .ContainerData{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     gap: 1vh;
     margin: 2vh;
-    width: 183vh;
-    height: 54vh;
+    width: 200vh;
+    height: 56vh;
 }
 
 .AnalyticDocDetail .Ranking{
     margin: 2vh;
-    width: 183vh;
-    height: 20vh;
+    border-radius: 2vh;
+    padding: 2vh 1vh;
+    background-image: linear-gradient(45deg, var(--lightGradient1), var(--lightGradient3), var(--lightGradient4));
+    outline: solid .1vh var(--inputsBorder);
 }
 
 .AnalyticDocDetail .gridOptionsDocuments{
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: space-evenly;
     gap: 2vh;
     width: auto;
+}
+
+.AnalyticDocDetail .CardRankingAnalytics{
+    width: 20vw;
+    height: 13vh;
+    background-image: none;
+    box-shadow: none;
+    outline: none;
+}
+
+.AnalyticDocDetail .BoldTitle{
+    font-size: 2.4vh;
+    margin-top: 2vh;
+}
+
+.AnalyticDocDetail .FormInput label{
+    margin: 0;
+}
+
+.AnalyticDocDetail .FormInput .inputContainer{
+    margin-top: .5vh;
+}
+    
+.AnalyticDocDetail .Search .SearchElements{
+    display: flex;
+    flex-direction: row;
+    gap: 1vh;
+}
+
+.AnalyticDocDetail .Search .FormButton{
+    margin-top: 2vh;
 }

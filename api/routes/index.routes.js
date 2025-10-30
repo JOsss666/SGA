@@ -71,6 +71,8 @@ router.post('/getTransactionsData', controller.getTransactionsData);
 
 router.post('/getDocAnalyticDocNumber', controller.getDocAnalyticDocNumber);
 
+router.post('/getDocAnalyticDocNumberTable', controller.getDocAnalyticDocNumberTable);
+
 // SGA - Inventory
 
 router.post('/getSubCategories',controller.getSubCategories);
