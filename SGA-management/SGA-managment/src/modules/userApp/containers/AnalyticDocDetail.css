@@ -19,13 +19,17 @@
 .AnalyticDocDetail .Graph{
     margin: .5vh;
     align-content: center;
-    box-shadow: 0 .4vh 2vh #0002;
+    padding: 2vh 1vh;
+    background-image: linear-gradient(45deg, var(--lightGradient1), var(--lightGradient3), var(--lightGradient4));
+    border-radius: 2vh;
+    outline: solid .1vh var(--inputsBorder);
 }
 
 .AnalyticDocDetail .Search{
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    width: 40vh;
     margin: 2vh;
     border-radius: 2vh;
     padding: 2vh 1vh;
@@ -38,7 +42,6 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    height: 80vh;
 }
 
 .AnalyticDocDetail .ContainerData{
@@ -47,11 +50,24 @@
     justify-content: space-between;
     gap: 1vh;
     margin: 2vh;
-    width: 200vh;
-    height: 56vh;
+    width: 100vh;
+}
+
+.AnalyticDocDetail .ContainerData .TableValues{
+   
+    width: 100vh;
+    padding: 2vh 1vh;
+    background-image: linear-gradient(45deg, var(--lightGradient1), var(--lightGradient3), var(--lightGradient4));
+    border-radius: 2vh;
+    outline: solid .1vh var(--inputsBorder);
+}
+
+.AnalyticDocDetail .ContainerData .TableValues .AnalyticDocDetailTable table{
+    width: 100%;
 }
 
 .AnalyticDocDetail .Ranking{
+    width: 40vh;
     margin: 2vh;
     border-radius: 2vh;
     padding: 2vh 1vh;
@@ -64,11 +80,10 @@
     flex-direction: column;
     justify-content: space-evenly;
     gap: 2vh;
-    width: auto;
 }
 
 .AnalyticDocDetail .CardRankingAnalytics{
-    width: 20vw;
+    width: 18vw;
     height: 13vh;
     background-image: none;
     box-shadow: none;
@@ -80,6 +95,10 @@
     margin-top: 2vh;
 }
 
+.AnalyticDocDetail .FormInput{
+    min-width: none;
+}
+
 .AnalyticDocDetail .FormInput label{
     margin: 0;
 }
@@ -88,6 +107,7 @@
     margin-top: .5vh;
 }
     
+
 .AnalyticDocDetail .Search .SearchElements{
     display: flex;
     flex-direction: row;
