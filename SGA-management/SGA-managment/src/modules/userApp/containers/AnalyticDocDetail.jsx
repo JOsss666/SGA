@@ -9,6 +9,8 @@ import { BoldTitle } from "../components/BoldTitle";
 import { FormButton } from "../components/FormButton";
 import { FormInput } from "../components/FormInput";
 import { AnalyticDocDetailTable } from "./AnalyticDocDetailTable";
+import { useEffect, useState } from "react";
+import { postInfo } from "../../../utils/functions";
 
 const DOC_NAMES = {
     OCS: "Ordenes de cliente (OC)",
@@ -26,6 +28,21 @@ export function AnalyticDocDetail() {
     const pathSections = filterRoute[1] ? filterRoute[1].split('/') : [];
     const docType = pathSections[0] || 'DEFAULT';
     const docName = DOC_NAMES[docType] || "Documento desconocido";
+
+    const [tableData, setTableData] = useState([]);
+
+    useEffect(() => {
+        const body = {
+        type: "DOC_ANALYTIC",
+        doc_type: docType 
+        };
+
+        postInfo("/getDocAnalyticDocNumberTable", body).then((res) => {
+            console.log("Resultado:", res);
+            setTableData(res[1]); 
+        });
+
+    }, []);
 
     return (
         <div className="AnalyticDocDetail">
@@ -45,16 +62,7 @@ export function AnalyticDocDetail() {
                     </div>
 
                     <div className="TableValues">
-                        <AnalyticDocDetailTable tableData={{
-                            headers: ['Fecha', 'Cantidad de documentos'],
-                            rows: [
-                                ['2024-01-01', 120],
-                                ['2024-01-02', 150],
-                                ['2024-01-03', 100],
-                                ['2024-01-04', 180],
-                                ['2024-01-05', 200],
-                            ]
-                        }}/>
+                        <AnalyticDocDetailTable tableData={tableData} />
                     </div>
                 </div>
 
