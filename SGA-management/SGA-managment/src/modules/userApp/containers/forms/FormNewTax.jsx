@@ -45,7 +45,36 @@ export function FormNewTax({reloadInfo}){
         rate: parseFloat(rate),
         account_id: selectedAccount
     };
+    
+    const createTax = async () => {
+        setDisabled(true);
+        setLoading(true);
+        
+        let res = await postInfo('/createTax', formInfo);
+        if(res){
+            addNotification({
+                type: 'aproved',
+                title: 'Nuevo Impuesto creado',
+                description: `El impuesto "${name}" ha sido creado correctamente.`
+            });
+            popOutAlert();
+            if(reloadInfo != undefined){
+                reloadInfo();
+            }
+        } else {
+            addNotification({
+                type: 'error',
+                title: 'Error al crear el nuevo impuesto',
+                description: `Ups, ocurrió un error al intentar crear el nuevo impuesto, inténtalo de nuevo.`
+            });
+        }
+        setLoading(false);
+        setDisabled(false);
+    }
 
+    useEffect(() => {
+        getAccounts();
+    }, []);
 
     return(
         <div className="FormNewTax">
