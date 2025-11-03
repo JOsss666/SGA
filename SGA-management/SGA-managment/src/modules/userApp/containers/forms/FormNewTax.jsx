@@ -38,6 +38,15 @@ export function FormNewTax({reloadInfo}){
         }
     }
 
+    const formInfo = {
+        company_id: appInfo.company_id,
+        name: name,
+        code: code,
+        rate: parseFloat(rate),
+        account_id: selectedAccount
+    };
+
+
     return(
         <div className="FormNewTax">
             <BoldTitle text={'Nuevo Impuesto'}/>
