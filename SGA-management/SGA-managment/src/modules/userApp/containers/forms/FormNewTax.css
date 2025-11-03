@@ -1,0 +1,32 @@
+@import '../UserApp.css';
+
+.FormNewTax{
+    display: flex;
+    flex-direction: column;
+    width: 30vw;
+    background-color:var(--bg);
+    padding: 3vh;
+    border-radius: 2vh;
+}
+
+.FormNewTax .BoldTitle{
+    margin:1vh auto; 
+}
+
+.FormNewTax form{
+    display: flex;
+    flex-direction: column;
+    padding: 0 1vh;
+}
+
+.FormNewTax form .SearchinList{
+    margin-bottom: .5vh;
+}
+
+.FormNewTax form .FormButton{
+    margin: 1vh auto;
+}
+
+.FormNewTax form .FormInput{
+    margin-bottom: .5vh;
+}
