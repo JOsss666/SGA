@@ -11,6 +11,7 @@ import { ConceptCard } from "../components/ConceptCard";
 import { SearchBar } from "../components/SearchBar";
 import { TaxCard } from "../components/TaxCard";
 import { LoadingSpace } from "./LoadingSpace";
+import { FormNewTax } from "./forms/FormNewTax";
 
 export function ConceptsPlan(){
 
@@ -88,6 +89,10 @@ export function ConceptsPlan(){
         popInAlert(<FormNewConcept reloadInfo={getInfo}/>)
     }
 
+    const createNewTax = ()=>{
+        popInAlert(<FormNewTax reloadInfo={getInfo}/>)
+    }
+
     return(
         <div className="ConcenptsPlan">
             <div className="headSection">
@@ -100,7 +105,7 @@ export function ConceptsPlan(){
                     }} title={'Volver a cargar'} children={<i className="fa-solid fa-rotate-right"/>}/>
                     <MoreOptions options={[
                         {text:'Crear concepto',icon:<i className="fa-solid fa-cash-register"/>,action:createNewConcept},
-                        {text:'Crear impuesto',icon:<i className="fa-solid fa-sack-dollar"/>}
+                        {text:'Crear impuesto',icon:<i className="fa-solid fa-sack-dollar"/>,action:createNewTax}
                     ]}>
                         <i className="fa-solid fa-plus"/>
                     </MoreOptions>
