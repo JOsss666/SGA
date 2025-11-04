@@ -12,11 +12,11 @@ export function FormNewTax({reloadInfo}){
     const {addNotification} = useNotifications();
     const {appInfo} = useAppInfo();
     const {popOutAlert} = useAlert();
-    const [name, setName] = useState('');
     const [code, setCode] = useState('');
     const [rate, setRate] = useState('');
     const [selectedAccount, setSelectedAccount] = useState();
     const [disabled, setDisabled] = useState(false);
+    const [base,setBase] = useState(0);
     const [loading, setLoading] = useState(false);
     const [accounts, setAccounts] = useState([]);
 
@@ -40,16 +40,15 @@ export function FormNewTax({reloadInfo}){
 
     const formInfo = {
         company_id: appInfo.company_id,
-        name: name,
         code: code,
         rate: parseFloat(rate),
+        base,
         account_id: selectedAccount
     };
     
     const createTax = async () => {
         setDisabled(true);
         setLoading(true);
-        
         let res = await postInfo('/createTax', formInfo);
         if(res){
             addNotification({
@@ -84,11 +83,6 @@ export function FormNewTax({reloadInfo}){
                 createTax();
             }}>
                 <FormInput 
-                    action={setName} 
-                    title={'Nombre'} 
-                    placeholder={'Nombre del nuevo impuesto'}
-                />
-                <FormInput 
                     action={setCode} 
                     title={'Código'} 
                     placeholder={'Código del impuesto'}
@@ -96,14 +90,20 @@ export function FormNewTax({reloadInfo}){
                 <FormInput 
                     action={setRate} 
                     title={'Tasa'} 
-                    placeholder={'Tasa del impuesto (ej: 0.12)'}
+                    placeholder={'Tasa del impuesto'}
                     type="number"
                     step="0.01"
+                />
+                <FormInput 
+                    action={setBase} 
+                    title={'Base'} 
+                    type={'number'}
+                    placeholder={'A partir de '}
                 />
                 <SearchinList 
                     action={setSelectedAccount} 
                     title={'Cuenta'} 
-                    list= {[]} 
+                    list={accounts}
                     placeHolder={'Seleccionar Cuenta'}
                     specialOption={
                         <NewElementSelect title={'Crear nueva cuenta'}/>

@@ -37,7 +37,7 @@
     top: 4.8vh;
     left: 0;
     list-style: none;
-    background-color: var(--translucidMenu);
+    background-color: var(--bg);
     outline: solid .1vh var(--inputsBg);
     backdrop-filter: blur(1vh);
     z-index: 8;

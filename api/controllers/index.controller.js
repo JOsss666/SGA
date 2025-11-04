@@ -397,19 +397,19 @@ controller.createTax = (req,res)=>{
             INSERT INTO
                 sga_ecosystem.taxes(
                     company_id,
-                    name,
+                    account_id,
                     code,
                     rate,
-                    account_id
+                    base
                 )
             VALUES(?,?,?,?,?);
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
-            info.name,
+            info.account_id,
             info.code,
             info.rate,
-            info.account_id
+            info.base
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
