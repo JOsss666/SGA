@@ -95,8 +95,8 @@
     margin-top: 2vh;
 }
 
-.AnalyticDocDetail .FormInput{
-    min-width: none;
+.AnalyticDocDetail .Search .FormInput{
+    min-width: 1vh;
 }
 
 .AnalyticDocDetail .FormInput label{
