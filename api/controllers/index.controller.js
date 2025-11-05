@@ -1702,42 +1702,97 @@ controller.getDocAnalyticDocNumber = async (req, res) => {
             data += chunk;
         });
         req.on('end', async () => {
-                let info = JSON.parse(data)
-                if (!info.type) {
-                    console.warn("⚠️ 'type' no recibido en el cuerpo de la solicitud");
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ error: "'type' es requerido" }));
+            try {
+                const info = JSON.parse(data);
+                console.log("Datos recibidos:", info);
+
+                if (!info.doc_type) {
+                    return res.status(400).json({ error: "'doc_type' es requerido" });
                 }
+
                 const period = (req.query.period || "MONTH").toUpperCase();
-                let format;
-                if (period === "DAY") format = "%Y-%m-%d";
-                else if (period === "YEAR") format = "%Y";
-                else format = "%Y-%m";
+                const format = (period === "DAY") ? "%Y-%m-%d" : (period === "YEAR") ? "%Y" : "%Y-%m";
 
-                let sentence =` `;
+                const tableName = info.doc_type === "TRS"
+                    ? `sga_ecosystem.transaction_detail`
+                    : `sga_process.${info.doc_type}`;
 
-                if(info.doc_type === 'TRS'){
-                    sentence = `
-                    SELECT
-                        DATE_FORMAT(created_at, '${format}') AS label , COUNT(*) AS total
-                    FROM sga_ecosystem.transaction_detail
-                    GROUP BY DATE_FORMAT(created_at, '${format}')
-                    ORDER BY DATE_FORMAT(created_at, '${format}') ASC;
+                const noFilters =
+                    !info.dateStart &&
+                    !info.dateEnd &&
+                    !info.status &&
+                    !info.filterValue &&
+                    !info.orderBy &&
+                    !info.limit;
+
+
+                if (noFilters) {
+                    const sentence = `
+                        SELECT
+                            DATE_FORMAT(created_at, '${format}') AS label,
+                            COUNT(*) AS total
+                        FROM ${tableName}
+                        GROUP BY DATE_FORMAT(created_at, '${format}')
+                        ORDER BY DATE_FORMAT(created_at, '${format}') ASC;
                     `;
-                }else{
-                    const tableName = `sga_process.${info.doc_type}`;
-                    sentence = `
-                    SELECT
-                        DATE_FORMAT(created_at, '${format}') AS label , COUNT(*) AS total
-                    FROM ${tableName}
-                    GROUP BY DATE_FORMAT(created_at, '${format}')
-                    ORDER BY DATE_FORMAT(created_at, '${format}') ASC;
-                    `;
+
+                    const consulta = await useDataBase(sentence, [], 1);
+                    return res.status(200).json(consulta);
                 }
 
-                const consulta = await useDataBase(sentence, [], 1);
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(consulta));
+                const whereClauses = [];
+                const values = [];
+
+                if (info.dateStart) {
+                    whereClauses.push(`created_at >= ?`);
+                    values.push(info.dateStart);
+                }
+
+                if (info.dateEnd) {
+                    whereClauses.push(`created_at <= ?`);
+                    values.push(info.dateEnd);
+                }
+
+                if (info.status) {
+                    whereClauses.push(`status = ?`);
+                    values.push(info.status);
+                }
+
+                if (info.filterField && info.filterValue) {
+                    whereClauses.push(`${info.filterField} LIKE ?`);
+                    values.push(`%${info.filterValue}%`);
+                }
+
+                const whereQuery = whereClauses.length > 0
+                    ? `WHERE ${whereClauses.join(" AND ")}`
+                    : "";
+
+                const orderQuery = info.orderBy
+                    ? `ORDER BY ${info.orderBy} ${info.orderDirection === "DESC" ? "DESC" : "ASC"}`
+                    : `ORDER BY DATE_FORMAT(created_at, '${format}') ASC`;
+
+                const limitQuery = info.limit ? `LIMIT ${parseInt(info.limit)}` : "";
+
+                const sentence = `
+                    SELECT
+                        DATE_FORMAT(created_at, '${format}') AS label,
+                        COUNT(*) AS total
+                    FROM ${tableName}
+                    ${whereQuery}
+                    GROUP BY DATE_FORMAT(created_at, '${format}')
+                    ${orderQuery}
+                    ${limitQuery};
+                `;
+
+                console.log("SQL generado:", sentence, values);
+
+                const consulta = await useDataBase(sentence, values, 1);
+                return res.status(200).json(consulta);
+
+            } catch (err) {
+                console.error("⚠️ Error:", err);
+                res.status(500).json({ error: "Error procesando la solicitud", detail: err.message });
+            }
         });
 
         req.on('error', (err) => {
