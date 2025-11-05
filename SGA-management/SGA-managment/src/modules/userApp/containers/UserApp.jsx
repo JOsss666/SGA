@@ -29,6 +29,7 @@ import { LoadingSpace } from './LoadingSpace';
 import { LogOut } from '../../Login/LogOut';
 import { AppIcon } from '../components/AppIcon';
 import { NotificationsMenuSpace } from './NotificationsMenuSpace';
+import { Modules } from './Modules';
 
 export function UserApp(){
 
@@ -161,7 +162,7 @@ export function UserApp(){
                             <Route path='/' element={<HomeProcess/>} />
                             <Route path='/myBussines/' element={<span>Mi empresa</span>}/>
                             <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
-                            <Route path='/modules/*' element={<span></span>}/>
+                            <Route path='/modules/*' element={<Modules/>}/>
                             <Route path='/services' element={<span>Servicios</span>}/>
                             <Route path='/billing' element={<span>Facturación</span>}/>
                             <Route path='/messages/*' element={<span>messages</span>} />
