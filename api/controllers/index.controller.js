@@ -484,6 +484,39 @@ controller.getTaxes = (req,res)=>{
     })
 }
 
+
+
+/* ELIMINAR IMPUESTOS*/
+
+controller.deleteTax = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+
+        const idTaxesArray = info.taxes.map(() => "?").join(",");
+
+        let sentence = `
+                DELETE FROM sga_ecosystem.taxes
+                WHERE id IN (${idTaxesArray});
+            `;
+
+        let consulta = await useDataBase(sentence,[
+            info.taxes
+        ],2);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+
+
 controller.createConcept = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
@@ -575,6 +608,35 @@ controller.getConcepts = (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
+
+
+/* ELIMINAR CONCEPTOS*/
+controller.deleteConcept = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        const idConceptsArray = info.concepts.map(() => "?").join(",");
+        let sentence = `
+                DELETE FROM sga_ecosystem.concepts
+                WHERE id IN (${idConceptsArray});
+            `;
+        let consulta = await useDataBase(sentence,[
+            info.concepts
+        ],2);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+
+
 
 controller.getPaymentMethods = (req,res)=>{
     let data = '';
@@ -764,6 +826,35 @@ controller.getTransactions = (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
+
+
+
+/* ELIMINAR TRASACTIONS */
+
+controller.deleteTransaction = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        const idTransactionsArray = info.transactions.map(() => "?").join(",");
+        let sentence = `
+                DELETE FROM sga_ecosystem.transactions
+                WHERE id IN (${idTransactionsArray});
+            `;
+        let consulta = await useDataBase(sentence,[
+            info.transactions
+        ],2);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 
 controller.getTransactionDetails = (req,res)=>{
     let data = '';
