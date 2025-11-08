@@ -401,7 +401,7 @@ processController.searchDocument = (req,res)=>{
                 sga_process.OPS.company_id = ${info.company_id}
                 AND sga_process.OPS.op_id LIKE '${info.searchVal}' 
                 ${info.store_id != null? ` AND sga_process.OPS.store_id = ${info.store_id} `:''}
-                ${(info.initialDate!= null && info.finalDate != null)? ` AND DATE(sga_process.OPS.created_at) BETWEEN '${info.initialDate}' AND '${info.finalDate} '   `:''}
+                ${(info.initialDate!= null && info.finalDate != null)? ` AND DATE(sga_process.OPS.created_at) BETWEEN '${info.initialDate}' AND '${info.finalDate}'   `:''}
         `;
         let sentenceOC = `SELECT
                 'OC' AS type,

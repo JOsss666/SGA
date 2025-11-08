@@ -1,5 +1,10 @@
 
 import { urlSer } from "../App";
+import domtoimage from "dom-to-image-more";
+import Papa from 'papaparse';
+import ExcelJs from 'exceljs';
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 export async function postInfo(route,informacion){
     console.log('Funcion post');
@@ -23,6 +28,130 @@ export async function postInfo(route,informacion){
         })
     })
 }
+
+export async function parseToXlsx(info, download, columns, name) {
+    const workbook = new ExcelJs.Workbook();
+    const worksheet = workbook.addWorksheet(name || "Hoja 1");
+    if (columns && Array.isArray(columns)) {
+        worksheet.columns = columns;
+        worksheet.addRows(info);
+    } else {
+        // Si no hay columnas, inferir encabezados automáticamente
+        if (info.length > 0 && typeof info[0] === "object") {
+        const headers = Object.keys(info[0]);
+        worksheet.addRow(headers);
+        info.forEach(obj => worksheet.addRow(Object.values(obj)));
+        } else {
+        worksheet.addRows(info);
+        }
+    }
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", name ? `${name}.xlsx` : "descarga.xlsx");
+    if (download) {
+        link.click();
+    } else {
+        return link;
+    }
+}
+
+
+export  async function parseToCsv(info,download,name){
+    const newCsv = Papa.unparse(info);
+    const blob = new Blob([newCsv],{type:"text/csv;charset=utf-8;"})
+    let blobUrl = URL.createObjectURL(blob)
+    let newLinkDownload = document.createElement("a");
+    newLinkDownload.href = blobUrl;
+    newLinkDownload.setAttribute("download",name? name:"SGA - descarga.csv");
+    if(download){
+        newLinkDownload.click();
+    }else{
+        return newLinkDownload;
+    }
+}
+
+export async function componentToPdf(component,download = true,options = {},name = "SGA-descarga.pdf") {
+    const { title = "", scale = 2 } = options;
+
+    // Asegurar que todas las imágenes dentro del componente estén cargadas
+    await Promise.all(
+        Array.from(component.getElementsByTagName("img")).map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+        });
+        })
+    );
+
+    // Guardar estilos originales
+    const originalOverflow = component.style.overflow;
+    const originalHeight = component.style.height;
+
+    // Expandir el componente para capturar todo (en caso de scroll)
+    component.style.overflow = "visible";
+    component.style.height = "auto";
+
+    // Capturar el contenido
+    const canvas = await html2canvas(component, {
+        scale,
+        useCORS: true,
+        scrollY: 0,
+        logging: false,
+        backgroundColor: "#ffffff",
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // Si hay título, lo añadimos al inicio
+    if (title) {
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(16);
+        const textWidth = pdf.getTextWidth(title);
+        pdf.text(title, (pageWidth - textWidth) / 2, 15); // centrado
+        position = 25; // espacio para el título
+    }
+
+    // Añadir imagen (primera página)
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // Agregar páginas adicionales si es necesario
+    while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+    }
+
+    // Restaurar estilos originales
+    component.style.overflow = originalOverflow;
+    component.style.height = originalHeight;
+
+    // Descargar o retornar el PDF
+    if (download) {
+        pdf.save(name);
+    } else {
+        return pdf;
+    }
+}
+
+
+
 
 export function copyToClipBoard(text){
     navigator.clipboard.writeText(text)
@@ -129,3 +258,194 @@ export async function getAttached(type,attached,paramsDB) {
     }
 
 }
+
+
+export async function ScreenShotElement(element, name = "captura.png") {
+    if (!element) {
+        console.error("Elemento no encontrado para capturar.");
+        return;
+    }
+
+    // Guardar estilos originales
+    const originalOverflow = element.style.overflow;
+    const originalHeight = element.style.height;
+
+    try {
+        // Expandir el elemento para mostrar todo su contenido
+        element.style.overflow = "visible";
+        element.style.height = "auto";
+
+        // Esperar un pequeño tiempo para que el DOM se actualice visualmente
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        // Capturar el elemento completo
+        const dataUrl = await domtoimage.toPng(element, {
+        quality: 1,
+        bgcolor: "#ffffff",
+        cacheBust: true,
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+        });
+
+        // Crear y activar la descarga
+        const link = document.createElement("a");
+        link.download = name;
+        link.href = dataUrl;
+        link.click();
+
+    } catch (error) {
+        console.error("Error al generar la imagen:", error);
+    } finally {
+        // Restaurar estilos originales
+        element.style.overflow = originalOverflow;
+        element.style.height = originalHeight;
+    }
+}
+
+
+//Funciones estadisticas
+
+
+//media (promedio)
+export function media(datos) {
+    // Validar si no hay datos
+    if (!datos || datos.length === 0) return 0;
+        // Recorre los datos sumando cada numero al acumulador
+        const suma = datos.reduce((acum, valor) => acum + valor, 0);
+    return suma / datos.length;
+}
+
+//mediana
+export function mediana(datos){
+    if (!datos || datos.length === 0)return 0;
+    //copia de los datos ordenados para no editar el orden original
+    const orden = [...datos].sort ((a,b) => a - b);
+    const mitad = Math.floor(orden.length / 2)
+
+    //Si es par hacer el promedio de los dos valores del centro
+    if(orden.length % 2 === 0){
+        return(orden[mitad - 1] + orden[mitad]) / 2;
+    } else {
+        //Si es impar tomar el valor central
+        return orden[mitad];
+    } 
+}
+
+//moda
+export function moda(datos){
+    //retornamos datos si no hay moda
+    if(!datos || datos.length === 0) return [];
+
+    const frecuencia = {};
+    let maxF = 0;
+    const modass = []
+
+    //contar frecuencias de cada valor
+    datos.forEach(valor => {
+        frecuencia[valor] = (frecuencia[valor] || 0) + 1;
+        if (frecuencia[valor] > maxF) {
+            maxF = frecuencia[valor]
+        }
+    });
+
+    // Si la frecuencia máxima es 1 y hay más de un elemento, no hay moda
+    if (maxF === 1 && datos.length > 1) {
+        return [];
+    }
+
+    //valores con maxima frecuencia
+    Object.keys(frecuencia).forEach(valor => {
+        if (frecuencia[valor] === maxF){
+            modass.push(Number(valor));
+        }
+    });
+    return modass;
+}
+
+//Rango
+export function rango(datos) {
+    if (!datos || datos.length === 0) return 0;
+    
+    const max = Math.max(...datos);
+    const min = Math.min(...datos);
+
+    return max - min;
+}
+
+
+//definir funcion percentil (metodo 6) 
+export function percentil(datos , p){
+
+    //validar si hay datos
+    if (!datos || datos.length === 0) return 0;
+
+        //percentil entre 0 y 100
+        if (p < 0 || p > 100) throw new error ("percentil entre 0 y 100")
+            const orden = [...datos].sort((a,b) => a-b);
+            const n = orden.length;
+
+            //metodo 6
+            const posicion = (n + 1) * (p / 100);
+
+            if (posicion <= 1) return orden[0];
+            if (posicion >= n) return orden[n - 1];
+    
+            const partEnt = Math.floor(posicion) - 1;
+            const partDeci = posicion - Math.floor(posicion);
+    
+        return orden[partEnt] + partDeci * (orden[partEnt + 1] - orden[partEnt]);
+}
+
+//rango intercuartilico
+export function ric(datos){
+    if (!datos || datos.length === 0) return 0;
+    
+        const q1 = percentil(datos , 25);
+        const q3 = percentil(datos , 75);
+    return q1 - q3;
+}
+
+
+//varianza
+export function varianza(datos, poblacional = true) {
+    if (!datos || datos.length === 0) return 0;
+    
+        //Si solo hay un elemento, no hay variación
+        if (datos.length === 1) return 0;
+    
+            const promedio = media(datos);
+    
+            //suma de las diferencias al cuadrado
+            const sumCuadrados = datos.reduce((suma, valor) => {
+        return suma + Math.pow(valor - promedio, 2);
+        }, 0);
+
+    return sumCuadrados / datos.length;
+}
+
+
+//desviacion estandar
+export function desviacionEstandar(datos) {
+    if (!datos || datos.length === 0) return 0;
+    return Math.sqrt(varianza(datos));
+}
+
+
+//coeficiente de variación
+export function CoefVari(datos) {
+    if (!datos || datos.length === 0) return 0;
+        const mediaVal = media(datos);
+        if (mediaVal === 0) return 0;
+        const desviacion = desviacionEstandar(datos);
+    return (desviacion / mediaVal) * 100;
+}
+
+//Z-score
+export function zscore(valor, datos) {
+    if (!datos || datos.length === 0) return 0;
+    const mediaVal = media(datos);
+    const desviacion = desviacionEstandar(datos);
+    if (desviacion === 0) return 0;
+    return (valor - mediaVal) / desviacion;
+}
+

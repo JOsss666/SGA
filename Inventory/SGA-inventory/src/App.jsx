@@ -3,6 +3,7 @@ import './App.css'
 import { GerenceApp } from './modules/GerenceApp/containers/GerenceApp';
 import { AlertProvider,AppInfoProvider,PreviewProvider,AiAssistanProvider, NotificationsProvider } from './context/context';
 import { LandingPage } from './modules/LandingPage/containers/LandingPage';
+import { Login } from './LogIn';
 
 export const urlSer = 'http://localhost:3000';
 
@@ -13,7 +14,13 @@ function App() {
         <div className='AppSpace'>
           <AppInfoProvider>
             <Router>
+              
               <Routes>
+                  <Route path="/SGA_inventarios/logIn" element={
+                    <AppInfoProvider>
+                      <Login/>
+                    </AppInfoProvider>
+                  }/>
                   <Route path='/SGA_Inventarios/*' element={<LandingPage/>}/>
                   <Route path="/SGA_INVENTORY" element={<><span>LandingPage Inventario</span></>}/>
                   <Route path="/SGA_INVENTORY/aboutUs" element={<><span>SGA - Sobre Nosotros</span></>}/>

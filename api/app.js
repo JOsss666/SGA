@@ -38,6 +38,7 @@ const pool = mysql.createPool({
 const poolPromise = pool.promise();
 
 async function testDBConnection() {
+    console.log(mySQL_user)
     try {
         const connection = await poolPromise.getConnection();
         console.log('✅ Conexión a MySQL establecida correctamente.');
@@ -310,7 +311,6 @@ async function createTax(rows){
     console.log('Errores ----> ',errors.length);
     console.log(errors);
 }
-
 
 export{
     cloudinary,

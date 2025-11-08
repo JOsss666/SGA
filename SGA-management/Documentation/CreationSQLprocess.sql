@@ -1,0 +1,106 @@
+CREATE DATABASE IF NOT EXISTS sga_process;
+USE sga_process;
+
+
+CREATE TABLE OPS (
+    op_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    company_id BIGINT UNSIGNED NOT NULL,
+    store_id INT NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    thirdParty_id INT,
+    status VARCHAR(100) NOT NULL DEFAULT 'active',
+    budgetIncome FLOAT NOT NULL DEFAULT 0,
+    budgetCost FLOAT NOT NULL DEFAULT 0,
+    executedCost FLOAT NOT NULL DEFAULT 0,
+    invoicedValue FLOAT NOT NULL DEFAULT 0,
+    expiration_date DATE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES sga_ecosystem.users(user_id)
+);
+
+
+CREATE TABLE OCS (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    company_id INT NOT NULL,
+    store_id INT NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    op_id BIGINT UNSIGNED NOT NULL,
+    thirdParty_id BIGINT UNSIGNED NOT NULL,
+    description VARCHAR(1000),
+    status VARCHAR(100) NOT NULL DEFAULT 'active',
+    budgetIncome FLOAT NOT NULL DEFAULT 0,
+    budgetCost FLOAT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (op_id) REFERENCES OPS(op_id),
+    FOREIGN KEY (thirdParty_id) REFERENCES sga_ecosystem.thirdParties(id),
+    FOREIGN KEY (user_id) REFERENCES sga_ecosystem.users(user_id)
+);
+
+
+CREATE TABLE DCS (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    op_id BIGINT UNSIGNED NOT NULL,
+    company_id INT NOT NULL,
+    store_id INT NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    thirdParty_id BIGINT UNSIGNED NOT NULL,
+    description TEXT,
+    status VARCHAR(100) NOT NULL DEFAULT 'active',
+    value FLOAT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (op_id) REFERENCES OPS(op_id),
+    FOREIGN KEY (thirdParty_id) REFERENCES sga_ecosystem.thirdParties(id),
+    FOREIGN KEY (user_id) REFERENCES sga_ecosystem.users(user_id)
+);
+
+
+CREATE TABLE FVS (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    op_id BIGINT UNSIGNED NOT NULL,
+    company_id INT NOT NULL,
+    store_id INT NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    thirdParty_id BIGINT UNSIGNED NOT NULL,
+    description TEXT,
+    status VARCHAR(100) NOT NULL DEFAULT 'active',
+    value FLOAT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (op_id) REFERENCES OPS(op_id),
+    FOREIGN KEY (thirdParty_id) REFERENCES sga_ecosystem.thirdParties(id),
+    FOREIGN KEY (user_id) REFERENCES sga_ecosystem.users(user_id)
+);
+
+
+CREATE TABLE CIS (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    op_id BIGINT UNSIGNED NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    thirdParty_id BIGINT UNSIGNED NOT NULL,
+    description TEXT,
+    status VARCHAR(100) NOT NULL DEFAULT 'active',
+    company_id INT NOT NULL,
+    store_id INT NOT NULL,
+    cellar_id INT NOT NULL,
+    movement_id INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (op_id) REFERENCES OPS(op_id),
+    FOREIGN KEY (thirdParty_id) REFERENCES sga_ecosystem.thirdParties(id),
+    FOREIGN KEY (user_id) REFERENCES sga_ecosystem.users(user_id)
+);
+
+
+CREATE TABLE users_actions (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    type VARCHAR(200) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES sga_ecosystem.users(user_id)
+);
+
+

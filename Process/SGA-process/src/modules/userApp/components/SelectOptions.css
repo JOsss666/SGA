@@ -1,10 +1,12 @@
+@import '../containers/UserApp.css';
+
 
 .SelectOptions{
     border-radius: 1vh;
-    background-color: #fff;
+    background-color: var(--inputsBg);
     height: fit-content;
     display: flex;
-    border: solid .1vh #eee;
+    border: solid .1vh var(--inputsBorder);
     position: relative;
     transition: .3s;
 }
@@ -13,15 +15,15 @@
     display: flex;
     width: 100%;
     height: 100%;
-    background-color: #fff;
+    background-color: var(--inputsBg);
     z-index: 4;
-    padding: 1vh 2vh;
+    padding: 1.25vh 2vh;
     border-radius: 1vh;
     box-shadow: 0 .2vh 2vh #0003;
 }
 
 .SelectOptions:hover span{
-    color: #555;
+    color: var(--sectionTitle);
 }
 
 .SelectOptions:hover .despleOptions{
@@ -32,8 +34,8 @@
     margin: auto 0;
     margin-right: 1.5vh;
     font-size: clamp(1px,2vh,18px);
-    color: #747474;
-    background-color: #fff;
+    color: var(--descriptionText);
+    background-color: var(--inputsBg);
     text-wrap: nowrap;
     white-space: none;
     text-overflow: ellipsis;
@@ -44,16 +46,16 @@
     margin: auto 0;
     font-size: clamp(1px,2.5vh,18px);
     cursor: pointer;
-    color: #888;
+    color: var(--descriptionText);
 }
 
 .SelectOptions .listOptions{
     width: 100%;
     position: absolute;
     list-style: none;
-    top: 4.5vh;
+    top: 5.1vh;
     border-radius: 1vh;
-    background-color: #eee8;
+    background-color: var(--translucidMenu);
     backdrop-filter: blur(1vh);
     left: 0;
     overflow: hidden;
@@ -65,7 +67,7 @@
     font-size: clamp(1px,2vh,18px);
     padding: 1vh;
     padding-left: 2vh;
-    color: #666;
+    color: var(--descriptionText);
     cursor: pointer;
     border-radius: 1vh;
     transition: .2s;
@@ -75,8 +77,8 @@
 }
 
 .SelectOptions .listOptions li:hover{
-    background-color: #fff;
-    color: #444;
+    background-color: var(--iconHover);
+    color: var(--mainText);
     padding-left: 3vh;
     box-shadow: 0 .4vh 1vh #00000040;
 }

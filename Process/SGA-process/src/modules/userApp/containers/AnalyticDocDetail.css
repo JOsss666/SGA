@@ -1,0 +1,56 @@
+
+.AnalyticDocDetail{
+    padding: 2vh;
+    position: relative;
+}
+
+.AnalyticDocDetail .HeaderAnalytics{
+    margin: 1vh .2vh;
+}
+
+.AnalyticDocDetail .AiButton{
+    position: absolute;
+    top: 2vh;
+    right: 4vh;
+}
+
+.AnalyticDocDetail .Graph{
+    width: 140vh;
+    margin: .5vh;
+    align-content: center;
+    box-shadow: 0 .4vh 2vh #0002;
+}
+
+.AnalyticDocDetail .Search{
+    display: flex;
+    flex-direction: column;
+    margin: 1vh auto;
+    width: auto;
+    padding: 0 1vh;
+    align-content: center;
+}
+
+
+.AnalyticDocDetail .ContainerAnalitycs{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 1vh;
+    margin: 2vh;
+    width: 183vh;
+    height: 54vh;
+}
+
+.AnalyticDocDetail .Ranking{
+    margin: 2vh;
+    width: 183vh;
+    height: 20vh;
+}
+
+.AnalyticDocDetail .gridOptionsDocuments{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    gap: 2vh;
+    width: auto;
+}
