@@ -1,63 +1,63 @@
 
 .AnalyticDocDetail{
-    padding: 2vh;
+    padding: 0 2vh;
     position: relative;
     height: 100%;
+    overflow: auto;
 }
 
 .AnalyticDocDetail .HeaderAnalytics{
-    margin: 1vh .2vh;
-
+    margin-bottom: 2vh;
 }
 
 .AnalyticDocDetail .AiButton{
     position: absolute;
     top: 2vh;
     right: 4vh;
+    display: none;
 }
 
 .AnalyticDocDetail .Graph{
-    margin: .5vh;
+    height: 68%;
+    margin: 0vh;
     align-content: center;
-    padding: 2vh 1vh;
-    background-image: linear-gradient(45deg, var(--lightGradient1), var(--lightGradient3), var(--lightGradient4));
-    border-radius: 2vh;
+    padding: .4vh;
+    background-color: var(--menuAside);
     outline: solid .1vh var(--inputsBorder);
+    border-radius: 2vh;
 }
 
 .AnalyticDocDetail .Search{
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    width: 40vh;
-    margin: 2vh;
+    width: 50vh;
+    margin: 0 1vh;
     border-radius: 2vh;
-    padding: 2vh 1vh;
-    background-image: linear-gradient(45deg, var(--lightGradient1), var(--lightGradient3), var(--lightGradient4));
+    padding: 2vh;
+    background-color: var(--menuAside);
     outline: solid .1vh var(--inputsBorder);
 }
 
 
 .AnalyticDocDetail .ContainerAnalitycs{
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
 }
 
 .AnalyticDocDetail .ContainerData{
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 1vh;
-    margin: 2vh;
-    width: 100vh;
+    margin: 0;
+    width: 60%;
 }
 
 .AnalyticDocDetail .ContainerData .TableValues{
-   
-    width: 100vh;
+    height: 25vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
     padding: 2vh 1vh;
-    background-image: linear-gradient(45deg, var(--lightGradient1), var(--lightGradient3), var(--lightGradient4));
+    background-color: var(--menuAside);
     border-radius: 2vh;
     outline: solid .1vh var(--inputsBorder);
 }
@@ -67,11 +67,12 @@
 }
 
 .AnalyticDocDetail .Ranking{
-    width: 40vh;
-    margin: 2vh;
+    width: 20%;
+    margin: 0 2vh;
+    height: inherit;
     border-radius: 2vh;
     padding: 2vh 1vh;
-    background-image: linear-gradient(45deg, var(--lightGradient1), var(--lightGradient3), var(--lightGradient4));
+    background-color: var(--menuAside);
     outline: solid .1vh var(--inputsBorder);
 }
 
@@ -79,20 +80,19 @@
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
-    gap: 2vh;
 }
 
 .AnalyticDocDetail .CardRankingAnalytics{
-    width: 18vw;
-    height: 13vh;
     background-image: none;
     box-shadow: none;
     outline: none;
+    margin: .5vh;
 }
 
 .AnalyticDocDetail .BoldTitle{
     font-size: 2.4vh;
-    margin-top: 2vh;
+    margin:1vh 0;
+    margin-top: 3vh;
 }
 
 .AnalyticDocDetail .Search .FormInput{
@@ -114,6 +114,15 @@
     gap: 1vh;
 }
 
+.AnalyticDocDetail .Search .SearchElements .SelectOptions{
+    width: 10vw;
+}
+
 .AnalyticDocDetail .Search .FormButton{
-    margin-top: 2vh;
+    margin-top: 3vh;
+    background-color: #0071E3;
+}
+
+.AnalyticDocDetail .Search .SelectOptions .contentOptions{
+    box-shadow: none;
 }

@@ -13,8 +13,6 @@ export const LightChart = ({
   title,
   doc_type,
   type,
-
-  // ✅ nuevos props (filtros enviados desde AnalyticDocDetail.jsx)
   dateStart,
   dateEnd,
   status,
@@ -22,6 +20,7 @@ export const LightChart = ({
   filterValue,
   orderBy,
   limit,
+  updateFatherData
 }) => {
   const [data, setData] = useState([]);
   const [stateData, setStateData] = useState();
@@ -55,7 +54,7 @@ export const LightChart = ({
         filterField,
         filterValue,
         orderBy,
-        limit,
+        limit
       };
 
       console.log("📡 Enviando al backend:", body);
@@ -81,6 +80,12 @@ export const LightChart = ({
 
     setLoading(false);
   };
+
+  useEffect(()=>{
+    if(updateFatherData != undefined){
+      updateFatherData(data)
+    }
+  },[data])
 
   // ➕ Calcula tendencia (subió / bajó)
   const calcStateChart = () => {

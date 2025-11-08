@@ -5,14 +5,14 @@ import './DespleList.css'
 export function DespleList({options,father,children}){
 
     const [visibleChildren,setVisibleChildren] = useState(false);
-
+    console.log(options)
     const mainC = useRef();
 
     return(
         <div ref={mainC} className="DespleList">
             <h6>
                 {children}
-                {father.title}{options.length>0 && (
+                {father != undefined? father.title:''}{options.length>0 && (
                 <i onClick={()=>{setVisibleChildren(!visibleChildren)}} className={`fa-solid fa-angle-${visibleChildren? 'up':'down'}`}/>
             ) }</h6>
             {visibleChildren && (

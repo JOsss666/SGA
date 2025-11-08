@@ -55,12 +55,13 @@
     list-style: none;
     top: 5.1vh;
     border-radius: 1vh;
-    background-color: var(--translucidMenu);
+    background-color: var(--menuAside);
     backdrop-filter: blur(1vh);
     left: 0;
+    outline: solid .1vh var(--inputsBorder);
     overflow: hidden;
     box-shadow: 0 .4vh 1vh #00000040;
-    z-index: 3;
+    z-index: 15;
 }
 
 .SelectOptions .listOptions li{
