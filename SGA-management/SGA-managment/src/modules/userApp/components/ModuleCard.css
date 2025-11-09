@@ -1,0 +1,245 @@
+.module-card {
+    background: var(--card-bg, var(--bg));
+    border-radius: 12px;
+    padding: 18px;
+    border: 1px solid var(--inputsBorder);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+}
+
+.module-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: var(--cardHover);
+}
+
+.module-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.module-image {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1px solid var(--inputsBorder);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--inputsBg);
+}
+
+.module-image-placeholder {
+    color: var(--descriptionText);
+    font-size: 14px;
+}
+
+.module-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.module-content {
+    flex: 1;
+}
+
+.module-title {
+    color: var(--sectionTitle);
+    font-size: 20px;
+    font-weight: 700;
+    margin: 4px;
+}
+
+.module-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    justify-content: space-between;
+}
+
+.module-description-container {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+}
+
+.module-description {
+    color: var(--descriptionText);
+    font-size: 12px;
+    line-height: 1.4;
+    margin: 0;
+    display: -webkit-box;
+    max-height: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.module-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.buttons-left {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+}
+
+.buttons-right {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.module-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    height: 30px;
+    min-width: 80px;
+}
+
+.module-btn i {
+    font-size: 10px;
+}
+
+.btn-settings {
+    background-color: var(--inputsBg);
+    color: var(--descriptionText);
+    border: 1px solid var(--inputsBorder);
+    min-width: 65px;
+}
+
+.btn-settings:hover {
+    background-color: var(--iconHover);
+}
+
+.btn-view, .btn-buy {
+    background-color: var(--text);
+    color: var(--bg);
+}
+
+.btn-view:hover {
+    background-color: var(--descriptionText);
+}
+
+.btn-buy {
+    cursor: default;
+}
+
+.btn-buy:hover {
+    background-color: var(--text);
+    transform: none;
+}
+
+.small-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.circle-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.small-btn i {
+    font-size: 9px;
+    color: white;
+}
+
+.small-btn-green, .small-btn-blue {
+    cursor: default;
+}
+
+.small-btn-green:hover, .small-btn-blue:hover {
+    transform: none;
+}
+
+.small-btn-green {
+    background-color: var(--accent-color, #2e7d32);
+}
+
+.small-btn-blue {
+    background-color: var(--primary-color, #1976d2);
+}
+
+/* Responsive solo para ModuleCard */
+@media (max-width: 600px) {
+    .module-card {
+        padding: 15px;
+        min-height: 140px;
+    }
+    
+    .module-buttons {
+        gap: 10px;
+    }
+    
+    .module-actions {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .buttons-left {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .buttons-right {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .small-btn {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .module-btn {
+        height: 28px;
+        padding: 6px 10px;
+        min-width: 75px;
+    }
+    
+    .btn-settings {
+        min-width: 60px;
+    }
+    
+    .module-description {
+        font-size: 11px;
+    }
+}
