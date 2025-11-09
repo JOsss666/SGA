@@ -50,7 +50,7 @@ export function Users(){
                     <SelectOptions title={'Filtro'} options={['ninguno']}/>
                     <SelectOptions title={'Orden'} options={['Alfabetico','Fecha de Creación','Rol']}/>
                     <FormButton onClick={()=>{
-                        popInAlert(<FormNewUser/>)
+                        popInAlert(<FormNewUser reloadFun={getUsers}/>)
                     }} text={'Crear usuario'} children={<i className="fa-solid fa-plus"/>}/>
                 </div>
             </div>
@@ -69,7 +69,7 @@ export function Users(){
                 {!loading && (
                     <div className="bodyTableUsers">
                         {users.length > 0 && users.map((element,index)=>(
-                            <RowTableUsers info={element} key={index} onClick={()=>{
+                            <RowTableUsers reloadFun={getUsers} info={element} key={index} onClick={()=>{
                                 //handlenavigate(element.user_id)
                             }}/>
                         ))}

@@ -2,12 +2,10 @@ import './ModuleCard.css';
 
 export function ModuleCard({ module, onCardClick, onButtonClick, onSmallButtonClick }) {
     return (
-        <div className="module-card" onClick={() => onCardClick(module.id)}>
+        <div className="ModuleCard" onClick={() => onCardClick(module.id)}>
             <div className="module-header">
                 <div className="module-image">
-                    <div className="module-image-placeholder">
-                        <i className="fa-solid fa-cube"></i>
-                    </div>
+                    <img className='module-img' src={module.image} alt="" />
                 </div>
                 <div className="module-content">
                     <h3 className="module-title">{module.name}</h3>

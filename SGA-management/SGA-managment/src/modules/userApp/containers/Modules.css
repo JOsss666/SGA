@@ -4,36 +4,41 @@
     min-height: 100vh;
 }
 
-.ModulesMain { 
-    max-width: 1400px; 
+.Modules .ModulesMain { 
+    width: 95%;
     margin: 0 auto; 
 }
 
-.modules-header { 
-    margin-bottom: 25px; 
+.Modules .modules-header { 
+    margin-bottom: 4vh; 
     text-align: center;
 }
 
-.modules-description { 
-    color: var(--descriptionText); 
-    font-size: 14px; 
-    margin-top: 5px; 
+.Modules .modules-header .BoldTitle{
+    font-size: clamp(3px,5vh,50px);
+    margin-bottom: 1vh;
 }
 
-.modules-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 12px;
-    justify-content: center;
+.Modules .modules-header .DescriptionSpan{
+    margin: 1vh auto;
 }
 
-.ajustes-page {
-    max-width: 800px;
+.Modules .modules-grid {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.Modules .modules-grid .ModuleCard{
+    margin: 2vh auto;
+}
+
+.Modules .ajustes-page {
+    width: 100%;
     margin: 0 auto;
     padding: 20px;
 }
 
-.ajustes-content {
+.Modules .ajustes-content {
     background: var(--card-bg);
     padding: 20px;
     border-radius: 12px;
@@ -41,28 +46,28 @@
     margin-top: 20px;
 }
 
-.ajustes-content h3 {
+.Modules .ajustes-content h3 {
     color: var(--sectionTitle);
     margin-bottom: 15px;
 }
 
-.ajustes-content ul {
+.Modules .ajustes-content ul {
     color: var(--descriptionText);
     line-height: 1.6;
 }
 
-.ajustes-content li {
+.Modules .ajustes-content li {
     margin-bottom: 8px;
     padding-left: 10px;
 }
 
-.module-detail-page {
+.Modules .module-detail-page {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
 }
 
-.module-detail-content {
+.Modules .module-detail-content {
     background: var(--card-bg);
     padding: 20px;
     border-radius: 12px;
@@ -70,54 +75,26 @@
     margin-top: 20px;
 }
 
-.module-detail-content h3 {
+.Modules .module-detail-content h3 {
     color: var(--sectionTitle);
     margin-bottom: 15px;
 }
 
-.module-features {
+.Modules .module-features {
     margin-top: 20px;
 }
 
-.module-features h4 {
+.Modules .module-features h4 {
     color: var(--sectionTitle);
     margin-bottom: 10px;
 }
 
-.module-features ul {
+.Modules .module-features ul {
     color: var(--descriptionText);
     line-height: 1.6;
 }
 
-.module-features li {
+.Modules .module-features li {
     margin-bottom: 8px;
     padding-left: 10px;
-}
-
-@media (max-width: 1200px) {
-    .modules-grid {
-        grid-template-columns: repeat(3, 250px);
-    }
-}
-
-@media (max-width: 900px) {
-    .modules-grid {
-        grid-template-columns: repeat(2, 250px);
-    }
-}
-
-@media (max-width: 600px) {
-    .modules-grid {
-        grid-template-columns: 1fr;
-        max-width: 300px;
-        margin: 0 auto;
-    }
-    
-    .Modules {
-        padding: 15px;
-    }
-    
-    .modules-header {
-        text-align: left;
-    }
 }

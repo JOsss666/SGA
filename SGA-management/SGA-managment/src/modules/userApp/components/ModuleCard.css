@@ -1,22 +1,22 @@
-.module-card {
+.ModuleCard {
     background: var(--card-bg, var(--bg));
-    border-radius: 12px;
-    padding: 18px;
+    border-radius: 2vh;
+    padding: 2vh;
     border: 1px solid var(--inputsBorder);
     transition: all 0.3s ease;
     cursor: pointer;
-    min-height: 150px;
+    width: 20vw;
     display: flex;
     flex-direction: column;
 }
 
-.module-card:hover {
+.ModuleCard:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 .4vh 1.2vh #00000010;
     background-color: var(--cardHover);
 }
 
-.module-header {
+.ModuleCard .module-header {
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -24,58 +24,48 @@
     flex-shrink: 0;
 }
 
-.module-image {
-    width: 35px;
-    height: 35px;
-    border-radius: 8px;
-    overflow: hidden;
-    flex-shrink: 0;
-    border: 1px solid var(--inputsBorder);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.ModuleCard .module-image {
+    width: 5vh;
+    height: 5vh;
+    border-radius: 100%;
+    outline: solid .1vh var(--inputsBorder);
     background-color: var(--inputsBg);
+    overflow: hidden;
 }
 
-.module-image-placeholder {
-    color: var(--descriptionText);
-    font-size: 14px;
-}
-
-.module-img {
+.ModuleCard .module-image .module-img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover;  
 }
 
-.module-content {
-    flex: 1;
+.ModuleCard .module-content {
+    display: flex;
+    margin: auto 0;
 }
 
-.module-title {
+.ModuleCard .module-title {
     color: var(--sectionTitle);
-    font-size: 20px;
-    font-weight: 700;
-    margin: 4px;
+    font-size: clamp(3px,3vh,30px);
+    font-weight: 500;
+    margin: auto 0;
+    margin-left: 1vh;
 }
 
-.module-buttons {
+.ModuleCard .module-buttons {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    flex: 1;
-    justify-content: space-between;
+    gap: 1.2vh;
 }
 
-.module-description-container {
-    flex: 1;
+.ModuleCard .module-description-container {
     display: flex;
-    align-items: flex-start;
+    margin: .5vh auto;
 }
 
-.module-description {
+.ModuleCard .module-description {
     color: var(--descriptionText);
-    font-size: 12px;
+    font-size: clamp(2px,2vh,20px);
     line-height: 1.4;
     margin: 0;
     display: -webkit-box;
@@ -84,162 +74,116 @@
     overflow: hidden;
 }
 
-.module-actions {
+.ModuleCard .module-actions {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 8px;
-    flex-shrink: 0;
 }
 
-.buttons-left {
+.ModuleCard .buttons-left {
     display: flex;
-    gap: 6px;
-    flex: 1;
+    padding: 1vh 0;
+    margin: auto 0;
+    margin-right: 1vh;
 }
 
-.buttons-right {
-    display: flex;
-    gap: 4px;
-    flex-shrink: 0;
+.ModuleCard .buttons-left button{
+    margin: auto 0;
 }
 
-.module-btn {
+.ModuleCard .buttons-left button:nth-child(1){
+    margin-right: 1vh;
+}
+
+.ModuleCard .buttons-right {
     display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 7px 12px;
+    padding: 1vh;
+}
+
+.ModuleCard .module-btn {
+    display: flex;
+    padding: 1vh 2vh;
     border: none;
     border-radius: 6px;
-    font-size: 11px;
+    font-size: clamp(2px,1.8vh,20px);
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
-    height: 30px;
-    min-width: 80px;
 }
 
-.module-btn i {
-    font-size: 10px;
+.ModuleCard .module-btn i {
+    margin: auto 0;
+    margin-right: 1vh;
 }
 
-.btn-settings {
+.ModuleCard .btn-settings {
     background-color: var(--inputsBg);
     color: var(--descriptionText);
     border: 1px solid var(--inputsBorder);
     min-width: 65px;
 }
 
-.btn-settings:hover {
+.ModuleCard .btn-settings:hover {
     background-color: var(--iconHover);
 }
 
-.btn-view, .btn-buy {
+.ModuleCard .btn-view, .btn-buy {
     background-color: var(--text);
     color: var(--bg);
 }
 
-.btn-view:hover {
+.ModuleCard .btn-view:hover {
     background-color: var(--descriptionText);
 }
 
-.btn-buy {
+.ModuleCard .btn-buy {
     cursor: default;
 }
 
-.btn-buy:hover {
+.ModuleCard .btn-buy:hover {
     background-color: var(--text);
     transform: none;
 }
 
-.small-btn {
-    width: 30px;
-    height: 30px;
+.ModuleCard .small-btn {
+    margin: auto;
+    width: 4vh;
+    height: 4vh;
     border: none;
-    border-radius: 6px;
+    border-radius: .5vh;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
-    align-items: center;
-    justify-content: center;
     flex-shrink: 0;
     padding: 0;
 }
 
-.circle-icon {
-    width: 18px;
-    height: 18px;
+.ModuleCard .circle-icon {
+    width: 3vh;
+    height: 3vh;
     border-radius: 50%;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.2);
+    margin: auto;
+    background: #ffffff30;
 }
 
-.small-btn i {
-    font-size: 9px;
+.ModuleCard .small-btn i {
+    margin: auto;
+    font-size: clamp(3px,1.5vh,30px);
     color: white;
 }
 
-.small-btn-green, .small-btn-blue {
+.ModuleCard .small-btn-green, .small-btn-blue {
     cursor: default;
 }
 
-.small-btn-green:hover, .small-btn-blue:hover {
+.ModuleCard .small-btn-green:hover, .small-btn-blue:hover {
     transform: none;
 }
 
-.small-btn-green {
-    background-color: var(--accent-color, #2e7d32);
+.ModuleCard .small-btn-green {
+    background-color: var(--accent-color, #2A9689);
 }
 
-.small-btn-blue {
-    background-color: var(--primary-color, #1976d2);
-}
-
-/* Responsive solo para ModuleCard */
-@media (max-width: 600px) {
-    .module-card {
-        padding: 15px;
-        min-height: 140px;
-    }
-    
-    .module-buttons {
-        gap: 10px;
-    }
-    
-    .module-actions {
-        flex-wrap: wrap;
-        gap: 6px;
-    }
-    
-    .buttons-left {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    .buttons-right {
-        width: 100%;
-        justify-content: flex-end;
-    }
-    
-    .small-btn {
-        width: 28px;
-        height: 28px;
-    }
-    
-    .module-btn {
-        height: 28px;
-        padding: 6px 10px;
-        min-width: 75px;
-    }
-    
-    .btn-settings {
-        min-width: 60px;
-    }
-    
-    .module-description {
-        font-size: 11px;
-    }
+.ModuleCard .small-btn-blue {
+    background-color: var(--primary-color, #007AFF);
 }

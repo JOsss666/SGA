@@ -350,6 +350,30 @@ controller.signUp = (req,res)=>{
     })
 }
 
+controller.deleteUser = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            DELETE FROM sga_ecosystem.users
+            WHERE
+                user_id = ? AND company_id = ? ;
+        `
+        let consulta = await useDataBase(sentence,[
+            info.user_id,info.company_id
+        ],2);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 controller.insertNewAccount = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{

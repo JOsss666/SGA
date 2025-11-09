@@ -11,7 +11,7 @@ import { SearchinList } from '../../components/SearchInList';
 import { SwitchOption } from '../../components/SwitchOption';
 import { NewElementSelect } from '../../components/NewElementSelect';
 
-export function FormNewUser({info}){
+export function FormNewUser({info,reloadFun}){
     const {addNotification} = useNotifications();
     const {popOutAlert} = useAlert();
     const {appInfo} = useAppInfo();
@@ -56,9 +56,12 @@ export function FormNewUser({info}){
             addNotification({
                 type:'aproved',
                 title:`Usuario ${name} creado correctamente`,
-                description:`El usuario ${name} fue creado correctamentes`
+                description:`El usuario ${name} fue creado correctamente.`
             })
             popOutAlert();
+            if(reloadFun != undefined){
+                reloadFun();
+            }
         }
         else{
             addNotification({
@@ -91,7 +94,7 @@ export function FormNewUser({info}){
                     </div>
                     <FormInput action={setName} title={'Nombre'} placeholder={'Nombre del usuario'} disabled={disabled}/>
                     <FormInput action={setMail} title={'Correo'} type={'email'} placeholder={'....@gmail.com'} disabled={disabled}/>
-                    <FormInput action={setMail} title={'Contraseña'} type={'text'} placeholder={'*****'} disabled={disabled}/>
+                    <FormInput action={setPass} title={'Contraseña'} type={'text'} placeholder={'*****'} disabled={disabled}/>
                 </form>
             )}
             {stage == 1 && (
