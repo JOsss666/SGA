@@ -1,10 +1,5 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { useNavigate, Routes, Route } from 'react-router-dom';
 import { BoldTitle } from '../components/BoldTitle';
-<<<<<<< HEAD
-
-
-export function Modules(){
-=======
 import { ModuleCard } from '../components/ModuleCard';
 import './Modules.css';
 
@@ -110,26 +105,18 @@ export function Modules(){
         if (action === 'buy') {
             console.log(`Comprar módulo: ${moduleId}`);
         }
-    };
-
+        
     const handleSmallButtonClick = (e, action) => {
         e.stopPropagation();
-        // para botones que aun no tienen accion (el verde y azul)
+        //  para botones pequeños
+    };
     };
 
->>>>>>> 453e51e (ModuleCard.jsx y css)
     return(
         <div className="Modules">
             <Routes>
                 <Route path='' element={
                     <div className='ModulesMain'>
-<<<<<<< HEAD
-                        // Coloca el contenido
-                        <BoldTitle text={'Modulos'}/>
-                    </div>
-                }/>
-                <Route path='/contability' element={<span>contabilidad</span>}/>
-=======
                         <div className="modules-header">
                             <BoldTitle text={'SGA - Módulos'}/>
                             <p className="modules-description">
@@ -167,16 +154,14 @@ export function Modules(){
                                 <BoldTitle text={module.name} />
                                 <p>{module.description}</p>
                                 <div className="module-detail-content">
-                                    <p>{module.name}</p>
-                                    <div className="module-features">  
+                                    <div className="module-features">
                                     </div>
                                 </div>
                             </div>
                         } 
                     />
                 ))}
->>>>>>> 453e51e (ModuleCard.jsx y css)
             </Routes>
         </div>
-    )
+    );
 }

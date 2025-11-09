@@ -6,12 +6,11 @@
 
 .ModulesMain { 
     max-width: 1400px; 
-    margin: 0 auto; 
+    margin: 0; 
 }
 
 .modules-header { 
-    margin-bottom: 25px; 
-    text-align: center;
+    margin-bottom: 20px; 
 }
 
 .modules-description { 
@@ -22,9 +21,10 @@
 
 .modules-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(4, 260px);
     gap: 12px;
-    justify-content: center;
+    justify-content: start;
+    align-items: start;
 }
 
 .ajustes-page {
@@ -96,28 +96,23 @@
 
 @media (max-width: 1200px) {
     .modules-grid {
-        grid-template-columns: repeat(3, 250px);
+        grid-template-columns: repeat(4, 260px);
     }
 }
 
 @media (max-width: 900px) {
     .modules-grid {
-        grid-template-columns: repeat(2, 250px);
+        grid-template-columns: repeat(2, 260px);
     }
 }
 
 @media (max-width: 600px) {
     .modules-grid {
-        grid-template-columns: 1fr;
-        max-width: 300px;
-        margin: 0 auto;
+        grid-template-columns: repeat(2, 240px);
+        gap: 10px;
     }
     
     .Modules {
         padding: 15px;
-    }
-    
-    .modules-header {
-        text-align: left;
     }
 }
