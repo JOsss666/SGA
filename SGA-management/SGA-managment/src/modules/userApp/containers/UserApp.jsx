@@ -30,6 +30,8 @@ import { LogOut } from '../../Login/LogOut';
 import { AppIcon } from '../components/AppIcon';
 import { NotificationsMenuSpace } from './NotificationsMenuSpace';
 import { Modules } from './Modules';
+import { Users } from './Users';
+import { DetailsUser } from './DetailsUser';
 
 export function UserApp(){
 
@@ -167,7 +169,8 @@ export function UserApp(){
                             <Route path='/billing' element={<span>Facturación</span>}/>
                             <Route path='/messages/*' element={<span>messages</span>} />
                             <Route path='/thirdparties' element={<span>Terceros</span>} />
-                            <Route path='/users/*' element={<span>Usuarios</span>} />
+                            <Route path='/users/' element={<Users/>} />
+                            <Route path='/users/:user_id' element={<DetailsUser/>} />
                             <Route path='/reports/*' element={<Reports/>} />
                             <Route path='/analytics' element={<Analytics/>} />
                             <Route path='/analytics/*' element={<AnalyticDocDetail/>} />

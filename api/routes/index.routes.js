@@ -33,6 +33,8 @@ router.post('/getCompanyInfo',controller.getCompanyInfo);
 
 router.post('/getUserInfo',controller.getUserInfo);
 
+router.post('/getUsers',controller.getUsers);
+
 router.post('/getCategories',controller.getCategories);
 
 router.post('/getSuppliers',controller.getSuppliers);
@@ -51,9 +53,13 @@ router.post('/insertNewAccount',controller.insertNewAccount);
 
 router.post('/createTax',controller.createTax);
 
+router.post('/deleteTax',controller.deleteTax);
+
 router.post('/getTaxes',controller.getTaxes);
 
 router.post('/createConcept',controller.createConcept);
+
+router.post('/deleteConcept',controller.deleteConcept);
 
 router.post('/getConcepts',controller.getConcepts);
 

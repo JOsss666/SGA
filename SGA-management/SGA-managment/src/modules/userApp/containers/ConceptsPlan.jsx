@@ -124,7 +124,7 @@ export function ConceptsPlan(){
                     <SearchBar action={setSearchValCon} placeholder={'Buscar Concepto'}/>
                     <div className="conceptsC">
                         {!loading && concepts.map((element,index)=>(
-                            <ConceptCard hidden={!handleSearchConcept(element)} info={element} key={index}/>
+                            <ConceptCard hidden={!handleSearchConcept(element)} info={element} key={index} reloadFun={getConcepts} />
                         ))}
                         {loading && (
                             <LoadingSpace title={'Cargando Conceptos'} description={'Esto no debe tardar mucho...'}/>
@@ -136,7 +136,7 @@ export function ConceptsPlan(){
                     <SearchBar action={setSearchValTax} placeholder={'Buscar impuesto'}/>
                     <div className="taxesC">
                         {!loading && taxes.map((element,index)=>(
-                            <TaxCard hidden={!handleSearchTax(element.value)} info={element.value} key={index}/>
+                            <TaxCard hidden={!handleSearchTax(element.value)} info={element.value} key={index} reloadFun={getTaxes} />
                         ))}
                         {loading && (
                             <LoadingSpace title={'Cargando Impuestos'} description={'Esto no debe tardar mucho...'}/>

@@ -4,11 +4,12 @@ import { MoreOptions } from "./MoreOptions";
 import { useEffect, useState } from "react";
 import { postInfo } from "../../../utils/functions";
 import './ConceptCard.css'
-import { useAlert, useAppInfo } from "../../../context/context";
+import { useAlert, useAppInfo, useNotifications } from "../../../context/context";
 import { FormNewConcept } from "../containers/forms/FormNewConcept";
 
-export function ConceptCard({info,hidden}){    
+export function ConceptCard({info,hidden,reloadFun}){    
 
+    const {addNotification} = useNotifications();
     const {popInAlert} = useAlert();
     const {appInfo} = useAppInfo();
     const [visibleConceptData,setVisibleConceptData] = useState(false);
@@ -37,6 +38,28 @@ export function ConceptCard({info,hidden}){
         )
     }
 
+    const deleteConcept = async()=>{
+        let res = await postInfo('/deleteConcept',{
+            concepts:[info.id]
+        })
+        if(res){
+            addNotification({
+                type:'aproved',
+                title:'Concepto Eliminado',
+                description:`Se ha eliminado el concepto ${info.account_name}.`
+            })
+            if(reloadFun != undefined){
+                reloadFun();
+            }
+        }else{
+            addNotification({
+                type:'error',
+                title:'Error al eliminar concepto',
+                description:`Hubo un error al intentar eliminar el concepto ${info.account_name}.`
+            })
+        }
+    }
+
     useEffect(()=>{
         if(attachetTaxes.length == 0){
             if(!loadedChildren && visibleConceptData){
@@ -59,7 +82,7 @@ export function ConceptCard({info,hidden}){
                     </ButtonMenu>
                     <MoreOptions options={[
                         {text:'Editar',icon:<i className="fa-solid fa-pencil"/>,action:editConcept},
-                        {text:'Eliminar',icon:<i class="fa-solid fa-trash"></i>},
+                        {text:'Eliminar',icon:<i class="fa-solid fa-trash"></i>,action:deleteConcept},
                         {text:'Ver estadisticas',icon:<i className="fa-solid fa-chart-column"/>},
                         {text:'Ver movimientos',icon:<i className="fa-solid fa-eye"/>}
                     ]}/>

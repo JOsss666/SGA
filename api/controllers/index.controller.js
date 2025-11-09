@@ -120,6 +120,37 @@ controller.getUserInfo = (req,res)=>{
     })
 }
 
+controller.getUsers = (req,res)=>{
+    let data = ''
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            SELECT
+                sga_ecosystem.users.*,
+                sga_ecosystem.users_access.*
+            FROM
+                sga_ecosystem.users
+            LEFT JOIN
+                sga_ecosystem.users_access
+            ON
+                sga_ecosystem.users.user_id = sga_ecosystem.users_access.user_id
+            WHERE
+                sga_ecosystem.users.company_id = ?
+            ORDER BY sga_ecosystem.users.user_name ASC;  
+        `;
+        let consulta = await useDataBase(sentence,[info.company_id],1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 
 controller.getCompanyInfo = (req,res)=>{
     let data = '';
