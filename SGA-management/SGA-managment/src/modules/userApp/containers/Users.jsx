@@ -8,11 +8,13 @@ import './Users.css'
 import { RowTableUsers } from '../components/RowTableUsers'
 import { LoadingSpace } from './LoadingSpace'
 import { postInfo } from '../../../utils/functions'
-import { useAppInfo } from '../../../context/context'
+import { useAlert, useAppInfo } from '../../../context/context'
 import { CheckSquare } from '../components/CheckSquare'
+import { FormNewUser } from './forms/FormNewUser'
 
 export function Users(){
 
+    const {popInAlert} = useAlert();
     const [users,setUsers] = useState([]);
     const [loading,setLoading]= useState(false);
     const {appInfo} = useAppInfo();
@@ -42,12 +44,14 @@ export function Users(){
                 <DescriptionSpan text={'Adminstra los miembros de tu quipo y sus roles'}/>
             </div>
             <div className="menuUsers">
-                <h6 className='resultsTotal'>Todos los usuarios: <span className='nRes'>16</span></h6>
+                <h6 className='resultsTotal'>Todos los usuarios: <span className='nRes'>{users.length}</span></h6>
                 <div className="optionsMenuUsers">
                     <SearchBar placeholder={'Buscar'}/>
                     <SelectOptions title={'Filtro'} options={['ninguno']}/>
                     <SelectOptions title={'Orden'} options={['Alfabetico','Fecha de Creación','Rol']}/>
-                    <FormButton text={'Crear usuario'} children={<i className="fa-solid fa-plus"/>}/>
+                    <FormButton onClick={()=>{
+                        popInAlert(<FormNewUser/>)
+                    }} text={'Crear usuario'} children={<i className="fa-solid fa-plus"/>}/>
                 </div>
             </div>
             <div className="tableUsers">

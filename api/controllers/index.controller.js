@@ -308,10 +308,30 @@ controller.signUp = (req,res)=>{
         if(typeof(consulta) == 'number'){
             let posSen = `
                 INSERT INTO 
-                    sga_ecosystem.users_access (user_id)
-                VALUES(?);
+                    sga_ecosystem.users_access 
+                        (user_id,
+                        user_roll,
+                        sga_inventory_access,
+                        sga_process_access,
+                        sga_contability_access,
+                        sga_certicloud_access,
+                        sga_facturation_access,
+                        sga_treasury_access,
+                        sga_ctools_access
+                        )
+                VALUES(?,?,?,?,?,?,?,?,?);
             `;
-            let posCon = await useDataBase(posSen,[consulta],2);
+            let posCon = await useDataBase(posSen, [
+                consulta,               
+                info.userRol,             
+                info.accessInventory,     
+                info.accessProcess,       
+                info.accessContability,   
+                info.accessFacturation,   
+                info.accessTreasury,      
+                info.accessCerticloud,    
+                info.accessCtools         
+            ], 2);
             if(posCon){
                 res.writeHead(200,{'Content-Type':'text/plain'})
                 res.end(JSON.stringify(true));

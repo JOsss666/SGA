@@ -25,9 +25,15 @@ CREATE TABLE users_access(
     sga_contability_access TEXT,
     sga_certicloud_access TEXT,
     sga_facturation_access TEXT,
+    sga_treasury_access VARCHAR (100) DEFAULT 'false',
+    sga_ctools_access VARCHAR (100) DEFAULT 'false',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
+ALTER TABLE sga_ecosystem.users_access
+ADD COLUMN sga_ctools_access VARCHAR (100) DEFAULT 'false';
+
 
 
 CREATE TABLE companies(
