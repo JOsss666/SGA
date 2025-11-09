@@ -1,6 +1,6 @@
 import { useNavigate, Routes, Route } from 'react-router-dom';
 import { BoldTitle } from '../components/BoldTitle';
-import { UserCard } from '../components/UserCard';
+import { ModuleCard } from '../components/ModuleCard';
 import './Modules.css';
 
 export function Modules(){
@@ -70,8 +70,8 @@ export function Modules(){
         {
             id: 'certicloud',
             name: 'CertiCloud',
-            image: '',
             description: 'Analiza, gestiona y parametriza los módulos de tu empresa',
+            image: '',
             buttons: [
                 { text: 'Ajustes', action: 'settings', icon: 'fa-solid fa-gear' },
                 { text: 'Comprar', action: 'buy', icon: 'fa-solid fa-box' }
@@ -86,7 +86,7 @@ export function Modules(){
                 { text: 'Ajustes', action: 'settings', icon: 'fa-solid fa-gear' },
                 { text: 'Comprar', action: 'buy', icon: 'fa-solid fa-box' }
             ]
-        }
+        },
     ];
 
     const handleCardClick = (moduleId) => {
@@ -102,13 +102,17 @@ export function Modules(){
         if (action === 'view') {
             navigate(moduleId);
         }
+        if (action === 'buy') {
+            console.log(`Comprar módulo: ${moduleId}`);
+        }
     };
 
     const handleSmallButtonClick = (e, action) => {
         e.stopPropagation();
+        // para botones que aun no tienen accion (el verde y azul)
     };
 
-     return(
+    return(
         <div className="Modules">
             <Routes>
                 <Route path='' element={
@@ -122,59 +126,12 @@ export function Modules(){
                         
                         <div className="modules-grid">
                             {modulesData.map((module) => (
-                                <div 
+                                <ModuleCard
                                     key={module.id}
-                                    className="module-card"
-                                    onClick={() => handleCardClick(module.id)}
-                                >
-                                    <div className="module-header">
-                                        <div className="module-image">
-                                            <UserCard 
-                                                imgSrc={module.image}
-                                                name={module.name}
-                                                desc={module.description}
-                                            />
-                                        </div>
-                                        <div className="module-content">
-                                            <h3 className="module-title">{module.name}</h3>
-                                            {}
-                                        </div>
-                                    </div>
-                                    <div className="module-buttons">
-                                        <div className="module-description-container">
-                                            <p className="module-description">{module.description}</p>
-                                        </div>
-                                        <div className="module-actions">
-                                            <div className="buttons-left">
-                                                {module.buttons.map((button, index) => (
-                                                    <button
-                                                        key={index}
-                                                        className={`module-btn ${button.action === 'view' ? 'btn-view' : button.action === 'buy' ? 'btn-buy' : 'btn-settings'}`}
-                                                        onClick={(e) => handleButtonClick(e, module.id, button.action)}
-                                                    >
-                                                        <i className={button.icon}></i>
-                                                        {button.text}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                            <div className="buttons-right">
-                                                {module.buttons.map((button, index) => (
-                                                    (button.action === 'view' || button.action === 'buy') && (
-                                                        <button
-                                                            key={`small-${index}`}
-                                                            className={`small-btn ${button.action === 'view' ? 'small-btn-green' : 'small-btn-blue'}`}
-                                                            onClick={(e) => handleSmallButtonClick(e, button.action)}
-                                                        >
-                                                            <div className="circle-icon">
-                                                                <i className={button.action === 'view' ? 'fa-solid fa-check' : 'fa-solid fa-cart-shopping'}></i>
-                                                            </div>
-                                                        </button>
-                                                    )
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                    module={module}
+                                    onCardClick={handleCardClick}
+                                    onButtonClick={handleButtonClick}
+                                />
                             ))}
                         </div>
                     </div>
@@ -183,7 +140,8 @@ export function Modules(){
                 <Route path='ajustes' element={
                     <div className="ajustes-page">
                         <BoldTitle text={'Ajustes'} />
-                        <p></p>
+                        <div className="ajustes-content">
+                        </div>
                     </div>
                 }/>
                 
@@ -191,7 +149,17 @@ export function Modules(){
                     <Route 
                         key={module.id} 
                         path={module.id} 
-                        element={<div></div>} 
+                        element={
+                            <div className="module-detail-page">
+                                <BoldTitle text={module.name} />
+                                <p>{module.description}</p>
+                                <div className="module-detail-content">
+                                    <p>{module.name}</p>
+                                    <div className="module-features">  
+                                    </div>
+                                </div>
+                            </div>
+                        } 
                     />
                 ))}
             </Routes>
