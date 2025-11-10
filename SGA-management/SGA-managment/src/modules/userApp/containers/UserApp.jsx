@@ -32,6 +32,8 @@ import { NotificationsMenuSpace } from './NotificationsMenuSpace';
 import { Modules } from './Modules';
 import { Users } from './Users';
 import { DetailsUser } from './DetailsUser';
+import { Services } from './Services';
+import { PathLocation } from '../components/PathLocation';
 
 export function UserApp(){
 
@@ -165,7 +167,8 @@ export function UserApp(){
                             <Route path='/myBussines/' element={<span>Mi empresa</span>}/>
                             <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
                             <Route path='/modules/*' element={<Modules/>}/>
-                            <Route path='/services' element={<span>Servicios</span>}/>
+                            <Route path='/services' element={<Services/>}/>
+                            <Route path='/services/:serviceRequierd' element={<PathLocation/>}/>
                             <Route path='/billing' element={<span>Facturación</span>}/>
                             <Route path='/messages/*' element={<span>messages</span>} />
                             <Route path='/thirdparties' element={<span>Terceros</span>} />
