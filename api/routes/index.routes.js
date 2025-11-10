@@ -6,6 +6,7 @@ import processController from '../controllers/processController.js';
 import multer from "multer";
 import path from "path";
 import contabiltyController from '../controllers/contabilityController.js';
+import inventoryController from '../controllers/inventoryController.js';
 const router = express.Router();
 
 // temporal folder for chunks
@@ -83,39 +84,47 @@ router.post('/getDocAnalyticDocNumberTable', controller.getDocAnalyticDocNumberT
 
 // SGA - Inventory
 
-router.post('/getSubCategories',controller.getSubCategories);
+router.post('/inventory/getSubCategories',inventoryController.getSubCategories);
 
-router.post('/createSubCategory',controller.createSubCategory);
+router.post('/inventory/createSubCategory',inventoryController.createSubCategory);
 
-router.post('/getProducts',controller.getProducts);
+router.post('/inventory/getProducts',inventoryController.getProducts);
 
-router.post('/createProduct',controller.createProduct);
+router.post('/inventory/createProduct',inventoryController.createProduct);
 
-router.post('/getPricesNameList',controller.getPricesNameList);
+router.post('/inventory/getPricesNameList',inventoryController.getPricesNameList);
 
-router.post('/createStore',controller.createStore);
+router.post('/inventory/createStore',inventoryController.createStore);
 
-router.post('/createCellar',controller.createCellar);
+router.post('/inventory/getStores',inventoryController.getStores);
 
-router.post('/createPriceList',controller.createPriceList);
+router.post('/inventory/createCellar',inventoryController.createCellar);
 
-router.post('/getPricesList',controller.getPricesList);
+router.post('/inventory/getCellars',inventoryController.getCellars);
 
-router.post('/updateProductList',controller.updateProductList);
+router.post('/inventory/createPriceList',inventoryController.createPriceList);
 
-router.post('/getPriceStock',controller.getPriceStock);
+router.post('/inventory/getPricesList',inventoryController.getPricesList);
 
-router.post('/newEntry',controller.newEntry);
+router.post('/inventory/deletePriceList',inventoryController.deletePriceList);
 
-router.post('/newDeparture',controller.newDeparture);
+router.post('/inventory/updateProductList',inventoryController.updateProductList);
 
-router.post('/newMovement',controller.newMovement);
+router.post('/inventory/getPriceStock',inventoryController.getPriceStock);
 
-router.post('/getMovements',controller.getMovements);
+router.post('/inventory/newEntry',inventoryController.newEntry);
 
-router.post('/getDepartures',controller.getDepartures);
+router.post('/inventory/newDeparture',inventoryController.newDeparture);
 
-router.post('/getRotation',controller.getRotation);
+router.post('/inventory/newMovement',inventoryController.newMovement);
+
+router.post('/inventory/getMovements',inventoryController.getMovements);
+
+router.post('/inventory/deleteMovement',inventoryController.deleteMovement);
+
+router.post('/inventory/getDepartures',inventoryController.getDepartures);
+
+router.post('/inventory/getRotation',inventoryController.getRotation);
 
 
 // SGA - PROCESS
