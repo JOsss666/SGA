@@ -6,7 +6,7 @@ import processController from '../controllers/processController.js';
 import multer from "multer";
 import path from "path";
 import contabiltyController from '../controllers/contabilityController.js';
-import inventoryController from '../controllers/inventoryController.js';
+import inventoryController from '../controllers/inventoryController.js'
 const router = express.Router();
 
 // temporal folder for chunks
@@ -40,13 +40,15 @@ router.post('/getUsers',controller.getUsers);
 
 router.post('/getCategories',controller.getCategories);
 
-router.post('/getSuppliers',controller.getSuppliers);
+router.post('/getSuppliers',controller.getThirdParties);
 
-router.post('/getThirdParties',controller.getSuppliers);
+router.post('/getThirdParties',controller.getThirdParties);
 
-router.post('/getStores',controller.getStores);
+router.post('/getThirdPartyDetails',controller.getThirdPartyDetails);
 
-router.post('/getCellars',controller.getCellars);
+router.post('/getStores',inventoryController.getStores);
+
+router.post('/getCellars',inventoryController.getCellars);
 
 router.post('/createAccountPlan',controller.createAccountsPlan);
 

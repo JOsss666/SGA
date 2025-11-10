@@ -1,4 +1,3 @@
-
 import { calcWeightedAverage, encrypt, isRelevanPrompt, useDataBase, actualDate } from "../app.js";
 import fs from "fs";
 import path from "path";
@@ -1040,7 +1039,7 @@ controller.getCategories = (req,res)=>{
 
 
 
-controller.getSuppliers = (req,res)=>{
+controller.getThirdParties = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
         data += chunk
@@ -1059,8 +1058,37 @@ controller.getSuppliers = (req,res)=>{
     })
 }
 
+controller.getThirdPartyDetails = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            SELECT
+                sga_ecosystem.thirdParties.*
+            FROM
+                sga_ecosystem.thirdParties
+            WHERE
+                company_id = ?
+                AND id = ? ;
+        `;
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.id
+        ],1)
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 /* ELIMINAR PROVEEDORES */
-controller.deleteSupplier = (req,res)=>{
+controller.deleteThirdParty = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
         data += chunk;
@@ -1229,7 +1257,7 @@ controller.getDocAnalyticDocNumber = async (req, res) => {
 };
 
 
-inventoryController.getTransactionsData = async (req, res) => {
+controller.getTransactionsData = async (req, res) => {
     let data = '';
     req.on('data',chunk=>{
         data += chunk;

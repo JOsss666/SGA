@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react"
 import './SelectOptions.css'
 
-export function SelectOptions({title,options,action}){
+export function SelectOptions({title,options,action,value}){
 
     // 
-    const [selectedOption,setSelectedOption] = useState(options[0]);
+    const [selectedOption,setSelectedOption] = useState(value!=undefined? value:options[0]);
     const [openOptions,setOpenOptions] = useState(false);
     const optionsContainer = useRef();
     useEffect(()=>{

@@ -1,9 +1,6 @@
-import { useDataBase } from "../app";
+import { useDataBase } from "../app.js";
 
 const inventoryController = {};
-
-
-
 
 inventoryController.getSubCategories = (req,res)=>{
     let data = ''
@@ -806,5 +803,7 @@ inventoryController.getRotation = (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
+
+export default inventoryController;
 
 

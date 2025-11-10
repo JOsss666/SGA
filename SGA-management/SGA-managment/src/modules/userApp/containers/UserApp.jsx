@@ -34,6 +34,7 @@ import { Users } from './Users';
 import { DetailsUser } from './DetailsUser';
 import { Services } from './Services';
 import { PathLocation } from '../components/PathLocation';
+import { ThirdPartyDetail } from './ThirdPartyDetail';
 
 export function UserApp(){
 
@@ -172,6 +173,7 @@ export function UserApp(){
                             <Route path='/billing' element={<span>Facturación</span>}/>
                             <Route path='/messages/*' element={<span>messages</span>} />
                             <Route path='/thirdparties' element={<span>Terceros</span>} />
+                            <Route path='/thirdparties/:thirdparty_id' element={<ThirdPartyDetail/>} />
                             <Route path='/users/' element={<Users/>} />
                             <Route path='/users/:user_id' element={<DetailsUser/>} />
                             <Route path='/reports/*' element={<Reports/>} />

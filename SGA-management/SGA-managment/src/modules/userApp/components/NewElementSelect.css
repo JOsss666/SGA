@@ -12,8 +12,7 @@
 
 .NewElementSelect:hover{
     padding-left: 3vh;
-    background-color: #ddd;
-    color: #2874a6;
+    background-color: var(--iconHover);
 }
 
 .NewElementSelect i{
