@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { useNavigate, Routes, Route } from 'react-router-dom';
 import { BoldTitle } from '../components/BoldTitle';
 import { ModuleCard } from '../components/ModuleCard';
 import { useNavigate } from 'react-router-dom';
@@ -108,11 +108,11 @@ export function Modules(){
         if (action === 'buy') {
             console.log(`Comprar módulo: ${moduleId}`);
         }
-    };
-
+        
     const handleSmallButtonClick = (e, action) => {
         e.stopPropagation();
-        // para botones que aun no tienen accion (el verde y azul)
+        //  para botones pequeños
+    };
     };
 
     return(
@@ -155,8 +155,7 @@ export function Modules(){
                                 <BoldTitle text={module.name} />
                                 <p>{module.description}</p>
                                 <div className="module-detail-content">
-                                    <p>{module.name}</p>
-                                    <div className="module-features">  
+                                    <div className="module-features">
                                     </div>
                                 </div>
                             </div>
@@ -165,5 +164,5 @@ export function Modules(){
                 ))}
             </Routes>
         </div>
-    )
+    );
 }

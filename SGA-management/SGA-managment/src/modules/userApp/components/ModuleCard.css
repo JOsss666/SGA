@@ -187,3 +187,52 @@
 .ModuleCard .small-btn-blue {
     background-color: var(--primary-color, #007AFF);
 }
+<<<<<<< HEAD
+=======
+
+/* Responsive solo para ModuleCard */
+@media (max-width: 600px) {
+    .module-card {
+        padding: 15px;
+        min-height: 140px;
+    }
+    
+    .module-buttons {
+        gap: 10px;
+    }
+    
+    .module-actions {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .buttons-left {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .buttons-right {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .small-btn {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .module-btn {
+        height: 28px;
+        padding: 6px 10px;  
+        min-width: 75px;
+    }
+    
+    .btn-settings {
+        min-width: 60px;
+    }
+    
+    .module-description {
+        font-size: 11px;
+    }
+}
+>>>>>>> 67b85264f3d04b315b6c1d2b5aebdbbd21a86adf
