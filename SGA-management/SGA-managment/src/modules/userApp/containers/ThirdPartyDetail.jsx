@@ -11,6 +11,7 @@ import { postInfo } from '../../../utils/functions'
 import { useParams } from 'react-router-dom'
 import { useAppInfo } from '../../../context/context'
 import { LoadingSpace } from './LoadingSpace'
+import { TaxInfo } from './ThirdPartiesDetailsSections/TaxInfo'
 
 export function ThirdPartyDetail(){
 
@@ -106,6 +107,9 @@ export function ThirdPartyDetail(){
                             )}
                             {!loading && actualSection == 1 && (
                                 <ComercialInfo info={thirdPartyInfo}/>
+                            )}
+                            {!loading && actualSection == 2 && (
+                                <TaxInfo info={thirdPartyInfo}/>
                             )}
                             {loading && (
                                 <LoadingSpace title={'Cargando información del tercero'} description={'Esto no debe tardar mucho...'}/>
