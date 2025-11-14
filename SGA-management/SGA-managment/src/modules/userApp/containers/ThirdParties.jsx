@@ -6,6 +6,7 @@ import './ThirdParties.css';
 import { useState, useEffect } from 'react';
 import { SearchBar } from '../components/SearchBar';
 import { SelectOptions } from '../components/SelectOptions';
+import { FormButton } from '../components/FormButton';
 
 export function ThirdParties() {
     const navigate = useNavigate();
@@ -128,6 +129,7 @@ export function ThirdParties() {
                                                 'Personalizado'
                                             ]}
                                         />
+                                        <FormButton text={'Crear Nuevo'} children={<i className="fa-solid fa-plus"/>}/>
                                     </div>
                                 </div>
                             </div>

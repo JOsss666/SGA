@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { BoldTitle } from '../components/BoldTitle';
 import { ModuleCard } from '../components/ModuleCard';
+import { useNavigate } from 'react-router-dom';
 
 import './Modules.css';
 import { DescriptionSpan } from '../components/DescriptionSpan';
