@@ -1037,7 +1037,7 @@ controller.getCategories = (req,res)=>{
     })
 }
 
-
+[true,[{}]]
 
 controller.getThirdParties = (req,res)=>{
     let data = '';
@@ -1087,7 +1087,39 @@ controller.getThirdPartyDetails = (req,res)=>{
     })
 }
 
-/* ELIMINAR PROVEEDORES */
+
+// Crear Nuevo Tercero
+
+controller.createThirdParty = (req,res)=>{
+    let data = ''
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = ``;
+        let crearTercero = await useDataBase(sentence,[],6);
+        if(crearTercero){
+            let sentence2 = ``;
+            let crearInfoComercial = await useDataBase(sentence2,[],1);
+            let sentence3 = ``;
+            let crearInfoTributaria = await useDataBase(sentence3,[],1);
+            if(crearInfoComercial && crearInfoTributaria){
+                res.writeHead(200,{'Content-Type':'text/plain'})
+                res.end(JSON.stringify(crearTercero));
+            }else{
+                res.writeHead(200,{'Content-Type':'text/plain'})
+                res.end(JSON.stringify(false));
+            }
+        }else{
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(crearTercero));
+        }
+    })
+}
+
+// Eliminar Terceros
+
 controller.deleteThirdParty = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{

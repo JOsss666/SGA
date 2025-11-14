@@ -12,6 +12,7 @@ import { useParams } from 'react-router-dom'
 import { useAppInfo } from '../../../context/context'
 import { LoadingSpace } from './LoadingSpace'
 import { TaxInfo } from './ThirdPartiesDetailsSections/TaxInfo'
+import { PathLocation } from '../components/PathLocation'
 
 export function ThirdPartyDetail(){
 
@@ -68,6 +69,7 @@ export function ThirdPartyDetail(){
         <div className="ThirdPartyDetail">
             <div className="headerThirdParty">
                 <div className="bgImage">
+                    <PathLocation/>
                     <img className='bgImgTag' src="https://i.pinimg.com/1200x/d9/b1/a1/d9b1a1416f466987cc2491c8ce5f83a3.jpg" alt="" />
                     <div className="userCard">
                         <img src="https://i.pinimg.com/1200x/f0/c8/2a/f0c82a3d92bed43977eaff0f64c6a5f0.jpg" alt="" />

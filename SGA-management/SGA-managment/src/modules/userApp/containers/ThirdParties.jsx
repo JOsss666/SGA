@@ -31,7 +31,6 @@ export function ThirdParties() {
             }
             setLoading(false)
 
-           
         } catch (error) {
             console.error('Error fetching third parties:', error);
             setThirdPartiesData([]);
@@ -42,7 +41,7 @@ export function ThirdParties() {
     };
 
     const handleCardClick = (thirdPartyId) => {
-        navigate(`/SGA_management/:${params.company_key}/${params.user_key}/thirdParties/${thirdPartyId}`);
+        navigate(`/SGA_management/${params.company_key}/${params.user_key}/thirdParties/${thirdPartyId}`);
     };
 
     const handleRetry = () => {
