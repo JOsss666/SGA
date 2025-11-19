@@ -44,6 +44,8 @@ router.post('/getSuppliers',controller.getThirdParties);
 
 router.post('/getThirdParties',controller.getThirdParties);
 
+router.post('/createThirdParty',controller.createThirdParty);
+
 router.post('/getThirdPartyDetails',controller.getThirdPartyDetails);
 
 router.post('/getStores',inventoryController.getStores);

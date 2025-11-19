@@ -1046,9 +1046,12 @@ controller.getThirdParties = (req,res)=>{
     })
     req.on('end',async()=>{
         console.log(data);
-        let info = data != undefined? JSON.parse(data):''
+        let info = data != undefined? JSON.parse(data):'';
+        const { company_id } = info;
+        console.log('company_id recibido:', company_id);
         let sentence = `SELECT * FROM sga_ecosystem.thirdParties WHERE company_id = ? ;`; 
-        let consulta = await useDataBase(sentence,[info],1);
+        let consulta = await useDataBase(sentence, [company_id], 1);
+        //let consulta = await useDataBase(sentence,[info],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -1090,33 +1093,103 @@ controller.getThirdPartyDetails = (req,res)=>{
 
 // Crear Nuevo Tercero
 
-controller.createThirdParty = (req,res)=>{
-    let data = ''
-    req.on('data',chunk=>{
-        data += chunk
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = ``;
-        let crearTercero = await useDataBase(sentence,[],6);
-        if(crearTercero){
-            let sentence2 = ``;
-            let crearInfoComercial = await useDataBase(sentence2,[],1);
-            let sentence3 = ``;
-            let crearInfoTributaria = await useDataBase(sentence3,[],1);
-            if(crearInfoComercial && crearInfoTributaria){
-                res.writeHead(200,{'Content-Type':'text/plain'})
-                res.end(JSON.stringify(crearTercero));
-            }else{
-                res.writeHead(200,{'Content-Type':'text/plain'})
-                res.end(JSON.stringify(false));
+controller.createThirdParty = (req, res) => {
+    let data = '';
+    req.on('data', chunk => {
+        data += chunk;
+    });
+
+    req.on('end', async () => {
+        try {
+            console.log('Body crudo /createThirdParty:', data);
+
+            const info = data ? JSON.parse(data) : {};
+
+            const {
+                company_id,
+                name,
+                lastName,
+                identificationType,
+                identificationNumber,
+                mail,
+                phone,
+                country,
+                city,
+                address,
+                type
+            } = info;
+
+            // --- Validaciones mínimas ---
+            if (!company_id || !name || !identificationNumber || !mail) {
+                throw new Error('Faltan datos obligatorios: company_id, name, identificationNumber o mail');
             }
-        }else{
-            res.writeHead(200,{'Content-Type':'text/plain'})
-            res.end(JSON.stringify(crearTercero));
+
+            // --- Mapeo de identificación al ENUM de la DB ---
+            const idTypeMap = {
+                'NIT': 'NIT',
+                'Cédula de Ciudadanía': 'CC',
+                'Cédula de Extranjería': 'CE',
+                'Pasaporte': 'PAS'
+            };
+
+            const dbIdentificationType = idTypeMap[identificationType] || null;
+
+            // --- Mapeo de tipo de proveedor al ENUM de la DB ---
+            // Por ahora, todos los que vienen del form los tratamos como 'supplier'
+            const dbType = 'supplier';
+
+            // --- Sentencia alineada al DESCRIBE ---
+            const sentence = `
+                INSERT INTO sga_ecosystem.thirdParties 
+                (
+                    company_id,
+                    names,
+                    lastNames,
+                    indentification_type,
+                    indentification_number,
+                    email,
+                    phone,
+                    country,
+                    city,
+                    address,
+                    type
+                )
+                VALUES (?,?,?,?,?,?,?,?,?,?,?);
+            `;
+
+            const params = [
+                company_id,
+                name,
+                lastName,
+                dbIdentificationType,
+                identificationNumber,
+                mail,
+                phone,
+                country,
+                city,
+                address,
+                dbType
+            ];
+
+            console.log('INSERT thirdParties →', sentence, params);
+
+            const result = await useDataBase(sentence, params, 1);
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify([true, result]));
+        } catch (err) {
+            console.error('Error en createThirdParty:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify([false, err.message || err]));
         }
+    });
+
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
     })
-}
+};
+
 
 // Eliminar Terceros
 
