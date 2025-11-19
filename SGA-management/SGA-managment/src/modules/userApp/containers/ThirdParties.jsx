@@ -7,6 +7,8 @@ import { useState, useEffect } from 'react';
 import { SearchBar } from '../components/SearchBar';
 import { SelectOptions } from '../components/SelectOptions';
 import { FormButton } from '../components/FormButton';
+import { useAlert } from '../../../context/context';
+import { FormNewThirdParties } from './forms/FormNewThirdParties';
 
 export function ThirdParties() {
     const navigate = useNavigate();
@@ -15,6 +17,7 @@ export function ThirdParties() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchVal, setSearchVal] = useState('');
+    const {popInAlert} = useAlert();
 
     useEffect(() => {
         fetchThirdParties();
@@ -128,7 +131,9 @@ export function ThirdParties() {
                                                 'Personalizado'
                                             ]}
                                         />
-                                        <FormButton text={'Crear Nuevo'} children={<i className="fa-solid fa-plus"/>}/>
+                                        <FormButton onClick={()=>{
+                                            popInAlert(<FormNewThirdParties reloadFun={fetchThirdParties}/>)
+                                            }}text={'Crear Proveedor'} children={<i className="fa-solid fa-plus"/>}/>
                                     </div>
                                 </div>
                             </div>
