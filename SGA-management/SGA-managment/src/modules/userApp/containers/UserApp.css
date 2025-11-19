@@ -55,7 +55,6 @@
     z-index: 30;
     width: 100%;
     height: 10vh;
-    background-color: var(--translucidMenu);
     backdrop-filter: blur(1vh);
     display: flex;
     padding: 0 2vh;

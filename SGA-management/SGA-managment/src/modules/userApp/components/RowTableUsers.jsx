@@ -9,6 +9,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 export function RowTableUsers({info,onClick,reloadFun}){
 
+    console.log(info)
+
     const {addNotification} = useNotifications();
     const navigate = useNavigate();
     const params = useParams();
@@ -49,7 +51,7 @@ export function RowTableUsers({info,onClick,reloadFun}){
             <span className='atributeRow UserCardContainer'>{info.user_key}</span>
             <span className='atributeRow'>Tienda {info.company_id}</span>
             <span className='atributeRow'>{(info.created_at).substring(0,10)}</span>
-            <span className='atributeRow'>{(info.updated_at).substring(0,10)}</span>
+            <span className='atributeRow'>{info.updated_at != null?(info.updated_at).substring(0,10):''}</span>
             <span className='atributeRow redirectSpan' onClick={onClick}><MoreOptions options={[
                 {text:'Editar',icon:<i className="fa-solid fa-pencil"/>},
                 {text:'Eliminar',icon:<i className="fa-solid fa-trash"/>,action:deleteUser},

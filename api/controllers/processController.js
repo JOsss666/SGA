@@ -2,6 +2,27 @@
 import { useDataBase } from "../app.js";
 const processController = {};
 
+processController.createDocument = async(info)=>{
+        let sentence = `
+            INSERT INTO "Ecosystem".documents
+                (company_id,store_id,thirdParty_id,document_type ,ownSerial, status, subTotal, total, created_by, description, attached) 
+            VALUES
+                ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11);`
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.store_id,
+            info.thirdParty_id,
+            info.document_type,
+            info.ownSerial,
+            info.status,
+            info.subTotal,
+            info.total,
+            info.user_id,
+            info.description,
+            info.attached
+        ],3);
+        return(consulta);
+}
 
 processController.createOp = (req,res)=>{
     let data = '';
@@ -10,10 +31,29 @@ processController.createOp = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `INSERT INTO sga_process.OPS (company_id,store_id,user_id) VALUES(?,?,?);`
-        let consulta = await useDataBase(sentence,[info.company_id,info.store_id,info.user_id],4);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
+        let docN = await processController.createDocument(info);
+        if(typeof(parseInt(docN)) == 'number'){
+            let sentence = `
+                INSERT INTO "Ecosystem".process_details
+                    (company_id, document_id, budgetIncome, budgetCost, executedCost, invoicedValue, delivery_date)
+                VALUES
+                    ($1,$2,$3,$4,$5,$6,$7);
+            `;
+            let consulta = await useDataBase(sentence,[
+                info.company_id,
+                info.document_id,
+                info.budgetIncome,
+                info.budgetCost,
+                info.executedCost,
+                info.invoicedValue,
+                info.delivery_date
+            ],2)
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(consulta));
+        }else{
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(false));
+        }
     })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})

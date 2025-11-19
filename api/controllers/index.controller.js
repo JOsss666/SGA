@@ -50,7 +50,7 @@ controller.createCompany = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             INSERT INTO
-                sga_ecosystem.companies(
+                "Ecosystem".companies(
                     legal_name,
                     trade_name,
                     indentification_type,
@@ -62,7 +62,7 @@ controller.createCompany = (req,res)=>{
                     city,
                     address
                 )
-            VALUES(?,?,?,?,?,?,?,?,?,?);
+            VALUES($1,$2,$3,$3,$4,$5,$6,$7,$8,$9);
         `;
         let newompany_key = encrypt(`
             ${info.trade_name}*_${info.indentification_number}SGA_ab26212caa96090eacaebbf1${info.phone}_${actualDate.toISOString()}
@@ -98,13 +98,13 @@ controller.getUserInfo = (req,res)=>{
             let info = JSON.parse(data);
             let sentence = `
                 SELECT
-                    sga_ecosystem.users.* , sga_ecosystem.users_access.* 
+                    "Ecosystem".users.* , "Ecosystem".users_access.* 
                 FROM 
-                    sga_ecosystem.users LEFT JOIN sga_ecosystem.users_access
+                    "Ecosystem".users LEFT JOIN "Ecosystem".users_access
                 ON
-                    sga_ecosystem.users.user_id = sga_ecosystem.users_access.user_id 
+                    "Ecosystem".users.user_id = "Ecosystem".users_access.user_id 
                 WHERE
-                    sga_ecosystem.users.user_key = ? ;`
+                    "Ecosystem".users.user_key = $1 ;`
             let consulta = await useDataBase(sentence,[info],1);
             res.writeHead(200,{'Content-Type':'text/plain'})
             res.end(JSON.stringify(consulta));
@@ -128,17 +128,17 @@ controller.getUsers = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             SELECT
-                sga_ecosystem.users.*,
-                sga_ecosystem.users_access.*
+                "Ecosystem".users.*,
+                "Ecosystem".users_access.*
             FROM
-                sga_ecosystem.users
+                "Ecosystem".users
             LEFT JOIN
-                sga_ecosystem.users_access
+                "Ecosystem".users_access
             ON
-                sga_ecosystem.users.user_id = sga_ecosystem.users_access.user_id
+                "Ecosystem".users.user_id = "Ecosystem".users_access.user_id
             WHERE
-                sga_ecosystem.users.company_id = ?
-            ORDER BY sga_ecosystem.users.user_name ASC;  
+                "Ecosystem".users.company_id = $1
+            ORDER BY "Ecosystem".users.user_name ASC;  
         `;
         let consulta = await useDataBase(sentence,[info.company_id],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
@@ -160,16 +160,16 @@ controller.getCompanyInfo = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             SELECT 
-                sga_ecosystem.companies.*,
-                sga_ecosystem.acount_plans.id AS accountPlanId,
-                sga_ecosystem.acount_plans.type AS accountPlanType
+                "Ecosystem".companies.*,
+                "Ecosystem".account_plans.id AS accountPlanId,
+                "Ecosystem".account_plans.type AS accountPlanType
             FROM
-                sga_ecosystem.companies 
+                "Ecosystem".companies 
             LEFT JOIN
-                sga_ecosystem.acount_plans
+                "Ecosystem".account_plans
             ON
-                sga_ecosystem.companies.company_id = sga_ecosystem.acount_plans.company_id
-            WHERE sga_ecosystem.companies.company_key = ? ;`
+                "Ecosystem".companies.company_id = "Ecosystem".account_plans.company_id
+            WHERE "Ecosystem".companies.company_key = $1 ;`
         let consulta = await useDataBase(sentence,[info],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -189,19 +189,19 @@ controller.createAccountsPlan = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             INSERT INTO
-                sga_ecosystem.acount_plans
+                "Ecosystem".account_plans
             (
                 company_id,
                 name,
                 type
             )
-            VALUES(
-                ${info.company_id},
-                '${info.name}',
-                '${info.typePLan}'
-            );
+            VALUES($1,$2,$3);
         `;
-    let consulta = await useDataBase(sentence,[],2);
+    let consulta = await useDataBase(sentence,[
+        info.company_id,
+        info.name,
+        info.typePLan
+    ],2);
     res.writeHead(200,{'Content-Type':'text/plain'})
     res.end(JSON.stringify(consulta));
     })
@@ -220,25 +220,25 @@ controller.logIn = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             SELECT
-                sga_ecosystem.users.*,
-                sga_ecosystem.companies.company_key
+                "Ecosystem".users.*,
+                "Ecosystem".companies.company_key
             FROM    
-                sga_ecosystem.users
+                "Ecosystem".users
             LEFT JOIN
-                sga_ecosystem.companies
+                "Ecosystem".companies
             ON
-                sga_ecosystem.users.company_id = sga_ecosystem.companies.company_id
+                "Ecosystem".users.company_id = "Ecosystem".companies.company_id
             WHERE
-                user_mail = '${info.mail}'
-                AND user_password = '${encrypt(info.pass)}'
+                user_mail = $1
+                AND user_password = $2
             LIMIT 1;
         `
-        let consulta = await useDataBase(sentence,[],1);
+        let consulta = await useDataBase(sentence,[info.mail,encrypt(info.pass)],1);
         if(consulta[0]){
             let postSen = `
-                UPDATE sga_ecosystem.users_access
-                SET user_session = 1
-                WHERE user_id = ?
+                UPDATE "Ecosystem".users_access
+                SET user_session = true
+                WHERE user_id = $1
             `;
             let postConsul = await useDataBase(postSen,[consulta[1][0].user_id],2);
             if(postConsul){
@@ -268,9 +268,9 @@ controller.logOut = (req,res)=>{
     req.on('end',async()=>{
         let info = JSON.parse(data);
         let sentence = `
-        UPDATE sga_ecosystem.users_access
-        SET user_session = 0 
-        WHERE user_id = ?
+        UPDATE "Ecosystem".users_access
+        SET user_session = false
+        WHERE user_id = $1
         ;
         `;
         let consulta = await useDataBase(sentence,[info.user_id],2);
@@ -293,21 +293,22 @@ controller.signUp = (req,res)=>{
         let sentence = `
             INSERT
             INTO   
-                sga_ecosystem.users(
+                "Ecosystem".users(
                     company_id,
                     user_name,
                     user_mail,
                     user_password,
                     user_key
                 )
-            VALUES(?,?,?,?,?);
+            VALUES($1,$2,$3,$4,$5) RETURNING user_id;
         `;
         let newUserKey = encrypt(`${info.name.slice(1,info.name.length -1)}${info.mail.split('@')[0]}|SGA_ab26212caa96090eacaebbf1**_${info.pass}${actualDate.toISOString()}`);
-        let consulta = await useDataBase(sentence,[info.company_id,info.name,info.mail,encrypt(info.pass),newUserKey],4);
-        if(typeof(consulta) == 'number'){
+        let consulta = await useDataBase(sentence,[info.company_id,info.name,info.mail,encrypt(info.pass),newUserKey],3);
+        let insert_id = parseInt(consulta)
+        if(typeof(insert_id) == 'number'){
             let posSen = `
                 INSERT INTO 
-                    sga_ecosystem.users_access 
+                    "Ecosystem".users_access 
                         (user_id,
                         user_roll,
                         sga_inventory_access,
@@ -318,7 +319,7 @@ controller.signUp = (req,res)=>{
                         sga_treasury_access,
                         sga_ctools_access
                         )
-                VALUES(?,?,?,?,?,?,?,?,?);
+                VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9);
             `;
             let posCon = await useDataBase(posSen, [
                 consulta,               
@@ -357,9 +358,9 @@ controller.deleteUser = (req,res)=>{
     req.on('end',async()=>{
         let info = JSON.parse(data);
         let sentence = `
-            DELETE FROM sga_ecosystem.users
+            DELETE FROM "Ecosystem".users
             WHERE
-                user_id = ? AND company_id = ? ;
+                user_id = $1 AND company_id = $2 ;
         `
         let consulta = await useDataBase(sentence,[
             info.user_id,info.company_id
@@ -383,7 +384,7 @@ controller.insertNewAccount = (req,res)=>{
         let tableAcc = info.typePlanAccount == 'PUC'? 'account_templates_PUC':'contable_accounts';
         let sentence = `
             INSERT INTO
-                sga_ecosystem.${tableAcc}
+                "Ecosystem".${tableAcc}
             (
                 company_id,
                 code,
@@ -391,16 +392,16 @@ controller.insertNewAccount = (req,res)=>{
                 level,
                 type,
                 account_path
-            )VALUES(
-                ${info.company_id},
-                '${info.code}',
-                '${info.name}',
-                ${(info.code).length},
-                '${info.type}',
-                '${info.code}'
-            );
+            )VALUES($1,$2,$3,$4,$5,$6) RETURNING id;
         `; 
-        let consulta = await useDataBase(sentence,[],2);
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.code,
+            info.name,
+            (info.code).length,
+            info.type,
+            info.code
+        ],3);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -421,31 +422,31 @@ controller.getAccountsPlan = (req,res)=>{
             SELECT
                 *
             FROM
-                sga_ecosystem.acount_plans
+                "Ecosystem".account_plans
             WHERE
-                sga_ecosystem.acount_plans.company_id = ${info.company_id};
+                "Ecosystem".account_plans.company_id = $1;
         ` 
-        let prevCons = await useDataBase(prevSen,[],1);
+        let prevCons = await useDataBase(prevSen,[info.company_id],1);
         if(prevCons[0]){
             let sentence = `
                 SELECT * FROM (
                     SELECT 
                         'PUC' as type,
                         id,code,name,level,account_path
-                    FROM sga_ecosystem.account_templates_PUC
+                    FROM "Ecosystem".account_templates_PUC
                     UNION ALL
                     SELECT 
                         'personalized',
                         id,code,name,level,account_path
-                    FROM sga_ecosystem.contable_accounts
+                    FROM "Ecosystem".contable_accounts
                     WHERE 
-                        sga_ecosystem.contable_accounts.company_id = ${info.company_id}
-                        AND sga_ecosystem.contable_accounts.active = 1
+                        "Ecosystem".contable_accounts.company_id = $1
+                        AND "Ecosystem".contable_accounts.active = true
                 ) 
                 AS results
                     ORDER BY account_path ASC;  
             `;
-            let consulta = await useDataBase(sentence,[],1);
+            let consulta = await useDataBase(sentence,[info.company_id],1);
             res.writeHead(200,{'Content-Type':'text/plain'})
             res.end(JSON.stringify([prevCons,consulta]));
         }else{
@@ -469,14 +470,14 @@ controller.createTax = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             INSERT INTO
-                sga_ecosystem.taxes(
+                "Ecosystem".taxes(
                     company_id,
                     account_id,
                     code,
                     rate,
                     base
                 )
-            VALUES(?,?,?,?,?);
+            VALUES($1,$2,$3,$4,$5);
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -494,153 +495,167 @@ controller.createTax = (req,res)=>{
     })
 }
 
-controller.getTaxes = (req,res)=>{
+controller.getTaxes = (req, res) => {
     let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence;
-        let tableAcc = info.typePlanAccount == 'PUC'? 'contable_accounts':'account_templates_PUC';
-        if(info.attached == undefined){
-            sentence = `
-            SELECT
-                sga_ecosystem.taxes.id AS tax_id,
-                sga_ecosystem.taxes.code,
-                sga_ecosystem.taxes.rate,
-                sga_ecosystem.taxes.base,
-                sga_ecosystem.${tableAcc}.*
-            FROM
-                sga_ecosystem.taxes
-            LEFT JOIN
-                sga_ecosystem.${tableAcc}
-            ON
-                sga_ecosystem.taxes.account_id = sga_ecosystem.${tableAcc}.id
-            WHERE
-                sga_ecosystem.taxes.company_id = ${info.company_id}
-                ${info.id != null?`AND sga_ecosystem.taxes.id = ${info.id}`:''}
-                ${info.limit != null? `LIMIT ${info.limit}`:''}
-                ORDER BY sga_ecosystem.taxes.account_id ASC;
-            ;`;
-        }else{
-            sentence = `
+    req.on('data', chunk => data += chunk);
+
+    req.on('end', async () => {
+        try {
+            const info = JSON.parse(data);
+            const tableAcc = info.typePlanAccount === 'PUC'
+                ? 'contable_accounts'
+                : 'account_templates_PUC';
+
+            let values = [];
+            let where = []; // array de condiciones dinámicas
+
+            let sentence = `
                 SELECT
-                    sga_ecosystem.concept_taxes.id,
-                    sga_ecosystem.taxes.id AS tax_id,
-                    sga_ecosystem.taxes.account_id,
-                    sga_ecosystem.taxes.rate,
-                    sga_ecosystem.taxes.base,
-                    sga_ecosystem.taxes.code,
-                    sga_ecosystem.${tableAcc}.name
+                    "Ecosystem".taxes.id AS tax_id,
+                    "Ecosystem".taxes.code,
+                    "Ecosystem".taxes.rate,
+                    "Ecosystem".taxes.base,
+                    "Ecosystem".${tableAcc}.*
                 FROM
-                    sga_ecosystem.concept_taxes
-                LEFT JOIN 
-                    sga_ecosystem.taxes
-                ON
-                    sga_ecosystem.concept_taxes.tax_id = sga_ecosystem.taxes.id
-                LEFT JOIN
-                    sga_ecosystem.${tableAcc}
-                ON
-                    sga_ecosystem.taxes.account_id = sga_ecosystem.${tableAcc}.id
+                    "Ecosystem".taxes
+                LEFT JOIN "Ecosystem".${tableAcc}
+                ON "Ecosystem".taxes.account_id = "Ecosystem".${tableAcc}.id
                 WHERE
-                    sga_ecosystem.concept_taxes.concept_id = ${info.concept_id}
-                ORDER BY sga_ecosystem.${tableAcc}.name ASC ; 
-            `
+            `;
+
+            //  Filtro obligatorio
+            values.push(info.company_id);
+            where.push(`"Ecosystem".taxes.company_id = $${values.length}`);
+
+            //  Filtro opcional: ID
+            if (info.id != null) {
+                values.push(info.id);
+                where.push(`"Ecosystem".taxes.id = $${values.length}`);
+            }
+
+            // Combinar WHERE dinámico
+            sentence += where.join(' AND ');
+            
+            if (info.limit != null) {
+                values.push(info.limit);
+                sentence += ` LIMIT $${values.length}`;
+            }
+
+            sentence += ` ORDER BY "Ecosystem".taxes.account_id ASC;`;
+
+            const consulta = await useDataBase(sentence, values, 1);
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(consulta));
+
+        } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(err));
         }
-        let consulta = await useDataBase(sentence,[],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
+    });
+};
 
 
 
 /* ELIMINAR IMPUESTOS*/
 
-controller.deleteTax = (req,res)=>{
+controller.deleteTax = (req, res) => {
     let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
+    req.on('data', chunk => { data += chunk });
 
-        const idTaxesArray = info.taxes.map(() => "?").join(",");
+    req.on('end', async () => {
+        try {
+            const info = JSON.parse(data);
 
-        let sentence = `
-                DELETE FROM sga_ecosystem.taxes
-                WHERE id IN (${idTaxesArray});
+            const placeholders = info.taxes.map((_, i) => `$${i + 1}`).join(",");
+
+            const sentence = `
+                DELETE FROM "Ecosystem".taxes
+                WHERE id IN (${placeholders});
             `;
 
-        let consulta = await useDataBase(sentence,[
-            info.taxes
-        ],2);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
+            const consulta = await useDataBase(sentence, info.taxes, 2);
 
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(consulta));
 
+        } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(err));
+        }
+    });
+};
 
-controller.createConcept = (req,res)=>{
+controller.createConcept = (req, res) => {
     let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            INSERT INTO
-                sga_ecosystem.concepts
+    req.on('data', chunk => { data += chunk });
+
+    req.on('end', async () => {
+        try {
+            const info = JSON.parse(data);
+
+            // Crear el concepto
+            const insertConceptSQL = `
+                INSERT INTO "Ecosystem".concepts
                 (
                     company_id,
                     name,
                     account_id,
                     payment_method
                 )
-            VALUES (?,?,?,?);
-        `;
-        let newConcept = await useDataBase(sentence,[
-            info.company_id,
-            info.name,
-            info.account_id,
-            info.payment_method
-        ],4);
-        if(newConcept){
-            let sen2 = `
-                INSERT INTO
-                    sga_ecosystem.concept_taxes
-                    (
-                        concept_id,
-                        tax_id
-                    )
-                VALUES
-                    ${info.selectedTaxes.map((element) => 
-                        `(${newConcept},${element.value})`
-                    ).join(',')}
-            ;`;
-            let consulta = await useDataBase(sen2,[],2);
-            res.writeHead(200,{'Content-Type':'text/plain'})
-            res.end(JSON.stringify(consulta));
-        }else{
-            res.writeHead(200,{'Content-Type':'text/plain'})
-            res.end(JSON.stringify([false,`Error al crear nuevo concepto`]));
+                VALUES ($1, $2, $3, $4)
+                RETURNING id;
+            `;
+
+            const newConcept = await useDataBase(
+                insertConceptSQL,
+                [
+                    info.company_id,
+                    info.name,
+                    info.account_id,
+                    info.payment_method
+                ],3);
+
+            if (typeof newConcept !== "number") {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify([false, "Error al crear concepto"]));
+            }
+
+            // Insertar impuestos relacionados
+            const taxes = info.selectedTaxes; // array de objetos {value: tax_id}
+
+            if (!taxes || taxes.length === 0) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify(true));
+            }
+
+            const values = [];
+            const rows = taxes
+                .map((t, i) => {
+                    const p1 = `$${i * 2 + 1}`;
+                    const p2 = `$${i * 2 + 2}`;
+                    values.push(newConcept, t.value);
+                    return `(${p1}, ${p2})`;
+                })
+                .join(",");
+
+            const insertTaxesSQL = `
+                INSERT INTO "Ecosystem".concept_taxes
+                (concept_id, tax_id)
+                VALUES ${rows};
+            `;
+
+            const insertTaxes = await useDataBase(insertTaxesSQL, values, 2);
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(insertTaxes));
+
+        } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(err));
         }
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
+    });
+};
 
 
 controller.getConcepts = (req,res)=>{
@@ -651,29 +666,43 @@ controller.getConcepts = (req,res)=>{
     req.on('end',async()=>{
         let info = JSON.parse(data);
         let tableAcc = info.typePlanAccount == 'PUC'? 'account_templates_PUC':'contable_accounts';
+        let values = []
+        let whereClauses = []
+
+        whereClauses.push('"Ecosystem".concepts.company_id = $1');
+        values.push(info.company_id)
+
+        if(info.id != null){
+            whereClauses.push(`"Ecosystem".concepts.id = $${values.length + 1}`)
+            values.push(info.id)
+        }
+
+        const whereQuery = whereClauses.length > 0
+                ? `WHERE ${whereClauses.join(" AND ")}`
+                : "";
+
         let sentence = `
             SELECT
-                sga_ecosystem.concepts.*,
-                sga_ecosystem.payment_methods.name AS paymentMethodName,
-                sga_ecosystem.${tableAcc}.id AS account_id,
-                sga_ecosystem.${tableAcc}.code,
-                sga_ecosystem.${tableAcc}.name AS account_name
+                "Ecosystem".concepts.*,
+                "Ecosystem".payment_methods.name AS paymentMethodName,
+                "Ecosystem".${tableAcc}.id AS account_id,
+                "Ecosystem".${tableAcc}.code,
+                "Ecosystem".${tableAcc}.name AS account_name
             FROM
-                sga_ecosystem.concepts
+                "Ecosystem".concepts
             LEFT JOIN
-                sga_ecosystem.${tableAcc}
+                "Ecosystem".${tableAcc}
             ON
-                sga_ecosystem.concepts.account_id = sga_ecosystem.${tableAcc}.id
+                "Ecosystem".concepts.account_id = "Ecosystem".${tableAcc}.id
             LEFT JOIN
-                sga_ecosystem.payment_methods
+                "Ecosystem".payment_methods
             ON
-                sga_ecosystem.concepts.payment_method = sga_ecosystem.payment_methods.id
-            WHERE
-                sga_ecosystem.concepts.company_id = ${info.company_id}
-                ${info.id != null? `AND sga_ecosystem.concepts.id = ${info.id}`:''}
-                ;
+                "Ecosystem".concepts.payment_method = "Ecosystem".payment_methods.id
+            ${whereQuery}
+            ;
         `;
-        let consulta = await useDataBase(sentence,[],1);
+
+        let consulta = await useDataBase(sentence,values,1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -683,7 +712,6 @@ controller.getConcepts = (req,res)=>{
     })
 }
 
-
 /* ELIMINAR CONCEPTOS*/
 controller.deleteConcept = (req,res)=>{
     let data = '';
@@ -692,10 +720,11 @@ controller.deleteConcept = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        const idConceptsArray = info.concepts.map(() => "?").join(",");
+        const placeholders = info.concepts.map((_, i) => `$${i + 1}`).join(",");
+
         let sentence = `
-                DELETE FROM sga_ecosystem.concepts
-                WHERE id IN (${idConceptsArray});
+                DELETE FROM "Ecosystem".concepts
+                WHERE id IN (${placeholders});
             `;
         let consulta = await useDataBase(sentence,[
             info.concepts
@@ -728,12 +757,12 @@ controller.getPaymentMethods = (req,res)=>{
                 state,
                 account_id
             FROM
-                sga_ecosystem.payment_methods
+                "Ecosystem".payment_methods
             WHERE
-                company_id = ${info.company_id}
+                company_id = $1
             ORDER BY name ASC;
         `;
-        let consulta = await useDataBase(sentence,[],1);;
+        let consulta = await useDataBase(sentence,[info.company_id],1);;
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -742,7 +771,6 @@ controller.getPaymentMethods = (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
-
 
 controller.createTransaction = (req,res)=>{
     let data = ''
@@ -753,7 +781,7 @@ controller.createTransaction = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             INSERT INTO
-                sga_ecosystem.transactions
+                "Ecosystem".transactions
                 (
                     user_id,
                     company_id,
@@ -766,7 +794,7 @@ controller.createTransaction = (req,res)=>{
                     total
                 )
             VALUES
-                (?,?,?,?,?,?,?,?,?);
+                ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id;
         `;
         let consulta = await useDataBase(sentence,[
             info.user_id,
@@ -778,14 +806,14 @@ controller.createTransaction = (req,res)=>{
             info.doc_id,
             info.subtotal,
             info.total
-        ],6)
+        ],3)
         console.log('Transacción Creada correctamente No: ',consulta);
-        if(consulta[0]){
+        if(typeof(consulta) == 'number'){
             let resultDetails = [];
             for(const element of info.transactionDetails){
                 let sentence = `
                     INSERT INTO
-                        sga_ecosystem.transaction_detail
+                        "Ecosystem".transaction_detail
                         (
                             transaction_id,
                             account_id,
@@ -795,7 +823,7 @@ controller.createTransaction = (req,res)=>{
                             total
                         )
                     VALUES
-                    (?,?,?,?,?,?)
+                    ($1,$2,$3,$4,$5,$6)
                 `
                 let postConsulta = await useDataBase(sentence,[
                     consulta[1],
@@ -830,7 +858,7 @@ controller.createTransactionDetail = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             INSERT INTO
-                sga_ecosystem.transaction_detail
+                "Ecosystem".transaction_detail
                 (
                     transaction_id,
                     account_id,
@@ -840,7 +868,7 @@ controller.createTransactionDetail = (req,res)=>{
                     total
                 )
             VALUES
-            (?,?,?,?,?,?);
+            ($1,$2,$3,$4,$5,$6);
         `
         let consulta = await useDataBase(sentence,[
             info.transaction_id,
@@ -868,30 +896,30 @@ controller.getTransactions = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             SELECT
-                sga_ecosystem.transactions.*,
-                sga_ecosystem.users.user_name,
-                sga_ecosystem.stores.name AS store_name,
-                sga_ecosystem.concepts.name AS concept_name,
+                "Ecosystem".transactions.*,
+                "Ecosystem".users.user_name,
+                "Ecosystem".stores.name AS store_name,
+                "Ecosystem".concepts.name AS concept_name,
                 'TR' AS docType
             FROM
-                sga_ecosystem.transactions
+                "Ecosystem".transactions
             LEFT JOIN
-                sga_ecosystem.users
+                "Ecosystem".users
             ON
-                sga_ecosystem.transactions.user_id = sga_ecosystem.users.user_id
+                "Ecosystem".transactions.user_id = "Ecosystem".users.user_id
             LEFT JOIN
-                sga_ecosystem.stores
+                "Ecosystem".stores
             ON
-                sga_ecosystem.transactions.store_id = sga_ecosystem.stores.id
+                "Ecosystem".transactions.store_id = "Ecosystem".stores.id
             LEFT JOIN
-                sga_ecosystem.concepts
+                "Ecosystem".concepts
             ON
-                sga_ecosystem.transactions.concept_id = sga_ecosystem.concepts.id
+                "Ecosystem".transactions.concept_id = "Ecosystem".concepts.id
             WHERE
-                sga_ecosystem.transactions.company_id = ${info.company_id}
-            ORDER BY sga_ecosystem.transactions.created_at DESC;
+                "Ecosystem".transactions.company_id = $1
+            ORDER BY "Ecosystem".transactions.created_at DESC;
         `;
-        let consulta = await useDataBase(sentence,[],1);
+        let consulta = await useDataBase(sentence,[info.company_id],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -912,10 +940,10 @@ controller.deleteTransaction = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        const idTransactionsArray = info.transactions.map(() => "?").join(",");
+        const placeholders = info.transactions.map((_, i) => `$${i + 1}`).join(",");
         let sentence = `
-                DELETE FROM sga_ecosystem.transactions
-                WHERE id IN (${idTransactionsArray});
+                DELETE FROM "Ecosystem".transactions
+                WHERE id IN (${placeholders});
             `;
         let consulta = await useDataBase(sentence,[
             info.transactions
@@ -940,22 +968,22 @@ controller.getTransactionDetails = (req,res)=>{
         let tableAcc = info.typePlanAccount == 'PUC'? 'account_templates_PUC':'contable_accounts';
         let sentence = `
             SELECT
-                sga_ecosystem.transaction_detail.*,
-                sga_ecosystem.${tableAcc}.name AS concept_name,
-                sga_ecosystem.${tableAcc}.code AS account_code,
-                sga_ecosystem.payment_methods.name AS payment_name
+                "Ecosystem".transaction_detail.*,
+                "Ecosystem".${tableAcc}.name AS concept_name,
+                "Ecosystem".${tableAcc}.code AS account_code,
+                "Ecosystem".payment_methods.name AS payment_name
             FROM
-                sga_ecosystem.transaction_detail
+                "Ecosystem".transaction_detail
             LEFT JOIN
-                sga_ecosystem.${tableAcc}
+                "Ecosystem".${tableAcc}
             ON 
-                sga_ecosystem.transaction_detail.account_id = sga_ecosystem.${tableAcc}.id
+                "Ecosystem".transaction_detail.account_id = "Ecosystem".${tableAcc}.id
             LEFT JOIN
-                sga_ecosystem.payment_methods
+                "Ecosystem".payment_methods
             ON 
-                sga_ecosystem.${tableAcc}.id = sga_ecosystem.payment_methods.id
+                "Ecosystem".${tableAcc}.id = "Ecosystem".payment_methods.id
             WHERE
-                sga_ecosystem.transaction_detail.transaction_id = ? ;
+                "Ecosystem".transaction_detail.transaction_id = $1 ;
         `;
         let consulta = await useDataBase(sentence,[info.transaction_id],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
@@ -978,23 +1006,23 @@ controller.updateTransactionState = (req,res)=>{
         console.log(info);
         let sentence1 = `
             UPDATE
-                sga_ecosystem.transactions
+                "Ecosystem".transactions
             SET
-                status = '${info.status}'
+                status = $1
             WHERE
-                id = ${info.transaction_id} ;
+                id = $2 ;
         `
-        let consulta1 = await useDataBase(sentence1,[],2);
+        let consulta1 = await useDataBase(sentence1,[info.status,info.transaction_id],2);
         if(consulta1){
             let sentence2 = `
                 UPDATE
-                    sga_ecosystem.transaction_detail
+                    "Ecosystem".transaction_detail
                 SET
-                    status = '${info.status}'
+                    status = $1
                 WHERE
-                    transaction_id = ${info.transaction_id} ;
+                    transaction_id = $2 ;
             `
-            let consulta2 = await useDataBase(sentence2,[],2);
+            let consulta2 = await useDataBase(sentence2,[info.status,info.transaction_id],2);
             res.writeHead(200,{'Content-Type':'text/plain'})
             res.end(JSON.stringify([consulta1,consulta2]));
         }else{
@@ -1019,25 +1047,6 @@ controller.getSalute = (req,res)=>{
     })
 }
 
-controller.getCategories = (req,res)=>{
-    let data = ''
-    req.on('data',chunk=>{
-        data += chunk
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `SELECT * FROM categories WHERE company_id = ? ;`
-        let consulta = await useDataBase(sentence,[info],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
-[true,[{}]]
 
 controller.getThirdParties = (req,res)=>{
     let data = '';
@@ -1047,11 +1056,8 @@ controller.getThirdParties = (req,res)=>{
     req.on('end',async()=>{
         console.log(data);
         let info = data != undefined? JSON.parse(data):'';
-        const { company_id } = info;
-        console.log('company_id recibido:', company_id);
-        let sentence = `SELECT * FROM sga_ecosystem.thirdParties WHERE company_id = ? ;`; 
-        let consulta = await useDataBase(sentence, [company_id], 1);
-        //let consulta = await useDataBase(sentence,[info],1);
+        let sentence = `SELECT * FROM "Ecosystem".thirdParties WHERE company_id = $1 ;`; 
+        let consulta = await useDataBase(sentence,[info.company_id],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -1070,12 +1076,12 @@ controller.getThirdPartyDetails = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             SELECT
-                sga_ecosystem.thirdParties.*
+                "Ecosystem".thirdParties.*
             FROM
-                sga_ecosystem.thirdParties
+                "Ecosystem".thirdParties
             WHERE
-                company_id = ?
-                AND id = ? ;
+                company_id = $1
+                AND id = $2 ;
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -1101,46 +1107,11 @@ controller.createThirdParty = (req, res) => {
 
     req.on('end', async () => {
         try {
-            console.log('Body crudo /createThirdParty:', data);
-
             const info = data ? JSON.parse(data) : {};
-
-            const {
-                company_id,
-                name,
-                lastName,
-                identificationType,
-                identificationNumber,
-                mail,
-                phone,
-                country,
-                city,
-                address,
-                type
-            } = info;
-
-            // --- Validaciones mínimas ---
-            if (!company_id || !name || !identificationNumber || !mail) {
-                throw new Error('Faltan datos obligatorios: company_id, name, identificationNumber o mail');
-            }
-
-            // --- Mapeo de identificación al ENUM de la DB ---
-            const idTypeMap = {
-                'NIT': 'NIT',
-                'Cédula de Ciudadanía': 'CC',
-                'Cédula de Extranjería': 'CE',
-                'Pasaporte': 'PAS'
-            };
-
-            const dbIdentificationType = idTypeMap[identificationType] || null;
-
-            // --- Mapeo de tipo de proveedor al ENUM de la DB ---
-            // Por ahora, todos los que vienen del form los tratamos como 'supplier'
-            const dbType = 'supplier';
 
             // --- Sentencia alineada al DESCRIBE ---
             const sentence = `
-                INSERT INTO sga_ecosystem.thirdParties 
+                INSERT INTO "Ecosystem".thirdParties 
                 (
                     company_id,
                     names,
@@ -1154,27 +1125,23 @@ controller.createThirdParty = (req, res) => {
                     address,
                     type
                 )
-                VALUES (?,?,?,?,?,?,?,?,?,?,?);
+                VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11);
             `;
 
-            const params = [
-                company_id,
-                name,
-                lastName,
-                dbIdentificationType,
-                identificationNumber,
-                mail,
-                phone,
-                country,
-                city,
-                address,
-                dbType
+            const values = [
+                info.company_id,
+                info.name,
+                info.lastName,
+                info.identificationType,
+                info.identificationNumber,
+                info.mail,
+                info.phone,
+                info.country,
+                info.city,
+                info.address,
+                info.type
             ];
-
-            console.log('INSERT thirdParties →', sentence, params);
-
-            const result = await useDataBase(sentence, params, 1);
-
+            const result = await useDataBase(sentence, values, 2);
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify([true, result]));
         } catch (err) {
@@ -1200,10 +1167,10 @@ controller.deleteThirdParty = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        const idSuppliersArray = info.suppliers.map(() => "?").join(",");
+        const placeholders = info.suppliers.map((_, i) => `$${i + 1}`).join(",");
         let sentence = `
-                DELETE FROM sga_ecosystem.thirdParties
-                WHERE id IN (${idSuppliersArray});
+                DELETE FROM "Ecosystem".thirdParties
+                WHERE id IN (${placeholders});
             `;
         let consulta = await useDataBase(sentence,[
             info.suppliers
@@ -1216,8 +1183,6 @@ controller.deleteThirdParty = (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
-
-
 
 
 // Ai_asistant Actions
@@ -1244,9 +1209,6 @@ controller.processAiRequest= (req,res)=>{
 }
 
 
-
-//getDocAnalyticDOcNumber --> Nombre de la funcion
-
 controller.getDocAnalyticDocNumber = async (req, res) => {
     let data = '';
     req.on('data', chunk => {
@@ -1256,8 +1218,6 @@ controller.getDocAnalyticDocNumber = async (req, res) => {
     req.on('end', async () => {
         try {
             const info = JSON.parse(data);
-            console.log("📦 Datos recibidos:", info);
-
             if (!info.doc_type) {
                 return res.status(400).json({ error: "'doc_type' es requerido" });
             }
@@ -1272,8 +1232,8 @@ controller.getDocAnalyticDocNumber = async (req, res) => {
             console.log(`🕒 Agrupando por: ${period} (formato: ${format})`);
 
             const tableName = info.doc_type === "TRS"
-                ? `sga_ecosystem.transaction_detail`
-                : `sga_process.${info.doc_type}`;
+                ? `"Ecosystem".transaction_detail`
+                : `"Ecosystem".documents.${info.doc_type}`;
 
             const noFilters =
                 !info.dateStart &&
@@ -1374,19 +1334,26 @@ controller.getTransactionsData = async (req, res) => {
         if (period === "DAY") format = "%Y-%m-%d";
         else if (period === "YEAR") format = "%Y";
         else format = "%Y-%m";
+        let values = [];
+        let whereClauses = [];
+        if(info.doc_type != null){
+            whereClauses.push('"Ecosystem".transactions.doc_type = $1');
+            values.push(info.doc_type);
+        }
+        const whereQuery = whereClauses.length > 0
+                ? `WHERE ${whereClauses.join(" AND ")}`
+                : "";
+
         const sentence = `
         SELECT
             DATE_FORMAT(created_at, '${format}') AS label,
             SUM(subtotal) AS total
-        FROM sga_ecosystem.transactions
-        ${info.doc_type != null ? `
-        WHERE
-            sga_ecosystem.transactions.doc_type = '${info.doc_type}'
-        `:''}
+        FROM "Ecosystem".transactions
+        ${whereQuery}
         GROUP BY DATE_FORMAT(created_at, '${format}')
         ORDER BY DATE_FORMAT(created_at, '${format}') ASC;
         `;
-        const consulta = await useDataBase(sentence, [], 1);
+        const consulta = await useDataBase(sentence, values, 1);
         res.writeHead(200,{'Content-Type':'text/plain'});
         res.end(JSON.stringify(consulta));
     })
@@ -1415,19 +1382,23 @@ controller.getDocAnalyticDocNumberTable = async (req, res) => {
                 else format = "%Y-%m";
 
                 const tableName = info.doc_type === 'TRS'
-                    ? 'sga_ecosystem.transaction_detail'
-                    : `sga_process.${info.doc_type}`;
+                    ? '"Ecosystem".transaction_detail'
+                    : `"Ecosystem".documents.${info.doc_type}`;
 
                 const sentence = `
                     SELECT 
                         DATE_FORMAT(created_at, '${format}') AS period,
                         COUNT(*) AS total_docs
                     FROM ${tableName}
+                    ${info.doc_type != 'TRS'? `
+                    WHERE
+                        doc_type = $1;
+                        `:''}
                     GROUP BY DATE_FORMAT(created_at, '${format}')
                     ORDER BY period;
                 `;
 
-                const consulta = await useDataBase(sentence, [], 1);
+                const consulta = await useDataBase(sentence, [info.doc_type], 1);
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify(consulta));
         });
