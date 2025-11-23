@@ -31,8 +31,12 @@ const pool = new Pool({
     database: PG_DATABASE,
     port: PG_PORT,
     max: 10,
-    idleTimeoutMillis: 30000
+    idleTimeoutMillis: 30000,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
+
     
 async function testDBConnection() {
     console.log(PG_USER);
