@@ -8,25 +8,25 @@ import {NewElementSelect} from '../../components/NewElementSelect'
 import { CardTitleLogo } from "../../components/CardTitleLogo";
 import { postInfo } from "../../../../utils/functions";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
+import { FormNewTax } from "./FormNewTax";
 
 export function FormNewConcept({reloadInfo}){
-
+    const {popOutAlert,popInAlert} = useAlert();
     const {addNotification} = useNotifications();
     const {appInfo} = useAppInfo();
     const [name,setName] = useState('');
     const [selectedAccount,setSelectedAccount] = useState();
     const [selectedTaxes,setSelectedTaxes] = useState([]);
-    const [selectedPaymentMethod,setSelectedPaymentMethod] = useState()
-    const [payment_methods,setPaymnet_methods]  = useState([]);
     const [disabled,setsDisabled] = useState(false);
     const [loading,setLoading] = useState(false);
     const [accounts,setAccounts] = useState([]);
     const [taxes,setTaxes] = useState([]);
-    const {popOutAlert} = useAlert();
 
     const getAccounts = async()=>{
         let res = await postInfo('/getAccountsPlan',{
-            company_id:appInfo.company_id
+            company_id:appInfo.company_id,
+            accountPlanId:appInfo.accountPlanId,
+            accountPlanType:appInfo.accountPlanType
         })
         if(res[1][0]){
             let C = []
@@ -38,8 +38,6 @@ export function FormNewConcept({reloadInfo}){
             });
             console.log(C)
             setAccounts(C)
-        }else{
-            setAccounts('Error')
         }
     }
 
@@ -60,8 +58,6 @@ export function FormNewConcept({reloadInfo}){
                 })
             });
             setTaxes(C);
-        }else{
-            setTaxes('Error')
         }
     }
 
@@ -89,25 +85,8 @@ export function FormNewConcept({reloadInfo}){
         setSelectedTaxes(C)
     }
 
-    const getPayment_methods = async()=>{
-        let res  = await postInfo('/getPaymentMethods',{
-            company_id:appInfo.company_id
-        })
-        if(res[0]){
-            let C = [];
-            res[1].forEach(element => {
-                C.push({
-                    text:`${element.name} ${element.currency != null? ` (${element.currency})`:''}`,
-                    value:element.id
-                })
-            });
-            setPaymnet_methods(C);
-        }
-    }
-
     const formInfo = {
         company_id:appInfo.company_id,
-        payment_method:selectedPaymentMethod,
         name,
         account_id:selectedAccount,
         selectedTaxes
@@ -141,7 +120,6 @@ export function FormNewConcept({reloadInfo}){
     useEffect(()=>{
         getAccounts();
         getTaxes();
-        getPayment_methods();
     },[])
     
 
@@ -152,14 +130,14 @@ export function FormNewConcept({reloadInfo}){
                     e.preventDefault();
                     createConcept();
                 }}>
-                    <FormInput action={setName} title={'Nombre'} placeholder={'Nombre del nuevo concepto'}/>
-                    <SearchinList action={setSelectedAccount} title={'Cuenta'} list={accounts} placeHolder={'Seleccionar Cuenta'}/>
-                    <SearchinList action={addTax} title={'Impuestos'} list={taxes} placeHolder={'Seleccionar Impuestos'} specialOption={
-                        <NewElementSelect title={'Crear nuevo impuesto'}/>
-                    } />
-                    <SearchinList action={setSelectedPaymentMethod} title={'Metodo de págo'} list={payment_methods} placeHolder={'Seleccionar metodo de pago'} specialOption={
-                        <NewElementSelect title={'Crear nuevo metodo de págo'}/>
+                    <FormInput disabled={disabled} action={setName} title={'Nombre'} placeholder={'Nombre del nuevo concepto'}/>
+                    <SearchinList disabled={disabled} action={setSelectedAccount} title={'Cuenta'} list={accounts} placeHolder={'Seleccionar Cuenta'} specialOption={
+                        <NewElementSelect title={'Crear nueva cuenta'} onClick={()=>{popInAlert(<span>Formulario nueva cuenta</span>)}}/>
                     }/>
+                    <SearchinList disabled={disabled} action={addTax} title={'Impuestos'} list={taxes} placeHolder={'Seleccionar Impuestos'} specialOption={
+                        <NewElementSelect title={'Crear nuevo impuesto'} onClick={()=>{popInAlert(<FormNewTax/>)}}/>
+                    } />
+                    
                     <div className="selectedTaxesC">
                         <h5>Impuestos seleccinoados</h5>
                         {selectedTaxes.map((element,index)=>(
@@ -173,7 +151,7 @@ export function FormNewConcept({reloadInfo}){
                             <span className="excepMess">No hay ningun impuesto seleccionado</span>
                         )}
                     </div>
-                    <FormButton text={'Crear nuevo concepto'}/>
+                    <FormButton text={'Crear nuevo concepto'} disabled={disabled} loading={loading}/>
                 </form>
         </div>
     )

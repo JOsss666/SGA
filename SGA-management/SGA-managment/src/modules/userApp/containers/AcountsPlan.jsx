@@ -29,7 +29,12 @@ export function AcountsPlan(){
 
     const getAccountsplan = async()=>{
         setLoading(true)
-        let res = await postInfo('/getAccountsPlan',{company_id:appInfo.company_id})
+        console.log(appInfo)
+        let res = await postInfo('/getAccountsPlan',{
+            company_id:appInfo.company_id,
+            accountPlanId:appInfo.accountPlanId,
+            accountPlanType:appInfo.accountPlanType
+        })
         if(res[0][1]){
             setAccountPanInfo(res[0][1][0]);
         }

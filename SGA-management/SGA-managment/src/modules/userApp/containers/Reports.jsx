@@ -61,11 +61,11 @@ export function Reports(){
                     </>
                 }/>
                 // http://localhost:5173/SGA_process/:company_key/:user_key/reports/OPS
-                <Route path='/OCS' element={<ReportDocuments type={'OC'}/>} />
-                <Route path='/OPS' element={<ReportDocuments type={'OP'}/>} />
-                <Route path='/DCS' element={<ReportDocuments type={'DC'}/>} />
-                <Route path='/CIS' element={<ReportDocuments type={'CI'}/>} />
-                <Route path='/FVS' element={<ReportDocuments type={'FV'}/>} />
+                <Route path='/OCS' element={<ReportDocuments type={'Client Order'}/>} />
+                <Route path='/OPS' element={<ReportDocuments type={'Production Order'}/>} />
+                <Route path='/DCS' element={<ReportDocuments type={'Purchase Document'}/>} />
+                <Route path='/CIS' element={<ReportDocuments type={'Inventory Consume'}/>} />
+                <Route path='/FVS' element={<ReportDocuments type={'Sell Invoice'}/>} />
                 <Route path='/TRS' element={<ReportDocuments type={'TR'}/>} />
                 <Route path='/TRS/:transaction_id' element={<ReportTransactionDetails />} />
                 <Route path='/Balance' element={<ReportBalance/>}/>

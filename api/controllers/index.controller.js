@@ -161,8 +161,8 @@ controller.getCompanyInfo = (req,res)=>{
         let sentence = `
             SELECT 
                 "Ecosystem".companies.*,
-                "Ecosystem".account_plans.id AS accountPlanId,
-                "Ecosystem".account_plans.type AS accountPlanType
+                "Ecosystem".account_plans.id AS "accountPlanId",
+                "Ecosystem".account_plans.type AS "accountPlanType"
             FROM
                 "Ecosystem".companies 
             LEFT JOIN
@@ -322,7 +322,7 @@ controller.signUp = (req,res)=>{
                 VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9);
             `;
             let posCon = await useDataBase(posSen, [
-                consulta,               
+                consulta.user_id,               
                 info.userRol,             
                 info.accessInventory,     
                 info.accessProcess,       
@@ -381,26 +381,27 @@ controller.insertNewAccount = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let tableAcc = info.typePlanAccount == 'PUC'? 'account_templates_PUC':'contable_accounts';
         let sentence = `
             INSERT INTO
-                "Ecosystem".${tableAcc}
-            (
+                "Ecosystem".contable_accounts
+            (   
+                account_plan,
                 company_id,
                 code,
                 name,
                 level,
                 type,
-                account_path
-            )VALUES($1,$2,$3,$4,$5,$6) RETURNING id;
+                type_account
+            )VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id;
         `; 
         let consulta = await useDataBase(sentence,[
+            info.accountPlanId,
             info.company_id,
             info.code,
             info.name,
             (info.code).length,
             info.type,
-            info.code
+            info.accountPlanType
         ],3);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -429,24 +430,18 @@ controller.getAccountsPlan = (req,res)=>{
         let prevCons = await useDataBase(prevSen,[info.company_id],1);
         if(prevCons[0]){
             let sentence = `
-                SELECT * FROM (
-                    SELECT 
-                        'PUC' as type,
-                        id,code,name,level,account_path
-                    FROM "Ecosystem".account_templates_PUC
-                    UNION ALL
-                    SELECT 
-                        'personalized',
-                        id,code,name,level,account_path
-                    FROM "Ecosystem".contable_accounts
-                    WHERE 
-                        "Ecosystem".contable_accounts.company_id = $1
-                        AND "Ecosystem".contable_accounts.active = true
-                ) 
-                AS results
-                    ORDER BY account_path ASC;  
+                SELECT * FROM
+                    "Ecosystem".contable_accounts
+                WHERE company_id = $1
+                    AND account_plan = $2
+                    AND type_account = $3
+                ORDER BY code ASC;  
             `;
-            let consulta = await useDataBase(sentence,[info.company_id],1);
+            let consulta = await useDataBase(sentence,[
+                info.company_id,
+                info.accountPlanId,
+                info.accountPlanType
+            ],1);
             res.writeHead(200,{'Content-Type':'text/plain'})
             res.end(JSON.stringify([prevCons,consulta]));
         }else{
@@ -502,10 +497,6 @@ controller.getTaxes = (req, res) => {
     req.on('end', async () => {
         try {
             const info = JSON.parse(data);
-            const tableAcc = info.typePlanAccount === 'PUC'
-                ? 'contable_accounts'
-                : 'account_templates_PUC';
-
             let values = [];
             let where = []; // array de condiciones dinámicas
 
@@ -515,11 +506,11 @@ controller.getTaxes = (req, res) => {
                     "Ecosystem".taxes.code,
                     "Ecosystem".taxes.rate,
                     "Ecosystem".taxes.base,
-                    "Ecosystem".${tableAcc}.*
+                    "Ecosystem".contable_accounts.*
                 FROM
                     "Ecosystem".taxes
-                LEFT JOIN "Ecosystem".${tableAcc}
-                ON "Ecosystem".taxes.account_id = "Ecosystem".${tableAcc}.id
+                LEFT JOIN "Ecosystem".contable_accounts
+                ON "Ecosystem".taxes.account_id = "Ecosystem".contable_accounts.id
                 WHERE
             `;
 
@@ -600,10 +591,9 @@ controller.createConcept = (req, res) => {
                 (
                     company_id,
                     name,
-                    account_id,
-                    payment_method
+                    account_id
                 )
-                VALUES ($1, $2, $3, $4)
+                VALUES ($1, $2, $3)
                 RETURNING id;
             `;
 
@@ -613,7 +603,6 @@ controller.createConcept = (req, res) => {
                     info.company_id,
                     info.name,
                     info.account_id,
-                    info.payment_method
                 ],3);
 
             if (typeof newConcept !== "number") {
@@ -665,7 +654,6 @@ controller.getConcepts = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let tableAcc = info.typePlanAccount == 'PUC'? 'account_templates_PUC':'contable_accounts';
         let values = []
         let whereClauses = []
 
@@ -684,20 +672,15 @@ controller.getConcepts = (req,res)=>{
         let sentence = `
             SELECT
                 "Ecosystem".concepts.*,
-                "Ecosystem".payment_methods.name AS paymentMethodName,
-                "Ecosystem".${tableAcc}.id AS account_id,
-                "Ecosystem".${tableAcc}.code,
-                "Ecosystem".${tableAcc}.name AS account_name
+                "Ecosystem".contable_accounts.id AS account_id,
+                "Ecosystem".contable_accounts.code,
+                "Ecosystem".contable_accounts.name AS account_name
             FROM
                 "Ecosystem".concepts
             LEFT JOIN
-                "Ecosystem".${tableAcc}
+                "Ecosystem".contable_accounts
             ON
-                "Ecosystem".concepts.account_id = "Ecosystem".${tableAcc}.id
-            LEFT JOIN
-                "Ecosystem".payment_methods
-            ON
-                "Ecosystem".concepts.payment_method = "Ecosystem".payment_methods.id
+                "Ecosystem".concepts.account_id = "Ecosystem".contable_accounts.id
             ${whereQuery}
             ;
         `;
@@ -754,7 +737,7 @@ controller.getPaymentMethods = (req,res)=>{
                 code,
                 name,
                 currency,
-                state,
+                status,
                 account_id
             FROM
                 "Ecosystem".payment_methods
@@ -790,54 +773,58 @@ controller.createTransaction = (req,res)=>{
                     doc_date,
                     doc_type,
                     doc_id,
-                    subtotal,
-                    total
+                    "subTotal",
+                    total,
+                    "costCenter_id"
                 )
             VALUES
-                ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id;
+                ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id;
         `;
         let consulta = await useDataBase(sentence,[
             info.user_id,
             info.company_id,
             info.store_id,
             info.concept_id,
-            info.doc_date,
+            info.doc_date.replace(/\//g, '-'),
             info.doc_type,
             info.doc_id,
-            info.subtotal,
-            info.total
+            info.subTotal,
+            info.total,
+            info.costCenter_id
         ],3)
         console.log('Transacción Creada correctamente No: ',consulta);
-        if(typeof(consulta) == 'number'){
+        if(typeof(parseInt(consulta.id)) == 'number'){
             let resultDetails = [];
             for(const element of info.transactionDetails){
                 let sentence = `
-                    INSERT INTO
-                        "Ecosystem".transaction_detail
-                        (
-                            transaction_id,
-                            account_id,
-                            account_type,
-                            type,
-                            subtotal,
-                            total
-                        )
-                    VALUES
-                    ($1,$2,$3,$4,$5,$6)
+                    INSERT INTO "Ecosystem".transaction_detail(
+                        company_id,
+                        transaction_id,
+                        "thirdParty_id",
+                        account_id,
+                        type,
+                        "subTotal",
+                        total,
+                        nature
+                    )
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
                 `
+                console.log('---> ',info);
+                console.log('---> ',element);
                 let postConsulta = await useDataBase(sentence,[
-                    consulta[1],
+                    info.company_id,
+                    parseInt(consulta.id),
+                    info.thirdParty_id,
                     element.account_id,
-                    element.account_type,
                     element.type,
                     element.subtotal,
-                    element.total
+                    element.total,
+                    element.nature
                 ],2);
                 resultDetails.push([postConsulta]);
             }
-            consulta.push(resultDetails)
             res.writeHead(200,{'Content-Type':'text/plain'})
-            res.end(JSON.stringify(consulta));
+            res.end(JSON.stringify([consulta.id,resultDetails]));
         }else{
             res.writeHead(200,{'Content-Type':'text/plain'})
             res.end(JSON.stringify(false));
@@ -965,23 +952,22 @@ controller.getTransactionDetails = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let tableAcc = info.typePlanAccount == 'PUC'? 'account_templates_PUC':'contable_accounts';
         let sentence = `
             SELECT
                 "Ecosystem".transaction_detail.*,
-                "Ecosystem".${tableAcc}.name AS concept_name,
-                "Ecosystem".${tableAcc}.code AS account_code,
+                "Ecosystem".contable_accounts.name AS concept_name,
+                "Ecosystem".contable_accounts.code AS account_code,
                 "Ecosystem".payment_methods.name AS payment_name
             FROM
                 "Ecosystem".transaction_detail
             LEFT JOIN
-                "Ecosystem".${tableAcc}
+                "Ecosystem".contable_accounts
             ON 
-                "Ecosystem".transaction_detail.account_id = "Ecosystem".${tableAcc}.id
+                "Ecosystem".transaction_detail.account_id = "Ecosystem".contable_accounts.id
             LEFT JOIN
                 "Ecosystem".payment_methods
             ON 
-                "Ecosystem".${tableAcc}.id = "Ecosystem".payment_methods.id
+                "Ecosystem".contable_accounts.id = "Ecosystem".payment_methods.id
             WHERE
                 "Ecosystem".transaction_detail.transaction_id = $1 ;
         `;
@@ -1107,33 +1093,20 @@ controller.createThirdParty = (req, res) => {
 
     req.on('end', async () => {
         try {
-            const info = data ? JSON.parse(data) : {};
-
-            // --- Sentencia alineada al DESCRIBE ---
+            const info = JSON.parse(data);
+            console.log(info);
             const sentence = `
-                INSERT INTO "Ecosystem".thirdParties 
-                (
-                    company_id,
-                    names,
-                    lastNames,
-                    indentification_type,
-                    indentification_number,
-                    email,
-                    phone,
-                    country,
-                    city,
-                    address,
-                    type
-                )
-                VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11);
+                INSERT INTO "Ecosystem".thirdparties(
+                    company_id, names, "lastNames", indentification_type, indentification_number, mail, phone, country, city, address, type)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id;
             `;
 
             const values = [
                 info.company_id,
                 info.name,
-                info.lastName,
-                info.identificationType,
-                info.identificationNumber,
+                info.lastNames,
+                info.indentification_type,
+                info.indentification_number,
                 info.mail,
                 info.phone,
                 info.country,
@@ -1141,9 +1114,44 @@ controller.createThirdParty = (req, res) => {
                 info.address,
                 info.type
             ];
-            const result = await useDataBase(sentence, values, 2);
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify([true, result]));
+            const result = await useDataBase(sentence, values, 3);
+            let idNewThirdParty = parseInt(result);
+            console.log(idNewThirdParty);
+            if(typeof(parseInt(result))== 'number'){
+                let comercialInfoSen = `
+                    INSERT INTO "Ecosystem"."thirdPartyComercialInfo"(
+                        "thirdParty_id", company_id, credit, credit_term, credit_value, interest_rate, comercial_state)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7);
+                ` 
+                let comercialInfoCons = await useDataBase(comercialInfoSen,[
+                    idNewThirdParty,
+                    info.company_id,
+                    info.credit,
+                    info.credit_term,
+                    info.credit_value,
+                    info.interest_rate,
+                    info.comercial_state
+                ],2);
+                let taxInfo = `
+                    INSERT INTO "Ecosystem"."thirdPartyTaxInfo"(
+                        "thirdParty_id", company_id, regime, "IVA_responsability", retention_type, economic_activity, "attachedRut")
+                    VALUES ($1, $2, $3, $4, $5, $6, $7);
+                `;
+                let taxInfoCons = await useDataBase(taxInfo,[
+                    idNewThirdParty,
+                    info.company_id,
+                    info.regime,
+                    info.IVA_responsability,
+                    info.retention_type,
+                    info.economic_activity,
+                    info.attachedRut != undefined? info.attachedRut:''
+                ],2);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(comercialInfoCons && taxInfoCons));
+            }else{
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(false));
+            }
         } catch (err) {
             console.error('Error en createThirdParty:', err);
             res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -1211,29 +1219,33 @@ controller.processAiRequest= (req,res)=>{
 
 controller.getDocAnalyticDocNumber = async (req, res) => {
     let data = '';
-    req.on('data', chunk => {
-        data += chunk;
-    });
+    req.on('data', chunk => data += chunk);
 
     req.on('end', async () => {
         try {
             const info = JSON.parse(data);
+
             if (!info.doc_type) {
                 return res.status(400).json({ error: "'doc_type' es requerido" });
             }
 
-            // ✅ Tomar period desde el body o desde query
+            // Periodo: DAY, MONTH, YEAR
             const rawPeriod = info.period || req.query.period || "MONTH";
             const period = rawPeriod.toUpperCase();
-            const format = (period === "DAY") ? "%Y-%m-%d"
-                : (period === "YEAR") ? "%Y"
-                : "%Y-%m";
 
-            console.log(`🕒 Agrupando por: ${period} (formato: ${format})`);
+            const truncUnit =
+                period === "DAY" ? "day" :
+                period === "YEAR" ? "year" :
+                "month"; // default
 
-            const tableName = info.doc_type === "TRS"
-                ? `"Ecosystem".transaction_detail`
-                : `"Ecosystem".documents.${info.doc_type}`;
+            const labelFormat =
+                period === "DAY" ? 'YYYY-MM-DD' :
+                period === "YEAR" ? 'YYYY' :
+                'YYYY-MM';
+
+            console.log(`🕒 Agrupando por: ${period}`);
+
+            const tableName = `"Ecosystem".documents`;
 
             const noFilters =
                 !info.dateStart &&
@@ -1243,62 +1255,62 @@ controller.getDocAnalyticDocNumber = async (req, res) => {
                 !info.orderBy &&
                 !info.limit;
 
-            // 🔹 Consulta sin filtros
+            // 1️⃣ SIN FILTROS
             if (noFilters) {
                 const sentence = `
                     SELECT
-                        DATE_FORMAT(created_at, '${format}') AS label,
+                        TO_CHAR(DATE_TRUNC('${truncUnit}', created_at), '${labelFormat}') AS label,
                         COUNT(*) AS total
                     FROM ${tableName}
-                    GROUP BY DATE_FORMAT(created_at, '${format}')
-                    ORDER BY DATE_FORMAT(created_at, '${format}') ASC;
+                    WHERE document_type = $1
+                    GROUP BY DATE_TRUNC('${truncUnit}', created_at)
+                    ORDER BY DATE_TRUNC('${truncUnit}', created_at) ASC;
                 `;
 
-                const consulta = await useDataBase(sentence, [], 1);
+                const consulta = await useDataBase(sentence, [info.doc_type], 1);
                 return res.status(200).json(consulta);
             }
 
-            // 🔹 Consulta con filtros
-            const whereClauses = [];
-            const values = [];
+            // 2️⃣ CON FILTROS
+            const whereClauses = [`doc_type = $1`];
+            const values = [info.doc_type];
+            let paramIndex = 2;
 
             if (info.dateStart) {
-                whereClauses.push(`created_at >= ?`);
+                whereClauses.push(`created_at >= $${paramIndex++}`);
                 values.push(info.dateStart);
             }
 
             if (info.dateEnd) {
-                whereClauses.push(`created_at <= ?`);
+                whereClauses.push(`created_at <= $${paramIndex++}`);
                 values.push(info.dateEnd);
             }
 
             if (info.status) {
-                whereClauses.push(`status = ?`);
+                whereClauses.push(`status = $${paramIndex++}`);
                 values.push(info.status);
             }
 
             if (info.filterField && info.filterValue) {
-                whereClauses.push(`${info.filterField} LIKE ?`);
+                whereClauses.push(`${info.filterField} LIKE $${paramIndex++}`);
                 values.push(`%${info.filterValue}%`);
             }
 
-            const whereQuery = whereClauses.length > 0
-                ? `WHERE ${whereClauses.join(" AND ")}`
-                : "";
+            const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
 
             const orderQuery = info.orderBy
                 ? `ORDER BY ${info.orderBy} ${info.orderDirection === "DESC" ? "DESC" : "ASC"}`
-                : `ORDER BY DATE_FORMAT(created_at, '${format}') ASC`;
+                : `ORDER BY DATE_TRUNC('${truncUnit}', created_at) ASC`;
 
             const limitQuery = info.limit ? `LIMIT ${parseInt(info.limit)}` : "";
 
             const sentence = `
                 SELECT
-                    DATE_FORMAT(created_at, '${format}') AS label,
+                    TO_CHAR(DATE_TRUNC('${truncUnit}', created_at), '${labelFormat}') AS label,
                     COUNT(*) AS total
                 FROM ${tableName}
                 ${whereQuery}
-                GROUP BY DATE_FORMAT(created_at, '${format}')
+                GROUP BY DATE_TRUNC('${truncUnit}', created_at)
                 ${orderQuery}
                 ${limitQuery};
             `;
@@ -1313,13 +1325,8 @@ controller.getDocAnalyticDocNumber = async (req, res) => {
             res.status(500).json({ error: "Error procesando la solicitud", detail: err.message });
         }
     });
-
-    req.on('error', (err) => {
-        console.error("⚠️ Error en la recepción de datos:", err);
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: "Error en la recepción de datos", detail: err.message }));
-    });
 };
+
 
 
 controller.getTransactionsData = async (req, res) => {
@@ -1346,12 +1353,13 @@ controller.getTransactionsData = async (req, res) => {
 
         const sentence = `
         SELECT
-            DATE_FORMAT(created_at, '${format}') AS label,
-            SUM(subtotal) AS total
+            TO_CHAR(created_at, 'YYYY-MM') AS label,
+            SUM("total") AS total
         FROM "Ecosystem".transactions
         ${whereQuery}
-        GROUP BY DATE_FORMAT(created_at, '${format}')
-        ORDER BY DATE_FORMAT(created_at, '${format}') ASC;
+        GROUP BY TO_CHAR(created_at, 'YYYY-MM')
+        ORDER BY TO_CHAR(created_at, 'YYYY-MM') ASC;
+
         `;
         const consulta = await useDataBase(sentence, values, 1);
         res.writeHead(200,{'Content-Type':'text/plain'});

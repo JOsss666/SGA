@@ -5,7 +5,6 @@ import { postInfo } from '../../utils/functions';
 import { FormButton } from '../userApp/components/FormButton';
 import { FormInput } from '../userApp/components/FormInput';
 import {ButtonAccounts} from './components/ButtonAccounts'
-import { SwitchColorMode } from '../userApp/components/SwitchColorMode';
 import { useNavigate } from 'react-router-dom';
 import { useAppInfo } from '../../context/context';
 

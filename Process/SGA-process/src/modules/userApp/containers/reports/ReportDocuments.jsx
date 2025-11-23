@@ -30,7 +30,7 @@ export function ReportDocuments({ type }) {
     const documentTypes = {
         OC: "Ordenes de Cliente",
         OP: "Ordenes de Producción",
-        DC: "Documentos de Compra",
+        'Purchase Document': "Documentos de Compra",
         CI: "Consumos de inventario",
         FV: "Facturas de venta",
         TR: "Transacciónes",
@@ -102,7 +102,7 @@ export function ReportDocuments({ type }) {
     const columsDictionary = {
         OP: columnsOp,
         OC: columnsOc,
-        DC: columnsDc,
+        'Purchase Document': columnsDc,
         FV: columnsDc,
         CI: columnsDc,
         TR: columsTr,

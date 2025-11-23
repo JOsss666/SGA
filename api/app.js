@@ -129,7 +129,7 @@ const useDataBase = async (sentence, values, typeConsult) => {
             case 2: // UPDATE o DELETE (sin RETURNING)
                 return [true, result.rowCount];
             case 3:
-                return result.rows[0] ? Object.values(result.rows[0])[0] : undefined;
+                return result.rows[0];
             case 4:
                 return result.rows[0]?.id != undefined;
 

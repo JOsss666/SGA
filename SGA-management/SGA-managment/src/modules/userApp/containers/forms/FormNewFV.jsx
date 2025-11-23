@@ -7,37 +7,76 @@ import { FormInput } from "../../components/FormInput";
 import { SearchinList } from "../../components/SearchInList";
 import './FormNewFV.css'
 import { FormNewOperation } from "./FormNewOperation";
+import { NewElementSelect } from "../../components/NewElementSelect";
 
 export function FormNewFV({info,reloadFun}){
 
+     // control
     const {popOutAlert,popInAlert} = useAlert();
     const {appInfo,userInfo} = useAppInfo();
     const {addNotification} = useNotifications();
-    const [thirdParties,setTirdParties] = useState([]);
-    const [OPS,setOPS] = useState([]);
-    const [store_id,setStore_id] = useState();
-    const [op_id,setOp_id] = useState();
-    const [thirdParty_id,setTirdParty] = useState();
-    const [description,setDescription] = useState('');
-    const [value,setValue] = useState(0);
+    const [paymentMethods,setPaymentMethods] = useState([]);
+    const [paymentMethod,setPaymentMethod] = useState();
+    const [concepts,setConcepts] = useState([]);
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
-    const [concepts,setConcepts] = useState([])
+
+    // document info
+    const [thirdParties,setTirdParties] = useState([]);
+    const [OPS,setOPS] = useState([]);
+    const [status,setStatus] = useState('active');
+    const [store_id,setStore_id] = useState(1);
+    const [attached,setAttached] = useState('');
+    const [op_id,setOp_id] = useState();
+    const [thirdParty_id,setTirdParty] = useState(info.thirdParty_id);
+    const [description,setDescription] = useState('');
     const [concept_id,setConceptId] = useState();
+    const [doc_date,setDocDate] = useState();
+    
+    // DC info
+    const [total,setTotal] = useState(0);
 
     const formInfo = {
         company_id:appInfo.company_id,
-        user_id:userInfo.user_id,
-        store_id:1,
-        op_id,
-        concept_id,
+        store_id,
         thirdParty_id,
+        document_type:'Sell Invoice',
+        status,
+        created_by:userInfo.user_id,
+        op_id,
         description,
-        value:value != '' ? JSON.parse(value):0
+        costCenter_id:1,
+        attached,
+        total,
+        paymentMethod,
+        doc_date,
+        concept_id,
+        subTotal:total,
+        doc_date
     }
-
+    
     const getConcepts = async()=>{
-        let res = await postInfo('/getConcepts',{
+            let res = await postInfo('/getConcepts',{
+                company_id:appInfo.company_id,
+                typePlanAccount:appInfo.accountPlanType
+            })
+            console.log(res)
+            if(res[0]){
+                let C = []
+                res[1].forEach(element => {
+                    C.push({
+                        text:`SGA#${element.id} ${element.name}`,
+                        value:element.id
+                    })
+                    setConcepts(C)
+                });
+            }else{
+                setConcepts([])
+            }
+        }
+
+    const getPaymentMethods = async()=>{
+        let res = await postInfo('/getPaymentMethods',{
             company_id:appInfo.company_id,
             typePlanAccount:appInfo.accountPlanType
         })
@@ -46,13 +85,11 @@ export function FormNewFV({info,reloadFun}){
             let C = []
             res[1].forEach(element => {
                 C.push({
-                    text:`SGA#${element.id} ${element.name}`,
-                    value:element.id
+                    text:element.name,
+                    value:element
                 })
-                setConcepts(C)
             });
-        }else{
-            setConcepts([])
+            setPaymentMethods(C);
         }
     }
 
@@ -66,7 +103,7 @@ export function FormNewFV({info,reloadFun}){
                 description:`Se ha añadido la factura de venta (FV#${res}) correctamente a la orden de producción (OP#${op_id})`,
                 type:'aproved'
             })
-            formInfo.doc_type = 'FV',
+            formInfo.doc_type = 'Sell Invoice',
             formInfo.doc_id = res;
             popOutAlert();
             if(reloadFun != undefined){
@@ -87,16 +124,19 @@ export function FormNewFV({info,reloadFun}){
         setDisabled(false);
     }
 
+    
+
     const getFormOptions = async()=>{
         getConcepts();
+        getPaymentMethods();
         if(info.op_id == undefined){
             let getOps = await postInfo('/process/getOp',{company_id:appInfo.company_id});
             if(getOps[0]){
                 let C = [];
                 getOps[1].forEach(element => {
                     C.push({
-                        text:`OP#${element.op_id}`,
-                        value:element.op_id
+                        text:`OP#${element.ownSerial}`,
+                        value:element.id
                     })
                 });
                 setOPS(C);
@@ -140,10 +180,16 @@ export function FormNewFV({info,reloadFun}){
                 {info.thirdParty_id == undefined &&(
                     <SearchinList disabled={disabled} action={setTirdParty} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdParties}/>
                 )}
+                <FormInput disabled={disabled} action={setDocDate} title={'Fecha del documento'} type={'date'}/>
                 <SearchinList disabled={disabled} action={setConceptId} title={'Concepto de venta'} placeHolder={'Seleccione el concepto de la venta'} list={concepts}/>
                 <FormInput disabled={disabled} action={setDescription} title={'Descripción'} placeholder={'Descripción de la nueva orden de cliente'} textArea={true}/>
-                <FormInput disabled={disabled} action={setValue} title={'Valor factura'} moneyF={true} placeholder={'Descripción de la nueva orden de cliente'} />
-                <FormButton disabled={disabled} text={'Añadir orden del cliente'} loading={loading}/>
+                <FormInput disabled={disabled} action={setTotal} title={'Valor factura'} moneyF={true} placeholder={'Descripción de la nueva orden de cliente'} />
+                <SearchinList disabled={disabled} action={setPaymentMethod} title={'Metodo de pago'} placeHolder={'Seleccione el metodo de pago'} list={paymentMethods} specialOption={
+                    <NewElementSelect title={'Crear nuevo metodo de págo'} onClick={()=>{
+                        popInAlert(<span>Formulario para nuevo metodo de págo</span>)
+                    }}/>
+                }/>
+                <FormButton disabled={disabled} text={'Crear factura de venta'} loading={loading}/>
             </form>
         </div>
     )

@@ -22,7 +22,8 @@ export function OpCard({data}){
     const [visibleInfo,setVisibleInfo] = useState(true);
 
     const getAttachedDocuments = async()=>{
-        let res = await postInfo('/process/getOpAttached',{op_id:info.op_id})
+        let res = await postInfo('/process/getOpAttached',{id:info.id})
+        console.log(res)
         if(res[0]){
             setAttachedDocs(res[1]);
         }
@@ -30,12 +31,17 @@ export function OpCard({data}){
 
     const reloadInfo = async()=>{
         console.log('Recargando OP info')
-        let res = await postInfo('/process/getOp',{company_id:appInfo.company_id,op_id:info.op_id})
+        let res = await postInfo('/process/getOp',{company_id:appInfo.company_id,id:info.id})
         if(res[0]){
             setInfo(res[1][0]);
         }
     }
 
+    useEffect(()=>{
+        console.log(info);
+    },[info])
+
+    /*
     useEffect(()=>{
         if(info.user_id == undefined){
             reloadInfo();
@@ -45,10 +51,13 @@ export function OpCard({data}){
         }
     },[info]);
 
+    */
+
     useEffect(()=>{
         if(data.getData){
             reloadInfo();
         }
+        getAttachedDocuments();
     },[])
 
     const donwloadElement = async()=>{
@@ -58,7 +67,7 @@ export function OpCard({data}){
     return(
         <div ref={container} className="OpCard">
             <div className="headOP">
-                <h3 onClick={()=>{reloadInfo()}}>OP#{info.op_id}</h3>
+                <h3 onClick={()=>{reloadInfo()}}>OP#{info.ownSerial}</h3>
                 <SwitchOption action={setVisibleInfo} state1={'Información'} state2={'Adjuntos'}/>
                 <AiButton attached={{info,attachedDocs}} sugerence={[
                 {text:'Resume el estado de esta orden de producción',context:`Procesos - Orden de producción ${info.op_id}`},
@@ -76,13 +85,13 @@ export function OpCard({data}){
             {!visibleInfo && (
                 <div className="bodyOP">
                     <LabelValue title={'Creado por:'} value={info.user_name}/>
-                    <LabelValue title={'Cliente:'} value={info.names != null? info.names:'---'}/>
+                    <LabelValue title={'Cliente:'} value={info.thirdparty_names != null? info.thirdparty_names:'---'}/>
                     <LabelValue title={'Fecha entrega:'} value={info.expiration_date != null? info.expiration_date:'---'}/>
-                    <LabelValue title={'Ingreso pres:'} value={info.budgetIncome != null? `$ ${moneyFormat(info.budgetIncome)}`:0}/>
-                    <LabelValue title={'Costo pres:'} value={info.budgetCost != null? `$ ${moneyFormat(info.budgetCost)}`:0}/>
-                    <LabelValue title={'Costo ejecutado:'} value={info.executedCost != null? `$ ${moneyFormat(info.executedCost)}`:0}/>
-                    <LabelValue title={'Valor facturado:'} value={info.invoicedValue != null? `$ ${moneyFormat(info.invoicedValue)}`:0}/>
-                    <LabelValue title={'Utilidad Actual:'} value={`${((info.budgetIncome/info.budgetCost)*100).toFixed(1)}%`}/>
+                    <LabelValue title={'Ingreso pres:'} value={info.budgetIncome != null? `$ ${moneyFormat(parseInt(info.budgetIncome))}`:0}/>
+                    <LabelValue title={'Costo pres:'} value={info.budgetCost != null? `$ ${moneyFormat(parseInt(info.budgetCost))}`:0}/>
+                    <LabelValue title={'Costo ejecutado:'} value={info.executedCost != null? `$ ${moneyFormat(parseInt(info.executedCost))}`:0}/>
+                    <LabelValue title={'Valor facturado:'} value={info.invoicedValue != null? `$ ${moneyFormat(parseInt(info.invoicedValue))}`:0}/>
+                    <LabelValue title={'Utilidad Actual:'} value={`${((parseInt(info.budgetIncome)/parseInt(info.budgetCost))*100).toFixed(1)}%`}/>
                     <LabelValue title={'Estado:'} value={info.status}/>
                 </div>
             )}{visibleInfo && (
@@ -94,7 +103,7 @@ export function OpCard({data}){
                                 popInAlert(<FormNewOc info={info} reloadFun={reloadInfo}/>)
                             }} className="newOcCD"><i className="fa-solid fa-plus"/> Añadir nueva Orden de Cliente</div>
                                 {attachedDocs.length >0 && attachedDocs.map((element,index)=>{
-                                    if(element.type == 'OC'){
+                                    if(element.document_type == 'Client Order'){
                                         return(
                                             <OcSimpleCard info={element} key={index}/>
                                         )
@@ -109,7 +118,7 @@ export function OpCard({data}){
                                 popInAlert(<SelectTpeNewDoc info={info} reloadFun={reloadInfo}/>)
                             }} className="newOcCD"><i className="fa-solid fa-plus"/> Añadir nuevo documento</div>
                             {attachedDocs.length>0 && attachedDocs.map((element,index)=>{
-                                if(element.type != 'OC'){
+                                if(element.document_type != 'Client Order'){
                                     return(
                                         <DocsSimpleCard info={element} key={index}/>
                                     )

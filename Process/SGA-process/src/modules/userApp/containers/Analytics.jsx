@@ -38,8 +38,8 @@ export function Analytics() {
                 <div className="Graph">
                     <LightChart 
                         title="Compras" 
-                        doc_type="DC" 
-                        type="DC" 
+                        doc_type="Purchase Document" 
+                        type="Purchase Document" 
                     />
                 </div>
                 <div className="Search">
@@ -51,37 +51,37 @@ export function Analytics() {
                                     title: "Ordenes de cliente (OC)",
                                     children: <i className="fa-solid fa-file-contract" />,
                                     action: handleNavigate,
-                                    path: "OCS",
+                                    path: "Client_Order",
                                 },
                                 {
                                     title: "Ordenes de producción (OP)",
                                     children: <i className="fa-solid fa-file-lines" />,
                                     action: handleNavigate,
-                                    path: "OPS",
+                                    path: "Production_Order",
                                 },
                                 {
                                     title: "Documentos de compra (DC)",
                                     children: <i className="fa-solid fa-file-lines" />,
                                     action: handleNavigate,
-                                    path: "DCS",
+                                    path: "Purchase_Document",
                                 },
                                 {
                                     title: "Consumos de inventario (CI)",
                                     children: <i className="fa-solid fa-file-lines" />,
                                     action: handleNavigate,
-                                    path: "CIS",
+                                    path: "Inventory_Consume",
                                 },
                                 {
                                     title: "Facturas de venta (FV)",
                                     children: <i className="fa-solid fa-file-invoice" />,
                                     action: handleNavigate,
-                                    path: "FVS",
+                                    path: "Sell_Invoice",
                                 },
                                 {
                                     title: "Transacciones (TR)",
                                     children: <i className="fa-solid fa-magnifying-glass-chart" />,
                                     action: handleNavigate,
-                                    path: "TRS",
+                                    path: "Transaction",
                                 },
                                 {
                                     title: "Informes adicionales",

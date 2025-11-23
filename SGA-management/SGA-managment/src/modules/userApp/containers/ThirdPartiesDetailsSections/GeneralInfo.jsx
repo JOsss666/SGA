@@ -16,10 +16,10 @@ export function GeneralInfo({info}){
     const [lastNames,setLastNames] = useState(info.lastNames != undefined? info.lastNames:'');
     const [indentification_type,setIndentification_type] = useState(info.indentification_type != undefined? info.indentification_type:'');
     const [indentification_number,setIndentification_number] = useState(info.indentification_number != undefined? info.indentification_number:'');
-    const [email,setEmail] = useState(info.email != undefined? info.email:'');
+    const [mail,setmail] = useState(info.mail != undefined? info.mail:'');
     const [phone,setPhone] = useState(info.phone != undefined? info.phone:'');
     const [country,setCountry] = useState(info.country != undefined? info.country:'');
-    const [city,setCity] = useState(info.country != undefined? info.country:'');
+    const [city,setCity] = useState(info.city != undefined? info.city:'');
     const [address,setAddress] = useState(info.address != undefined ? info.address:'');
     const [type,setType] = useState(info.type != undefined? info.type:'');
 
@@ -30,7 +30,7 @@ export function GeneralInfo({info}){
         lastNames,
         indentification_type,
         indentification_number,
-        email,
+        mail,
         phone,
         country,
         city,
@@ -52,7 +52,7 @@ export function GeneralInfo({info}){
                     <SelectOptions action={setIndentification_type} options={['CC','NIT','CE','PAS']} value={indentification_type}/>
                 </div>
                 <FormInput action={setIndentification_number} title={'Número de documento'} placeholder={'132...'} disabled={disabled} type={'number'} value={indentification_number}/>
-                <FormInput action={setEmail} title={'Correo electronico'} placeholder={'...@gmail.com'} disabled={disabled} type={'email'} value={email}/>
+                <FormInput action={setmail} title={'Correo electronico'} placeholder={'...@gmail.com'} disabled={disabled} type={'mail'} value={mail}/>
                 <FormInput action={setPhone} title={'Número telefonico'} placeholder={'numero telefonico'} disabled={disabled} value={phone}/>
                 <FormInput action={setCountry} title={'País'} placeholder={'Pais de origen o de registro'} disabled={disabled} value={country}/>
                 <FormInput action={setCity} title={'Ciudad'} placeholder={'Ciudad o departamento'} disabled={disabled} value={city}/>
