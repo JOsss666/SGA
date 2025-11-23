@@ -17,30 +17,40 @@ export function CreateDocument(){
     const {addNotification} = useNotifications();
     const {popInAlert} = useAlert();
     const [lastOp,setLastOp] = useState({});
+    
+    const loadLastOp = async()=>{
+        let res = await postInfo('/process/getOp',{company_id:appInfo.company_id});
+        console.log(res);
+        if(res[0]){
+            setLastOp(res[1][0]);
+        }
+    }
 
     const createOp = async()=>{
-        let res = await postInfo('/process/createOP',{company_id:appInfo.company_id,store_id:1,user_id:userInfo.user_id})
+        let res = await postInfo('/process/createOP',{
+            company_id:appInfo.company_id,
+            store_id:1,
+            thirdParty_id:null,
+            document_type:'Production Order',
+            status:'active',
+            subTotal:0,
+            total:0,
+            created_by:userInfo.user_id,
+            attached:''
+        })
         if(res){
             addNotification({
-                title:`OP#${res} creada`,
+                title:`OP#${res.ownSerial} creada`,
                 description:`Se ha iniciado la nueva orden de producción "OP${res}" exitosamente.`,
                 type:'aproved'
             })
+            loadLastOp();
         }else{
             addNotification({
                 title:`Error al crear OP`,
                 description:`No se pudo crear la nueva orden de producción intentelo de nuevo.`,
                 type:'error'
             })
-        }
-    }
-
-    const loadLastOp = async()=>{
-        let res = await postInfo('/process/getOp',{company_id:appInfo.company_id});
-        if(res[0]){
-            setLastOp(res[1][0]);
-        }else{
-            alert('No se pudo cargar la ultima OP')
         }
     }
 
@@ -72,7 +82,7 @@ export function CreateDocument(){
                 </div>
                 <div className="lastOpContainer">
                     <h5>Ultima orden de producción</h5>
-                    {lastOp.op_id != undefined && (
+                    {lastOp.ownSerial != undefined && (
                         <OpCard data={lastOp} />
                     )}
                 </div>

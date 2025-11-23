@@ -29,11 +29,13 @@ export function FormNewOperation({info}){
             company_id:appInfo.company_id,
             store_id:1,
             concept_id:info.concept_id,
-            doc_date,
+            doc_date:info.doc_date,
             transactionDetails,
             doc_type:info.doc_type,
+            thirdParty_id:info.thirdParty_id,
             doc_id:info.doc_id,
-            subtotal:info.value,
+            subTotal:info.subTotal,
+            costCenter_id:info.costCenter_id,
             total
     }
 
@@ -62,8 +64,6 @@ export function FormNewOperation({info}){
         console.log(res);
         if(res[0]){
             setTaxes(res[1])
-        }else{
-            setTaxes([])
         }
     }
 
@@ -73,8 +73,9 @@ export function FormNewOperation({info}){
         setDisabled(true);
         console.log('Creando nueva transacción',formInfo);
         let res = await postInfo('/createTransaction',formInfo);
-        if(res[0]){
-            setTransId(res[1])
+        console.log(res)
+        if(typeof(parseInt(res[0])) == 'number'){
+            setTransId(parseInt(res[0]))
             setDisabled(false);
         }
         setloadingCractionTransaction(true)
@@ -82,36 +83,37 @@ export function FormNewOperation({info}){
     }
 
     const pushDetailsTrans = ()=>{
-        const dicNatureDocs = {'DC':'DB','FV':'CR','FE':'CR','NC':'CR','ND':'DB'}
+        let newSubTtl = 0;
         let newTransDetails = [];
         console.log(info)
         console.log(taxes)
-        console.log(conceptInfo)
         newTransDetails.push({
                 account_id:conceptInfo.account_id,
                 account_type:appInfo.accountPlanType,
                 type:'operation',
-                subtotal:info.value,
-                total:info.value,
-                nature:dicNatureDocs[info.doc_type]
+                subtotal:info.total,
+                total:info.total,
+                nature:'DB'
         })
+        newSubTtl += info.total;
         taxes.forEach(element => {
                 newTransDetails.push({
-                account_id:element.account_id,
+                account_id:element.id,
                 account_type:appInfo.accountPlanType,
                 type:'tax',
-                subtotal:info.value,
-                total: info.value * Number(((element.rate/100)).toFixed(2)),
-                nature:element.nature
+                subtotal:info.total,
+                total: info.total * Number(((element.rate/100)).toFixed(2)),
+                nature:element.type
             })
+            newSubTtl += info.total * Number(((element.rate/100)).toFixed(2))
         });
-        let paymentMethod = info.paymentMethod;
+        let paymentMethod = info.paymentMethod != undefined? info.paymentMethod:{};
         newTransDetails.push({
             account_id:paymentMethod.account_id,
             account_type:appInfo.accountPlanType,
             type:'payment',
-            subtotal:info.value,
-            total:total,
+            subtotal:info.total,
+            total:newSubTtl,
             nature:paymentMethod.nature == 'D' || paymentMethod.nature == 'DB' ? 'DB':'CR'
         })
         console.log(newTransDetails);
@@ -160,9 +162,9 @@ export function FormNewOperation({info}){
 
     useEffect(()=>{
         if(taxes[0] != false){
-            let newTotal = info.value;
+            let newTotal = parseFloat(info.total);
             taxes.forEach(element => {
-                newTotal += info.value * Number((element.rate/100).toFixed(2));
+                newTotal += parseFloat(info.total) * Number((parseInt(element.rate)/100).toFixed(2));
             });
             pushDetailsTrans();
             setTotal(newTotal);
@@ -170,6 +172,7 @@ export function FormNewOperation({info}){
     },[taxes])
 
     useEffect(()=>{
+        console.log(formInfo)
         if(transactionDetails.length >0 && !loadingCractionTransaction){
             createTransaction();
         }
@@ -199,9 +202,9 @@ export function FormNewOperation({info}){
                         </section>
                         <section className="FormSec ">
                             <h4 className="secFormTtl">Información movimiento</h4>
-                            <LabelValue title={'Sub Total'} value={`$ ${moneyFormat(info.value)}`}/>
+                            <LabelValue title={'Sub Total'} value={`$ ${moneyFormat(parseInt(info.subTotal))}`}/>
                             {taxes[0] != false && taxes.map((element,index)=>(
-                                <LabelValue title={element.name} value={`$ ${moneyFormat((info.value * (element.rate/100).toFixed(2)))}`} key={index}/>
+                                <LabelValue title={element.name} value={`$ ${moneyFormat((parseFloat(info.total) * (parseInt(element.rate)/100).toFixed(2)))}`} key={index}/>
                             ))}
                         </section>
                         <section className="FormSec submitSec">

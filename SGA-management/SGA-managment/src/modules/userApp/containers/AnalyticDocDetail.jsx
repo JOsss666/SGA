@@ -14,12 +14,12 @@ import { media, mediana, moda, varianza, desviacionEstandar, CoefVari } from "..
 import { SelectOptions } from "../components/SelectOptions";
 
 const DOC_NAMES = {
-    OCS: "Ordenes de cliente (OC)",
-    OPS: "Ordenes de producción (OP)",
-    DCS: "Documentos de compra (DC)",
-    CIS: "Consumos de inventario (CI)",
-    FVS: "Facturas de venta (FV)",
-    TRS: "Transacciones (TR)",
+    'Client Order': "Ordenes de cliente (OC)",
+    'Production Order': "Ordenes de producción (OP)",
+    'Purchase Document': "Documentos de compra (DC)",
+    'Inventory Consume': "Consumos de inventario (CI)",
+    'Sell Invoice': "Facturas de venta (FV)",
+    'Transaction': "Transacciones (TR)",
 };
 
 export function AnalyticDocDetail() {
@@ -27,7 +27,7 @@ export function AnalyticDocDetail() {
     const [tableData, setTableData] = useState([]);
     const filterRoute = location.pathname.split('/analytics/');
     const pathSections = filterRoute[1] ? filterRoute[1].split('/') : [];
-    const docType = pathSections[0] || 'DEFAULT';
+    const docType = (pathSections[0]).replace('_',' ') || 'DEFAULT';
     const docName = DOC_NAMES[docType] || "Documento desconocido";
     const [procesData,setProcesData] = useState([]);
     const [dateStart, setDateStart] = useState("");

@@ -163,7 +163,7 @@ export function ThirdParties() {
                                         {filteredThirdParties.map((thirdParty) => (
                                             <ThirdPartyCard
                                                 key={thirdParty.id}
-                                                thirdParty={thirdParty}
+                                                info={thirdParty}
                                                 onCardClick={handleCardClick}
                                             />
                                         ))}

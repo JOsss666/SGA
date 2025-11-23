@@ -1,4 +1,4 @@
-import mysql from 'mysql2';
+import pkg from 'pg';
 import { v2 as cloudinary } from 'cloudinary'; // Importando `v2` directamente de cloudinary
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
@@ -16,36 +16,37 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-
 // Datos Conexion MYSQL
-const mySQL_host  = process.env.MYSQL_HOST;
-const mySQL_user = process.env.MYSQL_USER;
-const mySQL_password = process.env.MYSQL_PASSWORD;
-const database = process.env.MYSQL_DATABASE;
-const MYSQL_PORT = process.env.MYSQL_PORT;
+const PG_HOST  = process.env.MYSQL_HOST;
+const PG_USER = process.env.MYSQL_USER;
+const PG_PASSWORD = process.env.MYSQL_PASSWORD;
+const PG_DATABASE = process.env.MYSQL_DATABASE;
+const PG_PORT = process.env.MYSQL_PORT;
+const { Pool } = pkg;
 
-const pool = mysql.createPool({
-    host: mySQL_host,
-    user: mySQL_user,
-    password: mySQL_password,
-    database: database,
-    port: MYSQL_PORT,
-    waitForConnections: true,
-    connectionLimit: 10, 
-    queueLimit: 0
+const pool = new Pool({
+    host: PG_HOST,
+    user: PG_USER,
+    password: PG_PASSWORD,
+    database: PG_DATABASE,
+    port: PG_PORT,
+    max: 10,
+    idleTimeoutMillis: 30000,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
-    
-const poolPromise = pool.promise();
 
+    
 async function testDBConnection() {
-    console.log(mySQL_user)
+    console.log(PG_USER);
+
     try {
-        const connection = await poolPromise.getConnection();
-        console.log('✅ Conexión a MySQL establecida correctamente.');
-        connection.release(); // Muy importante liberar la conexión
+        const result = await pool.query('SELECT NOW() as now');
+        console.log('✅ Conexión a PostgreSQL establecida correctamente:', result.rows[0].now);
     } catch (err) {
-        console.error('❌ Error al conectar a MySQL:', err);
-        process.exit(1); // Opcional: termina el servidor si la DB falla
+        console.error('❌ Error al conectar a PostgreSQL:', err);
+        process.exit(1);
     }
 }
 
@@ -119,22 +120,29 @@ function encrypt(data) {
 
 const useDataBase = async (sentence, values, typeConsult) => {
     console.log(sentence, values);
-
     try {
-        const [results] = await poolPromise.query(sentence, values);
+        const result = await pool.query(sentence, values);
 
         switch (typeConsult) {
-            case 1:
-                return results.length > 0 ? [true, results] : [false, []];
-            case 2:
-                return true;
+
+            case 1: // SELECT
+                return result.rows.length > 0 
+                    ? [true, result.rows] 
+                    : [false, []];
+
+            case 2: // UPDATE o DELETE (sin RETURNING)
+                return [true, result.rowCount];
             case 3:
+                return result.rows[0];
             case 4:
-                return results.insertId;
-            case 5:
-                return [true, results[0].total];
-            case 6:
-                return [true,results.insertId]
+                return result.rows[0]?.id != undefined;
+
+            case 5: // SELECT con total
+                return [true, result.rows[0]?.total];
+
+            case 6: // INSERT RETURNING insertId personalizado
+                return [true, result.rows[0]?.id];
+
             default:
                 throw new Error("Tipo de consulta no válido");
         }
@@ -236,7 +244,7 @@ async function createPUC(rows){
     let errors = [];
     let sentence = `
         INSERT INTO
-            sga_ecosystem.account_templates_PUC
+            Ecosystem.account_templates_PUC
         (
             company_id,
             code,
@@ -274,7 +282,7 @@ async function createPUC(rows){
 async function createTax(rows){
     let sentence = `
         INSERT INTO
-            sga_ecosystem.taxes
+            Ecosystem.taxes
         (
             company_id,
             account_id,

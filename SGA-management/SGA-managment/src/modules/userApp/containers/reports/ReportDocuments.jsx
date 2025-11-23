@@ -27,11 +27,11 @@ export function ReportDocuments({ type }) {
 
     // Settings Report
     const documentTypes = {
-        OC: "Ordenes de Cliente",
-        OP: "Ordenes de Producción",
-        DC: "Documentos de Compra",
-        CI: "Consumos de inventario",
-        FV: "Facturas de venta",
+        'Client Order': "Ordenes de Cliente",
+        'Production Order': "Ordenes de Producción",
+        'Purchase Document': "Documentos de Compra",
+        'Inventory Consume': "Consumos de inventario",
+        'Sell Invoice': "Facturas de venta",
         TR: "Transacciónes",
         TR_details: "Detalles de la Transacción",
     };
@@ -99,11 +99,11 @@ export function ReportDocuments({ type }) {
     ];
 
     const columsDictionary = {
-        OP: columnsOp,
-        OC: columnsOc,
-        DC: columnsDc,
-        FV: columnsDc,
-        CI: columnsDc,
+        'Production Order': columnsOp,
+        'Client Order': columnsOc,
+        'Purchase Document': columnsDc,
+        'Sell Invoice': columnsDc,
+        'Inventory Consume': columnsDc,
         TR: columsTr,
         TR_details: columsTr_details,
     };
@@ -140,6 +140,10 @@ export function ReportDocuments({ type }) {
     useEffect(() => {
         GetDocuments();
     }, []);
+
+    useEffect(()=>{
+        console.log(info)
+    },[info])
 
     return (
         <div className="ReportDocument">

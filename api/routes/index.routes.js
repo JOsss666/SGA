@@ -38,8 +38,6 @@ router.post('/getUserInfo',controller.getUserInfo);
 
 router.post('/getUsers',controller.getUsers);
 
-router.post('/getCategories',controller.getCategories);
-
 router.post('/getSuppliers',controller.getThirdParties);
 
 router.post('/getThirdParties',controller.getThirdParties);
@@ -87,6 +85,8 @@ router.post('/getDocAnalyticDocNumber', controller.getDocAnalyticDocNumber);
 router.post('/getDocAnalyticDocNumberTable', controller.getDocAnalyticDocNumberTable);
 
 // SGA - Inventory
+
+router.post('/inventory/getCategories',inventoryController.getCategories);
 
 router.post('/inventory/getSubCategories',inventoryController.getSubCategories);
 

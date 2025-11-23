@@ -804,6 +804,26 @@ inventoryController.getRotation = (req,res)=>{
     })
 }
 
+inventoryController.getCategories = (req,res)=>{
+    let data = ''
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `SELECT * FROM Inventory.categories WHERE company_id = $1 ;`
+        let consulta = await useDataBase(sentence,[info],1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+[true,[{}]]
+
 export default inventoryController;
 
 

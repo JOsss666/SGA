@@ -1,8 +1,8 @@
 import './ThirdPartyCard.css';
 
-export function ThirdPartyCard({ thirdParty, onCardClick }) {
+export function ThirdPartyCard({ info, onCardClick }) {
     const handleClick = () => {
-        onCardClick(thirdParty.id);
+        onCardClick(info.id);
     };
 
     const handleButtonClick = (e, action) => {
@@ -10,17 +10,6 @@ export function ThirdPartyCard({ thirdParty, onCardClick }) {
         console.log(`${action} clicked for:`, thirdParty.id);
     };
 
-    const getDisplayName = () => {
-        return thirdParty.name || thirdParty.legal_name || thirdParty.trade_name || 'Nombre no disponible';
-    };
-
-    const getDisplayEmail = () => {
-        return thirdParty.email || thirdParty.company_mail || 'Email no disponible';
-    };
-
-    const getDisplayPhone = () => {
-        return thirdParty.phone || thirdParty.contact_phone || 'Teléfono no disponible';
-    };
 
     return (
         <div className="ThirdpartyCard" onClick={handleClick}>
@@ -28,7 +17,7 @@ export function ThirdPartyCard({ thirdParty, onCardClick }) {
                 <div className="CardHeader">
                     <div className="NameSection">
                         <i className="far fa-user"></i>
-                        <span className="ThirdpartyName">{getDisplayName()}</span>
+                        <span className="ThirdpartyName">{info.names}</span>
                     </div>
                     <div className="CardActions">
                         <button type="Button" className="btn-edit" onClick={(e) => handleButtonClick(e, 'edit')}>
@@ -43,11 +32,11 @@ export function ThirdPartyCard({ thirdParty, onCardClick }) {
                 <div className="ContactInfo">
                     <div className="ContactItem">
                         <i className="far fa-envelope"></i>
-                        <span className="ContactText">{getDisplayEmail()}</span>
+                        <span className="ContactText">{info.mail}</span>
                     </div>
                     <div className="ContactItem">
                         <i className="fa-solid fa-phone"></i>
-                        <span className="ContactText">{getDisplayPhone()}</span>
+                        <span className="ContactText">{info.phone}</span>
                     </div>
                 </div>
             </div>

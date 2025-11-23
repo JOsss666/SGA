@@ -25,7 +25,6 @@ export function ConceptsPlan(){
     const [searchValTax,setSearchValTax] = useState('');
     const searchValConLowerCase = searchValCon.toLowerCase();
     const searchValTaxLowerCase = searchValTax.toLowerCase();
-    const [visibleFormConc,setVisibleFormConc] = useState(false);
 
     const getConcepts = async()=>{
         let res = await postInfo('/getConcepts',{
@@ -55,8 +54,6 @@ export function ConceptsPlan(){
                 })
             });
             setTaxes(C);
-        }else{
-            setTaxes('Error')
         }
     }
 

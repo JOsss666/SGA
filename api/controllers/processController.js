@@ -2,6 +2,27 @@
 import { useDataBase } from "../app.js";
 const processController = {};
 
+processController.createDocument = async(info,ownSerial)=>{
+        console.log(info)
+        let sentence = `
+            INSERT INTO "Ecosystem".documents(
+                company_id, store_id, "thirdParty_id", document_type, status, "subTotal", total, created_by, description, attached)
+            VALUES
+                ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id , ${ownSerial? '"ownSerial"':''} ;`
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.store_id,
+            info.thirdParty_id,
+            info.document_type,
+            info.status,
+            info.subTotal != undefined? info.subTotal:0,
+            info.total != undefined? info.total:0,
+            info.created_by,
+            info.description,
+            info.attached != undefined? info.attached:''
+        ],3);
+        return(consulta);
+}
 
 processController.createOp = (req,res)=>{
     let data = '';
@@ -10,10 +31,25 @@ processController.createOp = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `INSERT INTO sga_process.OPS (company_id,store_id,user_id) VALUES(?,?,?);`
-        let consulta = await useDataBase(sentence,[info.company_id,info.store_id,info.user_id],4);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
+        let docN = await processController.createDocument(info,true);
+        console.log('---> ',docN)
+        if(typeof(parseInt(docN.id)) == 'number'){
+            let sentence = `
+                INSERT INTO "Ecosystem".process_details(
+	                company_id, document_id)
+                VALUES
+                    ($1,$2) RETURNING id;
+            `;
+            let consulta = await useDataBase(sentence,[
+                info.company_id,
+                parseInt(docN.id)
+            ],3)
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(consulta));
+        }else{
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(false));
+        }
     })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
@@ -28,30 +64,63 @@ processController.getOp = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        let values = []
+        let whereClauses = []
+        whereClauses.push(`d.company_id = $1 AND d.document_type = 'Production Order'`)
+        values.push(info.company_id);
+
+        
+        if(info.id != null){
+            whereClauses.push(`d.id = $${values.length+1} `);
+            values.push(info.id);
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
         let sentence = `
             SELECT
-                sga_process.OPS.*,
-                sga_ecosystem.users.user_name,
-                sga_ecosystem.thirdParties.names
+                d.id AS id,
+                d.company_id,
+                d.store_id,
+                d."thirdParty_id",
+                d.document_type,
+                d."ownSerial",
+                d.status,
+                d."subTotal",
+                d.total,
+                d.created_by,
+                d.created_at,
+                d.updated_at,
+                d.description,
+                d.attached,
+
+                p.id AS process_id,
+                p."budgetIncome",
+                p."budgetCost",
+                p."executedCost",
+                p."invoicedValue",
+                p.delivery_date,
+
+                u.user_name,
+
+                t.names AS thirdparty_names
             FROM
-                sga_process.OPS
+                "Ecosystem".documents d
             LEFT JOIN
-                sga_ecosystem.users
-            ON
-                sga_process.OPS.user_id = sga_ecosystem.users.user_id
+                "Ecosystem".process_details p
+                ON d.id = p.document_id
             LEFT JOIN
-                sga_ecosystem.thirdParties
-            ON
-                sga_process.OPS.thirdParty_id = sga_ecosystem.thirdParties.id
-            WHERE
-                sga_process.OPS.company_id = ${info.company_id}
-                ${info.user_id != null? ` AND sga_process.OPS.user_id = ${info.user_id} `:''}
-                ${info.op_id != null? ` AND sga_process.OPS.op_id = ${info.op_id} `:''}
-                ${info.limint != null? ` LIMIT ${info.limint}`:''}
-                ORDER BY sga_process.OPS.op_id DESC
-            ;
-        `
-        let consulta = await useDataBase(sentence,[],1);
+                "Ecosystem".thirdParties t
+                ON d."thirdParty_id" = t.id
+            LEFT JOIN
+                "Ecosystem".users u
+                ON d.created_by = u.user_id
+            ${whereQuery}
+            ORDER BY d.id DESC
+            ${ info.limint ? `LIMIT ${info.limint}` : "" }; `
+        let consulta = await useDataBase(sentence,[info.company_id],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -68,40 +137,95 @@ processController.getDocuments = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        console.log(info.type)
+        const values = [];
+        const whereClauses = []
+        const variableColumns = []
+        const variableJoins = []
+
+        if(info.type == 'Client Order' || info.type == 'Production Order'){
+            variableColumns.push('"Ecosystem".process_details."budgetIncome"')
+            variableColumns.push('"Ecosystem".process_details."budgetCost"')
+            variableColumns.push('"Ecosystem".process_details."executedCost"')
+            variableColumns.push('"Ecosystem".process_details."invoicedValue"')
+            variableColumns.push('"Ecosystem".process_details.delivery_date')
+            variableJoins.push(`
+                LEFT JOIN
+                    "Ecosystem".process_details
+                ON
+                    "Ecosystem".documents.id = "Ecosystem".process_details.document_id
+                
+            `);
+        }
+
+        whereClauses.push(`"Ecosystem".documents.company_id = $${values.length +1}`)
+        values.push(info.company_id);
+
+        if(info.type != null){
+            whereClauses.push(`"Ecosystem".documents.document_type = $${values.length +1}`)
+            values.push(info.type)
+        }
+
+        if(info.user_id != null){
+            whereClauses.push(`"Ecosystem".documents.user_id = $${values.length +1}`)
+            values.push(info.user_id);
+        }
+
+        if(info.id != null){
+            whereClauses.push(`"Ecosystem".documents.id = $${values.length +1}`)
+            values.push(info.id);
+        }
+
+        if(info.status != null){
+            whereClauses.push(`"Ecosystem".documents.status = $${values.length +1}`)
+            values.push(info.status);
+        }
+
+        if(info.initialDate!= null && info.finalDate != null){
+            whereClauses.push(`DATE("Ecosystem".documents.created_at) BETWEEN '${info.initialDate}' AND '${info.finalDate}`)
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+        
+        const variableColumsQuery = variableColumns.length>0
+        ? `,\n ${variableColumns.join(', \n')}`
+        :'';
+
         let sentence = `
             SELECT
                 '${info.type}' AS docType,
-                sga_process.${info.type}S.*,
-                sga_ecosystem.users.user_name,
-                sga_ecosystem.thirdParties.names,
-                sga_ecosystem.stores.name AS store_name
+                "Ecosystem".documents.*,
+                "Ecosystem".users.user_name,
+                "Ecosystem".thirdParties.names,
+                "Ecosystem".stores.name AS store_name,
+                "Ecosystem".documents_group.main_doc_id AS op_id
+                ${variableColumsQuery}
             FROM
-                sga_process.${info.type}S
+                "Ecosystem".documents
             LEFT JOIN
-                sga_ecosystem.users
+                "Ecosystem".documents_group
             ON
-                sga_process.${info.type}S.user_id = sga_ecosystem.users.user_id
+                "Ecosystem".documents.id = "Ecosystem".documents_group.doc_id
             LEFT JOIN
-                sga_ecosystem.thirdParties
+                "Ecosystem".users
             ON
-                sga_process.${info.type}S.thirdParty_id = sga_ecosystem.thirdParties.id
+                "Ecosystem".documents.created_by = "Ecosystem".users.user_id
             LEFT JOIN
-                sga_ecosystem.stores
+                "Ecosystem".thirdParties
             ON
-                sga_process.${info.type}S.store_id = sga_ecosystem.stores.id
-            WHERE
-                sga_process.${info.type}S.company_id = ${info.company_id}
-                ${info.user_id != null? ` AND sga_process.${info.type}S.user_id = ${info.user_id} `:''}
-                ${info.id != null? ` AND sga_process.${info.type}S.id = ${info.id} `:''}
-                ${info.op_id != null? ` AND sga_process.${info.type}S.id = ${info.op_id} `:''}
+                "Ecosystem".documents."thirdParty_id" = "Ecosystem".thirdParties.id
+            LEFT JOIN
+                "Ecosystem".stores
+            ON
+                "Ecosystem".documents.store_id = "Ecosystem".stores.id
+            ${variableJoins}
+            ${whereQuery}
+            ORDER BY "Ecosystem".documents."ownSerial" DESC
                 ${info.limint != null? ` LIMIT ${info.limint}`:''}
-                ${info.status != null? `AND sga_process.${info.type}S.status '${info.stauts}'`:''}
-                ${(info.initialDate!= null && info.finalDate != null)? ` AND DATE(sga_process.${info.type}S.created_at) BETWEEN '${info.initialDate}' AND '${info.finalDate} '   `:''}
-                ORDER BY sga_process.${info.type}S.op_id DESC
             ;
         `;
-        let consulta = await useDataBase(sentence,[],1);
+        let consulta = await useDataBase(sentence,values,1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -119,76 +243,21 @@ processController.getOpAttached = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        console.log(info)
         let sentence = `
             SELECT
-                sga_process.OCS.user_id,
-                sga_process.OCS.id,
-                sga_process.OCS.status,
-                sga_process.OCS.description,
-                sga_process.OCS.created_at,
-                sga_ecosystem.thirdParties.names,
-                'OC' as type
+                "Ecosystem".documents_group.id,
+                "Ecosystem".documents.*
             FROM
-                sga_process.OCS
+                "Ecosystem".documents_group
             LEFT JOIN
-                sga_ecosystem.thirdParties
+                "Ecosystem".documents
             ON
-                sga_process.OCS.thirdParty_id = sga_ecosystem.thirdParties.id
+                "Ecosystem".documents_group.doc_id = "Ecosystem".documents.id
             WHERE
-                sga_process.OCS.op_id = ${info.op_id}
-            UNION ALL
-            SELECT
-                sga_process.DCS.user_id,
-                sga_process.DCS.id,
-                sga_process.DCS.status,
-                sga_process.DCS.description,
-                sga_process.DCS.created_at,
-                sga_ecosystem.thirdParties.names,
-                'DC' as type
-            FROM
-                sga_process.DCS
-            LEFT JOIN
-                sga_ecosystem.thirdParties
-            ON
-                sga_process.DCS.thirdParty_id = sga_ecosystem.thirdParties.id
-            WHERE
-                sga_process.DCS.op_id = ${info.op_id}
-            UNION ALL
-            SELECT
-                sga_process.FVS.user_id,
-                sga_process.FVS.id,
-                sga_process.FVS.status,
-                sga_process.FVS.description,
-                sga_process.FVS.created_at,
-                sga_ecosystem.thirdParties.names,
-                'FV' as type
-            FROM
-                sga_process.FVS
-            LEFT JOIN
-                sga_ecosystem.thirdParties
-            ON
-                sga_process.FVS.thirdParty_id = sga_ecosystem.thirdParties.id
-            WHERE
-                sga_process.FVS.op_id = ${info.op_id}
-            UNION ALL
-            SELECT
-                sga_process.CIS.user_id,
-                sga_process.CIS.id,
-                sga_process.CIS.status,
-                sga_process.CIS.description,
-                sga_process.CIS.created_at,
-                sga_ecosystem.thirdParties.names,
-                'CI' as type
-            FROM
-                sga_process.CIS
-            LEFT JOIN
-                sga_ecosystem.thirdParties
-            ON
-                sga_process.CIS.thirdParty_id = sga_ecosystem.thirdParties.id
-            WHERE
-                sga_process.CIS.op_id = ${info.op_id}
+                "Ecosystem".documents_group.main_doc_id = $1 ;
         `
-        let consulta = await useDataBase(sentence,[],1);
+        let consulta = await useDataBase(sentence,[info.id],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -205,45 +274,47 @@ processController.createOc = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        console.log(info);
+        let docN = await processController.createDocument(info,true);
+        let document_id = parseInt(docN.id);
         let sentence = `
-        INSERT INTO
-            sga_process.OCS
-        (   
-            company_id,
-            store_id,
-            user_id,
-            op_id,
-            thirdParty_id,
-            description,
-            budgetIncome,
-            budgetCost
-        )
-            VALUES(?,?,?,?,?,?,?,?);
+        INSERT INTO "Ecosystem".process_details(
+            company_id, document_id, "budgetIncome", "budgetCost", "executedCost", "invoicedValue", delivery_date)
+        VALUES ($1, $2, $3, $4, $5, $6, $7);
         `
         let consulta = await useDataBase(sentence,[
-            info.company_id,
-            info.store_id,
-            info.user_id,
-            info.op_id,
-            info.thirdParty_id,
-            info.description,
+            parseInt(info.company_id),
+            document_id,
             info.budgetIncome,
-            info.budgetCost
-        ],4)
-        if(typeof consulta === "number"){
+            info.budgetCost,
+            0,
+            0,
+            info.delivery_date != undefined? info.delivery_date:''
+        ],2)
+        if(consulta){
+            let posSen1 = `
+                INSERT INTO "Ecosystem".documents_group(
+                    main_doc_id, doc_id)        
+                VALUES ($1, $2);
+            `
+            let postCOnsul1 = await useDataBase(posSen1,[
+                parseInt(info.op_id),
+                document_id
+            ],2);
             let sentence = `
             UPDATE
-                sga_process.OPS
+                "Ecosystem".process_details
             SET
-                sga_process.OPS.thirdParty_id = ${info.thirdParty_id},
-                sga_process.OPS.budgetIncome = sga_process.OPS.budgetIncome + ${info.budgetIncome},
-                sga_process.OPS.budgetCost = sga_process.OPS.budgetCost +  ${info.budgetCost}
+                "budgetIncome" = "budgetIncome" + $1,
+                "budgetCost" = "budgetCost" + $2
             WHERE
-                sga_process.OPS.op_id = ${info.op_id} ; 
+                document_id = $3 ; 
             `
-            let postConsul = await useDataBase(sentence,[],2);
-            if(postConsul){
+            let postConsul = await useDataBase(sentence,[
+                info.budgetIncome,
+                info.budgetCost,
+                parseInt(info.op_id)
+            ],2);
+            if(postCOnsul1 && postConsul){
                 res.writeHead(200,{'Content-Type':'text/plain'})
                 res.end(JSON.stringify(consulta));
             }else{
@@ -270,47 +341,37 @@ processController.createDC = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `
-        INSERT INTO
-            sga_process.DCS
-        (   
-            company_id,
-            store_id,
-            user_id,
-            op_id,
-            thirdParty_id,
-            description,
-            value,
-            status
-        )
-            VALUES(?,?,?,?,?,?,?,?);
-        `
-        let consulta = await useDataBase(sentence,[
-            info.company_id,
-            info.store_id,
-            info.user_id,
-            info.op_id,
-            info.thirdParty_id,
-            info.description,
-            info.value,
-            'draft'
-        ],4);
-        if(typeof consulta === "number"){
-            let sentence = `
-            UPDATE
-                sga_process.OPS
-            SET
-                sga_process.OPS.executedCost =  sga_process.OPS.executedCost + ${info.value}
-            WHERE
-                sga_process.OPS.op_id = ${info.op_id};
+        let docN = await processController.createDocument(info,true);
+        let document_id = parseInt(docN.id);
+        console.log('Doc de compra creado: ',document_id)
+        if(typeof document_id === "number"){
+            let posSen1 = `
+                INSERT INTO "Ecosystem".documents_group(
+                    main_doc_id, doc_id)        
+                VALUES ($1, $2);
             `
-            let postConsul = await useDataBase(sentence,[],2);
-            if(postConsul){
+            let postCOnsul1 = await useDataBase(posSen1,[
+                parseInt(info.op_id),
+                document_id
+            ],2);
+            let sentence = `
+                UPDATE
+                    "Ecosystem".process_details
+                SET
+                    "executedCost" = "executedCost" + $1
+                WHERE
+                    document_id = $2 ; 
+                `
+            let postConsul = await useDataBase(sentence,[
+                info.total,
+                parseInt(info.op_id)
+            ],2);
+            if(postCOnsul1 && postConsul){
                 res.writeHead(200,{'Content-Type':'text/plain'})
-                res.end(JSON.stringify(consulta));
+                res.end(JSON.stringify(document_id));
             }else{
                 res.writeHead(200,{'Content-Type':'text/plain'})
-                res.end(JSON.stringify([false,['Error actualizando costo ejecutado']]));
+                res.end(JSON.stringify([false,['Error actualizando totales']]));
             }
         }else{
             res.writeHead(200,{'Content-Type':'text/plain'})
@@ -330,45 +391,37 @@ processController.createFV = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `
-        INSERT INTO
-            sga_process.FVS
-        (   
-            company_id,
-            store_id,
-            user_id,
-            op_id,
-            thirdParty_id,
-            description,
-            value
-        )
-            VALUES(?,?,?,?,?,?,?);
-        `
-        let consulta = await useDataBase(sentence,[
-            info.company_id,
-            info.store_id,
-            info.user_id,
-            info.op_id,
-            info.thirdParty_id,
-            info.description,
-            info.value
-        ],4);
-        if(typeof consulta === "number"){
-            let sentence = `
-            UPDATE
-                sga_process.OPS
-            SET
-                sga_process.OPS.invoicedValue =  sga_process.OPS.invoicedValue + ${info.value}
-            WHERE
-                sga_process.OPS.op_id = ${info.op_id};
+        let docN = await processController.createDocument(info,true);
+        let document_id = parseInt(docN.id);
+        console.log('Doc de compra creado: ',document_id)
+        if(typeof document_id === "number"){
+            let posSen1 = `
+                INSERT INTO "Ecosystem".documents_group(
+                    main_doc_id, doc_id)        
+                VALUES ($1, $2);
             `
-            let postConsul = await useDataBase(sentence,[],2);
-            if(postConsul){
+            let postCOnsul1 = await useDataBase(posSen1,[
+                parseInt(info.op_id),
+                document_id
+            ],2);
+            let sentence = `
+                UPDATE
+                    "Ecosystem".process_details
+                SET
+                    "invoicedValue" = "invoicedValue" + $1
+                WHERE
+                    document_id = $2 ; 
+                `
+            let postConsul = await useDataBase(sentence,[
+                info.total,
+                parseInt(info.op_id)
+            ],2);
+            if(postCOnsul1 && postConsul){
                 res.writeHead(200,{'Content-Type':'text/plain'})
-                res.end(JSON.stringify(consulta));
+                res.end(JSON.stringify(document_id));
             }else{
                 res.writeHead(200,{'Content-Type':'text/plain'})
-                res.end(JSON.stringify([false,['Error actualizando costo ejecutado']]));
+                res.end(JSON.stringify([false,['Error actualizando totales']]));
             }
         }else{
             res.writeHead(200,{'Content-Type':'text/plain'})
