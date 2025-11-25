@@ -1,0 +1,52 @@
+
+.CardMyBussines {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding: 2vh;
+    width: 40vh;
+    height: 60vh;
+}
+
+.CardMyBussines .imageCardMyBussines{
+    width: 36vh;
+    height: 40vh;
+    object-fit: cover;
+    background-color: lightgray;
+}
+
+.CardMyBussines .infoCardMyBussines{
+    width: 36vh;
+    height: 20vh;
+    text-align: center;
+}
+
+.CardMyBussines .infoCardMyBussines .BoldTitle{
+    font-size: 4vh;
+    font-weight: 500;
+    margin-bottom: 1vh;
+}
+
+.CardMyBussines .infoCardMyBussines .DescriptionSpan{
+    font-size: 2vh;
+    font-weight: 700;
+    margin-bottom: 1vh;
+}
+
+.CardMyBussines .buttonCardMyBussines{
+    padding: 2vh;
+}
+
+.CardMyBussines .buttonCardMyBussines .FormButton{
+    background-color: #0071E3;
+    border-radius: 3vh;
+}
+
+.CardMyBussines .linkCardMyBussines{
+    text-align: center;
+}
+
+.CardMyBussines .linkCardMyBussines a{
+    text-decoration: none;
+    color: #0071E3;
+}

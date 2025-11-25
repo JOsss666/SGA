@@ -36,6 +36,7 @@ import { Services } from './Services';
 import { PathLocation } from '../components/PathLocation';
 import { ThirdPartyDetail } from './ThirdPartyDetail';
 import { ThirdParties } from './ThirdParties';
+import { MyBussines } from './MyBussines';
 
 export function UserApp(){
 
@@ -166,7 +167,7 @@ export function UserApp(){
                 <main className='bodyApp'>
                     <Routes>
                             <Route path='/' element={<HomeProcess/>} />
-                            <Route path='/myBussines/' element={<span>Mi empresa</span>}/>
+                            <Route path='/myBussines/' element={<MyBussines/>}/>
                             <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
                             <Route path='/modules/*' element={<Modules/>}/>
                             <Route path='/services' element={<Services/>}/>
