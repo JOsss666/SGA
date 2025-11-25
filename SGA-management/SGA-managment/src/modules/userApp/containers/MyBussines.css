@@ -1,0 +1,32 @@
+
+.MyBussines{
+    display: flex;
+    padding: 2vh;
+    height: 90vh;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.MyBussines .headMyBussines{
+    display: flex;
+    flex-direction: column;
+    font-weight: bold;
+    justify-content: center;
+    align-items: center;
+    gap: 1vh;
+    padding: 1vh 20vh;
+}
+
+.MyBussines .headMyBussines .Boltitle{
+    font-size: 7vh;
+    font-weight: 700;
+}
+
+.MyBussines .carouselMyBussines{
+    display: flex;
+    justify-content: space-around;
+    gap: 1vh;
+    height: 70vh;
+    padding: 2vh;
+}
+
