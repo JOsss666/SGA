@@ -3,12 +3,13 @@ import { BoldTitle } from './BoldTitle';
 import './CardMyBussines.css';
 import { DescriptionSpan } from './DescriptionSpan';
 import { FormButton } from './FormButton';
+import imageMyBussines from '../../../assets/imageCardMyBussines.png';
 
 export function CardMyBussines({info, onClick}) {
     return (
         <div className="CardMyBussines" onClick={onClick}>
             <div className="imageCardMyBussines">
-                <img src={""} alt="" />
+                <img src={imageMyBussines} alt="" />
             </div>
 
             <div className="infoCardMyBussines">
@@ -20,7 +21,7 @@ export function CardMyBussines({info, onClick}) {
                 <FormButton text={"Crear Nueva"}/>
             </div>
             <div className="linkCardMyBussines">
-                <a href="#">{'Ver todas >'}</a>
+                <FormButton text={"Ver todos >"}/>
             </div>
         </div>
     );
