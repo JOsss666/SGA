@@ -17,10 +17,11 @@
     padding: 1vh 20vh;
 }
 
-.MyBussines .headMyBussines .Boltitle{
-    font-size: 7vh;
-    font-weight: 700;
+.MyBussines .headMyBussines .BoldTitle{
+    font-size: 6vh;
+    font-weight: 600;
 }
+
 
 .MyBussines .carouselMyBussines{
     display: flex;

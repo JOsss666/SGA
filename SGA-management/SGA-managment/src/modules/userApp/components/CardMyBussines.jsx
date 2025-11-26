@@ -8,7 +8,7 @@ export function CardMyBussines({info, onClick}) {
     return (
         <div className="CardMyBussines" onClick={onClick}>
             <div className="imageCardMyBussines">
-                <img src={""} alt="" />
+                <img src={info.image} alt="" />
             </div>
 
             <div className="infoCardMyBussines">
@@ -20,7 +20,7 @@ export function CardMyBussines({info, onClick}) {
                 <FormButton text={"Crear Nueva"}/>
             </div>
             <div className="linkCardMyBussines">
-                <a href="#">{'Ver todas >'}</a>
+                <a href="#">Ver más <i class="fa-solid fa-arrow-right-long"></i></a>
             </div>
         </div>
     );
