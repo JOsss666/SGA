@@ -4,37 +4,42 @@
     flex-direction: column;
     gap: 1vh;
     padding: 2vh;
-    width: 40vh;
-    height: 60vh;
+    width: 20vw;
 }
 
 .CardMyBussines .imageCardMyBussines{
     width: 36vh;
-    height: 40vh;
+    height: 28vh;
     object-fit: cover;
+    margin: 0 auto;
+    margin-bottom: 2vh;
 }
 
 .CardMyBussines .imageCardMyBussines img{
-    width: -webkit-fill-available;
-    object-fit: cover;
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
 }
 
 .CardMyBussines .infoCardMyBussines{
     width: 36vh;
     height: 20vh;
     text-align: center;
+    width: 100%;
 }
 
 .CardMyBussines .infoCardMyBussines .BoldTitle{
     font-size: 3vh;
     font-weight: 500;
-    margin-bottom: 1vh;
+    margin-bottom: 2vh;
+    width: 100%;
 }
 
 .CardMyBussines .infoCardMyBussines .DescriptionSpan{
     font-size: 2vh;
-    font-weight: 700;
+    font-weight: 500;
     margin-bottom: 1vh;
+    padding: 0 2vh;
 }
 
 .CardMyBussines .buttonCardMyBussines{

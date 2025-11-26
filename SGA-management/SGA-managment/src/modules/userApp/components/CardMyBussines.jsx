@@ -9,7 +9,7 @@ export function CardMyBussines({info, onClick}) {
     return (
         <div className="CardMyBussines" onClick={onClick}>
             <div className="imageCardMyBussines">
-                <img src={imageMyBussines} alt="" />
+                <img src={info.image} alt="" />
             </div>
 
             <div className="infoCardMyBussines">
