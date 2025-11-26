@@ -3,6 +3,7 @@ import { BoldTitle } from './BoldTitle';
 import './CardMyBussines.css';
 import { DescriptionSpan } from './DescriptionSpan';
 import { FormButton } from './FormButton';
+import imageMyBussines from '../../../assets/imageCardMyBussines.png';
 
 export function CardMyBussines({info, onClick}) {
     return (
@@ -20,7 +21,7 @@ export function CardMyBussines({info, onClick}) {
                 <FormButton text={"Crear Nueva"}/>
             </div>
             <div className="linkCardMyBussines">
-                <a href="#">Ver más <i class="fa-solid fa-arrow-right-long"></i></a>
+                <FormButton text={"Ver todos >"}/>
             </div>
         </div>
     );
