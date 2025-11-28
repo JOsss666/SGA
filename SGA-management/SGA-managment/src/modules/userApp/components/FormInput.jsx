@@ -28,7 +28,7 @@ export function FormInput({action,title,placeholder,children,type,disabled,textA
                     }} ref={moneyFspan} className='moneFHolder'>$ {moneyFormat(JSON.parse(inRef.current!= undefined? inRef.current.value != ""?inRef.current.value:0:0))}</span>
                 )}
                 {!textArea && (
-                    <input required={required != undefined? required:false} value={value} min={min} max={max} ref={inRef} onChange={()=>{
+                    <input required={required != undefined? required:true} value={value} min={min} max={max} ref={inRef} onChange={()=>{
                         if(action != null){
                             action(inRef.current.value)
                         }

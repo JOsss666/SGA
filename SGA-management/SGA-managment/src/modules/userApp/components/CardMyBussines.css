@@ -23,7 +23,7 @@
 
 .CardMyBussines .infoCardMyBussines{
     width: 36vh;
-    height: 20vh;
+    height: 18vh;
     text-align: center;
     width: 100%;
 }
@@ -31,7 +31,7 @@
 .CardMyBussines .infoCardMyBussines .BoldTitle{
     font-size: 3vh;
     font-weight: 500;
-    margin-bottom: 2vh;
+    margin-bottom: 1.5vh;
     width: 100%;
 }
 
@@ -43,7 +43,8 @@
 }
 
 .CardMyBussines .buttonCardMyBussines{
-    padding: 2vh;
+    margin: 1vh auto;
+    width: 90%;
 }
 
 .CardMyBussines .buttonCardMyBussines .FormButton{
@@ -56,7 +57,8 @@
 }
 
 .CardMyBussines .linkCardMyBussines{
-    padding: 0 2vh;
+    margin: 0 auto;
+    width: 80%;
 }
 
 .CardMyBussines .linkCardMyBussines .FormButton{

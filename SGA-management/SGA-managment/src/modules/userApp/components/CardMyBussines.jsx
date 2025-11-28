@@ -21,7 +21,7 @@ export function CardMyBussines({info, onClick}) {
                 <FormButton text={"Crear Nueva"}/>
             </div>
             <div className="linkCardMyBussines">
-                <FormButton text={"Ver todos >"}/>
+                <FormButton text={"Ver todos "} children={<i className="fa-solid fa-arrow-right"/>}/>
             </div>
         </div>
     );

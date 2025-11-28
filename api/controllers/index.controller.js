@@ -211,6 +211,62 @@ controller.createAccountsPlan = (req,res)=>{
     })
 }
 
+controller.createCostCenter = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            INSERT INTO "Ecosystem"."costCenters"(
+                company_id,name,description,code,parent_id 
+            ) VALUES ($1,$2,$3,$4,$5);
+        `;
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.name,
+            info.description,
+            info.code,
+            info.parent_id
+        ],2);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+controller.createStore = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            INSERT INTO "Ecosystem".stores(
+                company_id, name, zone, city, address)
+            VALUES ($1, $2, $3, $4, $5);
+        `;
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.name,
+            info.zone,
+            info.city,
+            info.address
+        ],2);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 controller.logIn = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{

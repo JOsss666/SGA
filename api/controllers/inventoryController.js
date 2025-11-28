@@ -205,25 +205,6 @@ inventoryController.getPricesNameList = (req,res)=>{
     })
 }
 
-
-inventoryController.createStore = (req,res)=>{
-    let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `INSERT INTO sga_ecosystem.stores (company_id,name,zone,city,location) VALUES(?,?,?,?,?);`;
-        let consulta = await useDataBase(sentence,[info.company_id,info.store_name,info.store_zone,info.store_city,info.store_location],2);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
-
 inventoryController.getStores = (req,res)=>{
     let data = ''
     req.on('data',chunk=>{

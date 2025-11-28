@@ -52,6 +52,10 @@ router.post('/getCellars',inventoryController.getCellars);
 
 router.post('/createAccountPlan',controller.createAccountsPlan);
 
+router.post('/createCostCenter',controller.createCostCenter);
+
+router.post('/createStore',controller.createStore);
+
 router.post('/getAccountsPlan',controller.getAccountsPlan);
 
 router.post('/insertNewAccount',controller.insertNewAccount);
@@ -97,8 +101,6 @@ router.post('/inventory/getProducts',inventoryController.getProducts);
 router.post('/inventory/createProduct',inventoryController.createProduct);
 
 router.post('/inventory/getPricesNameList',inventoryController.getPricesNameList);
-
-router.post('/inventory/createStore',inventoryController.createStore);
 
 router.post('/inventory/getStores',inventoryController.getStores);
 
