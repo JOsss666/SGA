@@ -38,7 +38,7 @@ export function MyBussines(){
     ];
 
 
-    const n = cardsData.length;
+    const n = info.length;
     const trackRef = useRef(null);
 
     // índice dentro del array con clones (0 .. n + 2*VISIBLE - 1)
@@ -47,9 +47,9 @@ export function MyBussines(){
     const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
 
     // construimos el array con clones: [last-VISIBLE .. last] + originals + [first .. first+VISIBLE-1]
-    const prefix = cardsData.slice(-VISIBLE);
-    const suffix = cardsData.slice(0, VISIBLE);
-    const all = [...prefix, ...cardsData, ...suffix];
+    const prefix = info.slice(-VISIBLE);
+    const suffix = info.slice(0, VISIBLE);
+    const all = [...prefix, ...info, ...suffix];
 
     // cuando cambie index por wrap, ajustamos sin animación (jump)
     const handleTransitionEnd = () => {
@@ -128,7 +128,14 @@ export function MyBussines(){
                 <button className="carouselArrow right" onClick={handleNext} aria-label="Siguiente">
                     ›
                 </button>
-
+                {/*
+                    <div className='carouselMyBussines'>
+                        {info.map((element,index)=>(
+                            <CardMyBussines info={element} key={index} />
+                        ))}
+                    </div>
+                */}
+            </div>
         </div>
     </div>
     )
