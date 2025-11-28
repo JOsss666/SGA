@@ -4,8 +4,18 @@ import './CardMyBussines.css';
 import { DescriptionSpan } from './DescriptionSpan';
 import { FormButton } from './FormButton';
 import imageMyBussines from '../../../assets/imageCardMyBussines.png';
+import { Route, Routes } from 'react-router-dom';
+import { MyBussinesUnits } from '../containers/MyBussinesUnits';
+import { useNavigate } from 'react-router-dom';
 
 export function CardMyBussines({info, onClick}) {
+
+    const navigate = useNavigate();
+    const handleNavigate = ()=>{
+        navigate(`${location.pathname}/Units`);
+    }
+
+
     return (
         <div className="CardMyBussines" onClick={onClick}>
             <div className="imageCardMyBussines">
@@ -18,10 +28,12 @@ export function CardMyBussines({info, onClick}) {
             </div>
 
             <div className="buttonCardMyBussines">        
-                <FormButton text={"Crear Nueva"}/>
+                <FormButton text={"Crear Nueva"} onClick={() => handleNavigate(`Units`)}/>
             </div>
             <div className="linkCardMyBussines">
-                <FormButton text={"Ver todos >"}/>
+                <FormButton onClick={()=>{
+                    {/*popInAlert(<"Componente para  Formulario"/>)*/}
+                }} text={"Ver todos >"}/>
             </div>
         </div>
     );

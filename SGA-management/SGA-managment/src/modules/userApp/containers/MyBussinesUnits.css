@@ -1,0 +1,69 @@
+
+.MyBussinesUnits {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding: 2vh;
+    align-content: center;
+}
+
+
+.MyBussinesUnits .headMyBussinesUnits {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding: 0 2vh;
+}
+
+.MyBussinesUnits .headMyBussinesUnits .DescriptionSpan{
+    margin: 0;
+}
+
+.MyBussinesUnits .bodyMyBussinesUnits {
+    height: 73vh;
+    display: flex;
+    flex-direction: row;
+    gap: 2vh;
+}  
+
+.MyBussinesUnits .bodyMyBussinesUnits .StoresContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    width: 71vh;
+    padding: 2vh;
+}
+
+.MyBussinesUnits .bodyMyBussinesUnits .StoresContainer .FilterUnits{
+    display: flex;
+    flex-direction: row;
+    gap: 1vh;
+}
+.MyBussinesUnits .bodyMyBussinesUnits .StoresContainer .FilterUnits .SearchBar{
+    width: 32vh;
+}
+.MyBussinesUnits .bodyMyBussinesUnits .StoresContainer .FilterUnits .SelectOptions{
+    width: 16vh;
+}
+.MyBussinesUnits .bodyMyBussinesUnits .StoresContainer .FilterUnits .SelectOptions .contentOptions{
+    box-shadow: none;
+}
+.MyBussinesUnits .bodyMyBussinesUnits .StoresContainer .FilterUnits .FormButton{
+    width: 18vh;
+    box-shadow: none;
+}
+
+.MyBussinesUnits .bodyMyBussinesUnits .StoresContainer .GaleryUnists{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2vh;
+    width: 69vh;
+}
+
+.MyBussinesUnits .bodyMyBussinesUnits .maps{
+    display: flex;
+    flex-direction: row;
+    gap: 1vh;
+    width: 115vh;
+    padding: 2vh;
+}

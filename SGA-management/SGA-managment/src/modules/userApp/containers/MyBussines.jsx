@@ -3,6 +3,7 @@ import { BoldTitle } from '../components/BoldTitle';
 import { DescriptionSpan } from '../components/DescriptionSpan';
 import { CardMyBussines } from '../components/CardMyBussines';
 import {useAppInfo} from '../../../context/context'
+import { useRef, useState } from 'react';
 
 export function MyBussines(){
     const {appInfo} = useAppInfo();
@@ -28,18 +29,9 @@ export function MyBussines(){
     ]
     
     const VISIBLE = 4;
-    // datos reales (aquí los genero con el mismo info repetido para tu ejemplo)
-    const cardsData = [
-        { name: "Unidades de Negocio", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles." },
-        { name: "Centros de costo", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles." },
-        { name: "Clientes y Proveedores", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles." },
-        { name: "Personal", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles." },
-        { name: "Card 5", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles." },
-        { name: "Card 6", text: "Info 6" },
-    ];
 
 
-    const n = cardsData.length;
+    const n = info.length;
     const trackRef = useRef(null);
 
     // índice dentro del array con clones (0 .. n + 2*VISIBLE - 1)
@@ -48,9 +40,9 @@ export function MyBussines(){
     const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
 
     // construimos el array con clones: [last-VISIBLE .. last] + originals + [first .. first+VISIBLE-1]
-    const prefix = cardsData.slice(-VISIBLE);
-    const suffix = cardsData.slice(0, VISIBLE);
-    const all = [...prefix, ...cardsData, ...suffix];
+    const prefix = info.slice(-VISIBLE);
+    const suffix = info.slice(0, VISIBLE);
+    const all = [...prefix, ...info, ...suffix];
 
     // cuando cambie index por wrap, ajustamos sin animación (jump)
     const handleTransitionEnd = () => {
@@ -129,12 +121,14 @@ export function MyBussines(){
                 <button className="carouselArrow right" onClick={handleNext} aria-label="Siguiente">
                     ›
                 </button>
-            <div className='carouselMyBussines'>
-                {info.map((element,index)=>(
-                    <CardMyBussines info={element} key={index} />
-                ))}
+                {/*
+                    <div className='carouselMyBussines'>
+                        {info.map((element,index)=>(
+                            <CardMyBussines info={element} key={index} />
+                        ))}
+                    </div>
+                */}
             </div>
-            
         </div>
     )
 }
