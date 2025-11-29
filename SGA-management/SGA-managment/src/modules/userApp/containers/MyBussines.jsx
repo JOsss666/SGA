@@ -25,7 +25,8 @@ export function MyBussines(){
         { name: "Unidades de Negocio", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1763930815/3d-business-wallet-finance-illustration-free-png_vr9tvx.png',form:<FormNewStore/>},
         { name: "Centros de costo", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.",image:'https://res.cloudinary.com/djjxugmni/image/upload/v1763930815/3d-business-wallet-finance-illustration-free-png_vr9tvx.png',form:<FormNewCostCenter/>,path:'costCenters'},
         { name: "Clientes y Proveedores", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1763930685/ChatGPT_Image_23_nov_2025_15_41_45_xvrjtd.png', form:<FormNewThirdParties/>,path:'thirdParties'},
-        { name: "Personal", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1764082062/ChatGPT_Image_25_nov_2025_09_47_22_lmd5sy.png',form:<FormNewUser/>},
+        { name: "Listas de precios", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1764363272/ChatGPT_Image_28_nov_2025_15_54_16_tl5bv3.png',form:<FormNewUser/>},
+        { name: "Personal", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1764082062/ChatGPT_Image_25_nov_2025_09_47_22_lmd5sy.png',form:<FormNewUser/>}
     ];
 
 
@@ -101,7 +102,7 @@ export function MyBussines(){
                                 // posición local dentro de la vista (0..VISIBLE-1) si está visible
                                 const localPos = inViewport ? (i - index) : null;
                                 // las dos del centro en 4 visibles son las posiciones 1 y 2
-                                const isCenter = inViewport && (localPos === 1 || localPos === 2);
+                                const isCenter = inViewport && (localPos === 1);
 
                                 return (
                                 <div
