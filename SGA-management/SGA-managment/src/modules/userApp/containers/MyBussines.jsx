@@ -17,12 +17,12 @@ export function MyBussines(){
     const {popInAlert} = useAlert();
 
     const handleNavigate = (path)=>{
-        navigate(`SGA_management/${params.company_key}/${params.user_key}/myBussines/${path}`)
+        navigate(`/SGA_management/${params.company_key}/${params.user_key}/myBussines/${path}`)
     }
 
     const VISIBLE = 4;
-    const cardsData = [
-        { name: "Unidades de Negocio", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1763930815/3d-business-wallet-finance-illustration-free-png_vr9tvx.png',form:<FormNewStore/>},
+    const info = [
+        { name: "Unidades de Negocio", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1763930815/3d-business-wallet-finance-illustration-free-png_vr9tvx.png',form:<FormNewStore/>,path:'Units'},
         { name: "Centros de costo", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.",image:'https://res.cloudinary.com/djjxugmni/image/upload/v1763930815/3d-business-wallet-finance-illustration-free-png_vr9tvx.png',form:<FormNewCostCenter/>,path:'costCenters'},
         { name: "Clientes y Proveedores", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1763930685/ChatGPT_Image_23_nov_2025_15_41_45_xvrjtd.png', form:<FormNewThirdParties/>,path:'thirdParties'},
         { name: "Listas de precios", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1764363272/ChatGPT_Image_28_nov_2025_15_54_16_tl5bv3.png',form:<FormNewUser/>},
@@ -30,7 +30,7 @@ export function MyBussines(){
     ];
 
 
-    const n = cardsData.length;
+    const n = info.length;
     const trackRef = useRef(null);
 
     // índice dentro del array con clones (0 .. n + 2*VISIBLE - 1)
@@ -39,9 +39,9 @@ export function MyBussines(){
     const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
 
     // construimos el array con clones: [last-VISIBLE .. last] + originals + [first .. first+VISIBLE-1]
-    const prefix = cardsData.slice(-VISIBLE);
-    const suffix = cardsData.slice(0, VISIBLE);
-    const all = [...prefix, ...cardsData, ...suffix];
+    const prefix = info.slice(-VISIBLE);
+    const suffix = info.slice(0, VISIBLE);
+    const all = [...prefix, ...info, ...suffix];
 
     // cuando cambie index por wrap, ajustamos sin animación (jump)
     const handleTransitionEnd = () => {
@@ -113,7 +113,11 @@ export function MyBussines(){
                                         if(cardInfo.form != undefined){
                                             popInAlert(cardInfo.form)
                                         }
-                                    }}/>
+                                    }}
+                                    navigate={()=>{
+                                        handleNavigate(cardInfo.path)
+                                    }}
+                                    />
                                 </div>
                                 );
                             })
@@ -124,8 +128,7 @@ export function MyBussines(){
                 <button className="carouselArrow right" onClick={handleNext} aria-label="Siguiente">
                     ›
                 </button>
-
+            </div>
         </div>
-    </div>
     )
 }

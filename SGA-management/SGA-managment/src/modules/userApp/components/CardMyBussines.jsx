@@ -3,11 +3,11 @@ import { BoldTitle } from './BoldTitle';
 import './CardMyBussines.css';
 import { DescriptionSpan } from './DescriptionSpan';
 import { FormButton } from './FormButton';
-import imageMyBussines from '../../../assets/imageCardMyBussines.png';
 
-export function CardMyBussines({info, onClick}) {
+export function CardMyBussines({info, onClick, navigate}) {
+
     return (
-        <div className="CardMyBussines" onClick={onClick}>
+        <div className="CardMyBussines">
             <div className="imageCardMyBussines">
                 <img src={info.image} alt="" />
             </div>
@@ -18,10 +18,10 @@ export function CardMyBussines({info, onClick}) {
             </div>
 
             <div className="buttonCardMyBussines">        
-                <FormButton text={"Crear Nueva"}/>
+                <FormButton text={"Crear Nueva"} onClick={onClick}/>
             </div>
             <div className="linkCardMyBussines">
-                <FormButton text={"Ver todos "} children={<i className="fa-solid fa-arrow-right"/>}/>
+                <FormButton text={"Ver todos "} children={<i className="fa-solid fa-arrow-right"/>} onClick={navigate}/>
             </div>
         </div>
     );

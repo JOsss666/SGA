@@ -267,6 +267,47 @@ controller.createStore = (req,res)=>{
     })
 }
 
+controller.deleteStore = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            DELETE FROM "Ecosystem".stores WHERE company_id = $1 AND  id =$2 ;
+        `
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.store_id
+        ],2);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+controller.getStores = (req,res)=>{
+    let data = ''
+    req.on('data',chunk=>{
+        data += chunk; 
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `SELECT * FROM "Ecosystem".stores WHERE company_id = $1 ;`;
+        let consulta = await useDataBase(sentence,[info.company_id],1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 controller.logIn = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{

@@ -46,7 +46,7 @@ router.post('/createThirdParty',controller.createThirdParty);
 
 router.post('/getThirdPartyDetails',controller.getThirdPartyDetails);
 
-router.post('/getStores',inventoryController.getStores);
+router.post('/getStores',controller.getStores);
 
 router.post('/getCellars',inventoryController.getCellars);
 
@@ -55,6 +55,8 @@ router.post('/createAccountPlan',controller.createAccountsPlan);
 router.post('/createCostCenter',controller.createCostCenter);
 
 router.post('/createStore',controller.createStore);
+
+router.post('/deleteStore',controller.deleteStore);
 
 router.post('/getAccountsPlan',controller.getAccountsPlan);
 
@@ -101,8 +103,6 @@ router.post('/inventory/getProducts',inventoryController.getProducts);
 router.post('/inventory/createProduct',inventoryController.createProduct);
 
 router.post('/inventory/getPricesNameList',inventoryController.getPricesNameList);
-
-router.post('/inventory/getStores',inventoryController.getStores);
 
 router.post('/inventory/createCellar',inventoryController.createCellar);
 
