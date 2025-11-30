@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './UserApp.css'
-import {BigTitle} from './../components/BigTitle'
 import { SearchBar } from '../components/SearchBar';
 import { ButtonMenu } from '../components/ButtonMenu';
 import { UserCard } from '../components/UserCard';
@@ -11,12 +10,10 @@ import { ServiceSgaCard } from '../components/ServiceSgaCard';
 import { LoadingAppDataPage } from './LoadingAppDataPage';
 import { ServicesGrid } from './ServicesGrid';
 import { HomeProcess } from './HomeProcess';
-import { CreateDocument } from './CreateDocument';
 import { NotificationsApp } from './NotificationsApp';
 import { AlertsHolder } from './AlertsHolder';
 import { AcountsPlan } from './AcountsPlan';
 import { TutorialAccountsPlan } from './tutorials/TutorialAccountsPlan';
-import { SearchDocument } from './SearchDocument';
 import { Reports } from './Reports';
 import { DocumentPreview } from './Alerts/DocumentPreview';
 import { ConceptsPlan } from './ConceptsPlan';
@@ -24,8 +21,6 @@ import { ChatAi } from './ChatAi';
 import { SwitchColorMode } from '../components/SwitchColorMode';
 import { Analytics } from './Analytics'; 
 import { AnalyticDocDetail } from './AnalyticDocDetail';
-import { postInfo } from '../../../utils/functions';
-import { LoadingSpace } from './LoadingSpace';
 import { LogOut } from '../../Login/LogOut';
 import { AppIcon } from '../components/AppIcon';
 import { NotificationsMenuSpace } from './NotificationsMenuSpace';
@@ -38,6 +33,7 @@ import { ThirdPartyDetail } from './ThirdPartyDetail';
 import { ThirdParties } from './ThirdParties';
 import { MyBussines } from './MyBussines';
 import { MyBussinesUnits } from './MyBussinesUnits';
+import { Settings } from './Settings';
 
 export function UserApp(){
 
@@ -187,7 +183,7 @@ export function UserApp(){
                             <Route path='/calendar' element={<span>Calendario</span>} />
                             <Route path='/concepts' element={<ConceptsPlan/>} />
                             <Route path='/accounts' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
-                            <Route path='/settings' element={<span>settings</span>} />
+                            <Route path='/settings/*' element={<Settings/>} />
                             <Route path='/tutorials' element={<span>tutorials</span>} />
                             <Route path='/help' element={<span>help</span>} />
                             <Route path='/logOut' element={<LogOut/>} />
