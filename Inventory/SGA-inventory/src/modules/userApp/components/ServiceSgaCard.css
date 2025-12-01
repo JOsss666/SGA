@@ -1,0 +1,39 @@
+@import '../containers/UserApp.css';
+
+.ServiceSgaCard{
+    display: flex;
+    padding: .5vh;
+    border-radius: 1vh;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.ServiceSgaCard:hover{
+    background-color: var(--iconHover);
+}
+
+.ServiceSgaCard img{
+    height: 7vh;
+    width: 7vh;
+    object-fit: cover;
+    border-radius: .5vh;
+}
+
+.ServiceSgaCard .serviceInfo{
+    display: flex;
+    flex-direction: column;
+    margin: auto 2vh;
+}
+
+.ServiceSgaCard .serviceInfo h2{
+    font-size: clamp(3px,3vh,30px);
+    font-weight: 600;
+    margin-bottom: .25vh;
+    color: var(--mainText);
+}
+
+.ServiceSgaCard .serviceInfo span{
+    font-size: clamp(2px,2.2vh,22px);
+    font-weight: 500;
+    color: #777;
+}

@@ -1,0 +1,46 @@
+
+.ServiceCard{
+    padding: 2vh;
+    border-radius: 3vh;
+    background-color: var(--cardHover);
+    cursor: pointer;
+    transition: .3s ease-in-out;
+    display: flex;
+}
+
+.ServiceCard:hover{
+    transform: scale(1.02);
+}
+
+
+.ServiceCard strong{
+    margin: auto 1vh;
+    margin-bottom: 0;
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 700;
+    letter-spacing: -.025vh;
+    color:var(--mainText);
+}
+
+.SelectedServiceCard{
+    animation-name: selectedServiecCard;
+    animation-duration: 1s;
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+}
+
+.SelectedServiceCard strong{
+    display: none;
+}
+
+
+@keyframes selectedServiecCard {
+    0%{
+        transform: scale(1.0);
+    }
+
+
+    100%{
+        transform: scale(20);
+    }
+}

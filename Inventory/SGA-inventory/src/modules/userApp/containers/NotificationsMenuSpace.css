@@ -1,0 +1,46 @@
+
+.NotificationsMenuSpace{
+    position: absolute;
+    height: 90vh;
+    width: 25vw;
+    background-color: var(--menuAside);
+    top: 10vh;
+    right: 0;
+    padding: 1vh;
+    border-radius: .5vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -.4vh 2vh 2vh var(--inputsBorder);
+}
+
+.NotificationsMenuSpace .BoldTitle{
+    margin: 1vh 0;
+    margin-left: 2vh;
+}
+
+.NotificationsMenuSpace .notiResGrid{
+    display: flex;
+    flex-direction: column;
+    margin-top: 2vh;
+}
+
+.NotificationsMenuSpace .NotificationCard{
+    width: 25vw;
+    box-shadow: none;
+    outline: none;
+    margin: .5vh 0;
+}
+
+.visibleSpaceNoti{
+    animation-name: appearChatAi;
+    animation-duration: .5s;
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+}
+
+.hiddenSpaceNoti{
+    animation-name: desapearChatAi;
+    animation-duration: 1s;
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+}
