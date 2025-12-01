@@ -1,0 +1,187 @@
+
+/*  VARIABLES LIGHT AND DARKMODE */
+
+:root {
+    --bg: #ffffff;
+    --menuAside:#FAFAFA;
+    --lightGradient1: #EEF2FF;
+    --lightGradient2: #F7FAFF;
+    --lightGradient3: #F8FAFD;
+    --lightGradient4: #FEF2F2;
+    --text: #111111;
+    --mainText:#121212;
+    --sectionTitle:#1E1E1E;
+    --descriptionText:#838383;
+    --iconHover:#DFF2FE;
+    --inputsBg:#fff;
+    --inputsBorder:#ddd;
+    --translucidMenu:#fff9;
+    --cardHover:#fafafa;
+    --bgOpacity:#ffffff50;
+    --bgImage: url('https://i.pinimg.com/1200x/23/5f/8d/235f8df39cf98153029b9cc09495f390.jpg');
+}
+
+:root.dark {
+    --bg: #252525;
+    --menuAside:#18181B;
+    --lightGradient1: #0C0A09;
+    --lightGradient2: #121212;
+    --lightGradient3: #1E1E1E;
+    --lightGradient4: #252525;
+    --text: #e6eef6;
+    --mainText:#fff;
+    --sectionTitle:#E1E1E1;
+    --descriptionText:#bbb;
+    --iconHover:#303030;
+    --inputsBg:#303030;
+    --inputsBorder:#5a5a5a;
+    --translucidMenu:#20202099;
+    --cardHover:#444;
+    --bgOpacity:#00000050;
+    --bgImage: url('https://i.pinimg.com/1200x/80/d1/bd/80d1bd8f8c9777a8ff1a8b4ed534418e.jpg');
+}
+
+.UserApp{
+    height: 100%;
+    width: 100%;
+    position: relative;
+    display:flex;
+    background-color: var(--menuAside);
+    transition: .3s;
+}
+
+.UserApp .headApp{
+    position: fixed;
+    z-index: 30;
+    width: 100%;
+    height: 10vh;
+    background-color: var(--menuAside);
+    display: flex;
+    padding: 0 2vh;
+    transition: .3s;
+}
+
+.UserApp .headApp .ServicesGrid{
+    position: absolute;
+    top: 11vh;
+    right: 15vw;
+}
+
+.UserApp .headApp .UserCard{
+    margin: auto 2vh;
+}
+
+.UserApp .headApp .BigTitle{
+    margin: auto 2vh;
+    width: 25%;
+}
+
+.UserApp .headApp .SearchBar{
+    margin: 2vh 0;
+    width: 35vw;
+    border: .24vh solid transparent;
+}
+
+.UserApp .headApp .resultsQuickSerch{
+    position: absolute;
+    width: 32vw;
+    max-height: 30vh;
+    overflow: hidden;
+    background-color: #D2EAFB90;
+    backdrop-filter: blur(3vh);
+    top: 10vh;
+    left: 29vw;
+    border-radius: 2vh;
+}
+
+.UserApp .headApp .resultsQuickSerch .AppIcon img{
+    height: 3vh;
+    width: 3vh;
+    margin: auto 0;
+}
+
+.UserApp .headApp .resultsQuickSerch .AppIcon span{
+    margin-left: 0;
+}
+
+.UserApp .headApp .SearchBar input{
+    border-radius: 3vh;
+}
+
+
+.UserApp .headApp .subMenuHeader{
+    display: flex;
+    margin: auto 2vh;
+    margin-left: 6vh;
+}
+
+.UserApp .headApp .subMenuHeader .ButtonMenu{
+    margin: auto 1vh;
+}
+
+.UserApp .headApp .SwitchColorMode{
+    margin: auto;
+}
+
+
+.UserApp .asideMenuApp{
+    width: 5vw;
+    height: 100%;
+    background-color: var(--menuAside);
+    transition: .3s;
+}
+
+.UserApp .asideMenuApp .menusHolder{
+    position: absolute;
+    height: 90vh;
+    width: fit-content;
+    background-color: var(--menuAside);
+    z-index: 29;
+    margin-top: 10vh;
+    transition: .3s;
+    overflow-y: auto;
+}
+
+/* ancho del scrollbar */
+.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar {
+    width: 10px;           /* vertical */
+    height:50%;          /* horizontal */
+}
+
+.UserApp .asideMenuApp .menusHolder:hover {
+  scrollbar-width: auto; /* Firefox */
+}
+
+
+/* fondo del track */
+.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar-track {
+    background: var((var(--inputsBg)));
+    border-radius: 8px;
+}
+
+/* thumb (la "barrita" que se mueve) */
+.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    border: .1vh solid var(--inputsBg);
+}
+
+
+.UserApp .asideMenuApp .ServiceSgaCard{
+    margin: 1vh;
+    margin-bottom: 2vh;
+}
+
+.UserApp .asideMenuApp .activeMenusHolder{
+    box-shadow: 0 .4vh 1vh #3333;
+}
+
+.UserApp .bodyApp{
+    height: 89.5vh;
+    margin-top: 10vh;
+    width: 94.5vw;
+    border-radius: 4vh;
+    box-shadow:  0 0 2vh #5553;
+    background-color: var(--bg);
+    transition: .3s;
+    overflow: hidden;
+}

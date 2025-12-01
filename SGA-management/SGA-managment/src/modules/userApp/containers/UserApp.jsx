@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './UserApp.css'
-import {BigTitle} from './../components/BigTitle'
 import { SearchBar } from '../components/SearchBar';
 import { ButtonMenu } from '../components/ButtonMenu';
 import { UserCard } from '../components/UserCard';
@@ -11,12 +10,10 @@ import { ServiceSgaCard } from '../components/ServiceSgaCard';
 import { LoadingAppDataPage } from './LoadingAppDataPage';
 import { ServicesGrid } from './ServicesGrid';
 import { HomeProcess } from './HomeProcess';
-import { CreateDocument } from './CreateDocument';
 import { NotificationsApp } from './NotificationsApp';
 import { AlertsHolder } from './AlertsHolder';
 import { AcountsPlan } from './AcountsPlan';
 import { TutorialAccountsPlan } from './tutorials/TutorialAccountsPlan';
-import { SearchDocument } from './SearchDocument';
 import { Reports } from './Reports';
 import { DocumentPreview } from './Alerts/DocumentPreview';
 import { ConceptsPlan } from './ConceptsPlan';
@@ -24,12 +21,19 @@ import { ChatAi } from './ChatAi';
 import { SwitchColorMode } from '../components/SwitchColorMode';
 import { Analytics } from './Analytics'; 
 import { AnalyticDocDetail } from './AnalyticDocDetail';
-import { postInfo } from '../../../utils/functions';
-import { LoadingSpace } from './LoadingSpace';
 import { LogOut } from '../../Login/LogOut';
 import { AppIcon } from '../components/AppIcon';
 import { NotificationsMenuSpace } from './NotificationsMenuSpace';
 import { Modules } from './Modules';
+import { Users } from './Users';
+import { DetailsUser } from './DetailsUser';
+import { Services } from './Services';
+import { PathLocation } from '../components/PathLocation';
+import { ThirdPartyDetail } from './ThirdPartyDetail';
+import { ThirdParties } from './ThirdParties';
+import { MyBussines } from './MyBussines';
+import { MyBussinesUnits } from './MyBussinesUnits';
+import { Settings } from './Settings';
 
 export function UserApp(){
 
@@ -160,21 +164,26 @@ export function UserApp(){
                 <main className='bodyApp'>
                     <Routes>
                             <Route path='/' element={<HomeProcess/>} />
-                            <Route path='/myBussines/' element={<span>Mi empresa</span>}/>
+                            <Route path='/myBussines/' element={<MyBussines/>}/>
+                            <Route path='/myBussines/Units' element={<MyBussinesUnits/>}/>
+                            <Route path='/myBussines/Units/:store_id' element={<PathLocation/>}/>
                             <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
                             <Route path='/modules/*' element={<Modules/>}/>
-                            <Route path='/services' element={<span>Servicios</span>}/>
+                            <Route path='/services' element={<Services/>}/>
+                            <Route path='/services/:serviceRequierd' element={<PathLocation/>}/>
                             <Route path='/billing' element={<span>Facturación</span>}/>
                             <Route path='/messages/*' element={<span>messages</span>} />
-                            <Route path='/thirdparties' element={<span>Terceros</span>} />
-                            <Route path='/users/*' element={<span>Usuarios</span>} />
+                            <Route path='/thirdparties/*' element={<ThirdParties/>} />
+                            <Route path='/thirdparties/:thirdparty_id' element={<ThirdPartyDetail/>} />
+                            <Route path='/users/' element={<Users/>} />
+                            <Route path='/users/:user_id' element={<DetailsUser/>} />
                             <Route path='/reports/*' element={<Reports/>} />
                             <Route path='/analytics' element={<Analytics/>} />
                             <Route path='/analytics/*' element={<AnalyticDocDetail/>} />
                             <Route path='/calendar' element={<span>Calendario</span>} />
                             <Route path='/concepts' element={<ConceptsPlan/>} />
                             <Route path='/accounts' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
-                            <Route path='/settings' element={<span>settings</span>} />
+                            <Route path='/settings/*' element={<Settings/>} />
                             <Route path='/tutorials' element={<span>tutorials</span>} />
                             <Route path='/help' element={<span>help</span>} />
                             <Route path='/logOut' element={<LogOut/>} />

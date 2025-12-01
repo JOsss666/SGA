@@ -15,7 +15,6 @@ CREATE TABLE users(
     FOREIGN KEY (company_id) REFERENCES companies(company_id)
 );
 
-
 CREATE TABLE users_access(
     user_id BIGINT UNSIGNED NOT NULL,
     user_roll VARCHAR(200) NOT NULL DEFAULT 'operator',
@@ -25,10 +24,19 @@ CREATE TABLE users_access(
     sga_contability_access TEXT,
     sga_certicloud_access TEXT,
     sga_facturation_access TEXT,
+    sga_treasury_access VARCHAR (100) DEFAULT 'false',
+    sga_ctools_access VARCHAR (100) DEFAULT 'false',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
+CREATE TABLE companies_roll(
+    user_id BIGINT UNSIGNED NOT NULL,
+    company_id BIGINT UNSIGNED NOT NULL,
+    user_cofig TEXT NOT NULL,
+    FOREIGN KEY (company_id) REFERENCES companies(company_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
 
 CREATE TABLE companies(
     company_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -77,6 +85,29 @@ CREATE TABLE thirdParties(
     FOREIGN KEY (company_id) REFERENCES companies(company_id)
 );
 
+CREATE TABLE thirdPartyComercialInfo(
+    thirdParty_id BIGINT UNSIGNED NOT NULL,
+    company_id BIGINT UNSIGNED NOT NULL,
+    credit BOOLEAN NOT NULL  DEFAULT 0,
+    credit_term INT NOT NULL DEFAULT 0,
+    credit_value FLOAT NOT NULL DEFAULT 0,
+    interest_rate FLOAT NOT NULL DEFAULT 0,
+    comercial_state ENUM('active','disabled','blocked','reported') DEFAULT 'active',
+    FOREIGN KEY (thirdParty_id) REFERENCES thirdParties(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(company_id)
+);
+
+CREATE TABLE thirdPartyTaxInfo(
+    thirdParty_id BIGINT UNSIGNED NOT NULL,
+    company_id BIGINT UNSIGNED NOT NULL,
+    regime VARCHAR(500) NOT NULL,
+    IVA_responsability VARCHAR(500) NOT NULL,
+    retention_type VARCHAR(500) NOT NULL,
+    economic_activity VARCHAR(500) NOT NULL,
+    attachedRut VARCHAR(2000) NOT NULL DEFAULT 'undefined',
+    FOREIGN KEY (thirdParty_id) REFERENCES thirdParties(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(company_id)
+);
 
 CREATE TABLE payment_methods(
     company_id BIGINT UNSIGNED NOT NULL,

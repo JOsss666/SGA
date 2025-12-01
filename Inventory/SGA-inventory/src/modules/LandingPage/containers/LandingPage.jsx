@@ -1,16 +1,15 @@
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
-import {SearchBar} from '../../GerenceApp/componets/SearchBar'
-import {BoldTitle} from '../../GerenceApp/componets/BoldTitle'
-import {FormButton} from '../../GerenceApp/componets/FormButton'
-import './LandingPage.css'
+import {SearchBar} from '../../userApp/components/SearchBar'
+import {BoldTitle} from '../../userApp/components/BoldTitle'
+import {FormButton} from '../../userApp/components/FormButton'
 import { Home } from './Home';
-import { Titles } from '../components/Titles';
 import { AboutUs } from './AboutUs';
 import { FooterSugerence } from '../components/FooterSugerence';
 import { MediaHandler } from '../../../../media/MediaHandler';
 import { Contact } from './Contact';
-import { Login } from './Login';
-import {SignUp} from './SignUp'
+import { Login } from '../../Login/Login';
+import {SignUp} from '../../Login/SignUp'
+import './LandingPage.css'
 
 export function LandingPage(){
 

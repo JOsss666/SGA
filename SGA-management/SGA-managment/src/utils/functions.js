@@ -1,6 +1,9 @@
 
 import { urlSer } from "../App";
-import domtoimage from "dom-to-image-more";
+import Papa from 'papaparse';
+import ExcelJs from 'exceljs';
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 export async function postInfo(route,informacion){
     console.log('Funcion post');
@@ -24,6 +27,128 @@ export async function postInfo(route,informacion){
         })
     })
 }
+
+export async function parseToXlsx(info, download, columns, name) {
+    const workbook = new ExcelJs.Workbook();
+    const worksheet = workbook.addWorksheet(name || "Hoja 1");
+    if (columns && Array.isArray(columns)) {
+        worksheet.columns = columns;
+        worksheet.addRows(info);
+    } else {
+        // Si no hay columnas, inferir encabezados automáticamente
+        if (info.length > 0 && typeof info[0] === "object") {
+        const headers = Object.keys(info[0]);
+        worksheet.addRow(headers);
+        info.forEach(obj => worksheet.addRow(Object.values(obj)));
+        } else {
+        worksheet.addRows(info);
+        }
+    }
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", name ? `${name}.xlsx` : "descarga.xlsx");
+    if (download) {
+        link.click();
+    } else {
+        return link;
+    }
+}
+
+
+export  async function parseToCsv(info,download,name){
+    const newCsv = Papa.unparse(info);
+    const blob = new Blob([newCsv],{type:"text/csv;charset=utf-8;"})
+    let blobUrl = URL.createObjectURL(blob)
+    let newLinkDownload = document.createElement("a");
+    newLinkDownload.href = blobUrl;
+    newLinkDownload.setAttribute("download",name? name:"SGA - descarga.csv");
+    if(download){
+        newLinkDownload.click();
+    }else{
+        return newLinkDownload;
+    }
+}
+
+export async function componentToPdf(component,download = true,options = {},name = "SGA-descarga.pdf") {
+    const { title = "", scale = 2 } = options;
+
+    // Asegurar que todas las imágenes dentro del componente estén cargadas
+    await Promise.all(
+        Array.from(component.getElementsByTagName("img")).map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+        });
+        })
+    );
+
+    // Guardar estilos originales
+    const originalOverflow = component.style.overflow;
+    const originalHeight = component.style.height;
+
+    // Expandir el componente para capturar todo (en caso de scroll)
+    component.style.overflow = "visible";
+    component.style.height = "auto";
+
+    // Capturar el contenido
+    const canvas = await html2canvas(component, {
+        scale,
+        useCORS: true,
+        scrollY: 0,
+        logging: false,
+        backgroundColor: "#ffffff",
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // Si hay título, lo añadimos al inicio
+    if (title) {
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(16);
+        const textWidth = pdf.getTextWidth(title);
+        pdf.text(title, (pageWidth - textWidth) / 2, 15); // centrado
+        position = 25; // espacio para el título
+    }
+
+    // Añadir imagen (primera página)
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // Agregar páginas adicionales si es necesario
+    while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+    }
+
+    // Restaurar estilos originales
+    component.style.overflow = originalOverflow;
+    component.style.height = originalHeight;
+
+    // Descargar o retornar el PDF
+    if (download) {
+        pdf.save(name);
+    } else {
+        return pdf;
+    }
+}
+
 
 export function copyToClipBoard(text){
     navigator.clipboard.writeText(text)
