@@ -21,3 +21,13 @@
 .Reports .spaceSelectReports .DespleList{
     margin-right: 2vh;
 }
+
+.Reports .galleryReports{
+    margin-top: 8vh;
+    height: 68vh;
+    padding: 2vh;
+    display: flex;
+    gap: 0vh 4vh;
+    flex-wrap: wrap;
+}
+
