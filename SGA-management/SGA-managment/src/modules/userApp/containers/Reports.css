@@ -13,7 +13,6 @@
 
 .Reports .spaceSelectReports{
     display: flex;
-    padding: 1vh;
     position: absolute;
     top: 12vh;
 }
@@ -23,11 +22,60 @@
 }
 
 .Reports .galleryReports{
-    margin-top: 8vh;
+    margin-top: 4vh;
     height: 68vh;
     padding: 2vh;
     display: flex;
-    gap: 0vh 4vh;
+    gap: 4vh;
     flex-wrap: wrap;
 }
 
+.Reports .menuBar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 2vh 0;
+}
+
+.Reports .menuBar .spaceSelectReports{
+    position: inherit;
+    width: 266vh;
+}
+
+.Reports .menuBar .spaceSelectReports .DespleList{
+    position: inherit;
+    width: auto;
+}
+
+.Reports .menuBar .optionsBar{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: end;
+    gap: 1vh;
+}
+
+.Reports .menuBar .optionsBar .IconList, .Reports .menuBar .optionsBar .IconListCudriculate{
+    background-color: var(--inputsBg);
+    border-radius: 1vh;
+    box-shadow: 0 .2vh .8vh #0003;
+    font-size: 3.5vh;
+    align-content: center;
+    position: relative;
+    font-size: 3vh;
+    position: relative;
+    padding: 1vh;
+}
+
+.Reports .menuBar .optionsBar .IconList i, .Reports .menuBar .optionsBar .IconListCudriculate i{
+    font-size: 2vh;
+}
+
+.Reports .menuBar .optionsBar .SearchBar{
+    width: 34vh;
+}
+
+.Reports .menuBar .optionsBar .SelectOptions .contentOptions{
+    width: 12vh;
+    box-shadow: 0 .2vh .8vh #0003;
+}

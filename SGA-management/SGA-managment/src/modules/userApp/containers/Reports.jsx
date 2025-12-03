@@ -7,6 +7,9 @@ import { ReportDocuments } from './reports/ReportDocuments';
 import { ReportTransactionDetails } from '../components/ReportTransactionDetails';
 import { ReportBalance } from './reports/ReportBalance';
 import { CardReport } from '../components/CardReport';
+import { SearchBar } from '../components/SearchBar';
+import { SelectOptions } from '../components/SelectOptions';
+import { FormButton } from '../components/FormButton';
 
 export function Reports(){
 
@@ -26,38 +29,48 @@ export function Reports(){
                             <BoldTitle text={'Informes de procesos'}/>
                             <DescriptionSpan text={'Selecciona el informe que necesites'}/>
                         </div>
-                        <div className="spaceSelectReports">
-                            <DespleList children={<i className="fa-solid fa-book"/>} father={{
-                                title:'Informes de Documentos'
-                            }} options={[
-                                {title:'Ordenes de cliente (OC)',children:<i className="fa-solid fa-file-contract"/>,action:handleNavigate,path:'OCS'},
-                                {title:'Ordenes de producción (OP)',children:<i className="fa-solid fa-file-lines"/>,action:handleNavigate,path:'OPS'},
-                                {title:'Documentos de compra (DC)',children:<i className="fa-solid fa-file-lines"/>,action:handleNavigate,path:'DCS'},
-                                {title:'Consumos de inventario (CI)',children:<i className="fa-solid fa-file-lines"/>,action:handleNavigate,path:'CIS'},
-                                {title:'Facturas de venta (FV)',children:<i className="fa-solid fa-file-invoice"/>,action:handleNavigate,path:'FVS'},
-                                {title:'Transacciones (TR)',children:<i className="fa-solid fa-magnifying-glass-chart"/>,action:handleNavigate,path:'TRS'},
-                                {title:'Informes adicionales',options:[
-                                    {title:'Informe Costos Operativos',children:<i className="fa-solid fa-book"/>},
-                                    {title:'Balance de prueba',children:<i className="fa-solid fa-book"/>,action:handleNavigate,path:'Balance'}
-                                ]}
-                            ]}/>
-                            <DespleList children={<i className="fa-solid fa-book"/>} father={{
-                                title:'Informes por estado'
-                            }} options={[
-                                {title:'Documentos reportados',children:<i className="fa-solid fa-book"/>},
-                                {title:'Estado Ordenes de producción',children:<i className="fa-solid fa-file-lines"/>},
-                                {title:'Volumen ordenes de clientes',children:<i className="fa-solid fa-file-lines"/>},
-                                {title:'Informes adicionales',options:[
-                                    {title:'Informe Costos Operativos',children:<i className="fa-solid fa-book"/>}
-                                ]}
-                            ]}/>
-                            <DespleList children={<i className="fa-solid fa-calendar-check"/>} father={{
-                                title:'Informes de aplicación'
-                            }} options={[
-                                {title:'Productividad usuarios',children:<i className="fa-solid fa-chart-line"/>},
-                                {title:'Eficiencia procesos',children:<i className="fa-solid fa-business-time"/>},
-                                {title:'Estado de ejecución',children:<i class="fa-solid fa-list-check"/>}
-                            ]}/>
+                        <div className="menuBar">
+                            <div className="spaceSelectReports">
+                                <DespleList children={<i className="fa-solid fa-book"/>} father={{
+                                    title:'Informes de Documentos'
+                                }} options={[
+                                    {title:'Ordenes de cliente (OC)',children:<i className="fa-solid fa-file-contract"/>,action:handleNavigate,path:'OCS'},
+                                    {title:'Ordenes de producción (OP)',children:<i className="fa-solid fa-file-lines"/>,action:handleNavigate,path:'OPS'},
+                                    {title:'Documentos de compra (DC)',children:<i className="fa-solid fa-file-lines"/>,action:handleNavigate,path:'DCS'},
+                                    {title:'Consumos de inventario (CI)',children:<i className="fa-solid fa-file-lines"/>,action:handleNavigate,path:'CIS'},
+                                    {title:'Facturas de venta (FV)',children:<i className="fa-solid fa-file-invoice"/>,action:handleNavigate,path:'FVS'},
+                                    {title:'Transacciones (TR)',children:<i className="fa-solid fa-magnifying-glass-chart"/>,action:handleNavigate,path:'TRS'},
+                                    {title:'Informes adicionales',options:[
+                                        {title:'Informe Costos Operativos',children:<i className="fa-solid fa-book"/>},
+                                        {title:'Balance de prueba',children:<i className="fa-solid fa-book"/>,action:handleNavigate,path:'Balance'}
+                                    ]}
+                                ]}/>
+                                <DespleList children={<i className="fa-solid fa-book"/>} father={{
+                                    title:'Informes por estado'
+                                }} options={[
+                                    {title:'Documentos reportados',children:<i className="fa-solid fa-book"/>},
+                                    {title:'Estado Ordenes de producción',children:<i className="fa-solid fa-file-lines"/>},
+                                    {title:'Volumen ordenes de clientes',children:<i className="fa-solid fa-file-lines"/>},
+                                    {title:'Informes adicionales',options:[
+                                        {title:'Informe Costos Operativos',children:<i className="fa-solid fa-book"/>}
+                                    ]}
+                                ]}/>
+                                <DespleList children={<i className="fa-solid fa-calendar-check"/>} father={{
+                                    title:'Informes de aplicación'
+                                }} options={[
+                                    {title:'Productividad usuarios',children:<i className="fa-solid fa-chart-line"/>},
+                                    {title:'Eficiencia procesos',children:<i className="fa-solid fa-business-time"/>},
+                                    {title:'Estado de ejecución',children:<i class="fa-solid fa-list-check"/>}
+                                ]}/>
+                            </div>
+                            <div className="optionsBar">
+                                <i className="fa-solid fa-bars IconList"/>
+                                <i className="fa-solid fa-table-cells-large IconListCudriculate"/>
+                                <SearchBar placeholder={'Buscar'}/>
+                                <SelectOptions title={'Filtro'} options={['ninguno']}/>
+                                <SelectOptions title={'Orden'} options={['Alfabetico','Fecha de Creación','Rol']}/>
+                            </div>
+
                         </div>
                     </>
                 }/>
@@ -76,7 +89,7 @@ export function Reports(){
                 <CardReport type={'Documento'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
                 <CardReport type={'contable'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
                 <CardReport type={'contable'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
-                <CardReport type={'contable'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
+                <CardReport type={'Estadistico'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
                 <CardReport type={'contable'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
                 <CardReport type={'contable'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
             </div>
