@@ -4,28 +4,36 @@
     display: flex;
     flex-direction: column;
     gap: 1vh;
-    width: 26vh;
+    width: 16vw;
     height: 26vh;
-    border: 1px solid #ccc;
-    border-radius: 0.5vh;  
-    padding: 2vh;
-    box-shadow: 0 1.3dvh 1.6dvh rgba(0, 0, 0, 0.1);
+    border: .1vh solid var(--inputsBorder);
+    border-radius: 4vh;  
+    padding: 2vh 3vh;
+    box-shadow: 0 1dvh 1.6dvh #00000015;
+    background-color: var(--menuAside);
+    cursor: pointer;
+    position: relative;
 }
 
 .CardReport .IconReport{
-    position: relative;
-    top: -6vh;
-    width: 6vh;
-    height: 1vh;
+    position: absolute;
+    top: -3vh;
+    left: 2.5vh;
+    width: 5.5vh;
+    height: 5.5vh;
+    border-radius: 100%;
+    display: flex;
+    padding: 1vh;
 }
 
 .CardReport .IconReport i{
-    font-size: 3vh;
-    position: relative;
-    border: solid;
-    border-radius: 5vh;
-    padding: 1.5vh;
-    background-color: #fff;
+    margin: auto;
+    font-size: clamp(3px,3vh,30px);
+    color: #fff;
+}
+
+.CardReport .titleReport{
+    margin-top: 2vh;
 }
 
 .CardReport .titleReport .BoldTitle{
@@ -38,18 +46,26 @@
 
 .CardReport .actionReport{
     display: flex;
-    flex-direction: row;
-    gap: 1vh;
-    padding: 0 2vh;
-    align-items: center;
-    justify-content: center;
+    width: 100%;
+    margin-top: 1.5vh;
+    padding-top: 1.5vh;
+    border-top: solid .1vh var(--inputsBorder);
 }
 
 .CardReport .actionReport button{
     background-color: transparent;
-    border: solid #ccc 0.2vh;
+    width: 5vh;
+    height: 5vh;
+    border: solid var(--inputsBorder) 0.2vh;
     font-size: 2vh;
     cursor: pointer;
     padding: 1vh;
     border-radius: 3vh;
+    color: var(--descriptionText);
+    margin: auto;
+}
+
+.CardReport .actionReport button:hover{
+    background-color: var(--iconHover);
+    color: var(--mainText);
 }

@@ -15,6 +15,7 @@
     display: flex;
     position: absolute;
     top: 12vh;
+    z-index: 10;
 }
 
 .Reports .spaceSelectReports .DespleList{
@@ -22,7 +23,8 @@
 }
 
 .Reports .galleryReports{
-    margin-top: 4vh;
+    
+    margin-top: 10vh;
     height: 68vh;
     padding: 2vh;
     display: flex;
