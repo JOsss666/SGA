@@ -65,12 +65,11 @@ export function Reports(){
                             </div>
                             <div className="optionsBar">
                                 <i className="fa-solid fa-bars IconList"/>
-                                <i className="fa-solid fa-table-cells-large IconListCudriculate"/>
+                                <i className="fa-solid fa-table-cells-large IconList"/>
                                 <SearchBar placeholder={'Buscar'}/>
                                 <SelectOptions title={'Filtro'} options={['ninguno']}/>
                                 <SelectOptions title={'Orden'} options={['Alfabetico','Fecha de Creación','Rol']}/>
                             </div>
-
                         </div>
                     </>
                 }/>
