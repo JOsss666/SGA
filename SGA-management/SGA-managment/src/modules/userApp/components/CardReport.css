@@ -1,0 +1,55 @@
+
+
+.CardReport{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    width: 26vh;
+    height: 26vh;
+    border: 1px solid #ccc;
+    border-radius: 0.5vh;  
+    padding: 2vh;
+    box-shadow: 0 1.3dvh 1.6dvh rgba(0, 0, 0, 0.1);
+}
+
+.CardReport .IconReport{
+    position: relative;
+    top: -6vh;
+    width: 6vh;
+    height: 1vh;
+}
+
+.CardReport .IconReport i{
+    font-size: 3vh;
+    position: relative;
+    border: solid;
+    border-radius: 5vh;
+    padding: 1.5vh;
+    background-color: #fff;
+}
+
+.CardReport .titleReport .BoldTitle{
+    font-size: 2.5vh
+}
+
+.CardReport .descripctionReport .DescriptionSpan{
+    font-size: 1.5vh;
+}
+
+.CardReport .actionReport{
+    display: flex;
+    flex-direction: row;
+    gap: 1vh;
+    padding: 0 2vh;
+    align-items: center;
+    justify-content: center;
+}
+
+.CardReport .actionReport button{
+    background-color: transparent;
+    border: solid #ccc 0.2vh;
+    font-size: 2vh;
+    cursor: pointer;
+    padding: 1vh;
+    border-radius: 3vh;
+}
