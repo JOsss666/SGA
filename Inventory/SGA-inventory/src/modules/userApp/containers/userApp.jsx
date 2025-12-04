@@ -30,8 +30,10 @@ import {ThirdParties} from './ThirdParties'
 import {ThirdPartyDetail} from './ThirdPartyDetail'
 import {MovementsInventory} from './MovementsInventory'
 import {RecordMovents} from './RecordMovements'
-import './userApp.css'
 import {BigTitle} from '../components/BigTitle'
+import {SearchDocument} from './SearchDocument'
+import { PathLocation } from '../components/PathLocation';
+import './userApp.css'
 
 export function UserApp(){
 
@@ -169,9 +171,13 @@ export function UserApp(){
                             <Route path="PricesList/:priceListName" element={<PricesListDetails info={{}}/>}/>
                             <Route path='/thirdparties/*' element={<ThirdParties/>} />
                             <Route path='/thirdparties/:thirdparty_id' element={<ThirdPartyDetail/>} />
+                            <Route path='/Products/' element={<Users/>} />
+                            <Route path='/Search/' element={<SearchDocument/>} />
+                            <Route path='/Categories/' element={<Users/>} />
                             <Route path='/users/' element={<Users/>} />
                             <Route path='/users/:user_id' element={<DetailsUser/>} />
                             <Route path="Stores" element={<MyBussinesUnits/>}/>
+                            <Route path='/Stores/:store_id' element={<PathLocation/>}/>
                             <Route path='/reports/*' element={<Reports/>} />
                             <Route path="Movements" element={<MovementsInventory/>}/>
                             <Route path="Movements/record" element={<RecordMovents/>}/>
