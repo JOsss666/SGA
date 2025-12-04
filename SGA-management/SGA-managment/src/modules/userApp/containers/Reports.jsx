@@ -6,6 +6,7 @@ import './Reports.css'
 import { ReportDocuments } from './reports/ReportDocuments';
 import { ReportTransactionDetails } from '../components/ReportTransactionDetails';
 import { ReportBalance } from './reports/ReportBalance';
+import { CardReport } from '../components/CardReport';
 
 export function Reports(){
 
@@ -70,6 +71,15 @@ export function Reports(){
                 <Route path='/TRS/:transaction_id' element={<ReportTransactionDetails />} />
                 <Route path='/Balance' element={<ReportBalance/>}/>
             </Routes>
+            <div className="galleryReports">
+                <CardReport type={'Estadistico'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
+                <CardReport type={'Documento'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
+                <CardReport type={'contable'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
+                <CardReport type={'contable'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
+                <CardReport type={'contable'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
+                <CardReport type={'contable'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
+                <CardReport type={'contable'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
+            </div>
         </div>
     )
 }
