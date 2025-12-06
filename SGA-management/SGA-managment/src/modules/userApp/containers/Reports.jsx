@@ -10,12 +10,13 @@ import { CardReport } from '../components/CardReport';
 import { SearchBar } from '../components/SearchBar';
 import { SelectOptions } from '../components/SelectOptions';
 import { FormButton } from '../components/FormButton';
+import { useEffect, useState } from 'react';
 
 export function Reports(){
 
     const navigate = useNavigate();
     const location = useLocation();
-
+    
     const handleNavigate = (path)=>{
         navigate(`${location.pathname}/${path}`);
     }
@@ -84,13 +85,12 @@ export function Reports(){
                 <Route path='/Balance' element={<ReportBalance/>}/>
             </Routes>
             <div className="galleryReports">
-                <CardReport type={'Estadistico'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
-                <CardReport type={'Documento'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
-                <CardReport type={'contable'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
-                <CardReport type={'contable'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
-                <CardReport type={'Estadistico'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
-                <CardReport type={'contable'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
-                <CardReport type={'contable'} title={'Nombre Informe'} description={'Esta es la descripción del informe Esta es la descripción del informe Esta es la descripción del informe'}/>
+                <CardReport type={'Documento'} title={'OCS'} description={'Client Order'}/>
+                <CardReport type={'Documento'} title={'OPS'} description={'Production Order'}/>
+                <CardReport type={'Documento'} title={'DCS'} description={'Purchase Document'}/>
+                <CardReport type={'Documento'} title={'CIS'} description={'Inventory Consume'}/>
+                <CardReport type={'Documento'} title={'FVS'} description={'Sell Invoice'}/>
+                <CardReport type={'Documento'} title={'TRS'} description={'transaction'}/>
             </div>
         </div>
     )
