@@ -277,20 +277,14 @@ export const uploadFiles = async (files) => {
     }
 
     const formData = new FormData();
-    console.log(files)
-    console.log(typeof(files))
-
-    formData['files'] = []
 
     // Append de varios archivos
-   for (let i = 0; i < files.length; i++) {
-    console.log("Agregando:", files[i].name);
-    formData.files.push(files[i])
-}
-
+    for (let i = 0; i < files.length; i++) {
+        console.log("Agregando:", files[i].name);
+        formData.append("files", files[i]); // CORRECTO
+    }
 
     try {
-        console.log(formData)
         const respuesta = await fetch(urlSer + "/uploadFiles", {
             method: "POST",
             body: formData,
@@ -308,3 +302,4 @@ export const uploadFiles = async (files) => {
         throw error;
     }
 };
+

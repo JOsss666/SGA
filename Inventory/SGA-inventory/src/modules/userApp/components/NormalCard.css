@@ -1,40 +1,50 @@
 
 .NormalCard{
-    padding: 1vh 2vh;
     position: relative;
     height: 20vh;
     width: 30vh;
-    background-color: #fff;
-    border-radius: 3vh;
+    border-radius: 2vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     cursor: pointer;
     transition: .3s;
+    background-color: var(--cardHover);
+    outline: solid .1vh var(--inputsBorder);
+    background-size: 100% auto;
     animation-name: appearCard;
     animation-duration: .5s;
     animation-fill-mode: both;
     animation-timing-function: ease;
-    outline: solid .1vh #eee;
-    box-shadow: 0 .2vh 1vh #ccc7;
 }
 
-.NormalCard:hover {
-    border-radius: 2vh;
-}
-
-.NormalCard:hover strong{
+.NormalCard_complete:hover strong{
     margin-top:20%;
     margin-bottom: 1vh;
 }
 
-.NormalCard  strong{
-    font-size: clamp(1px,2,5vh,25px);
-    font-weight: 600;
+.NormalCard strong{
+    font-size: clamp(1px,2.2vh,25px);
+    font-weight: 500;
+    transition: .3s;
+    color: #fff;
+    text-shadow: 0 .2vh .5vh #0007;
+}
+
+.NormalCard_onlyTitle strong{
+    margin: auto;
+    margin-bottom: 0;
+    width: 100%;
+    padding-bottom: 2.5vh;
+    padding-top: 4vh;
+    text-align: center;
+    background-image: linear-gradient(to top, #00000050,transparent);
+    backdrop-filter: blur(.15vh);
+}
+
+.NormalCard_complete strong{
     margin-bottom: 20%;
     margin-top: 52%;
-    transition: .3s;
-    color: #00022E;
 }
 
 .NormalCard  span{

@@ -7,6 +7,7 @@ import multer from "multer";
 import path from "path";
 import contabiltyController from '../controllers/contabilityController.js';
 import inventoryController from '../controllers/inventoryController.js'
+import { uploadMiddleware } from '../app.js';
 const router = express.Router();
 
 // temporal folder for chunks
@@ -17,7 +18,7 @@ const upload = multer({ dest: CHUNKS_DIR });
 // SGA General
 
     // Special actions
-    router.post("/uploadFiles", controller.uploadFile);
+    router.post("/uploadFiles", uploadMiddleware ,controller.uploadFile);
 
     router.post("/upload-chunk", upload.single("chunk"), controller.uploadChunk);
 
@@ -95,9 +96,11 @@ router.post('/getDocAnalyticDocNumberTable', controller.getDocAnalyticDocNumberT
 
 router.post('/inventory/getCategories',inventoryController.getCategories);
 
+router.post('/inventory/createCategory',inventoryController.createCatetory);
+
 router.post('/inventory/getSubCategories',inventoryController.getSubCategories);
 
-router.post('/inventory/createSubCategory',inventoryController.createSubCategory);
+router.post('/inventory/createSubCategory',inventoryController.createCatetory);
 
 router.post('/inventory/getProducts',inventoryController.getProducts);
 

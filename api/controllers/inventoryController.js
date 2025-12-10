@@ -1,5 +1,4 @@
 import { useDataBase } from "../app.js";
-
 const inventoryController = {};
 
 inventoryController.getSubCategories = (req,res)=>{
@@ -21,14 +20,27 @@ inventoryController.getSubCategories = (req,res)=>{
 }
 
 
-inventoryController.createSubCategory = (req,res)=>{
+inventoryController.createCatetory = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
         data += chunk    })
     req.on('end',async()=>{
         let info = JSON.parse(data)
-        let sentence = `INSERT INTO "Inventory".categories(category_code,category_name,company_id,category_description,category_color) VALUES (?,?,?,?,?);`;
-        let consulta = await useDataBase(sentence,[info.category_code,info.category_name,info.company_id,info.category_description,info.category_color],2);
+        let sentence = `
+            INSERT INTO "Inventory".categories(
+                company_id, name, slug, parent_id, path, description, status, img)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+        `;
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.name,
+            info.slug,
+            info.parent_id != ''? info.parent_id:0,
+            info.path,
+            info.description,
+            info.status,
+            info.photo
+        ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })

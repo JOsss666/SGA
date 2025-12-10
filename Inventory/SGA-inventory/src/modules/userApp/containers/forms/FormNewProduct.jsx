@@ -12,7 +12,7 @@ import { NewElementSelect } from '../../components/NewElementSelect'
 import { FileInput } from '../../components/FileInput'
 
 export function FormNewProduct({reloadFun}){
-
+ 
     // requiremts
     const {appInfo} = useAppInfo();
     const {addNotification} = useNotifications();
@@ -167,6 +167,10 @@ export function FormNewProduct({reloadFun}){
     useEffect(()=>{
         getRequierdData();
     },[])
+
+    useEffect(()=>{
+        console.log(photo);
+    },[photo])
 
     return(
         <div className="FormNewProduct">

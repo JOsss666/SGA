@@ -1,7 +1,7 @@
 import { calcWeightedAverage, encrypt, isRelevanPrompt, useDataBase, actualDate } from "../app.js";
 import fs from "fs";
 import path from "path";
-import { uploadDependence } from "../app.js";
+import { uploadToCloudinary } from "../app.js";
 import { send_API_AI } from "../ApiFunctions.js";
 const controller = {};
 
@@ -42,26 +42,29 @@ controller.mergeChunks = (req, res) => {
 };
 
 controller.uploadFile = async (req, res) => {
+    console.log("Archivo recibido");
     try {
         const archivos = req.files;
+
         if (!archivos || archivos.length === 0) {
             return res.status(400).json({ mensaje: "No se enviaron archivos" });
         }
 
         const urls = [];
 
+        // Subir archivos uno por uno
         for (const archivo of archivos) {
-            const resultado = await uploadToCloudinary(archivo.buffer);
+            const resultado = await uploadToCloudinary(archivo.buffer, archivo.originalname);
             urls.push(resultado.secure_url);
         }
 
         res.json({ urls });
 
     } catch (e) {
+        console.error("Error al subir archivos:", e);
         res.status(500).json({ mensaje: e.message });
     }
 };
-
 
 controller.createCompany = (req,res)=>{
     let data = '';
@@ -544,7 +547,7 @@ controller.getAccountsPlan = (req,res)=>{
             FROM
                 "Ecosystem".account_plans
             WHERE
-                "Ecosystem".account_plans.company_id = $1;
+                "Ecosystem".account_plans.company_id = $1 OR "Ecosystem".account_plans.company_id = 1 ;
         ` 
         let prevCons = await useDataBase(prevSen,[info.company_id],1);
         if(prevCons[0]){

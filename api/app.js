@@ -2,6 +2,7 @@ import pkg from 'pg';
 import { v2 as cloudinary } from 'cloudinary'; // Importando `v2` directamente de cloudinary
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
+import path from 'path';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import multer from 'multer';
@@ -15,7 +16,6 @@ cloudinary.config({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
-
 
 // Datos Conexion MYSQL
 const PG_HOST  = process.env.MYSQL_HOST;
@@ -40,6 +40,23 @@ const pool = new Pool({
 
 // informacion para subida archivos
 const uploadDependence = multer({ storage: multer.memoryStorage() });
+
+async function uploadToCloudinary(buffer, originalName) {
+    return new Promise((resolve, reject) => {
+        const config = {
+            folder: "SGA_imgs",     // cambia si quieres
+            resource_type: "auto",
+            public_id: path.parse(originalName).name + "-" + Date.now()
+        };
+
+        const stream = cloudinary.uploader.upload_stream(config, (err, result) => {
+            if (err) return reject(err);
+            resolve(result);
+        });
+
+        stream.end(buffer);
+    });
+}
 
 const uploadMiddleware = uploadDependence.array("files", 10) // o la cantidad máxima que quieras;
 
@@ -248,29 +265,30 @@ export function readCSV(path,type){
 async function createPUC(rows){
     let errors = [];
     let sentence = `
-        INSERT INTO
-            Ecosystem.account_templates_PUC
-        (
+        INSERT INTO "Ecosystem".contable_accounts(
             company_id,
+            account_plan,
             code,
             name,
             level,
             type,
-            account_path
-        )
-        VALUES(?,?,?,?,?,?);
+            state,
+            type_account)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
     `;
     const results = await Promise.all(
     rows.map(async (element, index) => {
             let values = element[0].split(';');
             console.log(values);
             let res = await useDataBase(sentence,[
-                0,
+                1,
+                1,
                 values[0],
                 values[1],
                 values[0].length,
                 values[2],
-                `${values[0]}`,
+                'active',
+                'PUC'
             ],2);
             console.log(res);
             if(!res[0]){
@@ -330,7 +348,8 @@ export{
     encrypt,
     useDataBase,
     uploadMiddleware,
-    uploadDependence
+    uploadDependence,
+    uploadToCloudinary
 }
 
 
