@@ -1,0 +1,115 @@
+
+
+.CategoriesDetail{
+    padding: 2vh;
+    display: flex;
+    flex-direction: row;
+    gap: 2vh;
+}
+
+.CategoriesDetail .ContentPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    width: 20vh;
+    padding: 2vh;
+    
+    border-right: .5vh solid #F0F0F0;
+    height: 85vh;
+}
+
+.CategoriesDetail .ContentPanel .list {
+    font-family: sans-serif;
+}
+
+.CategoriesDetail .ContentPanel .CategoriList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.CategoriesDetail .ContentPanel .Categori {
+    font-weight: 500;
+    margin-top: 1.5vh;
+    font-size: 2.2vh;
+}
+
+.CategoriesDetail .ContentPanel .SubcategoriList {
+    list-style: none;
+    padding-left: 1.5vh; /* Sangría */
+    margin: 1vh 0;
+}
+
+.CategoriesDetail .ContentPanel .SubcategoriList li {
+    color: #5D5D5D;
+    font-weight: 400;
+    margin: 1vh 0;
+    font-size: 2vh;
+}
+
+
+.CategoriesDetail .ContentMain{
+    display: flex;
+    flex-direction: column;
+    gap: 3vh;
+}
+.CategoriesDetail .ContentMain .HeadCategories{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2vh 0;
+}
+
+.CategoriesDetail .ContentMain .HeadCategoriesDetail .BoldTitle .PathLocation{
+    align-items: center;
+}
+
+.CategoriesDetail .ContentMain .HeadCategoriesDetail .BoldTitle .PathLocation span:first-of-type{
+    font-size: 4vh;
+    color: #1D1D1D;
+}
+
+
+.CategoriesDetail .ContentMain .MenuBarCategories{
+    display: flex;
+    width: fit-content;
+    gap: 2vh;
+    align-items: center;
+}
+
+.CategoriesDetail .ContentMain .MenuBarCategories .SearchBar{
+    width: 38vh;
+    padding-right: 1.5vh;
+}
+
+.CategoriesDetail .ContentMain .MenuBarCategories .IconList{
+    background-color: var(--inputsBg);
+    border-radius: 1vh;
+    height: fit-content;
+    box-shadow: 0 .2vh .8vh #0003;
+    font-size: 3.5vh;
+    align-content: center;
+    position: relative;
+    font-size: 3vh;
+    position: relative;
+    padding: 1vh;
+    color: var(--descriptionText);
+    cursor: pointer;
+}
+
+.CategoriesDetail .ContentMain .MenuBarCategories .IconList:hover{
+    background-color: var(--cardHover);
+}
+
+
+.CategoriesDetail .ContentMain .MenuBarCategories .SelectOptions .contentOptions{
+    width: 26vh;
+    box-shadow: 0 .2vh .8vh #0003;
+    padding-left: 1.5vh;
+}
+
+.CategoriesDetail .ContentMain .DetailsCategoriesDetail{
+    display: flex;
+    flex-wrap: wrap;    
+    gap: 2vh;
+}
