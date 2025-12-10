@@ -21,7 +21,7 @@ export function FormNewCategory({info,reloadFun}){
     const [loading,setLoading] = useState();
 
     // FormInfo
-    const [photo,setPhoto] = useState('https://res.cloudinary.com/djjxugmni/image/upload/v1764620093/ChatGPT_Image_1_dic_2025_15_04_38_3_hcdqxl.png');
+    const [photo,setPhoto] = useState('https://res.cloudinary.com/djjxugmni/image/upload/v1764619633/ChatGPT_Image_1_dic_2025_15_04_38_2_hwmmk5.png');
     const [name,setName] = useState('');
     const [description,setDescription] = useState('');
     const [parent_id,setParent_id] = useState(0);
