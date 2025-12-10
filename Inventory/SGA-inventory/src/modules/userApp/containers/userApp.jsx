@@ -33,7 +33,11 @@ import {RecordMovents} from './RecordMovements'
 import {BigTitle} from '../components/BigTitle'
 import {SearchDocument} from './SearchDocument'
 import { PathLocation } from '../components/PathLocation';
+import { Categories } from './Categories';
 import './userApp.css'
+import { CategoriesDetail } from './CategoriesDetail';
+
+
 
 export function UserApp(){
 
@@ -173,7 +177,8 @@ export function UserApp(){
                             <Route path='/thirdparties/:thirdparty_id' element={<ThirdPartyDetail/>} />
                             <Route path='/Products/' element={<Users/>} />
                             <Route path='/Search/' element={<SearchDocument/>} />
-                            <Route path='/Categories/' element={<Users/>} />
+                            <Route path='/Categories/' element={<Categories/>} />
+                            <Route path='/Categories/detail' element={<CategoriesDetail/>} />
                             <Route path='/users/' element={<Users/>} />
                             <Route path='/users/:user_id' element={<DetailsUser/>} />
                             <Route path="Stores" element={<MyBussinesUnits/>}/>

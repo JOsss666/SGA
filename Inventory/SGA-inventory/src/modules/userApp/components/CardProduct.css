@@ -1,0 +1,71 @@
+
+.CardProduct {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    width: 18vw;
+    height: 55vh;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: 4vh;
+    padding: 2vh 3vh;
+    box-shadow: 0 1dvh 1.6dvh #00000015;
+    background-color: #FAFAFA;
+    cursor: pointer;
+    position: relative;
+}
+
+.CardProduct :hover {
+    box-shadow: 0 2vh 2.6vh #00000020;
+    transform: translateY(-.5vh);
+}
+
+.CardProduct .SKU{
+    text-align: center;
+    padding: 1vh 2vh;
+    color: #007AFF;
+    background-color: #D6E6F9;
+    border-radius: 4vh;
+    font-size: .8vh;
+    width: fit-content;
+    height: fit-content;
+    position: absolute;
+    top: 2vh;
+    z-index: 4;
+}
+
+.CardProduct .Image {
+    width: 30vh;
+    height: 30vh;
+    background-color: #F0F0F0;
+}
+
+.CardProduct .Image img{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.CardProduct .InfoProducto{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.CardProduct .InfoProducto .BoldTitle{
+    font-size: 2.5vh;
+    font-weight: 600;
+    color: #282828;
+}
+
+.CardProduct .InfoProducto .DescriptionSpan{
+    font-size: 1.8vh;
+    color: #5A5A5A;
+}
+
+.CardProduct .InfoProducto .FormButton{
+    background-color: #D40D11;
+    color: #FFFFFF;
+    border-radius: 3vh;
+    font-size: 1.8vh;
+}
+    
