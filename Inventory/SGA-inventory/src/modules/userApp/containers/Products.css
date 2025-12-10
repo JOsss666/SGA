@@ -1,0 +1,56 @@
+
+.Products{
+    padding: 2vh;
+    padding-left: 4vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.Products .BoldTitle{
+    margin: 2vh 0;
+    margin-bottom: 1vh;
+}
+
+.Products .searchOptions{
+    display: flex;
+    width: 100%;
+    gap: 2vh;
+    margin: 2vh 0;
+    margin-top: 4vh;
+}
+
+.Products .searchOptions .ButtonMenu{
+    background-color:#DFF2FE;
+    margin: auto 1vh;
+    height: 6vh;
+    width: 6vh;
+}
+
+.Products .searchOptions .ButtonMenu i{
+    color: #007AFF;
+}
+
+.Products .gridProducts{
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    height: fit-content;
+    max-height: 62vh;
+    overflow-y: auto;
+    padding:.2vh .1vh;
+}
+
+.Products .gridP_line{
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.Products .gridP_grid{
+    gap: 2vh;
+    flex-direction: row;
+}
+
+
+.Products .searchOptions .FormButton{
+    width: 12vw;
+}

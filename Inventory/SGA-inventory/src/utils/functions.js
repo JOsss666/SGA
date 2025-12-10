@@ -269,3 +269,42 @@ export async function ScreenShotElement(elemet,name){
         console.error('Error al generar la imagen:', error);
     });
 }
+
+
+export const uploadFiles = async (files) => {
+    if (!files || files.length === 0) {
+        throw new Error("Debe proporcionar al menos un archivo.");
+    }
+
+    const formData = new FormData();
+    console.log(files)
+    console.log(typeof(files))
+
+    formData['files'] = []
+
+    // Append de varios archivos
+   for (let i = 0; i < files.length; i++) {
+    console.log("Agregando:", files[i].name);
+    formData.files.push(files[i])
+}
+
+
+    try {
+        console.log(formData)
+        const respuesta = await fetch(urlSer + "/uploadFiles", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!respuesta.ok) {
+            const errorData = await respuesta.json().catch(() => ({}));
+            throw new Error(errorData.mensaje || `Error HTTP: ${respuesta.status}`);
+        }
+
+        return await respuesta.json();
+
+    } catch (error) {
+        console.error("Error al subir los archivos:", error.message);
+        throw error;
+    }
+};

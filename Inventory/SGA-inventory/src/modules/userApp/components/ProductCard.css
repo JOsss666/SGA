@@ -1,0 +1,113 @@
+.ProductCard{
+    display: flex;
+    padding: 1vh;
+    background-color: var(--cardHover);
+    outline: solid .1vh var(--inputsBorder);
+    cursor: pointer;
+    position: relative;
+}
+
+.ProductCard_grid{
+    flex-direction: column;
+    width: 18vw;
+    border-radius: 3vh;
+    height: 42vh;
+}
+
+.ProductCard_line{
+    flex-direction: row;
+    width: 100%;
+    height: fit-content;
+    border-radius: 1vh;
+}
+
+.ProductCard_grid .imgContainer{
+    height: 25vh;
+    background-color: var(--inputsBorder);
+    border-radius: 2.5vh;
+    position: relative;
+}
+
+.ProductCard_line .imgContainer{
+    height: 8vh;
+    width: 8vh;
+    background-color: var(--inputsBorder);
+    border-radius: .5vh;
+    position: relative;
+    display: flex;
+}
+
+.ProductCard .imgContainer img{
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+}
+
+
+.ProductCard .SKU_C .TagIndicator{
+    background-color: #D6E6F9;
+}
+
+.ProductCard_grid .SKU_C{
+    position: absolute;
+    top: 2vh;
+    left: 2vh;
+}
+
+.ProductCard_line  .SKU_C{
+    margin: auto 1vh;
+}
+
+.ProductCard .imgContainer .TagIndicator h5{
+    color: #007AFF;
+    font-size: clamp(2px,2vh,20px);
+}
+
+.ProductCard .ProductInfo{
+    padding: 1vh;
+    display: flex;
+    flex-direction: column;
+    margin-top: 1vh;
+}
+
+.ProductCard_line .ProductInfo{
+    width: 50%;
+    margin: auto 1vh;
+}
+
+.ProductCard .ProductInfo strong{
+    margin-bottom: .5vh;
+    font-size: clamp(2.2px,2.2vh,22px);
+    color: var(--mainText);
+    font-weight: 600;
+}
+
+.ProductCard .ProductInfo span{
+    font-size: clamp(1.8px,1.8vh,18px);
+    color: var(--descriptionText);
+    white-space: nowrap;        /* No permite saltos de línea */
+    overflow: hidden;           /* Oculta el texto extra */
+    text-overflow: ellipsis;
+}
+
+.ProductCard .attachedSpace {
+    margin-top: .5vh;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0 1vh;
+}
+
+.ProductCard_line .attachedSpace{
+    width: fit-content;
+    height: fit-content;
+    margin: auto 1vh;
+}
+
+.ProductCard .attachedSpace .TagIndicator{
+    background-color: #EBEDF8;
+}
+
+.ProductCard .attachedSpace .TagIndicator h5{
+    color: #1E1E1E;
+    font-size: clamp(1.5px,1.5vh,15px);
+}

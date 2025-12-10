@@ -17,7 +17,8 @@ const upload = multer({ dest: CHUNKS_DIR });
 // SGA General
 
     // Special actions
-    
+    router.post("/uploadFiles", controller.uploadFile);
+
     router.post("/upload-chunk", upload.single("chunk"), controller.uploadChunk);
 
     router.post("/merge-chunks", controller.mergeChunks);

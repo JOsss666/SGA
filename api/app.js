@@ -16,6 +16,7 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+
 // Datos Conexion MYSQL
 const PG_HOST  = process.env.MYSQL_HOST;
 const PG_USER = process.env.MYSQL_USER;
@@ -37,7 +38,11 @@ const pool = new Pool({
     }
 });
 
-    
+// informacion para subida archivos
+const uploadDependence = multer({ storage: multer.memoryStorage() });
+
+const uploadMiddleware = uploadDependence.array("files", 10) // o la cantidad máxima que quieras;
+
 async function testDBConnection() {
     console.log(PG_USER);
 
@@ -324,6 +329,8 @@ export{
     cloudinary,
     encrypt,
     useDataBase,
+    uploadMiddleware,
+    uploadDependence
 }
 
 

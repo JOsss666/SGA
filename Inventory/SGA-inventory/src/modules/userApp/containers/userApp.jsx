@@ -34,6 +34,7 @@ import {BigTitle} from '../components/BigTitle'
 import {SearchDocument} from './SearchDocument'
 import { PathLocation } from '../components/PathLocation';
 import './userApp.css'
+import { Products } from './Products';
 
 export function UserApp(){
 
@@ -171,7 +172,8 @@ export function UserApp(){
                             <Route path="PricesList/:priceListName" element={<PricesListDetails info={{}}/>}/>
                             <Route path='/thirdparties/*' element={<ThirdParties/>} />
                             <Route path='/thirdparties/:thirdparty_id' element={<ThirdPartyDetail/>} />
-                            <Route path='/Products/' element={<Users/>} />
+                            <Route path='/Products/' element={<Products/>} />
+                            <Route path='/Products/:product_id' element={<ReferenceAnalitics/>} />
                             <Route path='/Search/' element={<SearchDocument/>} />
                             <Route path='/Categories/' element={<Users/>} />
                             <Route path='/users/' element={<Users/>} />

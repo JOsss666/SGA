@@ -1,6 +1,7 @@
 import { calcWeightedAverage, encrypt, isRelevanPrompt, useDataBase, actualDate } from "../app.js";
 import fs from "fs";
 import path from "path";
+import { uploadDependence } from "../app.js";
 import { send_API_AI } from "../ApiFunctions.js";
 const controller = {};
 
@@ -38,6 +39,27 @@ controller.mergeChunks = (req, res) => {
     fs.rmdirSync(chunkFolder);
 
     res.json({ message: "Archivo ensamblado correctamente", path: finalPath });
+};
+
+controller.uploadFile = async (req, res) => {
+    try {
+        const archivos = req.files;
+        if (!archivos || archivos.length === 0) {
+            return res.status(400).json({ mensaje: "No se enviaron archivos" });
+        }
+
+        const urls = [];
+
+        for (const archivo of archivos) {
+            const resultado = await uploadToCloudinary(archivo.buffer);
+            urls.push(resultado.secure_url);
+        }
+
+        res.json({ urls });
+
+    } catch (e) {
+        res.status(500).json({ mensaje: e.message });
+    }
 };
 
 
