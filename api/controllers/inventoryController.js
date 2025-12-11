@@ -190,8 +190,18 @@ inventoryController.createCellar = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `INSERT into "Inventory".cellars(company_id,store_id,cellar_name,cellar_location) VALUES(?,?,?,?);`
-        let consulta = await useDataBase(sentence,[info.company_id,info.store_id,info.cellar_name,info.cellar_location],2);
+        let sentence = `
+            INSERT into "Inventory".cellars(
+                company_id,
+                store_id,
+                name,
+                address
+            ) VALUES($1,$2,$3,$4);`
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.store_id,
+            info.name,
+            info.address],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -208,13 +218,29 @@ inventoryController.getCellars = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `SELECT * FROM "Inventory".cellars WHERE company_id = ? `;
-        if(info.store_id != undefined){
-            sentence += `and store_id = ? ;`
-        }else{
-            sentence += ';'
+        let values = [];
+        let whereClauses = [];
+        console.log(info)
+        whereClauses.push(`company_id = $${values.length +1}`)
+        values.push(info.company_id)
+        const storeIdParsed = Number(info.store_id);
+
+        if(Number.isInteger(storeIdParsed)) {
+            whereClauses.push(`store_id = $${values.length + 1}`);
+            values.push(storeIdParsed);
         }
-        let consulta = await useDataBase(sentence,[info.company_id,info.store_id],1)
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
+
+        let sentence = `
+            SELECT * FROM 
+                "Inventory".cellars
+            ${whereQuery} ;
+            `;
+        
+        let consulta = await useDataBase(sentence,values,1)
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })

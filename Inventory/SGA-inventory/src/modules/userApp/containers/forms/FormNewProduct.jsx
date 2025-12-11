@@ -10,6 +10,7 @@ import './FormNewProduct.css'
 import { SearchinList } from '../../components/SearchInList'
 import { NewElementSelect } from '../../components/NewElementSelect'
 import { FileInput } from '../../components/FileInput'
+import { FormNewCategory } from './FormNewCategory'
 
 export function FormNewProduct({reloadFun}){
  
@@ -196,7 +197,9 @@ export function FormNewProduct({reloadFun}){
                         <FormInput title={'Nombre'} action={setName} placeholder={'Nombre de tu producto'} value={name} disabled={disabled}/>
                         <FormInput title={'Código'} action={setCode} placeholder={'SKU#....'} value={code} disabled={disabled}/>
                         <SearchinList title={'Categorias'} action={setCategory_id} placeHolder={'Seleccine una o varias'} list={categories} specialOption={
-                            <NewElementSelect title={'Crear nueva categoría'}/>
+                            <NewElementSelect title={'Crear nueva categoría'} onClick={()=>{
+                                popInAlert(<FormNewCategory/>)
+                            }}/>
                         } disabled={disabled}/>
                         <FormInput title={'Descripción'} action={setDescription} value={description} placeholder={'Descripción del producto'} disabled={disabled} textArea={true}/>
                     </section>

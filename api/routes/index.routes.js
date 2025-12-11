@@ -56,6 +56,8 @@ router.post('/createAccountPlan',controller.createAccountsPlan);
 
 router.post('/createCostCenter',controller.createCostCenter);
 
+router.post('/getCostCenters',controller.getCostCenters);
+
 router.post('/createStore',controller.createStore);
 
 router.post('/deleteStore',controller.deleteStore);

@@ -34,6 +34,8 @@ import { ThirdParties } from './ThirdParties';
 import { MyBussines } from './MyBussines';
 import { MyBussinesUnits } from './MyBussinesUnits';
 import { Settings } from './Settings';
+import { CostCenters } from './CostCenters';
+import { StoreDetail } from './StoreDetail';
 
 export function UserApp(){
 
@@ -165,8 +167,9 @@ export function UserApp(){
                     <Routes>
                             <Route path='/' element={<HomeProcess/>} />
                             <Route path='/myBussines/' element={<MyBussines/>}/>
+                            <Route path='/myBussines/costCenters' element={<CostCenters/>}/>
                             <Route path='/myBussines/Units' element={<MyBussinesUnits/>}/>
-                            <Route path='/myBussines/Units/:store_id' element={<PathLocation/>}/>
+                            <Route path='/myBussines/Units/:store_id' element={<StoreDetail/>}/>
                             <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
                             <Route path='/modules/*' element={<Modules/>}/>
                             <Route path='/services' element={<Services/>}/>
