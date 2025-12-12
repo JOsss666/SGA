@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "start": "nodemon ./api/server.js",
+    "start": "node ./api/server.js",
+    "server-dev": "nodemon ./api/server.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },
