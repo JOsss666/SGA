@@ -10,16 +10,20 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "dom-to-image-more": "^3.7.2",
-    "exceljs": "^4.4.0",
-    "html2canvas": "^1.4.1",
-    "jspdf": "^3.0.3",
-    "papaparse": "^5.5.3",
-    "react-virtualized-auto-sizer": "^1.0.26",
-    "react-window": "^2.2.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "recharts": "^3.2.1"
+    "react-router-dom": "^7.4.0",
+    "react-pdf": "^10.2.0",
+    "react-virtualized-auto-sizer": "^1.0.26",
+    "react-window": "^2.2.1",
+    "recharts": "^3.2.1",
+    "html2canvas": "^1.4.1",
+    "dom-to-image-more": "^3.7.1",
+    "jspdf": "^3.0.3",
+    "axios": "^1.11.0",
+    "papaparse": "^5.5.3",
+    "xlsx": "^0.18.5",
+    "lightweight-charts": "^5.0.9"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

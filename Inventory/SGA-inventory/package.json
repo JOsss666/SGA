@@ -11,17 +11,20 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "cloudinary": "^2.7.0",
-    "crypto": "^1.0.1",
-    "dotenv": "^17.0.1",
-    "lightweight-charts": "^5.0.8",
-    "mysql": "^2.18.1",
-    "mysql2": "^3.14.1",
-    "nodemailer": "^7.0.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "react-router-dom": "^7.4.0",
-    "xlsx": "^0.18.5"
+    "react-pdf": "^10.2.0",
+    "react-virtualized-auto-sizer": "^1.0.26",
+    "react-window": "^2.2.1",
+    "recharts": "^3.2.1",
+    "html2canvas": "^1.4.1",
+    "dom-to-image-more": "^3.7.1",
+    "jspdf": "^3.0.3",
+    "axios": "^1.11.0",
+    "papaparse": "^5.5.3",
+    "xlsx": "^0.18.5",
+    "lightweight-charts": "^5.0.9"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
