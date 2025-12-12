@@ -1,8 +1,7 @@
 
 import { urlSer } from "../App";
-import domtoimage from "dom-to-image-more";
 import Papa from 'papaparse';
-import ExcelJs from 'exceljs';
+import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -29,37 +28,46 @@ export async function postInfo(route,informacion){
     })
 }
 
-export async function parseToXlsx(info, download, columns, name) {
-    const workbook = new ExcelJs.Workbook();
-    const worksheet = workbook.addWorksheet(name || "Hoja 1");
+export function parseToXlsx(info, download, columns, name) {
+    // Crear hoja
+    let worksheet;
+
     if (columns && Array.isArray(columns)) {
-        worksheet.columns = columns;
-        worksheet.addRows(info);
+        // Formato con columnas definidas
+        const rows = info.map(row => {
+            const obj = {};
+            columns.forEach(col => {
+                obj[col.header] = row[col.key];
+            });
+            return obj;
+        });
+        worksheet = XLSX.utils.json_to_sheet(rows);
     } else {
-        // Si no hay columnas, inferir encabezados automáticamente
-        if (info.length > 0 && typeof info[0] === "object") {
-        const headers = Object.keys(info[0]);
-        worksheet.addRow(headers);
-        info.forEach(obj => worksheet.addRow(Object.values(obj)));
-        } else {
-        worksheet.addRows(info);
-        }
+        // Inferir columnas automáticamente
+        worksheet = XLSX.utils.json_to_sheet(info);
     }
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
+
+    // Crear libro
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, name || "Hoja1");
+
+    // Generar archivo excel
+    const wbout = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+
+    const blob = new Blob([wbout], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", name ? `${name}.xlsx` : "descarga.xlsx");
+
     if (download) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = (name || "archivo") + ".xlsx";
         link.click();
     } else {
-        return link;
+        return blob;
     }
 }
-
 
 export  async function parseToCsv(info,download,name){
     const newCsv = Papa.unparse(info);
@@ -149,8 +157,6 @@ export async function componentToPdf(component,download = true,options = {},name
         return pdf;
     }
 }
-
-
 
 
 export function copyToClipBoard(text){
@@ -260,192 +266,49 @@ export async function getAttached(type,attached,paramsDB) {
 }
 
 
-export async function ScreenShotElement(element, name = "captura.png") {
-    if (!element) {
-        console.error("Elemento no encontrado para capturar.");
-        return;
-    }
-
-    // Guardar estilos originales
-    const originalOverflow = element.style.overflow;
-    const originalHeight = element.style.height;
-
-    try {
-        // Expandir el elemento para mostrar todo su contenido
-        element.style.overflow = "visible";
-        element.style.height = "auto";
-
-        // Esperar un pequeño tiempo para que el DOM se actualice visualmente
-        await new Promise((resolve) => setTimeout(resolve, 200));
-
-        // Capturar el elemento completo
-        const dataUrl = await domtoimage.toPng(element, {
-        quality: 1,
-        bgcolor: "#ffffff",
-        cacheBust: true,
-        width: element.scrollWidth,
-        height: element.scrollHeight,
-        });
-
-        // Crear y activar la descarga
-        const link = document.createElement("a");
-        link.download = name;
+export async function ScreenShotElement(elemet,name){
+    domtoimage.toPng(elemet)
+    .then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = name != undefined? name:'captura.png';
         link.href = dataUrl;
         link.click();
+    })
+    .catch((error) => {
+        console.error('Error al generar la imagen:', error);
+    });
+}
+
+
+export const uploadFiles = async (files) => {
+    if (!files || files.length === 0) {
+        throw new Error("Debe proporcionar al menos un archivo.");
+    }
+
+    const formData = new FormData();
+
+    // Append de varios archivos
+    for (let i = 0; i < files.length; i++) {
+        console.log("Agregando:", files[i].name);
+        formData.append("files", files[i]); // CORRECTO
+    }
+
+    try {
+        const respuesta = await fetch(urlSer + "/uploadFiles", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!respuesta.ok) {
+            const errorData = await respuesta.json().catch(() => ({}));
+            throw new Error(errorData.mensaje || `Error HTTP: ${respuesta.status}`);
+        }
+
+        return await respuesta.json();
 
     } catch (error) {
-        console.error("Error al generar la imagen:", error);
-    } finally {
-        // Restaurar estilos originales
-        element.style.overflow = originalOverflow;
-        element.style.height = originalHeight;
+        console.error("Error al subir los archivos:", error.message);
+        throw error;
     }
-}
-
-
-//Funciones estadisticas
-
-
-//media (promedio)
-export function media(datos) {
-    // Validar si no hay datos
-    if (!datos || datos.length === 0) return 0;
-        // Recorre los datos sumando cada numero al acumulador
-        const suma = datos.reduce((acum, valor) => acum + valor, 0);
-    return suma / datos.length;
-}
-
-//mediana
-export function mediana(datos){
-    if (!datos || datos.length === 0)return 0;
-    //copia de los datos ordenados para no editar el orden original
-    const orden = [...datos].sort ((a,b) => a - b);
-    const mitad = Math.floor(orden.length / 2)
-
-    //Si es par hacer el promedio de los dos valores del centro
-    if(orden.length % 2 === 0){
-        return(orden[mitad - 1] + orden[mitad]) / 2;
-    } else {
-        //Si es impar tomar el valor central
-        return orden[mitad];
-    } 
-}
-
-//moda
-export function moda(datos){
-    //retornamos datos si no hay moda
-    if(!datos || datos.length === 0) return [];
-
-    const frecuencia = {};
-    let maxF = 0;
-    const modass = []
-
-    //contar frecuencias de cada valor
-    datos.forEach(valor => {
-        frecuencia[valor] = (frecuencia[valor] || 0) + 1;
-        if (frecuencia[valor] > maxF) {
-            maxF = frecuencia[valor]
-        }
-    });
-
-    // Si la frecuencia máxima es 1 y hay más de un elemento, no hay moda
-    if (maxF === 1 && datos.length > 1) {
-        return [];
-    }
-
-    //valores con maxima frecuencia
-    Object.keys(frecuencia).forEach(valor => {
-        if (frecuencia[valor] === maxF){
-            modass.push(Number(valor));
-        }
-    });
-    return modass;
-}
-
-//Rango
-export function rango(datos) {
-    if (!datos || datos.length === 0) return 0;
-    
-    const max = Math.max(...datos);
-    const min = Math.min(...datos);
-
-    return max - min;
-}
-
-
-//definir funcion percentil (metodo 6) 
-export function percentil(datos , p){
-
-    //validar si hay datos
-    if (!datos || datos.length === 0) return 0;
-
-        //percentil entre 0 y 100
-        if (p < 0 || p > 100) throw new error ("percentil entre 0 y 100")
-            const orden = [...datos].sort((a,b) => a-b);
-            const n = orden.length;
-
-            //metodo 6
-            const posicion = (n + 1) * (p / 100);
-
-            if (posicion <= 1) return orden[0];
-            if (posicion >= n) return orden[n - 1];
-    
-            const partEnt = Math.floor(posicion) - 1;
-            const partDeci = posicion - Math.floor(posicion);
-    
-        return orden[partEnt] + partDeci * (orden[partEnt + 1] - orden[partEnt]);
-}
-
-//rango intercuartilico
-export function ric(datos){
-    if (!datos || datos.length === 0) return 0;
-    
-        const q1 = percentil(datos , 25);
-        const q3 = percentil(datos , 75);
-    return q1 - q3;
-}
-
-
-//varianza
-export function varianza(datos, poblacional = true) {
-    if (!datos || datos.length === 0) return 0;
-    
-        //Si solo hay un elemento, no hay variación
-        if (datos.length === 1) return 0;
-    
-            const promedio = media(datos);
-    
-            //suma de las diferencias al cuadrado
-            const sumCuadrados = datos.reduce((suma, valor) => {
-        return suma + Math.pow(valor - promedio, 2);
-        }, 0);
-
-    return sumCuadrados / datos.length;
-}
-
-
-//desviacion estandar
-export function desviacionEstandar(datos) {
-    if (!datos || datos.length === 0) return 0;
-    return Math.sqrt(varianza(datos));
-}
-
-
-//coeficiente de variación
-export function CoefVari(datos) {
-    if (!datos || datos.length === 0) return 0;
-        const mediaVal = media(datos);
-        if (mediaVal === 0) return 0;
-        const desviacion = desviacionEstandar(datos);
-    return (desviacion / mediaVal) * 100;
-}
-
-//Z-score
-export function zscore(valor, datos) {
-    if (!datos || datos.length === 0) return 0;
-    const mediaVal = media(datos);
-    const desviacion = desviacionEstandar(datos);
-    if (desviacion === 0) return 0;
-    return (valor - mediaVal) / desviacion;
-}
+};
 
