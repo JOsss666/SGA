@@ -10,48 +10,41 @@
 .CategoriesDetail .ContentPanel {
     display: flex;
     flex-direction: column;
+    position: relative;
     gap: 1vh;
-    width: 20vh;
+    background-color: var(--menuAside);
     padding: 2vh;
-    
-    border-right: .5vh solid #F0F0F0;
+    border-radius: 2vh;
+    width: 15vw;
     height: 85vh;
+    overflow-y: auto;
+    scrollbar-width: none;
 }
 
-.CategoriesDetail .ContentPanel .list {
-    font-family: sans-serif;
+.CategoriesDetail .ContentPanel:hover{
+    scrollbar-width: auto;
 }
 
 .CategoriesDetail .ContentPanel .CategoriList {
     list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.CategoriesDetail .ContentPanel .Categori {
+    padding: .5vh 1vh;
+    font-size: clamp(2px,2vh,20px);
+    color:var(--descriptionText);
+    cursor: pointer;
     font-weight: 500;
-    margin-top: 1.5vh;
-    font-size: 2.2vh;
 }
 
-.CategoriesDetail .ContentPanel .SubcategoriList {
-    list-style: none;
-    padding-left: 1.5vh; /* Sangría */
-    margin: 1vh 0;
+.CategoriesDetail .ContentPanel .CategoriList:hover{
+    color:var(--mainText);
+    font-weight: 600;
 }
-
-.CategoriesDetail .ContentPanel .SubcategoriList li {
-    color: #5D5D5D;
-    font-weight: 400;
-    margin: 1vh 0;
-    font-size: 2vh;
-}
-
 
 .CategoriesDetail .ContentMain{
     display: flex;
     flex-direction: column;
     gap: 3vh;
+    width: 90%;
+    padding-left: 3vh;
 }
 .CategoriesDetail .ContentMain .HeadCategories{
     display: flex;
@@ -83,7 +76,7 @@
 }
 
 .CategoriesDetail .ContentMain .MenuBarCategories .SearchBar{
-    width: 38vh;
+    width: 20vw;
     padding-right: 1.5vh;
 }
 
@@ -108,7 +101,6 @@
 
 
 .CategoriesDetail .ContentMain .MenuBarCategories .SelectOptions .contentOptions{
-    width: 26vh;
     box-shadow: 0 .2vh .8vh #0003;
     padding-left: 1.5vh;
 }
@@ -117,4 +109,7 @@
     display: flex;
     flex-wrap: wrap;    
     gap: 2vh;
+    height: 65vh;
+    overflow-y: auto;
+    padding: .2vh;
 }

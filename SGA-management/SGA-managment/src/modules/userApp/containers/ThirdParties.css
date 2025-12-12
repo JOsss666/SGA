@@ -122,10 +122,11 @@
 }
 
 .thirdparties-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 2dvh 1.5dvw;
-    justify-content: start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2vh;
+    overflow-y: auto;
+    height: 70vh;
 }
 
 .thirdparties-loading {

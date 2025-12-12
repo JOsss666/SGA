@@ -44,7 +44,7 @@ export function MyBussinesUnits(){
     },[])
 
     const handleNavigateStore = (path)=>{
-        navigate(`/SGA_management/${params.company_key}/${params.user_key}/myBussines/Units/${path}`)
+        navigate(`/SGA_INVENTORY/${params.company_key}/${params.user_key}/Stores/${path}`)
     }
 
 

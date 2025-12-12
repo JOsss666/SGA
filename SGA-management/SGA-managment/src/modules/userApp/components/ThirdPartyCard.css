@@ -2,7 +2,7 @@
 
 .ThirdpartyCard {
     background: var(--bg);
-    border-radius: 0.8rem;
+    border-radius:2vh;
     padding: 1.5dvh 1.5dvw;
     border: 0.1dvh solid var(--inputsBorder);
     box-shadow: 0 0.3dvh 0.6dvh rgba(0, 0, 0, 0.1);
@@ -12,6 +12,7 @@
     display: flex;
     flex-direction: column;
     position: relative;
+    width: 20vw;
 }
 
 .thirdparty-card:Hover {

@@ -12,27 +12,44 @@ import { useAppInfo } from '../../../context/context';
 import { useEffect, useState } from 'react';
 import { postInfo } from '../../../utils/functions';
 import { LoadingSpace } from './LoadingSpace';
+import { useNavigate, useParams } from 'react-router-dom';
+import { NoResults } from './NoResults';
+import { FormNewProduct } from './forms/FormNewProduct';
 
 export function CategoriesDetail(){
+    const navigate = useNavigate();
+    const params = useParams();
     const [displayGird,setDisplayGrid] = useState('grid');
     const [searchVal,setSearchVal] = useState('');
     const {appInfo} = useAppInfo();
     const [products,setProducts] = useState([]);
     const [loading,setLoading] = useState(false);
-
+    const [categories,setCategories] = useState([]);
+        const getCategories = async()=>{
+            setLoading(true)
+            let res = await postInfo('/inventory/getCategories',{
+                company_id:appInfo.company_id
+            });
+            setCategories(res[1]);
+            setLoading(false)
+        }
+    
     const getProducts = async()=>{
         setLoading(true);
         let res = await postInfo('/inventory/getProducts',{
-            company_id:appInfo.company_id
+            company_id:appInfo.company_id,
+            category_id:params.category_id
         })
-        if(res[0]){
-            setProducts(res[1])
-        }
+        setProducts(res[1])
         setLoading(false);
     }
 
     const handleNavigate = (path)=>{
-        navigate(`/SGA_INVENTORY/${params.company_key}/${params.user_key}/Products/${path}`);
+        navigate(`/SGA_INVENTORY/${params.company_key}/${params.user_key}/Categories/${path}`);
+    }
+
+    const handleNavigateProducts = (path)=>{
+        navigate(`/SGA_INVENTORY/${params.company_key}/${params.user_key}/Categories/${path}`);
     }
 
     const filterOptions = (value) => {
@@ -41,32 +58,25 @@ export function CategoriesDetail(){
     }
 
     useEffect(()=>{
-        getProducts();
+        getCategories();
     },[])
+
+    useEffect(()=>{
+        getProducts();
+    },[params.category_id])
 
     return( 
         <div className="CategoriesDetail">
-            <div className="ContentPanel">
-                <div className="list">
-                    <ul className="CategoriList">
-                        <li className="Categori">
-                            Categoría 1
-                            <ul className="SubcategoriList">
-                                <li>Sub-categoría</li>
-                                <li>Sub-categoría</li>
-                                <li>Sub-categoría</li>
-                                <li>Sub-categoría</li>
-                            </ul>
+            <ul className="ContentPanel">
+                    {categories.map((element,index)=>(
+                        <li onClick={()=>{
+                            console.log('Redirigiendo categoría')
+                            handleNavigate(element.id)
+                        }} key={index} className='CategoriList'>
+                            {element.name}
                         </li>
-
-                        <li className="Categori">Categoría 1</li>
-                        <li className="Categori">Categoría 1</li>
-                        <li className="Categori">Categoría 1</li>
-                        <li className="Categori">Categoría 1</li>
-                        <li className="Categori">Categoría 1</li>
-                    </ul>
-                </div>
-            </div>
+                    ))}
+            </ul>
             <div className="ContentMain">
                 <div className="HeadCategoriesDetail">
                     <div className="TitlePath">
@@ -76,7 +86,7 @@ export function CategoriesDetail(){
                     <DescriptionSpan text={'Esta es la descripción de la categoría actual' }/>
                 </div>
                 <div className="MenuBarCategories">
-                    <SearchBar placeholder={'Buscar'}/>
+                    <SearchBar placeholder={'Buscar'} action={setSearchVal}/>
                     <i className="fa-solid fa-bars IconList"/>
                     <i className="fa-solid fa-table-cells-large IconList"/>
                     <SelectOptions title={'Orden'} options={['Ascendente','Descendente']}/>
@@ -90,9 +100,18 @@ export function CategoriesDetail(){
                 )}
                     {!loading && products.map((element,index)=>(
                         <ProductCard info={element} key={index} hidden={!filterOptions(JSON.stringify(element))} display={displayGird} onClick={()=>{
-                            handleNavigate(element.id)
+                            handleNavigateProducts(element.id)
                         }}/>
                     ))}
+                    {!loading && products.length == 0 && (
+                        <NoResults 
+                            title={`La categoria ${params.category_id} no tiene productos asociados`}
+                            newOption={'Crear nuevo producto'}
+                            children={
+                                <FormNewProduct/>
+                            }
+                        />
+                    )}
                 </div>
             </div>
         </div>

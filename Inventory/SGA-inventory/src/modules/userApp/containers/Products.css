@@ -42,6 +42,7 @@
 
 .Products .gridP_line{
     flex-direction: column;
+    flex-wrap: nowrap;
     gap: 1vh;
 }
 

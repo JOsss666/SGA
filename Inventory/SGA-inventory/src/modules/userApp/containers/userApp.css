@@ -140,13 +140,15 @@
     margin-top: 10vh;
     transition: .3s;
     overflow-y: auto;
+    scrollbar-width: none;
 }
 
 /* ancho del scrollbar */
-.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar {
-    width: 10px;           /* vertical */
+.UserApp ::-webkit-scrollbar {
+    width: 1vh;           /* vertical */
     height:50%;          /* horizontal */
 }
+
 
 .UserApp .asideMenuApp .menusHolder:hover {
   scrollbar-width: auto; /* Firefox */
@@ -154,15 +156,16 @@
 
 
 /* fondo del track */
-.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar-track {
-    background: var((var(--inputsBg)));
+.UserApp ::-webkit-scrollbar-track {
+    background: var(--cardHover);
     border-radius: 8px;
 }
 
 /* thumb (la "barrita" que se mueve) */
-.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar-thumb {
+.UserApp ::-webkit-scrollbar-thumb {
     border-radius: 8px;
-    border: .1vh solid var(--inputsBg);
+    background-color: var(--iconHover);
+    border: .1vh solid var(--inputsBorder);
 }
 
 

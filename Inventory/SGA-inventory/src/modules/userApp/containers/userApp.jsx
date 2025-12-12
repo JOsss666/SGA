@@ -33,6 +33,7 @@ import {RecordMovents} from './RecordMovements'
 import {BigTitle} from '../components/BigTitle'
 import {SearchDocument} from './SearchDocument'
 import { PathLocation } from '../components/PathLocation';
+import {StoreDetail} from './StoreDetail'
 import { Categories } from './Categories';
 import './userApp.css'
 import { Products } from './Products';
@@ -183,7 +184,7 @@ export function UserApp(){
                             <Route path='/users/' element={<Users/>} />
                             <Route path='/users/:user_id' element={<DetailsUser/>} />
                             <Route path="Stores" element={<MyBussinesUnits/>}/>
-                            <Route path='/Stores/:store_id' element={<PathLocation/>}/>
+                            <Route path='/Stores/:store_id' element={<StoreDetail/>}/>
                             <Route path='/reports/*' element={<Reports/>} />
                             <Route path="Movements" element={<MovementsInventory/>}/>
                             <Route path="Movements/record" element={<RecordMovents/>}/>
