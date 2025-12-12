@@ -3,11 +3,11 @@ import cors from 'cors';
 import routes from './routes/index.routes.js'
 
 const app = express();
-const assignedPort = process.env.PORT || 3000;
+const asignedPort  = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(routes);
 
-app.listen(assignedPort, () => {
+app.listen(asignedPort , () => {
     console.log('Servidor SGA_inventory v1.2 Escuchando en el puerto', asignedPort);
 });
