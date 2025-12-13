@@ -6,7 +6,7 @@ const app = express();
 const asignedPort  = process.env.PORT || 3000;
 
 // *** Configuración CORRECTA y SEGURA para Producción ***
-const productionOrigin = 'http://localhost:5173'; 
+const productionOrigin = 'https://sga-managemet.onrender.com'; 
 
 app.use(cors({
     origin: productionOrigin, // El servidor responderá SOLO con este origen
