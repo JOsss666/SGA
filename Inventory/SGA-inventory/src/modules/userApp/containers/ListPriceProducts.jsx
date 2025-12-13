@@ -1,5 +1,4 @@
-
-import { ActionButton } from '../components/actionButton'
+import { ButtonDownload } from '../components/ButtonDownload'
 import { SearchBar } from '../components/SearchBar'
 import { SelectOptions } from '../components/SelectOptions'
 import { TablePrices } from '../components/TablePrices'
@@ -21,7 +20,7 @@ export function ListPriceProducts({info}){
                     <span>Productos: <strong>2,300</strong></span>
                 </div>
                 <div className="actionsList">
-                    <ActionButton text={'Descargar Lista'} children={<i className="fa-solid fa-file-arrow-down"/>} options={['pdf','csv','xlsx']}/>
+                    <ButtonDownload title={'Descargar listas'}/>
                 </div>
             </div>
             <div className="filtersList">
