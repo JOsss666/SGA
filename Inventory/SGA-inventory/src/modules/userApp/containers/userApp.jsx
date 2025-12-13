@@ -12,7 +12,7 @@ import { HomeProcess } from './HomeProcess';
 import { NotificationsApp } from './NotificationsApp';
 import { AlertsHolder } from './AlertsHolder';
 import { Reports } from './Reports';
-import { DocumentPreview } from './Alerts/DocumentPreview';
+import { DocumentPreview } from './alerts/DocumentPreview';
 import { ChatAi } from './ChatAi';
 import { SwitchColorMode } from '../components/SwitchColorMode';
 import { Analytics } from './Analytics'; 
