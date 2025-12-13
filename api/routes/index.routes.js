@@ -7,7 +7,7 @@ import multer from "multer";
 import path from "path";
 import contabiltyController from '../controllers/contabilityController.js';
 import inventoryController from '../controllers/inventoryController.js'
-import { uploadMiddleware } from '../app.js';
+import { uploadMiddleware } from '../uploadMiddleWare.js';
 const router = express.Router();
 
 // temporal folder for chunks

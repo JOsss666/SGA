@@ -1,22 +1,13 @@
 import pkg from 'pg';
-import { v2 as cloudinary } from 'cloudinary'; // Importando `v2` directamente de cloudinary
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
-import path from 'path';
 import dotenv from 'dotenv';
 import fs from 'fs';
-import multer from 'multer';
 import * as transformers from "@xenova/transformers";
 
 // Cargar las variables de entorno
 dotenv.config();
     // Informacion Cloudynary
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
-});
-
 // Datos Conexion MYSQL
 const PG_HOST  = process.env.MYSQL_HOST;
 const PG_USER = process.env.MYSQL_USER;
@@ -38,27 +29,6 @@ const pool = new Pool({
     }
 });
 
-// informacion para subida archivos
-const uploadDependence = multer({ storage: multer.memoryStorage() });
-
-async function uploadToCloudinary(buffer, originalName) {
-    return new Promise((resolve, reject) => {
-        const config = {
-            folder: "SGA_imgs",     // cambia si quieres
-            resource_type: "auto",
-            public_id: path.parse(originalName).name + "-" + Date.now()
-        };
-
-        const stream = cloudinary.uploader.upload_stream(config, (err, result) => {
-            if (err) return reject(err);
-            resolve(result);
-        });
-
-        stream.end(buffer);
-    });
-}
-
-const uploadMiddleware = uploadDependence.array("files", 10) // o la cantidad máxima que quieras;
 
 async function testDBConnection() {
     console.log(PG_USER);
@@ -344,12 +314,8 @@ async function createTax(rows){
 }
 
 export{
-    cloudinary,
     encrypt,
-    useDataBase,
-    uploadMiddleware,
-    uploadDependence,
-    uploadToCloudinary
+    useDataBase
 }
 
 

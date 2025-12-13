@@ -24,7 +24,7 @@ export function Login() {
         setLoading(true);
         setError(null);
         const formInfo = { mail, pass };
-        const res = await postInfo("/login", formInfo);
+        const res = await postInfo("/logIn", formInfo);
         if (Array.isArray(res) && res[0]) {
             handleRedirect(res[1][0])
         } else {

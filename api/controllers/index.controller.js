@@ -1,7 +1,7 @@
 import { calcWeightedAverage, encrypt, isRelevanPrompt, useDataBase, actualDate } from "../app.js";
 import fs from "fs";
 import path from "path";
-import { uploadToCloudinary } from "../app.js";
+import { uploadToCloudinary } from "../uploadMiddleWare.js";
 import { send_API_AI } from "../ApiFunctions.js";
 const controller = {};
 
@@ -182,22 +182,27 @@ controller.getCompanyInfo = (req,res)=>{
         data += chunk
     })
     req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            SELECT 
-                "Ecosystem".companies.*,
-                "Ecosystem".account_plans.id AS "accountPlanId",
-                "Ecosystem".account_plans.type AS "accountPlanType"
-            FROM
-                "Ecosystem".companies 
-            LEFT JOIN
-                "Ecosystem".account_plans
-            ON
-                "Ecosystem".companies.company_id = "Ecosystem".account_plans.company_id
-            WHERE "Ecosystem".companies.company_key = $1 ;`
-        let consulta = await useDataBase(sentence,[info],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
+        if(data != undefined){
+            let info = JSON.parse(data);
+            let sentence = `
+                SELECT 
+                    "Ecosystem".companies.*,
+                    "Ecosystem".account_plans.id AS "accountPlanId",
+                    "Ecosystem".account_plans.type AS "accountPlanType"
+                FROM
+                    "Ecosystem".companies 
+                LEFT JOIN
+                    "Ecosystem".account_plans
+                ON
+                    "Ecosystem".companies.company_id = "Ecosystem".account_plans.company_id
+                WHERE "Ecosystem".companies.company_key = $1 ;`
+            let consulta = await useDataBase(sentence,[info],1);
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(consulta));
+        }else{
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(consulta));
+        }
     })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
