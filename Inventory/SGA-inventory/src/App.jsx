@@ -4,7 +4,7 @@ import { AlertProvider,AppInfoProvider,PreviewProvider,AiAssistanProvider, Notif
 import { LandingPage } from './modules/LandingPage/containers/LandingPage';
 import { Login } from './modules/Login/Login';
 import { SignUp } from './modules/Login/SignUp';
-import { UserApp } from './modules/userApp/containers/UserApp';
+import {UserApp} from '../src/modules/userApp/containers/UserApp'
 //export const urlSer = 'http://localhost:3000';
 export const urlSer = 'https://sga-2zgp.onrender.com';
 
