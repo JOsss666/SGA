@@ -14,7 +14,11 @@ function App() {
         <div className="appSpace">
           <Router>
                 <Routes>
-                    <Route path="" element={<><span>LandingPage Proceso</span></>}/>
+                    <Route path="" element={
+                      <AppInfoProvider>
+                        <Login/>
+                      </AppInfoProvider>
+                    }/>
                     <Route path="/SGA_INVENTORY/login" element={
                       <AppInfoProvider>
                         <Login/>
