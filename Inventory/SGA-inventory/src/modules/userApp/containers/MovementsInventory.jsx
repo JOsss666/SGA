@@ -1,17 +1,8 @@
-import { ActionButton } from "../components/actionButton";
-import { ChartIndicator } from "../components/ChartIndicator";
-import { FormButton } from "../components/FormButton";
-import { MovementCard } from "../components/MovementCard";
-import { NormalCard } from "../components/NormalCard";
-import { SectionTitle } from "../components/SectionTitle";
-import { SubSectionTitle } from "../components/SubSectionTitle";
 import { useAlert } from "../../../context/context";
 import './MovementsInventory.css'
-import { FormNewDocument } from "./forms/FormNewDocument";
 import { postInfo } from "../../../utils/functions";
 import { useAppInfo } from "../../../context/context";
 import { useEffect, useState } from "react";
-import { WarningForm } from "../components/WarningForm";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BoldTitle } from "../components/BoldTitle";
 import { DescriptionSpan } from "../components/DescriptionSpan";
