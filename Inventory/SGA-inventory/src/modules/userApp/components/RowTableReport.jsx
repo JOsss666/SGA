@@ -3,7 +3,6 @@ import { CheckSquare } from "./CheckSquare"
 import { UserCard } from "./UserCard"
 import './RowTableReport.css'
 import { useAlert, usePreview } from "../../../context/context"
-import { DocumentPreview } from "../containers/Alerts/DocumentPreview"
 import { useLocation, useNavigate } from "react-router-dom"
 
 export function RowTableReport({columns,info,type,hidden}){
