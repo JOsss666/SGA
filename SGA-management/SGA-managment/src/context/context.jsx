@@ -303,7 +303,7 @@ export function AppInfoProvider({children}){
     }
 
     useEffect(()=>{
-        if(location.pathname != '/SGA_process/logIn' && location.pathname != '/SGA_process/SignUp'){
+        if(location.pathname != '/SGA_management/logIn' && location.pathname != '/SGA_management/SignUp' && location.pathname != '/'){
             getAppData();
         }
     },[])
