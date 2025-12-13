@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ButtonMenu } from './ButtonMenu'
-import './CardCategory.css'
 import { TreeFormNewAccount } from '../containers/forms/TreeFormNewAccount';
+import './cardCategory.css'
 
 export function CardCategory({info,hidden,reloadFun}){
 

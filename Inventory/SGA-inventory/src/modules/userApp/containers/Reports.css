@@ -13,11 +13,78 @@
 
 .Reports .spaceSelectReports{
     display: flex;
-    padding: 1vh;
     position: absolute;
     top: 12vh;
+    z-index: 10;
 }
 
 .Reports .spaceSelectReports .DespleList{
     margin-right: 2vh;
+}
+
+.Reports .galleryReports{
+    margin-top: 10vh;
+    height: 68vh;
+    padding: 2vh;
+    display: flex;
+    gap: 4vh;
+    flex-wrap: wrap;
+}
+
+.Reports .menuBar {
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 2vh 0;
+    margin-top: 8vh;
+}
+
+.Reports .menuBar .spaceSelectReports{
+    position: relative;
+    width: fit-content;
+    display: flex;
+    top: 0;
+    margin-right: 2vh;
+}
+
+.Reports .menuBar .spaceSelectReports .DespleList{
+    margin: 0 1vh;
+}
+
+
+.Reports .menuBar .optionsBar{
+    display: flex;
+    width: fit-content;
+    gap: 1.5vh;
+    margin: auto;
+    margin-top: 0;
+}
+
+.Reports .menuBar .optionsBar .IconList{
+    background-color: var(--inputsBg);
+    border-radius: 1vh;
+    height: fit-content;
+    box-shadow: 0 .2vh .8vh #0003;
+    font-size: 3.5vh;
+    align-content: center;
+    position: relative;
+    font-size: 3vh;
+    position: relative;
+    padding: 1vh;
+    color: var(--descriptionText);
+    cursor: pointer;
+}
+
+.Reports .menuBar .optionsBar .IconList:hover{
+    background-color: var(--cardHover);
+}
+
+.Reports .menuBar .optionsBar .SearchBar{
+    width: 34vh;
+}
+
+.Reports .menuBar .optionsBar .SelectOptions .contentOptions{
+    width: 12vh;
+    box-shadow: 0 .2vh .8vh #0003;
 }

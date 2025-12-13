@@ -26,7 +26,7 @@ export function Login() {
         setLoading(true);
         setError(null);
         const formInfo = { mail, pass };
-        const res = await postInfo("/login", formInfo);
+        const res = await postInfo("/logIn", formInfo);
         if (Array.isArray(res) && res[0]) {
             handleRedirect(res[1][0])
         } else {
@@ -41,7 +41,7 @@ export function Login() {
         <div className="Card">
             <div className="CardTitle">
             <BoldTitle text={'Iniciar Sesión'} />
-            <h2>SGA - Procesos</h2>
+            <h2>SGA - Administrativo</h2>
             </div>
             <form className="Form" id="loginForm" autoComplete="off" onSubmit={(e) => {
                     e.preventDefault();

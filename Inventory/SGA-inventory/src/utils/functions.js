@@ -1,7 +1,7 @@
 
 import { urlSer } from "../App";
 import Papa from 'papaparse';
-import ExcelJs from 'exceljs';
+import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -28,37 +28,46 @@ export async function postInfo(route,informacion){
     })
 }
 
-export async function parseToXlsx(info, download, columns, name) {
-    const workbook = new ExcelJs.Workbook();
-    const worksheet = workbook.addWorksheet(name || "Hoja 1");
+export function parseToXlsx(info, download, columns, name) {
+    // Crear hoja
+    let worksheet;
+
     if (columns && Array.isArray(columns)) {
-        worksheet.columns = columns;
-        worksheet.addRows(info);
+        // Formato con columnas definidas
+        const rows = info.map(row => {
+            const obj = {};
+            columns.forEach(col => {
+                obj[col.header] = row[col.key];
+            });
+            return obj;
+        });
+        worksheet = XLSX.utils.json_to_sheet(rows);
     } else {
-        // Si no hay columnas, inferir encabezados automáticamente
-        if (info.length > 0 && typeof info[0] === "object") {
-        const headers = Object.keys(info[0]);
-        worksheet.addRow(headers);
-        info.forEach(obj => worksheet.addRow(Object.values(obj)));
-        } else {
-        worksheet.addRows(info);
-        }
+        // Inferir columnas automáticamente
+        worksheet = XLSX.utils.json_to_sheet(info);
     }
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
+
+    // Crear libro
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, name || "Hoja1");
+
+    // Generar archivo excel
+    const wbout = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+
+    const blob = new Blob([wbout], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", name ? `${name}.xlsx` : "descarga.xlsx");
+
     if (download) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = (name || "archivo") + ".xlsx";
         link.click();
     } else {
-        return link;
+        return blob;
     }
 }
-
 
 export  async function parseToCsv(info,download,name){
     const newCsv = Papa.unparse(info);
@@ -269,3 +278,37 @@ export async function ScreenShotElement(elemet,name){
         console.error('Error al generar la imagen:', error);
     });
 }
+
+
+export const uploadFiles = async (files) => {
+    if (!files || files.length === 0) {
+        throw new Error("Debe proporcionar al menos un archivo.");
+    }
+
+    const formData = new FormData();
+
+    // Append de varios archivos
+    for (let i = 0; i < files.length; i++) {
+        console.log("Agregando:", files[i].name);
+        formData.append("files", files[i]); // CORRECTO
+    }
+
+    try {
+        const respuesta = await fetch(urlSer + "/uploadFiles", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!respuesta.ok) {
+            const errorData = await respuesta.json().catch(() => ({}));
+            throw new Error(errorData.mensaje || `Error HTTP: ${respuesta.status}`);
+        }
+
+        return await respuesta.json();
+
+    } catch (error) {
+        console.error("Error al subir los archivos:", error.message);
+        throw error;
+    }
+};
+

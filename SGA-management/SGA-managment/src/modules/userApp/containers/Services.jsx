@@ -8,20 +8,20 @@ import { useNavigate, useParams } from 'react-router-dom';
 export function Services(){
 
     const navigate = useNavigate();
-    const params = useParams();
+    const params = useParams(); 
 
     const handleNavigate = (path)=>{
         navigate(`/SGA_management/${params.company_key}/${params.user_key}/services/${path}`)
     }
 
     const [services,setServices] = useState([
-        {title:'Almacenamiento en la nube',className:'CloudingStorage'},
-        {title:'Mensajeria',className:'Messages'},
-        {title:'Estadisticas',className:'Analitycs'},
-        {title:'Publicidad',className:'Advertising'},
-        {title:'Personalizados',className:'OwnServices'},
-        {title:'Inteligencía Artificial',className:'Ai'},
-        {title:'Correo profesional',className:'ProfesionalMail'},
+        {title:'Almacenamiento en la nube',className:'CloudingStorage',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044183/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.png'},
+        {title:'Mensajeria',className:'Messages',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044345/mensajes_eygd9a.png'},
+        {title:'Estadisticas',className:'Analitycs',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044500/Estadisticas_phv9hy.png'},
+        {title:'Publicidad',className:'Advertising',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044183/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.png'},
+        {title:'Personalizados',className:'OwnServices',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044183/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.png'},
+        {title:'Inteligencía Artificial',className:'Ai',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044183/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.png'},
+        {title:'Correo profesional',className:'ProfesionalMail',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044183/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.png'},
     ]);
 
     return(

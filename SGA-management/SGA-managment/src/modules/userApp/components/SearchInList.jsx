@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import './SearchinList.css'
+import './SearchInList.css'
 
 export function SearchinList({title,placeHolder,list,disabled,action,children,specialOption,noActVal}){
     

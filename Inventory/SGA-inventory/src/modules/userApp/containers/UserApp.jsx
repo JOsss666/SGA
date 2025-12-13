@@ -12,7 +12,7 @@ import { HomeProcess } from './HomeProcess';
 import { NotificationsApp } from './NotificationsApp';
 import { AlertsHolder } from './AlertsHolder';
 import { Reports } from './Reports';
-import { DocumentPreview } from './Alerts/DocumentPreview';
+import { DocumentPreview } from './alerts/DocumentPreview';
 import { ChatAi } from './ChatAi';
 import { SwitchColorMode } from '../components/SwitchColorMode';
 import { Analytics } from './Analytics'; 
@@ -30,8 +30,15 @@ import {ThirdParties} from './ThirdParties'
 import {ThirdPartyDetail} from './ThirdPartyDetail'
 import {MovementsInventory} from './MovementsInventory'
 import {RecordMovents} from './RecordMovements'
-import './userApp.css'
 import {BigTitle} from '../components/BigTitle'
+import {SearchDocument} from './SearchDocument'
+import { PathLocation } from '../components/PathLocation';
+import {StoreDetail} from './StoreDetail'
+import { Categories } from './Categories';
+import { Products } from './Products';
+import { CategoriesDetail } from './CategoriesDetail';
+import './UserApp.css';
+
 
 export function UserApp(){
 
@@ -169,9 +176,15 @@ export function UserApp(){
                             <Route path="PricesList/:priceListName" element={<PricesListDetails info={{}}/>}/>
                             <Route path='/thirdparties/*' element={<ThirdParties/>} />
                             <Route path='/thirdparties/:thirdparty_id' element={<ThirdPartyDetail/>} />
+                            <Route path='/Products/' element={<Products/>} />
+                            <Route path='/Products/:product_id' element={<ReferenceAnalitics/>} />
+                            <Route path='/Search/' element={<SearchDocument/>} />
+                            <Route path='/Categories/' element={<Categories/>} />
+                            <Route path='/Categories/:category_id' element={<CategoriesDetail/>} />
                             <Route path='/users/' element={<Users/>} />
                             <Route path='/users/:user_id' element={<DetailsUser/>} />
                             <Route path="Stores" element={<MyBussinesUnits/>}/>
+                            <Route path='/Stores/:store_id' element={<StoreDetail/>}/>
                             <Route path='/reports/*' element={<Reports/>} />
                             <Route path="Movements" element={<MovementsInventory/>}/>
                             <Route path="Movements/record" element={<RecordMovents/>}/>

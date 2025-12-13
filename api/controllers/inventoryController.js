@@ -1,5 +1,4 @@
 import { useDataBase } from "../app.js";
-
 const inventoryController = {};
 
 inventoryController.getSubCategories = (req,res)=>{
@@ -9,7 +8,7 @@ inventoryController.getSubCategories = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data)
-        let sentence = `SELECT * FROM sga_inventory.categories WHERE company_id = ? ORDER BY category_code ASC ;`;
+        let sentence = `SELECT * FROM "Inventory".categories WHERE company_id = ? ORDER BY category_code ASC ;`;
         let consulta = await useDataBase(sentence,[info],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -21,14 +20,27 @@ inventoryController.getSubCategories = (req,res)=>{
 }
 
 
-inventoryController.createSubCategory = (req,res)=>{
+inventoryController.createCatetory = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
         data += chunk    })
     req.on('end',async()=>{
         let info = JSON.parse(data)
-        let sentence = `INSERT INTO sga_inventory.categories(category_code,category_name,company_id,category_description,category_color) VALUES (?,?,?,?,?);`;
-        let consulta = await useDataBase(sentence,[info.category_code,info.category_name,info.company_id,info.category_description,info.category_color],2);
+        let sentence = `
+            INSERT INTO "Inventory".categories(
+                company_id, name, slug, parent_id, path, description, status, img)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+        `;
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.name,
+            info.slug,
+            info.parent_id != ''? info.parent_id:0,
+            info.path,
+            info.description,
+            info.status,
+            info.photo
+        ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -40,126 +52,47 @@ inventoryController.createSubCategory = (req,res)=>{
 
 
 
-inventoryController.getProducts = (req,res)=>{
-    let data = ''
-    req.on('data',chunk=>{
-        data += chunk
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data)
-        if(info.tree){
-            sentence = `SELECT * FROM sga_inventory.products WHERE category_id = ? AND subCategory_id = ? ;`
-            values = [info.category_id,info.subCategory_id]
-        }else if(info.totalProducts){
-            let sentence = '';
-            if(info.totalStocks){
-                sentence = `
-                SELECT
-                    p.*,
-                    SUM(s.stock) AS total_stock
-                FROM sga_inventory.products p
-                LEFT JOIN stocks s ON p.product_id = s.product_id
-                GROUP BY p.product_id, p.product_name
-                ORDER BY total_stock DESC;
-                `;
-            }else{
-                sentence = `SELECT * FROM sga_inventory.products WHERE company_id = ?`;
-            }
-            let consulta = await useDataBase(sentence,[info.company_id],1);
-            res.writeHead(200,{'Content-Type':'text/plain'})
-            res.end(JSON.stringify(consulta));
-        }else{
-            if(info.pricesList){
-                let sentence = `
-                    SELECT 
-                    products.*,
-                    pricesProducts.list_id,
-                    pricesProducts.unit_value,
-                    pricesProducts.min_stock,
-                    pricesProducts.unit_cost,
-                    pricesProducts.price_id,
-                    pricesProducts.total_cost,
-                    stocks.stock_id,
-                    stocks.stock AS storeStock  
+inventoryController.getProducts = (req, res) => {
+    let data = '';
+    req.on('data', chunk => {
+        data += chunk;
+    });
 
-                    FROM sga_inventory.products
+    req.on('end', async () => {
+        const info = JSON.parse(data);
+        const values = [info.company_id];
+        let whereExtra = "";
 
-                    LEFT JOIN pricesProducts 
-                    ON products.product_id = pricesProducts.product_id
-                    AND pricesProducts.price_state = 'active'
-                    AND pricesProducts.store_id = ?
-                    AND pricesProducts.company_id = products.company_id
-
-                    LEFT JOIN stocks 
-                    ON products.product_id = stocks.product_id
-                    AND stocks.store_id = ?
-                    AND stocks.company_id = products.company_id
-
-                    WHERE products.company_id = ?;
-                `;
-                let consulta = await useDataBase(sentence,[info.store_id,info.store_id,info.company_id],1);
-                res.writeHead(200,{'Content-Type':'text/plain'})
-                res.end(JSON.stringify(consulta));
-            }else{
-                let sentence = `
-                    SELECT DISTINCT
-                    products.*,
-                    pricesProducts.list_id,
-                    pricesProducts.unit_value,
-                    ${info.storeDetails? 'sga_ecosystem.stores.name,':''}
-                    pricesProducts.min_stock,
-                    pricesProducts.unit_cost,
-                    pricesProducts.price_id,
-                    pricesProducts.total_cost,
-                    stocks.stock_id,
-                    stocks.cellar_id,
-                    stocks.stock AS storeStock  
-                    FROM sga_inventory.products
-                    ${info.priceRequired? 'INNER':'LEFT'} JOIN pricesProducts 
-                    ON products.product_id = pricesProducts.product_id
-                    AND pricesProducts.price_state = 'active'
-                    ${info.store_id != undefined? 'AND pricesProducts.store_id = ?':" "}
-                    AND pricesProducts.company_id = products.company_id
-
-                    LEFT JOIN stocks
-                    ON products.product_id = stocks.product_id
-                    ${info.store_id != undefined? ' AND stocks.store_id = ? ':" "}${info.cellar_id != null? 'AND stocks.cellar_id = ?':' '}
-                    AND stocks.company_id = products.company_id
-
-                    ${info.storeDetails ?
-                    'LEFT JOIN sga_ecosystem.stores ON sga_process.stocks.store_id = sga_ecosystem.stores.store_id '
-                    :''}
-
-                    WHERE sga_process.products.company_id = ? ${info.requiredStock? 'AND sga_process.stocks.stock > 0 ':''}  ${info.product_id != null? 'AND sga_process.products.product_id = ? ':' '};
-                `;
-                let values;
-                console.log(info);
-                if(info.store_id == null){
-                    values = [info.company_id]
-                    console.log("Caso 1")
-                }else{
-                    values = [info.store_id,info.store_id]
-                    if(info.cellar_id != undefined){
-                        values.push(info.cellar_id)
-                    }
-                    values.push(info.company_id)
-                    if(info.product_id != undefined){
-                        values.push(info.product_id)
-                    }
-                    console.log("Caso 2")
-                }
-                console.log(values);
-                let consulta = await useDataBase(sentence,values,1);
-                res.writeHead(200,{'Content-Type':'text/plain'})
-                res.end(JSON.stringify(consulta));
-            }
+        if (info.category_id != null) {
+            values.push(info.category_id);
+            whereExtra = `AND c.id = $${values.length}`;
         }
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
+
+        const sentence = `
+            SELECT
+                ps.*,
+                array_remove(array_agg(c.name), NULL) AS categories
+            FROM
+                "Inventory"."products&services" AS ps
+            LEFT JOIN
+                "Inventory".product_categories AS pc
+                ON pc.product_id = ps.id
+            LEFT JOIN
+                "Inventory".categories AS c
+                ON pc.category_id = c.id
+            WHERE
+                ps.company_id = $1
+                ${whereExtra}
+            GROUP BY
+                ps.id;
+        `;
+
+        const consulta = await useDataBase(sentence, values, 1);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(consulta));
+    });
+};
+
 
 inventoryController.createProduct = (req,res)=>{
     let data = '';
@@ -169,10 +102,54 @@ inventoryController.createProduct = (req,res)=>{
     req.on('end',async()=>{
         let info = JSON.parse(data);
         console.log(info)
-        let sentence = `INSERT INTO sga_inventory.products (company_id,product_code,product_name,supplier_id,category_id,stock,units,product_description) VALUES(?,?,?,?,?,?,?,?);`
-        let consulta = await useDataBase(sentence,[info.company_id,info.product_code,info.name,info.supplier_id,info.category_id,0,info.units,info.description],2)
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
+        let sentence = `
+            INSERT INTO
+                "Inventory"."products&services"(
+                    company_id,
+                    code,
+                    name,
+                    stock,
+                    units,
+                    img,
+                    description)
+            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id ;`
+        let consulta = await useDataBase(sentence,[
+                    info.company_id,
+                    info.code,
+                    info.name,
+                    info.stock,
+                    info.units,
+                    info.photo,
+                    info.description],3);
+        console.log('---> ',consulta);
+        let insert_id = parseInt(consulta.id);
+        console.log('---> ',insert_id);
+        if(typeof(parseInt(consulta.id)) == 'number' && info.category_id != null){
+            let postSen = `
+                INSERT INTO "Inventory".product_categories(
+                    company_id, product_id, category_id)
+                VALUES ($1, $2, $3);
+            `
+            let postCons = await useDataBase(postSen,[
+                info.company_id,
+                insert_id,
+                info.category_id
+            ],2);
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            if(postCons[0]){
+                res.end(JSON.stringify(true));
+            }else{
+                res.end(JSON.stringify(false));
+            }
+        }else{
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            if(parseInt(consulta.id) == 'number'){
+                res.end(JSON.stringify(true));
+            }else{
+                res.end(JSON.stringify(false));
+            }
+        }
+        
     })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
@@ -191,9 +168,9 @@ inventoryController.getPricesNameList = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = ``;
         if(info.limit != undefined){
-            sentence = `SELECT * FROM sga_inventory.pricesList WHERE company_id = ? LIMIT 3;`
+            sentence = `SELECT * FROM "Inventory".pricesList WHERE company_id = ? LIMIT 3;`
         }else{
-            sentence = `SELECT * FROM sga_inventory.pricesList WHERE company_id = ? ; `
+            sentence = `SELECT * FROM "Inventory".pricesList WHERE company_id = ? ; `
         }
         let consulta = await useDataBase(sentence,[info.company_id],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
@@ -213,8 +190,18 @@ inventoryController.createCellar = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `INSERT into sga_inventory.cellars(company_id,store_id,cellar_name,cellar_location) VALUES(?,?,?,?);`
-        let consulta = await useDataBase(sentence,[info.company_id,info.store_id,info.cellar_name,info.cellar_location],2);
+        let sentence = `
+            INSERT into "Inventory".cellars(
+                company_id,
+                store_id,
+                name,
+                address
+            ) VALUES($1,$2,$3,$4);`
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.store_id,
+            info.name,
+            info.address],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -231,13 +218,29 @@ inventoryController.getCellars = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `SELECT * FROM sga_inventory.cellars WHERE company_id = ? `;
-        if(info.store_id != undefined){
-            sentence += `and store_id = ? ;`
-        }else{
-            sentence += ';'
+        let values = [];
+        let whereClauses = [];
+        console.log(info)
+        whereClauses.push(`company_id = $${values.length +1}`)
+        values.push(info.company_id)
+        const storeIdParsed = Number(info.store_id);
+
+        if(Number.isInteger(storeIdParsed)) {
+            whereClauses.push(`store_id = $${values.length + 1}`);
+            values.push(storeIdParsed);
         }
-        let consulta = await useDataBase(sentence,[info.company_id,info.store_id],1)
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
+
+        let sentence = `
+            SELECT * FROM 
+                "Inventory".cellars
+            ${whereQuery} ;
+            `;
+        
+        let consulta = await useDataBase(sentence,values,1)
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -254,7 +257,7 @@ inventoryController.createPriceList = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `INSERT INTO sga_inventory.pricesList(company_id,store_id,list_name, list_state, list_description) VALUES(?,?,?,?,?);`
+        let sentence = `INSERT INTO "Inventory".pricesList(company_id,store_id,list_name, list_state, list_description) VALUES(?,?,?,?,?);`
         let consulta = await useDataBase(sentence,[info.company_id,info.store_id,info.list_name,'Pendiente',info.list_description],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -301,7 +304,7 @@ inventoryController.deletePriceList = (req,res)=>{
         let info = JSON.parse(data);
         const idListsArray = info.lists.map(() => "?").join(",");
         let sentence = `
-                DELETE FROM sga_inventory.pricesList
+                DELETE FROM "Inventory".pricesList
                 WHERE id IN (${idListsArray});
             `;
         let consulta = await useDataBase(sentence,[
@@ -327,14 +330,14 @@ inventoryController.updateProductList = (req,res)=>{
         let info = JSON.parse(data)
         console.log(info)
         if(info.price_id == undefined){
-            let sentence = `INSERT INTO sga_inventory.pricesProducts (company_id,store_id,list_id,product_id,unit_value,price_state) VALUES (?,?,?,?,?,?); `
+            let sentence = `INSERT INTO "Inventory".prices"products&services" (company_id,store_id,list_id,product_id,unit_value,price_state) VALUES (?,?,?,?,?,?); `
             let consulta = await useDataBase(sentence,[info.company_id,info.store_id,info.list_id,info.product_id,info.unit_value,"active"],4);
             let postSen = `UPDATE stocks SET list_id = ? WHERE stock_id = ? ;`
             let postCon = await useDataBase(postSen,[consulta.insertId,info.stock_id],2);
             res.writeHead(200,{'Content-Type':'text/plain'})
             res.end(JSON.stringify(consulta));
         }else{
-            let sentence = `UPDATE pricesProducts SET list_id = ?, unit_value = ?, price_state = ?  WHERE price_id = ? ;`
+            let sentence = `UPDATE pricesproducts&services SET list_id = ?, unit_value = ?, price_state = ?  WHERE price_id = ? ;`
             let consulta = await useDataBase(sentence,[info.list_id,info.unit_value,'active',info.price_id],2);
             let postSen = `UPDATE stocks SET list_id = ? WHERE stock_id = ? ;`
             let postCon = await useDataBase(postSen,[info.list_id,info.stock_id],2);
@@ -357,7 +360,7 @@ inventoryController.getPriceStock = (req,res)=>{
     req.on('end',async()=>{
         let info = JSON.parse(data)
         console.log(info);
-        let sentence = `SELECT products.*, stocks.* FROM sga_inventory.stocks LEFT JOIN products ON products.product_id = stocks.product_id WHERE stocks.product_id = ? AND stocks.list_id = ? ;`;
+        let sentence = `SELECT products&services.*, stocks.* FROM "Inventory".stocks LEFT JOIN products&services ON products&services.product_id = stocks.product_id WHERE stocks.product_id = ? AND stocks.list_id = ? ;`;
         let consulta = await useDataBase(sentence,[info.product_id,info.list_id],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -382,33 +385,33 @@ inventoryController.newEntry = (req,res)=>{
         if(typeof info.units == "string"){
             info.units = JSON.parse(info.units);
         }
-        let s1 = `INSERT INTO sga_inventory.entries (company_id,store_id,cellar_id,section_id,user_id,product_id,supplier_id,units,entry_value,unit_value,entry_status)VALUES(?,?,?,?,?,?,?,?,?,?,?);`;
+        let s1 = `INSERT INTO "Inventory".entries (company_id,store_id,cellar_id,section_id,user_id,product_id,supplier_id,units,entry_value,unit_value,entry_status)VALUES(?,?,?,?,?,?,?,?,?,?,?);`;
         let preConsul = await useDataBase(s1,[info.company_id,info.store_id,info.cellar_id,info.section_id,info.user_id,info.product_id,info.supplier_id,info.units,info.cost,(info.cost/info.units),info.entry_status],4);
         if(preConsul){
             let PrevSen = `
                 SELECT 
-                    pricesProducts.list_id, 
-                    pricesProducts.price_id, 
-                    pricesProducts.product_id, 
-                    pricesProducts.total_cost, 
+                    pricesproducts&services.list_id, 
+                    pricesproducts&services.price_id, 
+                    pricesproducts&services.product_id, 
+                    pricesproducts&services.total_cost, 
                     stocks.stock_id, 
                     stocks.stock 
-                FROM sga_inventory.pricesProducts 
+                FROM "Inventory".pricesproducts&services 
                 LEFT  JOIN stocks 
-                    ON pricesProducts.list_id = stocks.list_id 
-                    AND pricesProducts.product_id = stocks.product_id 
-                    AND pricesProducts.company_id = stocks.company_id 
-                    AND pricesProducts.store_id = stocks.store_id 
-                WHERE pricesProducts.price_state = 'active' 
-                    AND pricesProducts.company_id = ? 
-                    AND pricesProducts.store_id = ? 
-                    AND pricesProducts.product_id = ?;
+                    ON pricesproducts&services.list_id = stocks.list_id 
+                    AND pricesproducts&services.product_id = stocks.product_id 
+                    AND pricesproducts&services.company_id = stocks.company_id 
+                    AND pricesproducts&services.store_id = stocks.store_id 
+                WHERE pricesproducts&services.price_state = 'active' 
+                    AND pricesproducts&services.company_id = ? 
+                    AND pricesproducts&services.store_id = ? 
+                    AND pricesproducts&services.product_id = ?;
                 `;
 
             let prevCons = await useDataBase(PrevSen,[info.store_id,info.company_id,info.product_id],1);
             console.log(prevCons)
             if(prevCons[0]){
-                let s1 = `UPDATE pricesProducts SET total_cost = ? , unit_cost = ?  WHERE price_id = ? ;`
+                let s1 = `UPDATE pricesproducts&services SET total_cost = ? , unit_cost = ?  WHERE price_id = ? ;`
                 let values = calcWeightedAverage(prevCons[1][0].total_cost,prevCons[1][0].stock,info.cost,info.units);
                 console.log(values);
                 let conS1 = await useDataBase(s1,[values[1],values[2],prevCons[1][0].price_id],2);
@@ -418,15 +421,15 @@ inventoryController.newEntry = (req,res)=>{
                     res.writeHead(200,{'Content-Type':'text/plain'})
                     res.end(JSON.stringify([consulta,preConsul]));
                 }else{
-                    let sentence = `INSERT INTO sga_inventory.stocks (company_id,store_id,list_id,product_id,cellar_id,stock) VALUES(?,?,?,?,?,?);`;
+                    let sentence = `INSERT INTO "Inventory".stocks (company_id,store_id,list_id,product_id,cellar_id,stock) VALUES(?,?,?,?,?,?);`;
                     let consulta = await useDataBase(sentence,[info.company_id,info.store_id,info.list_id,info.product_id,info.cellar_id,info.units],2);
                     res.writeHead(200,{'Content-Type':'text/plain'});
                     res.end(JSON.stringify([consulta,preConsul]));
                 }
             }else{
-                let s1 = `INSERT INTO sga_inventory.pricesProducts (company_id,store_id,list_id,product_id,total_cost,unit_cost,price_state) VALUES (?,?,?,?,?,?,?);`;
+                let s1 = `INSERT INTO "Inventory".pricesproducts&services (company_id,store_id,list_id,product_id,total_cost,unit_cost,price_state) VALUES (?,?,?,?,?,?,?);`;
                 let conS1 = await useDataBase(s1,[info.company_id,info.store_id,0,info.product_id,info.cost,(info.cost/info.units),"active"],2)
-                let sentence = `INSERT INTO sga_inventory.stocks (company_id,store_id,list_id,product_id,cellar_id,stock) VALUES(?,?,?,?,?,?);`;
+                let sentence = `INSERT INTO "Inventory".stocks (company_id,store_id,list_id,product_id,cellar_id,stock) VALUES(?,?,?,?,?,?);`;
                 let consulta = await useDataBase(sentence,[info.company_id,info.store_id,info.list_id,info.product_id,info.cellar_id,info.units],2);
                 res.writeHead(200,{'Content-Type':'text/plain'});
                 res.end(JSON.stringify([consulta,preConsul]));
@@ -452,14 +455,14 @@ inventoryController.newDeparture = (req,res)=>{
     req.on('end',async()=>{
         let info = JSON.parse(data);
         console.log(info);
-        let s1 = `INSERT INTO sga_inventory.departures (company_id,store_id,cellar_id,section_id,user_id,product_id,departure_units,departure_value,departure_status,client_id) VALUES (?,?,?,?,?,?,?,?,?,?);`
+        let s1 = `INSERT INTO "Inventory".departures (company_id,store_id,cellar_id,section_id,user_id,product_id,departure_units,departure_value,departure_status,client_id) VALUES (?,?,?,?,?,?,?,?,?,?);`
         let prevIn = await useDataBase(s1,[info.company_id,info.store_id,info.cellar_id,info.section_id,info.user_id,info.product_id,info.units,(info.units * info.departure_value),info.departure_status,0],4);
         if(prevIn){
-            let s2 = `SELECT pricesProducts.* , stocks.stock FROM sga_inventory.pricesProducts LEFT JOIN stocks ON pricesProducts.list_id = stocks.list_id AND pricesProducts.product_id = stocks.product_id WHERE pricesProducts.list_id = ? AND stocks.stock_id = ? ;`
+            let s2 = `SELECT pricesproducts&services.* , stocks.stock FROM "Inventory".pricesproducts&services LEFT JOIN stocks ON pricesproducts&services.list_id = stocks.list_id AND pricesproducts&services.product_id = stocks.product_id WHERE pricesproducts&services.list_id = ? AND stocks.stock_id = ? ;`
             let prevC = await useDataBase(s2,[info.list_id,info.stock_id],1);
             console.log(prevC);
             if(prevC[0]){
-                let s1 = `UPDATE pricesProducts SET total_cost = ?, unit_cost = ? WHERE price_id = ? ; `
+                let s1 = `UPDATE pricesproducts&services SET total_cost = ?, unit_cost = ? WHERE price_id = ? ; `
                 let newStock = prevC[1][0].stock - info.units;
                 let newCostProduct = prevC[1][0].total_cost - (info.units * prevC[1][0].unit_cost);
                 let cs1 = await useDataBase(s1,[newCostProduct,(newCostProduct/newStock).toFixed(0),prevC[1][0].list_id],2);
@@ -491,7 +494,7 @@ inventoryController.newMovement = (req,res)=>{
     req.on('end',async()=>{
         let info = JSON.parse(data);
         console.log(info);
-        let sentence = `INSERT INTO sga_inventory.inventoryMovements (user_id,company_id,store_id,cellar_id,movement_date,document_number,movement_type,movement_value,movement_transactions,movement_state,movement_description,attach_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?);`
+        let sentence = `INSERT INTO "Inventory".inventoryMovements (user_id,company_id,store_id,cellar_id,movement_date,document_number,movement_type,movement_value,movement_transactions,movement_state,movement_description,attach_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?);`
         let values = [info.user_id,info.company_id,info.store_id,info.cellar_id,info.movement_date,info.document_number,info.movement_type,info.movement_value,info.movement_transactions,"Completado",info.movement_description,"-"]
         let consulta = await useDataBase(sentence,values,4);
         if(typeof consulta == 'number'){
@@ -566,7 +569,7 @@ inventoryController.getMovements = (req,res)=>{
                 sga_ecosystem.users.user_name,
                 ${info.cellar_name? 'cellars.cellar_name,':''}
                 sga_ecosystem.stores.name
-            FROM sga_inventory.inventoryMovements LEFT JOIN sga_ecosystem.stores
+            FROM "Inventory".inventoryMovements LEFT JOIN sga_ecosystem.stores
             ON inventoryMovements.store_id = sga_ecosystem.stores.id
 
             LEFT JOIN sga_ecosystem.users
@@ -600,7 +603,7 @@ inventoryController.deleteMovement = (req,res)=>{
         let info = JSON.parse(data);
         const idMovementsArray = info.movements.map(() => "?").join(",");
         let sentence = `
-                DELETE FROM sga_inventory.inventoryMovements
+                DELETE FROM "Inventory".inventoryMovements
                 WHERE movement_id IN (${idMovementsArray});
             `;
         let consulta = await useDataBase(sentence,[
@@ -775,8 +778,8 @@ inventoryController.getCategories = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `SELECT * FROM Inventory.categories WHERE company_id = $1 ;`
-        let consulta = await useDataBase(sentence,[info],1);
+        let sentence = `SELECT * FROM "Inventory".categories WHERE company_id = $1 ;`
+        let consulta = await useDataBase(sentence,[info.company_id],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })

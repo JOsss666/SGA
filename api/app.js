@@ -1,21 +1,13 @@
 import pkg from 'pg';
-import { v2 as cloudinary } from 'cloudinary'; // Importando `v2` directamente de cloudinary
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import fs from 'fs';
-import multer from 'multer';
 import * as transformers from "@xenova/transformers";
 
 // Cargar las variables de entorno
 dotenv.config();
     // Informacion Cloudynary
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
-});
-
 // Datos Conexion MYSQL
 const PG_HOST  = process.env.MYSQL_HOST;
 const PG_USER = process.env.MYSQL_USER;
@@ -37,7 +29,7 @@ const pool = new Pool({
     }
 });
 
-    
+
 async function testDBConnection() {
     console.log(PG_USER);
 
@@ -243,29 +235,30 @@ export function readCSV(path,type){
 async function createPUC(rows){
     let errors = [];
     let sentence = `
-        INSERT INTO
-            Ecosystem.account_templates_PUC
-        (
+        INSERT INTO "Ecosystem".contable_accounts(
             company_id,
+            account_plan,
             code,
             name,
             level,
             type,
-            account_path
-        )
-        VALUES(?,?,?,?,?,?);
+            state,
+            type_account)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
     `;
     const results = await Promise.all(
     rows.map(async (element, index) => {
             let values = element[0].split(';');
             console.log(values);
             let res = await useDataBase(sentence,[
-                0,
+                1,
+                1,
                 values[0],
                 values[1],
                 values[0].length,
                 values[2],
-                `${values[0]}`,
+                'active',
+                'PUC'
             ],2);
             console.log(res);
             if(!res[0]){
@@ -321,9 +314,8 @@ async function createTax(rows){
 }
 
 export{
-    cloudinary,
     encrypt,
-    useDataBase,
+    useDataBase
 }
 
 

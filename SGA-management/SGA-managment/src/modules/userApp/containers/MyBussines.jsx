@@ -22,7 +22,7 @@ export function MyBussines(){
 
     const VISIBLE = 4;
     const info = [
-        { name: "Unidades de Negocio", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1763930815/3d-business-wallet-finance-illustration-free-png_vr9tvx.png',form:<FormNewStore/>,path:'Units'},
+        { name: "Unidades de Negocio", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1764436577/ChatGPT_Image_29_nov_2025_12_15_47_kxqs81.png',form:<FormNewStore/>,path:'Units'},
         { name: "Centros de costo", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.",image:'https://res.cloudinary.com/djjxugmni/image/upload/v1763930815/3d-business-wallet-finance-illustration-free-png_vr9tvx.png',form:<FormNewCostCenter/>,path:'costCenters'},
         { name: "Clientes y Proveedores", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1763930685/ChatGPT_Image_23_nov_2025_15_41_45_xvrjtd.png', form:<FormNewThirdParties/>,path:'thirdParties'},
         { name: "Listas de precios", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1764363272/ChatGPT_Image_28_nov_2025_15_54_16_tl5bv3.png',form:<FormNewUser/>},

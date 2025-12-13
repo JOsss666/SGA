@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
 import './SubCategory.css'
-import { CreateNewSubSection } from "../componets/CreateNewSubSection";
+import { CreateNewSubSection } from "../components/CreateNewSubSection";
 import { postInfo } from "../../../utils/functions";
-import { CreateNewProduct } from "../componets/CreateNewProduct";
-import { ProductTreeCard } from "../componets/ProductTreeCard";
+import { CreateNewProduct } from "../components/CreateNewProduct";
+import { ProductTreeCard } from "../components/ProductTreeCard";
 
 export function SubCategory({info,maxF}){
     const [visibleChildren,setVisibleChildren] = useState(false);

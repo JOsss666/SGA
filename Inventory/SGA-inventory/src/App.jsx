@@ -4,8 +4,9 @@ import { AlertProvider,AppInfoProvider,PreviewProvider,AiAssistanProvider, Notif
 import { LandingPage } from './modules/LandingPage/containers/LandingPage';
 import { Login } from './modules/Login/Login';
 import { SignUp } from './modules/Login/SignUp';
-import { UserApp } from './modules/userApp/containers/userApp';
-export const urlSer = 'http://localhost:3000';
+import {UserApp} from '../src/modules/userApp/containers/UserApp'
+//export const urlSer = 'http://localhost:3000';
+export const urlSer = 'https://sga-2zgp.onrender.com';
 
 function App() {
   return (
@@ -13,7 +14,11 @@ function App() {
         <div className="appSpace">
           <Router>
                 <Routes>
-                    <Route path="" element={<><span>LandingPage Proceso</span></>}/>
+                    <Route path="" element={
+                      <AppInfoProvider>
+                        <Login/>
+                      </AppInfoProvider>
+                    }/>
                     <Route path="/SGA_INVENTORY/login" element={
                       <AppInfoProvider>
                         <Login/>

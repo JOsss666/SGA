@@ -1,6 +1,7 @@
 import { calcWeightedAverage, encrypt, isRelevanPrompt, useDataBase, actualDate } from "../app.js";
 import fs from "fs";
 import path from "path";
+import { uploadToCloudinary } from "../uploadMiddleWare.js";
 import { send_API_AI } from "../ApiFunctions.js";
 const controller = {};
 
@@ -40,6 +41,30 @@ controller.mergeChunks = (req, res) => {
     res.json({ message: "Archivo ensamblado correctamente", path: finalPath });
 };
 
+controller.uploadFile = async (req, res) => {
+    console.log("Archivo recibido");
+    try {
+        const archivos = req.files;
+
+        if (!archivos || archivos.length === 0) {
+            return res.status(400).json({ mensaje: "No se enviaron archivos" });
+        }
+
+        const urls = [];
+
+        // Subir archivos uno por uno
+        for (const archivo of archivos) {
+            const resultado = await uploadToCloudinary(archivo.buffer, archivo.originalname);
+            urls.push(resultado.secure_url);
+        }
+
+        res.json({ urls });
+
+    } catch (e) {
+        console.error("Error al subir archivos:", e);
+        res.status(500).json({ mensaje: e.message });
+    }
+};
 
 controller.createCompany = (req,res)=>{
     let data = '';
@@ -157,22 +182,27 @@ controller.getCompanyInfo = (req,res)=>{
         data += chunk
     })
     req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            SELECT 
-                "Ecosystem".companies.*,
-                "Ecosystem".account_plans.id AS "accountPlanId",
-                "Ecosystem".account_plans.type AS "accountPlanType"
-            FROM
-                "Ecosystem".companies 
-            LEFT JOIN
-                "Ecosystem".account_plans
-            ON
-                "Ecosystem".companies.company_id = "Ecosystem".account_plans.company_id
-            WHERE "Ecosystem".companies.company_key = $1 ;`
-        let consulta = await useDataBase(sentence,[info],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
+        if(data != undefined){
+            let info = JSON.parse(data);
+            let sentence = `
+                SELECT 
+                    "Ecosystem".companies.*,
+                    "Ecosystem".account_plans.id AS "accountPlanId",
+                    "Ecosystem".account_plans.type AS "accountPlanType"
+                FROM
+                    "Ecosystem".companies 
+                LEFT JOIN
+                    "Ecosystem".account_plans
+                ON
+                    "Ecosystem".companies.company_id = "Ecosystem".account_plans.company_id
+                WHERE "Ecosystem".companies.company_key = $1 ;`
+            let consulta = await useDataBase(sentence,[info],1);
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(consulta));
+        }else{
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(consulta));
+        }
     })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
@@ -239,6 +269,31 @@ controller.createCostCenter = (req,res)=>{
     })
 }
 
+controller.getCostCenters = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            SELECT * FROM 
+                "Ecosystem"."costCenters"
+            WHERE
+                company_id = $1
+        `
+        let consulta = await useDataBase(sentence,[
+            info.company_id
+        ],1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+        req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 controller.createStore = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
@@ -297,8 +352,28 @@ controller.getStores = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `SELECT * FROM "Ecosystem".stores WHERE company_id = $1 ;`;
-        let consulta = await useDataBase(sentence,[info.company_id],1);
+        let values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`company_id = $${values.length + 1}`);
+        values.push(info.company_id)
+
+        if(info.id != null){
+            whereClauses.push(`id = $${values.length + 1}`)
+            values.push(info.id)
+        }
+
+        
+        const whereQuery = whereClauses.length > 0
+                ? `WHERE ${whereClauses.join(" AND ")}`
+                : "";
+
+        let sentence = `
+            SELECT * FROM
+                "Ecosystem".stores
+            ${whereQuery}
+            `;
+        let consulta = await useDataBase(sentence,values,1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -522,7 +597,7 @@ controller.getAccountsPlan = (req,res)=>{
             FROM
                 "Ecosystem".account_plans
             WHERE
-                "Ecosystem".account_plans.company_id = $1;
+                "Ecosystem".account_plans.company_id = $1 OR "Ecosystem".account_plans.company_id = 1 ;
         ` 
         let prevCons = await useDataBase(prevSen,[info.company_id],1);
         if(prevCons[0]){
