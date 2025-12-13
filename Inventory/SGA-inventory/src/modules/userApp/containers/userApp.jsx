@@ -35,9 +35,9 @@ import {SearchDocument} from './SearchDocument'
 import { PathLocation } from '../components/PathLocation';
 import {StoreDetail} from './StoreDetail'
 import { Categories } from './Categories';
-import './UserApp.css'
 import { Products } from './Products';
 import { CategoriesDetail } from './CategoriesDetail';
+import './UserApp.css';
 
 
 export function UserApp(){
