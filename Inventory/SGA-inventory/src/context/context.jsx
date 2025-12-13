@@ -293,7 +293,7 @@ export function AppInfoProvider({children}){
     }
 
     useEffect(()=>{
-        if(location.pathname != '/SGA_INVENTORY/logIn' && location.pathname != '/SGA_INVENTORY/SignUp'){
+        if(location.pathname != '/SGA_INVENTORY/logIn' && location.pathname != '/SGA_INVENTORY/SignUp' && location.pathname != '/'){
             getAppData();
         }
     },[])
