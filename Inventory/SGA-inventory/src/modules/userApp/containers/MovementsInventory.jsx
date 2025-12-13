@@ -38,7 +38,7 @@ export function MovementsInventory(){
             <BoldTitle text={'Movimientos'}/>
             <DescriptionSpan text={'Esta es la descripción de la categoría actual '}/>
             <div className="AnalyticsIndicators">
-                div.
+                
             </div>
         </div>
     )
