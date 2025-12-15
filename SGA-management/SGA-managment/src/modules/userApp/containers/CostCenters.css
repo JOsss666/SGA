@@ -70,3 +70,7 @@
 .CostCenters .treeSpaceCostCenters .showAll .SwitchOption{
     width: 3vw;
 }
+
+.CostCenters .NoResults{
+    height: 50vh;
+}

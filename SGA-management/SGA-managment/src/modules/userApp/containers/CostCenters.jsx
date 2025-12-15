@@ -15,6 +15,7 @@ import {NormalCard} from '../components/NormalCard'
 import { useParams, useNavigate } from "react-router-dom";
 import { TreeOrganizer } from "./TreeOrganizer";
 import { SwitchOption } from "../components/SwitchOption";
+import { NoResults } from "./NoResults";
 
 export function CostCenters(){
 
@@ -56,6 +57,10 @@ export function CostCenters(){
         setDisabled(false);
     }
 
+    const createNewChild = (element)=>{
+        popInAlert(<FormNewCostCenter info={element}/>)
+    }
+
     useEffect(()=>{
         if(costCenters.length>0){
             let C = arrayToTree(costCenters);
@@ -86,7 +91,7 @@ export function CostCenters(){
                 }} children={<i className="fa-solid fa-plus"/>}/>
             </div>
             <div className="contentCostCenters">
-                {! loading && displayGird == 'grid' && (
+                {! loading && costCenters.length>0 &&displayGird == 'grid' && (
                     <div className="gridCostCenters">
                         {costCenters.map((element,index)=>(
                             <>
@@ -102,19 +107,24 @@ export function CostCenters(){
                         ))}
                     </div>
                 )}
-                {!loading && displayGird == 'tree' && (
+                {!loading && costCenters.length>0 && displayGird == 'tree' && (
                     <div className="treeSpaceCostCenters">
                         <div className="showAll">
                             <span>Desplegar todo</span>
                             <SwitchOption action={setAllOpenTree}/>
                         </div>
                         {organizedTree.map((element,index)=>(
-                            <TreeOrganizer list={[element]} key={index} allOpen={allOpenTree}/>
+                            <TreeOrganizer list={[element]} key={index} allOpen={allOpenTree} popNewOption={createNewChild}/>
                         ))}
                     </div>
                 )}
                 {loading && (
                     <LoadingSpace title={'Cargando centros de costo'} description={'Esto no debe tardar mucho...'}/>
+                )}
+                {!loading && costCenters.length == 0 && (
+                    <NoResults title={'No hay centros de costo'} newOption={'Crea tu primer centro de costo'} children={
+                        <FormNewCostCenter reloadFun={getCostCenters}/>
+                    }/>
                 )}
             </div>
             

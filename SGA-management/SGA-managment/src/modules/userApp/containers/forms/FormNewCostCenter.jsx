@@ -7,7 +7,10 @@ import './FormNewCostCenter.css'
 import { postInfo } from "../../../../utils/functions";
 import { SearchinList } from "../../components/SearchInList";
 
-export function FormNewCostCenter({reloadFun}){
+export function FormNewCostCenter({reloadFun,info}){
+    if(info == undefined){
+        info = {}
+    }
     const {addNotification} = useNotifications();
     const {popOutAlert} = useAlert();
     const {appInfo} = useAppInfo();
@@ -18,8 +21,8 @@ export function FormNewCostCenter({reloadFun}){
     const [name,setName] = useState('');
     const [code,setCode] = useState('');
     const [description,setDescription] = useState('')
-    const [parent_id,setParent_id] = useState(0);
-    const [path,setPath] = useState('/');
+    const [parent_id,setParent_id] = useState(info.id != undefined? info.id:0);
+    const [path,setPath] = useState(info.path != undefined? info.path:'/');
 
     let formInfo = {
         name,
@@ -43,7 +46,7 @@ export function FormNewCostCenter({reloadFun}){
                 const indent = "\t".repeat(level);
                 C.push({
                     text:`${indent}${element.name}`,
-                    value:`${element.id}&&${element.path}/${element.name}/`
+                    value:`${element.id}&&${element.path}/`
                 })
             });
             setCostCenters(C)
@@ -54,9 +57,18 @@ export function FormNewCostCenter({reloadFun}){
 
     const setIdentationAndId = (text)=>{
         let data = text.split('&&');
-        console.log(data);
-        setParent_id(data[0] != ''? data[0]:0);
-        setPath(data[1] != undefined? data[1]:'/');
+        if(data[0] == ''){
+            if(info != undefined && info.id != undefined){
+                setParent_id(info.id)
+                setPath(`${info.path}/${info.name}/`);
+            }else{
+                setParent_id(0)
+                setPath('/')
+            }
+        }else{
+            setParent_id(data[0] != ''? data[0]:0);
+            setPath(data[1] != undefined? data[1]:'/');
+        }
     }
 
     async function createCostCenter(){
@@ -99,7 +111,7 @@ export function FormNewCostCenter({reloadFun}){
                 <FormInput title={'Nombre'} action={setName} placeholder={'Nombre de tu centro de costo'} disabled={disabled}/>
                 <FormInput title={'Código'} action={setCode} placeholder={'Nombre de tu centro de costo'} disabled={disabled}/>
                 <FormInput title={'Descripción'} action={setDescription} textArea={true} placeholder={'Nombre de tu centro de costo'} disabled={disabled}/>
-                <SearchinList title={'Clasificación Centro de costo'} action={setIdentationAndId} placeHolder={'/..'} list={costCenters}/>
+                <SearchinList title={'Clasificación Centro de costo'} action={setIdentationAndId} placeHolder={path !='/' ? path:'/..'} list={costCenters}/>
                 <FormButton text={'Crear centro de costo'} loading={loading}/>
             </form>
         </div>

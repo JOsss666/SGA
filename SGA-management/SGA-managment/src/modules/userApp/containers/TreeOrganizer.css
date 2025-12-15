@@ -21,6 +21,7 @@
     padding-top: 1vh;
     display: flex;
     flex-direction: column;
+    padding-right: 2vh;
     width: fit-content;
 }
 
@@ -42,6 +43,26 @@
 .TreeOrganizer .treeItem .listTitle .despleChildren i{
     margin: auto;
     color: var(--mainText);
+}
+
+.TreeOrganizer .treeItem .listTitle .NewChildrenCreation{
+    display: none;
+    height: 3vh;
+    width: 3vh;
+    border-radius: 100%;
+    background-color: #CBFBF1;
+    cursor: pointer;
+    margin: auto 0;
+    margin-left: 2vh;
+}
+
+.TreeOrganizer .treeItem .listTitle:hover .NewChildrenCreation{
+    display: flex;
+}
+
+.TreeOrganizer .treeItem .listTitle .NewChildrenCreation i{
+    margin: auto;
+    color: #2A9689;
 }
 
 .TreeOrganizer .treeItem .listTitle strong{
