@@ -8,12 +8,14 @@ import { useAppInfo, useNotifications } from '../../../../context/context';
 export function TreeFormNewAccount({fatherInfo,reloadINfo}){
     
     const {appInfo} = useAppInfo();
+    console.log(appInfo)
     const [name,setName] = useState('');
     const [type,setType] = useState('DB')
     const [subNacc,setsubNacc] = useState(0);
     const {addNotification} = useNotifications();
 
     const formInfo = {
+        accountPlanId:appInfo.accountPlanId,
         name,
         type,
         company_id:appInfo.company_id,

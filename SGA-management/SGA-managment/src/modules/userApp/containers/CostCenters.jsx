@@ -9,10 +9,11 @@ import { useEffect, useState } from "react";
 import './CostCenters.css'
 import { useAlert, useAppInfo } from "../../../context/context";
 import { FormNewCostCenter } from "./forms/FormNewCostCenter";
-import { postInfo } from "../../../utils/functions";
+import { arrayToTree, postInfo } from "../../../utils/functions";
 import { LoadingSpace } from "./LoadingSpace";
 import {NormalCard} from '../components/NormalCard'
 import { useParams, useNavigate } from "react-router-dom";
+import { TreeOrganizer } from "./TreeOrganizer";
 
 export function CostCenters(){
 
@@ -26,7 +27,8 @@ export function CostCenters(){
     // Control
     const [disabled,setDisabled] = useState();
     const [loading,setLoading] = useState(false);
-    const [displayGird,setDisplayGrid] = useState(false);
+    const [displayGird,setDisplayGrid] = useState('tree');
+    const [organizedTree,setOrganizedTree] = useState([]);
     const [searchValue,setSearchVal] = useState('');
 
     // Functions
@@ -52,6 +54,13 @@ export function CostCenters(){
         setDisabled(false);
     }
 
+    useEffect(()=>{
+        if(costCenters.length>0){
+            let C = arrayToTree(costCenters);
+            setOrganizedTree(C);
+        }
+    },[costCenters])
+
     // Previous Actions
     useEffect(()=>{
         getCostCenters();
@@ -67,30 +76,38 @@ export function CostCenters(){
                 <SelectOptions title={'Filtro'} options={['ninguno']}/>
                 <SelectOptions title={'Orden'} options={['Alfabetico','Fecha de Creación','Categoría']}/>
                 <ButtonMenu noRotate={true} onClick={()=>{
-                        displayGird == 'grid'? setDisplayGrid('line'):setDisplayGrid('grid')
-                    }} title={'Cambiar distribución'}><i className={displayGird == 'grid'? 'fa-solid fa-border-all':'fa-solid fa-grip-lines'}/>
+                        displayGird == 'grid'? setDisplayGrid('tree'):setDisplayGrid('grid')
+                    }} title={'Cambiar distribución'}><i className={displayGird == 'grid'? 'fa-solid fa-border-all':'fa-solid fa-folder-tree'}/>
                 </ButtonMenu>
                 <FormButton disabled={disabled} text={'Crear nuevo'} onClick={()=>{
-                    popInAlert(<FormNewCostCenter/>)
+                    popInAlert(<FormNewCostCenter reloadFun={getCostCenters}/>)
                 }} children={<i className="fa-solid fa-plus"/>}/>
             </div>
-            <div className="gridCostCenters">
-                {!loading && costCenters.map((element,index)=>(
-                    <>
-                        {filterOptions(JSON.stringify(element)) && (
-                            <NormalCard onClick={()=>{
-                                handleNavigate(element.id)
-                            }}title={element.name}
-                            onlyTitle={true} 
-                            key={index}
-                            img={'https://res.cloudinary.com/djjxugmni/image/upload/v1763930815/3d-business-wallet-finance-illustration-free-png_vr9tvx.png'}/>
-                        )}
-                    </>
-                ))}
+            <div className="contentCostCenters">
+                {! loading && displayGird == 'grid' && (
+                    <div className="gridCostCenters">
+                        {costCenters.map((element,index)=>(
+                            <>
+                                {filterOptions(JSON.stringify(element)) && (
+                                    <NormalCard onClick={()=>{
+                                        handleNavigate(element.id)
+                                    }}title={element.name}
+                                    onlyTitle={true} 
+                                    key={index}
+                                    img={'https://res.cloudinary.com/djjxugmni/image/upload/v1763930815/3d-business-wallet-finance-illustration-free-png_vr9tvx.png'}/>
+                                )}
+                            </>
+                        ))}
+                    </div>
+                )}
+                {!loading && displayGird == 'tree' && (
+                    <TreeOrganizer list={organizedTree}/>
+                )}
                 {loading && (
                     <LoadingSpace title={'Cargando centros de costo'} description={'Esto no debe tardar mucho...'}/>
                 )}
             </div>
+            
         </div>
     )
 }

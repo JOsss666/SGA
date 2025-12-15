@@ -312,3 +312,44 @@ export const uploadFiles = async (files) => {
     }
 };
 
+
+export const arrayToTree = (flatArray, rootIdValue = null) => {
+    // 1. Crear un mapa (Hash Map) de todos los nodos por su ID
+    const nodes = {};
+    flatArray.forEach(item => {
+        let O = item;
+        O.children = [];
+        nodes[item.id] = O;
+    });
+
+    const tree = [];
+
+    Object.values(nodes).forEach(node => {
+        const parentId = node.parent_id;
+        
+        // Si el nodo tiene un padre (y el padre existe en el mapa)
+        if (parentId !== rootIdValue && nodes[parentId]) {
+            // Añade este nodo al array 'children' de su padre
+            nodes[parentId].children.push(node);
+        } else {
+            // Si es un nodo raíz (parent_id es null o el valor de rootIdValue), 
+            // añádelo directamente al array principal del árbol
+            tree.push(node);
+        }
+    });
+    
+    // Opcional: Ordenar los nodos raíz y los hijos alfabéticamente
+    // Esto se recomienda si la consulta SQL no garantiza el orden alfabético
+    const sortTree = (arr) => {
+        arr.sort((a, b) => a.name.localeCompare(b.name));
+        arr.forEach(node => {
+            if (node.children.length > 0) {
+                sortTree(node.children);
+            }
+        });
+    }
+    sortTree(tree);
+
+    return tree;
+};
+

@@ -250,15 +250,16 @@ controller.createCostCenter = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             INSERT INTO "Ecosystem"."costCenters"(
-                company_id,name,description,code,parent_id 
-            ) VALUES ($1,$2,$3,$4,$5);
+                company_id,name,description,code,parent_id,path
+            ) VALUES ($1,$2,$3,$4,$5,$6);
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
             info.name,
             info.description,
             info.code,
-            info.parent_id
+            info.parent_id,
+            info.path
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -277,10 +278,13 @@ controller.getCostCenters = (req,res)=>{
     req.on('end',async()=>{
         let info = JSON.parse(data);
         let sentence = `
-            SELECT * FROM 
+            SELECT *
+            FROM
                 "Ecosystem"."costCenters"
             WHERE
-                company_id = $1
+                company_id = $1 AND id != 1
+            ORDER BY
+                path ASC; -- Cláusula de ordenamiento por la columna 'path' de forma ascendente
         `
         let consulta = await useDataBase(sentence,[
             info.company_id
@@ -553,6 +557,7 @@ controller.insertNewAccount = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        console.log(info);
         let sentence = `
             INSERT INTO
                 "Ecosystem".contable_accounts
@@ -573,7 +578,7 @@ controller.insertNewAccount = (req,res)=>{
             info.name,
             (info.code).length,
             info.type,
-            info.accountPlanType
+            info.typePlanAccount
         ],3);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
