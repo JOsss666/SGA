@@ -32,8 +32,13 @@
     color: #007AFF;
 }
 
-.CostCenters .gridCostCenters{
+.CostCenters .contentCostCenters{
     max-height: 60vh;
+    width: 100%;
+    position: relative;
+}
+
+.CostCenters .gridCostCenters{
     width: 100%;
     display: flex;
     flex-wrap: wrap;
@@ -42,38 +47,26 @@
     padding: .1vh;
 }
 
-.CostCenters .treeCostCenters{
+.CostCenters .treeSpaceCostCenters{
+    height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    max-height: 60vh;
-    width: 100%;
 }
 
-.CostCenters .CostCenterTreeItem{
+.CostCenters .treeSpaceCostCenters .showAll{
     display: flex;
     width: fit-content;
-    position: relative;
+    margin-bottom: 2vh;
 }
 
-.CostCenters .treeCostCenters .CostCenterTreeItem .identation{
-    height: 3vh;
-    width: 2vh;
-    border-bottom: solid .1vh var(--inputsBorder);
-    border-left: solid .1vh var(--inputsBorder);
-    margin: auto 0;
-    margin-right: 1vh;
-    border-bottom-left-radius: 1vh;
-}
-
-.CostCenters .treeCostCenters .CostCenterTreeItem strong{
-    color: var(--descriptionText);
+.CostCenters .treeSpaceCostCenters .showAll span{
+    margin: auto 1vh;
     font-size: clamp(2px,2vh,20px);
-    font-weight: 400;
-    padding-top: 3vh;
-    cursor: pointer;
+    font-weight: 500;
+    color: var(--sectionTitle);
 }
 
-.CostCenters .treeCostCenters .CostCenterTreeItem strong:hover{
-    font-weight: 500;
-    color: #007AFF;
+.CostCenters .treeSpaceCostCenters .showAll .SwitchOption{
+    width: 3vw;
 }

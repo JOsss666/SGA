@@ -14,6 +14,7 @@ import { LoadingSpace } from "./LoadingSpace";
 import {NormalCard} from '../components/NormalCard'
 import { useParams, useNavigate } from "react-router-dom";
 import { TreeOrganizer } from "./TreeOrganizer";
+import { SwitchOption } from "../components/SwitchOption";
 
 export function CostCenters(){
 
@@ -30,6 +31,7 @@ export function CostCenters(){
     const [displayGird,setDisplayGrid] = useState('tree');
     const [organizedTree,setOrganizedTree] = useState([]);
     const [searchValue,setSearchVal] = useState('');
+    const [allOpenTree,setAllOpenTree] = useState(false);
 
     // Functions
     const handleNavigate = (path)=>{
@@ -101,7 +103,15 @@ export function CostCenters(){
                     </div>
                 )}
                 {!loading && displayGird == 'tree' && (
-                    <TreeOrganizer list={organizedTree}/>
+                    <div className="treeSpaceCostCenters">
+                        <div className="showAll">
+                            <span>Desplegar todo</span>
+                            <SwitchOption action={setAllOpenTree}/>
+                        </div>
+                        {organizedTree.map((element,index)=>(
+                            <TreeOrganizer list={[element]} key={index} allOpen={allOpenTree}/>
+                        ))}
+                    </div>
                 )}
                 {loading && (
                     <LoadingSpace title={'Cargando centros de costo'} description={'Esto no debe tardar mucho...'}/>
