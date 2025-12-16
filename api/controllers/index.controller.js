@@ -284,7 +284,7 @@ controller.getCostCenters = (req,res)=>{
             WHERE
                 company_id = $1 AND id != 1
             ORDER BY
-                path ASC; -- Cláusula de ordenamiento por la columna 'path' de forma ascendente
+                path ASC; 
         `
         let consulta = await useDataBase(sentence,[
             info.company_id
@@ -292,7 +292,63 @@ controller.getCostCenters = (req,res)=>{
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
-        req.on('error',(err)=>{
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+controller.createBussines = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            INSERT INTO "Ecosystem".bussines(
+                company_id, name, description, img)
+            VALUES ($1, $2, $3, $4);
+        `
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.name,
+            info.description,
+            info.photo
+        ],2)
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+
+controller.getBussines = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            SELECT *
+            FROM 
+                "Ecosystem".bussines
+            WHERE
+                company_id = $1
+            ORDER BY
+                name ASC ; 
+        `;
+        let consulta = await useDataBase(sentence,[
+            info.company_id
+        ],1)
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
@@ -647,16 +703,20 @@ controller.createTax = (req,res)=>{
                     account_id,
                     code,
                     rate,
-                    base
+                    base,
+                    parent_id,
+                    path
                 )
-            VALUES($1,$2,$3,$4,$5);
+            VALUES($1,$2,$3,$4,$5,$6,$7);
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
             info.account_id,
             info.code,
             info.rate,
-            info.base
+            info.base,
+            info.parent_id != undefined? info.parent_id:0,
+            info.path != undefined? info.path:'/'
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -683,6 +743,8 @@ controller.getTaxes = (req, res) => {
                     "Ecosystem".taxes.code,
                     "Ecosystem".taxes.rate,
                     "Ecosystem".taxes.base,
+                    "Ecosystem".taxes.parent_id,
+                    "Ecosystem".taxes.path,
                     "Ecosystem".contable_accounts.*
                 FROM
                     "Ecosystem".taxes
@@ -723,8 +785,6 @@ controller.getTaxes = (req, res) => {
     });
 };
 
-
-
 /* ELIMINAR IMPUESTOS*/
 
 controller.deleteTax = (req, res) => {
@@ -753,6 +813,65 @@ controller.deleteTax = (req, res) => {
         }
     });
 };
+
+controller.createTaxCategory = (req,res)=>{
+    let data = ''
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            INSERT INTO "Ecosystem"."teaxesCategories"(
+                company_id, name, code, parent_id, path)
+            VALUES ($1, $2, $3, $4, $5);
+        `
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.name,
+            info.code,
+            info.parent_id,
+            info.path
+        ],2);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+controller.getTaxCategory = (req,res)=>{
+    let data = ''
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            SELECT *
+            FROM
+                "Ecosystem"."teaxesCategories"
+            WHERE
+                company_id = $1
+            ORDER BY
+                path ASC;
+            ;
+        `
+        let consulta = await useDataBase(sentence,[
+            info.company_id
+        ],1);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+
 
 controller.createConcept = (req, res) => {
     let data = '';

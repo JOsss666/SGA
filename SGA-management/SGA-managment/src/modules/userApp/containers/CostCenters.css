@@ -18,7 +18,7 @@
 }
 
 .CostCenters .searchOptions .FormButton{
-    width: fit-content;
+    width: 10vw;
 }
 
 .CostCenters .searchOptions .ButtonMenu{
@@ -36,6 +36,8 @@
     max-height: 60vh;
     width: 100%;
     position: relative;
+    overflow: hidden;
+    overflow-y: auto;
 }
 
 .CostCenters .gridCostCenters{
@@ -48,7 +50,6 @@
 }
 
 .CostCenters .treeSpaceCostCenters{
-    height: 100%;
     width: 100%;
     display: flex;
     flex-direction: column;

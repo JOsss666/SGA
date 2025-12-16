@@ -36,6 +36,7 @@ import { MyBussinesUnits } from './MyBussinesUnits';
 import { Settings } from './Settings';
 import { CostCenters } from './CostCenters';
 import { StoreDetail } from './StoreDetail';
+import { Bussines } from './Bussines';
 
 export function UserApp(){
 
@@ -168,6 +169,8 @@ export function UserApp(){
                             <Route path='/' element={<HomeProcess/>} />
                             <Route path='/myBussines/' element={<MyBussines/>}/>
                             <Route path='/myBussines/costCenters' element={<CostCenters/>}/>
+                            <Route path='/myBussines/Bussines' element={<Bussines/>}/>
+                            <Route path='/myBussines/Bussines/:bussines_id' element={<PathLocation/>}/>
                             <Route path='/myBussines/Units' element={<MyBussinesUnits/>}/>
                             <Route path='/myBussines/Units/:store_id' element={<StoreDetail/>}/>
                             <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
