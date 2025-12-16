@@ -82,18 +82,16 @@ export function ConceptsPlan(){
     }
 
     useEffect(()=>{
-            if(noOrganizedTaxes.length>0 && categories.length>0){
-                let C = []
-                categories.forEach(element => {
-                    C.push(element);
-                });
-                noOrganizedTaxes.forEach(element => {
-                    C.push(element)
-                });
-                console.log(C);
-                let orgTaxes = arrayToTree(C);
-                setOrganizedTaxes(orgTaxes)
-            }
+            let C = []
+            categories.forEach(element => {
+                C.push(element);
+            });
+            noOrganizedTaxes.forEach(element => {
+                C.push(element)
+            });
+            console.log(C);
+            let orgTaxes = arrayToTree(C);
+            setOrganizedTaxes(orgTaxes)
     },[noOrganizedTaxes,categories])
 
     const getInfo = async()=>{
