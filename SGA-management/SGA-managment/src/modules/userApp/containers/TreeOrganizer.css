@@ -78,14 +78,22 @@
     color: #007AFF;
 }
 
-.TreeOrganizer .treeItem .listTitle strong i{
+.TreeOrganizer .treeItem .listTitle strong {
     margin: auto 0;
     margin-right: 1vh;
+}
+
+.TreeOrganizer .treeItem .listTitle .fatherIcon{
     color: #A65F1B;
 }
 
 .TreeOrganizer .openIconFolder{
     color: #F0B13B !important;
+}
+
+.TreeOrganizer .FinalChildren{
+    color: var(--descriptionText);
+    margin-right: 1vh;
 }
 
 .TreeOrganizer .treeItem .identOrganizator{

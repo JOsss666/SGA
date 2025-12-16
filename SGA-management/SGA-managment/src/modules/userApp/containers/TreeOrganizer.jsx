@@ -14,12 +14,19 @@ export function TreeOrganizer({list,allOpen,popNewOption}){
                     <div className="listTitle">
                         <div className="identOrganizator"/>
                         <strong>
-                            <i className={openChildren? `fa-regular fa-folder-open openIconFolder`:`fa-solid fa-folder`}/>
+                            {element.children != undefined && element.children.length >0 && (
+                                <i className={'fatherIcon' + openChildren? `fa-regular fa-folder-open openIconFolder`:`fa-solid fa-folder`}/>
+                            )}
+                            {element.children.length == 0 && (
+                                <i class="fa-solid fa-file FinalChildren"/>
+                            )}
                             {element.name}
                         </strong>
-                        <div className="despleChildren" onClick={()=>{setOpenChildren(!openChildren)}}>
-                            <i className={`fa-solid fa-angle-${openChildren? 'up':'down'}`}></i>
-                        </div>
+                        {element.children.length> 0 && (
+                            <div className="despleChildren" onClick={()=>{setOpenChildren(!openChildren)}}>
+                                <i className={`fa-solid fa-angle-${openChildren? 'up':'down'}`}></i>
+                            </div>
+                        )}
                         <div className="NewChildrenCreation" title={`Crear subDivision de ${element.name}`} onClick={()=>{
                             if(popNewOption != undefined){
                                 popNewOption(element)
