@@ -81,7 +81,11 @@
 .TreeOrganizer .treeItem .listTitle strong i{
     margin: auto 0;
     margin-right: 1vh;
-    color: var(--descriptionText);
+    color: #A65F1B;
+}
+
+.TreeOrganizer .openIconFolder{
+    color: #F0B13B !important;
 }
 
 .TreeOrganizer .treeItem .identOrganizator{

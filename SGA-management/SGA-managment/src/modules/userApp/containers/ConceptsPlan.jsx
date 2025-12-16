@@ -16,6 +16,7 @@ import { SelectOptions } from "../components/SelectOptions";
 import { arrayToTree } from "../../../utils/functions";
 import { TreeOrganizer } from "./TreeOrganizer";
 import { FormNewCategoryTaxes } from "./forms/FormNewCategoryTaxes";
+import { SwitchOption } from "../components/SwitchOption";
 
 export function ConceptsPlan(){
 
@@ -26,6 +27,7 @@ export function ConceptsPlan(){
 
     // Prev info
     const [categories,setCategories] = useState([]);
+    const [openTree,setOpenTree] = useState(false);
     const {appInfo} = useAppInfo();
     const {popInAlert} = useAlert();
     const [concepts,setConcepts] = useState([]);
@@ -181,13 +183,16 @@ export function ConceptsPlan(){
                                 displayGird == 'grid'? setDisplayGrid('tree'):setDisplayGrid('grid')
                             }} title={'Cambiar distribución'}><i className={displayGird == 'grid'? 'fa-solid fa-grip-lines':'fa-solid fa-folder-tree'}/>
                         </ButtonMenu>
+                        {displayGird == 'tree' && (
+                            <SwitchOption action={setOpenTree}/>
+                        )}
                     </div>
                     <div className="taxesC">
                         {!loading && displayGird == 'grid' && taxes.map((element,index)=>(
                             <TaxCard hidden={!handleSearchTax(element.value)} info={element.value} key={index} reloadFun={getTaxes} />
                         ))}
                         {!loading && displayGird == 'tree' && organizedTaxes.map((element,index)=>(
-                            <TreeOrganizer list={[element]} key={index} popNewOption={()=>{
+                            <TreeOrganizer allOpen={openTree} list={[element]} key={index} popNewOption={()=>{
                                 popInAlert(<FormNewTax reloadInfo={getTaxes}/>)
                             }}/>
                         ))}

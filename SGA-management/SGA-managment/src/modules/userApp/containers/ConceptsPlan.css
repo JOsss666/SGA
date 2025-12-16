@@ -83,6 +83,11 @@
     gap: 2vh;
 }
 
+.ConcenptsPlan .searchOptions .SwitchOption{
+    height: 3vh;
+    margin: auto 1vh;
+}
+
 .ConcenptsPlan .searchOptions .FormButton{
     width: 10vw;
 }

@@ -114,7 +114,7 @@ export function FormNewCategoryTaxes({reloadFun,info}){
                 <FormInput title={'Nombre'} action={setName} placeholder={'Nombre de tu centro de costo'} disabled={disabled}/>
                 <FormInput title={'Código'} action={setCode} placeholder={'Nombre de tu centro de costo'} disabled={disabled}/>
                 <SearchinList title={'Categoria'} action={setIdentationAndId} placeHolder={path !='/' ? path:'/..'} list={categories}/>
-                <FormButton text={'Crear centro de costo'} loading={loading}/>
+                <FormButton text={'Crear categoria'} loading={loading}/>
             </form>
         </div>
     )

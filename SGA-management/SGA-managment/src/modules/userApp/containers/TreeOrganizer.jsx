@@ -14,7 +14,7 @@ export function TreeOrganizer({list,allOpen,popNewOption}){
                     <div className="listTitle">
                         <div className="identOrganizator"/>
                         <strong>
-                            <i className={openChildren? `fa-regular fa-folder-open`:`fa-solid fa-folder`}/>
+                            <i className={openChildren? `fa-regular fa-folder-open openIconFolder`:`fa-solid fa-folder`}/>
                             {element.name}
                         </strong>
                         <div className="despleChildren" onClick={()=>{setOpenChildren(!openChildren)}}>
