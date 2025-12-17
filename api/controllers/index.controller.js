@@ -785,6 +785,43 @@ controller.getTaxes = (req, res) => {
     });
 };
 
+controller.getConceptTaxes = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            SELECT
+                "Ecosystem".taxes.*,
+                "Ecosystem".concept_taxes.*,
+                "Ecosystem".contable_accounts.name
+            FROM
+                "Ecosystem".concept_taxes
+            LEFT JOIN
+                "Ecosystem".taxes
+            ON
+                "Ecosystem".concept_taxes.tax_id = "Ecosystem".taxes.id
+            LEFT JOIN
+                "Ecosystem".contable_accounts
+            ON
+                "Ecosystem".taxes.account_id = "Ecosystem".contable_accounts.id
+            WHERE
+                "Ecosystem".concept_taxes.concept_id = $1
+            ORDER BY
+                "Ecosystem".contable_accounts.name ASC ;
+        `
+        let consulta = await useDataBase(sentence,[info.concept_id],1);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 /* ELIMINAR IMPUESTOS*/
 
 controller.deleteTax = (req, res) => {
@@ -803,7 +840,6 @@ controller.deleteTax = (req, res) => {
             `;
 
             const consulta = await useDataBase(sentence, info.taxes, 2);
-
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(consulta));
 
@@ -1063,6 +1099,7 @@ controller.createTransaction = (req,res)=>{
                 "Ecosystem".transactions
                 (
                     user_id,
+                    "thirdParty_id",
                     company_id,
                     store_id,
                     concept_id,
@@ -1074,10 +1111,11 @@ controller.createTransaction = (req,res)=>{
                     "costCenter_id"
                 )
             VALUES
-                ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id;
+                ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id;
         `;
         let consulta = await useDataBase(sentence,[
             info.user_id,
+            info.thirdParty_id,
             info.company_id,
             info.store_id,
             info.concept_id,
@@ -1159,7 +1197,7 @@ controller.createTransactionDetail = (req,res)=>{
             info.account_type,
             info.type,
             info.subtotal,
-            info.total
+            (info.total).toFixed(5)
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -1183,6 +1221,8 @@ controller.getTransactions = (req,res)=>{
                 "Ecosystem".users.user_name,
                 "Ecosystem".stores.name AS store_name,
                 "Ecosystem".concepts.name AS concept_name,
+                "Ecosystem".thirdparties.names AS thirdParty_name,
+                "Ecosystem".thirdparties.img AS thirdParty_img,
                 'TR' AS docType
             FROM
                 "Ecosystem".transactions
@@ -1198,6 +1238,10 @@ controller.getTransactions = (req,res)=>{
                 "Ecosystem".concepts
             ON
                 "Ecosystem".transactions.concept_id = "Ecosystem".concepts.id
+            LEFT JOIN
+                "Ecosystem".thirdparties
+            ON
+                "Ecosystem".transactions."thirdParty_id" = "Ecosystem".thirdparties.id
             WHERE
                 "Ecosystem".transactions.company_id = $1
             ORDER BY "Ecosystem".transactions.created_at DESC;
@@ -1253,7 +1297,9 @@ controller.getTransactionDetails = (req,res)=>{
                 "Ecosystem".transaction_detail.*,
                 "Ecosystem".contable_accounts.name AS concept_name,
                 "Ecosystem".contable_accounts.code AS account_code,
-                "Ecosystem".payment_methods.name AS payment_name
+                "Ecosystem".payment_methods.name AS payment_name,
+                "Ecosystem".thirdparties.names AS thirdParty_name,
+                "Ecosystem".thirdparties.img AS thirdParty_img
             FROM
                 "Ecosystem".transaction_detail
             LEFT JOIN
@@ -1264,6 +1310,10 @@ controller.getTransactionDetails = (req,res)=>{
                 "Ecosystem".payment_methods
             ON 
                 "Ecosystem".contable_accounts.id = "Ecosystem".payment_methods.id
+            LEFT JOIN
+                "Ecosystem".thirdparties
+            ON
+                "Ecosystem".transaction_detail."thirdParty_id" = "Ecosystem".thirdparties.id
             WHERE
                 "Ecosystem".transaction_detail.transaction_id = $1 ;
         `;

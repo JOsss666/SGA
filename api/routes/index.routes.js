@@ -76,6 +76,8 @@ router.post('/deleteTax',controller.deleteTax);
 
 router.post('/getTaxes',controller.getTaxes);
 
+router.post('/getConceptTaxes',controller.getConceptTaxes);
+
 router.post('/createTaxCategory',controller.createTaxCategory);
 
 router.post('/getTaxCategories',controller.getTaxCategory);

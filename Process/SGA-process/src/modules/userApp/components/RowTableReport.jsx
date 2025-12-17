@@ -44,6 +44,7 @@ export function RowTableReport({columns,info,type,hidden}){
         "Cuenta":<span>{info.account_code}</span>,
         'Estado':<span>{info.status}</span>,
         'Descripción':<span>{info.description}</span>,
+        'Tercero':<span><UserCard name={info.thirdparty_name} imgSrc={info.thirdparty_img != undefined? info.thirdParty_img:''}/></span>,
         "Ingreso Presupuestado":<span>$ {parseFloat(info.budgetIncome) != undefined ? moneyFormat(parseFloat(info.budgetIncome)):0}</span>,
         "Costo Presupuestado":<span>$ {parseFloat(info.budgetCost)!= undefined? moneyFormat(parseFloat(info.budgetCost)):0}</span>,
         'Costo Ejecutado':<span>$ {parseFloat(info.executedCost) != undefined? moneyFormat(parseFloat(info.executedCost)):0}</span>,
