@@ -2,6 +2,7 @@
     display: flex;
     flex-direction: column;
     padding: 2vh;
+    padding-left: 4vh;
 }
 
 .New .DescriptionSpan{
@@ -10,7 +11,7 @@
 
 .New .gridOptions{
     margin-top: 2vh;
-    padding: 2vh;
+    padding: 2vh 0;
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;

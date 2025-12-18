@@ -43,8 +43,13 @@
     height: 8vh;
     width: 8vh;
     margin: auto 1vh;
+    object-fit: cover;
     border-radius: 1vh;
-    background-color: var(--inputsBg);
+    
+}
+
+.SelectTpeNewDoc .gridTypes .hiddenDoc{
+    display: none;
 }
 
 .SelectTpeNewDoc .gridTypes .infoContaier{

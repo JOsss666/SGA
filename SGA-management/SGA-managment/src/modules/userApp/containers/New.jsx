@@ -12,8 +12,9 @@ import { FormNewUser } from "./forms/FormNewUser";
 import { SelectTpeNewDoc } from "./forms/SelectTypeNewDoc";
 import { CreatePricesList } from "./forms/CreatePricesList";
 import { FormNewProduct } from "./forms/FormNewProduct";
-import './New.css'
 import { FormNewPaymentMethod } from "./forms/FormNewPaymentMethod";
+import './New.css'
+
 
 export function New(){
 
