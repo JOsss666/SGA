@@ -1,6 +1,9 @@
 
 .MovementsInventory{
     padding: 1vh;
+    display: flex;
+    flex-direction: row;
+    gap: 1vh;
 }
 
 .MovementsInventory .SectionTitle{
@@ -8,18 +11,6 @@
     margin-bottom: 2vh;
 }
 
-
-.MovementsInventory .contentMovements{
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.MovementsInventory .contentMovements .optionsMovements{
-    display: flex;
-    flex-wrap: wrap;
-    width: 31vw;
-    height: fit-content;
-}
 
 .MovementsInventory .contentMovements .optionsMovements .NormalCard{
     margin: 1.5vh;
@@ -31,51 +22,91 @@
 .MovementsInventory .contentMovements .optionsMovements .NormalCard:nth-child(4){animation-delay: .4s;}
 .MovementsInventory .contentMovements .optionsMovements .NormalCard:nth-child(5){animation-delay: .5s;}
 
-.MovementsInventory .contentMovements .historyMovements{
-    width: 26vw;
-    margin: 0 auto;
-    padding: 1vh;
-    background-color: #fff;
-    border-radius: 2vh;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
 
-.MovementsInventory .historyMovements .movementsContainer{
-    display: flex;
-    flex-direction: column;
-    height: 90%;
-}
-
-.MovementsInventory .contentMovements .historyMovements .SubSectionTitle{
-    position: absolute;
-    z-index: 3;
-    top: -6vh;
-    left: 3vh;
-}
-
-.MovementsInventory .contentMovements .historyMovements .FormButton{
-    margin: 2vh auto;
-    width: 70%;
-}
-
-.MovementsInventory .contentMovements .analyticsMovements{
-    width: 33vw;
-    margin: 0 auto;
-    position: relative;
+/** NUEVOS **/
+.MovementsInventory .BodyAnalyticsIndicators{
+    width: 150vh;
+    padding: 2vh;
     display: flex;
     flex-direction: column;
 }
 
-.MovementsInventory .contentMovements .analyticsMovements .SubSectionTitle{
-    position: absolute;
-    z-index: 3;
-    top: -6vh;
-    left: 3vh;
+.MovementsInventory .BodyAnalyticsIndicators .AnalyticsIndicators{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    width: 145vh;
+    height: 100%; /* PENDIENTE AJUSTAR **/
+    padding: 2VH;
 }
 
-.MovementsInventory .contentMovements .analyticsMovements .ChartIndicator{
-    margin: 0 auto;
-    margin-bottom: 1vh;
+.MovementsInventory .BodyAnalyticsIndicators .AnalyticsIndicators .Graphics{
+    display: flex;
+    flex-direction: row;
+    gap: 2vh;
+    align-items: center;
+    
+}
+
+.MovementsInventory .AnalyticsIndicators .Graphics .Graph{
+    height: 45vh;
+    background-color: #FAFAFA;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    border-radius: 3vh;
+}
+
+.MovementsInventory .BodyAnalyticsIndicators .AnalyticsIndicators .Graphics .HeadGraph{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2vh;
+    height: 4vh;
+}
+
+.MovementsInventory .BodyAnalyticsIndicators .AnalyticsIndicators .Graphics .PlotGraph {
+    height: 35vh;
+    {/*background-color: lightcoral;*/}
+}
+
+.MovementsInventory .BodyAnalyticsIndicators .AnalyticsIndicators .Graphics .PlotGraph .GraphChart{
+    object-fit: contain;
+}
+
+.MovementsInventory .BodyAnalyticsIndicators .AnalyticsIndicators .Graphics .HeadGraph .TitleGraph{
+    font-size: 2.2vh;
+}
+
+.MovementsInventory .BodyAnalyticsIndicators .AnalyticsIndicators .Graphics .HeadGraph .OpionsGraph{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+
+
+.MovementsInventory .BodyAnalyticsIndicators .AnalyticsIndicators .Graphics .BarCharts{
+    width: 45vh;
+    height: 45vh;
+}
+
+.MovementsInventory .BodyAnalyticsIndicators .AnalyticsIndicators .Graphics .CalendarChart{
+    width: 95vh;
+    height: 45vh;
+}
+
+.MovementsInventory .BodyAnalyticsIndicators .AnalyticsIndicators .Graphics .BarCharts .TitleGraph,
+.MovementsInventory .BodyAnalyticsIndicators .AnalyticsIndicators .Graphics .CalendarChart .TitleGraph{
+    display: flex;
+    flex-direction: row;
+    gap: 2vh;
+    justify-content: center;
+}
+
+.MovementsInventory .CardsAnalytics{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
 }
