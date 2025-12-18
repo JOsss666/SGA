@@ -69,7 +69,8 @@
 }
 
 .MenuApp .listOptions li i{
-    margin-right: 1.5vh;
+    margin-right: 1.5vw;
+    font-size: clamp(2px,3vh,30px);
     color: var(--sectionTitle);
 }
 

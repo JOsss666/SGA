@@ -10,6 +10,9 @@ import { FormNewOperation } from "./FormNewOperation";
 import { NewElementSelect } from "../../components/NewElementSelect";
 
 export function FormNewFV({info,reloadFun}){
+    if(info == undefined){
+        info = {}
+    }
 
      // control
     const {popOutAlert,popInAlert} = useAlert();

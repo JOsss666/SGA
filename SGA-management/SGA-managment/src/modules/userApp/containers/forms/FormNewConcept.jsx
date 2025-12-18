@@ -36,7 +36,6 @@ export function FormNewConcept({reloadInfo}){
                     value:element.id
                 })
             });
-            console.log(C)
             setAccounts(C)
         }
     }

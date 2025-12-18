@@ -936,8 +936,9 @@ controller.createConcept = (req, res) => {
                     info.name,
                     info.account_id,
                 ],3);
-
-            if (typeof newConcept !== "number") {
+            let insertIdConcept = parseInt(newConcept.id);
+            if (typeof(insertIdConcept) !== "number") {
+                console.log('No es número')
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify([false, "Error al crear concepto"]));
             }
@@ -955,7 +956,7 @@ controller.createConcept = (req, res) => {
                 .map((t, i) => {
                     const p1 = `$${i * 2 + 1}`;
                     const p2 = `$${i * 2 + 2}`;
-                    values.push(newConcept, t.value);
+                    values.push(insertIdConcept, t.value);
                     return `(${p1}, ${p2})`;
                 })
                 .join(",");
@@ -1028,21 +1029,62 @@ controller.getConcepts = (req,res)=>{
 }
 
 /* ELIMINAR CONCEPTOS*/
-controller.deleteConcept = (req,res)=>{
+controller.deleteConcept = (req, res) => {
+    let data = '';
+
+    req.on('data', chunk => {
+        data += chunk;
+    });
+
+    req.on('end', async () => {
+        const info = JSON.parse(data);
+
+        // Asegúrate que sea un array de números
+        const ids = info.concepts.map(Number);
+
+        const sentence = `
+            DELETE FROM "Ecosystem".concepts
+            WHERE id = ANY($1::bigint[]);
+        `;
+
+        const consulta = await useDataBase(sentence, [ids], 2);
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(consulta));
+    });
+
+    req.on('error', err => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(err));
+    });
+};
+
+controller.createPaymentMethod = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
-        data += chunk;
+        data += chunk
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        const placeholders = info.concepts.map((_, i) => `$${i + 1}`).join(",");
-
         let sentence = `
-                DELETE FROM "Ecosystem".concepts
-                WHERE id IN (${placeholders});
-            `;
+            INSERT INTO "Ecosystem".payment_methods(
+                company_id,
+                name,
+                account_id,
+                code,
+                currency,
+                type,
+                status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7);
+        `;
         let consulta = await useDataBase(sentence,[
-            info.concepts
+            info.company_id,
+            info.name,
+            info.account_id,
+            info.code,
+            info.currency,
+            info.type,
+            info.status
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -1052,9 +1094,6 @@ controller.deleteConcept = (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
-
-
-
 
 controller.getPaymentMethods = (req,res)=>{
     let data = '';

@@ -8,20 +8,28 @@
 
 .SelectTpeNewDoc .BoldTitle{
     margin: 2vh auto;
+    margin-bottom: 3vh;
+}
+
+.SelectTpeNewDoc .SearchBar{
+    margin: 0 auto;
+    width: 94%;
 }
 
 .SelectTpeNewDoc .gridTypes{
     display: flex;
     flex-direction: column;
     padding: 1vh 2vh;
+    max-height: 78vh;
+    overflow-y: auto;
 }
 
 .SelectTpeNewDoc .gridTypes .typeDoc{
     display: flex;
     width: 100%;
     padding: 1vh;
-    background-image: linear-gradient(45deg,#EEF2FF,#F7FAFF,#F8FAFD,#FEF2F2);
-    outline: solid .1vh #eee;
+    background-color: var(--cardHover);
+    outline: solid .1vh var(--inputsBorder);
     border-radius: 1vh;
     cursor: pointer;
     margin: 1vh auto;
@@ -35,8 +43,8 @@
     height: 8vh;
     width: 8vh;
     margin: auto 1vh;
-    border-radius: .5vh;
-    background-color: #eee;
+    border-radius: 1vh;
+    background-color: var(--inputsBg);
 }
 
 .SelectTpeNewDoc .gridTypes .infoContaier{
@@ -50,10 +58,11 @@
     font-size: clamp(3px,3vh,30px);
     font-weight: 500;
     margin-bottom: .5vh;
+    color: var(--mainText);
 }
 
 .SelectTpeNewDoc .gridTypes .infoContaier span{
     font-size: clamp(3px,2.2vh,30px);
     font-weight: 400;
-    color: #555;
+    color: var(--descriptionText);
 }

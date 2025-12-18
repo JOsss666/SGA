@@ -37,6 +37,7 @@ import { Settings } from './Settings';
 import { CostCenters } from './CostCenters';
 import { StoreDetail } from './StoreDetail';
 import { Bussines } from './Bussines';
+import { New } from './New';
 
 export function UserApp(){
 
@@ -167,6 +168,7 @@ export function UserApp(){
                 <main className='bodyApp'>
                     <Routes>
                             <Route path='/' element={<HomeProcess/>} />
+                            <Route path='/new' element={<New></New>} />
                             <Route path='/myBussines/' element={<MyBussines/>}/>
                             <Route path='/myBussines/costCenters' element={<CostCenters/>}/>
                             <Route path='/myBussines/Bussines' element={<Bussines/>}/>

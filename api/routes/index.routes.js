@@ -88,6 +88,8 @@ router.post('/deleteConcept',controller.deleteConcept);
 
 router.post('/getConcepts',controller.getConcepts);
 
+router.post('/createPaymentMethod',controller.createPaymentMethod);
+
 router.post('/getPaymentMethods',controller.getPaymentMethods);
 
 router.post('/createTransaction',controller.createTransaction);

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useAlert } from "../../../../context/context";
 import { BoldTitle } from "../../components/BoldTitle";
 import { FormNewDC } from "./FormNewDC";
@@ -5,10 +6,12 @@ import { FormNewDocument } from "./FormNewDocument";
 import { FormNewFV } from "./FormNewFV";
 import { FormNewOc } from "./FormNewOc";
 import './SelectTypeNewDoc.css'
+import { SearchBar } from "../../components/SearchBar";
 
 export function SelectTpeNewDoc({info,reloadFun}){
 
     const {popInAlert,popOutAlert} = useAlert();
+    const [searchVal,setSearchVal] = useState('');
 
     const endProcess = ()=>{
         popOutAlert();
@@ -20,6 +23,7 @@ export function SelectTpeNewDoc({info,reloadFun}){
     return(
         <div className="SelectTpeNewDoc">
             <BoldTitle text={'Seleccione documento'}/>
+            <SearchBar placeholder={'Buscar documentos'} action={setSearchVal}/>
             <div className="gridTypes">
 
                 <div onClick={()=>{
