@@ -63,11 +63,11 @@ export function ConceptsPlan(){
         setDisabled(false);
     }
 
-    const getTaxes = async(attached)=>{
-        console.log('Cargando Impuestos');
+    const getTaxes = async()=>{
         let res = await postInfo('/getTaxes',{
             company_id:appInfo.company_id,
         })
+        console.log(res);
         if(res[0]){
             let C = []
             setNoOrganizedTaxes(res[1]);

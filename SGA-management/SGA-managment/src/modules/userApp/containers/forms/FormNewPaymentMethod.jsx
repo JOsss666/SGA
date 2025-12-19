@@ -130,7 +130,7 @@ export function FormNewPaymentMethod({reloadFun}){
                     {text:'blocked'},
                     {text:'reported'}
                 ]}/>
-                <FormButton text={loading? 'Creando ...':'Crear metodo de pago'}/>
+                <FormButton text={loading? 'Creando ...':'Crear metodo de pago'} loading={loading} disabled={disabled}/>
             </form>
         </div>
     )

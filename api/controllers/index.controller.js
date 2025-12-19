@@ -705,9 +705,10 @@ controller.createTax = (req,res)=>{
                     rate,
                     base,
                     parent_id,
-                    path
+                    path,
+                    "isRetention"
                 )
-            VALUES($1,$2,$3,$4,$5,$6,$7);
+            VALUES($1,$2,$3,$4,$5,$6,$7,$8);
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -716,7 +717,8 @@ controller.createTax = (req,res)=>{
             info.rate,
             info.base,
             info.parent_id != undefined? info.parent_id:0,
-            info.path != undefined? info.path:'/'
+            info.path != undefined? info.path:'/',
+            info.isRetention
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -737,7 +739,7 @@ controller.getTaxes = (req, res) => {
             let values = [];
             let where = []; // array de condiciones dinámicas
 
-            let sentence = `
+            let sentence2 = `
                 SELECT
                     "Ecosystem".taxes.id AS tax_id,
                     "Ecosystem".taxes.code,
@@ -752,6 +754,22 @@ controller.getTaxes = (req, res) => {
                 ON "Ecosystem".taxes.account_id = "Ecosystem".contable_accounts.id
                 WHERE
             `;
+
+            let sentence = `
+                SELECT 
+                    "Ecosystem"."taxes".id AS tax_id,
+                    "Ecosystem"."taxes".code,
+                    "Ecosystem"."taxes".rate,
+                    "Ecosystem"."taxes".base,
+                    "Ecosystem"."taxes".parent_id,
+                    "Ecosystem"."taxes".path,
+                    "Ecosystem"."contable_accounts".type,
+                    "Ecosystem"."contable_accounts".name
+                FROM "Ecosystem"."taxes"
+                LEFT JOIN "Ecosystem"."contable_accounts"
+                    ON "Ecosystem"."contable_accounts".id = "Ecosystem"."taxes".account_id
+                WHERE
+            `
 
             //  Filtro obligatorio
             values.push(info.company_id);
@@ -774,7 +792,6 @@ controller.getTaxes = (req, res) => {
             sentence += ` ORDER BY "Ecosystem".taxes.account_id ASC;`;
 
             const consulta = await useDataBase(sentence, values, 1);
-
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(consulta));
 
@@ -796,7 +813,8 @@ controller.getConceptTaxes = (req,res)=>{
             SELECT
                 "Ecosystem".taxes.*,
                 "Ecosystem".concept_taxes.*,
-                "Ecosystem".contable_accounts.name
+                "Ecosystem".contable_accounts.name,
+                "Ecosystem".contable_accounts.type
             FROM
                 "Ecosystem".concept_taxes
             LEFT JOIN
@@ -1348,7 +1366,7 @@ controller.getTransactionDetails = (req,res)=>{
             LEFT JOIN
                 "Ecosystem".payment_methods
             ON 
-                "Ecosystem".contable_accounts.id = "Ecosystem".payment_methods.id
+                "Ecosystem".transaction_detail.account_id = "Ecosystem".payment_methods.account_id
             LEFT JOIN
                 "Ecosystem".thirdparties
             ON

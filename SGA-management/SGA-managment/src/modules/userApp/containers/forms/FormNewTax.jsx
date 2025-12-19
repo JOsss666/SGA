@@ -7,6 +7,7 @@ import './FormNewTax.css';
 import { NewElementSelect } from '../../components/NewElementSelect';
 import { postInfo } from "../../../../utils/functions";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
+import { SwitchOption } from "../../components/SwitchOption";
 
 export function FormNewTax({reloadInfo,info}){
     if(info == undefined){
@@ -17,6 +18,7 @@ export function FormNewTax({reloadInfo,info}){
     const {popOutAlert} = useAlert();
     const [accounts, setAccounts] = useState([]);
     const [categories,setCategories] = useState([]);
+    const [isRetention,setIsRetention] = useState(false);
 
     // Control
     const [disabled, setDisabled] = useState(false);
@@ -38,7 +40,8 @@ export function FormNewTax({reloadInfo,info}){
         parent_id,
         account_id: selectedAccount,
         company_id:appInfo.company_id,
-        path:path
+        path:path,
+        isRetention
     };
 
     const getAccounts = async () => {
@@ -169,6 +172,10 @@ export function FormNewTax({reloadInfo,info}){
                         <NewElementSelect title={'Crear nueva cuenta'}/>
                     }
                 />
+                <div className="FlexOption">
+                    <h6>Es retención</h6>
+                    <SwitchOption action={setIsRetention}/>
+                </div>
                 <FormButton 
                     text={'Crear nuevo impuesto'} 
                     disabled={disabled}

@@ -50,6 +50,7 @@ export function SelectTpeNewDoc({info,reloadFun}){
         {title:'Consumo de inventario',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_4_jcodbi.png',alert:<FormNewDocument type={'consuption'} info={info} reloadFun={endProcess}/>},
         {title:'Orden de producción',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076216/Cuadricula3Documentos_3_q2hsc4.png',alert:<span>No disponible aún</span>},
         {title:'Transacciónes',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_6_fvpiav.png',alert:<span>No disponible aún</span>},
+        {title:'Transacciónes',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_6_fvpiav.png',alert:<span>No disponible aún</span>},
     ]
 
 

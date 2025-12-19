@@ -54,10 +54,10 @@ export function FormNewOperation({info}){
     }
 
     const getAttachedTaxes = async()=>{
-        console.log('Cargando Impuestos');
         let res = await postInfo('/getConceptTaxes',{
             concept_id:info.concept_id
         })
+        console.log(res)
         if(res[0]){
             setTaxes(res[1])
         }
@@ -83,6 +83,7 @@ export function FormNewOperation({info}){
         let newTransDetails = [];
         console.log(info)
         console.log(taxes)
+        console.log(conceptInfo)
         newTransDetails.push({
                 account_id:conceptInfo.account_id,
                 account_type:appInfo.accountPlanType,
@@ -93,7 +94,8 @@ export function FormNewOperation({info}){
         })
         newSubTtl += info.total;
         taxes.forEach(element => {
-                newTransDetails.push({
+            console.log('Tp --> ',element)
+            newTransDetails.push({
                 account_id:element.id,
                 account_type:appInfo.accountPlanType,
                 type:'tax',
@@ -101,8 +103,16 @@ export function FormNewOperation({info}){
                 total: info.total * Number(((element.rate/100)).toFixed(2)),
                 nature:element.type
             })
-            newSubTtl += info.total * Number(((element.rate/100)).toFixed(2))
+            console.log("-->",element.isRetention)
+            console.log('Previo Sub',newSubTtl)
+            if(element.isRetention){
+                newSubTtl -= info.total * Number(((element.rate/100)).toFixed(2))
+            }else{
+                newSubTtl += info.total * Number(((element.rate/100)).toFixed(2))
+            }
+            console.log('Post sub',newSubTtl)
         });
+        console.log('T --> ',newTransDetails);
         let paymentMethod = info.paymentMethod != undefined? info.paymentMethod:{};
         newTransDetails.push({
             account_id:paymentMethod.account_id,
