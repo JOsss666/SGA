@@ -38,6 +38,7 @@ import { CostCenters } from './CostCenters';
 import { StoreDetail } from './StoreDetail';
 import { Bussines } from './Bussines';
 import { New } from './New';
+import { Messages } from './Messages';
 
 export function UserApp(){
 
@@ -180,7 +181,7 @@ export function UserApp(){
                             <Route path='/services' element={<Services/>}/>
                             <Route path='/services/:serviceRequierd' element={<PathLocation/>}/>
                             <Route path='/billing' element={<span>Facturación</span>}/>
-                            <Route path='/messages/*' element={<span>messages</span>} />
+                            <Route path='/messages/*' element={<Messages/>} />
                             <Route path='/thirdparties/*' element={<ThirdParties/>} />
                             <Route path='/thirdparties/:thirdparty_id' element={<ThirdPartyDetail/>} />
                             <Route path='/users/' element={<Users/>} />
