@@ -1,0 +1,282 @@
+.Messages {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    background-color: var(--mainBg);
+}
+
+.Messages .usersPanel {
+    width: 35%;
+    min-width: 30dvw;   
+    max-width: 30dvw;    
+    height: 100%;
+    border-right: 0.1vh solid var(--inputsBorder);
+    display: flex;
+    flex-direction: column;
+    background-color: var(--users-panel-bg, var(--mainBg));
+}
+
+.Messages .usersPanel .panelHeader {
+    padding: 2vh;
+    border-bottom: 0.1vh solid var(--inputsBorder);
+}
+
+.Messages .usersPanel .searchContainer {
+    margin-top: 1.5vh;
+}
+
+.Messages .usersPanel .usersList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1vh;
+}
+
+.Messages .usersPanel .loadingState,
+.Messages .usersPanel .emptyState {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: var(--descriptionText);
+    font-size: 1.6vh;
+}
+
+.Messages .chatPanel {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--mainBg);
+}
+
+.Messages .chatPanel .noChatSelected {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: var(--descriptionText);
+}
+
+.Messages .chatPanel .welcomeMessage {
+    text-align: center;
+    padding: 4vh;
+}
+
+.Messages .chatPanel .welcomeMessage i {
+    font-size: 4vh;
+    color: var(--iconHover);
+    margin-bottom: 2vh;
+}
+
+.Messages .chatPanel .welcomeMessage h3 {
+    font-size: 2.2vh;
+    margin-bottom: 1vh;
+    color: var(--mainText);
+}
+
+.Messages .chatPanel .welcomeMessage p {
+    font-size: 1.6vh;
+    color: var(--descriptionText);
+}
+
+.Messages .chatPanel .ChatWindow {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: var(--mainBg);
+}
+
+.Messages .chatPanel .chatHeader {
+    padding: 1.8vh 2.5vh;
+    border-bottom: 0.1vh solid var(--inputsBorder);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--mainBg);
+}
+
+.Messages .chatPanel .chatUserInfo {
+    display: flex;
+    align-items: center;
+}
+
+.Messages .chatPanel .chatAvatar {
+    width: 5.5vh !important; 
+    height: 5.5vh !important;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 2vh; 
+}
+
+.Messages .chatPanel .chatUserDetails {
+    display: flex;
+    flex-direction: column;
+}
+
+.Messages .chatPanel .chatUserName {
+    font-size: 2.2vh !important;
+    margin: 0 0 0.5vh 0; 
+    color: var(--mainText);
+    font-weight: 600;
+}
+
+.Messages .chatPanel .userStatus {
+    font-size: 1.4vh; 
+    color: var(--descriptionText);
+}
+
+.Messages .chatPanel .messagesArea {
+    flex: 1;
+    padding: 2vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+    background-color: var(--mainBg); 
+}
+
+.Messages .chatPanel .messageBubble {
+    max-width: 100%;
+    display: flex;
+}
+
+.Messages .chatPanel .messageBubble.me {
+    align-self: flex-end;
+}
+
+.Messages .chatPanel .messageBubble.them {
+    align-self: flex-start;
+}
+
+.Messages .chatPanel .messageContent {
+    padding: 1.5vh 2.1vh; 
+    border-radius: 1.8vh; 
+    position: relative;
+    word-wrap: break-word; 
+    white-space: pre-wrap; 
+    overflow-wrap: break-word; 
+    word-break: break-word; 
+}
+
+.Messages .chatPanel .messageBubble.me .messageContent {
+    background-color: var(--iconHover);
+    color: var(--my-message-text, var(--text)) !important; 
+    border-bottom-right-radius: 0.8vh;
+}
+
+.Messages .chatPanel .messageBubble.them .messageContent {
+    background-color: var(--cardHover);
+    color: var(--mainText);
+    border-bottom-left-radius: 0.8vh;
+}
+
+.Messages .chatPanel .messageContent p {
+    margin: 0 0 0.8vh 0; 
+    font-size: 2vh; 
+    word-wrap: break-word;
+    max-width: 50ch; 
+    white-space: pre-wrap; 
+}
+
+.Messages .chatPanel .messageTime {
+    font-size: 1.4vh; 
+    opacity: 0.8;
+    display: block;
+    text-align: right;
+}
+
+.Messages .chatPanel .messageInputContainer {
+    padding: 1.8vh 2.5vh; 
+    border-top: 0.1vh solid var(--inputsBorder);
+    display: flex;
+    align-items: center;
+    background-color: var(--mainBg);
+}
+
+.Messages .chatPanel .inputActions {
+    display: flex;
+    gap: 0.5vh;
+    margin-right: 1vh;
+}
+
+.Messages .chatPanel .inputActionBtn {
+    background: none;
+    border: none;
+    color: var(--iconColor);
+    font-size: 1.6vh;
+    cursor: pointer;
+    padding: 0.8vh;
+    border-radius: 50%;
+}
+
+.Messages .chatPanel .messageInput {
+    flex: 1;
+    border: 0.1vh solid var(--inputsBorder);
+    border-radius: 1.5vh;
+    padding: 3vh 2vh; 
+    font-size: 2vh;
+    resize: none;
+    max-height: 15vh;
+    background-color: var(--mainBg);
+    color: var(--mainText);
+    font-family: inherit;
+}
+
+.Messages .chatPanel .messageInput:focus {
+    outline: none;
+    border-color: var(--iconHover);
+}
+
+.Messages .usersPanel .usersList::-webkit-scrollbar,
+.Messages .chatPanel .messagesArea::-webkit-scrollbar {
+    width: 0.5vh;
+}
+
+.Messages .usersPanel .usersList::-webkit-scrollbar-track,
+.Messages .chatPanel .messagesArea::-webkit-scrollbar-track {
+    background: var(--inputsBg);
+    border-radius: 1vh;
+}
+
+.Messages .usersPanel .usersList::-webkit-scrollbar-thumb,
+.Messages .chatPanel .messagesArea::-webkit-scrollbar-thumb {
+    background: var(--iconHover);
+    border-radius: 1vh;
+}
+
+.Messages .messageInputContainer > button:last-of-type,
+.Messages .chatPanel .ChatWindow .messageInputContainer button[class*="Button"],
+.Messages .chatPanel .ChatWindow .messageInputContainer .FormButton {
+    width: 7dvw !important;
+    margin-left: 2dvh !important;
+    padding: 1.2dvh 0.8dvw !important;
+    font-size: 1.6dvh !important;
+    color: #FFFFFF !important;             
+    background-color: #000000 !important;     
+    border-radius: 1dvh !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-family: inherit !important;
+    text-align: center !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+}
+
+.Messages .messageInputContainer > button:last-of-type:hover:not(:disabled),
+.Messages .chatPanel .ChatWindow .messageInputContainer button[class*="Button"]:hover:not(:disabled) {
+    background-color: var(--button-hover, color-mix(in srgb, var(--iconHover) 80%, #000000 20%)) !important;
+    opacity: 0.9 !important;
+    transform: translateY(-0.2dvh) !important;
+}
+
+.Messages .messageInputContainer > button:last-of-type:disabled,
+.Messages .chatPanel .ChatWindow .messageInputContainer button[class*="Button"]:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}

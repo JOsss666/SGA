@@ -1,0 +1,167 @@
+.MessagesCard {
+    background: var(--mainBg);
+    border-radius: 2vh;
+    padding: 0.6vh 1vw;
+    border: 0.1vh solid var(--inputsBorder);
+    box-shadow: 0 0.3vh 0.6vh rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    position: relative;
+    margin-bottom: 1vh;
+    width: 100%;
+}
+
+.MessagesCard:hover {
+    transform: translateY(-0.3vh);
+    background-color: var(--cardHover);
+    border-color: var(--cardHover);
+}
+
+.MessagesCard.selected {
+    background-color: var(--cardHover); 
+    border-color: var(--cardHover);
+}
+
+.MessagesCard .CardContent {
+    flex: 1;
+    min-width: 0;
+    margin-left: 1vw;
+    display: flex;
+    flex-direction: column;
+}
+
+.MessagesCard .CardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.3vh;
+    width: 100%;
+}
+
+.MessagesCard .NameSection {
+    flex: 1;
+    min-width: 0;
+}
+
+.MessagesCard .UserName {
+    color: var(--mainText);
+    font-size: clamp(0.9rem, 1.6vh, 1.2rem);
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.MessagesCard .TimeSection {
+    margin-left: 1vw;
+    flex-shrink: 0;
+}
+
+.MessagesCard .MessageTime {
+    color: var(--descriptionText);
+    font-size: clamp(0.7rem, 1.2vh, 0.9rem);
+    font-weight: 400;
+    white-space: nowrap;
+}
+
+.MessagesCard .CardFooter {
+    width: 100%;
+}
+
+.MessagesCard .LastMessage {
+    color: var(--descriptionText);
+    font-size: clamp(0.8rem, 1.4vh, 1rem);
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+
+.MessagesCard .AvatarSection {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.MessagesCard .UserAvatar {
+    width: 7vh !important;
+    height: 7vh !important;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
+    flex-shrink: 0;
+    border: 0.15vh solid var(--inputsBorder);
+}
+
+.MessagesCard .UnreadBadge {
+    position: absolute;
+    top: -0.5vh;
+    right: -0.5vh;
+    background-color: var(--iconHover);
+    color: white;
+    border-radius: 50%;
+    width: 2vh;
+    height: 2vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(0.6rem, 1vh, 0.8rem);
+    font-weight: 600;
+    z-index: 1;
+}
+
+.MessagesCard.selected.text-light-on-dark .UserName,
+.MessagesCard.selected.dark-bg .UserName {
+    color: #FFFFFF !important;
+    font-weight: 600;
+}
+
+.MessagesCard.selected.text-light-on-dark .LastMessage,
+.MessagesCard.selected.dark-bg .LastMessage {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.MessagesCard.selected.text-light-on-dark .MessageTime,
+.MessagesCard.selected.dark-bg .MessageTime {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.MessagesCard.selected.text-dark-on-light .UserName,
+.MessagesCard.selected.light-bg .UserName {
+    color: #000000 !important;
+    font-weight: 700;
+}
+
+.MessagesCard.selected.text-dark-on-light .LastMessage,
+.MessagesCard.selected.light-bg .LastMessage {
+    color: #222222 !important;
+    font-weight: 500;
+}
+
+.MessagesCard.selected.text-dark-on-light .MessageTime,
+.MessagesCard.selected.light-bg .MessageTime {
+    color: #444444 !important;
+    font-weight: 500;
+}
+
+.MessagesCard img,
+.MessagesCard .UserAvatar {
+    filter: none !important;
+    mix-blend-mode: normal !important;
+}
+
+.MessagesCard.selected.text-light-on-dark .UnreadBadge,
+.MessagesCard.selected.dark-bg .UnreadBadge {
+    background-color: #FFFFFF !important;
+    color: var(--iconHover) !important;
+}
+
+.MessagesCard.selected.text-dark-on-light .UnreadBadge,
+.MessagesCard.selected.light-bg .UnreadBadge {
+    background-color: var(--iconHover) !important;
+    color: #FFFFFF !important;
+}
