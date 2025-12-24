@@ -122,7 +122,6 @@ export function FormNewOperation({info}){
             total:newSubTtl,
             nature:paymentMethod.nature == 'D' || paymentMethod.nature == 'DB' ? 'DB':'CR'
         })
-        console.log(newTransDetails);
         setTransactionDetails(newTransDetails);
     }
 
