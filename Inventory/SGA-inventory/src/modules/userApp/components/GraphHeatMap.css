@@ -1,0 +1,43 @@
+
+
+.GraphHeatMap{
+    height: 24vh;
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    justify-content: space-between;
+    border-radius: 3vh;
+    padding: 0;
+}
+
+.GraphHeatMap .HeadGraph{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2vh .5vh;
+    height: 8vh;
+}
+
+.GraphHeatMap .HeadGraph .TitleGraph{
+    display: flex;
+    flex-direction: row;
+    gap: 2vh;
+    justify-content: center;
+}
+
+.GraphHeatMap .HeadGraph .OptionsGraph{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.GraphHeatMap .PlotGraph{
+    border-radius: 3vh;
+}
+
+
+
+
+
