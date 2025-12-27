@@ -1,0 +1,66 @@
+
+.GraphBarCharts{
+    height: 24vh;
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    justify-content: space-between;
+    border-radius: 3vh;
+}
+
+.GraphBarCharts .HeadGraph{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2vh .5vh;
+    height: 8vh;
+}
+
+.GraphBarCharts .HeadGraph .TitleGraph{
+    display: flex;
+    flex-direction: row;
+    gap: 2vh;
+    justify-content: center;
+}
+
+.GraphBarCharts .HeadGraph .OptionsGraph{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.GraphBarCharts .PlotGraph{
+    border-radius: 3vh;
+}
+
+
+/* QUITAR LOGO DE LA GRAFICA */
+a#tv-attr-logo { display: none !important; }
+
+
+
+
+
+
+
+.chart-tooltip {
+    position: absolute;
+    padding: 6px 10px;
+    background: black;
+    color: white;
+    font-size: 12px;
+    border-radius: 10px;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.MonthsRow {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    text-align: center;
+    color: #9ca3af;
+    font-size: 12px;
+    background-color: lightcoral;
+}
