@@ -17,6 +17,20 @@
     transition: .3s;
 }
 
+.Settings .asideMenu .SearchBar{
+    margin-bottom: 1vh;
+}
+
+.Settings .asideMenu .SearchBar i{
+    top: 1vh;
+}
+
+.Settings .asideMenu .SearchBar input{
+    border-radius: 1vh;
+    padding-top: 1vh;
+    padding-bottom: 1vh;
+}
+
 .Settings .asideMenu .SettingsMenuOptions{
     font-size: clamp(2.2px,2.2vh,22px);
     font-weight: 400;

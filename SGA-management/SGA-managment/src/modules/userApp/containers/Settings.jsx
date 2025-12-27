@@ -5,6 +5,9 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './Settings.css'
 import { useState } from "react";
 import { AccountSettings } from "./SettingsSections/AccountSettings";
+import { SearchBar } from "../components/SearchBar";
+import { GeneralSettings } from "./SettingsSections/GeneralSettings";
+import { AlertsSettings } from "./SettingsSections/AlertsSettings";
 
 export function Settings(){
 
@@ -31,6 +34,7 @@ export function Settings(){
     return(
         <div className="Settings">
             <div className="asideMenu">
+                <SearchBar placeholder={'Buscar'}/>
                 {menuOptions.map((element,index)=>(
                     <strong className={`SettingsMenuOptions ${activeSection == index? 'activeSettigsSec':''}`} onClick={()=>{
                             handleNavigate(element.path);
@@ -49,9 +53,9 @@ export function Settings(){
                 </div>
                 <div className="spaceSectionsSettings">
                     <Routes>
-                        <Route path="" element={<span>General</span>} />
+                        <Route path="" element={<GeneralSettings/>} />
                         <Route path="Account" element={<AccountSettings/>} />
-                        <Route path="Alerts" element={<span>Notificaciónes</span>} />
+                        <Route path="Alerts" element={<AlertsSettings/>} />
                         <Route path="Styles" element={<span>Personalización</span>} />
                         <Route path="Billing" element={<span>Facturación</span>} />
                         <Route path="Security" element={<span>Seguridad</span>} />
