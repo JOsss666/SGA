@@ -11,7 +11,7 @@ export function SettingLine({info}){
             case "system":
                 return "#FF8C00"
             case "accesibility":
-                return "#14AE5C"
+                return "#C6185C"
             case "mode":
                 return "#7B00FF"
             case undefined:

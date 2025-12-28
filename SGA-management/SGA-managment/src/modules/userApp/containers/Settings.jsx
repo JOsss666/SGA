@@ -8,6 +8,11 @@ import { AccountSettings } from "./SettingsSections/AccountSettings";
 import { SearchBar } from "../components/SearchBar";
 import { GeneralSettings } from "./SettingsSections/GeneralSettings";
 import { AlertsSettings } from "./SettingsSections/AlertsSettings";
+import { StylesSettings } from "./SettingsSections/StylesSettings";
+import { BillingSettings } from "./SettingsSections/BillingSettings";
+import { SecuritySettings } from "./SettingsSections/SecuritySettings";
+import { SystemSettings } from "./SettingsSections/SystemSettings";
+import { NoResults } from "./NoResults";
 
 export function Settings(){
 
@@ -56,11 +61,11 @@ export function Settings(){
                         <Route path="" element={<GeneralSettings/>} />
                         <Route path="Account" element={<AccountSettings/>} />
                         <Route path="Alerts" element={<AlertsSettings/>} />
-                        <Route path="Styles" element={<span>Personalización</span>} />
-                        <Route path="Billing" element={<span>Facturación</span>} />
-                        <Route path="Security" element={<span>Seguridad</span>} />
-                        <Route path="Devices" element={<span>Dispositivos vinculados</span>} />
-                        <Route path="System" element={<span>Sistema</span>} />
+                        <Route path="Styles" element={<StylesSettings/>} />
+                        <Route path="Billing" element={<BillingSettings/>} />
+                        <Route path="Security" element={<SecuritySettings/>} />
+                        <Route path="Devices" element={<NoResults title={'No es posible acceder a tus disposivos fisicos desde la nube'}/>} />
+                        <Route path="System" element={<SystemSettings/>} />
                     </Routes>
                 </div>
             </div>

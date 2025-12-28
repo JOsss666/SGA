@@ -96,3 +96,7 @@
 .Settings .spaceSettings .headSpace .PathLocation{
     margin: auto 0;
 }
+
+.Settings .NoResults{
+    height: 60vh;
+}
