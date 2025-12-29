@@ -73,7 +73,17 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    background-color: var(--mainBg);
+    transition: .3s;
+}
+
+:root .Messages .chatPanel{
+    background-image: url('https://res.cloudinary.com/djjxugmni/image/upload/v1766976628/ChatBgClaro_dpmpap.jpg');
+    background-size: 30dvw 100dvh;
+}
+
+:root.dark .Messages .chatPanel{
+    background-image: url('https://res.cloudinary.com/djjxugmni/image/upload/v1766976335/ChatBg_cmqg5b.jpg');
+    background-size: 30dvw 100dvh;
 }
 
 .Messages .chatPanel .noChatSelected {
@@ -92,7 +102,7 @@
 
 .Messages .chatPanel .welcomeMessage i {
     font-size: clamp(10px,10vh,100px);
-    color: var(--iconHover);
+    color: var(--mainText);
     margin-bottom: 4vh;
 }
 
@@ -122,6 +132,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background-color: var(--menuAside);
 }
 
 .Messages .chatPanel .chatUserInfo {
@@ -223,6 +234,7 @@
     left: 5%;
     padding: 1vh;
     gap: 1vh;
+    border: solid .1vh var(--inputsBorder);
 }
 
 .Messages .chatPanel .messageInputContainer .ButtonMenu, .Messages .chatPanel .messageInputContainer .MoreOptions {

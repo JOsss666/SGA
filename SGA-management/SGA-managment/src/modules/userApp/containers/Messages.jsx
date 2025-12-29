@@ -29,11 +29,7 @@ export function Messages() {
                 company_id: appInfo.company_id
             });
             
-            console.log('🔍 RESPUESTA DE LA API:', res);
-            
             if (res[0] && Array.isArray(res[1])) {
-                console.log(`${res[1].length}`);
-                
                 const chatUsers = res[1].map((apiUser, index) => {
                     let userName = apiUser.user_name || 'Usuario';
                     
@@ -42,7 +38,6 @@ export function Messages() {
                         name: userName,
                         email: apiUser.user_mail || apiUser.email || '',
                         originalUser: apiUser,
-
                         last_message: "Haz clic para empezar a chatear",
                         last_message_time: new Date().toISOString(),
                         unread_count: 0,
