@@ -1,8 +1,9 @@
 import './MessagesCard.css';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 
 // Función para formatear la hora (PERMANECE IGUAL)
 const formatMessageTime = (timestamp) => {
+
     if (!timestamp) return 'Nuevo';
     
     try {
@@ -56,7 +57,19 @@ const formatMessageTime = (timestamp) => {
 
 export function MessagesCard({ user, isSelected, onClick }) {
     const [currentTime, setCurrentTime] = useState(Date.now());
-    
+    const cardC = useRef();
+    const [openOptions,setOpenOptions] = useState(false);
+
+    useEffect(()=>{
+        if(cardC.current != undefined){
+            cardC.current.addEventListener('contextmenu', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                setOpenOptions(!openOptions);
+            });
+        }
+    },[cardC.current])
+
     useEffect(() => {
         const intervalId = setInterval(() => {
             setCurrentTime(Date.now());
@@ -71,12 +84,13 @@ export function MessagesCard({ user, isSelected, onClick }) {
     
     return (
         <div 
+            ref={cardC}
             className={`MessagesCard ${isSelected ? 'selected' : ''}`}
             onClick={onClick}
         >
             <div className="AvatarSection">
                 <img 
-                    src={user.profile_picture || 'https://i.pinimg.com/736x/fc/55/78/fc557891f4587e03e4eaaea18a4bc9c3.jpg'}
+                    src={user.img || 'https://i.pinimg.com/736x/35/47/0c/35470c8c3ea8905f83e5efd5ccb3299b.jpg'}
                     alt={user.name}
                     className="UserAvatar"
                 />

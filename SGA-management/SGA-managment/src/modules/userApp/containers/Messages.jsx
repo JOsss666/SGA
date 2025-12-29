@@ -3,9 +3,11 @@ import { useState, useEffect, useRef } from 'react';
 import { BoldTitle } from '../components/BoldTitle';
 import { SearchBar } from '../components/SearchBar';
 import { MessagesCard } from '../components/MessagesCard';
-import { FormButton } from '../components/FormButton';
+import { AiButton } from '../components/ChatAiComponents/AiButton';
 import { postInfo } from '../../../utils/functions';
 import { useAppInfo } from '../../../context/context';
+import { MoreOptions } from '../components/MoreOptions';
+import { ButtonMenu } from '../components/ButtonMenu';
 
 export function Messages() {
     const [users, setUsers] = useState([]);
@@ -45,14 +47,9 @@ export function Messages() {
                         last_message_time: new Date().toISOString(),
                         unread_count: 0,
                         is_online: Math.random() > 0.5,
-                        
-                        profile_picture: apiUser.profile_picture || 
-                                       apiUser.avatar || 
-                                       'https://i0.wp.com/digitalhealthskills.com/wp-content/uploads/2022/11/3da39-no-user-image-icon-27.png?fit=500%2C500&ssl=1'
+                        img: apiUser.img
                     };
                 });
-                
-                console.log('👥 Usuarios cargados:', chatUsers);
 
                 const initialMessages = {};
                 chatUsers.forEach(user => {
@@ -173,10 +170,28 @@ export function Messages() {
         <div className="Messages appSection">
             <div className="usersPanel">
                 <div className="panelHeader">
-                    <BoldTitle text={'Mensajes'} />
+                    <div className="NewOptions">
+                        <BoldTitle text={'Mensajes'} />
+                        <div className="NopC">
+                            <MoreOptions options={[
+                                {text:'Chat',icon:<i className="fa-regular fa-message"/>},
+                                {text:'Grupo',icon:<i className="fa-solid fa-people-group"/>}
+                            ]}>
+                                <i className="fa-solid fa-plus"/>
+                            </MoreOptions>
+                            <MoreOptions options={[
+                                {text:'Chat',icon:<i className="fa-regular fa-message"/>},
+                                {text:'Grupo',icon:<i className="fa-solid fa-people-group"/>},
+                                {text:'Mensajes destacados',icon:<i className="fa-regular fa-star"/>},
+                                {text:'Imágenes',icon:<i className="fa-regular fa-image"/>},
+                                {text:'Documentos',icon:<i className="fa-regular fa-file"/>},
+                                {text:'Enlaces',icon:<i className="fa-solid fa-link"/>},
+                            ]}/>
+                        </div>
+                    </div>
                     <div className="searchContainer">
                         <SearchBar 
-                            placeholder={'Buscar chat...'}
+                            placeholder={'Buscar chat'}
                             onChange={handleSearch}
                         />
                     </div>
@@ -210,7 +225,7 @@ export function Messages() {
                         <div className="chatHeader">
                             <div className="chatUserInfo">
                                 <img 
-                                    src={selectedUser.profile_picture}
+                                    src={selectedUser.img}
                                     alt={selectedUser.name}
                                     className="chatAvatar"
                                 />
@@ -234,24 +249,32 @@ export function Messages() {
                                     </div>
                                 </div>
                             ))}
+                            <span>...</span>
                             <div ref={messagesEndRef} />
                         </div>
 
                         <div className="messageInputContainer">
-                            <textarea
-                                className="messageInput"
-                                placeholder={`Escribe un mensaje a ${selectedUser.name}...`}
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                                rows="1"
-                            />
-                            <FormButton
-                                onClick={handleSendMessage}
-                                disabled={!newMessage.trim()}
-                                text="Enviar"
-                                className="sendButton debug-button-border"
-                            />
+                            <MoreOptions options={[
+                                {text:'Documento', icon:<i className="fa-solid fa-file-lines"/>},
+                                {text:'Archivo', icon:<i className="fa-solid fa-file-lines"/>},
+                                {text:'Fotos y video', icon:<i className="fa-solid fa-file-lines"/>},
+                                {text:'Camara', icon:<i className="fa-solid fa-file-lines"/>},
+                                {text:'Audio', icon:<i className="fa-solid fa-file-lines"/>},
+                                {text:'Informe', icon:<i className="fa-solid fa-file-lines"/>},
+                                {text:'Estadistica', icon:<i className="fa-solid fa-file-lines"/>},
+                                {text:'Evento', icon:<i className="fa-solid fa-file-lines"/>}
+                            ]}>
+                                <i className="fa-solid fa-plus"/>
+                            </MoreOptions>
+                            <SearchBar placeholder={'Enviar mensaje'}/>
+                            <AiButton attached={messages} sugerence={[
+                                {text:'¿Que representa este informe?',context:``},
+                                {text:'Realiza un analisis de este informe',context:``},
+                                {text:'¿Que acciones me recomiendas basado en este informe?',context:``}
+                            ]}/>
+                            <ButtonMenu noRotate={true} title={'Enviar mensaje de voz'}>
+                                <i className="fa-solid fa-microphone"/>
+                            </ButtonMenu>
                         </div>
                     </div>
                 ) : (

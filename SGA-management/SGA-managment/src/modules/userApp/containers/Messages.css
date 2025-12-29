@@ -18,11 +18,39 @@
 
 .Messages .usersPanel .panelHeader {
     padding: 2vh;
-    border-bottom: 0.1vh solid var(--inputsBorder);
+}
+
+.Messages .usersPanel .panelHeader .NewOptions{
+    display: flex;
+    margin: auto;
+    margin-bottom: 2vh;
+    padding-left: 2vh;
+}
+
+.Messages .usersPanel .panelHeader .NewOptions .NopC{
+    display: flex;
+    margin: auto;
+    margin-right: 2vh;
+    gap: 1vh;
+}
+
+.Messages .usersPanel .panelHeader .BoldTitle{
+    margin: auto 0;
+    font-weight: 500;
 }
 
 .Messages .usersPanel .searchContainer {
     margin-top: 1.5vh;
+}
+
+.Messages .usersPanel .searchContainer .SearchBar input{
+    border-radius: 3.5vh;
+    height: 7vh;
+    background-color: var(--settingsHover);
+}
+
+.Messages .usersPanel .searchContainer .SearchBar i{
+    top: 2.5vh;
 }
 
 .Messages .usersPanel .usersList {
@@ -42,7 +70,6 @@
 }
 
 .Messages .chatPanel {
-    flex: 1;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -51,6 +78,7 @@
 
 .Messages .chatPanel .noChatSelected {
     display: flex;
+    width: 65dvw;
     justify-content: center;
     align-items: center;
     height: 100%;
@@ -63,19 +91,20 @@
 }
 
 .Messages .chatPanel .welcomeMessage i {
-    font-size: 4vh;
+    font-size: clamp(10px,10vh,100px);
     color: var(--iconHover);
-    margin-bottom: 2vh;
+    margin-bottom: 4vh;
 }
 
 .Messages .chatPanel .welcomeMessage h3 {
-    font-size: 2.2vh;
+    font-size: clamp(3px,3vh,30px );
     margin-bottom: 1vh;
+    font-weight: 500;
     color: var(--mainText);
 }
 
 .Messages .chatPanel .welcomeMessage p {
-    font-size: 1.6vh;
+    font-size: clamp(2.2px,2.2vh,22px);
     color: var(--descriptionText);
 }
 
@@ -83,7 +112,8 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background-color: var(--mainBg);
+    width: 64.5dvw;
+    position: relative;
 }
 
 .Messages .chatPanel .chatHeader {
@@ -92,7 +122,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: var(--mainBg);
 }
 
 .Messages .chatPanel .chatUserInfo {
@@ -126,13 +155,12 @@
 }
 
 .Messages .chatPanel .messagesArea {
-    flex: 1;
+    height: 75vh;
     padding: 2vh;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 1.5vh;
-    background-color: var(--mainBg); 
 }
 
 .Messages .chatPanel .messageBubble {
@@ -186,11 +214,53 @@
 }
 
 .Messages .chatPanel .messageInputContainer {
-    padding: 1.8vh 2.5vh; 
-    border-top: 0.1vh solid var(--inputsBorder);
+    width: 90%;
     display: flex;
-    align-items: center;
-    background-color: var(--mainBg);
+    background-color: var(--settingsHover);
+    border-radius: 4vh;
+    position: absolute;
+    bottom: 5vh;
+    left: 5%;
+    padding: 1vh;
+    gap: 1vh;
+}
+
+.Messages .chatPanel .messageInputContainer .ButtonMenu, .Messages .chatPanel .messageInputContainer .MoreOptions {
+    margin: auto 0;
+}
+
+.Messages .chatPanel .messageInputContainer .ButtonMenu, .Messages .chatPanel .messageInputContainer .MoreOptions .options{
+    top: auto;
+    right: auto;
+    left: 0;
+    bottom: 9vh;
+}
+
+
+.Messages .chatPanel .messageInputContainer .ButtonMenu, .Messages .chatPanel .messageInputContainer .AiButton .sugerencesList{
+    top: auto !important;
+    bottom: 9vh;
+    right: 0;
+}
+
+
+.Messages .chatPanel .messageInputContainer .SearchBar{
+    height: 100%;
+    width: auto;
+}
+
+.Messages .chatPanel .messageInputContainer .SearchBar i{
+    display: none;
+}
+
+.Messages .chatPanel .messageInputContainer .SearchBar input{
+    border: hidden;
+    outline: none;
+    border-radius: 3vh;
+    background-color: var(--settingsHover);
+    padding-left: 2vh;
+    width: 47vw;
+    font-size: clamp(2.5px,2.5vh,25px);
 }
 
 .Messages .chatPanel .inputActions {
@@ -227,22 +297,6 @@
     border-color: var(--iconHover);
 }
 
-.Messages .usersPanel .usersList::-webkit-scrollbar,
-.Messages .chatPanel .messagesArea::-webkit-scrollbar {
-    width: 0.5vh;
-}
-
-.Messages .usersPanel .usersList::-webkit-scrollbar-track,
-.Messages .chatPanel .messagesArea::-webkit-scrollbar-track {
-    background: var(--inputsBg);
-    border-radius: 1vh;
-}
-
-.Messages .usersPanel .usersList::-webkit-scrollbar-thumb,
-.Messages .chatPanel .messagesArea::-webkit-scrollbar-thumb {
-    background: var(--iconHover);
-    border-radius: 1vh;
-}
 
 .Messages .messageInputContainer > button:last-of-type,
 .Messages .chatPanel .ChatWindow .messageInputContainer button[class*="Button"],

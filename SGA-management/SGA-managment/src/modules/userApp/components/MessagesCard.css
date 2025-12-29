@@ -1,9 +1,7 @@
 .MessagesCard {
     background: var(--mainBg);
     border-radius: 2vh;
-    padding: 0.6vh 1vw;
-    border: 0.1vh solid var(--inputsBorder);
-    box-shadow: 0 0.3vh 0.6vh rgba(0, 0, 0, 0.1);
+    padding: 1vw;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
@@ -49,7 +47,7 @@
 .MessagesCard .UserName {
     color: var(--mainText);
     font-size: clamp(0.9rem, 1.6vh, 1.2rem);
-    font-weight: 600;
+    font-weight: 500;
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
