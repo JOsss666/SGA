@@ -38,6 +38,7 @@ import { Categories } from './Categories';
 import { Products } from './Products';
 import { CategoriesDetail } from './CategoriesDetail';
 import './UserApp.css';
+import { Calendar } from './Calendar';
 
 
 export function UserApp(){
@@ -192,6 +193,7 @@ export function UserApp(){
                             <Route path='/tutorials' element={<span>tutorials</span>} />
                             <Route path='/help' element={<span>help</span>} />
                             <Route path='/logOut' element={<LogOut/>} />
+                            <Route path="Calendar" element={<Calendar/>}/>
                     </Routes>
                 </main>
                 {openPreview && (

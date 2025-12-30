@@ -35,10 +35,12 @@
     padding: 2vh;    
 }
 
+
+
 .MovementsInventory .Graphics .Graph{
     height: 45vh;
     width: auto;
-    background-color: #FAFAFA;
+    background-color: transparent;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
@@ -49,6 +51,9 @@
     height: 45vh;
     width: 60vh;
 }
+
+
+
 .MovementsInventory .Graphics .Graph .HeatMap{
     height: 45vh;
     width: 120vh;
@@ -66,5 +71,27 @@
 
 
 
+/* 🌞 Light mode */
+.mi-light {
+    --graph-card-bg: #fafafa;
+    color: #111827;
+}
 
+/* 🌙 Dark mode */
+.mi-dark {
+    --graph-card-bg: #303030;
+    color: #fafafa;
+}
+
+/* 🔹 Solo cambia el fondo de la tarjeta de la gráfica */
+.MovementsInventory .Graphics .Graph {
+    background: var(--graph-card-bg) !important;
+    border-radius: 3vh;
+}
+
+/* 🔹 Mantener las gráficas internas transparentes */
+.MovementsInventory .Graphics .Graph .BarCharts,
+.MovementsInventory .Graphics .Graph .HeatMap {
+    background: transparent !important;
+}
 
