@@ -1,5 +1,3 @@
-
-
 .Calendar{
     display: flex;
     flex-direction: row;
@@ -7,17 +5,24 @@
     height: 100%;
 }
 
-
+/* -------- SIDEBARS -------- */
 .Calendar .SideBar{
     width: 40vh;
     padding: 2vh;
     margin: 1vh;
-    border: solid #DADADA .3vh;
+    border: solid var(--sidebar-border) .3vh;
     border-radius: 3vh;
 
     display: flex;
     flex-direction: column;
     gap: 1vh;
+
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+}
+
+.Calendar .SideBar *{
+    color: var(--sidebar-text);
 }
 
 .Calendar .SideBar ul{
@@ -43,9 +48,6 @@
     font-size: 3.5vh;
 }
 
-
-
-
 /* SIDEBAR LEFT */
 .Calendar .SideBarLeft .FormButton{
     width: fit-content;
@@ -61,18 +63,17 @@
     padding: 2vh;
     font-weight: 500;
     align-content: start;
+    color: var(--sidebar-text);
 }
 
 .Calendar .SideBarLeft .Categories li:hover {
-  background: #f3f4f6;
+  background: var(--sidebar-hover);
 }
 
 .Calendar .SideBarLeft .Categories .activeCategory {
-  background: #e8f0ff;
+  background: var(--sidebar-active);
   font-weight: 600;
 }
-
-
 
 /* SIDEBAR RIGHT */
 .Calendar .SideBarRight {
@@ -85,12 +86,11 @@
     width: fit-content;
 }
 
+.Calendar .SideBarRight li:hover{
+  background: var(--sidebar-hover);
+}
 
-
-
-
-
-/* CALENDAR */
+/* -------- CALENDAR BODY -------- */
 .Calendar .CalendarBody{
     width: 110vh;
     padding: 2vh;
@@ -99,17 +99,17 @@
 .Calendar .CalendarBody .fc {
   border-radius: 1.5vh;
   overflow: hidden;
-  background-color: transparent;
+  background: var(--calendar-bg);
+  color: var(--calendar-text);
 }
 
-      /* BTN ACTIVO */
+/* Buttons */
 .Calendar .CalendarBody .fc .fc-button.fc-button-active {
   background-color: #838383 !important;
   color: #1f1f1f !important;
   border: none;
 }
 
-/* BTN NORMAL */
 .Calendar .CalendarBody .fc .fc-button {
   background-color: #DADADA;
   color: #1f1f1f;
@@ -117,60 +117,53 @@
   font-weight: 600;
 }
 
-
-/* ASIGNA EL COLOR DEL EVENTO*/
+/* Eventos */
 .Calendar .CalendarBody .fc-timegrid-event .fc-event-main {
   background: inherit !important;
   color: white;
   font-weight: 600;
 }
 
-/* RELLENA LAS HORAS ASIGNADAS */
 .Calendar .CalendarBody .fc-timegrid-event {
   border-radius: 10px;
   overflow: hidden;
   border: none !important;
 }
 
-/* Día de hoy en vista Month */
+/* Today colors */
 .Calendar .CalendarBody .fc-daygrid-day.fc-day-today {
   background-color: #e8f0ff !important;
 }
 
-/* Día de hoy en vista Week / Day */
 .Calendar .CalendarBody .fc-timegrid-col.fc-day-today,
 .Calendar .CalendarBody .fc-timegrid-axis.fc-scrollgrid-shrink {
   background-color: #e8f0ff !important;
 }
 
-/* Quitar el borde amarillo */
 .Calendar .CalendarBody .fc-day-today {
   border: none !important;
 }
 
-/* Ocultar scrollbar en navegadores WebKit (Chrome, Edge, etc.) */
+/* Scrollbars ocultos */
 .Calendar .CalendarBody .fc-scroller::-webkit-scrollbar {
   display: none;
 }
-
-/* Firefox */
 .Calendar .CalendarBody .fc-scroller {
   scrollbar-width: none;
 }
 
-/* GENERAL */
+/* General */
 .Calendar .Dot {
   width: 1vh;
   height: 1vh;
   border-radius: 3vh;
 }
 
-/* ANIMACION PARA EL EVENTO CUANDO  */
+/* Evento resaltado */
 .Calendar .highlight-event {
-  outline: 3px solid #ffcc00;
+  outline: 3px solid #303030;
   transition: 0.3s;
 }
-
 
 .Calendar .custom-event {
   padding: .3vh .6vh;
@@ -180,12 +173,41 @@
   text-overflow: ellipsis;
 }
 
+/* ---------- THEME VARIABLES ---------- */
+
+/* Light mode */
+.Calendar .calendar-light {
+  --calendar-bg: #ffffff;
+  --calendar-text: #111827;
+  --calendar-grid: #e5e7eb;
+
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #d1d5db;
+  --sidebar-text: #111827;
+  --sidebar-hover: #f3f4f6;
+  --sidebar-active: #e8f0ff;
+}
+
+/* Dark mode */
+.Calendar.calendar-dark {
+  --calendar-bg: #303030;
+  --calendar-text: #e5e7eb;
+  --calendar-grid: #1f2937;
+
+  --sidebar-bg: #303030;
+  --sidebar-border: #1f2937;
+  --sidebar-text: #e5e7eb;
+  --sidebar-hover: #111827;
+  --sidebar-active: #1e293b;
+}
 
 
+.Calendar .fc-scrollgrid {
+  border-color: var(--calendar-grid);
+}
 
-
-
-
-
-
-
+.Calendar .fc-daygrid-day,
+.Calendar.fc-timegrid-slot,
+.Calendar .fc-timegrid-axis {
+  border-color: var(--calendar-grid);
+}

@@ -11,10 +11,13 @@ import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { FormButton } from "../components/FormButton";
 import { SearchBar } from "../components/SearchBar";
 import { AiResume } from "../components/AiResume";
+import { useAppInfo } from "../../../context/context";
 
 import "./Calendar.css";
 
 export function Calendar() {
+
+    const { darkMode, setDarkMode } = useAppInfo();
 
     const [date, setDate] = useState(new Date());
     const [searchVal, setSearchVal] = useState("");
@@ -123,7 +126,8 @@ export function Calendar() {
     );
 
     return (
-        <div className="Calendar">
+        <div className={`Calendar ${darkMode ? "calendar-dark" : "calendar-light"}`}>
+
             <div className="SideBar SideBarLeft">
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <DateCalendar
