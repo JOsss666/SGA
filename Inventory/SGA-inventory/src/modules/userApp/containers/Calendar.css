@@ -1,0 +1,191 @@
+
+
+.Calendar{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 100%;
+}
+
+
+.Calendar .SideBar{
+    width: 40vh;
+    padding: 2vh;
+    margin: 1vh;
+    border: solid #DADADA .3vh;
+    border-radius: 3vh;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.Calendar .SideBar ul{
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: .2vh;
+    align-items: start;
+}
+
+.Calendar .SideBar ul li{
+    display: flex;
+    flex-direction: row;
+    gap: 0 1vh;
+    padding: 1vh 2vh;
+    font-size: 2vh;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 3vh;
+}
+
+.Calendar .SideBar ul li i{
+    font-size: 3.5vh;
+}
+
+
+
+
+/* SIDEBAR LEFT */
+.Calendar .SideBarLeft .FormButton{
+    width: fit-content;
+    font-weight: 400;
+    font-size: 1.5vh;
+    align-items: end;
+}
+
+.Calendar .SideBarLeft .Categories .ButtonCategories{
+    background-color: transparent;
+    border: none;
+    font-size: 2vh;
+    padding: 2vh;
+    font-weight: 500;
+    align-content: start;
+}
+
+.Calendar .SideBarLeft .Categories li:hover {
+  background: #f3f4f6;
+}
+
+.Calendar .SideBarLeft .Categories .activeCategory {
+  background: #e8f0ff;
+  font-weight: 600;
+}
+
+
+
+/* SIDEBAR RIGHT */
+.Calendar .SideBarRight {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.Calendar .SideBarRight .AiResume{
+    width: fit-content;
+}
+
+
+
+
+
+
+/* CALENDAR */
+.Calendar .CalendarBody{
+    width: 110vh;
+    padding: 2vh;
+}
+
+.Calendar .CalendarBody .fc {
+  border-radius: 1.5vh;
+  overflow: hidden;
+  background-color: transparent;
+}
+
+      /* BTN ACTIVO */
+.Calendar .CalendarBody .fc .fc-button.fc-button-active {
+  background-color: #838383 !important;
+  color: #1f1f1f !important;
+  border: none;
+}
+
+/* BTN NORMAL */
+.Calendar .CalendarBody .fc .fc-button {
+  background-color: #DADADA;
+  color: #1f1f1f;
+  border: none;
+  font-weight: 600;
+}
+
+
+/* ASIGNA EL COLOR DEL EVENTO*/
+.Calendar .CalendarBody .fc-timegrid-event .fc-event-main {
+  background: inherit !important;
+  color: white;
+  font-weight: 600;
+}
+
+/* RELLENA LAS HORAS ASIGNADAS */
+.Calendar .CalendarBody .fc-timegrid-event {
+  border-radius: 10px;
+  overflow: hidden;
+  border: none !important;
+}
+
+/* Día de hoy en vista Month */
+.Calendar .CalendarBody .fc-daygrid-day.fc-day-today {
+  background-color: #e8f0ff !important;
+}
+
+/* Día de hoy en vista Week / Day */
+.Calendar .CalendarBody .fc-timegrid-col.fc-day-today,
+.Calendar .CalendarBody .fc-timegrid-axis.fc-scrollgrid-shrink {
+  background-color: #e8f0ff !important;
+}
+
+/* Quitar el borde amarillo */
+.Calendar .CalendarBody .fc-day-today {
+  border: none !important;
+}
+
+/* Ocultar scrollbar en navegadores WebKit (Chrome, Edge, etc.) */
+.Calendar .CalendarBody .fc-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+/* Firefox */
+.Calendar .CalendarBody .fc-scroller {
+  scrollbar-width: none;
+}
+
+/* GENERAL */
+.Calendar .Dot {
+  width: 1vh;
+  height: 1vh;
+  border-radius: 3vh;
+}
+
+/* ANIMACION PARA EL EVENTO CUANDO  */
+.Calendar .highlight-event {
+  outline: 3px solid #ffcc00;
+  transition: 0.3s;
+}
+
+
+.Calendar .custom-event {
+  padding: .3vh .6vh;
+  font-size: 1.3vh;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+
+
+
+
+
+
+
+
