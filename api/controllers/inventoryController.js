@@ -494,59 +494,82 @@ inventoryController.newMovement = (req,res)=>{
     req.on('end',async()=>{
         let info = JSON.parse(data);
         console.log(info);
-        let sentence = `INSERT INTO "Inventory".inventoryMovements (user_id,company_id,store_id,cellar_id,movement_date,document_number,movement_type,movement_value,movement_transactions,movement_state,movement_description,attach_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?);`
-        let values = [info.user_id,info.company_id,info.store_id,info.cellar_id,info.movement_date,info.document_number,info.movement_type,info.movement_value,info.movement_transactions,"Completado",info.movement_description,"-"]
-        let consulta = await useDataBase(sentence,values,4);
-        if(typeof consulta == 'number'){
-            if(info.processAction == true){
-                let postSen = `
-                    INSERT 
-                        INTO sga_process.CIS(
-                            op_id,
-                            company_id,
-                            store_id,
-                            cellar_id,
-                            user_id,
-                            thirdParty_id,
-                            movement_id,
-                            description
-                        )
-                    VALUES(
-                        ${info.op_id},
-                        ${info.company_id},
-                        ${info.store_id},
-                        ${info.cellar_id},
-                        ${info.user_id},
-                        ${info.supplier_id},
-                        ${consulta},
-                        '${info.movement_description + ` (Consumo inventario OP#${info.op_id}`})'
-                    );
-                `
-                let postConsul = await useDataBase(postSen,[],4);
-                let senUpdate = `
-                    UPDATE
-                        sga_process.OPS
-                    SET
-                        sga_process.OPS.executedCost = sga_process.OPS.executedCost + ${info.movement_value}
-                    WHERE
-                        sga_process.OPS.op_id = ${info.op_id}
-                    ;
-                `
-                let updateOP = await useDataBase(senUpdate,[],2);
-                if(postConsul){
-                    res.writeHead(200,{'Content-Type':'text/plain'});
-                    res.end(JSON.stringify([consulta,postConsul,updateOP]));
-                }else{
-                    res.writeHead(200,{'Content-Type':'text/plain'});
-                    res.end(JSON.stringify([false,`Error al registrar Consumo de Inventario en OP#${info.movement_value}`]));
-                }
-            }else{
-                res.writeHead(200,{'Content-Type':'text/plain'});
-                res.end(JSON.stringify(consulta));
+        let resultsMovements = [];
+        let senMainDoc = `
+            INSERT INTO "Ecosystem".documents(
+                company_id,
+                store_id,
+                "thirdParty_id",
+                document_type,
+                status,
+                "subTotal",
+                total,
+                created_by,
+                description,
+                attached)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id;
+        `;
+        let valuesMainDoc = [
+            info.company_id,
+            info.store_id,
+            info.thirdParty_id,
+            info.movement_type,
+            info.status,
+            info.totalProducts,
+            info.totalProducts,
+            info.created_by,
+            info.description,
+            info.attached_document
+        ];
+        let createMainDoc = await useDataBase(senMainDoc,valuesMainDoc,3);
+        let idMainDoc = parseInt(createMainDoc.id);
+        console.log('Documento padre --> ',idMainDoc)
+        if(typeof(idMainDoc) == 'number' && idMainDoc != NaN){
+            let sentence = `
+            INSERT INTO
+                "Inventory"."inventoryMovements"(
+                    company_id,
+                    "thirdParty_id",
+                    store_id,
+                    cellar_id,
+                    "product&service_id",
+                    movement_type,
+                    units,
+                    value,
+                    movement_group_id,
+                    attached_document,
+                    status,
+                    description, 
+                    created_by)
+                VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13);`;
+
+            for (const element of info.listProducts) {
+                let values = [
+                    info.company_id,
+                    info.thirdParty_id,
+                    info.store_id,
+                    info.cellar_id,
+                    element.id,
+                    info.movement_type,
+                    element.stock,
+                    element.unit_cost,
+                    idMainDoc,
+                    info.attached_document,
+                    info.status,
+                    info.description,
+                    info.created_by,]
+                let consulta = await useDataBase(sentence,values,2);
+                resultsMovements.push(consulta);
             }
+            console.log(resultsMovements)
+            res.writeHead(200,{'Content-Type':'text/plain'});
+            res.end(JSON.stringify([true,{
+                doc_id:idMainDoc,
+                lines:resultsMovements
+            }]));
         }else{
             res.writeHead(200,{'Content-Type':'text/plain'});
-            res.end(JSON.stringify(consulta));
+            res.end(JSON.stringify([false,'Error al crear documento']));
         }
     })
     req.on('error',(err)=>{

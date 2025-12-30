@@ -7,6 +7,7 @@ import { FormNewFV } from "./FormNewFV";
 import { FormNewOc } from "./FormNewOc";
 import './SelectTypeNewDoc.css'
 import { SearchBar } from "../../components/SearchBar";
+import { FormNewMovement } from "./FormNewMovement";
 
 export function SelectTpeNewDoc({info,reloadFun}){
 
@@ -27,7 +28,7 @@ export function SelectTpeNewDoc({info,reloadFun}){
 
     const documents = [
         {title:'Orden de Cliente',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_5_she308.png',alert:<FormNewDC info={info} reloadFun={endProcess}/>},
-        {title:'Factura de venta',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766014163/ChatGPT_Image_17_dic_2025_18_27_41_1_a3acbd.png',alert:<FormNewDC info={info} reloadFun={endProcess}/>},
+        {title:'Factura de venta',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766014163/ChatGPT_Image_17_dic_2025_18_27_41_1_a3acbd.png',alert:<FormNewFV info={info} reloadFun={endProcess}/>},
         {title:'Documento de compra',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_3_nph10p.png',alert:<FormNewDC info={info} reloadFun={endProcess}/>},
         {title:'Recibo de caja',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_4_ioz7jp.png',alert:<span>No disponible aún</span>},
         {title:'Recibo de salida',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_5_fvbrtz.png',alert:<span>No disponible aún</span>},
@@ -42,7 +43,7 @@ export function SelectTpeNewDoc({info,reloadFun}){
         {title:'Devolución de venta',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766075162/Cuadricula2Documentos_3_qktrem.png',alert:<span>No disponible aún</span>},
         {title:'Conteo de inventario',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766075163/Cuadricula2Documentos_4_upxtqv.png',alert:<span>No disponible aún</span>},
         {title:'Transferencia de inventario',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766075162/Cuadricula2Documentos_5_lv2weo.png',alert:<span>No disponible aún</span>},
-        {title:'Ingreso de inventario',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766075163/Cuadricula2Documentos_6_pqxoh2.png',alert:<span>No disponible aún</span>},
+        {title:'Ingreso de inventario',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766075163/Cuadricula2Documentos_6_pqxoh2.png',alert:<FormNewMovement/>},
         {title:'Salida de inventario',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766075210/Cuadricula2Documentos_8_ueftuc.png',alert:<span>No disponible aún</span>},
         {title:'Devolución de inventario',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766075186/Cuadricula2Documentos_7_nxrlfb.png',alert:<span>No disponible aún</span>},
         {title:'Donación de inventario',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766075211/Cuadricula2Documentos_9_h3eovd.png',alert:<span>No disponible aún</span>},

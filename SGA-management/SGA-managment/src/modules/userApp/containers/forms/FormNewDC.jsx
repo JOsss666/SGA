@@ -9,11 +9,20 @@ import './FormNewDC.css'
 import { LoadingSpace } from "../LoadingSpace";
 import { FormNewOperation } from "./FormNewOperation";
 import { NewElementSelect } from "../../components/NewElementSelect";
+import { FormNewStore } from "./FormNewStore";
+import { FormNewBussines } from "./FormNewBussines";
+import { FormNewCostCenter } from "./FormNewCostCenter";
 
 export function FormNewDC({info,reloadFun}){
     if(info == undefined){
         info = {}
     }
+
+    // Requirements
+    const [concepts,setConcepts] = useState([]);
+    const [stores,setStores] = useState([]);
+    const [bussines,setBussines] = useState([]);
+    const [costCenters,setCostCenters] = useState([]);
 
     // control
     const {popOutAlert,popInAlert} = useAlert();
@@ -21,15 +30,16 @@ export function FormNewDC({info,reloadFun}){
     const {addNotification} = useNotifications();
     const [paymentMethods,setPaymentMethods] = useState([]);
     const [paymentMethod,setPaymentMethod] = useState();
-    const [concepts,setConcepts] = useState([]);
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
+    const [thirdParties,setTirdParties] = useState([]);
 
     // document info
-    const [thirdParties,setTirdParties] = useState([]);
     const [OPS,setOPS] = useState([]);
     const [status,setStatus] = useState('active');
-    const [store_id,setStore_id] = useState(1);
+    const [store_id,setStore_id] = useState();
+    const [bussines_id,setbussines_id] = useState();
+    const [costCenter_id,setCostCenter_id] = useState();
     const [attached,setAttached] = useState('');
     const [op_id,setOp_id] = useState();
     const [thirdParty_id,setTirdParty] = useState();
@@ -43,6 +53,8 @@ export function FormNewDC({info,reloadFun}){
     const formInfo = {
         company_id:appInfo.company_id,
         store_id,
+        bussines_id,
+        costCenter_id,
         thirdParty_id,
         document_type:'Purchase Document',
         status,
@@ -55,7 +67,8 @@ export function FormNewDC({info,reloadFun}){
         paymentMethod,
         doc_date,
         concept_id,
-        subTotal:total
+        subTotal:total,
+        
     }
     
     const getConcepts = async()=>{
@@ -92,6 +105,56 @@ export function FormNewDC({info,reloadFun}){
             setTirdParties(C);
         }
     }
+
+    const getStores = async()=>{
+        let res = await postInfo('/getStores',{
+            company_id:appInfo.company_id
+        })
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:element.name,
+                    value:element.id
+                })
+                setStores(C);
+            });
+        }
+    }
+
+    const getBussines = async()=>{
+        let res = await postInfo('/getBussines',{
+            company_id:appInfo.company_id
+        })
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:element.name,
+                    value:element.id
+                })
+                setBussines(C);
+            });
+        }
+    }
+
+    const getCostCenters = async()=>{
+        let res = await postInfo('/getCostCenters',{
+            company_id:appInfo.company_id
+        })
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:element.name,
+                    value:element.id
+                })
+                setCostCenters(C);
+            });
+            
+        }
+    }
+    
 
     const createDC = async()=>{
         setDisabled(true);
@@ -146,6 +209,9 @@ export function FormNewDC({info,reloadFun}){
 
     const getFormOptions = async()=>{
         setLoading(true);
+        await getStores()
+        await getBussines()
+        await getCostCenters();
         await getThirdParties();
         await getConcepts();
         await getPaymentMethods();
@@ -182,6 +248,27 @@ export function FormNewDC({info,reloadFun}){
                     }} >
                     {info.op_id == undefined &&(
                         <SearchinList disabled={disabled} action={setOp_id} title={'Orden de produccíon'} placeHolder={'Seleccione la OP a la que pertenece'} list={OPS}/>
+                    )}
+                    {info.store_id == undefined && (
+                        <SearchinList disabled={disabled} action={setStore_id} title={'Tienda'} list={stores} placeHolder={'Selecione la tienda'} specialOption={
+                            <NewElementSelect title={'Crear nueva'} onClick={()=>{
+                                popInAlert(<FormNewStore/>)
+                            }}/>
+                        }/>
+                    )}
+                    {info.bussines_id == undefined && (
+                        <SearchinList disabled={disabled} action={setbussines_id} title={'Negocio'} list={bussines} placeHolder={'Seleccione el negoio'} specialOption={
+                            <NewElementSelect title={'Crear nuevo'} onClick={()=>{
+                                popInAlert(<FormNewBussines/>)
+                            }}/>
+                        }/>
+                    )}
+                    {info.costCenter_id == undefined && (
+                        <SearchinList disabled={disabled} action={setCostCenter_id} title={'Centro de costo'} list={costCenters} placeHolder={'Seleccione el centro de costo'} specialOption={
+                            <NewElementSelect title={'Crear nuevo'} onClick={()=>{
+                                popInAlert(<FormNewCostCenter/>)
+                            }}/>
+                        }/>
                     )}
                     <FormInput disabled={disabled} action={setDocDate} title={'Fecha del documento'} type={'date'}/>
                     <SearchinList disabled={disabled} action={setTirdParty} title={'Provedor'} placeHolder={'Seleccione el proveedor'} list={thirdParties}/>

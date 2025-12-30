@@ -1,0 +1,40 @@
+.FormNewMovement{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    padding-top: 6vh;
+    gap: 2vh;
+    transition: .3s;
+}
+
+.FormNewMovement .BoldTitle{
+    margin: 0 auto;
+}
+
+.FormNewMovement form{
+    display: flex;
+    flex-direction: column;
+    gap: 3vh;
+}
+
+.FormNewMovement .gridProducts{
+    width: 80vw;
+}
+
+.FormNewMovement .LoadingSpace{
+    height: 70vh;
+    width: 100%;
+}
+
+.FormNewMovement form .buttonsC{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3vh;
+    min-width: 30vw;
+    margin: auto;
+}
+
+.FormNewMovement form .buttonsC .FormButton{
+    width: 30vw;
+    margin: auto;
+}

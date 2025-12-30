@@ -18,7 +18,7 @@
 .TableTransactions .headTable span{
     border-right: solid .1vh #ccc;
     border-bottom: solid .2vh #ccc;
-    min-width:5vh;
+    width: 10vw;
     background-color: #fff;
     backdrop-filter: blur(1vh);
     padding: 1vh;
@@ -27,37 +27,6 @@
     font-weight: 500;
     font-size: clamp(2.2px,2.2vh,23px);
     color: #555;
-}
-
-.TableTransactions .headTable span:nth-child(3){
-    width: 15vw;
-}
-
-.TableTransactions .headTable span:nth-child(4){
-    width: 8vw;
-}
-
-.TableTransactions .headTable span:nth-child(5){
-    width: 15vw;
-}
-
-.TableTransactions .headTable span:nth-child(6){
-    width: 10vw;
-}
-
-.TableTransactions .headTable span:nth-child(7){
-    width: 10vw;
-}
-
-.TableTransactions .headTable span:nth-child(8){
-    width: 10vw;
-}
-
-.TableTransactions .headTable span:nth-child(9){
-    width: 5;
-}
-.TableTransactions .headTable span:nth-child(10){
-    width: 5;
 }
 
 .TableTransactions .bodyTable{

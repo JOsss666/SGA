@@ -27,7 +27,9 @@ export function FormNewOperation({info}){
     const formInfo = {
             user_id:userInfo.user_id,
             company_id:appInfo.company_id,
-            store_id:1,
+            store_id:info.store_id,
+            bussines_id:info.bussines_id,
+            costCenter_id:info.costCenter_id,
             concept_id:info.concept_id,
             doc_date:info.doc_date,
             transactionDetails,
@@ -45,7 +47,6 @@ export function FormNewOperation({info}){
             company_id:appInfo.company_id,
             typePlanAccount:appInfo.accountPlanType
         })
-        console.log(res);
         if(res[0]){
             setConceptinfo(res[1][0])
         }else{
@@ -57,14 +58,12 @@ export function FormNewOperation({info}){
         let res = await postInfo('/getConceptTaxes',{
             concept_id:info.concept_id
         })
-        console.log(res)
         if(res[0]){
             setTaxes(res[1])
         }
     }
 
     const createTransaction = async()=>{
-        console.log('Creando transacción -->')
         setloadingCractionTransaction(true)
         setDisabled(true);
         console.log('Creando nueva transacción',formInfo);
@@ -96,7 +95,7 @@ export function FormNewOperation({info}){
         taxes.forEach(element => {
             console.log('Tp --> ',element)
             newTransDetails.push({
-                account_id:element.id,
+                account_id:element.account_id,
                 account_type:appInfo.accountPlanType,
                 type:'tax',
                 subtotal:info.total,
@@ -113,6 +112,8 @@ export function FormNewOperation({info}){
             console.log('Post sub',newSubTtl)
         });
         console.log('T --> ',newTransDetails);
+        console.log('SubTotal: ',newSubTtl)
+        console.log('Total: ',info.total)
         let paymentMethod = info.paymentMethod != undefined? info.paymentMethod:{};
         newTransDetails.push({
             account_id:paymentMethod.account_id,
@@ -123,6 +124,7 @@ export function FormNewOperation({info}){
             nature:paymentMethod.nature == 'D' || paymentMethod.nature == 'DB' ? 'DB':'CR'
         })
         setTransactionDetails(newTransDetails);
+        setTotal(newSubTtl);
     }
 
     const getFormData = async()=>{
@@ -167,12 +169,7 @@ export function FormNewOperation({info}){
 
     useEffect(()=>{
         if(taxes[0] != false){
-            let newTotal = parseFloat(info.total);
-            taxes.forEach(element => {
-                newTotal += parseFloat(info.total) * Number((parseInt(element.rate)/100).toFixed(2));
-            });
             pushDetailsTrans();
-            setTotal(newTotal);
         }
     },[taxes])
 

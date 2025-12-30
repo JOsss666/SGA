@@ -8,11 +8,20 @@ import { SearchinList } from "../../components/SearchInList";
 import './FormNewFV.css'
 import { FormNewOperation } from "./FormNewOperation";
 import { NewElementSelect } from "../../components/NewElementSelect";
+import { FormNewBussines } from "./FormNewBussines";
+import { FormNewCostCenter } from "./FormNewCostCenter";
+import { FormNewStore } from "./FormNewStore";
 
 export function FormNewFV({info,reloadFun}){
     if(info == undefined){
         info = {}
     }
+
+    // Requirements
+    const [concepts,setConcepts] = useState([]);
+    const [stores,setStores] = useState([]);
+    const [bussines,setBussines] = useState([]);
+    const [costCenters,setCostCenters] = useState([]);
 
      // control
     const {popOutAlert,popInAlert} = useAlert();
@@ -20,7 +29,6 @@ export function FormNewFV({info,reloadFun}){
     const {addNotification} = useNotifications();
     const [paymentMethods,setPaymentMethods] = useState([]);
     const [paymentMethod,setPaymentMethod] = useState();
-    const [concepts,setConcepts] = useState([]);
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
 
@@ -28,7 +36,9 @@ export function FormNewFV({info,reloadFun}){
     const [thirdParties,setTirdParties] = useState([]);
     const [OPS,setOPS] = useState([]);
     const [status,setStatus] = useState('active');
-    const [store_id,setStore_id] = useState(1);
+    const [store_id,setStore_id] = useState();
+    const [bussines_id,setbussines_id] = useState();
+    const [costCenter_id,setCostCenter_id] = useState();
     const [attached,setAttached] = useState('');
     const [op_id,setOp_id] = useState();
     const [thirdParty_id,setTirdParty] = useState(info.thirdParty_id);
@@ -55,7 +65,9 @@ export function FormNewFV({info,reloadFun}){
         doc_date,
         concept_id,
         subTotal:total,
-        doc_date
+        doc_date,
+        bussines_id,
+        costCenter_id
     }
     
     const getConcepts = async()=>{
@@ -96,6 +108,55 @@ export function FormNewFV({info,reloadFun}){
         }
     }
 
+        const getStores = async()=>{
+            let res = await postInfo('/getStores',{
+                company_id:appInfo.company_id
+            })
+            if(res[0]){
+                let C = []
+                res[1].forEach(element => {
+                    C.push({
+                        text:element.name,
+                        value:element.id
+                    })
+                    setStores(C);
+                });
+            }
+        }
+    
+        const getBussines = async()=>{
+            let res = await postInfo('/getBussines',{
+                company_id:appInfo.company_id
+            })
+            if(res[0]){
+                let C = []
+                res[1].forEach(element => {
+                    C.push({
+                        text:element.name,
+                        value:element.id
+                    })
+                    setBussines(C);
+                });
+            }
+        }
+    
+        const getCostCenters = async()=>{
+            let res = await postInfo('/getCostCenters',{
+                company_id:appInfo.company_id
+            })
+            if(res[0]){
+                let C = []
+                res[1].forEach(element => {
+                    C.push({
+                        text:element.name,
+                        value:element.id
+                    })
+                    setCostCenters(C);
+                });
+                
+            }
+        }
+
     const createFV = async()=>{
         setDisabled(true);
         setLoading(true);
@@ -127,11 +188,13 @@ export function FormNewFV({info,reloadFun}){
         setDisabled(false);
     }
 
-    
 
     const getFormOptions = async()=>{
-        getConcepts();
-        getPaymentMethods();
+        await getStores();
+        await getBussines();
+        await getCostCenters();
+        await getConcepts();
+        await getPaymentMethods();
         if(info.op_id == undefined){
             let getOps = await postInfo('/process/getOp',{company_id:appInfo.company_id});
             if(getOps[0]){
@@ -182,6 +245,27 @@ export function FormNewFV({info,reloadFun}){
                 )}
                 {info.thirdParty_id == undefined &&(
                     <SearchinList disabled={disabled} action={setTirdParty} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdParties}/>
+                )}
+                {info.store_id == undefined && (
+                    <SearchinList disabled={disabled} action={setStore_id} title={'Tienda'} list={stores} placeHolder={'Selecione la tienda'} specialOption={
+                        <NewElementSelect title={'Crear nueva'} onClick={()=>{
+                            popInAlert(<FormNewStore/>)
+                        }}/>
+                    }/>
+                )}
+                {info.bussines_id == undefined && (
+                    <SearchinList disabled={disabled} action={setbussines_id} title={'Negocio'} list={bussines} placeHolder={'Seleccione el negoio'} specialOption={
+                        <NewElementSelect title={'Crear nuevo'} onClick={()=>{
+                            popInAlert(<FormNewBussines/>)
+                        }}/>
+                    }/>
+                )}
+                {info.costCenter_id == undefined && (
+                    <SearchinList disabled={disabled} action={setCostCenter_id} title={'Centro de costo'} list={costCenters} placeHolder={'Seleccione el centro de costo'} specialOption={
+                        <NewElementSelect title={'Crear nuevo'} onClick={()=>{
+                            popInAlert(<FormNewCostCenter/>)
+                        }}/>
+                    }/>
                 )}
                 <FormInput disabled={disabled} action={setDocDate} title={'Fecha del documento'} type={'date'}/>
                 <SearchinList disabled={disabled} action={setConceptId} title={'Concepto de venta'} placeHolder={'Seleccione el concepto de la venta'} list={concepts}/>

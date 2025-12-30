@@ -251,21 +251,21 @@ export function Messages() {
                         <div className="messageInputContainer">
                             <MoreOptions options={[
                                 {text:'Documento', icon:<i className="fa-solid fa-file-lines"/>},
-                                {text:'Archivo', icon:<i className="fa-solid fa-file-lines"/>},
-                                {text:'Fotos y video', icon:<i className="fa-solid fa-file-lines"/>},
-                                {text:'Camara', icon:<i className="fa-solid fa-file-lines"/>},
-                                {text:'Audio', icon:<i className="fa-solid fa-file-lines"/>},
-                                {text:'Informe', icon:<i className="fa-solid fa-file-lines"/>},
-                                {text:'Estadistica', icon:<i className="fa-solid fa-file-lines"/>},
-                                {text:'Evento', icon:<i className="fa-solid fa-file-lines"/>}
+                                {text:'Archivo', icon:<i className="fa-regular fa-folder"/>},
+                                {text:'Fotos y video', icon:<i className="fa-regular fa-image"/>},
+                                {text:'Camara', icon:<i className="fa-regular fa-camera"/>},
+                                {text:'Audio', icon:<i className="fa-regular fa-file-audio"/>},
+                                {text:'Informe', icon:<i className="fa-solid fa-align-left"/>},
+                                {text:'Estadistica', icon:<i className="fa-solid fa-chart-line"/>},
+                                {text:'Evento', icon:<i className="fa-regular fa-calendar"/>}
                             ]}>
                                 <i className="fa-solid fa-plus"/>
                             </MoreOptions>
                             <SearchBar placeholder={'Enviar mensaje'}/>
                             <AiButton attached={messages} sugerence={[
-                                {text:'¿Que representa este informe?',context:``},
-                                {text:'Realiza un analisis de este informe',context:``},
-                                {text:'¿Que acciones me recomiendas basado en este informe?',context:``}
+                                {text:'Realiza un resumen de este chat',context:``},
+                                {text:'Identifica los aspectos principales de esta conversación',context:``},
+                                {text:'Responde automaticamente',context:``}
                             ]}/>
                             <ButtonMenu noRotate={true} title={'Enviar mensaje de voz'}>
                                 <i className="fa-solid fa-microphone"/>

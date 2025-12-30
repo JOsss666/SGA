@@ -1165,10 +1165,11 @@ controller.createTransaction = (req,res)=>{
                     doc_id,
                     "subTotal",
                     total,
-                    "costCenter_id"
+                    "costCenter_id",
+                    bussines_id
                 )
             VALUES
-                ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id;
+                ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id;
         `;
         let consulta = await useDataBase(sentence,[
             info.user_id,
@@ -1181,10 +1182,12 @@ controller.createTransaction = (req,res)=>{
             info.doc_id,
             info.subTotal,
             info.total,
-            info.costCenter_id
+            info.costCenter_id,
+            info.bussines_id
         ],3)
-        console.log('Transacción Creada correctamente No: ',consulta);
-        if(typeof(parseInt(consulta.id)) == 'number'){
+        const transId = parseInt(consulta.id)
+        console.log('- ',transId)
+        if(typeof(transId) == 'number'){
             let resultDetails = [];
             for(const element of info.transactionDetails){
                 let sentence = `
@@ -1200,11 +1203,11 @@ controller.createTransaction = (req,res)=>{
                     )
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
                 `
-                console.log('---> ',info);
+                console.log('---> ',transId);
                 console.log('---> ',element);
                 let postConsulta = await useDataBase(sentence,[
                     info.company_id,
-                    parseInt(consulta.id),
+                    transId,
                     info.thirdParty_id,
                     element.account_id,
                     element.type,
@@ -1276,10 +1279,13 @@ controller.getTransactions = (req,res)=>{
             SELECT
                 "Ecosystem".transactions.*,
                 "Ecosystem".users.user_name,
+                "Ecosystem".users.img AS user_img,
                 "Ecosystem".stores.name AS store_name,
                 "Ecosystem".concepts.name AS concept_name,
                 "Ecosystem".thirdparties.names AS thirdParty_name,
                 "Ecosystem".thirdparties.img AS thirdParty_img,
+                "Ecosystem".bussines.name AS bussines_name,
+                "Ecosystem"."costCenters".name AS costCenter_name,
                 'TR' AS docType
             FROM
                 "Ecosystem".transactions
@@ -1299,6 +1305,14 @@ controller.getTransactions = (req,res)=>{
                 "Ecosystem".thirdparties
             ON
                 "Ecosystem".transactions."thirdParty_id" = "Ecosystem".thirdparties.id
+            LEFT JOIN
+                "Ecosystem".bussines
+            ON 
+                "Ecosystem".transactions.bussines_id = "Ecosystem".bussines.id
+            LEFT JOIN
+                "Ecosystem"."costCenters"
+            ON
+                "Ecosystem".transactions."costCenter_id" = "Ecosystem"."costCenters".id
             WHERE
                 "Ecosystem".transactions.company_id = $1
             ORDER BY "Ecosystem".transactions.created_at DESC;
