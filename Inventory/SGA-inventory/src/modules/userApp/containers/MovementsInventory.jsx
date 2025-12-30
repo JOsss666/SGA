@@ -4,9 +4,12 @@ import { DescriptionSpan } from "../components/DescriptionSpan";
 import { NormalCard } from "../components/NormalCard";
 import { GraphHeatMap } from "../components/GraphHeatMap";
 import { GraphBarCharts } from "../components/GraphBarCharts";
+import { useAppInfo } from "../../../context/context";
 import './MovementsInventory.css'
 
 export function MovementsInventory() {
+
+    const { darkMode } = useAppInfo();
     const [period, setPeriod] = useState("MONTH");
 
     const changePeriod = (value) => {
@@ -19,7 +22,7 @@ export function MovementsInventory() {
     };
 
     return (
-        <div className="MovementsInventory appSection">
+        <div className={`MovementsInventory ${darkMode ? "mi-dark" : "mi-light"} appSection`}>
             <div className="SectionTitle">
                 <BoldTitle text="Movimientos" />
                 <DescriptionSpan text="Esta es la descripción de la categoría actual" />
