@@ -250,15 +250,16 @@ controller.createCostCenter = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             INSERT INTO "Ecosystem"."costCenters"(
-                company_id,name,description,code,parent_id 
-            ) VALUES ($1,$2,$3,$4,$5);
+                company_id,name,description,code,parent_id,path
+            ) VALUES ($1,$2,$3,$4,$5,$6);
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
             info.name,
             info.description,
             info.code,
-            info.parent_id
+            info.parent_id,
+            info.path
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -277,10 +278,13 @@ controller.getCostCenters = (req,res)=>{
     req.on('end',async()=>{
         let info = JSON.parse(data);
         let sentence = `
-            SELECT * FROM 
+            SELECT *
+            FROM
                 "Ecosystem"."costCenters"
             WHERE
-                company_id = $1
+                company_id = $1 AND id != 1
+            ORDER BY
+                path ASC; 
         `
         let consulta = await useDataBase(sentence,[
             info.company_id
@@ -288,7 +292,63 @@ controller.getCostCenters = (req,res)=>{
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
-        req.on('error',(err)=>{
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+controller.createBussines = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            INSERT INTO "Ecosystem".bussines(
+                company_id, name, description, img)
+            VALUES ($1, $2, $3, $4);
+        `
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.name,
+            info.description,
+            info.photo
+        ],2)
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+
+controller.getBussines = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            SELECT *
+            FROM 
+                "Ecosystem".bussines
+            WHERE
+                company_id = $1
+            ORDER BY
+                name ASC ; 
+        `;
+        let consulta = await useDataBase(sentence,[
+            info.company_id
+        ],1)
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
@@ -553,6 +613,7 @@ controller.insertNewAccount = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        console.log(info);
         let sentence = `
             INSERT INTO
                 "Ecosystem".contable_accounts
@@ -573,7 +634,7 @@ controller.insertNewAccount = (req,res)=>{
             info.name,
             (info.code).length,
             info.type,
-            info.accountPlanType
+            info.typePlanAccount
         ],3);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -642,16 +703,22 @@ controller.createTax = (req,res)=>{
                     account_id,
                     code,
                     rate,
-                    base
+                    base,
+                    parent_id,
+                    path,
+                    "isRetention"
                 )
-            VALUES($1,$2,$3,$4,$5);
+            VALUES($1,$2,$3,$4,$5,$6,$7,$8);
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
             info.account_id,
             info.code,
             info.rate,
-            info.base
+            info.base,
+            info.parent_id != undefined? info.parent_id:0,
+            info.path != undefined? info.path:'/',
+            info.isRetention
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -672,12 +739,14 @@ controller.getTaxes = (req, res) => {
             let values = [];
             let where = []; // array de condiciones dinámicas
 
-            let sentence = `
+            let sentence2 = `
                 SELECT
                     "Ecosystem".taxes.id AS tax_id,
                     "Ecosystem".taxes.code,
                     "Ecosystem".taxes.rate,
                     "Ecosystem".taxes.base,
+                    "Ecosystem".taxes.parent_id,
+                    "Ecosystem".taxes.path,
                     "Ecosystem".contable_accounts.*
                 FROM
                     "Ecosystem".taxes
@@ -685,6 +754,22 @@ controller.getTaxes = (req, res) => {
                 ON "Ecosystem".taxes.account_id = "Ecosystem".contable_accounts.id
                 WHERE
             `;
+
+            let sentence = `
+                SELECT 
+                    "Ecosystem"."taxes".id AS tax_id,
+                    "Ecosystem"."taxes".code,
+                    "Ecosystem"."taxes".rate,
+                    "Ecosystem"."taxes".base,
+                    "Ecosystem"."taxes".parent_id,
+                    "Ecosystem"."taxes".path,
+                    "Ecosystem"."contable_accounts".type,
+                    "Ecosystem"."contable_accounts".name
+                FROM "Ecosystem"."taxes"
+                LEFT JOIN "Ecosystem"."contable_accounts"
+                    ON "Ecosystem"."contable_accounts".id = "Ecosystem"."taxes".account_id
+                WHERE
+            `
 
             //  Filtro obligatorio
             values.push(info.company_id);
@@ -707,7 +792,6 @@ controller.getTaxes = (req, res) => {
             sentence += ` ORDER BY "Ecosystem".taxes.account_id ASC;`;
 
             const consulta = await useDataBase(sentence, values, 1);
-
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(consulta));
 
@@ -718,7 +802,43 @@ controller.getTaxes = (req, res) => {
     });
 };
 
-
+controller.getConceptTaxes = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            SELECT
+                "Ecosystem".taxes.*,
+                "Ecosystem".concept_taxes.*,
+                "Ecosystem".contable_accounts.name,
+                "Ecosystem".contable_accounts.type
+            FROM
+                "Ecosystem".concept_taxes
+            LEFT JOIN
+                "Ecosystem".taxes
+            ON
+                "Ecosystem".concept_taxes.tax_id = "Ecosystem".taxes.id
+            LEFT JOIN
+                "Ecosystem".contable_accounts
+            ON
+                "Ecosystem".taxes.account_id = "Ecosystem".contable_accounts.id
+            WHERE
+                "Ecosystem".concept_taxes.concept_id = $1
+            ORDER BY
+                "Ecosystem".contable_accounts.name ASC ;
+        `
+        let consulta = await useDataBase(sentence,[info.concept_id],1);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
 
 /* ELIMINAR IMPUESTOS*/
 
@@ -738,7 +858,6 @@ controller.deleteTax = (req, res) => {
             `;
 
             const consulta = await useDataBase(sentence, info.taxes, 2);
-
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(consulta));
 
@@ -748,6 +867,65 @@ controller.deleteTax = (req, res) => {
         }
     });
 };
+
+controller.createTaxCategory = (req,res)=>{
+    let data = ''
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            INSERT INTO "Ecosystem"."teaxesCategories"(
+                company_id, name, code, parent_id, path)
+            VALUES ($1, $2, $3, $4, $5);
+        `
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.name,
+            info.code,
+            info.parent_id,
+            info.path
+        ],2);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+controller.getTaxCategory = (req,res)=>{
+    let data = ''
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            SELECT *
+            FROM
+                "Ecosystem"."teaxesCategories"
+            WHERE
+                company_id = $1
+            ORDER BY
+                path ASC;
+            ;
+        `
+        let consulta = await useDataBase(sentence,[
+            info.company_id
+        ],1);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+
 
 controller.createConcept = (req, res) => {
     let data = '';
@@ -776,8 +954,9 @@ controller.createConcept = (req, res) => {
                     info.name,
                     info.account_id,
                 ],3);
-
-            if (typeof newConcept !== "number") {
+            let insertIdConcept = parseInt(newConcept.id);
+            if (typeof(insertIdConcept) !== "number") {
+                console.log('No es número')
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify([false, "Error al crear concepto"]));
             }
@@ -795,7 +974,7 @@ controller.createConcept = (req, res) => {
                 .map((t, i) => {
                     const p1 = `$${i * 2 + 1}`;
                     const p2 = `$${i * 2 + 2}`;
-                    values.push(newConcept, t.value);
+                    values.push(insertIdConcept, t.value);
                     return `(${p1}, ${p2})`;
                 })
                 .join(",");
@@ -868,21 +1047,62 @@ controller.getConcepts = (req,res)=>{
 }
 
 /* ELIMINAR CONCEPTOS*/
-controller.deleteConcept = (req,res)=>{
+controller.deleteConcept = (req, res) => {
+    let data = '';
+
+    req.on('data', chunk => {
+        data += chunk;
+    });
+
+    req.on('end', async () => {
+        const info = JSON.parse(data);
+
+        // Asegúrate que sea un array de números
+        const ids = info.concepts.map(Number);
+
+        const sentence = `
+            DELETE FROM "Ecosystem".concepts
+            WHERE id = ANY($1::bigint[]);
+        `;
+
+        const consulta = await useDataBase(sentence, [ids], 2);
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(consulta));
+    });
+
+    req.on('error', err => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(err));
+    });
+};
+
+controller.createPaymentMethod = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
-        data += chunk;
+        data += chunk
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        const placeholders = info.concepts.map((_, i) => `$${i + 1}`).join(",");
-
         let sentence = `
-                DELETE FROM "Ecosystem".concepts
-                WHERE id IN (${placeholders});
-            `;
+            INSERT INTO "Ecosystem".payment_methods(
+                company_id,
+                name,
+                account_id,
+                code,
+                currency,
+                type,
+                status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7);
+        `;
         let consulta = await useDataBase(sentence,[
-            info.concepts
+            info.company_id,
+            info.name,
+            info.account_id,
+            info.code,
+            info.currency,
+            info.type,
+            info.status
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -892,9 +1112,6 @@ controller.deleteConcept = (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
-
-
-
 
 controller.getPaymentMethods = (req,res)=>{
     let data = '';
@@ -939,6 +1156,7 @@ controller.createTransaction = (req,res)=>{
                 "Ecosystem".transactions
                 (
                     user_id,
+                    "thirdParty_id",
                     company_id,
                     store_id,
                     concept_id,
@@ -947,13 +1165,15 @@ controller.createTransaction = (req,res)=>{
                     doc_id,
                     "subTotal",
                     total,
-                    "costCenter_id"
+                    "costCenter_id",
+                    bussines_id
                 )
             VALUES
-                ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id;
+                ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id;
         `;
         let consulta = await useDataBase(sentence,[
             info.user_id,
+            info.thirdParty_id,
             info.company_id,
             info.store_id,
             info.concept_id,
@@ -962,10 +1182,12 @@ controller.createTransaction = (req,res)=>{
             info.doc_id,
             info.subTotal,
             info.total,
-            info.costCenter_id
+            info.costCenter_id,
+            info.bussines_id
         ],3)
-        console.log('Transacción Creada correctamente No: ',consulta);
-        if(typeof(parseInt(consulta.id)) == 'number'){
+        const transId = parseInt(consulta.id)
+        console.log('- ',transId)
+        if(typeof(transId) == 'number'){
             let resultDetails = [];
             for(const element of info.transactionDetails){
                 let sentence = `
@@ -981,11 +1203,11 @@ controller.createTransaction = (req,res)=>{
                     )
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
                 `
-                console.log('---> ',info);
+                console.log('---> ',transId);
                 console.log('---> ',element);
                 let postConsulta = await useDataBase(sentence,[
                     info.company_id,
-                    parseInt(consulta.id),
+                    transId,
                     info.thirdParty_id,
                     element.account_id,
                     element.type,
@@ -1035,7 +1257,7 @@ controller.createTransactionDetail = (req,res)=>{
             info.account_type,
             info.type,
             info.subtotal,
-            info.total
+            (info.total).toFixed(5)
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -1057,8 +1279,13 @@ controller.getTransactions = (req,res)=>{
             SELECT
                 "Ecosystem".transactions.*,
                 "Ecosystem".users.user_name,
+                "Ecosystem".users.img AS user_img,
                 "Ecosystem".stores.name AS store_name,
                 "Ecosystem".concepts.name AS concept_name,
+                "Ecosystem".thirdparties.names AS thirdParty_name,
+                "Ecosystem".thirdparties.img AS thirdParty_img,
+                "Ecosystem".bussines.name AS bussines_name,
+                "Ecosystem"."costCenters".name AS costCenter_name,
                 'TR' AS docType
             FROM
                 "Ecosystem".transactions
@@ -1074,6 +1301,18 @@ controller.getTransactions = (req,res)=>{
                 "Ecosystem".concepts
             ON
                 "Ecosystem".transactions.concept_id = "Ecosystem".concepts.id
+            LEFT JOIN
+                "Ecosystem".thirdparties
+            ON
+                "Ecosystem".transactions."thirdParty_id" = "Ecosystem".thirdparties.id
+            LEFT JOIN
+                "Ecosystem".bussines
+            ON 
+                "Ecosystem".transactions.bussines_id = "Ecosystem".bussines.id
+            LEFT JOIN
+                "Ecosystem"."costCenters"
+            ON
+                "Ecosystem".transactions."costCenter_id" = "Ecosystem"."costCenters".id
             WHERE
                 "Ecosystem".transactions.company_id = $1
             ORDER BY "Ecosystem".transactions.created_at DESC;
@@ -1129,7 +1368,9 @@ controller.getTransactionDetails = (req,res)=>{
                 "Ecosystem".transaction_detail.*,
                 "Ecosystem".contable_accounts.name AS concept_name,
                 "Ecosystem".contable_accounts.code AS account_code,
-                "Ecosystem".payment_methods.name AS payment_name
+                "Ecosystem".payment_methods.name AS payment_name,
+                "Ecosystem".thirdparties.names AS thirdParty_name,
+                "Ecosystem".thirdparties.img AS thirdParty_img
             FROM
                 "Ecosystem".transaction_detail
             LEFT JOIN
@@ -1139,7 +1380,11 @@ controller.getTransactionDetails = (req,res)=>{
             LEFT JOIN
                 "Ecosystem".payment_methods
             ON 
-                "Ecosystem".contable_accounts.id = "Ecosystem".payment_methods.id
+                "Ecosystem".transaction_detail.account_id = "Ecosystem".payment_methods.account_id
+            LEFT JOIN
+                "Ecosystem".thirdparties
+            ON
+                "Ecosystem".transaction_detail."thirdParty_id" = "Ecosystem".thirdparties.id
             WHERE
                 "Ecosystem".transaction_detail.transaction_id = $1 ;
         `;

@@ -14,6 +14,10 @@ import {WarningForm} from '../../components/WarningForm'
 
 export function FormNewDocument({type,reloadFun,info}){
 
+    if(info == undefined){
+        info = {}
+    }
+
     const titleForm = {
         "sell":"Salida",
         "transfer":"Translado",

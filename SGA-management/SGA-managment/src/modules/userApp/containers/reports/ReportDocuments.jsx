@@ -77,9 +77,12 @@ export function ReportDocuments({ type }) {
     const columsTr = [
         "ID",
         "Fecha Documento",
+        "Tercero",
         "Tipo Doc",
         "Concepto",
         "Tienda",
+        "Negocio",
+        "Centro de costo",
         "Sub Total",
         "Valor ",
         "Estado",

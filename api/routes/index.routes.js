@@ -62,6 +62,10 @@ router.post('/createStore',controller.createStore);
 
 router.post('/deleteStore',controller.deleteStore);
 
+router.post('/createBussines',controller.createBussines);
+
+router.post('/getBussines',controller.getBussines);
+
 router.post('/getAccountsPlan',controller.getAccountsPlan);
 
 router.post('/insertNewAccount',controller.insertNewAccount);
@@ -72,11 +76,19 @@ router.post('/deleteTax',controller.deleteTax);
 
 router.post('/getTaxes',controller.getTaxes);
 
+router.post('/getConceptTaxes',controller.getConceptTaxes);
+
+router.post('/createTaxCategory',controller.createTaxCategory);
+
+router.post('/getTaxCategories',controller.getTaxCategory);
+
 router.post('/createConcept',controller.createConcept);
 
 router.post('/deleteConcept',controller.deleteConcept);
 
 router.post('/getConcepts',controller.getConcepts);
+
+router.post('/createPaymentMethod',controller.createPaymentMethod);
 
 router.post('/getPaymentMethods',controller.getPaymentMethods);
 

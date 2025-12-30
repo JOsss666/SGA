@@ -20,6 +20,7 @@ export function ReportTransactionDetails() {
     const { appInfo } = useAppInfo();
     const [info, setInfo] = useState([]);
     const tableR = useRef();
+    const [thirdparty_name,setThirdparty_name] = useState('')
     const [loading, setLoading] = useState(false);
 
     const type = "TR_details";
@@ -52,6 +53,7 @@ export function ReportTransactionDetails() {
         try {
             const res = await postInfo("/getTransactionDetails", settingsReport);
             if (res && res[0]) {
+                setThirdparty_name(res[1][0].thirdparty_name)
                 setInfo(res[1]);
             } else {
                 setInfo([]);
@@ -71,7 +73,7 @@ export function ReportTransactionDetails() {
         <div className="ReportDocument">
             <PathLocation />
             <div className="headReport">
-                <BoldTitle text={`Detalle de Transacción #${transaction_id} - Nombre del tercero`} />
+                <BoldTitle text={`Detalle de Transacción #${transaction_id} - ${thirdparty_name}`} />
                 <DescriptionSpan text={`Vista detallada de la transacción seleccionada.`} />
             </div>
 

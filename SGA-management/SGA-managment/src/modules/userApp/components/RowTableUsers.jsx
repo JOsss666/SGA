@@ -46,7 +46,7 @@ export function RowTableUsers({info,onClick,reloadFun}){
         <div className="RowTableUsers">
             <CheckSquare/>
             <span className='atributeRow idContainer'>{info.user_id}</span>
-            <span className='atributeRow UserCardContainer'><UserCard imgSrc={'https://i0.wp.com/digitalhealthskills.com/wp-content/uploads/2022/11/3da39-no-user-image-icon-27.png?fit=500%2C500&ssl=1'} name={info.user_name} desc={info.user_mail}/></span>
+            <span className='atributeRow UserCardContainer'><UserCard imgSrc={info.img} name={info.user_name} desc={info.user_mail}/></span>
             <span className='atributeRow'><TagIndicator type={'indicator'} title={info.user_roll}/></span>
             <span className='atributeRow UserCardContainer'>{info.user_key}</span>
             <span className='atributeRow'>Tienda {info.company_id}</span>

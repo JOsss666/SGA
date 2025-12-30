@@ -36,6 +36,9 @@ import { MyBussinesUnits } from './MyBussinesUnits';
 import { Settings } from './Settings';
 import { CostCenters } from './CostCenters';
 import { StoreDetail } from './StoreDetail';
+import { Bussines } from './Bussines';
+import { New } from './New';
+import { Messages } from './Messages';
 
 export function UserApp(){
 
@@ -166,8 +169,11 @@ export function UserApp(){
                 <main className='bodyApp'>
                     <Routes>
                             <Route path='/' element={<HomeProcess/>} />
+                            <Route path='/new' element={<New></New>} />
                             <Route path='/myBussines/' element={<MyBussines/>}/>
                             <Route path='/myBussines/costCenters' element={<CostCenters/>}/>
+                            <Route path='/myBussines/Bussines' element={<Bussines/>}/>
+                            <Route path='/myBussines/Bussines/:bussines_id' element={<PathLocation/>}/>
                             <Route path='/myBussines/Units' element={<MyBussinesUnits/>}/>
                             <Route path='/myBussines/Units/:store_id' element={<StoreDetail/>}/>
                             <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
@@ -175,7 +181,7 @@ export function UserApp(){
                             <Route path='/services' element={<Services/>}/>
                             <Route path='/services/:serviceRequierd' element={<PathLocation/>}/>
                             <Route path='/billing' element={<span>Facturación</span>}/>
-                            <Route path='/messages/*' element={<span>messages</span>} />
+                            <Route path='/messages/*' element={<Messages/>} />
                             <Route path='/thirdparties/*' element={<ThirdParties/>} />
                             <Route path='/thirdparties/:thirdparty_id' element={<ThirdPartyDetail/>} />
                             <Route path='/users/' element={<Users/>} />

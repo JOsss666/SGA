@@ -1,6 +1,10 @@
 
 .MovementsInventory{
-    padding: 1vh;
+    padding: 2vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+
 }
 
 .MovementsInventory .SectionTitle{
@@ -9,73 +13,85 @@
 }
 
 
-.MovementsInventory .contentMovements{
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.MovementsInventory .contentMovements .optionsMovements{
-    display: flex;
-    flex-wrap: wrap;
-    width: 31vw;
-    height: fit-content;
-}
-
-.MovementsInventory .contentMovements .optionsMovements .NormalCard{
+.MovementsInventory .CardsAnalytics .NormalCard{
     margin: 1.5vh;
 }
 
-.MovementsInventory .contentMovements .optionsMovements .NormalCard:nth-child(1){animation-delay: .1s;}
-.MovementsInventory .contentMovements .optionsMovements .NormalCard:nth-child(2){animation-delay: .2s;}
-.MovementsInventory .contentMovements .optionsMovements .NormalCard:nth-child(3){animation-delay: .3s;}
-.MovementsInventory .contentMovements .optionsMovements .NormalCard:nth-child(4){animation-delay: .4s;}
-.MovementsInventory .contentMovements .optionsMovements .NormalCard:nth-child(5){animation-delay: .5s;}
+.MovementsInventory .CardsAnalytics .NormalCard:nth-child(1){animation-delay: .1s;}
+.MovementsInventory .CardsAnalytics .NormalCard:nth-child(2){animation-delay: .2s;}
+.MovementsInventory .CardsAnalytics .NormalCard:nth-child(3){animation-delay: .3s;}
+.MovementsInventory .CardsAnalytics .NormalCard:nth-child(4){animation-delay: .4s;}
+.MovementsInventory .CardsAnalytics .NormalCard:nth-child(5){animation-delay: .5s;}
 
-.MovementsInventory .contentMovements .historyMovements{
-    width: 26vw;
-    margin: 0 auto;
-    padding: 1vh;
-    background-color: #fff;
-    border-radius: 2vh;
+
+/** NUEVOS **/
+
+.MovementsInventory .Graphics{
+    display: flex;
+    flex-direction: row;
+    gap: 2vh;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2vh;    
+}
+
+
+
+.MovementsInventory .Graphics .Graph{
+    height: 45vh;
+    width: auto;
+    background-color: transparent;
     display: flex;
     flex-direction: column;
-    position: relative;
+    justify-content: space-around;
+    border-radius: 3vh;
 }
 
-.MovementsInventory .historyMovements .movementsContainer{
+.MovementsInventory .Graphics .Graph .BarCharts{
+    height: 45vh;
+    width: 60vh;
+}
+
+
+
+.MovementsInventory .Graphics .Graph .HeatMap{
+    height: 45vh;
+    width: 120vh;
+}
+
+.MovementsInventory .CardsAnalytics{
     display: flex;
-    flex-direction: column;
-    height: 90%;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 2vh;
+
 }
 
-.MovementsInventory .contentMovements .historyMovements .SubSectionTitle{
-    position: absolute;
-    z-index: 3;
-    top: -6vh;
-    left: 3vh;
+
+
+
+
+/* 🌞 Light mode */
+.mi-light {
+    --graph-card-bg: #fafafa;
+    color: #111827;
 }
 
-.MovementsInventory .contentMovements .historyMovements .FormButton{
-    margin: 2vh auto;
-    width: 70%;
+/* 🌙 Dark mode */
+.mi-dark {
+    --graph-card-bg: #303030;
+    color: #fafafa;
 }
 
-.MovementsInventory .contentMovements .analyticsMovements{
-    width: 33vw;
-    margin: 0 auto;
-    position: relative;
-    display: flex;
-    flex-direction: column;
+/* 🔹 Solo cambia el fondo de la tarjeta de la gráfica */
+.MovementsInventory .Graphics .Graph {
+    background: var(--graph-card-bg) !important;
+    border-radius: 3vh;
 }
 
-.MovementsInventory .contentMovements .analyticsMovements .SubSectionTitle{
-    position: absolute;
-    z-index: 3;
-    top: -6vh;
-    left: 3vh;
+/* 🔹 Mantener las gráficas internas transparentes */
+.MovementsInventory .Graphics .Graph .BarCharts,
+.MovementsInventory .Graphics .Graph .HeatMap {
+    background: transparent !important;
 }
 
-.MovementsInventory .contentMovements .analyticsMovements .ChartIndicator{
-    margin: 0 auto;
-    margin-bottom: 1vh;
-}

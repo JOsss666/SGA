@@ -63,6 +63,8 @@
     margin: auto auto;
 }
 
+
+
 .ConcenptsPlan .spaceCards .taxesSpaceC .taxesC, .ConcenptsPlan .spaceCards .conceptsSpaceC .conceptsC{
     display: flex;
     flex-direction: column;
@@ -73,4 +75,30 @@
 .ConcenptsPlan .spaceCards .SearchBar{
     margin-bottom: 1vh;
     z-index: 11; 
+}
+
+.ConcenptsPlan .searchOptions{
+    display: flex;
+    width: 100%;
+    gap: 2vh;
+}
+
+.ConcenptsPlan .searchOptions .SwitchOption{
+    height: 3vh;
+    margin: auto 1vh;
+}
+
+.ConcenptsPlan .searchOptions .FormButton{
+    width: 10vw;
+}
+
+.ConcenptsPlan .searchOptions .ButtonMenu{
+    background-color:#DFF2FE;
+    margin: auto 1vh;
+    height: 6vh;
+    width: 6vh;
+}
+
+.ConcenptsPlan .searchOptions .ButtonMenu i{
+    color: #007AFF;
 }

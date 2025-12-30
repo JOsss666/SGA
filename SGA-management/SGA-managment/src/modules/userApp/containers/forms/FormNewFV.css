@@ -1,6 +1,6 @@
 
 .FormNewFV{
-    background-color: #fff;
+    background-color:var(--bg);
     padding: 2vh 3vh;
     margin-top: 4vh;
     width: 30vw;

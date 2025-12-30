@@ -29,7 +29,7 @@ export function SearchinList({title,placeHolder,list,disabled,action,children,sp
 
 
     useEffect(()=>{
-        if(action != undefined){
+        if(selectedOption != undefined && action != undefined){
             action(selectedOption);
         }
     },[selectedOption])

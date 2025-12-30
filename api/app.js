@@ -4,6 +4,7 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import * as transformers from "@xenova/transformers";
+import { type } from 'os';
 
 // Cargar las variables de entorno
 dotenv.config();
@@ -233,6 +234,7 @@ export function readCSV(path,type){
 }
 
 async function createPUC(rows){
+    console.log('Insertando cuentas al PUC')
     let errors = [];
     let sentence = `
         INSERT INTO "Ecosystem".contable_accounts(

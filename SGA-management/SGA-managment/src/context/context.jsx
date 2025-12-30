@@ -230,6 +230,7 @@ export function AppInfoProvider({children}){
 
     const optionsMenu = [
         {text:'Inicio',path:'',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914614/LogoInicio1_nsuzaj.png' />,action:handleNavigate},
+        {text:'Crear',path:'new',icon:<i className="fa-solid fa-plus"/>,action:handleNavigate},
         {text:'Mi empresa',path:'myBussines',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515331/Grupo5logos_1_ypuddp.png'/>,action:handleNavigate},
         {text:'Panel de control',path:'controlPanel',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515365/Grupo5logos_2_kjgapy.png'/>,action:handleNavigate},
         {text:'Modulos',path:'modules',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515340/Grupo5logos_3_qp85tn.png'/>,action:handleNavigate},

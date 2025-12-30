@@ -4,12 +4,11 @@ import { MoreOptions } from "./MoreOptions";
 import { useEffect, useState } from "react";
 import { postInfo } from "../../../utils/functions";
 import './ConceptCard.css'
-import { useAlert, useAppInfo, useNotifications } from "../../../context/context";
+import { useAlert, useAppInfo } from "../../../context/context";
 import { FormNewConcept } from "../containers/forms/FormNewConcept";
 
 export function ConceptCard({info,hidden,reloadFun}){    
 
-    const {addNotification} = useNotifications();
     const {popInAlert} = useAlert();
     const {appInfo} = useAppInfo();
     const [visibleConceptData,setVisibleConceptData] = useState(false);
@@ -18,13 +17,10 @@ export function ConceptCard({info,hidden,reloadFun}){
 
     const getAttachedTaxes = async()=>{
         console.log('Cargando Impuestos');
-        let res = await postInfo('/getTaxes',{
-            company_id:appInfo.company_id,
-            attached:true,
-            typePlanAccount:appInfo.account_type,
-            concept_id:info.id
+        let res = await postInfo('/getConceptTaxes',{
+            concept_id:info.id,
         })
-        console.log(res)
+        console.log(res);
         if(res[0]){
             setAttachedTaxes(res[1])
         }else{
@@ -32,32 +28,19 @@ export function ConceptCard({info,hidden,reloadFun}){
         }
     }
 
-    const editConcept = ()=>{
-        popInAlert(
-            <FormNewConcept/>
-        )
-    }
-
     const deleteConcept = async()=>{
         let res = await postInfo('/deleteConcept',{
             concepts:[info.id]
         })
-        if(res){
-            addNotification({
-                type:'aproved',
-                title:'Concepto Eliminado',
-                description:`Se ha eliminado el concepto ${info.account_name}.`
-            })
-            if(reloadFun != undefined){
-                reloadFun();
-            }
-        }else{
-            addNotification({
-                type:'error',
-                title:'Error al eliminar concepto',
-                description:`Hubo un error al intentar eliminar el concepto ${info.account_name}.`
-            })
+        if(reloadFun != undefined){
+            reloadFun();
         }
+    }
+
+    const editConcept = ()=>{
+        popInAlert(
+            <FormNewConcept/>
+        )
     }
 
     useEffect(()=>{

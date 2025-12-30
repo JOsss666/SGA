@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAppInfo } from "../../../context/context";
 import { postInfo } from "../../../utils/functions";
@@ -19,6 +19,8 @@ export function ReportTransactionDetails() {
     const { transaction_id } = useParams();
     const { appInfo } = useAppInfo();
     const [info, setInfo] = useState([]);
+    const tableR = useRef();
+    const [thirdparty_name,setThirdparty_name] = useState('')
     const [loading, setLoading] = useState(false);
 
     const type = "TR_details";
@@ -50,7 +52,9 @@ export function ReportTransactionDetails() {
         setLoading(true);
         try {
             const res = await postInfo("/getTransactionDetails", settingsReport);
+            console.log(res);
             if (res && res[0]) {
+                setThirdparty_name(res[1][0].thirdparty_name)
                 setInfo(res[1]);
             } else {
                 setInfo([]);
@@ -70,7 +74,7 @@ export function ReportTransactionDetails() {
         <div className="ReportDocument">
             <PathLocation />
             <div className="headReport">
-                <BoldTitle text={`Detalle de Transacción #${transaction_id} - Nombre del tercero`} />
+                <BoldTitle text={`Detalle de Transacción #${transaction_id} - ${thirdparty_name}`} />
                 <DescriptionSpan text={`Vista detallada de la transacción seleccionada.`} />
             </div>
 
@@ -95,10 +99,10 @@ export function ReportTransactionDetails() {
                 {text:'Verifica el contenido de este documento',context:`Procesos - Informe - ${documentTypes[type]}`},
                 {text:'¿Que acciones me recomiendas basado en este documento?',context:`Procesos - Informe - ${documentTypes[type]}`}
             ]}/>
-                <ButtonDownload />
+                <ButtonDownload info={info} title={`Detalle de Transacción #${transaction_id} - Nombre del tercero`} component={tableR.current}/>
             </div>
 
-            <div className="SpaceReport">
+            <div className="SpaceReport" ref={tableR}>
                 {loading ? (
                     <LoadingSpace title="Cargando detalles" description="Esto no debe tardar mucho..." />
                 ) : (

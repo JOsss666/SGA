@@ -72,6 +72,14 @@ export function Reports(){
                                 <SelectOptions title={'Orden'} options={['Alfabetico','Fecha de Creación','Rol']}/>
                             </div>
                         </div>
+                        <div className="galleryReports">
+                            <CardReport type={'Documento'} title={'OCS'} description={'Client Order'}/>
+                            <CardReport type={'Documento'} title={'OPS'} description={'Production Order'}/>
+                            <CardReport type={'Documento'} title={'DCS'} description={'Purchase Document'}/>
+                            <CardReport type={'Documento'} title={'CIS'} description={'Inventory Consume'}/>
+                            <CardReport type={'Documento'} title={'FVS'} description={'Sell Invoice'}/>
+                            <CardReport type={'Documento'} title={'TRS'} description={'transaction'}/>
+                        </div>
                     </>
                 }/>
                 // http://localhost:5173/SGA_process/:company_key/:user_key/reports/OPS
@@ -81,17 +89,9 @@ export function Reports(){
                 <Route path='/CIS' element={<ReportDocuments type={'Inventory Consume'}/>} />
                 <Route path='/FVS' element={<ReportDocuments type={'Sell Invoice'}/>} />
                 <Route path='/TRS' element={<ReportDocuments type={'TR'}/>} />
-                <Route path='/TRS/:transaction_id' element={<ReportTransactionDetails />} />
+                <Route path='/TRS/:transaction_id' element={<ReportTransactionDetails/>} />
                 <Route path='/Balance' element={<ReportBalance/>}/>
             </Routes>
-            <div className="galleryReports">
-                <CardReport type={'Documento'} title={'OCS'} description={'Client Order'}/>
-                <CardReport type={'Documento'} title={'OPS'} description={'Production Order'}/>
-                <CardReport type={'Documento'} title={'DCS'} description={'Purchase Document'}/>
-                <CardReport type={'Documento'} title={'CIS'} description={'Inventory Consume'}/>
-                <CardReport type={'Documento'} title={'FVS'} description={'Sell Invoice'}/>
-                <CardReport type={'Documento'} title={'TRS'} description={'transaction'}/>
-            </div>
         </div>
     )
 }

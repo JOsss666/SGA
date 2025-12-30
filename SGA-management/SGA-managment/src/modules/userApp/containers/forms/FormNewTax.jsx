@@ -7,18 +7,42 @@ import './FormNewTax.css';
 import { NewElementSelect } from '../../components/NewElementSelect';
 import { postInfo } from "../../../../utils/functions";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
+import { SwitchOption } from "../../components/SwitchOption";
 
-export function FormNewTax({reloadInfo}){
+export function FormNewTax({reloadInfo,info}){
+    if(info == undefined){
+        info = {}
+    }
     const {addNotification} = useNotifications();
     const {appInfo} = useAppInfo();
     const {popOutAlert} = useAlert();
+    const [accounts, setAccounts] = useState([]);
+    const [categories,setCategories] = useState([]);
+    const [isRetention,setIsRetention] = useState(false);
+
+    // Control
+    const [disabled, setDisabled] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    // Form Info
     const [code, setCode] = useState('');
     const [rate, setRate] = useState('');
     const [selectedAccount, setSelectedAccount] = useState();
-    const [disabled, setDisabled] = useState(false);
+    const [parent_id,setParent_id] = useState(info.id != undefined? info.id:0);
+    const [path,setPath] = useState(info.path != undefined? info.path:'/');
     const [base,setBase] = useState(0);
-    const [loading, setLoading] = useState(false);
-    const [accounts, setAccounts] = useState([]);
+    
+    const formInfo = {
+        company_id: appInfo.company_id,
+        code: code,
+        rate: parseFloat(rate),
+        base,
+        parent_id,
+        account_id: selectedAccount,
+        company_id:appInfo.company_id,
+        path:path,
+        isRetention
+    };
 
     const getAccounts = async () => {
         let res = await postInfo('/getAccountsPlan', {
@@ -37,14 +61,45 @@ export function FormNewTax({reloadInfo}){
             setAccounts(accountsList);
         }
     }
+    
+    const getCategories = async()=>{
+        setLoading(true);
+        setDisabled(true);
+        let res = await postInfo('/getTaxCategories',{
+            company_id:appInfo.company_id
+        })
+        if(res[0]){
+            let C = [];
+            res[1].forEach(element => {
+                let level = (element.path.split('/')).length -1;
+                const indent = "\t".repeat(level);
+                C.push({
+                    text:`${indent}${element.name}`,
+                    value:`${element.id}&&${element.path}/`
+                })
+            });
+            setCategories(C)
+        }
+        setLoading(false);
+        setDisabled(false);
+    }
 
-    const formInfo = {
-        company_id: appInfo.company_id,
-        code: code,
-        rate: parseFloat(rate),
-        base,
-        account_id: selectedAccount
-    };
+    const setIdentationAndId = (text)=>{
+        let data = text.split('&&');
+        if(data[0] == ''){
+            if(info != undefined && info.id != undefined){
+                setParent_id(info.id)
+                setPath(`${info.path}/${info.name}/`);
+            }else{
+                setParent_id(0)
+                setPath('/')
+            }
+        }else{
+            setParent_id(data[0] != ''? data[0]:0);
+            setPath(data[1] != undefined? data[1]:'/');
+        }
+    }
+
     
     const createTax = async () => {
         setDisabled(true);
@@ -54,7 +109,7 @@ export function FormNewTax({reloadInfo}){
             addNotification({
                 type: 'aproved',
                 title: 'Nuevo Impuesto creado',
-                description: `El impuesto "${name}" ha sido creado correctamente.`
+                description: `El impuesto ha sido creado correctamente.`
             });
             popOutAlert();
             if(reloadInfo != undefined){
@@ -73,6 +128,7 @@ export function FormNewTax({reloadInfo}){
 
     useEffect(() => {
         getAccounts();
+        getCategories();
     }, []);
 
     return(
@@ -80,6 +136,7 @@ export function FormNewTax({reloadInfo}){
             <BoldTitle text={'Nuevo Impuesto'}/>
             <form className="createNewTax" onSubmit={(e) => {
                 e.preventDefault();
+                console.log(formInfo)
                 createTax();
             }}>
                 <FormInput 
@@ -101,6 +158,11 @@ export function FormNewTax({reloadInfo}){
                     type={'number'}
                     placeholder={'A partir de '}
                 />
+                <SearchinList
+                    title={'Categoria'}
+                    action={setIdentationAndId}
+                    placeHolder={path !='/' ? path:'/..'}
+                    list={categories}/>
                 <SearchinList 
                     action={setSelectedAccount} 
                     title={'Cuenta'} 
@@ -110,6 +172,10 @@ export function FormNewTax({reloadInfo}){
                         <NewElementSelect title={'Crear nueva cuenta'}/>
                     }
                 />
+                <div className="FlexOption">
+                    <h6>Es retención</h6>
+                    <SwitchOption action={setIsRetention}/>
+                </div>
                 <FormButton 
                     text={'Crear nuevo impuesto'} 
                     disabled={disabled}

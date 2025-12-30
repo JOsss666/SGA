@@ -18,7 +18,7 @@
 }
 
 .CostCenters .searchOptions .FormButton{
-    width: fit-content;
+    width: 10vw;
 }
 
 .CostCenters .searchOptions .ButtonMenu{
@@ -32,12 +32,46 @@
     color: #007AFF;
 }
 
+.CostCenters .contentCostCenters{
+    max-height: 60vh;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    overflow-y: auto;
+}
+
 .CostCenters .gridCostCenters{
-    height: 60vh;
     width: 100%;
     display: flex;
     flex-wrap: wrap;
     gap: 2vh;
     overflow-y: auto;
     padding: .1vh;
+}
+
+.CostCenters .treeSpaceCostCenters{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.CostCenters .treeSpaceCostCenters .showAll{
+    display: flex;
+    width: fit-content;
+    margin-bottom: 2vh;
+}
+
+.CostCenters .treeSpaceCostCenters .showAll span{
+    margin: auto 1vh;
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+    color: var(--sectionTitle);
+}
+
+.CostCenters .treeSpaceCostCenters .showAll .SwitchOption{
+    width: 3vw;
+}
+
+.CostCenters .NoResults{
+    height: 50vh;
 }

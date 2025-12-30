@@ -1,45 +1,54 @@
-import { useAlert } from "../../../context/context";
-import './MovementsInventory.css'
-import { postInfo } from "../../../utils/functions";
-import { useAppInfo } from "../../../context/context";
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { BoldTitle } from "../components/BoldTitle";
 import { DescriptionSpan } from "../components/DescriptionSpan";
+import { NormalCard } from "../components/NormalCard";
+import { GraphHeatMap } from "../components/GraphHeatMap";
+import { GraphBarCharts } from "../components/GraphBarCharts";
+import { useAppInfo } from "../../../context/context";
+import './MovementsInventory.css'
 
+export function MovementsInventory() {
 
-export function MovementsInventory(){
+    const { darkMode } = useAppInfo();
+    const [period, setPeriod] = useState("MONTH");
 
-    const navigate = useNavigate();
-    const location = useLocation()
-    const {appInfo} = useAppInfo();
-    const {popInAlert,setOpenAlert} = useAlert();
-    const [movements,setMovements] = useState([]);
+    const changePeriod = (value) => {
+        const dicper = {
+        "Por día": "DAY",
+        "Por mes": "MONTH",
+        "Por año": "YEAR",
+        };
+        setPeriod(dicper[value]);
+    };
 
-    const getMovements = async()=>{
-        let res = await postInfo('/getMovements',{company_id:appInfo.company_id,limit:10})
-        console.log(res);
-        if(res[0]){
-            setMovements(res[1]);
-        }
-    }
+    return (
+        <div className={`MovementsInventory ${darkMode ? "mi-dark" : "mi-light"} appSection`}>
+            <div className="SectionTitle">
+                <BoldTitle text="Movimientos" />
+                <DescriptionSpan text="Esta es la descripción de la categoría actual" />
+            </div>
 
-    const handleNavigate = (path)=>{
-        console.log(location)
-        navigate(location.pathname + path)
-    }
+            <div className="Graphics">
+                <div className="Graph">
+                    <div className="BarCharts">
+                        <GraphBarCharts  onChangePeriod={changePeriod}/>
+                    </div>
+                </div>
 
-    useEffect(()=>{
-        //getMovements();
-    },[])
-    
-    return(
-        <div className="MovementsInventory appSection">
-            <BoldTitle text={'Movimientos'}/>
-            <DescriptionSpan text={'Esta es la descripción de la categoría actual '}/>
-            <div className="AnalyticsIndicators">
-                
+                <div className="Graph">
+                    <div className="HeatMap">
+                        <GraphHeatMap />
+                    </div>
+                </div>
+            </div>
+
+            <div className="CardsAnalytics">
+                <NormalCard onlyTitle={true} e img={'https://i.pinimg.com/736x/00/2c/13/002c13c1b24794d3fd202c2a184c46d3.jpg'} title={'Entradas'}/>
+                <NormalCard onlyTitle={true} e img={'https://i.pinimg.com/736x/00/2c/13/002c13c1b24794d3fd202c2a184c46d3.jpg'} title={'Salidas'}/>
+                <NormalCard onlyTitle={true} e img={'https://i.pinimg.com/736x/00/2c/13/002c13c1b24794d3fd202c2a184c46d3.jpg'} title={'Translados'}/>
+                <NormalCard onlyTitle={true} e img={'https://i.pinimg.com/736x/00/2c/13/002c13c1b24794d3fd202c2a184c46d3.jpg'} title={'Consumos'}/>
+                <NormalCard onlyTitle={true} e img={'https://i.pinimg.com/736x/00/2c/13/002c13c1b24794d3fd202c2a184c46d3.jpg'} title={'Consumos'}/>
             </div>
         </div>
-    )
+    );
 }

@@ -1,0 +1,37 @@
+.New{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    padding-left: 4vh;
+}
+
+.New .DescriptionSpan{
+    margin: 1vh 0;
+}
+
+.New .gridOptions{
+    margin-top: 2vh;
+    padding: 2vh 0;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 3vh;
+}
+
+.New .gridOptions span{
+    cursor: pointer;
+    font-weight: 400;
+    color: var(--descriptionText);
+    font-size: clamp(2.2px,2.2vh,22px);
+    width: fit-content;
+}
+
+.New .gridOptions span i{
+    margin: auto 0;
+    margin-right: 1vh;
+    width: 3vh;
+}
+
+.New .gridOptions span:hover{
+    color: #007AFF;
+}

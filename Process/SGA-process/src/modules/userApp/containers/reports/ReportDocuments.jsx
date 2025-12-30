@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppInfo } from "../../../../context/context";
 import { postInfo } from "../../../../utils/functions";
 import { BoldTitle } from "../../components/BoldTitle";
@@ -21,18 +21,17 @@ export function ReportDocuments({ type }) {
     const [info, setInfo] = useState([]);
     const { appInfo } = useAppInfo();
     const [searchValue,setSearchValue] = useState("");
-    const reportT = useRef();
 
     // Actions Page
     const [loading, setLoading] = useState(false);
 
     // Settings Report
     const documentTypes = {
-        OC: "Ordenes de Cliente",
-        OP: "Ordenes de Producción",
+        'Client Order': "Ordenes de Cliente",
+        'Production Order': "Ordenes de Producción",
         'Purchase Document': "Documentos de Compra",
-        CI: "Consumos de inventario",
-        FV: "Facturas de venta",
+        'Inventory Consume': "Consumos de inventario",
+        'Sell Invoice': "Facturas de venta",
         TR: "Transacciónes",
         TR_details: "Detalles de la Transacción",
     };
@@ -100,11 +99,11 @@ export function ReportDocuments({ type }) {
     ];
 
     const columsDictionary = {
-        OP: columnsOp,
-        OC: columnsOc,
+        'Production Order': columnsOp,
+        'Client Order': columnsOc,
         'Purchase Document': columnsDc,
-        FV: columnsDc,
-        CI: columnsDc,
+        'Sell Invoice': columnsDc,
+        'Inventory Consume': columnsDc,
         TR: columsTr,
         TR_details: columsTr_details,
     };
@@ -142,6 +141,10 @@ export function ReportDocuments({ type }) {
         GetDocuments();
     }, []);
 
+    useEffect(()=>{
+        console.log(info)
+    },[info])
+
     return (
         <div className="ReportDocument">
         <PathLocation />
@@ -172,9 +175,9 @@ export function ReportDocuments({ type }) {
                 {text:'Realiza un analisis de este informe',context:`Procesos - Informe - ${documentTypes[type]}`},
                 {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Informe - ${documentTypes[type]}`}
             ]}/>
-            <ButtonDownload info={info} title={`Informe ${documentTypes[type]}`} component={reportT.current} />
+            <ButtonDownload />
         </div>
-        <div className="SpaceReport" ref={reportT}>
+        <div className="SpaceReport">
             {!loading && (
                 <TableReport columns={settingsReport.columns} info={info} type={type} searchValue={searchValue}/>
             )}

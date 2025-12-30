@@ -17,13 +17,10 @@ export function ConceptCard({info,hidden}){
 
     const getAttachedTaxes = async()=>{
         console.log('Cargando Impuestos');
-        let res = await postInfo('/getTaxes',{
-            company_id:appInfo.company_id,
-            attached:true,
-            typePlanAccount:appInfo.account_type,
-            concept_id:info.id
+        let res = await postInfo('/getConceptTaxes',{
+            concept_id:info.id,
         })
-        console.log(res)
+        console.log(res);
         if(res[0]){
             setAttachedTaxes(res[1])
         }else{
