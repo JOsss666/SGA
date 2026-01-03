@@ -39,6 +39,7 @@ import { StoreDetail } from './StoreDetail';
 import { Bussines } from './Bussines';
 import { New } from './New';
 import { Messages } from './Messages';
+import { Calendar } from './Calendar';
 
 export function UserApp(){
 
@@ -189,7 +190,7 @@ export function UserApp(){
                             <Route path='/reports/*' element={<Reports/>} />
                             <Route path='/analytics' element={<Analytics/>} />
                             <Route path='/analytics/*' element={<AnalyticDocDetail/>} />
-                            <Route path='/calendar' element={<span>Calendario</span>} />
+                            <Route path='/calendar' element={<Calendar/>} />
                             <Route path='/concepts' element={<ConceptsPlan/>} />
                             <Route path='/accounts' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
                             <Route path='/settings/*' element={<Settings/>} />

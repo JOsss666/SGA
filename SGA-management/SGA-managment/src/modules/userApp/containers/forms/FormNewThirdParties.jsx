@@ -127,10 +127,10 @@ export function FormNewThirdParties({reloadFun}){
                     <FormInput action={setName} title={'Nombre o razón social'} placeholder={'Nombre del proveedor'} disabled={disabled} value={name}/>
                     <FormInput action={setLastName} title={'Apellido o complemento'} placeholder={'Apellido del proveedor'} disabled={disabled} value={lastNames}/>
                     <SearchinList action={setindentification_type} title={'Tipo de Identificación'} placeHolder={'Tipo de identificación'} list={[
-                        {text:'NIT'},
-                        {text:'Cédula de Ciudadanía'},
-                        {text:'Cédula de Extranjería'},
-                        {text:'Pasaporte'}
+                        {text:'NIT',value:'NIT'},
+                        {text:'Cédula de Ciudadanía',value:'CC'},
+                        {text:'Cédula de Extranjería',value:'CE'},
+                        {text:'Pasaporte',value:'PAS'}
                     ]}/>
                     <FormInput action={setindentification_number} title={'Número de Identificación'} placeholder={'Número de identificación'} disabled={disabled}/>
                 </form>

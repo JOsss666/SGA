@@ -1532,7 +1532,7 @@ controller.createThirdParty = (req, res) => {
                 info.type
             ];
             const result = await useDataBase(sentence, values, 3);
-            let idNewThirdParty = parseInt(result);
+            let idNewThirdParty = parseInt(result.id);
             console.log(idNewThirdParty);
             if(typeof(parseInt(result))== 'number'){
                 let comercialInfoSen = `

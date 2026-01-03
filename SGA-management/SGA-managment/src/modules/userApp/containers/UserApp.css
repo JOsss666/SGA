@@ -20,6 +20,7 @@
     --bgOpacity:#ffffff50;
     --bgImage: url('https://i.pinimg.com/1200x/23/5f/8d/235f8df39cf98153029b9cc09495f390.jpg');
     --settingsHover:#f5f5f5;
+    --lightSelected:#F3F4F6
 }
 
 :root.dark {
@@ -41,6 +42,7 @@
     --bgOpacity:#00000050;
     --settingsHover:#111;
     --bgImage: url('https://i.pinimg.com/1200x/80/d1/bd/80d1bd8f8c9777a8ff1a8b4ed534418e.jpg');
+    --lightSelected:#18181B
 }
 
 .UserApp{
