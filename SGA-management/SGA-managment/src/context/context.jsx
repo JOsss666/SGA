@@ -50,10 +50,15 @@ export function NotificationsProvider({children}){
         setNotifications(C);
     }
 
+    const clearNotifications = ()=>{
+        setNotifications([])
+    }
+
     const value = {
         notifications,
         addNotification,
-        deleteNotification
+        deleteNotification,
+        clearNotifications
     }
 
     useEffect(()=>{

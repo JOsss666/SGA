@@ -10,10 +10,11 @@ export function NotificationCard({type,title,description,index,fixed}){
     const {deleteNotification} = useNotifications();
     const [timeNoti,setTimeNoti] = useState(5);
     const typeNotifications = {
-        'aproved': 'fa-regular fa-circle-check aproved',
-        'error': 'fa-regular fa-circle-xmark error',
-        'info': 'fa-solid fa-circle-info info',
-        'warning':'fa-solid fa-triangle-exclamation warning'
+        'aproved': <i className="fa-regular fa-circle-check aproved"/>,
+        'error': <i className="fa-regular fa-circle-xmark error"/>,
+        'AI':<img src="https://i.pinimg.com/1200x/c0/1a/9c/c01a9c2c1663ee8e03632fa7e11571aa.jpg" alt="" />,
+        'info': <i className="fa-solid fa-circle-info info"/>,
+        'warning':<i className="fa-solid fa-triangle-exclamation warning"/>
     }
 
     useEffect(() => {
@@ -36,7 +37,9 @@ export function NotificationCard({type,title,description,index,fixed}){
     return(
         <div className={`NotificationCard ${desapearCard? 'despearNotificationCard':''}`}>
             <div className="headNotification">
-                <i className={`indicatorNoti ${typeNotifications[type]}`}/>
+                <div className="iconC">
+                    {typeNotifications[type]}
+                </div>
                 <strong>{title}</strong>
                 <div className="optionsNoti">
                     {description != undefined && (

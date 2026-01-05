@@ -81,6 +81,7 @@
     align-content: start;
     color: var(--sidebar-text);
 }
+
 .Calendar .SideBarLeft .Categories .activeCategory {
   background: var(--iconHover);
   font-weight: 600;
