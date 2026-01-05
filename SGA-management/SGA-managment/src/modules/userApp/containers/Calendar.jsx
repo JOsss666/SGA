@@ -32,7 +32,6 @@ export function Calendar() {
 
     const [selectedCategory, setSelectedCategory] = useState("cat1");
 
-
     const [events, setEvents] = useState([
         {
             id: "1",
