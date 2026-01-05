@@ -3,7 +3,8 @@
     height: 60vh;
     width: 35%;
     background-color: #D2EAFB90;
-    backdrop-filter: blur(3vh);
+    background-color: var(--translucidMenu);
+    backdrop-filter: blur(1vh);
     border-radius: 2vh;
     padding: 2vh;
     animation-name:appearSearcHome;

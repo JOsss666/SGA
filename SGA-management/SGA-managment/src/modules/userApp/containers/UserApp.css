@@ -59,7 +59,6 @@
     z-index: 30;
     width: 100%;
     height: 10vh;
-    backdrop-filter: blur(1vh);
     display: flex;
     padding: 0 2vh;
     transition: .3s;
@@ -84,17 +83,30 @@
 .UserApp .headApp .SearchBar{
     margin: 2vh 0;
     width: 25vw;
-    border: .24vh solid transparent;
+}
+
+.UserApp .headApp .SearchBar i{
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
+    top: 1.8vh;
+    left: 2.5vh;
+}
+
+.UserApp .headApp .SearchBar input{
+    border: none;
+    background-color: var(--menuAside);
+    outline: none;
+    padding-left: 7vh;
 }
 
 .UserApp .headApp .resultsQuickSerch{
     position: absolute;
     width: 25vw;
-    max-height: 30vh;
+    max-height: 40vh;
     overflow: hidden;
-    background-color: #D2EAFB90;
-    backdrop-filter: blur(3vh);
-    top: 10vh;
+    background-color: var(--translucidMenu);
+    backdrop-filter: blur(2vh);
+    top: 8vh;
     left: 7vw;
     border-radius: 2vh;
 }

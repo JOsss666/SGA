@@ -27,7 +27,7 @@
 }
 
 .AppIcon:hover{
-    background-color: #ffffff75;
+    background-color: var(--cardHover);
     border-radius: 1vh;
 }
 
@@ -49,13 +49,16 @@
     font-size: clamp(2.2px,2.2vh,22px);
     font-weight: 400;
     max-width: 9vh;
-    color: #333;
+    color: var(--descriptionText);
     overflow: hidden;
     white-space: none;
     text-overflow: ellipsis;
     text-wrap: nowrap;
 }
 
+.AppIcon:hover span{
+    color: var(--mainText);
+}
 
 .horizontalAppIcon{
     flex-direction: flex;
@@ -76,6 +79,7 @@
     margin: auto 0;
     max-width: max-content;
 }
+
 
 @keyframes apperIconApp {
     0%{

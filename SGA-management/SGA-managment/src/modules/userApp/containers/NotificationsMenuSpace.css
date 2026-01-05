@@ -4,7 +4,8 @@
     height: 90vh;
     min-width: 30vw;
     width: fit-content;
-    background-color: var(--menuAside);
+    background-color: var(--translucidMenu);
+    backdrop-filter: blur(2vh);
     outline: solid .1vh var(--inputsBorder);
     top: 10vh;
     right: 0;

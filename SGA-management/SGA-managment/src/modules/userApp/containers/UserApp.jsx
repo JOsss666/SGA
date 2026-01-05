@@ -157,7 +157,7 @@ export function UserApp(){
                         <ServicesGrid/>
                     )}
                     <NotificationsMenuSpace visible={visibleNotifications}/>
-                    <UserCard name={userInfo.user_name} imgSrc={'https://i.pinimg.com/736x/fc/55/78/fc557891f4587e03e4eaaea18a4bc9c3.jpg'} desc={userInfo.user_roll} />
+                    <UserCard name={userInfo.user_name} imgSrc={userInfo.img} desc={userInfo.user_roll} />
                     <SwitchColorMode/>
                 </header>
                 <aside ref={asideMenuC}  className='asideMenuApp'>

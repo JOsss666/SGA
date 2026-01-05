@@ -3,9 +3,10 @@
 
 .ServicesGrid{
     display: flex;
-    background-color: var(--menuAside);
-    border: solid .5vh var(--iconHover);
+    background-color: var(--translucidMenu);
+    backdrop-filter: blur(2vh);
     border-radius: 2vh;
+    outline: solid .1vh var(--inputsBorder);
     max-width: 24vw;
     height: fit-content;
     flex-wrap: wrap;
@@ -48,7 +49,7 @@
 
 
 .ServicesGrid .serviceBubble:hover{
-    background-color: var(--iconHover);
+    background-color: var(--cardHover);
 }
 
 .ServicesGrid .serviceBubble img{
