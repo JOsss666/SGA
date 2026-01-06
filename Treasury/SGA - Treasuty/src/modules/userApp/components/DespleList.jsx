@@ -1,0 +1,38 @@
+
+import { useEffect, useRef, useState } from 'react'
+import './DespleList.css'
+
+export function DespleList({options,father,children}){
+
+    const [visibleChildren,setVisibleChildren] = useState(false);
+    console.log(options)
+    const mainC = useRef();
+
+    return(
+        <div ref={mainC} className="DespleList">
+            <h6>
+                {children}
+                {father != undefined? father.title:''}{options.length>0 && (
+                <i onClick={()=>{setVisibleChildren(!visibleChildren)}} className={`fa-solid fa-angle-${visibleChildren? 'up':'down'}`}/>
+            ) }</h6>
+            {visibleChildren && (
+                <div className="childrenSpan">
+                    {options.length > 0 && options.map((element,index)=>(
+                        <>
+                            {element.options ==  null && (
+                                <span onClick={()=>{
+                                    if(element.action != undefined){
+                                        element.action(element.path);
+                                    }
+                                }} key={index}>{element.children}{element.title}</span>
+                            )}
+                            {element.options != null && (
+                                <DespleList father={element} options={element.options} children={element.children} />
+                            )}
+                        </>
+                    ))}
+                </div>
+            )}
+        </div>
+    )
+}

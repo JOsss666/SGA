@@ -1,0 +1,287 @@
+@import '../containers/UserApp.css';
+
+.ThirdParties {
+    padding: 1.25dvh 1.25dvw;
+    background-color: var(--bg);
+    min-height: 100dvh;
+}
+
+.ThirdPartiesMain { 
+    max-width: 95dvw; 
+    margin: 0; 
+}
+
+.thirdparties-header { 
+    margin-bottom: 3dvh; 
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    position: relative;
+}
+
+.header-left {
+    flex: 1;
+}
+
+.header-right {
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 0.5dvh;
+}
+
+.thirdparties-header h1, 
+.thirdparties-header .BoldTitle {
+    font-size: clamp(1.5rem, 5dvh, 2.5rem) !important;
+    color: var(--sectionTitle);
+    margin-bottom: 0.5dvh;
+}
+
+.thirdparties-description { 
+    color: var(--descriptionText); 
+    font-size: clamp(0.75rem, 5dvh, 1rem); 
+    margin-top: 0.31dvh; 
+    margin-bottom: 0.625dvh;
+}
+
+.thirdparties-counter {
+    background: transparent;
+    padding: 0.5dvh 0dvw;
+    display: inline-block;
+    font-weight: 600;
+    color: var(--sectionTitle);
+    font-size: clamp(0.75rem, 7dvh, 1rem);
+}
+
+.thirdparties-search {
+    display: flex;
+    align-items: center;
+    gap: 1vw;
+    margin-left: 2vw;
+}
+
+.thirdparties-search .SearchBar {
+    margin-bottom: 0;
+    width: 200px;
+}
+
+.thirdparties-search .SelectOptions {
+    min-width: 180px;
+    background: var(--inputsBg) !important;
+    border: 1px solid var(--inputsBorder) !important;
+    border-radius: 0.375rem !important;
+    padding: 0;
+    position: relative;
+    outline: none !important;
+}
+
+.thirdparties-search .SelectOptions select {
+    background: var(--inputsBg) !important;
+    color: var(--text) !important;
+    border: none !important;
+    width: 100%;
+    padding: 0.7dvh 0.8dvw;
+    font-size: clamp(0.8rem, 1.4dvh, 1rem);
+    border-radius: 0.375rem;
+
+}
+
+.thirdparties-search .SelectOptions select:focus {
+    border: 1px solid var(--primary-color) !important;
+}
+
+.thirdparties-search .SelectOptions::after {
+    content: "▼";
+    font-size: 0.7rem;
+    color: var(--descriptionText);
+    position: absolute;
+    right: 0.8dvw;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+
+.thirdparties-search .SelectOptions select:-moz-focusring {
+    color: transparent !important;
+    text-shadow: 0 0 0 var(--text) !important;
+}
+
+.thirdparties-no-results {
+    text-align: center;
+    padding: 3dvh;
+    color: var(--descriptionText);
+    font-size: clamp(0.9rem, 1.6dvh, 1.2rem);
+    background: var(--cardHover);
+    border-radius: 0.8rem;
+    margin: 2dvh 0;
+    border: 0.1dvh solid var(--inputsBorder);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1dvh;
+}
+
+.thirdparties-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2vh;
+    overflow-y: auto;
+    height: 70vh;
+}
+
+.thirdparties-loading {
+    text-align: center;
+    padding: 2dvh;
+    color: var(--descriptionText);
+    font-size: clamp(0.9rem, 1.6dvh, 1.2rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5dvh;
+}
+
+.thirdparties-loading i {
+    font-size: clamp(1.2rem, 2.4dvh, 1.8rem);
+    margin-bottom: 0.5dvh;
+}
+
+.thirdparties-error {
+    text-align: center;
+    padding: 2dvh;
+    color: #dc3545;
+    font-size: clamp(0.9rem, 1.6dvh, 1.2rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1dvh;
+}
+
+.retry-btn {
+    padding: 0.5dvh 1dvw;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-size: clamp(0.8rem, 1.4dvh, 1rem);
+    transition: background-color 0.2s ease;
+}
+
+.retry-btn:hover {
+    background-color: var(--accent-color);
+}
+
+.thirdparties-empty {
+    text-align: center;
+    padding: 2dvh;
+    color: var(--descriptionText);
+    font-size: clamp(0.9rem, 1.6dvh, 1.2rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1dvh;
+}
+
+.thirdparty-detail {
+    padding: 2dvh 2dvw;
+}
+
+.thirdparty-detail h2 {
+    color: var(--sectionTitle);
+    margin-bottom: 1dvh;
+}
+
+.thirdparty-detail button {
+    padding: 0.5dvh 1dvw;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    margin-top: 1dvh;
+}
+
+@media (max-width: 1600px) {
+    .thirdparties-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.8dvh 1.3dvw;
+    }
+}
+
+@media (max-width: 1200px) {
+    .thirdparties-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.6dvh 1.1dvw;
+    }
+    
+    .thirdparties-search {
+        gap: 0.8vw;
+    }
+    
+    .thirdparties-search .SearchBar {
+        width: 180px;
+    }
+    
+    .thirdparties-search .SelectOptions {
+        min-width: 160px;
+    }
+    
+    .thirdparties-search .SelectOptions select {
+        padding: 0.6dvh 0.7dvw;
+    }
+}
+
+@media (max-width: 900px) {
+    .thirdparties-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.4dvh 0.9dvw;
+    }
+    
+    .thirdparties-header {
+        flex-direction: column;
+        gap: 2vh;
+    }
+    
+    .thirdparties-search {
+        width: 100%;
+        margin-left: 0;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 1vh;
+    }
+    
+    .header-right {
+        width: 100%;
+    }
+    
+    .thirdparties-search .SearchBar,
+    .thirdparties-search .SelectOptions {
+        width: 48%;
+        min-width: auto;
+    }
+}
+
+@media (max-width: 600px) {
+    .ThirdParties {
+        padding: 0.94dvh 0.94dvw;
+    }
+    
+    .thirdparties-grid {
+        grid-template-columns: 1fr;
+        gap: 1.2dvh;
+    }
+    
+    .thirdparties-search {
+        flex-direction: column;
+        gap: 1vh;
+    }
+    
+    .thirdparties-search .SearchBar,
+    .thirdparties-search .SelectOptions {
+        width: 100%;
+    }
+    
+    .thirdparties-search .SelectOptions select {
+        padding: 0.8dvh 0.8dvw;
+    }
+}

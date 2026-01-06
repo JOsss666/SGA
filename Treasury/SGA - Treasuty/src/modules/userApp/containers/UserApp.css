@@ -1,0 +1,208 @@
+
+/*  VARIABLES LIGHT AND DARKMODE */
+
+:root {
+    --bg: #ffffff;
+    --menuAside:#FAFAFA;
+    --lightGradient1: #EEF2FF;
+    --lightGradient2: #F7FAFF;
+    --lightGradient3: #F8FAFD;
+    --lightGradient4: #FEF2F2;
+    --text: #111111;
+    --mainText:#121212;
+    --sectionTitle:#1E1E1E;
+    --descriptionText:#838383;
+    --iconHover:#DFF2FE;
+    --inputsBg:#fff;
+    --inputsBorder:#ddd;
+    --translucidMenu:#fff9;
+    --cardHover:#F3F4F6;
+    --bgOpacity:#ffffff50;
+    --bgImage: url('https://i.pinimg.com/1200x/23/5f/8d/235f8df39cf98153029b9cc09495f390.jpg');
+    --settingsHover:#f5f5f5;
+    --lightSelected:#F3F4F6
+}
+
+:root.dark {
+    --bg: #252525;
+    --menuAside:#18181B;
+    --lightGradient1: #0C0A09;
+    --lightGradient2: #121212;
+    --lightGradient3: #1E1E1E;
+    --lightGradient4: #252525;
+    --text: #e6eef6;
+    --mainText:#fff;
+    --sectionTitle:#E1E1E1;
+    --descriptionText:#bbb;
+    --iconHover:#303030;
+    --inputsBg:#303030;
+    --inputsBorder:#5a5a5a;
+    --translucidMenu:#20202099;
+    --cardHover:#444;
+    --bgOpacity:#00000050;
+    --settingsHover:#111;
+    --bgImage: url('https://i.pinimg.com/1200x/80/d1/bd/80d1bd8f8c9777a8ff1a8b4ed534418e.jpg');
+    --lightSelected:#18181B
+}
+
+.UserApp{
+    height: 100%;
+    width: 100%;
+    position: relative;
+    display:flex;
+    transition: .3s;
+    background-color: var(--bg);
+}
+
+.UserApp .headApp{
+    position: fixed;
+    z-index: 30;
+    width: 100%;
+    height: 10vh;
+    display: flex;
+    padding: 0 2vh;
+    transition: .3s;
+    padding-left: 7vw;
+}
+
+.UserApp .headApp .ServicesGrid{
+    position: absolute;
+    top: 11vh;
+    right: 15vw;
+}
+
+.UserApp .headApp .UserCard{
+    margin: auto 2vh;
+}
+
+.UserApp .headApp .SearchBar{
+    margin: 2vh 0;
+    width: 25vw;
+}
+
+.UserApp .headApp .SearchBar i{
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
+    top: 1.8vh;
+    left: 2.5vh;
+}
+
+.UserApp .headApp .SearchBar input{
+    border: none;
+    background-color: var(--menuAside);
+    outline: none;
+    padding-left: 7vh;
+}
+
+.UserApp .headApp .resultsQuickSerch{
+    position: absolute;
+    width: 25vw;
+    max-height: 40vh;
+    overflow: hidden;
+    background-color: var(--translucidMenu);
+    backdrop-filter: blur(2vh);
+    top: 8vh;
+    left: 7vw;
+    border-radius: 2vh;
+}
+
+.UserApp .headApp .resultsQuickSerch .AppIcon img{
+    height: 3vh;
+    width: 3vh;
+    margin: auto 0;
+}
+
+.UserApp .headApp .resultsQuickSerch .AppIcon span{
+    margin-left: 0;
+}
+
+.UserApp .headApp .SearchBar input{
+    border-radius: 3vh;
+}
+
+
+.UserApp .headApp .subMenuHeader{
+    display: flex;
+    margin: auto;
+    margin-right: 0;
+}
+
+.UserApp .headApp .subMenuHeader .ButtonMenu{
+    margin: auto 1vh;
+}
+
+.UserApp .headApp .SwitchColorMode{
+    margin: auto 3vw;
+}
+
+
+.UserApp .asideMenuApp{
+    width: fit-content;
+    height: 100%;
+    transition: .3s;
+}
+
+.UserApp .asideMenuApp .menusHolder{
+    position: absolute;
+    height: 100%;
+    width: fit-content;
+    background-color: var(--menuAside);
+    backdrop-filter: blur(1vh);
+    z-index: 29;
+    z-index: 40;
+    transition: .3s;
+    overflow-y: auto;
+    border-top-right-radius: 3vh;
+    border-bottom-right-radius: 3vh;
+    scrollbar-width:none;
+}
+
+/* ancho del scrollbar */
+.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar {
+    width: 10px;           /* vertical */
+    height:50%;          /* horizontal */
+}
+
+.UserApp .asideMenuApp .menusHolder:hover {
+  scrollbar-width: auto; /* Firefox */
+}
+
+
+/* fondo del track */
+.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar-track {
+    background: var((var(--inputsBg)));
+    border-radius: 8px;
+}
+
+/* thumb (la "barrita" que se mueve) */
+.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    border: .1vh solid var(--inputsBg);
+}
+
+
+
+.UserApp .asideMenuApp .ServiceSgaCard{
+    margin: 1vh;
+    margin-bottom: 2vh;
+    /*background-color: var(--menuAside);*/
+    
+    z-index: 10;
+    padding-top: 1vh;
+}
+
+.UserApp .asideMenuApp .activeMenusHolder{
+    box-shadow: 0 .4vh 1vh #3333;
+    min-width: 18vw;
+}
+
+.UserApp .bodyApp{
+    height: 100dvh;
+    width: 100dvw;
+    padding-left: 5dvw;
+    border-radius: 4vh;
+    padding-top: 10vh;
+    transition: .3s;
+    background-color: var(--bg);
+    overflow: hidden;
+}

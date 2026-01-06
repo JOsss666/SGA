@@ -1,0 +1,106 @@
+
+.NotificationsMenuSpace{
+    position: absolute;
+    height: 90vh;
+    min-width: 30vw;
+    width: fit-content;
+    background-color: var(--translucidMenu);
+    backdrop-filter: blur(2vh);
+    outline: solid .1vh var(--inputsBorder);
+    top: 10vh;
+    right: 0;
+    padding: 1vh 2vh;
+    border-radius: 2vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.NotificationsMenuSpace .switchTypes{
+    display: flex;
+    width: 100%;
+    background-color: var(--cardHover);
+    border-radius: 1vh;
+    padding: .5vh 1vh;
+    transition: .3s;
+}
+
+.NotificationsMenuSpace .switchTypes .typeNoti{
+    margin: auto;
+    padding: .5vh 2vh;
+    display: flex;
+    gap: 1vh;
+    border-radius: 1vh;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.NotificationsMenuSpace .switchTypes .actualType{
+    background-color: var(--bg);
+    box-shadow: 0 .2vh 1vh var(--inputsBorder);
+}
+
+.NotificationsMenuSpace .switchTypes .typeNoti span{
+    margin: auto 0;
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
+    transition: .3s;
+}
+
+.NotificationsMenuSpace .switchTypes .actualType span{
+    color: var(--mainText);
+}
+
+.NotificationsMenuSpace .switchTypes .typeNoti .TagIndicator{
+    font-size: clamp(2px,2vh,20px);
+    border-radius: 1vh;
+}
+
+.NotificationsMenuSpace .optionsSpaceNoti{
+    position: absolute;
+    top: 2vh;
+    right: 4vh;
+    display: flex;
+    gap: 1vh;
+}
+
+.NotificationsMenuSpace .optionsSpaceNoti i{    
+    font-size: clamp(2.5px,2.5vh,25px);
+    cursor: pointer;
+    color: var(--descriptionText);
+}
+
+.NotificationsMenuSpace .BoldTitle{
+    margin: 2vh 1vh ;
+    font-size: clamp(3px,3vh,30px);
+    margin-bottom: 4vh;
+}
+
+.NotificationsMenuSpace .notiResGrid{
+    display: flex;
+    flex-direction: column;
+    margin-top: 2vh;
+    gap: 1vh;
+    height: 70vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.NotificationsMenuSpace .NotificationCard{
+    width: 100%;
+    box-shadow: none;
+    outline: none;
+}
+
+.visibleSpaceNoti{
+    animation-name: appearChatAi;
+    animation-duration: .5s;
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+}
+
+.hiddenSpaceNoti{
+    animation-name: desapearChatAi;
+    animation-duration: 1s;
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+}
