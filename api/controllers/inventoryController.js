@@ -110,15 +110,19 @@ inventoryController.createProduct = (req,res)=>{
                     name,
                     stock,
                     units,
+                    entry_account,
+                    exit_account,
                     img,
                     description)
-            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id ;`
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id ;`
         let consulta = await useDataBase(sentence,[
                     info.company_id,
                     info.code,
                     info.name,
                     info.stock,
                     info.units,
+                    info.inventotyAccount,
+                    info.costAccount,
                     info.photo,
                     info.description],3);
         console.log('---> ',consulta);
@@ -543,6 +547,27 @@ inventoryController.newMovement = (req,res)=>{
                     created_by)
                 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13);`;
 
+            let stockSen = `
+                INSERT INTO "Inventory".stocks(
+                    company_id,
+                    store_id,
+                    cellar_id,
+                    product_id,
+                    stock,
+                    min_stock,
+                    max_stock,
+                    avg_cost)
+                VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+                ON CONFLICT (company_id, store_id, cellar_id, product_id)
+                DO UPDATE SET
+                    avg_cost = (
+                    ("Inventory"."stocks".stock * "Inventory"."stocks".avg_cost)
+                    + (EXCLUDED.stock * EXCLUDED.avg_cost)
+                ) / ("Inventory"."stocks".stock + EXCLUDED.stock),
+                stock = "Inventory"."stocks".stock + EXCLUDED.stock, 
+                updated_at = NOW();
+            `
+
             for (const element of info.listProducts) {
                 let values = [
                     info.company_id,
@@ -559,9 +584,23 @@ inventoryController.newMovement = (req,res)=>{
                     info.description,
                     info.created_by,]
                 let consulta = await useDataBase(sentence,values,2);
-                resultsMovements.push(consulta);
+                let stockUpdate = await useDataBase(stockSen,[
+                    info.company_id,
+                    info.store_id,
+                    info.cellar_id,
+                    element.id,
+                    element.stock,
+                    0,
+                    0,
+                    element.unit_cost
+                ],2);
+                resultsMovements.push({
+                    movement:consulta,
+                    stock:stockUpdate
+                });
             }
             console.log(resultsMovements)
+            console.log('---------------------')
             res.writeHead(200,{'Content-Type':'text/plain'});
             res.end(JSON.stringify([true,{
                 doc_id:idMainDoc,
@@ -633,6 +672,61 @@ inventoryController.deleteMovement = (req,res)=>{
             info.movements
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+// Obtener stocks
+inventoryController.getStocks = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        console.log('---> ',info)
+        let values = [];
+        let whereClauses = [];
+        whereClauses.push(`"Inventory".stocks.company_id = $${values.length +1}`)
+        values.push(info.company_id)
+        const storeIdParsed = Number(info.store_id);
+        const cellarIdParsed = Number(info.cellar_id);
+
+        if(Number.isInteger(storeIdParsed)) {
+            whereClauses.push(`"Inventory".stocks.store_id = $${values.length + 1}`);
+            values.push(storeIdParsed);
+        }
+
+        if(Number.isInteger(cellarIdParsed)) {
+            whereClauses.push(`"Inventory".stocks.cellar_id = $${values.length + 1}`);
+            values.push(cellarIdParsed);
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
+        let sentence = `
+            SELECT
+                "Inventory".stocks.*,
+                "Inventory"."products&services".name,
+                "Inventory"."products&services".code,
+                "Inventory"."products&services".img
+            FROM
+                "Inventory".stocks
+            LEFT JOIN
+                "Inventory"."products&services"
+            ON
+                "Inventory".stocks.product_id = "Inventory"."products&services".id
+            ${whereQuery}
+            ORDER BY "Inventory"."products&services".name ASC ;
+        `;
+        let consulta = await useDataBase(sentence,values,1)
+        res.writeHead(200,{'Content-Type':'text/plain'});
         res.end(JSON.stringify(consulta));
     })
     req.on('error',(err)=>{

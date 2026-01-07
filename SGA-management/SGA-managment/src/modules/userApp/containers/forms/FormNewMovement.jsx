@@ -238,6 +238,7 @@ export function FormNewMovement({info}){
     const createMovement = async()=>{
         setDisabled(true)
         setLoading(true)
+        setStage(0);
         let res = await postInfo('/inventory/newMovement',formInfo);
         if(res[0]){
             formInfo['doc_id'] = res[1].doc_id;
@@ -350,7 +351,7 @@ export function FormNewMovement({info}){
                                     }/>
                                 )}
                                 {movement_type != 'Inventory Consume' && movement_type != 'Inventory Transfer' &&  info.thirdParty_id == undefined && (
-                                    <SearchinList action={setThirdParty_id} disabled={disabled} title={`${movement_type == 'entry'? 'Proveedor':'Cliente'}`} placeHolder={`Seleccione el ${movement_type == 'Inventory Entry'? 'Proveedor':'Cliente'}`} list={thirdParties} specialOption={
+                                    <SearchinList action={setThirdParty_id} disabled={disabled} title={`${movement_type == 'Inventory Entry' ? 'Proveedor':'Cliente'}`} placeHolder={`Seleccione el ${movement_type == 'Inventory Entry'? 'Proveedor':'Cliente'}`} list={thirdParties} specialOption={
                                         <NewElementSelect onClick={()=>{
                                             popInAlert(<FormNewThirdParties/>)
                                         }}/>

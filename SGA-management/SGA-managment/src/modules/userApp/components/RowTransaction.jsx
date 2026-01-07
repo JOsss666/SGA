@@ -27,7 +27,7 @@ export const RowTransaction = memo(function RowTransaction({
   const handleUnitsChange = useCallback((value) => {
     setUnits(value);
     onChangeRow?.(info.id, {
-      movementsUnits: Number(value) || 0
+      stock: Number(value) || 0
     });
   }, [info?.id, onChangeRow]);
 

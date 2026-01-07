@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAppInfo } from "../../../context/context";
 import { PathLocation } from "../components/PathLocation";
 import { postInfo } from "../../../utils/functions";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { BoldTitle } from "../components/BoldTitle";
 import { LoadingSpace } from "./LoadingSpace";
 import { DescriptionSpan } from "../components/DescriptionSpan";
@@ -12,6 +12,7 @@ import { CellarsBody } from "./CellarsBody";
 export function StoreDetail(){
 
     // Requirements
+    const navigate = useNavigate();
     const [info,setInfo] = useState({});
     const {appInfo} = useAppInfo();
     const params = useParams();
@@ -31,6 +32,11 @@ export function StoreDetail(){
     ];
 
     // Functions
+
+    const navigateToCellar = (path)=>{
+        navigate(`/SGA_management/${params.company_key}/${params.user_key}/myBussines/Units/${params.store_id}/${path}`)
+    }
+
     const getStoreinfo = async()=>{
         setDisabled(true);
         setLoading(true);
@@ -38,7 +44,6 @@ export function StoreDetail(){
             company_id:appInfo.company_id,
             id:params.store_id
         })
-        console.log(res)
         if(res[0]){
             setInfo(res[1][0])
         }
@@ -84,7 +89,7 @@ export function StoreDetail(){
                 </div>
                 <div className="contentStoreDetail">
                     {!loading && actualSection == 1 && (
-                        <CellarsBody cellars={cellars} reloadFun={getCellars} storeInfo={info}/>
+                        <CellarsBody cellars={cellars} reloadFun={getCellars} storeInfo={info} onClick={navigateToCellar}/>
                     )}
                     {loading && (
                         <LoadingSpace title={`Cargando información de ${info.name}`} description={'Esto no debe tardar mucho...'}/>

@@ -7,10 +7,9 @@ import { ButtonMenu } from "../components/ButtonMenu";
 import { FormButton } from "../components/FormButton";
 import { SearchBar } from "../components/SearchBar";
 import { SelectOptions } from "../components/SelectOptions";
-import { FormNewCostCenter } from "./forms/FormNewCostCenter";
 import { useAlert } from "../../../context/context";
 
-export function CellarsBody({cellars,storeInfo,reloadFun}){
+export function CellarsBody({cellars,storeInfo,reloadFun,onClick}){
     
     const {popInAlert} = useAlert();
     const [searchValue,setSearchVal]  = useState('');
@@ -39,7 +38,7 @@ export function CellarsBody({cellars,storeInfo,reloadFun}){
                     </div>
                     <div className="CellarsGird">
                         {cellars != undefined && cellars.map((element,index)=>(
-                            <NormalCard onlyTitle={true} title={element.name} key={index}
+                            <NormalCard onlyTitle={true} title={element.name} key={index} onClick={()=>{onClick?.(element.id)}}
                                 img={'https://res.cloudinary.com/djjxugmni/image/upload/v1764620093/ChatGPT_Image_1_dic_2025_15_04_38_3_hcdqxl.png'}
                             />
                         ))}
