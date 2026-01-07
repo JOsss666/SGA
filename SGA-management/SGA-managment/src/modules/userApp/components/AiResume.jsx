@@ -1,11 +1,11 @@
 import { BoldTitle } from "./BoldTitle";
 import './AiResume.css'
-import { useAiAssistant } from "../../../context/context";
+import { useAiAssistant, useNotifications } from "../../../context/context";
 import { useEffect, useState } from "react";
 import { TextPlainAi } from "./ChatAiComponents/TextPlainAi";
 
 export function AiResume(){
-
+    const {addNotification} = useNotifications();
     const {sendPrompt} = useAiAssistant();
     const [contentResume,setContentResume] = useState([]);
     const [loading,setLoading] = useState(false);
@@ -18,6 +18,11 @@ export function AiResume(){
         console.log(res)
         if(res[0]){
             setContentResume(res[1]);
+            addNotification({
+                type:'AI',
+                title:'Resumen IA diario listo',
+                description:'Tu resumen díario generado por la IA esta listo'
+            })
         }
     }
 
@@ -31,7 +36,6 @@ export function AiResume(){
                 <img src="https://i.pinimg.com/1200x/c0/1a/9c/c01a9c2c1663ee8e03632fa7e11571aa.jpg" alt="" />
                 <strong>Resumen Ai</strong>
             </div>
-            <BoldTitle text={'Ama lo que haces.'}/>
             <div className="contentResume">
                 {contentResume.map((element,index)=>(
                     <TextPlainAi text={element.content} key={index} />

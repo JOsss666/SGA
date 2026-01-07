@@ -1,0 +1,35 @@
+.iconMenuSvg {
+    width: 3.5vh;
+    height: 3.5vh;
+    stroke: var(--descriptionText);
+    fill: var(--cardHover);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.noFillSvg{
+    width: 3.5vh;
+    height: 3.5vh;
+    stroke: var(--descriptionText);
+    color: var(--descriptionText);
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.MenuApp .listOptions li:hover .iconMenuSvg{
+    stroke: var(--mainText);
+    fill: var(--bg);
+}
+
+.MenuApp .listOptions li:hover .noFillSvg{
+    color: var(--mainText);
+    stroke: var(--mainText);
+    fill: none;
+}
+
+.visibleMenu .iconMenuSvg, .visibleMenu .noFillSvg{
+    margin-right: 2vh;
+}

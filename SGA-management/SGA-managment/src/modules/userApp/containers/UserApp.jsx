@@ -39,6 +39,8 @@ import { StoreDetail } from './StoreDetail';
 import { Bussines } from './Bussines';
 import { New } from './New';
 import { Messages } from './Messages';
+import { Calendar } from './Calendar';
+import { CellarDetail } from './CellarDetail';
 
 export function UserApp(){
 
@@ -156,7 +158,7 @@ export function UserApp(){
                         <ServicesGrid/>
                     )}
                     <NotificationsMenuSpace visible={visibleNotifications}/>
-                    <UserCard name={userInfo.user_name} imgSrc={'https://i.pinimg.com/736x/fc/55/78/fc557891f4587e03e4eaaea18a4bc9c3.jpg'} desc={userInfo.user_roll} />
+                    <UserCard name={userInfo.user_name} imgSrc={userInfo.img} desc={userInfo.user_roll} />
                     <SwitchColorMode/>
                 </header>
                 <aside ref={asideMenuC}  className='asideMenuApp'>
@@ -176,6 +178,7 @@ export function UserApp(){
                             <Route path='/myBussines/Bussines/:bussines_id' element={<PathLocation/>}/>
                             <Route path='/myBussines/Units' element={<MyBussinesUnits/>}/>
                             <Route path='/myBussines/Units/:store_id' element={<StoreDetail/>}/>
+                            <Route path='/myBussines/Units/:store_id/:cellar_id' element={<CellarDetail/>}/>
                             <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
                             <Route path='/modules/*' element={<Modules/>}/>
                             <Route path='/services' element={<Services/>}/>
@@ -189,7 +192,7 @@ export function UserApp(){
                             <Route path='/reports/*' element={<Reports/>} />
                             <Route path='/analytics' element={<Analytics/>} />
                             <Route path='/analytics/*' element={<AnalyticDocDetail/>} />
-                            <Route path='/calendar' element={<span>Calendario</span>} />
+                            <Route path='/calendar' element={<Calendar/>} />
                             <Route path='/concepts' element={<ConceptsPlan/>} />
                             <Route path='/accounts' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
                             <Route path='/settings/*' element={<Settings/>} />

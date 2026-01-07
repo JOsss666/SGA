@@ -6,7 +6,7 @@ import './ChatAi.css'
 import { DespleList } from '../components/DespleList';
 import { CardTitleLogo } from '../components/CardTitleLogo';
 import {getAttached, postInfo} from '../../../utils/functions'
-import { useAiAssistant, useAppInfo } from '../../../context/context';
+import { useAiAssistant, useAppInfo, useNotifications } from '../../../context/context';
 import { ChatMessage } from '../components/ChatMessage';
 import { BoldTitle } from '../components/BoldTitle';
 import { AttachedCard } from '../components/AttachedCard';
@@ -15,6 +15,7 @@ import { MainTitleAi } from '../components/ChatAiComponents/MainTitleAi';
 
 export function ChatAi({visible}){
     const {chat,addMessage} = useAiAssistant();
+    const {addNotification} = useNotifications();
     const {userInfo,appInfo} = useAppInfo();
     const fileInput = useRef();
     const [visibleAddOptions,setVisibleAddOptions] = useState(false);
@@ -43,10 +44,7 @@ export function ChatAi({visible}){
             text:searchVal,
             user_id:userInfo.user_id,
         })
-/*       await addMessage({
-            text:`Procesando...`,
-            user_id:0
-        })*/
+
         let res = await postInfo('/processAiRequest',{
             text:searchVal,
             userInfo,

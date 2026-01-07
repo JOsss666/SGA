@@ -1,0 +1,218 @@
+@import '../containers/UserApp.css';
+
+.ThirdpartyCard {
+    background: var(--bg);
+    border-radius:2vh;
+    padding: 1.5dvh 1.5dvw;
+    border: 0.1dvh solid var(--inputsBorder);
+    box-shadow: 0 0.3dvh 0.6dvh rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 14dvh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 20vw;
+}
+
+.thirdparty-card:Hover {
+    transform: translateY(-0.3dvh);
+    box-shadow: 0 0.6dvh 1.2dvh rgba(0, 0, 0, 0.15);
+    background-color: var(--cardHover);
+}
+
+.ThirdpartyCard .CardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0dvh;
+    width: 100%;
+    position: relative;
+}
+
+.ThirdpartyCard .NameSection {
+    display: flex;
+    align-items: center;
+    gap: 0.4dvw;
+    flex: 1;
+    min-width: 0;
+}
+
+.ThirdpartyCard .NameSection .fa-user {
+    color: var(--sectionTitle);
+    font-size: clamp(0.9rem, 1.6dvh, 1.2rem);
+    flex-shrink: 0;
+    width: 1.2dvw;
+    text-align: center;
+}
+
+.ThirdpartyCard .ThirdpartyName {
+    color: var(--sectionTitle);
+    font-size: clamp(0.9rem, 1.6dvh, 1.2rem);
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}
+
+.ThirdpartyCard .CardActions {
+    display: flex;
+    gap: 0.4dvw;
+    position: absolute;
+    top: 0;
+    right: 0;
+    flex-shrink: 0;
+}
+
+.ThirdpartyCard .btn-edit,
+.ThirdpartyCard .btn-delete {
+    width: clamp(1.8rem, 2.8dvh, 2.4rem);
+    height: clamp(1.8rem, 2.8dvh, 2.4rem);
+    border: none;
+    border-radius: 0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: clamp(0.7rem, 1.2dvh, 0.9rem);
+    flex-shrink: 0;
+}
+
+.ThirdpartyCard .btn-edit {
+    background-color: #3498db;
+    color: white;
+}
+
+.ThirdpartyCard .btn-edit:hover {
+    background-color: #2980b9;
+    transform: scale(1.05);
+}
+
+.ThirdpartyCard .btn-delete {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.ThirdpartyCard .btn-delete:hover {
+    background-color: #c0392b;
+    transform: scale(1.05);
+}
+
+.ThirdpartyCard .ContactInfo {
+    display: grid;
+    grid-template-columns: auto 1fr; 
+    gap: 0.3dvw 0.3dvw;
+    align-items: center;
+}
+
+.ThirdpartyCard .ContactItem {
+    display: contents; 
+}
+
+.ThirdpartyCard .ContactItem i {
+    color: var(--descriptionText);
+    font-size: clamp(0.8rem, 1.4dvh, 1rem);
+    width: 1.2dvw;
+    flex-shrink: 0;
+    text-align: center;
+    grid-column: 1;
+}
+
+.ThirdpartyCard .ContactText {
+    color: var(--descriptionText);
+    font-size: clamp(0.8rem, 1.4dvh, 1rem);
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    grid-column: 2; 
+    min-width: 0;
+}
+
+@media (max-width: 600px) {
+    .thirdparty-card {
+        padding: 1.2dvh 1.2dvw;
+        min-height: 12dvh;
+    }
+    
+    .ThirdpartyCard .ThirdpartyName {
+        font-size: clamp(0.8rem, 1.4dvh, 1rem);
+    }
+    
+    .ThirdpartyCard .ContactText {
+        font-size: clamp(0.7rem, 1.2dvh, 0.9rem);
+    }
+    
+    .ThirdpartyCard .btn-edit,
+    .ThirdpartyCard .btn-delete {
+        width: clamp(1.6rem, 2.5dvh, 2rem);
+        height: clamp(1.6rem, 2.5dvh, 2rem);
+    }
+    
+    .ThirdpartyCard .NameSection .fa-user,
+    .ThirdpartyCard .ContactItem i {
+        font-size: clamp(0.7rem, 1.2dvh, 0.9rem);
+        width: 1.5dvw;
+    }
+    
+    .ThirdpartyCard .NameSection {
+        gap: 0.8dvw;
+    }
+    
+    .ThirdpartyCard .cCntactInfo {
+        gap: 0.8dvw 0.4dvw;
+    }
+}
+.ThirdpartyCard .CardContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1dvh;
+}
+
+.ThirdpartyCard .ImageSection {
+    background-color: var(--inputsBorder);
+    height: 20dvh;
+    border-radius: 0.4rem;
+    margin-top: 3dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0dvh dashed var(--descriptionText);
+}
+
+.ThirdpartyCard .ImagePlaceholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3dvh;
+    color: var(--descriptionText);
+    font-size: clamp(0.7rem, 1.2dvh, 0.9rem);
+}
+
+.ThirdpartyCard .ThirdpartyCard .ImagePlaceholder i {
+    font-size: clamp(1rem, 1.8dvh, 1.4rem);
+}
+
+
+.ThirdpartyCard .thirdparty-card {
+    padding: 1.5dvh 1.5dvw 1dvh 1.5dvw; 
+}
+
+@media (max-width: 600px) {
+    .ThirdpartyCard .ImageSection {
+        height: 5dvh;
+    }
+    
+    .ThirdpartyCard .ImagePlaceholder {
+        font-size: clamp(0.6rem, 1.1dvh, 0.8rem);
+    }
+    
+    .ThirdpartyCard .ImagePlaceholder i {
+        font-size: clamp(0.8rem, 1.5dvh, 1.1rem);
+    }
+}

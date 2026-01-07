@@ -1,0 +1,53 @@
+@import './UserApp.css';
+
+.LightChart{
+    width: 100%;
+    height: 50vh;
+    position: relative;
+    background-color: var(--translucidMenu);
+    border-radius: 2vh;
+    backdrop-filter: blur(2vh);
+    padding-top: 8vh;
+}
+
+.LightChart .titleAndValueContainer{
+    position: absolute;
+    background-color: var(--translucidMenu);
+    padding: 1vh 2vh;
+    border-radius: 1vh;
+    top: 0%;
+    left: 0%;
+    display: flex;
+    padding-left: 4vh;
+    flex-direction: column;
+    backdrop-filter: blur(.3vh);
+}
+
+.LightChart .titleAndValueContainer h3{
+    color: var(--sectionTitle);
+    font-size: clamp(5.5px,5.5vh,55px);
+    font-weight: 500;
+    display: flex;
+}
+
+.LightChart .titleAndValueContainer .PercentTimeIndicator{
+    margin-left: 1vh;
+}
+
+.LightChart .XAxis, .LightChart .YAxis{
+    font-size: clamp(2.2px,2vh,22px);
+}
+
+.LightChart .optionsChart{
+    position: absolute;
+    top: 2%;
+    right: 1%;
+    display: flex;
+    background-color: var(--translucidMenu);
+    padding: 1vh;
+    border-radius: 1vh;
+}
+
+.LightChart .optionsChart .SelectOptions{
+    margin: auto 1vh;
+}
