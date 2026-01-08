@@ -1,3 +1,52 @@
 SGA sistema de gestion Administrativa.
 
-LICENSE: Na
+Copyright (c) 2026 [TU NOMBRE O EMPRESA]
+
+All rights reserved.
+
+Permission is hereby granted to any person obtaining a copy of this software
+and associated documentation files (the "Software") to view, study, modify,
+and contribute to the Software, subject to the following conditions:
+
+1. NON-COMMERCIAL USE ONLY
+   The Software may NOT be used, in whole or in part, for commercial purposes,
+   including but not limited to:
+   - Selling the Software
+   - Offering the Software as a paid service (SaaS)
+   - Using the Software in commercial products or services
+   - Monetizing the Software directly or indirectly
+
+2. NO REDISTRIBUTION OR FORKING FOR DEPLOYMENT
+   You may NOT:
+   - Redistribute the Software as a standalone product
+   - Deploy modified or unmodified versions of the Software publicly
+   - Offer hosted versions of the Software without explicit written permission
+
+3. CONTRIBUTIONS
+   Contributions (pull requests, issues, patches) are welcome.
+   By submitting a contribution, you grant the copyright holder a perpetual,
+   worldwide, royalty-free right to use, modify, relicense, and commercialize
+   your contribution as part of the Software.
+
+4. TRADEMARK AND BRANDING
+   The name "SGA", its logo, and any associated branding
+   are protected trademarks.
+   This license does NOT grant permission to use the project name, logo,
+   or branding in any product, service, or derivative work.
+
+5. OWNERSHIP
+   All rights, title, and interest in the Software remain exclusively with
+   the copyright holder.
+   This license does not transfer ownership.
+
+6. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+7. TERMINATION
+   Any violation of the terms of this license will result in automatic
+   termination of the rights granted herein.
+
+For commercial licensing, deployment permissions, or trademark usage,
+contact: murillojose.nvc@gmail.com
