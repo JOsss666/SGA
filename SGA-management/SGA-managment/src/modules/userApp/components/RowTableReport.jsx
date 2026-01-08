@@ -64,7 +64,7 @@ export function RowTableReport({columns,info,type,hidden}){
         'Naturaleza':<span>{info.nature}</span>,
         'Debito':<span>{info.total_debit != undefined? moneyFormat(info.total_debit):0}</span>,
         'Crédito':<span>{info.total_credit != undefined? moneyFormat(info.total_credit):0}</span>,
-        'Saldo inicial':<span>0</span>,
+        'Saldo inicial':<span>{info.opening_balance != undefined? moneyFormat(info.opening_balance):0}</span>,
         'Saldo':<span>{info.balance != undefined? moneyFormat(info.balance):0}</span>,
         "Ver Detalles": <span className="Redirect" onClick={() => handleNavigate(`${info.id}`)}> Ver Detalles </span>
     }
