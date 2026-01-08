@@ -9,6 +9,7 @@ import { DescriptionSpan } from "../components/DescriptionSpan";
 import './StoreDetail.css'
 import { CellarsBody } from "./CellarsBody";
 import { ReportBody } from "./ReportBody";
+import { GeneralInfoBody } from "./GeneralInfoBody";
 
 export function StoreDetail(){
     const [info, setInfo] = useState({});
@@ -83,10 +84,20 @@ export function StoreDetail(){
                     }}/>
                 </div>
                 <div className="contentStoreDetail">
+                    {!loading && actualSection === 0 && (
+                        <GeneralInfoBody 
+                            storeInfo={info} 
+                            companyId={appInfo.company_id}
+                            reloadInfo={getStoreInfo}
+                        />
+                    )}
+                    
+                    {/* Sección 1: Bodegas y Secciones */}
                     {!loading && actualSection === 1 && (
                         <CellarsBody cellars={cellars} reloadFun={getCellars} storeInfo={info}/>
                     )}
                     
+                    {/* Sección 5: Informes */}
                     {!loading && actualSection === 5 && (
                         <ReportBody storeInfo={info} companyId={appInfo.company_id}/>
                     )}
