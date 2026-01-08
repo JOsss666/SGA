@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { FormInput } from "../components/FormInput";
 import { FormButton } from "../components/FormButton";
 import { postInfo } from "../../../utils/functions";
-import './GeneralInfoBody.css';
+import './GeneralInfoBodyStore.css';
 
-export function GeneralInfoBody({ storeInfo, companyId, reloadInfo }) {
+export function GeneralInfoBodyStore({ storeInfo, companyId, reloadInfo }) {
     const [loading, setLoading] = useState(false);
     const [disabled, setDisabled] = useState(false);
     const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ export function GeneralInfoBody({ storeInfo, companyId, reloadInfo }) {
     useEffect(() => {
         if (storeInfo) {
             setFormData({
-                legalName: storeInfo.legal_name || "",
+                legalName: storeInfo.name || "",
                 brandName: storeInfo.brand_name || storeInfo.name || "",
                 identificationNumber: storeInfo.identification_number || "",
                 identificationType: storeInfo.identification_type || "",
@@ -33,6 +33,8 @@ export function GeneralInfoBody({ storeInfo, companyId, reloadInfo }) {
                 address: storeInfo.address || ""
             });
         }
+
+        console.log(storeInfo)
     }, [storeInfo]);
 
     const handleInputChange = (field, value) => {

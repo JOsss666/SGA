@@ -9,7 +9,7 @@ import { DescriptionSpan } from "../components/DescriptionSpan";
 import './StoreDetail.css'
 import { CellarsBody } from "./CellarsBody";
 import { ReportBody } from "./ReportBody";
-import { GeneralInfoBody } from "./GeneralInfoBody";
+import { GeneralInfoBodyStore } from "./GeneralInfoBodyStore";
 
 export function StoreDetail(){
 
@@ -38,7 +38,7 @@ export function StoreDetail(){
         navigate(`/SGA_management/${params.company_key}/${params.user_key}/myBussines/Units/${params.store_id}/${path}`)
     }
 
-    const getStoreinfo = async()=>{
+    const getStoreInfo = async()=>{
         setDisabled(true);
         setLoading(true);
         let res = await postInfo('/getStores',{
@@ -94,7 +94,7 @@ export function StoreDetail(){
                 </div>
                 <div className="contentStoreDetail">
                     {!loading && actualSection === 0 && (
-                        <GeneralInfoBody 
+                        <GeneralInfoBodyStore 
                             storeInfo={info} 
                             companyId={appInfo.company_id}
                             reloadInfo={getStoreInfo}
@@ -103,7 +103,7 @@ export function StoreDetail(){
                     
                     {/* Sección 1: Bodegas y Secciones */}
                     {!loading && actualSection === 1 && (
-                        <CellarsBody cellars={cellars} reloadFun={getCellars} storeInfo={info}/>
+                        <CellarsBody cellars={cellars} reloadFun={getCellars} storeInfo={info} onClick={navigateToCellar}/>
                     )}
                     
                     {/* Sección 5: Informes */}
