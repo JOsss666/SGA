@@ -19,6 +19,7 @@ export function ListProductsServices({
     const [manualProduct, setManualProduct] = useState(false);
     const [visibleNew, setVisibleNew] = useState(true);
     const inputSKU = useRef(null);
+    const [skuValue, setSkuValue] = useState("");
 
     /* =========================
         ADD PRODUCT
@@ -26,7 +27,7 @@ export function ListProductsServices({
     const addProducts = useCallback((info) => {
         setListPorducts(prev => {
         if (prev.some(p => p.id === info.id)) return prev;
-        return [...prev, { ...info, movementsUnits: 0 }];
+        return [...prev, { ...info, stock: 0 }];
         });
         inputSKU.current?.focus();
     }, [setListPorducts]);
@@ -54,7 +55,7 @@ export function ListProductsServices({
     ========================== */
     const total = useMemo(() => {
         return listProducts.reduce((acc, p) => {
-        const units = Number(p.movementsUnits) || 0;
+        const units = Number(p.stock) || 0;
         if (type === "Inventory Entry") {
             return acc + units * (Number(p.unit_cost) || 0);
         }
@@ -65,10 +66,33 @@ export function ListProductsServices({
     /* =========================
         FIND SKU
     ========================== */
+
     const findSKU = useCallback((sku) => {
+        console.log('SKU ',sku)
         const map = new Map(products.map(p => [p.value.code, p]));
         return map.get(sku);
     }, [products]);
+
+
+    const handleSkuKeyDown = useCallback((e) => {
+        if (e.key !== "Enter") return;
+
+        e.preventDefault();
+
+        const sku = skuValue.trim();
+        if (!sku) return;
+
+        const found = findSKU(sku);
+
+        if (found) {
+            addProducts(found.value);
+        } else {
+            alert("Producto no encontrado");
+        }
+
+        setSkuValue("");               // limpiar input
+        inputSKU.current?.focus();     // volver a enfocar
+    }, [skuValue, findSKU, addProducts]);
 
     /* =========================
         FOCUS
@@ -105,17 +129,17 @@ export function ListProductsServices({
                 <>
                     <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1767055082/CodeScan_ifoxi8.png" />
                     <input
-                    className="inputSKU"
-                    ref={inputSKU}
-                    type="text"
-                    onChange={(e) => {
-                        if (!e.target.value) return;
-                        const found = findSKU(e.target.value);
-                        if (found) addProducts(found.value);
-                        else alert("Producto no encontrado");
-                        e.target.value = "";
-                    }}
-                    />
+                        className="inputSKU"
+                        ref={inputSKU}
+                        type="text"
+                        value={skuValue}
+                        onChange={(e) => setSkuValue(e.target.value)}
+                        onKeyDown={handleSkuKeyDown}
+                        disabled={disabled}
+                        autoFocus
+                        inputMode="numeric"
+                        autoComplete="off"
+                        />
                 </>
                 )}
 

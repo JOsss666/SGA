@@ -134,6 +134,8 @@ router.post('/inventory/deletePriceList',inventoryController.deletePriceList);
 
 router.post('/inventory/updateProductList',inventoryController.updateProductList);
 
+router.post('/inventory/getStocks',inventoryController.getStocks);
+
 router.post('/inventory/getPriceStock',inventoryController.getPriceStock);
 
 router.post('/inventory/newEntry',inventoryController.newEntry);

@@ -636,6 +636,7 @@ controller.insertNewAccount = (req,res)=>{
             info.type,
             info.typePlanAccount
         ],3);
+        useDataBase(`REFRESH MATERIALIZED VIEW mv_account_hierarchy;`,[],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -1426,6 +1427,7 @@ controller.updateTransactionState = (req,res)=>{
                     transaction_id = $2 ;
             `
             let consulta2 = await useDataBase(sentence2,[info.status,info.transaction_id],2);
+            useDataBase(`REFRESH MATERIALIZED VIEW CONCURRENTLY mv_account_movements;`,[],2);
             res.writeHead(200,{'Content-Type':'text/plain'})
             res.end(JSON.stringify([consulta1,consulta2]));
         }else{

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAppInfo } from "../../../context/context";
 import { PathLocation } from "../components/PathLocation";
 import { postInfo } from "../../../utils/functions";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { BoldTitle } from "../components/BoldTitle";
 import { LoadingSpace } from "./LoadingSpace";
 import { DescriptionSpan } from "../components/DescriptionSpan";
@@ -12,8 +12,11 @@ import { ReportBody } from "./ReportBody";
 import { GeneralInfoBody } from "./GeneralInfoBody";
 
 export function StoreDetail(){
-    const [info, setInfo] = useState({});
-    const { appInfo } = useAppInfo();
+
+    // Requirements
+    const navigate = useNavigate();
+    const [info,setInfo] = useState({});
+    const {appInfo} = useAppInfo();
     const params = useParams();
     const [cellars, setCellars] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -29,13 +32,19 @@ export function StoreDetail(){
         'Informes'
     ];
 
-    const getStoreInfo = async () => {
+    // Functions
+
+    const navigateToCellar = (path)=>{
+        navigate(`/SGA_management/${params.company_key}/${params.user_key}/myBussines/Units/${params.store_id}/${path}`)
+    }
+
+    const getStoreinfo = async()=>{
         setDisabled(true);
         setLoading(true);
-        let res = await postInfo('/getStores', {
-            company_id: appInfo.company_id,
-            id: params.store_id
-        });
+        let res = await postInfo('/getStores',{
+            company_id:appInfo.company_id,
+            id:params.store_id
+        })
         if(res[0]){
             setInfo(res[1][0]);
         }

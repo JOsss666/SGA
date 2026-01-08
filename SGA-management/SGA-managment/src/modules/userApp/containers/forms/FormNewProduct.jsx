@@ -62,6 +62,7 @@ export function FormNewProduct({reloadFun}){
         defaultSupplier,
         sellDescription,
         sellConcept,
+        costAccount,
         purchaseConcept,
         taxes
     }

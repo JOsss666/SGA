@@ -22,8 +22,10 @@ export function ReportBalance({}) {
     const { appInfo } = useAppInfo();
     const [searchValue,setSearchValue] = useState();
 
-    // Actions Page
+    // Control
     const [loading, setLoading] = useState(false);
+    const [start_date,setStart_date] = useState(undefined);
+    const [end_date,setEnd_date] = useState(undefined);
 
     const columsTr = [
         "Cuenta",
@@ -37,23 +39,29 @@ export function ReportBalance({}) {
     const settingsReport = {
         columns: columsTr,
         company_id: appInfo.company_id,
-        typePlanAccount:appInfo.accountPlanType
+        typePlanAccount:appInfo.accountPlanType,
+        start_date,
+        end_date
     };
 
 
-    const GetDocuments = async () => {
+    const getBalance = async () => {
         setLoading(true);
         let res = await postInfo('/contability/contabiltyController',settingsReport);
+        console.log(res)
         if(res[0]){
             setInfo(res[1])
         }
-        console.log(res)
         setLoading(false)
     };
 
+    useEffect(()=>{
+        getBalance();
+    },[])
+
     useEffect(() => {
-        GetDocuments();
-    }, []);
+        getBalance();
+    }, [start_date,end_date]);
 
     return (
         <div className="ReportDocument">
@@ -65,9 +73,9 @@ export function ReportBalance({}) {
         <div className="settingsReport">
             <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
             <div className="rangeInput">
-            <FormInput type={"date"} title={"Fecha Inicial"} />
+            <FormInput type={"date"} title={"Fecha Inicial"} action={setStart_date} />
             <span>-</span>
-            <FormInput type={"date"} title={"Fecha Final"} />
+            <FormInput type={"date"} title={"Fecha Final"} action={setEnd_date} />
             </div>
             <SelectOptions
             options={[
