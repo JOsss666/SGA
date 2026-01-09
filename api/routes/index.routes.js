@@ -177,5 +177,10 @@ router.post('/process/searchDocument',processController.searchDocument);
 
 router.post('/contability/contabiltyController', contabiltyController.getBalance);
 
+
+// SGA treasury
+
+router.post('/treasury/getTreasury',controller.getTreasury); //PENDIENTE IMPLEMENTAR 
+
 export default router;
 
