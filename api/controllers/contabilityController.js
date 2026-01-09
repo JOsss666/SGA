@@ -142,7 +142,7 @@ contabiltyController.getBalance = (req,res)=>{
             info.company_id,
             startDate,
             endDate,
-            true
+            info.allAccounts != undefined ? info.allAccounts:false
         ],1);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(consulta));

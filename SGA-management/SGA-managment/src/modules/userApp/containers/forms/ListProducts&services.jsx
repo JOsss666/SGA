@@ -27,7 +27,7 @@ export function ListProductsServices({
     const addProducts = useCallback((info) => {
         setListPorducts(prev => {
         if (prev.some(p => p.id === info.id)) return prev;
-        return [...prev, { ...info, stock: 0 }];
+        return [...prev, { ...info, movementsUnits: 0 }];
         });
         inputSKU.current?.focus();
     }, [setListPorducts]);
@@ -55,11 +55,14 @@ export function ListProductsServices({
     ========================== */
     const total = useMemo(() => {
         return listProducts.reduce((acc, p) => {
-        const units = Number(p.stock) || 0;
+        const units = Number(p.movementsUnits) || 0;
         if (type === "Inventory Entry") {
             return acc + units * (Number(p.unit_cost) || 0);
+        }else if(type == "Inventory Out"){
+            return acc + units * (Number(p.avg_cost) || 0);
+        }else{
+            return acc + units * (Number(p.avg_cost) || 0);
         }
-        return acc + units * (p.unit_value || p.unit_cost || 0);
         }, 0);
     }, [listProducts, type]);
 

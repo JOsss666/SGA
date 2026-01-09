@@ -1145,6 +1145,42 @@ controller.getPaymentMethods = (req,res)=>{
     })
 }
 
+controller.getDocParams = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`company_id = $1`);
+        values.push(info.company_id)
+
+        if(info.docType != undefined){
+            whereClauses.push(`docType = $${values.length +1}`)
+            values.push(info.docType)
+        }
+        
+        const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
+
+        let sentence = `
+            SELECT * FROM
+                "Ecosystem".docs_params
+            ${whereQuery}
+        `
+
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+        req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 controller.createTransaction = (req,res)=>{
     let data = ''
     req.on('data',chunk=>{

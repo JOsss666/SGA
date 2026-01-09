@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAppInfo } from "../../../../context/context";
-import { postInfo } from "../../../../utils/functions";
+import { moneyFormat, postInfo } from "../../../../utils/functions";
 import { BoldTitle } from "../../components/BoldTitle";
 import { ButtonMenu } from "../../components/ButtonMenu";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
@@ -14,6 +14,9 @@ import "./ReportDocuments.css";
 import { LoadingSpace } from "../LoadingSpace";
 import { ButtonDownload } from "../../components/ButtonDownload";
 import { AiButton } from "../../components/ChatAiComponents/AiButton";
+import { LabelValue } from "../../components/LabelValue";
+import { SearchinList } from "../../components/SearchInList";
+import { FilterReports } from "./FilterReports";
 
 export function ReportBalance({}) {
 
@@ -26,6 +29,12 @@ export function ReportBalance({}) {
     const [loading, setLoading] = useState(false);
     const [start_date,setStart_date] = useState(undefined);
     const [end_date,setEnd_date] = useState(undefined);
+    const [allAccounts,setAllAccounts] = useState(false);
+    const [visibleSettings,setVisibleSettings] = useState(false);
+    const [totalCredit,setTotalCredit] = useState(0)
+    const [totalDebit,setTotalDebit] = useState(0)
+    const [totalBalance,setTotalBalance] = useState(0)
+    const [totalInitialBalance,setTotalInitialBalance] = useState(0)
 
     const columsTr = [
         "Cuenta",
@@ -36,14 +45,50 @@ export function ReportBalance({}) {
         "Saldo"
     ];
 
+    const filters = {
+        "Saldo":[
+            {title:'Valor',
+                options:[
+                    {text:'Todas',value:true},
+                    {text:'Distinto de 0',value:false}
+                ],
+                action:setAllAccounts
+            }
+        ]
+    }
+
     const settingsReport = {
         columns: columsTr,
         company_id: appInfo.company_id,
         typePlanAccount:appInfo.accountPlanType,
         start_date,
-        end_date
+        end_date,
+        allAccounts
     };
 
+    const calcTotals = ()=>{
+        let td = 0;
+        let tc = 0;
+        let tb = 0;
+        let tiB = 0;
+        info.forEach(element => {
+            td += element.total_debit
+            tc += element.total_credit
+            tb += element.final_balance
+            tiB += element.opening_balance
+        });
+        console.log(td,tc,tb,tiB)
+        setTotalDebit(td);
+        setTotalCredit(tc);
+        setTotalBalance(tb)
+        setTotalInitialBalance(tiB)
+    }
+
+    useEffect(()=>{
+        if(info.length >0){
+            calcTotals();
+        }
+    },[info])
 
     const getBalance = async () => {
         setLoading(true);
@@ -60,8 +105,9 @@ export function ReportBalance({}) {
     },[])
 
     useEffect(() => {
+        setVisibleSettings(false)
         getBalance();
-    }, [start_date,end_date]);
+    }, [start_date,end_date,allAccounts]);
 
     return (
         <div className="ReportDocument">
@@ -69,6 +115,12 @@ export function ReportBalance({}) {
         <div className="headReport">
             <BoldTitle text={`Balance de prueba`} />
             <DescriptionSpan text={`Balance de cuentas contables.`} />
+        </div>
+        <div className="totalsBalanceC">
+            <LabelValue title={'Debito'} value={<b>$ {moneyFormat(totalDebit)}</b>}/>
+            <LabelValue title={'Crédito'} value={<b>$ {moneyFormat(totalCredit)}</b>}/>
+            <LabelValue title={'Balance inicial'} value={<b>$ {moneyFormat(totalInitialBalance)}</b>}/>
+            <LabelValue title={'Balance final'} value={<b>$ {moneyFormat(totalBalance)}</b>}/>
         </div>
         <div className="settingsReport">
             <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
@@ -86,7 +138,9 @@ export function ReportBalance({}) {
             ]}
             title={"Orden"}
             />
-            <ButtonMenu title={"Mas Ajustes"} children={<i className="fa-solid fa-sliders" />} noRotate={true} />
+            <ButtonMenu title={"Mas Ajustes"} children={<i className="fa-solid fa-sliders" />} noRotate={true} onClick={()=>{
+                setVisibleSettings(!visibleSettings)
+            }}/>
             <ButtonMenu title={"Agregar a favoritos"} children={<i className="fa-regular fa-star" />} noRotate={true} />
             <AiButton attached={info} sugerence={[
                 {text:'¿Que representa este informe?',context:`Procesos - Balance - Cuentas contables - Saldo`},
@@ -94,6 +148,7 @@ export function ReportBalance({}) {
                 {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Balance - Cuentas contables - Saldo`}
             ]}/>
             <ButtonDownload />
+            <FilterReports hidden={visibleSettings} columns={columsTr} filters={filters}/>
         </div>
         <div className="SpaceReport">
             {!loading && (

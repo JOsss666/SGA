@@ -32,6 +32,7 @@ export function FormNewMovement({info}){
     const [costCenters,setCostCenters] = useState([]);
     const [products,setProducts] = useState([]);
     const [concepts,setConcepts] = useState([]);
+    const [accounts,setAccounts] = useState([]);
 
     // Control
     const [disabled,setDisabled] = useState(false);
@@ -40,6 +41,7 @@ export function FormNewMovement({info}){
     const [lodingRequirements,setLoadingRequierements] = useState(false);
 
     // formInfo
+    const [bridgeAccount,setBridgeAccount] = useState();
     const [bussines_id,setBussines_id] = useState();
     const [costCenter_id,setCostCenter_id] = useState();
     const [doc_date,setdoc_date] = useState('');
@@ -142,6 +144,7 @@ export function FormNewMovement({info}){
     }
 
     const getProducts = async()=>{
+        console.log('Cargando productos')
         let res = await postInfo('/inventory/getProducts',{
             company_id:appInfo.company_id,
             store_id
@@ -160,9 +163,11 @@ export function FormNewMovement({info}){
     }
 
     const getProductsStock = async()=>{
-        let res = await postInfo('/inventory/getProducts',{
+        console.log('Cargando stock')
+        let res = await postInfo('/inventory/getStocks',{
             company_id:appInfo.company_id,
-            store_id
+            store_id,
+            cellar_id
         })
         console.log(res)
         if(res[0]){
@@ -210,9 +215,42 @@ export function FormNewMovement({info}){
         }
     }
 
+    const getAccounts = async()=>{
+        let res = await postInfo('/getAccountsPlan',{
+            company_id:appInfo.company_id,
+            accountPlanId:appInfo.accountPlanId,
+            accountPlanType:appInfo.accountPlanType
+        })
+        if(res[1][0]){
+            let C = []
+            res[1][1].forEach(element => {
+                C.push({
+                    text:`${element.code} - ${element.name}`,
+                    value:element.id
+                })
+            });
+            setAccounts(C)
+        }
+    }
+
+    const getDocParams = async()=>{
+        let res = await postInfo('/getDocParams',{
+            company_id:appInfo.company_id,
+            docType:movement_type
+        });
+        if(res[0]){
+            setBridgeAccount(res[1][0].bridgeAccount)
+        }else{
+            getAccounts();
+        }
+    }
+
     const getRequierements = async()=>{
         setDisabled(true)
         setLoading(true)
+        if(info.bridgeAccount == undefined){
+            await getDocParams();
+        }
         if(info.concept_id == undefined){
             await getConcepts()
         }
@@ -232,6 +270,20 @@ export function FormNewMovement({info}){
         setDisabled(false);
     }
 
+    const updateTransactions = async(id)=>{
+        let res = await postInfo('/updateTransactionState',{
+            status:formInfo.status == 'active'? 'posted':'draft',
+            transaction_id:id
+        })
+        if(res[0]){
+            addNotification({
+                type:'aproved',
+                title:'Transacciones Actualziadas',
+                description:'Totas las transacciónes fueron actualizadas correctamente.'
+            })
+        }
+    }
+
 
     // Creation Functions
 
@@ -249,12 +301,19 @@ export function FormNewMovement({info}){
             formInfo.listProducts.forEach(element => {
                 formInfo.transactionDetails.push({
                     account_id:movement_type == 'Inventory Entry'? element.entry_account:element.exit_account,
-                    subtotal:(element.unit_cost * element.stock),
-                    total:(element.unit_cost * element.stock),
+                    subtotal:(movement_type == 'Inventory Entry'? element.unit_cost:element.avg_cost * element.movementsUnits),
+                    total:(movement_type == 'Inventory Entry'? element.unit_cost:element.avg_cost * element.movementsUnits),
                     type:'inventoryMovement',
-                    nature:'DB'
+                    nature:movement_type == 'Inventory Entry'? 'DB':'CR'
                 })
             });
+            formInfo.transactionDetails.push({
+                account_id:bridgeAccount,
+                subtotal:totalProducts,
+                total:totalProducts,
+                type:'inventoryMovement',
+                nature:movement_type == 'Inventory Entry'? 'CR':'DB'
+            })
             toAccount();
             addNotification({
                 type:'aproved',
@@ -274,13 +333,13 @@ export function FormNewMovement({info}){
     const toAccount = async()=>{
         let res = await postInfo('/createTransaction',formInfo);
         const insertId = parseInt(res[0]);
-        console.log(insertId)
         if(typeof(insertId) == 'number' && insertId != NaN && insertId != undefined){
             addNotification({
                 type:'aproved',
                 title:`Movimiento contabilizado correctamente`,
                 description:`La transacción ${insertId} fue contabilizada correctamente.`
             })
+            updateTransactions(insertId);
         }else{
             addNotification({
                 type:'error',
@@ -307,16 +366,23 @@ export function FormNewMovement({info}){
         }
     },[store_id])
 
-    useEffect(()=>{
-        console.log(cellar_id)
-        if(cellar_id != undefined && cellar_id != null){
-            console.log(movement_type)
-            switch(movement_type){
-                case 'Inventory Entry': getProducts(); break;
-                case 'Inventory Out':getProductsStock();break;
-            }
+    useEffect(() => {
+        if (cellar_id == null) return;
+
+        switch (movement_type) {
+            case 'Inventory Entry':
+            getProducts();
+            break;
+
+            case 'Inventory Out':
+            getProductsStock();
+            break;
+
+            default:
+            break;
         }
-    },[cellar_id])
+    }, [cellar_id, movement_type]);
+
 
     useEffect(()=>{
         getRequierements();
@@ -330,6 +396,7 @@ export function FormNewMovement({info}){
             {!loading && (
                 <form onSubmit={(e)=>{
                         e.preventDefault();
+                        console.log(formInfo)
                         createMovement();
                     }}>
                         {stage == 0 && (
@@ -345,6 +412,13 @@ export function FormNewMovement({info}){
                                 )}
                                 {info.concept_id == undefined && (
                                     <SearchinList disabled={disabled} placeHolder={'Selecione el concepto'} action={setConceptId} title={'Concepto'} list={concepts} specialOption={
+                                        <NewElementSelect title={'Crear nuevo'} onClick={()=>{
+                                            popInAlert(<FormNewConcept/>)
+                                        }}/>
+                                    }/>
+                                )}
+                                {info.bridgeAccount == undefined && (
+                                    <SearchinList disabled={disabled} placeHolder={'Selecione la cuenta'} action={setBridgeAccount} title={'Cuenta puente'} list={accounts} specialOption={
                                         <NewElementSelect title={'Crear nuevo'} onClick={()=>{
                                             popInAlert(<FormNewConcept/>)
                                         }}/>

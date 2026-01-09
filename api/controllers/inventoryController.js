@@ -576,8 +576,8 @@ inventoryController.newMovement = (req,res)=>{
                     info.cellar_id,
                     element.id,
                     info.movement_type,
-                    element.stock,
-                    element.unit_cost,
+                    info.movement_type == 'Inventory Entry'? (element.movementsUnits):(element.movementsUnits * -1),
+                    info.movement_type == 'Inventory Entry'? element.unit_cost:element.avg_cost,
                     idMainDoc,
                     info.attached_document,
                     info.status,
@@ -589,10 +589,10 @@ inventoryController.newMovement = (req,res)=>{
                     info.store_id,
                     info.cellar_id,
                     element.id,
-                    element.stock,
+                    info.movement_type == 'Inventory Entry'? (element.movementsUnits):(element.movementsUnits * -1),
                     0,
                     0,
-                    element.unit_cost
+                    info.movement_type == 'Inventory Entry'? element.unit_cost:element.avg_cost
                 ],2);
                 resultsMovements.push({
                     movement:consulta,
@@ -712,9 +712,21 @@ inventoryController.getStocks = (req,res)=>{
 
         let sentence = `
             SELECT
-                "Inventory".stocks.*,
+                "Inventory".stocks.company_id,
+                "Inventory".stocks.store_id,
+                "Inventory".stocks.cellar_id,
+                "Inventory".stocks.product_id AS id,
+                "Inventory".stocks.id AS stock_id,
+                "Inventory".stocks.stock,
+                "Inventory".stocks.min_stock,
+                "Inventory".stocks.max_stock,
+                "Inventory".stocks.updated_at,
+                "Inventory".stocks.avg_cost,
                 "Inventory"."products&services".name,
                 "Inventory"."products&services".code,
+                "Inventory"."products&services".stock AS globalStock,
+                "Inventory"."products&services".exit_account,
+                "Inventory"."products&services".entry_account,
                 "Inventory"."products&services".img
             FROM
                 "Inventory".stocks
