@@ -41,6 +41,7 @@ import { New } from './New';
 import { Messages } from './Messages';
 import { Calendar } from './Calendar';
 import { Treasury } from './Treasury';
+import { Banks } from './Banks';
 
 export function UserApp(){
 
@@ -178,7 +179,7 @@ export function UserApp(){
 
                             <Route path='/movements' element={<span>Movimientos</span>}/>
                             <Route path='/treasury' element={<span><Treasury/></span>}/>
-                            <Route path='/banks' element={<span>Bancos</span>}/>
+                            <Route path='/banks' element={<span><Banks/></span>}/>
                             <Route path='/transfers' element={<span>Transferencias</span>}/>
                             <Route path='/payments' element={<span>Pagos y cobros</span>}/>
                             <Route path='/bankReconciliation' element={<span>Conciliación Bancaria</span>}/>

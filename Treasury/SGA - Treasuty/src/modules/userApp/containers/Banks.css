@@ -1,0 +1,71 @@
+
+
+
+.Banks{
+    padding: 2vh;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.Banks .HeadBanks{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2vh;
+    padding-left: 3vh;
+}
+
+
+.Banks .MenuBarBanks{
+    display: flex;
+    width: fit-content;
+    gap: 2vh;
+    align-items: center;
+    padding-left: 3vh;
+}
+
+.Banks .MenuBarBanks .SearchBar{
+    width: 38vh;
+    padding-right: 1.5vh;
+}
+
+.Banks .MenuBarBanks .IconList{
+    background-color: var(--inputsBg);
+    border-radius: 1vh;
+    height: fit-content;
+    box-shadow: 0 .2vh .8vh #0003;
+    font-size: 3.5vh;
+    align-content: center;
+    position: relative;
+    font-size: 3vh;
+    position: relative;
+    padding: 1vh;
+    color: var(--descriptionText);
+    cursor: pointer;
+}
+
+.Banks .MenuBarBanks .IconList:hover{
+    background-color: var(--cardHover);
+}
+
+
+.Banks .MenuBarBanks .SelectOptions .contentOptions{
+    width: 26vh;
+    box-shadow: 0 .2vh .8vh #0003;
+    padding-left: 1.5vh;
+}
+
+.Banks .GalleryBanks{
+    display: flex;
+    flex-wrap: wrap;    
+    gap: 2vh;
+    padding: 2vh;
+    width: 100%;
+    height: 100%;
+}
+
+.Banks .LoadingSpace{
+    height: 50vh;
+    width: 100%;
+}
