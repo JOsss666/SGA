@@ -675,6 +675,10 @@ inventoryController.newMovement2 = async (req, res) => {
                 result = await inventoryOutHandler(info, docId);
                 break;
 
+                case 'Inventory Consume':
+                result = await inventoryOutHandler(info, docId);
+                break;
+
                 case 'Inventory Transfer':
                 result = await inventoryTransferHandler(info,docId);
                 break;

@@ -415,6 +415,10 @@ export function FormNewMovement({info}){
             getProductsStock();
             break;
 
+            case 'Inventory Consume':
+            getProductsStock();
+            break;
+
             default:
             break;
         }

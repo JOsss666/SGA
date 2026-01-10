@@ -48,7 +48,7 @@ export function SelectTpeNewDoc({info,reloadFun}){
         {title:'Devolución de inventario',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766075186/Cuadricula2Documentos_7_nxrlfb.png',alert:<span>No disponible aún</span>},
         {title:'Donación de inventario',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766075211/Cuadricula2Documentos_9_h3eovd.png',alert:<span>No disponible aún</span>},
         {title:'Perdida de inventario',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076215/Cuadricula3Documentos_1_bdy63r.png',alert:<span>No disponible aún</span>},
-        {title:'Consumo de inventario',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_4_jcodbi.png',alert:<FormNewDocument type={'consuption'} info={info} reloadFun={endProcess}/>},
+        {title:'Consumo de inventario',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_4_jcodbi.png',alert:<FormNewMovement info={{type:'Inventory Consume'}}/>},
         {title:'Orden de producción',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076216/Cuadricula3Documentos_3_q2hsc4.png',alert:<span>No disponible aún</span>},
         {title:'Transacciónes',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_6_fvpiav.png',alert:<span>No disponible aún</span>},
         {title:'Transacciónes',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_6_fvpiav.png',alert:<span>No disponible aún</span>},
