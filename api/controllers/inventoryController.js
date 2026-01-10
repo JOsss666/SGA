@@ -489,122 +489,203 @@ inventoryController.newDeparture = (req,res)=>{
     })
 }
 
+// Handlers y funciones para movimientos de inventario
 
-inventoryController.newMovement = (req,res)=>{
-    let data = '';
+async function createMainDocument(info){
+    let senMainDoc = `
+        INSERT INTO "Ecosystem".documents(
+            company_id,
+            store_id,
+            "thirdParty_id",
+            document_type,
+            status,
+            "subTotal",
+            total,
+            created_by,
+            description,
+            attached)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id;
+    `;
+    let valuesMainDoc = [
+        info.company_id,
+        info.store_id,
+        info.thirdParty_id,
+        info.movement_type,
+        info.status,
+        info.totalProducts,
+        info.totalProducts,
+        info.created_by,
+        info.description,
+        info.attached_document
+    ];
+    let createMainDoc = await useDataBase(senMainDoc,valuesMainDoc,3);
+    let idMainDoc = parseInt(createMainDoc.id);
+    return idMainDoc;
+}
+
+async function insertMovement(info,element,idMainDoc){
+    console.log("Información movimientos ---> ",info)
+    let sentence = `
+        INSERT INTO
+            "Inventory"."inventoryMovements"(
+                company_id,
+                "thirdParty_id",
+                store_id,
+                cellar_id,
+                "product&service_id",
+                movement_type,
+                units,
+                value,
+                movement_group_id,
+                attached_document,
+                status,
+                description, 
+                created_by)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13);
+        `;
+    let consulta = await useDataBase(sentence,[
+                info.company_id,
+                info.thirdParty_id,
+                info.store_id,
+                info.cellar_id,
+                element.id,
+                info.movement_type,
+                info.movement_type == 'Inventory Entry'? (element.movementsUnits):(element.movementsUnits * -1),
+                element.unit_cost != undefined ? element.unit_cost:element.avg_cost,
+                idMainDoc,
+                info.attached_document,
+                info.status,
+                info.description,
+                info.created_by,],2);
+    return consulta;
+}
+
+async function updateStocks(info,element){
+    let sentence = `
+        INSERT INTO "Inventory".stocks(
+            company_id,
+            store_id,
+            cellar_id,
+            product_id,
+            stock,
+            min_stock,
+            max_stock,
+            avg_cost)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+        ON CONFLICT (company_id, store_id, cellar_id, product_id)
+        DO UPDATE SET
+            avg_cost = (
+            ("Inventory"."stocks".stock * "Inventory"."stocks".avg_cost)
+            + (EXCLUDED.stock * EXCLUDED.avg_cost)
+        ) / ("Inventory"."stocks".stock + EXCLUDED.stock),
+        stock = "Inventory"."stocks".stock + EXCLUDED.stock, 
+        updated_at = NOW();
+    `;
+    let consulta = await useDataBase(sentence,[
+        info.company_id,
+        info.store_id,
+        info.cellar_id,
+        element.id,
+        info.movement_type == 'Inventory Entry'? (element.movementsUnits):(element.movementsUnits * -1),
+        0,
+        0,
+        element.unit_cost != undefined ? element.unit_cost:element.avg_cost
+    ],2);
+    return consulta;
+}
+
+async function inventoryOutHandler(info,idMainDoc){
+    let results = [];
+    for (const element of info.listProducts) {
+        let movement = await insertMovement(info,element,idMainDoc)
+        let stockUpdate = await updateStocks(info,element)
+        results.push({
+            movement:movement,
+            stock:stockUpdate
+        });
+    }
+    return results;
+}
+
+async function inventoryEntryHandler(info,idMainDoc){
+    let results = [];
+    for (const element of info.listProducts) {
+        let movement = await insertMovement(info,element,idMainDoc)
+        let stockUpdate = await updateStocks(info,element)
+        results.push({
+            movement:movement,
+            stock:stockUpdate
+        });
+    }
+    return results;
+}
+
+async function inventoryTransferHandler(info){
+    // documento salida
+    const exit_id = await createMainDocument({
+        ...info,
+        movement_type: 'Inventory Out',
+        store_id: info.origin_store_id,
+        cellar_id: info.origin_cellar_id,
+    });
+
+    const exitResult = await inventoryOutHandler({
+        ...info,
+        movement_type: 'Inventory Out',
+        store_id: info.origin_store_id,
+        cellar_id: info.origin_cellar_id,
+    }, exit_id);
+
+    // documento entrada
+    const entry_id = await createMainDocument({
+        ...info,
+        movement_type: 'Inventory Entry',
+        store_id: info.destiny_store_id,
+        cellar_id: info.destiny_cellar_id,
+    });
+
+    const entryResult = await inventoryEntryHandler({
+        ...info,
+        movement_type: 'Inventory Entry',
+        store_id: info.destiny_store_id,
+        cellar_id: info.destiny_cellar_id,
+    }, entry_id);
+
+    return { exit: exitResult, entry: entryResult };
+}
+
+
+
+inventoryController.newMovement2 = async (req, res) => {
+    let data = ''
     req.on('data',chunk=>{
         data += chunk;
     })
     req.on('end',async()=>{
-        let info = JSON.parse(data);
-        console.log(info);
-        let resultsMovements = [];
-        let senMainDoc = `
-            INSERT INTO "Ecosystem".documents(
-                company_id,
-                store_id,
-                "thirdParty_id",
-                document_type,
-                status,
-                "subTotal",
-                total,
-                created_by,
-                description,
-                attached)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id;
-        `;
-        let valuesMainDoc = [
-            info.company_id,
-            info.store_id,
-            info.thirdParty_id,
-            info.movement_type,
-            info.status,
-            info.totalProducts,
-            info.totalProducts,
-            info.created_by,
-            info.description,
-            info.attached_document
-        ];
-        let createMainDoc = await useDataBase(senMainDoc,valuesMainDoc,3);
-        let idMainDoc = parseInt(createMainDoc.id);
-        console.log('Documento padre --> ',idMainDoc)
-        if(typeof(idMainDoc) == 'number' && idMainDoc != NaN){
-            let sentence = `
-            INSERT INTO
-                "Inventory"."inventoryMovements"(
-                    company_id,
-                    "thirdParty_id",
-                    store_id,
-                    cellar_id,
-                    "product&service_id",
-                    movement_type,
-                    units,
-                    value,
-                    movement_group_id,
-                    attached_document,
-                    status,
-                    description, 
-                    created_by)
-                VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13);`;
+        const info = JSON.parse(data);
+        const docId = await createMainDocument(info);
+        let result;
+        if(typeof(docId) === 'number'){
+            switch (info.movement_type) {
+                case 'Inventory Entry':
+                result = await inventoryEntryHandler(info, docId);
+                break;
 
-            let stockSen = `
-                INSERT INTO "Inventory".stocks(
-                    company_id,
-                    store_id,
-                    cellar_id,
-                    product_id,
-                    stock,
-                    min_stock,
-                    max_stock,
-                    avg_cost)
-                VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-                ON CONFLICT (company_id, store_id, cellar_id, product_id)
-                DO UPDATE SET
-                    avg_cost = (
-                    ("Inventory"."stocks".stock * "Inventory"."stocks".avg_cost)
-                    + (EXCLUDED.stock * EXCLUDED.avg_cost)
-                ) / ("Inventory"."stocks".stock + EXCLUDED.stock),
-                stock = "Inventory"."stocks".stock + EXCLUDED.stock, 
-                updated_at = NOW();
-            `
+                case 'Inventory Out':
+                result = await inventoryOutHandler(info, docId);
+                break;
 
-            for (const element of info.listProducts) {
-                let values = [
-                    info.company_id,
-                    info.thirdParty_id,
-                    info.store_id,
-                    info.cellar_id,
-                    element.id,
-                    info.movement_type,
-                    info.movement_type == 'Inventory Entry'? (element.movementsUnits):(element.movementsUnits * -1),
-                    info.movement_type == 'Inventory Entry'? element.unit_cost:element.avg_cost,
-                    idMainDoc,
-                    info.attached_document,
-                    info.status,
-                    info.description,
-                    info.created_by,]
-                let consulta = await useDataBase(sentence,values,2);
-                let stockUpdate = await useDataBase(stockSen,[
-                    info.company_id,
-                    info.store_id,
-                    info.cellar_id,
-                    element.id,
-                    info.movement_type == 'Inventory Entry'? (element.movementsUnits):(element.movementsUnits * -1),
-                    0,
-                    0,
-                    info.movement_type == 'Inventory Entry'? element.unit_cost:element.avg_cost
-                ],2);
-                resultsMovements.push({
-                    movement:consulta,
-                    stock:stockUpdate
-                });
+                case 'Inventory Transfer':
+                result = await inventoryTransferHandler(info,docId);
+                break;
+
+                default:
+                throw new Error('Tipo de movimiento no soportado');
             }
-            console.log(resultsMovements)
-            console.log('---------------------')
             res.writeHead(200,{'Content-Type':'text/plain'});
             res.end(JSON.stringify([true,{
-                doc_id:idMainDoc,
-                lines:resultsMovements
+                doc_id:docId,
+                lines:result
             }]));
         }else{
             res.writeHead(200,{'Content-Type':'text/plain'});
@@ -615,8 +696,7 @@ inventoryController.newMovement = (req,res)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
-}
-
+};
 
 inventoryController.getMovements = (req,res)=>{
     let data = '';
@@ -705,6 +785,9 @@ inventoryController.getStocks = (req,res)=>{
             whereClauses.push(`"Inventory".stocks.cellar_id = $${values.length + 1}`);
             values.push(cellarIdParsed);
         }
+
+        whereClauses.push(`"Inventory".stocks.stock > $${values.length +1}`);
+        values.push(info.minStock != undefined? info.minStock:0)
 
         const whereQuery = whereClauses.length > 0
             ? `WHERE ${whereClauses.join(" AND ")}`

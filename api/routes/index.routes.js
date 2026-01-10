@@ -144,7 +144,7 @@ router.post('/inventory/newEntry',inventoryController.newEntry);
 
 router.post('/inventory/newDeparture',inventoryController.newDeparture);
 
-router.post('/inventory/newMovement',inventoryController.newMovement);
+router.post('/inventory/newMovement',inventoryController.newMovement2);
 
 router.post('/inventory/getMovements',inventoryController.getMovements);
 

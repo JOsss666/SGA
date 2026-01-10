@@ -28,6 +28,7 @@ export function FormNewMovement({info}){
     const [thirdParties,setThirdParties] = useState([]);
     const [stores,setStores] = useState([])
     const [cellars,setCellars] = useState([])
+    const [destinyCellars,setDestinyCellars] = useState([])
     const [bussines,setBussines] = useState([]);
     const [costCenters,setCostCenters] = useState([]);
     const [products,setProducts] = useState([]);
@@ -57,6 +58,12 @@ export function FormNewMovement({info}){
     const [status,setStatus] = useState('active');
     const [description,setDescription] = useState('');
 
+    // Transfer options
+    const [origin_store_id,setOrigin_store_id] = useState();
+    const [destiny_store_id,setDestiny_store_id] = useState();
+    const [origin_cellar_id,setOrigin_cellar_id] = useState();
+    const [destiny_cellar_id,setDestiny_cellar_id] = useState();
+
     const formInfo = {
         company_id:appInfo.company_id,
         created_by:userInfo.user_id,
@@ -74,7 +81,11 @@ export function FormNewMovement({info}){
         totalProducts,
         doc_date,
         costCenter_id,
-        bussines_id
+        bussines_id,
+        origin_store_id,
+        destiny_store_id,
+        origin_cellar_id,
+        destiny_cellar_id
     }
 
 
@@ -284,6 +295,33 @@ export function FormNewMovement({info}){
         }
     }
 
+    const handleDestinyStore = (id)=>{
+        setStore_id(id)
+        setOrigin_store_id(id)
+    }
+
+    const loadDestinyCellars = async()=>{
+        let res = await postInfo('/getCellars',{
+            company_id:appInfo.company_id,
+            store_id:destiny_store_id
+        })
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:`${element.name} - ${element.id}`,
+                    value:element.id
+                })
+                setDestinyCellars(C)
+            });
+        }
+    }
+
+    const handleOrginCellar = (id)=>{
+        setCellar_id(id);
+        setOrigin_cellar_id(id);
+    }
+
 
     // Creation Functions
 
@@ -315,11 +353,6 @@ export function FormNewMovement({info}){
                 nature:movement_type == 'Inventory Entry'? 'CR':'DB'
             })
             toAccount();
-            addNotification({
-                type:'aproved',
-                title:`Movimiento contabilizado correctamente`,
-                description:`El movimiento ${res[1].doc_id} fue registrado correctamente.`
-            })
         }else{
             addNotification({
                 type:'error',
@@ -367,8 +400,8 @@ export function FormNewMovement({info}){
     },[store_id])
 
     useEffect(() => {
-        if (cellar_id == null) return;
-
+        if (cellar_id == null || movement_type == null) return;
+        console.log(movement_type)
         switch (movement_type) {
             case 'Inventory Entry':
             getProducts();
@@ -378,10 +411,18 @@ export function FormNewMovement({info}){
             getProductsStock();
             break;
 
+            case 'Inventory Transfer':
+            getProductsStock();
+            break;
+
             default:
             break;
         }
     }, [cellar_id, movement_type]);
+
+    useEffect(()=>{
+        loadDestinyCellars();
+    },[destiny_store_id])
 
 
     useEffect(()=>{
@@ -391,8 +432,8 @@ export function FormNewMovement({info}){
     return(
         <div className="FormNewMovement">
             <BoldTitle text={info.type != undefined? 
-                info.type == 'entry'? 'Ingreso de inventario':'Salida de inventario'
-                :'Movimiento de inventario'}/>
+                info.type
+                :movement_type != ''? movement_type:'Movimiento de inventario'}/>
             {!loading && (
                 <form onSubmit={(e)=>{
                         e.preventDefault();
@@ -424,7 +465,7 @@ export function FormNewMovement({info}){
                                         }}/>
                                     }/>
                                 )}
-                                {movement_type != 'Inventory Consume' && movement_type != 'Inventory Transfer' &&  info.thirdParty_id == undefined && (
+                                {  info.thirdParty_id == undefined && (
                                     <SearchinList action={setThirdParty_id} disabled={disabled} title={`${movement_type == 'Inventory Entry' ? 'Proveedor':'Cliente'}`} placeHolder={`Seleccione el ${movement_type == 'Inventory Entry'? 'Proveedor':'Cliente'}`} list={thirdParties} specialOption={
                                         <NewElementSelect onClick={()=>{
                                             popInAlert(<FormNewThirdParties/>)
@@ -445,11 +486,31 @@ export function FormNewMovement({info}){
                                             }}/>
                                         }/>
                                     )}
-                                {info.store_id == undefined && (
-                                    <SearchinList disabled={disabled} action={setStore_id} title={'Tienda'} placeHolder={'Seleccione la tienda'} list={stores}/>
+                                {info.type != 'Inventory Transfer' && movement_type != 'Inventory Transfer' && (
+                                    <>
+                                        {info.store_id == undefined && (
+                                            <SearchinList disabled={disabled} action={setStore_id} title={'Tienda'} placeHolder={'Seleccione la tienda'} list={stores}/>
+                                        )}
+                                        {info.cellar_id == undefined && (
+                                            <SearchinList disabled={disabled} action={setCellar_id} title={'Bodega'} placeHolder={'Seleccione bodéga'} list={cellars}/>
+                                        )}
+                                    </>
                                 )}
-                                {info.cellar_id == undefined && (
-                                    <SearchinList disabled={disabled} action={setCellar_id} title={'Bodega'} placeHolder={'Seleccione bodéga'} list={cellars}/>
+                                {movement_type == 'Inventory Transfer' && (
+                                    <>
+                                        {info.origin_store_id == undefined && (
+                                            <SearchinList disabled={disabled} action={handleDestinyStore} title={'Tienda de origen'} placeHolder={'Seleccione la tienda'} list={stores}/>
+                                        )}
+                                        {info.origin_cellar_id == undefined && (
+                                            <SearchinList disabled={disabled} action={handleOrginCellar} title={'Bodega de origen'} placeHolder={'Seleccione bodéga'} list={cellars}/>
+                                        )}
+                                        {info.destiny_store_id == undefined && (
+                                            <SearchinList disabled={disabled} action={setDestiny_store_id} title={'Tienda de destino'} placeHolder={'Seleccione la tienda'} list={stores}/>
+                                        )}
+                                        {info.origin_cellar_id == undefined && (
+                                            <SearchinList disabled={disabled} action={setDestiny_cellar_id} title={'Bodega de destino'} placeHolder={'Seleccione bodéga'} list={destinyCellars}/>
+                                        )}
+                                    </>
                                 )}
                             </>
                         )}
