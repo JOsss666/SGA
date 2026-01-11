@@ -68,9 +68,16 @@ contabiltyController.getBalance = (req,res)=>{
                     COALESCE(SUM(m.total_credit), 0)    AS total_credit,
 
                     COALESCE(
-                        SUM(m.opening_balance + m.total_debit - m.total_credit),
+                        CASE
+                            WHEN p.type = 'DB' THEN
+                                SUM(m.opening_balance + m.total_debit - m.total_credit)
+                            WHEN p.type = 'CR' THEN
+                                SUM(m.opening_balance + m.total_credit - m.total_debit)
+                            ELSE 0
+                        END,
                         0
                     ) AS final_balance
+
 
                 FROM "Ecosystem".contable_accounts p
 

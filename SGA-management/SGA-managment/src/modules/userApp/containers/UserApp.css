@@ -163,7 +163,7 @@
 }
 
 /* ancho del scrollbar */
-.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar {
+*::-webkit-scrollbar {
     width: 10px;           /* vertical */
     height:50%;          /* horizontal */
 }
@@ -174,13 +174,13 @@
 
 
 /* fondo del track */
-.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar-track {
+*::-webkit-scrollbar-track {
     background: var((var(--inputsBg)));
     border-radius: 8px;
 }
 
 /* thumb (la "barrita" que se mueve) */
-.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb {
     border-radius: 8px;
     border: .1vh solid var(--inputsBg);
 }

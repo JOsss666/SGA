@@ -4,21 +4,29 @@ import './GeneralSettings.css'
 
 export function GeneralSettings(){
 
-    const {userInfo,appInfo} = useAppInfo();
+    const {userInfo,userConfig,appInfo,appConfig} = useAppInfo();
     const now = new Date();
     const formatted = now.toLocaleString('es-CO');
 
 
     const sec1 = [
         {text:'Información personal',path:'info',value:userInfo.user_name,type:'functionality',icon:<i className="fa-solid fa-circle-info"/>},
-        {text:'Actualización de software',path:'softwareUpdate',value:'',type:'system',icon:<i className="fa-solid fa-code"/>},
+        {text:'Actualización de software',path:'SoftwareUpdate',value:
+            `${appConfig.system.software["version-name"]}    V_${appConfig.system.software["version"]}`,
+            type:'system',icon:<i class="fa-solid fa-code"/>},
         {text:'Almacenamiento en la nube',path:'cloudStorage',value:'',type:'functionality',icon:<i className="fa-solid fa-cloud"/>}
     ]
 
     const sec2 = [
-        {text:'Fecha y hora',path:'time',value:formatted,type:'functionality',icon:<i className="fa-solid fa-clock"/>},
-        {text:'Idioma y regíon',path:'language',value:appInfo.country,type:'functionality',icon:<i className="fa-solid fa-earth-americas"/>},
-        {text:'Tipo y tamaño de letra',path:'letterSize',value:'Normal',type:'functionality',icon:<i className="fa-solid fa-t"/>}
+        {text:'Fecha y hora',path:'time',value:
+            `${userConfig.system.hour} ${formatted}`
+            ,type:'functionality',icon:<i className="fa-solid fa-clock"/>},
+        {text:'Idioma y regíon',path:'language',value:
+            `${userConfig.system.region} - ${userConfig.system.language}`
+            ,type:'functionality',icon:<i className="fa-solid fa-earth-americas"/>},
+        {text:'Tipo y tamaño de letra',path:'letterSize',value:
+            `${userConfig.styles.typography.style}`
+            ,type:'accesibility',icon:<i className="fa-solid fa-t"/>}
     ]
 
     const sec3 = [

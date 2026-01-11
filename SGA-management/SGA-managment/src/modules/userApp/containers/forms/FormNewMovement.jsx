@@ -339,8 +339,8 @@ export function FormNewMovement({info}){
             formInfo.listProducts.forEach(element => {
                 formInfo.transactionDetails.push({
                     account_id:movement_type == 'Inventory Entry'? element.entry_account:element.exit_account,
-                    subtotal:(movement_type == 'Inventory Entry'? element.unit_cost:element.avg_cost * element.movementsUnits),
-                    total:(movement_type == 'Inventory Entry'? element.unit_cost:element.avg_cost * element.movementsUnits),
+                    subtotal:(movement_type == 'Inventory Entry'? element.unit_cost * element.movementsUnits:element.avg_cost * element.movementsUnits),
+                    total:(movement_type == 'Inventory Entry'? element.unit_cost * element.movementsUnits:element.avg_cost * element.movementsUnits),
                     type:'inventoryMovement',
                     nature:movement_type == 'Inventory Entry'? 'DB':'CR'
                 })

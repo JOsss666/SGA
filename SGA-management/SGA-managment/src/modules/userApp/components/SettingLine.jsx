@@ -1,6 +1,6 @@
 import './SettingLine.css'
 
-export function SettingLine({info}){
+export function SettingLine({info,onClick}){
 
     const asingColor = (type)=>{
         switch (type){
@@ -20,7 +20,7 @@ export function SettingLine({info}){
     }
 
     return(
-        <div className="SettingLine">
+        <div className="SettingLine" onClick={onClick}>
             <div className="iconContainer" style={{
                 backgroundColor:`${asingColor(info.type)}`
             }}>

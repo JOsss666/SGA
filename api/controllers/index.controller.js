@@ -123,11 +123,19 @@ controller.getUserInfo = (req,res)=>{
             let info = JSON.parse(data);
             let sentence = `
                 SELECT
-                    "Ecosystem".users.* , "Ecosystem".users_access.* 
+                    "Ecosystem".users.* ,
+                    "Ecosystem".users_access.*,
+                    "Ecosystem"."users_config".config
                 FROM 
-                    "Ecosystem".users LEFT JOIN "Ecosystem".users_access
+                    "Ecosystem".users 
+                LEFT JOIN
+                    "Ecosystem".users_access
                 ON
                     "Ecosystem".users.user_id = "Ecosystem".users_access.user_id 
+                LEFT JOIN
+                    "Ecosystem"."users_config"
+                ON
+                    "Ecosystem".users.user_id = "Ecosystem"."users_config".user_id
                 WHERE
                     "Ecosystem".users.user_key = $1 ;`
             let consulta = await useDataBase(sentence,[info],1);
@@ -188,13 +196,18 @@ controller.getCompanyInfo = (req,res)=>{
                 SELECT 
                     "Ecosystem".companies.*,
                     "Ecosystem".account_plans.id AS "accountPlanId",
-                    "Ecosystem".account_plans.type AS "accountPlanType"
+                    "Ecosystem".account_plans.type AS "accountPlanType",
+                    "Ecosystem".company_settings.config
                 FROM
                     "Ecosystem".companies 
                 LEFT JOIN
                     "Ecosystem".account_plans
                 ON
                     "Ecosystem".companies.company_id = "Ecosystem".account_plans.company_id
+                LEFT JOIN
+                    "Ecosystem".company_settings
+                ON
+                    "Ecosystem".companies.company_id = "Ecosystem".company_settings.company_id
                 WHERE "Ecosystem".companies.company_key = $1 ;`
             let consulta = await useDataBase(sentence,[info],1);
             res.writeHead(200,{'Content-Type':'text/plain'})
@@ -551,7 +564,12 @@ controller.signUp = (req,res)=>{
                         sga_treasury_access,
                         sga_ctools_access
                         )
-                VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9);
+                VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
+
+                INSERT INTO "Ecosystem".users_config(
+                    company_id,user_id)
+                VALUES ($1,$10);
+                ;
             `;
             let posCon = await useDataBase(posSen, [
                 consulta.user_id,               
@@ -562,7 +580,8 @@ controller.signUp = (req,res)=>{
                 info.accessFacturation,   
                 info.accessTreasury,      
                 info.accessCerticloud,    
-                info.accessCtools         
+                info.accessCtools,
+                info.company_id       
             ], 2);
             if(posCon){
                 res.writeHead(200,{'Content-Type':'text/plain'})
