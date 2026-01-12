@@ -1005,7 +1005,71 @@ inventoryController.getCategories = (req,res)=>{
     })
 }
 
-[true,[{}]]
+inventoryController.getKardex = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`"Inventory"."inventoryMovements".company_id = $1`)
+        values.push(info.company_id)
+
+        const start = info.start_date || null;
+        const end = info.end_date || null;
+
+        const column = '"Inventory"."inventoryMovements".created_at';
+
+        if (start && end) {
+            values.push(start, end);
+            whereClauses.push(`${column} BETWEEN $${values.length - 1} AND $${values.length}`);
+        } else if (start) {
+            values.push(start);
+            whereClauses.push(`${column} >= $${values.length}`);
+        } else if (end) {
+            values.push(end);
+            whereClauses.push(`${column} <= $${values.length}`);
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
+        let sentence = `
+            SELECT
+                "Inventory"."inventoryMovements".*,
+                "Inventory"."products&services".name AS product_name,
+                "Inventory"."products&services".img,
+                "Inventory"."products&services".code AS product_SKU,
+                "Ecosystem"."thirdparties".names AS thirdparty_name,
+                "Ecosystem"."thirdparties".img AS thirdparty_img,
+                "Inventory"."products&services".description AS product_description
+            FROM
+                "Inventory"."inventoryMovements"
+            LEFT JOIN
+                "Inventory"."products&services"
+            ON
+                "Inventory"."inventoryMovements"."product&service_id" = "Inventory"."products&services".id
+            LEFT JOIN
+                "Ecosystem"."thirdparties"
+            ON
+                "Inventory"."inventoryMovements"."thirdParty_id" = "Ecosystem"."thirdparties".id
+            ${whereQuery}
+            ORDER BY "Inventory"."inventoryMovements".created_at DESC;
+        `;
+
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
 
 export default inventoryController;
 

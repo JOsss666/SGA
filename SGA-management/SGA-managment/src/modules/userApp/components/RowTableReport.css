@@ -6,15 +6,15 @@
     background-color: var(--bg);
     border-bottom: dashed .1vh var(--inputsBorder);
     transition: .3s;
-    width: fit-content;
+    width: 100%;
+    padding-left: 1vh;
 }
-
 
 .RowTableReport .ElementRow{
     position: relative;
-    padding: 1vh;
+    margin: auto 1vh;
     display: flex;
-    width: 10vw;
+    width: fit-content;
 }
 
 .RowTableReport .Redirect:hover{
@@ -22,19 +22,9 @@
     cursor: pointer;
 }
 
-.RowTableReport .ElementRow:nth-child(2), .RowTableReport .idHolder{
-    width: 5vw !important;
-}
-
-.RowTableReport span{
-    font-size: clamp(2px,1.8vh,20px);
-    color: var(--descriptionText);
-    margin: auto 0;
-    margin-left: .5vh;
-}
-
 .RowTableReport .UserCard{
     margin: auto 0;
+    width: 10vw;
     cursor: pointer;
 }
 
@@ -42,11 +32,19 @@
     color: #3C83F7;
 }
 
-.RowTableReport span{
-     white-space: nowrap;        /* 🔹 evita el salto de línea */
+.RowTableReport .rowSpan{
+    font-size: clamp(2px,1.8vh,20px);
+    color: var(--descriptionText);
+    margin: auto 0;
+    width: 10vw;
+    white-space: nowrap;        /* 🔹 evita el salto de línea */
     overflow: hidden;           /* 🔹 oculta el texto que se sale del contenedor */
     text-overflow: ellipsis;    /* 🔹 agrega los puntos suspensivos */
-    display: block;   
+    display: block;  
+}
+
+.RowTableReport .rightAl{
+    text-align: right;
 }
 
 .RowTableReport .UserCard img{

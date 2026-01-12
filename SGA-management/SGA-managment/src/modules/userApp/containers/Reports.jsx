@@ -11,6 +11,7 @@ import { SearchBar } from '../components/SearchBar';
 import { SelectOptions } from '../components/SelectOptions';
 import { FormButton } from '../components/FormButton';
 import { useEffect, useState } from 'react';
+import { ReportKardex } from './reports/ReportKardex';
 
 export function Reports(){
 
@@ -50,6 +51,7 @@ export function Reports(){
                                     title:'Informes por estado'
                                 }} options={[
                                     {title:'Documentos reportados',children:<i className="fa-solid fa-book"/>},
+                                    {title:'Estado de Existencias y Movimientos (Kardex)',children:<i className="fa-solid fa-book"/>,action:handleNavigate,path:'kardex'},
                                     {title:'Estado Ordenes de producción',children:<i className="fa-solid fa-file-lines"/>},
                                     {title:'Volumen ordenes de clientes',children:<i className="fa-solid fa-file-lines"/>},
                                     {title:'Informes adicionales',options:[
@@ -91,6 +93,7 @@ export function Reports(){
                 <Route path='/TRS' element={<ReportDocuments type={'TR'}/>} />
                 <Route path='/TRS/:transaction_id' element={<ReportTransactionDetails/>} />
                 <Route path='/Balance' element={<ReportBalance/>}/>
+                <Route path='/Kardex' element={<ReportKardex/>}/>
             </Routes>
         </div>
     )

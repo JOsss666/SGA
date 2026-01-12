@@ -162,27 +162,27 @@
     scrollbar-width:none;
 }
 
-/* ancho del scrollbar */
-*::-webkit-scrollbar {
-    width: 10px;           /* vertical */
-    height:50%;          /* horizontal */
-}
-
 .UserApp .asideMenuApp .menusHolder:hover {
   scrollbar-width: auto; /* Firefox */
 }
 
+/* ancho del scrollbar */
+*::-webkit-scrollbar {
+    width: 10%;           /* vertical */
+    height:50%;          /* horizontal */
+}
 
 /* fondo del track */
 *::-webkit-scrollbar-track {
-    background: var((var(--inputsBg)));
+    background: var(--cardHover);
     border-radius: 8px;
 }
 
 /* thumb (la "barrita" que se mueve) */
 *::-webkit-scrollbar-thumb {
     border-radius: 8px;
-    border: .1vh solid var(--inputsBg);
+    background-color: var(--menuAside);
+    border: .1vh solid var(--inputsBorder);
 }
 
 

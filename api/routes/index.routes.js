@@ -154,6 +154,8 @@ router.post('/inventory/getDepartures',inventoryController.getDepartures);
 
 router.post('/inventory/getRotation',inventoryController.getRotation);
 
+router.post('/inventory/getKardex',inventoryController.getKardex);
+
 
 // SGA - PROCESS
 

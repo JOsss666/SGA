@@ -87,8 +87,8 @@
     max-width: 100%;
     overflow-x: auto;
     height: 60vh;
+    padding: .1vh;
 }
-
 
 .ReportDocument .totalsBalanceC{
     position: absolute;
