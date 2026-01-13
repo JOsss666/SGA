@@ -77,14 +77,14 @@ export function ReportDocuments({ type }) {
     const columsTr = [
         "ID",
         "Fecha Documento",
-        "Tercero",
         "Tipo Doc",
         "Concepto",
+        "Subtotal",
+        "Valor ",
         "Tienda",
+        "Tercero",
         "Negocio",
         "Centro de costo",
-        "Sub Total",
-        "Valor ",
         "Estado",
         "Creada por",
         "Fecha creación",
@@ -96,7 +96,7 @@ export function ReportDocuments({ type }) {
         "Concepto",
         "Creada por",
         "Fecha Documento",
-        "Sub Total",
+        "Subtotal",
         "Valor ",
         "Fecha creación",
     ];
@@ -182,7 +182,7 @@ export function ReportDocuments({ type }) {
         </div>
         <div className="SpaceReport">
             {!loading && (
-                <TableReport columns={settingsReport.columns} info={info} type={type} searchValue={searchValue}/>
+                <TableReport columns={settingsReport.columns} info={info} type={type} searchValue={searchValue} navigation={type == 'TR'}/>
             )}
             {loading && (
                 <LoadingSpace title={"Cargando información"} description={"Esto no debe tardar mucho..."} />

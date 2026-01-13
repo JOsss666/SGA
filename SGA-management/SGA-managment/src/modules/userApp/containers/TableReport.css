@@ -35,8 +35,27 @@
     color: var(--mainText);
 }
 
-
 .TableReport .bodyTable{
-    padding: 1vh;
-    overflow-x: scroll;
+    overflow-y: auto;
+}
+
+.TableReport .headTable .headColum_ID,
+.TableReport .headTable .headColum_Estado,
+.TableReport .headTable .headColum_Serial
+{
+    width: 5vw;
+}
+
+.TableReport .headTable .headColum_Unidades{
+    width: 7vw;
+}
+
+.TableReport .headTable .headColum_Naturaleza,
+.TableReport .headTable .headColum_Valor,
+.TableReport .headTable .headColum_Subtotal,
+.TableReport .headTable .headColum_Costo,
+.TableReport .headTable .headColum_Unidades
+{
+    text-align: right;
+    padding-right: 3vh;
 }

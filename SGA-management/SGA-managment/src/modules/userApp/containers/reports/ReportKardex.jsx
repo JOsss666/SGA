@@ -40,7 +40,8 @@ export function ReportKardex(){
         "Tercero",
         "Unidades",
         "Costo",
-        "Valor"
+        "Valor",
+        "Estado"
     ];
 
     const filters = {

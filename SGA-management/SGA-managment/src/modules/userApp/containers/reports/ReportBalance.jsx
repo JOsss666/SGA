@@ -152,7 +152,7 @@ export function ReportBalance({}) {
         </div>
         <div className="SpaceReport">
             {!loading && (
-                <TableReport columns={settingsReport.columns} info={info} type={''} searchValue={searchValue}/>
+                <TableReport columns={settingsReport.columns} info={info} type={''} searchValue={searchValue} navigation={true}/>
             )}
             {loading && (
             <LoadingSpace title={"Cargando información"} description={"Esto no debe tardar mucho..."} />
