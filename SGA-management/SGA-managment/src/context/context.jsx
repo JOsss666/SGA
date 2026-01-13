@@ -218,8 +218,10 @@ export function PreviewProvider({children}){
 
 export function AppInfoProvider({children}){
     const [appInfo,setAppInfo] = useState({});
+    const [appConfig,setAppConfig] = useState({});
     const [darkMode,setDarkMode] = useState(false);
     const [userInfo,setUserInfo] = useState({});
+    const [userConfig,setUserConfig] = useState({});
     const [loadingAppData,setLoadingAppData] = useState(true);
     const location = useLocation();
     const params = useParams();
@@ -295,6 +297,7 @@ export function AppInfoProvider({children}){
         let appI = await postInfo('/getCompanyInfo',data[2]);
         if(appI[0]){
             setAppInfo(appI[1][0]);
+            setAppConfig(appI[1][0].config);
         }else{
             handleRedirect();
         }
@@ -302,11 +305,20 @@ export function AppInfoProvider({children}){
         console.log(userI);
         if(userI[0] && userI[1][0].user_session == 1){
             setUserInfo(userI[1][0])
+            if(userI[1][0].config != undefined){
+                setUserConfig(userI[1][0].config)
+            }
         }else{
             handleRedirect();
         }
         setLoadingAppData(false);
     }
+
+    useEffect(()=>{
+        if(userConfig.account != undefined){
+            setDarkMode(userConfig.styles.theme.default != 'light')
+        }
+    },[userConfig])
 
     useEffect(()=>{
         if(location.pathname != '/SGA_management/logIn' && location.pathname != '/SGA_management/SignUp' && location.pathname != '/'){
@@ -316,8 +328,10 @@ export function AppInfoProvider({children}){
 
         const value = {
         appInfo,
+        appConfig,
         setAppInfo,
         userInfo,
+        userConfig,
         setUserInfo,
         darkMode,
         setDarkMode,

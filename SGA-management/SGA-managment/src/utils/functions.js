@@ -169,7 +169,8 @@ export function copyToClipBoard(text){
 
 export function moneyFormat(number){
     if(number != undefined){
-        let n = JSON.stringify(number);
+        let testN = number>0 ? number:number * -1
+        let n = JSON.stringify(testN);
         let data = ''
         let counter = 1;
         for(let i = n.length -1;i >= 0;i--){
@@ -186,6 +187,9 @@ export function moneyFormat(number){
             }
         }
         let x = '';
+        if(number < 0){
+            x += '- '
+        }
         for(let i = data.length -1;i >= 0;i--){
             x += data[i];
         }

@@ -88,6 +88,8 @@ router.post('/deleteConcept',controller.deleteConcept);
 
 router.post('/getConcepts',controller.getConcepts);
 
+router.post('/getDocParams',controller.getDocParams);
+
 router.post('/createPaymentMethod',controller.createPaymentMethod);
 
 router.post('/getPaymentMethods',controller.getPaymentMethods);
@@ -142,7 +144,7 @@ router.post('/inventory/newEntry',inventoryController.newEntry);
 
 router.post('/inventory/newDeparture',inventoryController.newDeparture);
 
-router.post('/inventory/newMovement',inventoryController.newMovement);
+router.post('/inventory/newMovement',inventoryController.newMovement2);
 
 router.post('/inventory/getMovements',inventoryController.getMovements);
 
@@ -151,6 +153,8 @@ router.post('/inventory/deleteMovement',inventoryController.deleteMovement);
 router.post('/inventory/getDepartures',inventoryController.getDepartures);
 
 router.post('/inventory/getRotation',inventoryController.getRotation);
+
+router.post('/inventory/getKardex',inventoryController.getKardex);
 
 
 // SGA - PROCESS

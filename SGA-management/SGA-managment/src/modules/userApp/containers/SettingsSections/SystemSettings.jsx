@@ -6,11 +6,17 @@ import './AccountSettings.css'
 
 export function SystemSettings(){
 
-    const {userInfo} = useAppInfo();
+    const {appInfo,appConfig} = useAppInfo();
+    const now = new Date();
+    const formatted = now.toLocaleString('es-CO');
 
     const sec1 = [
         {text:'Información del sistema',path:'SystemInfo',value:'',type:'functionality',icon:<i className="fa-solid fa-circle-info"/>},
-        {text:'Actualización de software',path:'SoftwareUpdate',value:userInfo.user_name,type:'system',icon:<i class="fa-solid fa-code"/>},
+        {text:'Fecha y hora',path:'time',value:formatted,type:'functionality',icon:<i className="fa-solid fa-clock"/>},
+        {text:'Idioma y regíon',path:'language',value:appInfo.country,type:'functionality',icon:<i className="fa-solid fa-earth-americas"/>},
+        {text:'Actualización de software',path:'SoftwareUpdate',value:
+            `${appConfig.system.software["version-name"]}    V_${appConfig.system.software["version"]}`,
+            type:'system',icon:<i class="fa-solid fa-code"/>},
         {text:'Integraciones',path:'Devices',value:'',type:'functionality',icon:<i className="fa-solid fa-plug"/>},
         {text:'Automatizaciones',path:'ActivityRegister',value:'',type:'system',icon:<i className="fa-solid fa-robot"/>}
     ]

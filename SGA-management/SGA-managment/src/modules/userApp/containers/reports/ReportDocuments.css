@@ -11,6 +11,7 @@
 
 .ReportDocument .settingsReport{
     display: flex;
+    position: relative;
 }
 
 .ReportDocument .settingsReport .SearchBar{
@@ -86,4 +87,29 @@
     max-width: 100%;
     overflow-x: auto;
     height: 60vh;
+    padding: .1vh;
+}
+
+.ReportDocument .totalsBalanceC{
+    position: absolute;
+    display: flex;
+    gap: 4vh;
+    right: 3vw;
+    top: 6vh;
+}
+
+.ReportDocument .totalsBalanceC .LabelValue{
+    display: flex;
+    flex-direction: column;
+    max-width: 12vw;
+}
+
+.ReportDocument .totalsBalanceC .LabelValue .lab ,.ReportDocument .totalsBalanceC .LabelValue .val{
+    width: 100% ;
+    text-wrap: nowrap;
+}
+
+.ReportDocument .totalsBalanceC .LabelValue .val{
+    font-weight: 400 !important;
+    margin-top: 1vh;
 }

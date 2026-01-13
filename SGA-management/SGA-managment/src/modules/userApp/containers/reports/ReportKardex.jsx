@@ -1,26 +1,23 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useAppInfo } from "../../../../context/context";
-import { moneyFormat, postInfo } from "../../../../utils/functions";
+import { postInfo, moneyFormat } from "../../../../utils/functions";
 import { BoldTitle } from "../../components/BoldTitle";
+import { ButtonDownload } from "../../components/ButtonDownload";
 import { ButtonMenu } from "../../components/ButtonMenu";
+import { AiButton } from "../../components/ChatAiComponents/AiButton";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
-import { FormButton } from "../../components/FormButton";
 import { FormInput } from "../../components/FormInput";
+import { LabelValue } from "../../components/LabelValue";
 import { PathLocation } from "../../components/PathLocation";
 import { SearchBar } from "../../components/SearchBar";
 import { SelectOptions } from "../../components/SelectOptions";
-import { TableReport } from "../TableReport";
-import "./ReportDocuments.css";
 import { LoadingSpace } from "../LoadingSpace";
-import { ButtonDownload } from "../../components/ButtonDownload";
-import { AiButton } from "../../components/ChatAiComponents/AiButton";
-import { LabelValue } from "../../components/LabelValue";
-import { SearchinList } from "../../components/SearchInList";
+import { TableReport } from "../TableReport";
 import { FilterReports } from "./FilterReports";
 
-export function ReportBalance({}) {
 
-    // Prev Info
+export function ReportKardex(){
+     // Prev Info
     const [info, setInfo] = useState([]);
     const { appInfo } = useAppInfo();
     const [searchValue,setSearchValue] = useState();
@@ -33,16 +30,18 @@ export function ReportBalance({}) {
     const [visibleSettings,setVisibleSettings] = useState(false);
     const [totalCredit,setTotalCredit] = useState(0)
     const [totalDebit,setTotalDebit] = useState(0)
-    const [totalBalance,setTotalBalance] = useState(0)
-    const [totalInitialBalance,setTotalInitialBalance] = useState(0)
 
     const columsTr = [
-        "Cuenta",
-        "Concepto",
-        "Saldo inicial",
-        "Debito",
-        "Crédito",
-        "Saldo"
+        "SKU",
+        "Referencia",
+        "Fecha creación",
+        "Serial",
+        "Tipo movimiento",
+        "Tercero",
+        "Unidades",
+        "Costo",
+        "Valor",
+        "Estado"
     ];
 
     const filters = {
@@ -68,20 +67,11 @@ export function ReportBalance({}) {
 
     const calcTotals = ()=>{
         let td = 0;
-        let tc = 0;
-        let tb = 0;
-        let tiB = 0;
         info.forEach(element => {
-            td += element.total_debit
-            tc += element.total_credit
-            tb += element.final_balance
-            tiB += element.opening_balance
+            td += parseInt(element.units)
         });
-        console.log(td,tc,tb,tiB)
         setTotalDebit(td);
-        setTotalCredit(tc);
-        setTotalBalance(tb)
-        setTotalInitialBalance(tiB)
+        setTotalCredit(info.length);
     }
 
     useEffect(()=>{
@@ -90,37 +80,37 @@ export function ReportBalance({}) {
         }
     },[info])
 
-    const getBalance = async () => {
+    const getKardex = async () => {
         setLoading(true);
-        let res = await postInfo('/contability/contabiltyController',settingsReport);
-        console.log(res)
+        let res = await postInfo('/inventory/getKardex',settingsReport);
         if(res[0]){
+            res[1].forEach(element => {
+                element.total = (element.units * element.value).toFixed(2)
+            });
             setInfo(res[1])
         }
         setLoading(false)
     };
 
     useEffect(()=>{
-        getBalance();
+        getKardex();
     },[])
 
     useEffect(() => {
         setVisibleSettings(false)
-        getBalance();
+        getKardex();
     }, [start_date,end_date,allAccounts]);
 
     return (
         <div className="ReportDocument">
         <PathLocation />
         <div className="headReport">
-            <BoldTitle text={`Balance de prueba`} />
+            <BoldTitle text={`Informe de existencias y movimientos (Kardex)`} />
             <DescriptionSpan text={`Balance de cuentas contables.`} />
         </div>
         <div className="totalsBalanceC">
-            <LabelValue title={'Debito'} value={<b>$ {moneyFormat(totalDebit)}</b>}/>
-            <LabelValue title={'Crédito'} value={<b>$ {moneyFormat(totalCredit)}</b>}/>
-            <LabelValue title={'Balance inicial'} value={<b>$ {moneyFormat(totalInitialBalance)}</b>}/>
-            <LabelValue title={'Balance final'} value={<b>$ {moneyFormat(totalBalance)}</b>}/>
+            <LabelValue title={'Referencias'} value={<b>{totalDebit}</b>}/>
+            <LabelValue title={'Movimientos'} value={<b>{totalCredit}</b>}/>
         </div>
         <div className="settingsReport">
             <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
@@ -152,7 +142,7 @@ export function ReportBalance({}) {
         </div>
         <div className="SpaceReport">
             {!loading && (
-                <TableReport columns={settingsReport.columns} info={info} type={''} searchValue={searchValue} navigation={true}/>
+                <TableReport columns={settingsReport.columns} info={info} type={''} searchValue={searchValue}/>
             )}
             {loading && (
             <LoadingSpace title={"Cargando información"} description={"Esto no debe tardar mucho..."} />

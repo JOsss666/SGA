@@ -7,13 +7,15 @@ import './AccountSettings.css'
 
 export function AccountSettings(){
 
-    const {userInfo} = useAppInfo();
+    const {userInfo,userConfig} = useAppInfo();
 
     const sec1 = [
         {text:'Información personal',path:'personalInfo',value:userInfo.user_name,type:'functionality',icon:<i className="fa-solid fa-circle-info"/>},
         {text:'Inicion de sesión y seguridad',path:'logIn',value:'',type:'functionality',icon:<i className="fa-solid fa-key"/>},
         {text:'Actividad',path:'activity',value:'',type:'general',icon:<i className="fa-solid fa-user-clock"/>},
-        {text:'Grabar sesiónes',path:'recodSession',value:'',type:'functionality',icon:<i className="fa-solid fa-video"/>}
+        {text:'Grabar sesiónes',path:'recodSession',value:
+            `${userConfig.account.recordSesion}`
+            ,type:'functionality',icon:<i className="fa-solid fa-video"/>}
     ]
 
     const sec3 = [
@@ -25,7 +27,7 @@ export function AccountSettings(){
         <div className="AccountSettings">
             <div className="UserContainer">
                 <UserCard
-                    imgSrc={'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png'}
+                    imgSrc={userInfo.img != undefined? userInfo.img:'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png'}
                     name={userInfo.user_name}
                     desc={userInfo.user_mail}
                 />

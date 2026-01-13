@@ -147,43 +147,52 @@
     transition: .3s;
 }
 
-.UserApp .asideMenuApp .menusHolder{
+.UserApp .asideMenuApp .menusHolder {
     position: absolute;
     height: 100%;
     width: fit-content;
     background-color: var(--translucidMenu);
     backdrop-filter: blur(1vh);
-    z-index: 29;
-    z-index: 40;
+    z-index: 40; /* Eliminado el duplicado */
     transition: .3s;
     overflow-y: auto;
     border-top-right-radius: 3vh;
     border-bottom-right-radius: 3vh;
-    scrollbar-width:none;
+    
+    /* Firefox: Por defecto oculto, pero permite scroll */
+    scrollbar-width: none; 
 }
 
-/* ancho del scrollbar */
-.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar {
-    width: 10px;           /* vertical */
-    height:50%;          /* horizontal */
+/* --- Estilos para Chrome, Edge y Safari --- */
+
+/* 1. Definir que la barra existe y su ancho en PX */
+*::-webkit-scrollbar {
+    width: 6px;  /* No uses %, usa px o vh */
+    height: 6px;
+    display: none; /* Oculto por defecto */
 }
 
-.UserApp .asideMenuApp .menusHolder:hover {
-  scrollbar-width: auto; /* Firefox */
+/* 2. Mostrar la barra al hacer hover sobre el contenedor */
+*:hover::-webkit-scrollbar {
+    display: block;
 }
 
+/* 3. Fondo del track */
 
-/* fondo del track */
-.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar-track {
-    background: var((var(--inputsBg)));
+*::-webkit-scrollbar-track {
+    background: var(--cardHover);
     border-radius: 8px;
 }
 
-/* thumb (la "barrita" que se mueve) */
-.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar-thumb {
+/* 4. El tirador (thumb) */
+*::-webkit-scrollbar-thumb {
     border-radius: 8px;
-    border: .1vh solid var(--inputsBg);
+    background-color: var(--inputsBorder); /* O un color más claro */
+    border: 1px solid var(--inputsBorder);
 }
+
+
+
 
 
 
