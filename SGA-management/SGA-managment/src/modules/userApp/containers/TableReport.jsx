@@ -1,5 +1,6 @@
 import { CheckSquare } from "../components/CheckSquare";
 import { RowTableReport } from "../components/RowTableReport";
+import { NoResults } from "./NoResults";
 import './TableReport.css'
 
 export function TableReport({columns,info,type,searchValue,navigation}){
@@ -21,6 +22,9 @@ export function TableReport({columns,info,type,searchValue,navigation}){
                 {info.length >0 && info.map((element,index)=>(
                     <RowTableReport hidden={!filterOptions(JSON.stringify(element))} type={type} columns={columns} info={element} key={index} navigation={navigation}/>
                 ))}
+                {info.length == 0 && (
+                    <NoResults title={'No hay resultados disponibles'}/>
+                )}
             </div>
         </div>
     )

@@ -1014,24 +1014,31 @@ inventoryController.getKardex = (req,res)=>{
         let info = JSON.parse(data);
         let values = [];
         let whereClauses = [];
+        const start = info.start_date || null;
+        const end = info.end_date || null;
+        const columnDate = '"Inventory"."inventoryMovements".created_at';
 
         whereClauses.push(`"Inventory"."inventoryMovements".company_id = $1`)
         values.push(info.company_id)
 
-        const start = info.start_date || null;
-        const end = info.end_date || null;
-
-        const column = '"Inventory"."inventoryMovements".created_at';
-
         if (start && end) {
             values.push(start, end);
-            whereClauses.push(`${column} BETWEEN $${values.length - 1} AND $${values.length}`);
+            whereClauses.push(
+                `${columnDate} >= $${values.length - 1}::timestamp
+                AND ${columnDate} < ($${values.length}::timestamp + INTERVAL '1 day')`
+            );
+
         } else if (start) {
             values.push(start);
-            whereClauses.push(`${column} >= $${values.length}`);
+            whereClauses.push(
+                `${columnDate} >= $${values.length}::timestamp`
+            );
+
         } else if (end) {
             values.push(end);
-            whereClauses.push(`${column} <= $${values.length}`);
+            whereClauses.push(
+                `${columnDate} < ($${values.length}::timestamp + INTERVAL '1 day')`
+            );
         }
 
         const whereQuery = whereClauses.length > 0

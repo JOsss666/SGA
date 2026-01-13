@@ -68,6 +68,8 @@ router.post('/getBussines',controller.getBussines);
 
 router.post('/getAccountsPlan',controller.getAccountsPlan);
 
+router.post('/getAccounts',controller.getAccounts);
+
 router.post('/insertNewAccount',controller.insertNewAccount);
 
 router.post('/createTax',controller.createTax);

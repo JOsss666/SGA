@@ -88,6 +88,10 @@ export function ReportKardex(){
                 element.total = (element.units * element.value).toFixed(2)
             });
             setInfo(res[1])
+        }else{
+            if(typeof(res[1]) == 'object'){
+                setInfo([]);
+            }
         }
         setLoading(false)
     };

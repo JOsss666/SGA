@@ -4,7 +4,6 @@ import { moneyFormat, postInfo } from "../../../../utils/functions";
 import { BoldTitle } from "../../components/BoldTitle";
 import { ButtonMenu } from "../../components/ButtonMenu";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
-import { FormButton } from "../../components/FormButton";
 import { FormInput } from "../../components/FormInput";
 import { PathLocation } from "../../components/PathLocation";
 import { SearchBar } from "../../components/SearchBar";
@@ -15,7 +14,6 @@ import { LoadingSpace } from "../LoadingSpace";
 import { ButtonDownload } from "../../components/ButtonDownload";
 import { AiButton } from "../../components/ChatAiComponents/AiButton";
 import { LabelValue } from "../../components/LabelValue";
-import { SearchinList } from "../../components/SearchInList";
 import { FilterReports } from "./FilterReports";
 
 export function ReportBalance({}) {
@@ -151,13 +149,13 @@ export function ReportBalance({}) {
             <FilterReports hidden={visibleSettings} columns={columsTr} filters={filters}/>
         </div>
         <div className="SpaceReport">
-            {!loading && (
-                <TableReport columns={settingsReport.columns} info={info} type={''} searchValue={searchValue} navigation={true}/>
-            )}
-            {loading && (
-            <LoadingSpace title={"Cargando información"} description={"Esto no debe tardar mucho..."} />
-            )}
-        </div>
+                {!loading && (
+                    <TableReport columns={settingsReport.columns} info={info} type={''} searchValue={searchValue} navigation={true}/>
+                )}
+                {loading && (
+                <LoadingSpace title={"Cargando información"} description={"Esto no debe tardar mucho..."} />
+                )}
+            </div>
         </div>
     );
 }

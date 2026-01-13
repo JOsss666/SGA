@@ -706,7 +706,44 @@ controller.getAccountsPlan = (req,res)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
-    
+}
+controller.getAccounts = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`company_id = $1`);
+        values.push(info.company_id);
+
+        if(info.id != undefined){
+            whereClauses.push(`id = $${values.length +1}`);
+            values.push(info.id);
+        }
+        
+        const whereQuery = whereClauses.length > 0
+        ? `WHERE ${whereClauses.join(" AND ")}`
+        : "";
+
+        let sentence = `
+            SELECT * FROM
+                "Ecosystem".contable_accounts
+            ${whereQuery}
+            ORDER BY code ASC;  
+        `;
+
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
 }
 
 controller.createTax = (req,res)=>{
@@ -1419,6 +1456,53 @@ controller.getTransactionDetails = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        console.log(info)
+        let values = [];
+        let whereClauses = [];
+        const start = info.start_date || null;
+        const end = info.end_date || null;
+        const columnDate = '"Inventory"."transaction_detail".created_at';
+
+        whereClauses.push(`"Ecosystem".transaction_detail.company_id = $1`)
+        values.push(info.company_id)
+
+        if(info.transaction_id != undefined){
+            whereClauses.push(`"Ecosystem".transaction_detail.transaction_id = $${values.length +1}`)
+            values.push(info.transaction_id)
+        }
+
+        if (info.account_code != undefined) {
+            whereClauses.push(`"Ecosystem".contable_accounts.code LIKE $${values.length + 1}`);
+            values.push(`${info.account_code}%`);
+        }
+
+        if(info.account_id != undefined){
+            whereClauses.push(`"Ecosystem".transaction_detail.account_id = $${values.length +1}`)
+            values.push(info.account_id)
+        }
+        if (start && end) {
+            values.push(start, end);
+            whereClauses.push(
+                `${columnDate} >= $${values.length - 1}::timestamp
+                AND ${columnDate} < ($${values.length}::timestamp + INTERVAL '1 day')`
+            );
+
+        } else if (start) {
+            values.push(start);
+            whereClauses.push(
+                `${columnDate} >= $${values.length}::timestamp`
+            );
+
+        } else if (end) {
+            values.push(end);
+            whereClauses.push(
+                `${columnDate} < ($${values.length}::timestamp + INTERVAL '1 day')`
+            );
+        }
+
+
+        const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
+
         let sentence = `
             SELECT
                 "Ecosystem".transaction_detail.*,
@@ -1441,10 +1525,10 @@ controller.getTransactionDetails = (req,res)=>{
                 "Ecosystem".thirdparties
             ON
                 "Ecosystem".transaction_detail."thirdParty_id" = "Ecosystem".thirdparties.id
-            WHERE
-                "Ecosystem".transaction_detail.transaction_id = $1 ;
+            ${whereQuery}
+            ORDER BY "Ecosystem".transaction_detail.created_at DESC;
         `;
-        let consulta = await useDataBase(sentence,[info.transaction_id],1);
+        let consulta = await useDataBase(sentence,values,1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })

@@ -12,6 +12,8 @@ import { SelectOptions } from '../components/SelectOptions';
 import { FormButton } from '../components/FormButton';
 import { useEffect, useState } from 'react';
 import { ReportKardex } from './reports/ReportKardex';
+import { PathLocation } from '../components/PathLocation';
+import { ReportAccountTransactions } from './reports/ReportAccountTransactions';
 
 export function Reports(){
 
@@ -44,13 +46,13 @@ export function Reports(){
                                     {title:'Transacciones (TR)',children:<i className="fa-solid fa-magnifying-glass-chart"/>,action:handleNavigate,path:'TRS'},
                                     {title:'Informes adicionales',options:[
                                         {title:'Informe Costos Operativos',children:<i className="fa-solid fa-book"/>},
-                                        {title:'Balance de prueba',children:<i className="fa-solid fa-book"/>,action:handleNavigate,path:'Balance'}
                                     ]}
                                 ]}/>
                                 <DespleList children={<i className="fa-solid fa-book"/>} father={{
                                     title:'Informes por estado'
                                 }} options={[
                                     {title:'Documentos reportados',children:<i className="fa-solid fa-book"/>},
+                                    {title:'Balance de prueba',children:<i className="fa-solid fa-book"/>,action:handleNavigate,path:'Balance'},
                                     {title:'Estado de Existencias y Movimientos (Kardex)',children:<i className="fa-solid fa-book"/>,action:handleNavigate,path:'kardex'},
                                     {title:'Estado Ordenes de producción',children:<i className="fa-solid fa-file-lines"/>},
                                     {title:'Volumen ordenes de clientes',children:<i className="fa-solid fa-file-lines"/>},
@@ -93,6 +95,7 @@ export function Reports(){
                 <Route path='/TRS' element={<ReportDocuments type={'TR'}/>} />
                 <Route path='/TRS/:transaction_id' element={<ReportTransactionDetails/>} />
                 <Route path='/Balance' element={<ReportBalance/>}/>
+                <Route path='/Balance/:account_id' element={<ReportAccountTransactions/>}/>
                 <Route path='/Kardex' element={<ReportKardex/>}/>
             </Routes>
         </div>
