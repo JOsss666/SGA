@@ -1,0 +1,86 @@
+.TableDetailTreasury table {
+    width: 100%;
+    border-collapse: collapse;
+    justify-content: center;
+}
+
+.TableDetailTreasury .TitleColumns {
+    font-size: 2vh;
+    background-color: #D9D9D9;
+}
+
+.TableDetailTreasury tr{
+    border: .2vh solid #ddd;
+    border-radius: 3vh;
+}
+.TableDetailTreasury tr td{
+    text-align: center;
+}
+
+.TableDetailTreasury th,
+.TableDetailTreasury td {
+    padding: 2vh;
+    justify-content: center;
+}
+
+.TableDetailTreasury .statusDot {
+    width: 2.5vh;
+    height: 2.5vh;
+    border-radius: 3vh;
+}
+
+.TableDetailTreasury .positive .statusDot {
+    background-color: #28D97B;
+    border: solid 0.4vh #016731;
+}
+
+.TableDetailTreasury .negative .statusDot {
+    background-color: #EE2F2F;
+    border: solid 0.4vh #b61f1f; /* QUEDO UN COLOR DIFERENTE */
+}
+
+
+    
+.TableDetailTreasury .bankCell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .2vh;
+}
+
+.TableDetailTreasury .bankCell  .bankCellName{
+    display: flex;
+    align-items: center;
+    gap: 2vh;
+    font-size: 2.8vh;
+    font-weight: 600;
+}
+
+.TableDetailTreasury .bankCell  .bankCellDescription{
+    display: flex;
+    align-items: center;
+    gap: 2vh;
+    font-size: 1.8vh;
+    font-weight: 200;
+}
+
+.TableDetailTreasury .PrivateIcon {
+    color: #8D8D8D;
+    font-size: 3vh;
+}
+.TableDetailTreasury .SubCategory {
+    color: #8D8D8D;
+    transform: rotate(90deg);
+}
+
+.TableDetailTreasury .balanceCell {
+    display: flex;
+    align-items: center;
+    gap: 2vh;
+    font-weight: 600;
+}
+
+
+
+
+
