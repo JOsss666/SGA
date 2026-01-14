@@ -1,6 +1,7 @@
+import { NoResults } from "../containers/NoResults";
 import "./TableDetailTreasury.css";
 
-export function TableDetailTreasury({ columns = [], data = [], search = "", headTable}) {
+export function TableDetailTreasury({ columns = [], data = [], search, headTable}) {
 
     const filteredData = data.filter(row =>
         Object.values(row).some(value =>
@@ -61,14 +62,16 @@ export function TableDetailTreasury({ columns = [], data = [], search = "", head
                 <div className={`roundedBottom ${!headTable? 'roundedList':''}`}>
                     {filteredData.length > 0 ?  (
                         filteredData.map((row, i) => (
-                            <div className="row" key={i}>
+                            <div className="row" onClick={()=>{
+                                if(row.action != undefined){
+                                    row.action(row.id)
+                                }
+                            }} key={i}>
                                     {columns.map((col, j) => renderCell(row, col, j))}
                             </div>
                         ))
                     ) : (
-                        <div className="row">        
-                            vacio
-                        </div>
+                        <NoResults title={search == ""?'No hay resultados disponibles':`No hay resultados para "${search}"`}/>
                     )}
                 </div>
         </div>

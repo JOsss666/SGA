@@ -7,6 +7,7 @@
     background-size: 100% 100%;
     transition: .3s;
     background-image: var(--bgImage);
+    background-position: 90deg;
     position: absolute;
     top: 0;
     left: 0;

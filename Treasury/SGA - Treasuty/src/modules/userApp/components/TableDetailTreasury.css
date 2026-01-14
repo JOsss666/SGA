@@ -32,10 +32,6 @@
     margin-left: 0;
 }
 
-.TableDetailTreasury .headTable .TitleColumns:last-child{
-    
-}
-
 .TableDetailTreasury .row{
     border: solid .1vh var(--inputsBorder);
     background-color: var(--bg);
@@ -87,7 +83,7 @@
 }
 
 .TableDetailTreasury .row .elementRow .colValue{
-    font-size: clamp(1.8px,1.8vh,18px);
+    font-size: clamp(1.8px,2vh,20px);
     color: var(--descriptionText);
 }
 
@@ -130,11 +126,10 @@
     color: var(--mainText);
 }
 
-.TableDetailTreasury .bankCell  .bankCellDescription{
+.TableDetailTreasury .bankCell .bankCellDescription{
     display: flex;
     align-items: center;
     gap: 2vh;
-    font-size: clamp(18px,1.8vh,18px);
     font-weight: 400;
     margin-left: .5vh;
     color: var(--descriptionText);
@@ -143,6 +138,7 @@
     text-wrap: nowrap;
     white-space: none;
     text-overflow: ellipsis;
+    font-size: clamp(2px,2vh,20px);
 }
 
 .TableDetailTreasury .row .bankCell .bankCellName i {
@@ -164,7 +160,7 @@
 }
 
 .TableDetailTreasury .balanceCell h5{
-    font-size: clamp(1.8px,1.8vh,18px);
+    font-size: clamp(2px,2vh,20px);
     font-weight: 500;
     color: var(--mainText);
     margin: auto;
@@ -190,4 +186,8 @@
 .TableDetailTreasury .negative .statusDot {
     background-color: #D92828;
     border: solid .4vh #F9B2B2; /* QUEDO UN COLOR DIFERENTE */
+}
+
+.TableDetailTreasury .NoResults{
+    height: 50vh;
 }

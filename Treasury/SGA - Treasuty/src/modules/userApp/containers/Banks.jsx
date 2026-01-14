@@ -9,12 +9,20 @@ import { useAppInfo } from "../../../context/context";
 import { postInfo } from "../../../utils/functions";
 
 import './Banks.css';
+import { useNavigate, useParams } from "react-router-dom";
 
 export function Banks() {
 
     const { appInfo } = useAppInfo();
     const [banks, setBanks] = useState([]);
     const [search, setSearch] = useState("");
+    const params = useParams();
+    const navigate = useNavigate();
+    
+    const handleNavigate = (path)=>{
+        navigate(`/SGA_management/${params.company_key}/${params.user_key}/banks/${path}`);
+    }
+
 
     /* Cambiar a true cuando el backend esté listo */
     const useBackend = false;
@@ -32,6 +40,7 @@ export function Banks() {
     /* DATA DE EJEMPLO  */
     const dataBanks = [
         {
+            id:1,
             name: "Bancolombia 1 Bogotá",
             description:'Esta es la franquicia',
             account_type: "Ahorros",
@@ -39,9 +48,11 @@ export function Banks() {
             account_code:"1405",
             state: "Activo",
             balance: 200000,
-            icon: <i className="fa-solid fa-unlock"/>
+            icon: <i className="fa-solid fa-unlock"/>,
+            action:handleNavigate
         },
         {
+            id:2,
             name: "Bancolombia 2",
             description:'Esta es la franquicia',
             account_type: "Ahorros",
@@ -49,9 +60,11 @@ export function Banks() {
             account_code:"1405",
             state: "Activo",
             balance: 200000,
-            icon: <i className="fa-solid fa-unlock"/>
+            icon: <i className="fa-solid fa-unlock"/>,
+            action:handleNavigate
         },
         {
+            id:3,
             name: "Bancolombia 3",
             description:'Esta es la franquicia',
             account_type: "Ahorros",
@@ -59,7 +72,8 @@ export function Banks() {
             account_code:"1405",
             state: "Activo",
             balance: 200000,
-            icon: <i className="fa-solid fa-unlock"/>
+            icon: <i className="fa-solid fa-unlock"/>,
+            action:handleNavigate
         },
     ];
 

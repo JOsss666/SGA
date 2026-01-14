@@ -178,8 +178,9 @@ export function UserApp(){
                             <Route path='/thirdparties/:thirdparty_id' element={<ThirdPartyDetail/>} />
 
                             <Route path='/movements' element={<span>Movimientos</span>}/>
-                            <Route path='/treasury' element={<span><Treasury/></span>}/>
-                            <Route path='/banks' element={<span><Banks/></span>}/>
+                            <Route path='/treasury' element={<Treasury/>}/>
+                            <Route path='/banks' element={<Banks/>}/>
+                                <Route path='/banks/:bank_id' element={<PathLocation/>}/>
                             <Route path='/transfers' element={<span>Transferencias</span>}/>
                             <Route path='/payments' element={<span>Pagos y cobros</span>}/>
                             <Route path='/bankReconciliation' element={<span>Conciliación Bancaria</span>}/>
