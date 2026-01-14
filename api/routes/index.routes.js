@@ -186,7 +186,7 @@ router.post('/contability/contabiltyController', contabiltyController.getBalance
 
 // SGA treasury
 
-router.post('/treasury/getTreasury',controller.getTreasury); //PENDIENTE IMPLEMENTAR 
+router.post('/treasury/getTreasury',controller.getAccounts); //PENDIENTE IMPLEMENTAR 
 
 export default router;
 
