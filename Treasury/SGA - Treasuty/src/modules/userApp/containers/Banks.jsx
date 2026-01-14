@@ -20,8 +20,9 @@ export function Banks() {
     const useBackend = false;
 
     const columns = [
-        { label: "Banco", key: "bank_name" },
+        { label: "Banco", key: "card" },
         { label: "Tipo de Cuenta", key: "account_type" },
+        { label: "Cuenta contable",key:'account_code'},
         { label: "Descripción", key: "account_description" },
         { label: "Estado", key: "state" },
         { label: "Saldo", key: "balance" }
@@ -31,29 +32,35 @@ export function Banks() {
     /* DATA DE EJEMPLO  */
     const dataBanks = [
         {
-            bank_name: "Banco No 1",
-            account_type: "Cuenta Corriente",
+            name: "Bancolombia 1 Bogotá",
+            description:'Esta es la franquicia',
+            account_type: "Ahorros",
             account_description: "Descripción breve del banco y su uso",
+            account_code:"1405",
             state: "Activo",
-            balance: 100000000,
-            is_private: true
+            balance: 200000,
+            icon: <i className="fa-solid fa-unlock"/>
         },
         {
-            bank_name: "Banco No 2",
-            account_type: "Cuenta Contable",
+            name: "Bancolombia 2",
+            description:'Esta es la franquicia',
+            account_type: "Ahorros",
             account_description: "Descripción breve del banco y su uso",
+            account_code:"1405",
             state: "Activo",
-            balance: -23580000,
-            is_private: true
+            balance: 200000,
+            icon: <i className="fa-solid fa-unlock"/>
         },
         {
-            bank_name: "Banco No 3",
-            account_type: "Cuenta Corriente",
+            name: "Bancolombia 3",
+            description:'Esta es la franquicia',
+            account_type: "Ahorros",
             account_description: "Descripción breve del banco y su uso",
+            account_code:"1405",
             state: "Activo",
-            balance: 100000000,
-            is_private: true
-        }
+            balance: 200000,
+            icon: <i className="fa-solid fa-unlock"/>
+        },
     ];
 
     const getBanks = async () => {
@@ -99,6 +106,7 @@ export function Banks() {
                     data={banks}
                     columns={columns}
                     search={search}
+                    headTable={true}
                 />
             </div>
         </div>

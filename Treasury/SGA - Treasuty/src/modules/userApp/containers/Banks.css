@@ -72,4 +72,7 @@
 
 .Banks .TableBanks{
     width: 100%;
+    padding: 1vh 3vh;
+    height: 65vh;
+    overflow-y: auto;
 }
