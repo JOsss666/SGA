@@ -22,7 +22,7 @@ export function RowTableReport({columns,info,hidden,navigation}){
             info.type = 'Document'
             setPreviewInfo(info);
             setOpenPreview(true)
-        }} >{info.docType}# {info.ownSerial}</span>,
+        }} >{info.docType}# {info.ownSerial != undefined? info.ownSerial:info.id}</span>,
         "Transacción":<span className="Redirect rowSpan" onClick={()=>{
             info.type = 'Document'
             setPreviewInfo(info);
@@ -67,6 +67,7 @@ export function RowTableReport({columns,info,hidden,navigation}){
         'Fecha de entrega':<span className="rowSpan">{info.created_at != undefined? (info.created_at).substring(0,10):''}</span>,
         'Fecha creación':<span className="rowSpan">{info.created_at != undefined? (info.created_at).substring(0,10):''}</span>,
         'Tipo Doc':<span className="rowSpan">{info.doc_type}</span>,
+        'Documento':<span className="rowSpan idHolder Redirect">#{info.doc_id}</span>,
         'Naturaleza':<span className="rowSpan centerAl">{info.nature}</span>,
         'Debito':<span className="rowSpan">{info.total_debit != undefined? moneyFormat(info.total_debit):0}</span>,
         'Crédito':<span className="rowSpan">{info.total_credit != undefined? moneyFormat(info.total_credit):0}</span>,

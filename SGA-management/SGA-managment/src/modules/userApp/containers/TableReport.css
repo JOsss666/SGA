@@ -2,7 +2,8 @@
 
 
 .TableReport{
-    height: 100%;
+    max-height: 100%;
+    height: fit-content;
     width: fit-content;
     display: flex;
     flex-direction: column;
@@ -41,7 +42,8 @@
 
 .TableReport .headTable .headColum_ID,
 .TableReport .headTable .headColum_Estado,
-.TableReport .headTable .headColum_Serial
+.TableReport .headTable .headColum_Serial,
+.TableReport .headTable .headColum_Documento
 {
     width: 5vw;
 }
