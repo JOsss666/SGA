@@ -1508,6 +1508,8 @@ controller.getTransactionDetails = (req,res)=>{
                 "Ecosystem".transaction_detail.*,
                 "Ecosystem".contable_accounts.name AS concept_name,
                 "Ecosystem".contable_accounts.code AS account_code,
+                "Ecosystem".transactions.doc_type,
+                "Ecosystem".transactions.doc_id,
                 "Ecosystem".payment_methods.name AS payment_name,
                 "Ecosystem".thirdparties.names AS thirdParty_name,
                 "Ecosystem".thirdparties.img AS thirdParty_img
@@ -1525,6 +1527,10 @@ controller.getTransactionDetails = (req,res)=>{
                 "Ecosystem".thirdparties
             ON
                 "Ecosystem".transaction_detail."thirdParty_id" = "Ecosystem".thirdparties.id
+            LEFT JOIN
+                "Ecosystem".transactions
+            ON
+                "Ecosystem".transaction_detail.transaction_id = "Ecosystem".transactions.id
             ${whereQuery}
             ORDER BY "Ecosystem".transaction_detail.created_at DESC;
         `;
