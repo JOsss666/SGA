@@ -1544,6 +1544,7 @@ controller.getTransactionDetails = (req,res)=>{
     })
 }
 
+
 controller.updateTransactionState = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{

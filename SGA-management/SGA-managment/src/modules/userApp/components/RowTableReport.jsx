@@ -14,7 +14,7 @@ export function RowTableReport({columns,info,hidden,navigation}){
     const handleNavigate = (path)=>{
         navigate(`${location.pathname}/${path}`);
     }
-
+    
     const {popInAlert} = useAlert();
     const {setOpenPreview,setPreviewInfo} = usePreview();
     const dictionaryElementsColum = {
