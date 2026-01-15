@@ -77,12 +77,30 @@ export function Reports(){
                             </div>
                         </div>
                         <div className="galleryReports">
-                            <CardReport type={'Documento'} title={'OCS'} description={'Client Order'}/>
-                            <CardReport type={'Documento'} title={'OPS'} description={'Production Order'}/>
-                            <CardReport type={'Documento'} title={'DCS'} description={'Purchase Document'}/>
-                            <CardReport type={'Documento'} title={'CIS'} description={'Inventory Consume'}/>
-                            <CardReport type={'Documento'} title={'FVS'} description={'Sell Invoice'}/>
-                            <CardReport type={'Documento'} title={'TRS'} description={'transaction'}/>
+                            <CardReport type={'Documento'} title={'Ordenes de cliente (OCS)'} description={'Consulta los detalles de todas tus Ordenes de cliente'} onClick={()=>{
+                                handleNavigate('OCS')
+                            }} />
+                            <CardReport type={'Documento'} title={'Ordenes de producción (OPS)'} description={'Consulta los detalles de todas tus Ordenes de producción'} onClick={()=>{
+                                handleNavigate("OPS")
+                            }}/>
+                            <CardReport type={'Documento'} title={'Documentos de compra (DCS)'} description={'Consulta los detalles de todos tus Documentos de compra'} onClick={()=>{
+                                handleNavigate('DCS')
+                            }}/>
+                            <CardReport type={'Documento'} title={'Consumos de inventario (CIS)'} description={'Consulta los detalles de todos tus Consumos de inventario'} onClick={()=>{
+                                handleNavigate('CIS')
+                            }}/>
+                            <CardReport type={'Documento'} title={'Facturas de venta (FVS)'} description={'Consulta los detalles de todas tus Facturas de venta'} onClick={()=>{
+                                handleNavigate('FVS')
+                            }}/>
+                            <CardReport type={'Documento'} title={'Transacciones (TRS)'} description={'Consulta los detalles de todas tus Transacciones'} onClick={()=>{
+                                handleNavigate('TRS')
+                            }}/>
+                            <CardReport type={'contable'} title={'Balance de prueba'} description={'Genera un balance de prueba de la contabilidad de tu empresa'} onClick={()=>{
+                                handleNavigate('Balance')
+                            }}/>
+                            <CardReport type={'inventarios'} title={'Informe de movimientos (Kardex)'} description={'Visualiza todos los movimientos por referencia de tu inventario'} onClick={()=>{
+                                handleNavigate('Kardex')
+                            }}/>
                         </div>
                     </>
                 }/>
