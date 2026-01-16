@@ -70,7 +70,8 @@ export function ReportAccountTransactions(){
         account_code:account_info.code,
         typePlanAccount:appInfo.accountPlanType,
         start_date,
-        end_date
+        end_date,
+        status:'posted'
     };
 
     const calcTotals = ()=>{

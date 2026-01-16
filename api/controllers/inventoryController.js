@@ -71,6 +71,8 @@ inventoryController.getProducts = (req, res) => {
         const sentence = `
             SELECT
                 ps.*,
+                c_exit.account_id AS exit_account,
+                c_entry.account_id AS entry_account,
                 array_remove(array_agg(c.name), NULL) AS categories
             FROM
                 "Inventory"."products&services" AS ps
@@ -80,11 +82,21 @@ inventoryController.getProducts = (req, res) => {
             LEFT JOIN
                 "Inventory".categories AS c
                 ON pc.category_id = c.id
+            LEFT JOIN 
+                "Ecosystem".concepts AS c_exit
+            ON 
+                ps.exit_concept = c_exit.id
+            LEFT JOIN 
+                "Ecosystem".concepts AS c_entry
+            ON 
+                ps.entry_concept = c_entry.id
             WHERE
                 ps.company_id = $1
                 ${whereExtra}
             GROUP BY
-                ps.id;
+                ps.id,
+                c_entry.account_id,
+                c_exit.account_id;
         `;
 
         const consulta = await useDataBase(sentence, values, 1);
@@ -110,19 +122,23 @@ inventoryController.createProduct = (req,res)=>{
                     name,
                     stock,
                     units,
-                    entry_account,
-                    exit_account,
+                    entry_concept,
+                    exit_concept,
+                    taxed,
+                    tax_id,
                     img,
                     description)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id ;`
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id ;`
         let consulta = await useDataBase(sentence,[
                     info.company_id,
                     info.code,
                     info.name,
                     info.stock,
                     info.units,
-                    info.inventotyAccount,
-                    info.costAccount,
+                    info.purchaseConcept,
+                    info.sellConcept,
+                    info.taxed,
+                    info.tax_id,
                     info.photo,
                     info.description],3);
         console.log('---> ',consulta);
@@ -811,9 +827,12 @@ inventoryController.getStocks = (req,res)=>{
                 "Inventory".stocks.avg_cost,
                 "Inventory"."products&services".name,
                 "Inventory"."products&services".code,
+                "Inventory"."products&services".taxed,
+                "Inventory"."products&services".tax_id,
                 "Inventory"."products&services".stock AS globalStock,
-                "Inventory"."products&services".exit_account,
-                "Inventory"."products&services".entry_account,
+                c_exit.account_id AS exit_account,
+                c_entry.account_id AS entry_account,
+                
                 "Inventory"."products&services".img
             FROM
                 "Inventory".stocks
@@ -821,8 +840,17 @@ inventoryController.getStocks = (req,res)=>{
                 "Inventory"."products&services"
             ON
                 "Inventory".stocks.product_id = "Inventory"."products&services".id
+            LEFT JOIN 
+                "Ecosystem".concepts AS c_exit
+            ON 
+                "Inventory"."products&services".exit_concept = c_exit.id
+            LEFT JOIN 
+                "Ecosystem".concepts AS c_entry
+            ON 
+                "Inventory"."products&services".entry_concept = c_entry.id
+
             ${whereQuery}
-            ORDER BY "Inventory"."products&services".name ASC ;
+            ORDER BY "Inventory"."products&services".name ASC;
         `;
         let consulta = await useDataBase(sentence,values,1)
         res.writeHead(200,{'Content-Type':'text/plain'});

@@ -4,6 +4,7 @@ import { UserApp } from './modules/userApp/containers/UserApp';
 import { AiAssistanProvider, AlertProvider, AppInfoProvider, NotificationsProvider, PreviewProvider } from './context/context';
 import { Login } from './modules/Login/Login';
 import { SignUp } from './modules/Login/SignUp';
+import { PreviewDocument } from './modules/userApp/containers/Preview/PreviewDocument';
 //export const urlSer = 'http://localhost:3000';
 export const urlSer = 'https://sga-2zgp.onrender.com';
 
@@ -41,6 +42,7 @@ function App() {
                         </AlertProvider>
                       </AppInfoProvider>
                     </>} />
+                    <Route path='/preview' element={<PreviewDocument/>}/>
                 </Routes>
             </Router>
         </div>

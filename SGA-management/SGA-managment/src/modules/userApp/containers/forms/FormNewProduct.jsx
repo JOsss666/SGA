@@ -11,6 +11,7 @@ import { SearchinList } from '../../components/SearchInList'
 import { NewElementSelect } from '../../components/NewElementSelect'
 import { FileInput } from '../../components/FileInput'
 import { FormNewCategory } from './FormNewCategory'
+import { SwitchOption } from '../../components/SwitchOption'
 
 export function FormNewProduct({reloadFun}){
 
@@ -29,6 +30,7 @@ export function FormNewProduct({reloadFun}){
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
     const [stage,setStage] = useState(0);
+    const [taxes,setTaxes] = useState([]);
     // form info
         // Sec 1
         const [photo,setPhoto] = useState('https://res.cloudinary.com/djjxugmni/image/upload/v1764620093/ChatGPT_Image_1_dic_2025_15_04_38_3_hcdqxl.png');
@@ -39,15 +41,14 @@ export function FormNewProduct({reloadFun}){
         // Sec 2
         const [units,setUnits] = useState();
         const [stock,setStock] = useState(0);
-        const [inventotyAccount,setInventotyAccount] = useState();
-        const [costAccount,setCostAccount] = useState();
         const [availableDate,setAvailableDate] = useState('');
-        // Sec 3
-        const [defaultSupplier,setDefaultSupplier] = useState();
         const [sellDescription,setSellDescription] = useState('');
         const [sellConcept,setSellConcept] = useState('');
+        const [taxed,setTaxed] = useState(false);
+        const [tax_id,setTax_id] = useState();
+        // Sec 3
+        const [defaultSupplier,setDefaultSupplier] = useState();
         const [purchaseConcept,setPurchaseConcept] = useState('');
-        const [taxes,setTaxes] = useState('');
     const formInfo = {
         company_id:appInfo.company_id,
         photo,
@@ -57,14 +58,13 @@ export function FormNewProduct({reloadFun}){
         category_id,
         units,
         stock,
-        inventotyAccount,
         availableDate,
         defaultSupplier,
         sellDescription,
         sellConcept,
-        costAccount,
         purchaseConcept,
-        taxes
+        tax_id,
+        taxed
     }
 
     const getThirdParties = async()=>{
@@ -113,6 +113,22 @@ export function FormNewProduct({reloadFun}){
         }
     }
 
+    const getTaxes = async()=>{
+        let res = await postInfo('/getTaxes',{
+            company_id:appInfo.company_id,
+        })
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:element.name,
+                    value:element.tax_id
+                })
+            });
+            setTaxes(C);
+        }
+    }
+
     const getCategories = async()=>{
         let res = await postInfo('/inventory/getCategories',{
             company_id:appInfo.company_id
@@ -143,7 +159,7 @@ export function FormNewProduct({reloadFun}){
         }else{
             addNotification({
                 type:'error',
-                title:`Errorn al crear producto`,
+                title:`Error al crear producto`,
                 description:`Hubo un problema al crear el producto ${name}, intentelo de nuevo.`
             })
         }
@@ -165,6 +181,14 @@ export function FormNewProduct({reloadFun}){
         setLoading(false);
         setDisabled(false);
     }
+
+    useEffect(()=>{
+        if(!taxed){
+            setTax_id(undefined);
+        }else{
+            getTaxes();
+        }
+    },[taxed])
 
     useEffect(()=>{
         getRequierdData();
@@ -195,8 +219,8 @@ export function FormNewProduct({reloadFun}){
                                 <i className="fa-solid fa-camera"/>
                             </FileInput>
                         </div>
-                        <FormInput title={'Nombre'} action={setName} placeholder={'Nombre de tu producto'} value={name} disabled={disabled}/>
                         <FormInput title={'Código'} action={setCode} placeholder={'SKU#....'} value={code} disabled={disabled}/>
+                        <FormInput title={'Nombre'} action={setName} placeholder={'Nombre de tu producto'} value={name} disabled={disabled}/>
                         <SearchinList title={'Categorias'} action={setCategory_id} placeHolder={'Seleccine una o varias'} list={categories} specialOption={
                             <NewElementSelect title={'Crear nueva categoría'} onClick={()=>{
                                 popInAlert(<FormNewCategory/>)
@@ -209,16 +233,21 @@ export function FormNewProduct({reloadFun}){
                     <section>
                         <SearchinList title={'Unidades de medida'} action={setUnits} placeHolder={'Seleccione unidad'} list={meassureUnits}/>
                         <FormInput title={'Stock'} action={setStock} placeholder={'0 unidades'} value={stock} disabled={disabled}/>
-                        <SearchinList title={'Cuenta de inventarios'} action={setInventotyAccount} placeHolder={'Seleccione la cuenta'} list={accounts} disabled={disabled}/>  
-                        <SearchinList title={'Cuenta de costo'} action={setCostAccount} placeHolder={'Seleccione la cuenta'} list={accounts} disabled={disabled}/>  
+                        <SearchinList title={'Concepto de compra'} action={setPurchaseConcept} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>  
                         <FormInput title={'Disponible a partir de'} action={setAvailableDate} value={availableDate} type={'date'} disabled={disabled}/>
                     </section>
                 )}
                 {stage == 2 && (
                     <section>
                         <SearchinList title={'Proveedor por defecto'} action={setDefaultSupplier} placeHolder={'Seleccione el proveedor'} list={ThirdParties} disabled={disabled}/>  
-                        <SearchinList title={'Concepto de compra'} action={setPurchaseConcept} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>  
                         <SearchinList title={'Concepto de venta'} action={setSellConcept} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>  
+                        <div className="accessSwitch">
+                        <h6>Gravado con impuestos</h6>
+                            <SwitchOption action={setTaxed}/>
+                        </div>
+                        {taxed && (
+                            <SearchinList title={'Impuesto asociado'} action={setTax_id} placeHolder={'Seleccione el impuesto'} list={taxes} disabled={disabled}/>  
+                        )}
                         <FormInput title={'Descripción para la venta'} action={setSellDescription} value={sellDescription} placeholder={'Detalles del producto para la venta'} disabled={disabled} textArea={true}/>
                     </section>
                 )}

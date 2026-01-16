@@ -1466,6 +1466,11 @@ controller.getTransactionDetails = (req,res)=>{
         whereClauses.push(`"Ecosystem".transaction_detail.company_id = $1`)
         values.push(info.company_id)
 
+        if(info.status != undefined){
+            whereClauses.push(`"Ecosystem".transaction_detail.status = $${values.length +1}`);
+            values.push(info.status)
+        }
+
         if(info.transaction_id != undefined){
             whereClauses.push(`"Ecosystem".transaction_detail.transaction_id = $${values.length +1}`)
             values.push(info.transaction_id)
