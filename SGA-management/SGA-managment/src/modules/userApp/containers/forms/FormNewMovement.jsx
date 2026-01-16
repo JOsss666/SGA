@@ -88,9 +88,7 @@ export function FormNewMovement({info}){
         destiny_cellar_id
     }
 
-
     // Functions
-
     const getThirdParties = async()=>{
         let getThirdParties = await postInfo('/getThirdParties',{company_id:appInfo.company_id});
         if(getThirdParties[0]){

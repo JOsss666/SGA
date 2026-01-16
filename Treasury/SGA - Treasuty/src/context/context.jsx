@@ -253,8 +253,9 @@ export function AppInfoProvider({children}){
         {text:'Cajas y Tesoreria',path:'treasury',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/a_-90/a_90/c_fill,w_720,h_720/v1767635300/ChatGPT_Image_5_ene_2026_12_36_27_2_y7x9xi.png'/>,action:handleNavigate},
         {text:'Bancos',path:'banks',icon:<BankIcon/>,action:handleNavigate},
         {text:'Transferencias',path:'transfers',icon:<DebitCardIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
-        {text:'Pagos y cobros',path:'payments',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
-        {text:'Conciliación Bancaria',path:'bankReconciliation',icon:<ConciliationIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        {text:'Pagos',path:'payments',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        {text:'Cobros',path:'collections',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        //{text:'Conciliación Bancaria',path:'bankReconciliation',icon:<ConciliationIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
         {text:'Gastos menores',path:'minorExpenses',icon:<CartShopIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
         //
     ]
@@ -282,8 +283,9 @@ export function AppInfoProvider({children}){
         {text:'Cajas y Tesoreria',path:'treasury',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/a_-90/a_90/c_fill,w_720,h_720/v1767635300/ChatGPT_Image_5_ene_2026_12_36_27_2_y7x9xi.png'/>,action:handleNavigate},
         {text:'Bancos',path:'banks',icon:<BankIcon/>,action:handleNavigate},
         {text:'Transferencias',path:'transfers',icon:<DebitCardIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
-        {text:'Pagos y cobros',path:'payments',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
-        {text:'Conciliación Bancaria',path:'bankReconciliation',icon:<ConciliationIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        {text:'Pagos',path:'payments',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        {text:'Cobros',path:'collections',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        //{text:'Conciliación Bancaria',path:'bankReconciliation',icon:<ConciliationIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
         {text:'Gastos menores',path:'minorExpenses',icon:<CartShopIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
         {text:'Mensajes',path:'messages',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913446/MensajesLogo2_y4fjoa.png'/>,action:handleNavigate},
         {text:'Calendario',path:'calendar',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913184/LogoCalendario1_ig0avt.png'/>,action:handleNavigate},
