@@ -1,0 +1,264 @@
+
+.Payments{
+    padding: 2vh;
+    display: flex;
+    flex-direction: row;
+}
+
+.Payments .SidebarLeft{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    width: 48vh;
+    padding: 2vh;
+}
+
+
+
+.Payments .SidebarLeft .CardPayments {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    padding: 3vh;
+    border-radius: 3vh;
+    min-height: 16vh;
+
+    background-image:
+        linear-gradient(
+        135deg,
+        rgba(10, 40, 25, 0.75),
+        rgba(5, 20, 15, 0.85)
+        ),
+        url("https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    color: #ffffff;
+    overflow: hidden;
+}
+
+.Payments .SidebarLeft .CardPayments .Progress {
+    position: absolute;
+    top: 25vh;
+    right: 146vh;
+    width: 6vh;
+    height: 6vh;
+    border-radius: 50%;
+    border: 0.3vh solid rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6vh;
+    font-weight: 500;
+    line-height: 1; /* SIRVE PARA CENTRAR VERTICALMENTE EL TEXTO */
+}
+
+.Payments .SidebarLeft .CardPayments .Text {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+/* Título pequeño */
+.Payments .SidebarLeft .CardPayments .Text .BoldTitle {
+    font-size: 2.6vh;
+    font-weight: 500;
+    opacity: 0.85;
+    color: #ffffff;
+}
+
+/* Valor pagado (PROTAGONISTA) */
+.Payments .SidebarLeft .CardPayments .Text .DescriptionSpan {
+    font-size: 2.8vh;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: #ffffff;
+}
+
+
+
+.Payments .OptionsSidebarLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+    margin-top: 2vh;
+}
+
+.Payments .OptionsSidebarLeft .Button {
+    display: flex;
+    align-items: center;
+    gap: 1vh;
+    padding: 1.2vh 1.5vh;
+    border-radius: 1vh;
+    font-size: 1.5vh;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+
+.Payments .OptionsSidebarLeft .Button.primary,
+.Payments .OptionsSidebarLeft .Button.secondary {
+    color: var(--text);
+    border: none;
+    background-color: unset;
+    font-size: 2.5vh;
+    display: flex;
+    gap: 2vh;
+}
+
+.Payments .OptionsSidebarLeft .Button.primary:hover,
+.Payments .OptionsSidebarLeft .Button.secondary:hover {
+    background: var(--cardHover);
+    font-size: 2.8vh;
+    transition: all 0.2s ease;
+}
+
+.Payments .OptionsSidebarLeft .Button.primary i,
+.Payments .OptionsSidebarLeft .Button.secondary i {
+    font-size: 3vh;
+}
+
+
+
+
+
+
+
+
+
+
+.Payments .SideBarRight{
+    display: flex;
+    flex-direction: column;
+    width: 140vh;
+    padding: 2vh;
+}
+
+
+
+.Payments .MenuBarPayments{
+    display: flex;
+    width: fit-content;
+    gap: 2vh;
+    align-items: center;
+    padding-left: 3vh;
+}
+
+.Payments .MenuBarPayments .SearchBar{
+    width: 38vh;
+    padding-right: 1.5vh;
+}
+
+.Payments .MenuBarPayments .IconList{
+    background-color: var(--inputsBg);
+    border-radius: 1vh;
+    height: fit-content;
+    box-shadow: 0 .2vh .8vh #0003;
+    font-size: 3.5vh;
+    align-content: center;
+    position: relative;
+    font-size: 3vh;
+    position: relative;
+    padding: 1vh;
+    color: var(--descriptionText);
+    cursor: pointer;
+}
+
+.Payments .MenuBarPayments .IconList:hover{
+    background-color: var(--cardHover);
+}
+
+
+.Payments .MenuBarPayments .SelectOptions .contentOptions{
+    width: 26vh;
+    box-shadow: 0 .2vh .8vh #0003;
+    padding-left: 1.5vh;
+}
+
+
+
+.Payments .settingsReport{
+    display: flex;
+}
+
+.Payments .settingsReport .SearchBar{
+    height: 4.5vh;
+    width: 10vw;
+    margin-top: 1vh;
+    height: 5vh;
+    margin-right: 3vh;
+}
+
+.Payments .settingsReport .SelectOptions{
+    margin: auto 2vh;
+    width: 18vh;
+} 
+
+.Payments .settingsReport .ButtonMenu{
+    margin: auto 1vh;
+}
+
+.Payments .settingsReport .AiButton{
+    margin: auto 1vh;
+}
+
+.Payments .settingsReport .SelectOptions .contentOptions{
+    box-shadow: none ;
+}
+
+.Payments .settingsReport .rangeInput{
+    display: flex;
+    margin: auto 0;
+    width: 45vh;
+}
+
+.Payments .settingsReport .rangeInput span{
+    margin: auto .5vh;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: #aaa;
+}
+
+.Payments .settingsReport .rangeInput .FormInput{
+    margin: auto 1vh;
+    position: relative;
+    min-width: 10vw;
+}
+
+.Payments .settingsReport .rangeInput .FormInput .inputContainer input{
+    box-shadow: none;
+}
+
+.Payments .settingsReport .FormInput label{
+    position: absolute;
+    top: -3vh;
+    font-size: clamp(2px,2.2vh,22px);
+    display: none;
+}
+
+.Payments .settingsReport .FormButton{
+    margin: auto;
+    margin-right: 1vh;
+    font-size: clamp(2.2px,1.8vh,22px) !important;
+    width: fit-content;
+    padding: 1vh 2vh;
+}
+
+.Payments .settingsReport .ButtonDownload{
+    margin: auto;
+    margin-right: 1vh;
+    font-size: clamp(2.2px,1.8vh,22px) !important;
+    width: fit-content;
+    padding: 1vh 2vh;
+}
+
+.Payments .SpaceReport .TableReport .headTable{
+    width: auto;
+}
+
+.Payments .SpaceReport .TableReport .bodyTable .RowTableReport{
+    width: auto;
+}

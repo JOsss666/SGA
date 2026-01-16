@@ -25,7 +25,7 @@
 }
 
 .BanksDetails .CarrouselOptions .activeSec{
-    color: #121212;
+    color: var(--mainText);
 }
 
 .BanksDetails .CarrouselOptions .CarrouselIndicator{
@@ -33,7 +33,7 @@
     bottom: 0;
     width: 14vw;
     height: .15vh;
-    background-color: #121212;
+    background-color: var(--mainText);
     border: .5vh;
     transition: .3s;
 }
