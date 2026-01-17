@@ -12,8 +12,12 @@ import { useAppInfo } from '../../../context/context';
 import './BanksDetails.css';
 import { DescriptionSpan } from '../components/DescriptionSpan';
 import { useNavigate, useParams } from "react-router-dom";
+import { FormInput } from '../components/FormInput';
+import { ButtonMenu } from '../components/ButtonMenu';
 
 export function BanksDetails() {
+
+    const [info, setInfo] = useState([]);
 
     /* VARIABLES PATCH */
     const location = useLocation();
@@ -132,13 +136,31 @@ export function BanksDetails() {
             <div className="MenuBarDetailBank">
                 <SearchBar placeholder="Buscar" action={setSearch} />
 
-                <i className="fa-solid fa-bars IconList" />
-                <i className="fa-solid fa-table-cells-large IconList" />
+                <div className="rangeInput">
+                    <FormInput type={"date"} />
+                    <span>-</span>
+                    <FormInput type={"date"} />
+                </div>
 
                 <SelectOptions
-                    title="Orden"
-                    options={["Ascendente", "Descendente"]}
+                    options={[
+                    "Ascendente (fecha)",
+                    "Descendente (fecha)",
+                    "Ascendente (Nombre)",
+                    "Descendente (Nombre)",
+                    ]}
+                    title={"Orden"}
                 />
+
+                <ButtonMenu
+                    title={"Mas Ajustes"}
+                    noRotate={true}
+                >
+                    <i className="fa-solid fa-sliders" />
+                </ButtonMenu>
+
+                <i className="fa-solid fa-bars IconList" />
+                <i className="fa-solid fa-table-cells-large IconList" />
 
                 <FormButton text="Crear nuevo">
                     <i className="fa-solid fa-plus" />
