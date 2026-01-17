@@ -127,8 +127,9 @@ inventoryController.createProduct = (req,res)=>{
                     taxed,
                     tax_id,
                     img,
+                    type,
                     description)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id ;`
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id ;`
         let consulta = await useDataBase(sentence,[
                     info.company_id,
                     info.code,
@@ -140,6 +141,7 @@ inventoryController.createProduct = (req,res)=>{
                     info.taxed,
                     info.tax_id,
                     info.photo,
+                    info.type_product,
                     info.description],3);
         console.log('---> ',consulta);
         let insert_id = parseInt(consulta.id);
