@@ -13,7 +13,11 @@ import { FileInput } from '../../components/FileInput'
 import { FormNewCategory } from './FormNewCategory'
 import { SwitchOption } from '../../components/SwitchOption'
 
-export function FormNewProduct({reloadFun}){
+export function FormNewProduct({info,update,reloadFun}){
+
+    if(info == undefined){
+        info = {}
+    }
 
     // requiremts
     const {appInfo} = useAppInfo();
@@ -34,6 +38,7 @@ export function FormNewProduct({reloadFun}){
     // form info
         // Sec 1
         const [photo,setPhoto] = useState('https://res.cloudinary.com/djjxugmni/image/upload/v1764620093/ChatGPT_Image_1_dic_2025_15_04_38_3_hcdqxl.png');
+        const [type_product,setType_product] = useState('product');
         const [name,setName] = useState('');
         const [code,setCode] = useState('');
         const [description,setDescription] = useState('');
@@ -43,12 +48,12 @@ export function FormNewProduct({reloadFun}){
         const [stock,setStock] = useState(0);
         const [availableDate,setAvailableDate] = useState('');
         const [sellDescription,setSellDescription] = useState('');
-        const [sellConcept,setSellConcept] = useState('');
+        const [sellConcept,setSellConcept] = useState();
         const [taxed,setTaxed] = useState(false);
         const [tax_id,setTax_id] = useState();
         // Sec 3
         const [defaultSupplier,setDefaultSupplier] = useState();
-        const [purchaseConcept,setPurchaseConcept] = useState('');
+        const [purchaseConcept,setPurchaseConcept] = useState();
     const formInfo = {
         company_id:appInfo.company_id,
         photo,
@@ -64,7 +69,8 @@ export function FormNewProduct({reloadFun}){
         sellConcept,
         purchaseConcept,
         tax_id,
-        taxed
+        taxed,
+        type_product
     }
 
     const getThirdParties = async()=>{
@@ -183,6 +189,13 @@ export function FormNewProduct({reloadFun}){
     }
 
     useEffect(()=>{
+        if(type_product == 'service'){
+            setStock(1);
+            setUnits('unit');
+        }
+    },[type_product])
+
+    useEffect(()=>{
         if(!taxed){
             setTax_id(undefined);
         }else{
@@ -219,6 +232,15 @@ export function FormNewProduct({reloadFun}){
                                 <i className="fa-solid fa-camera"/>
                             </FileInput>
                         </div>
+                        {info.type == undefined && (
+                            <SearchinList title={'Tipo de producto o servicio'} placeHolder={'Producto'} action={setType_product} list={[
+                                {text:'Producto',value:'product'},
+                                {text:'Servicio',value:'service'},
+                                {text:'Consumo',value:'consume'},
+                                {text:'Activo fijo',value:'fixed asset'},
+                                {text:'Combo o Kit',value:'kit'}
+                            ]}/>
+                        )}
                         <FormInput title={'Código'} action={setCode} placeholder={'SKU#....'} value={code} disabled={disabled}/>
                         <FormInput title={'Nombre'} action={setName} placeholder={'Nombre de tu producto'} value={name} disabled={disabled}/>
                         <SearchinList title={'Categorias'} action={setCategory_id} placeHolder={'Seleccine una o varias'} list={categories} specialOption={
@@ -231,9 +253,13 @@ export function FormNewProduct({reloadFun}){
                 )}
                 {stage == 1 && (
                     <section>
-                        <SearchinList title={'Unidades de medida'} action={setUnits} placeHolder={'Seleccione unidad'} list={meassureUnits}/>
-                        <FormInput title={'Stock'} action={setStock} placeholder={'0 unidades'} value={stock} disabled={disabled}/>
-                        <SearchinList title={'Concepto de compra'} action={setPurchaseConcept} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>  
+                        {(type_product == 'product' || type_product == 'consume') && (
+                            <>
+                                <SearchinList title={'Unidades de medida'} action={setUnits} placeHolder={'Seleccione unidad'} list={meassureUnits}/>
+                                <FormInput title={'Stock'} action={setStock} placeholder={'0 unidades'} value={stock} disabled={disabled}/>
+                                <SearchinList title={'Concepto de compra'} action={setPurchaseConcept} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>  
+                            </>
+                        )}
                         <FormInput title={'Disponible a partir de'} action={setAvailableDate} value={availableDate} type={'date'} disabled={disabled}/>
                     </section>
                 )}
