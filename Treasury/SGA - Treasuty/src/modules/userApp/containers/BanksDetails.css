@@ -45,12 +45,41 @@
     width: fit-content;
     gap: 2vh;
     align-items: center;
-    padding-left: 3vh;
 }
 
 .BanksDetails .MenuBarDetailBank .SearchBar{
     width: 38vh;
     padding-right: 1.5vh;
+}
+
+
+.BanksDetails .MenuBarDetailBank .rangeInput{
+    display: flex;
+    margin: auto 0;
+    width: 45vh;
+}
+
+.BanksDetails .MenuBarDetailBank .rangeInput span{
+    margin: auto .5vh;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: #aaa;
+}
+
+.BanksDetails .MenuBarDetailBank .rangeInput .FormInput{
+    margin: auto 1vh;
+    position: relative;
+    min-width: 10vw;
+}
+
+.BanksDetails .MenuBarDetailBank .rangeInput .FormInput .inputContainer input{
+    box-shadow: none;
+}
+
+.BanksDetails .MenuBarDetailBank .FormInput label{
+    position: absolute;
+    top: -3vh;
+    font-size: clamp(2px,2.2vh,22px);
+    display: none;
 }
 
 .BanksDetails .MenuBarDetailBank .IconList{

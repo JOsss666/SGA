@@ -8,9 +8,13 @@
     gap: 2vh;
 }
 
+.Banks .BoldTitle{
+    padding-left: 3vh;
+}
+
 .Banks .HeadBanks{
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: space-between;
     padding: 2vh;
     padding-left: 3vh;

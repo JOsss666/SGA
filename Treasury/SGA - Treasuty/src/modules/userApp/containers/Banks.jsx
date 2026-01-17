@@ -94,25 +94,26 @@ export function Banks() {
 
     return (
         <div className="Banks">
+            <BoldTitle text="Bancos" />
             <div className="HeadBanks">
-                <BoldTitle text="Bancos" />
-                <DescriptionSpan text="Analiza, gestiona y parametriza los módulos de tu empresa" />
-            </div>
+                <div className="Head">
+                    <DescriptionSpan text="Analiza, gestiona y parametriza los módulos de tu empresa" />
+                </div>
+                <div className="MenuBarBanks">
+                    <SearchBar placeholder="Buscar" action={setSearch} />
 
-            <div className="MenuBarBanks">
-                <SearchBar placeholder="Buscar" action={setSearch} />
+                    <i className="fa-solid fa-bars IconList" />
+                    <i className="fa-solid fa-table-cells-large IconList" />
 
-                <i className="fa-solid fa-bars IconList" />
-                <i className="fa-solid fa-table-cells-large IconList" />
+                    <SelectOptions
+                        title="Orden"
+                        options={["Ascendente", "Descendente"]}
+                    />
 
-                <SelectOptions
-                    title="Orden"
-                    options={["Ascendente", "Descendente"]}
-                />
-
-                <FormButton text="Crear nuevo">
-                    <i className="fa-solid fa-plus" />
-                </FormButton>
+                    <FormButton text="Crear nuevo">
+                        <i className="fa-solid fa-plus" />
+                    </FormButton>
+                </div>
             </div>
 
             <div className="TableBanks">
