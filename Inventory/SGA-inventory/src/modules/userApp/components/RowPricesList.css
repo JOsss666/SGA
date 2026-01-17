@@ -1,70 +1,55 @@
 
 .RowPricesList{
     display: flex;
-    background-color: #efefef70;
+    background-color: var(--bg);
     backdrop-filter: blur(.5vh);
     border: solid .1vh #E3E3E3;
     border-top: 0;
     margin-top: .1vh;
     border-radius: 1vh;
     transition: .3s;
+    gap: 1vh;
+    padding:0 1vh;
 }
 
-.ActualListProduct{
-    background-color: #abebc680;
-}
-
-.RowPricesList:hover{
-    margin-left: 1vh;
-    background-color: #fff;
-    box-shadow: 0 .4vh 1vh #0002;
-    z-index: 2;
-}
-
-.RowPricesList span{
-    color: #747474;
-    font-size: clamp(1px,2vh,20px);
-    font-weight: 500;
-    width: 25vh;
-    padding: 1.5vh 1vh;
-    padding-left: 2vh;
+.RowPricesList .ElementRow{
+    width: fit-content;
     margin: auto 0;
+    padding: .1vh;
 }
 
-.RowPricesList .editableSpan{
-    position: relative;
-    align-items: center;
+.RowPricesList .ElementRow .rowSpan{
+    padding: .9vh 1vh;
+    width: 10vw;
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
 }
 
-.RowPricesList .editableSpan .BoldButton{
-    position: absolute;
-    right: 1.5vh;
-    top: 1vh;
-    height: 3.5vh;
-    width: 3.5vh;
-    box-shadow: none;
-    outline: solid .1vh #ccc;
+.RowPricesList .ElementRow .idHolder{
+    width: 5vw;
 }
 
-.RowPricesList .editableSpan .BoldButton i{
-    font-size: clamp(2px,2.2vh,20px) !important;
+
+.RowPricesList .ElementRow .valueUpdateIn{
+    width: 10vw;
+    height: 5vh;
+    padding: 0 1vh;
+    margin: auto 0;
+    box-sizing: border-box;
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+    border: solid .1vh var(--inputsBorder);
+    background-color: var(--inputsBg);
+    border-radius: 1vh;
+    text-align: right;
 }
 
-.RowPricesList .multipleSelect{
-    text-decoration: underline;
-    text-underline-offset: .5vh;
-    color: #3498db;
-    cursor: pointer;
+.RowPricesList .ElementRow .valueUpdateIn:hover{
+    background-color: var(--cardHover);
 }
 
-.RowPricesList span:nth-child(1){
-    width: 18vh;
-}
-
-.RowPricesList span:nth-child(2){
-    width: 30vh;
-}
-
-.RowPricesList span:nth-child(3){
-    width: 30vh;
+.RowPricesList .ElementRow .valueUpdateIn:focus{
+    background-color: var(--inputsBg);
+    color: var(--mainText);
+    outline: solid .2vh #007AFF;
 }

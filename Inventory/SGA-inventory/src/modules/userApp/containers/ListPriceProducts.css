@@ -15,8 +15,8 @@
 }
 
 .ListPriceProducts .headDataLsit .informationList{
-    width: 60%;
-    max-width: 25vw;
+    width: 100%;
+    max-width: 40vw;
     display: flex;
     flex-wrap: wrap;
     max-height: 10vh;
@@ -51,32 +51,76 @@
     top: 1vh;
 }
 
-.ListPriceProducts .filtersList{
+.ListPriceProducts .settingsReport{
     display: flex;
-    width: 100%;
-    padding: 1vh;
+}
+
+.ListPriceProducts .settingsReport .SearchBar{
+    height: 4.5vh;
+    width: 20vw;
     margin-top: 1vh;
-    position: relative;
-}
-
-.ListPriceProducts .filtersList .clearFilters{
     height: 5vh;
-    width: 5vh;
+    margin-right: 3vh;
+}
+
+.ListPriceProducts .settingsReport .SelectOptions{
+    margin: auto 2vh;
+} 
+
+.ListPriceProducts .settingsReport .ButtonMenu{
+    margin: auto 1vh;
+}
+
+.ListPriceProducts .settingsReport .AiButton{
+    margin: auto 1vh;
+}
+
+.ListPriceProducts .settingsReport .SelectOptions .contentOptions{
+    box-shadow: none ;
+}
+
+.ListPriceProducts .settingsReport .rangeInput{
     display: flex;
-    border-radius: 100%;
-    cursor: pointer;
-    margin: auto 1vh;
-    transition: .3s;
+    margin: auto 0;
 }
 
-.ListPriceProducts .filtersList .SearchBar{
-    width: 36vh;
-    margin: auto 1vh;
-    margin-left: 0;
+.ListPriceProducts .settingsReport .rangeInput span{
+    margin: auto .5vh;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: #aaa;
 }
 
-.ListPriceProducts .filtersList .SelectOptions{
+.ListPriceProducts .settingsReport .rangeInput .FormInput{
     margin: auto 1vh;
+    position: relative;
+    min-width: 10vw;
+}
+
+.ListPriceProducts .settingsReport .rangeInput .FormInput .inputContainer input{
+    box-shadow: none;
+}
+
+.ListPriceProducts .settingsReport .FormInput label{
+    position: absolute;
+    top: -3vh;
+    font-size: clamp(2px,2.2vh,22px);
+    display: none;
+}
+
+.ListPriceProducts .settingsReport .FormButton{
+    margin: auto;
+    margin-right: 1vh;
+    font-size: clamp(2.2px,1.8vh,22px) !important;
+    width: fit-content;
+    padding: 1vh 2vh;
+}
+
+.ListPriceProducts .settingsReport .ButtonDownload{
+    margin: auto;
+    margin-right: 1vh;
+    font-size: clamp(2.2px,1.8vh,22px) !important;
+    width: fit-content;
+    padding: 1vh 2vh;
 }
 
 

@@ -50,6 +50,7 @@
 
 .FormInput .inputContainer textarea{
     height: 15vh;
+    font-size: clamp(2.2px,2.2vh,22px);
 }
 
 .FormInput .inputContainer input:focus, .FormInput .inputContainer textarea:focus{
