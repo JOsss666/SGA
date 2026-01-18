@@ -1,0 +1,63 @@
+@import './UserApp.css';
+
+
+.TableReport{
+    max-height: 100%;
+    height: fit-content;
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: .1vh;
+}
+
+.TableReport .headTable{
+    display: flex;
+    padding: 1vh;
+    background-color: var(--menuAside);
+    border-radius: .5vh;
+    box-shadow: 0 .4vh .5vh var(--translucidMenu);
+    outline: solid .1vh var(--inputsBorder);
+    z-index: 1;
+    transition: .3s;
+    width: 100%;
+}
+
+.TableReport .headTable .headColumn{
+    font-size: clamp(2px,2vh,20px);
+    margin: auto 1vh;
+    width: 10vw;
+    padding: 1vh;
+    overflow: hidden;
+    white-space: none;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 400;
+    color: var(--mainText);
+}
+
+.TableReport .bodyTable{
+    overflow-y: auto;
+}
+
+.TableReport .headTable .headColum_ID,
+.TableReport .headTable .headColum_Estado,
+.TableReport .headTable .headColum_Serial,
+.TableReport .headTable .headColum_Documento
+{
+    width: 5vw;
+}
+
+.TableReport .headTable .headColum_Unidades{
+    width: 7vw;
+}
+
+.TableReport .headTable .headColum_Naturaleza,
+.TableReport .headTable .headColum_Valor,
+.TableReport .headTable .headColum_Subtotal,
+.TableReport .headTable .headColum_Costo,
+.TableReport .headTable .headColum_Unidades
+{
+    text-align: right;
+    padding-right: 3vh;
+}

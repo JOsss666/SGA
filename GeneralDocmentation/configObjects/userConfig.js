@@ -120,10 +120,16 @@ let userConfig = {
                 "overAll":true
             },
             "thirdparties":{
-                "overAll":true
+                "overAll":true,
+                "can_create":false,
+                "can_delete":false,
+                "can_edit":false
             },
             "users":{
-                "overAll":true
+                "overAll":true,
+                "can_create":false,
+                "can_delete":false,
+                "can_edit":false
             },
             "reports":{
                 "overAll":true,

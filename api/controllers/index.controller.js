@@ -125,7 +125,9 @@ controller.getUserInfo = (req,res)=>{
                 SELECT
                     "Ecosystem".users.* ,
                     "Ecosystem".users_access.*,
-                    "Ecosystem"."users_config".config
+                    "Ecosystem"."users_config".role,
+                    "Ecosystem".roles.name AS user_roll,
+                    "Ecosystem".roles.config
                 FROM 
                     "Ecosystem".users 
                 LEFT JOIN
@@ -136,6 +138,10 @@ controller.getUserInfo = (req,res)=>{
                     "Ecosystem"."users_config"
                 ON
                     "Ecosystem".users.user_id = "Ecosystem"."users_config".user_id
+                LEFT JOIN
+                    "Ecosystem".roles
+                ON
+                    "Ecosystem".users_config.role = "Ecosystem".roles.id
                 WHERE
                     "Ecosystem".users.user_key = $1 ;`
             let consulta = await useDataBase(sentence,[info],1);
@@ -159,6 +165,21 @@ controller.getUsers = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`"Ecosystem".users.company_id = $1`);
+        values.push(info.company_id);
+
+        if(info.status){
+            whereClauses.push(`"Ecosystem".users.status = $${values.length +1}`)
+            values.push(info.status);
+        }
+    
+        const whereQuery = whereClauses.length > 0
+        ? `WHERE ${whereClauses.join(" AND ")}`
+        : "";
+
         let sentence = `
             SELECT
                 "Ecosystem".users.*,
@@ -169,11 +190,10 @@ controller.getUsers = (req,res)=>{
                 "Ecosystem".users_access
             ON
                 "Ecosystem".users.user_id = "Ecosystem".users_access.user_id
-            WHERE
-                "Ecosystem".users.company_id = $1
+            ${whereQuery}
             ORDER BY "Ecosystem".users.user_name ASC;  
         `;
-        let consulta = await useDataBase(sentence,[info.company_id],1);
+        let consulta = await useDataBase(sentence,values,1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -548,14 +568,14 @@ controller.signUp = (req,res)=>{
             VALUES($1,$2,$3,$4,$5) RETURNING user_id;
         `;
         let newUserKey = encrypt(`${info.name.slice(1,info.name.length -1)}${info.mail.split('@')[0]}|SGA_ab26212caa96090eacaebbf1**_${info.pass}${actualDate.toISOString()}`);
-        let consulta = await useDataBase(sentence,[info.company_id,info.name,info.mail,encrypt(info.pass),newUserKey],3);
-        let insert_id = parseInt(consulta)
-        if(typeof(insert_id) == 'number'){
+        const consulta = await useDataBase(sentence,[info.company_id,info.name,info.mail,encrypt(info.pass),newUserKey],3);
+        let insert_id = parseInt(consulta.user_id)
+        console.log(insert_id)
+        if (!isNaN(insert_id) && insert_id !== null){
             let posSen = `
                 INSERT INTO 
                     "Ecosystem".users_access 
                         (user_id,
-                        user_roll,
                         sga_inventory_access,
                         sga_process_access,
                         sga_contability_access,
@@ -564,16 +584,11 @@ controller.signUp = (req,res)=>{
                         sga_treasury_access,
                         sga_ctools_access
                         )
-                VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
-
-                INSERT INTO "Ecosystem".users_config(
-                    company_id,user_id)
-                VALUES ($1,$10);
+                VALUES($1,$2,$3,$4,$5,$6,$7,$8);
                 ;
             `;
             let posCon = await useDataBase(posSen, [
-                consulta.user_id,               
-                info.userRol,             
+                consulta.user_id,                   
                 info.accessInventory,     
                 info.accessProcess,       
                 info.accessContability,   
@@ -581,9 +596,16 @@ controller.signUp = (req,res)=>{
                 info.accessTreasury,      
                 info.accessCerticloud,    
                 info.accessCtools,
-                info.company_id       
             ], 2);
-            if(posCon){
+            let insertConfig = await useDataBase(`
+                INSERT INTO "Ecosystem".users_config(
+                    company_id,user_id)
+                VALUES ($1,$2);`,[info.company_id,consulta.user_id],2)
+            let insertRole = await useDataBase(`
+                INSERT INTO "Ecosystem".users_config(
+                    user_id, company_id, role)
+                VALUES ($1, $2, $3);`,[consulta.user_id,info.company_id, info.userRol],2)
+            if(posCon && insertConfig && insertRole){
                 res.writeHead(200,{'Content-Type':'text/plain'})
                 res.end(JSON.stringify(true));
             }else{
@@ -592,7 +614,7 @@ controller.signUp = (req,res)=>{
             }
         }else{
             res.writeHead(200,{'Content-Type':'text/plain'})
-            res.end(JSON.stringify(false));
+            res.end(JSON.stringify(consulta));
         }
     })
     req.on('error',(err)=>{

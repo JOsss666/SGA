@@ -1,0 +1,115 @@
+
+.ReportDocument{
+    display: flex;
+    flex-direction: column;
+}
+
+.ReportDocument .headReport{
+    margin: 1vh;
+    margin-bottom: 3vh;
+}
+
+.ReportDocument .settingsReport{
+    display: flex;
+    position: relative;
+}
+
+.ReportDocument .settingsReport .SearchBar{
+    height: 4.5vh;
+    width: 20vw;
+    margin-top: 1vh;
+    height: 5vh;
+    margin-right: 3vh;
+}
+
+.ReportDocument .settingsReport .SelectOptions{
+    margin: auto 2vh;
+} 
+
+.ReportDocument .settingsReport .ButtonMenu{
+    margin: auto 1vh;
+}
+
+.ReportDocument .settingsReport .AiButton{
+    margin: auto 1vh;
+}
+
+.ReportDocument .settingsReport .SelectOptions .contentOptions{
+    box-shadow: none ;
+}
+
+.ReportDocument .settingsReport .rangeInput{
+    display: flex;
+    margin: auto 0;
+}
+
+.ReportDocument .settingsReport .rangeInput span{
+    margin: auto .5vh;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: #aaa;
+}
+
+.ReportDocument .settingsReport .rangeInput .FormInput{
+    margin: auto 1vh;
+    position: relative;
+    min-width: 10vw;
+}
+
+.ReportDocument .settingsReport .rangeInput .FormInput .inputContainer input{
+    box-shadow: none;
+}
+
+.ReportDocument .settingsReport .FormInput label{
+    position: absolute;
+    top: -3vh;
+    font-size: clamp(2px,2.2vh,22px);
+    display: none;
+}
+
+.ReportDocument .settingsReport .FormButton{
+    margin: auto;
+    margin-right: 1vh;
+    font-size: clamp(2.2px,1.8vh,22px) !important;
+    width: fit-content;
+    padding: 1vh 2vh;
+}
+
+.ReportDocument .settingsReport .ButtonDownload{
+    margin: auto;
+    margin-right: 1vh;
+    font-size: clamp(2.2px,1.8vh,22px) !important;
+    width: fit-content;
+    padding: 1vh 2vh;
+}
+
+.ReportDocument .SpaceReport{
+    margin-top: 2vh;
+    max-width: 100%;
+    overflow-x: auto;
+    height: 60vh;
+    padding: .1vh;
+}
+
+.ReportDocument .totalsBalanceC{
+    position: absolute;
+    display: flex;
+    gap: 4vh;
+    right: 3vw;
+    top: 6vh;
+}
+
+.ReportDocument .totalsBalanceC .LabelValue{
+    display: flex;
+    flex-direction: column;
+    max-width: 12vw;
+}
+
+.ReportDocument .totalsBalanceC .LabelValue .lab ,.ReportDocument .totalsBalanceC .LabelValue .val{
+    width: 100% ;
+    text-wrap: nowrap;
+}
+
+.ReportDocument .totalsBalanceC .LabelValue .val{
+    font-weight: 400 !important;
+    margin-top: 1vh;
+}

@@ -1,0 +1,88 @@
+
+@import './UserApp.css';
+
+.MenuApp{
+    padding: 1vh 2vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.MenuApp h3{
+    font-size: clamp(2px,2.5vh,30px);
+    font-weight: 500;
+    margin-left: 1vh;
+    margin-bottom: 1.5vh;
+    color: #878787;
+}
+
+.HiddenMenu h3{
+    width: 100%;
+    margin-left: 0;
+    margin-top: 3vh;
+    border-bottom: solid .2vh #ccc;
+}
+
+
+.MenuApp .listOptions{
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    padding-left: 1vh;
+}
+
+.HiddenMenu .listOptions{
+    padding-left: 0;
+}
+
+.MenuApp .listOptions li{
+    margin-bottom: 1vh;
+    font-size: clamp(2px,2.5vh,30px);
+    font-weight: 400;
+    color: var(--descriptionText);
+    padding: 1vh 1.5vh;
+    border-radius: .5vh;
+    transition: .3s;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+}
+
+.HiddenMenu .listOptions li{
+    padding: 1vh 1vh;
+    margin: 0 auto ;
+    margin-bottom: 1vh;
+}
+
+.MenuApp .listOptions li img{
+    height: 3.5vh;
+    width: 3.5vh;
+}
+
+.MenuApp .listOptions li:hover{
+    background-color: var(--iconHover);
+}
+
+.MenuApp .listOptions li .despleSiubMe{
+    position: absolute;
+    top: 1.5vh;
+    right: 2vh;
+}
+
+.MenuApp .listOptions li i{
+    margin-right: 1.5vw;
+    font-size: clamp(2px,3vh,30px);
+    color: var(--sectionTitle);
+}
+
+.MenuApp .listOptions li span{
+    margin: auto 0;
+}
+
+
+.HiddenMenu .listOptions li i{
+    margin-right: 0;
+}
+
+.visibleMenu .listOptions li img{
+    margin-right: 2vh;
+}

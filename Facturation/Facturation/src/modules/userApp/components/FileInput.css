@@ -1,0 +1,38 @@
+
+
+.FileInput{
+    padding: 2vh;
+    border-radius: 2vh;
+    outline: dashed .2vh var(--inputsBorder);
+    transition: .3s;
+    cursor: pointer;
+    height: 100%;
+    width: 100%;
+}
+
+.FileInput .spaceInput{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.FileInput .spaceInput i{
+    margin: auto;
+    margin-bottom: .5vh;
+    font-size: clamp(3.5px,3.5vh,35px);
+    color: var(--descriptionText);
+}
+
+.FileInput .spaceInput strong{
+    margin: auto;
+    margin-top: 1vh;
+    font-size: clamp(2.5px,2.2vh,25px);
+    font-weight: 400;
+    color:var(--sectionTitle) ;
+    text-align: center;
+}
+
+.FileInput:hover{
+    background-color: var(--iconHover);
+}
