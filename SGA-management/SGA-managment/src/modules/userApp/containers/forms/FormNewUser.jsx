@@ -25,7 +25,7 @@ export function FormNewUser({info,reloadFun}){
     const [name,setName] = useState('');
     const [mail,setMail] = useState('');
     const [pass,setPass] = useState('');
-    const [userRol,setUserRol] = useState('');
+    const [userRol,setUserRol] = useState();
     const [accessInventory,setAccessInventory] = useState(false)
     const [accessContability,setAccessContability] = useState(false)
     const [accessProcess,setAccessProcess] = useState(false)
@@ -66,6 +66,10 @@ export function FormNewUser({info,reloadFun}){
             setRoles(C);
         }
     }
+
+    useEffect(()=>{
+        console.log(userRol)
+    },[userRol])
 
     const createUser = async()=>{
         setDisabled(true)

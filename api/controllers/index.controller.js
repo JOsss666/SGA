@@ -624,15 +624,11 @@ controller.signUp = (req,res)=>{
                 info.accessCerticloud,    
                 info.accessCtools,
             ], 2);
-            let insertConfig = await useDataBase(`
-                INSERT INTO "Ecosystem".users_config(
-                    company_id,user_id)
-                VALUES ($1,$2);`,[info.company_id,consulta.user_id],2)
             let insertRole = await useDataBase(`
                 INSERT INTO "Ecosystem".users_config(
                     user_id, company_id, role)
                 VALUES ($1, $2, $3);`,[consulta.user_id,info.company_id, info.userRol],2)
-            if(posCon && insertConfig && insertRole){
+            if(posCon && insertRole){
                 res.writeHead(200,{'Content-Type':'text/plain'})
                 res.end(JSON.stringify(true));
             }else{
