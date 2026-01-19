@@ -124,7 +124,7 @@ export function UserApp(){
     }, [visibleNotifications]);
 
     useEffect(()=>{
-        if(!userConfig.access != undefined){
+        if(userConfig.access != undefined){
             if(!userConfig.access.suspended){
                 if(userConfig.access.modules.management.use == true){
                     setStatusPage('page')
