@@ -124,7 +124,7 @@ export function UserApp(){
     }, [visibleNotifications]);
 
     useEffect(()=>{
-        if(userConfig.access != undefined){
+        if(!userConfig.access != undefined){
             if(!userConfig.access.suspended){
                 if(userConfig.access.modules.management.use == true){
                     setStatusPage('page')
@@ -134,14 +134,8 @@ export function UserApp(){
             }else{
                 setStatusPage('suspended')
             }
-            console.log(userConfig.access.suspended);
-            console.log(userConfig.access.modules.management.use);
         }
     },[userConfig])
-
-    useEffect(()=>{
-        console.log(statusPage);
-    },[statusPage])
 
     return(
         <div className={`UserApp`}>

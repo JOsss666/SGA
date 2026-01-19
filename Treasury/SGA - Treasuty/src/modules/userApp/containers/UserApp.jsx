@@ -45,14 +45,17 @@ import { Banks } from './Banks';
 import { BanksDetails } from './BanksDetails';
 import { Payments } from './Payments';
 import { Collections } from './Collections';
+import {NoAccess} from './NoAccess'
+import {SuspendedAccount} from './SuspendedAcount'
 
 export function UserApp(){
 
     // Context Info
-    const {appInfo,userInfo,loadingAppData,darkMode,getAppData,optionsMenu,secondOptionsMenu,toolsMenu,routesApp} = useAppInfo();
+    const {appInfo,userInfo,loadingAppData,darkMode,getAppData,optionsMenu,secondOptionsMenu,toolsMenu,routesApp, userConfig} = useAppInfo();
     const {openPreview,setOpenPreview} = usePreview();
     const {openAlert,popOutAlert} = useAlert();
     const {visibleChatAi,setVisibleChatAi} = useAiAssistant();
+    const [statusPage,setStatusPage] = useState('loading');
 
     // Container Params
     const [visibleMenu,setVisibleMenu] = useState(false);
@@ -122,10 +125,24 @@ export function UserApp(){
         }
     }, [visibleNotifications]);
 
+    useEffect(()=>{
+        if(userConfig.access != undefined){
+            if(!userConfig.access.suspended){
+                if(userConfig.access.modules.treasury.use == true){
+                    setStatusPage('page')
+                }else{
+                    setStatusPage('noAccess');
+                }
+            }else{
+                setStatusPage('suspended')
+            }
+        }
+    },[userConfig])
+
 
     return(
         <div className={`UserApp`}>
-            {!loadingAppData && (
+            {!loadingAppData  && statusPage=='page' &&  (
                 <>
                     <header className='headApp'>
                     <SearchBar placeholder={`Buscar en ${appInfo.legal_name} - Tesoreria`} action={setQuickSearch}/>
@@ -213,6 +230,12 @@ export function UserApp(){
             )}
             {loadingAppData && (
                 <LoadingAppDataPage/>
+            )}
+            {!loadingAppData && statusPage == 'noAccess' && (
+                <NoAccess/>
+            )}
+            {!loadingAppData && statusPage == 'suspended' && (
+                <SuspendedAccount/>
             )}
         </div>
     )
