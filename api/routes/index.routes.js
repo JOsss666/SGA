@@ -34,6 +34,8 @@ const upload = multer({ dest: CHUNKS_DIR });
 
     router.post('/deleteUser',controller.deleteUser);
 
+    router.post('/getRoles',controller.getRoles);
+
 router.post('/getCompanyInfo',controller.getCompanyInfo);
 
 router.post('/getUserInfo',controller.getUserInfo);
