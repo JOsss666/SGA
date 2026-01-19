@@ -127,7 +127,7 @@ let userConfig = {
             },
             "users":{
                 "overAll":true,
-                "can_create":false,
+                "can_create":true,
                 "can_delete":false,
                 "can_edit":false
             },

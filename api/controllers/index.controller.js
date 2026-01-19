@@ -456,6 +456,10 @@ controller.getStores = (req,res)=>{
             values.push(info.id)
         }
 
+        if(info.allowedStores != undefined){
+            whereClauses.push(`id = ANY($${values.length +1})`);
+            values.push(info.allowedStores);
+        }
         
         const whereQuery = whereClauses.length > 0
                 ? `WHERE ${whereClauses.join(" AND ")}`
