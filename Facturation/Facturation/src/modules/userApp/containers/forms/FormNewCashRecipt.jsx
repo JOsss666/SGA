@@ -1,0 +1,345 @@
+import { useEffect, useState } from "react";
+import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
+import { BoldTitle } from "../../components/BoldTitle";
+import { SearchinList } from "../../components/SearchInList";
+import { FormInput } from "../../components/FormInput";
+import { InputFiles } from "../../components/InputFiles";
+import { FormButton } from "../../components/FormButton";
+import './FormNewCashRecipt.css'
+import { FileInput } from "../../components/FileInput";
+import { id } from "date-fns/locale";
+import { LoadingSpace } from "../LoadingSpace";
+import { postInfo } from "../../../../utils/functions";
+import { NewElementSelect } from "../../components/NewElementSelect";
+import { FormNewThirdParties } from "./FormNewThirdParties";
+
+export function FormNewCashRecipt({InfoParams,reloadFun}){
+
+    // Requieremnets
+    const [info,setInfo] = useState(InfoParams != undefined? InfoParams:{})
+    const {appInfo,userInfo,userConfig} = useAppInfo();
+    const {popOutAlert,popInAlert} = useAlert();
+    const {addNotification} = useNotifications();
+    const [instances,setInstances] = useState([]);
+    const [thirdparties,setThirdParties] = useState([]);
+    const [paymentMehtods,setPaymentMethods] = useState([]);
+    const [stores,setStores] = useState([]);
+    const [bussines,setBussines] = useState([]);
+    const [costCenters,setCostCenters] = useState([]);
+    const [concepts,setConcepts] = useState([]);
+
+    // control
+    const [loading,setLoading] = useState();
+    const [disabled,setDisabled] = useState();
+    
+    // form info
+    const [thirdparty_id,setThirdParty_id] = useState();
+    const [paymentMethod,setPaymentMethod] = useState([]);
+    const [bussines_id,setBussines_id] = useState();
+    const [store_id,setStore_id] = useState();
+    const [costCenter_id,setCostCenter_id] = useState();
+    const [total,setTotal] = useState(0);
+    const [description,setDescription] = useState();
+    const [attached,setAttached] = useState();
+    const [instance_id,setInstance_id] = useState();
+    const [concept_id,setConcept_id] = useState();
+    const [status,setStatus] = useState('active');
+
+    // Object FormInfo
+    let FormInfo = {
+        paymentMethod,
+        store_id,
+        costCenter_id,
+        description,
+        concept_id,
+        company_id:appInfo.company_id,
+        created_by:userInfo.user_id,
+        thirdparty_id,
+        bussines_id,
+        document_type:'Cash Recipt',
+        status,
+        subTotal:total,
+        total,
+        attached,
+        instance_id
+    }
+
+    const formatCurrency = (value) =>
+            new Intl.NumberFormat("es-CO").format(value);
+
+    // PreProcess functions
+    const handleUserConfig = async()=>{
+        setDisabled(true)
+        setLoading(true)
+        getThirdParties();
+        let temInfo = {}
+        if(userConfig.access != undefined){
+            console.log(userConfig.access)
+            // Filtro para busqueda de tiendas
+            if(!userConfig.access.stores.overAll){
+                if(userConfig.access.stores.enabled.length > 1){
+                    // GetStores con filtro
+                    await getStores(userConfig.access.stores.enabled);
+                }else{
+                    temInfo.store_id = userConfig.access.stores.enabled[0]
+                }
+            }else{
+                // GetStores sin filtro
+                await getStores();
+            }
+
+            // Filtro para busqueda de negocios
+            if(!userConfig.access.bussines.overAll){
+                if(userConfig.access.bussines.enabled.length > 1){
+                    //GetBussines con filtro
+                    await getBussines(userConfig.access.bussines.enabled)
+                }else{
+                    temInfo.bussines_id = userConfig.access.bussines.enabled[0]
+                }
+            }else{
+                // GetBussines sin filtro
+                await getBussines();
+            }
+
+            // Filtro para busqueda de Centros de costo
+            if(!userConfig.access.costCenters.overAll){
+                if(userConfig.access.costCenters.enabled.length > 1){
+                    //GetCostCenters con filtro
+                    await getCostCenters(userConfig.access.costCenters.enabled)
+                }else{
+                    temInfo.costCenter_id = userConfig.access.costCenters.enabled[0]
+                }
+            }else{
+                // GetCostCenterSinFiltro
+                await getCostCenters();
+            }
+
+            // Filtro para busqueda de Instancias de Procesos
+            if(!userConfig.access.process_instances.overAll){
+                if(userConfig.access.process_instances.enabled.length > 1){
+                    //Getprocess_instances con array de filtro
+                }else{
+                    temInfo.instance_id = userConfig.access.process_instances.enabled[0]
+                }
+            }else{
+                //Getprocess_instances completos
+            }
+
+            // Filtro para busqueda de Metodos de pago
+            if(!userConfig.access.payments.payment_methods.overAll){
+                // GetPaymentMethods con filtro
+                await getPaymentMethods(userConfig.access.payments.payment_methods.enabled)
+            }else{
+                //GetPaymentMethods completos
+                await getPaymentMethods();
+            }
+
+        }
+        
+        if(temInfo != {}){
+            console.log(temInfo);
+            setInfo(temInfo);
+        }
+        setLoading(false);
+        setDisabled(false);
+    }
+
+    useEffect(()=>{
+        handleUserConfig();
+    },[])
+
+    // Getters of info
+
+    const getStores = async(allowedStores)=>{
+        let res = await postInfo('/getStores',{
+            company_id:appInfo.company_id,
+            allowedStores
+        })
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:element.name,
+                    value:element.id
+                })
+            });
+            setStores(C)
+        }
+    }
+
+    const getBussines = async(allowedBussines)=>{
+            let res = await postInfo('/getBussines',{
+                company_id:appInfo.company_id,
+                allowedBussines
+            })
+            if(res[0]){
+                let C = []
+                res[1].forEach(element => {
+                    C.push({
+                        text:element.name,
+                        value:element.id
+                    })
+                    setBussines(C);
+                });
+            }
+        }
+    
+    const getCostCenters = async(allowedCostCenters)=>{
+        let res = await postInfo('/getCostCenters',{
+            company_id:appInfo.company_id,
+            allowedCostCenters
+        })
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:element.name,
+                    value:element.id
+                })
+                setCostCenters(C);
+            });
+            
+        }
+    }
+
+    const getPaymentMethods = async(allowedPaymentMethods)=>{
+        let res = await postInfo('/getPaymentMethods',{
+            company_id:appInfo.company_id,
+            allowedPaymentMethods
+        })
+        console.log(res)
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:element.name,
+                    value:element
+                })
+            });
+            setPaymentMethods(C);
+        }
+    }
+
+    // Control functions
+
+    const addPaymentMethod = (newPayment) => {
+    setPaymentMethod(prev => {
+            // Verificamos si ya existe un objeto con ese ID
+            const exists = prev.some(item => item.id === newPayment.id);
+            if (exists) {
+                // Opcional: Podrías lanzar una alerta o simplemente no hacer nada
+                console.warn("Este método de pago ya ha sido agregado.");
+                alert(`El metodo de pago ${newPayment.name} ya fue agregado`)
+                return prev; 
+            }
+            // Si no existe, lo agregamos al array
+            return [...prev, newPayment];
+        });
+    };
+    const removePaymentMethod = (id) => {
+        setPaymentMethod(prev => prev.filter(item => item.id !== id));
+    };
+
+    const updatePaymentValue = (id, key, newValue) => {
+        setPaymentMethod(prev => 
+            prev.map(item => 
+                item.id === id 
+                    ? { ...item, [key]: newValue } 
+                    : item
+            )
+        );
+    };
+
+    const getThirdParties = async()=>{
+        let res = await postInfo('/getThirdParties',{company_id:appInfo.company_id});
+        if(res[0]){
+            let C = [];
+            res[1].forEach(element => {
+                C.push({
+                    text:`${element.names}  ${element.indentification_type}_${element.indentification_number}`,
+                    value:element.id
+                })
+            });
+            setThirdParties(C);
+        }
+    }
+
+    useEffect(()=>{
+        let newTTl = 0;
+        paymentMethod.forEach(element => {
+            console.log(element.value)
+            if(element.value != "" && element.value != undefined){
+                newTTl += parseFloat(element.value)
+            }
+        });
+        setTotal(newTTl);
+    },[paymentMethod])
+
+    // Creation Function
+
+
+    return(
+        <div className="FormNewCashRecipt">
+            <div className="headForm">
+                <BoldTitle text={'Recibo de caja'}>
+                    <i className="fa-solid fa-receipt"/>
+                </BoldTitle>
+
+                <h6 className="valueCashRecipt">Valor: $ {formatCurrency(total)}</h6>
+                <i className="fa-solid fa-xmark closeFormBtn" onClick={()=>{
+                    popOutAlert();
+                }}/>
+            </div>
+            {!loading && (
+                <form action="" disabled={disabled} onSubmit={(e)=>{
+                    e.preventDefault();
+                    console.log(FormInfo)
+                }}>
+                    {info.store_id == undefined && (
+                        <SearchinList action={setStore_id} title={'Tienda'} placeHolder={'Seleccione el proceso (opcional)'} list={stores} disabled={disabled}/>
+                    )}
+                    {info.bussines_id == undefined && (
+                        <SearchinList action={setBussines_id} title={'Negocio'} placeHolder={'Seleccione el proceso (opcional)'} list={bussines} disabled={disabled}/>
+                    )}
+                    {info.costCenter_id == undefined && (
+                        <SearchinList action={setCostCenter_id} title={'Centro de costo'} placeHolder={'Seleccione el proceso (opcional)'} list={costCenters} disabled={disabled}/>
+                    )}
+                    {info.instance_id == undefined && (
+                        <SearchinList action={setInstance_id} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={disabled}/>
+                    )}
+                    {info.thirdparty_id == undefined && (
+                        <SearchinList action={setThirdParty_id} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdparties} disabled={disabled} specialOption={
+                            <NewElementSelect title={'Crear nuevo'} onClick={()=>{
+                                popInAlert(<FormNewThirdParties reloadFun={getThirdParties}/>)
+                            }}/>
+                        }/>
+                    )}
+                    <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
+                    {info.paymentMethod == undefined && (
+                        <div className="paymentMehtodsContainer">
+                            <SearchinList title={'Metodos de pago'} action={addPaymentMethod} noActVal={true} placeHolder={'Selecione metodos de pago'} list={paymentMehtods}/>
+                            <div className="gridPaymentMethods">
+                                {paymentMethod.map((element,index)=>(
+                                    <div key={index} className="PaymentMethodCard">
+                                        <strong>{element.name}</strong>
+                                        <input step={0.001} type="number" placeholder="$0" onChange={(e)=>{
+                                            updatePaymentValue(element.id,"value",e.target.value)
+                                        }}/>
+                                        <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
+                                            removePaymentMethod(element.id)
+                                        }}/>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    <FileInput action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
+                    <FormButton text={'Crear recibo de caja'}/>
+                </form>
+            )}
+            {loading && (
+                <LoadingSpace title={'Cargando información'}/>
+            )}
+        </div>
+    )
+}

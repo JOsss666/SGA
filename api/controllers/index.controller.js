@@ -310,18 +310,30 @@ controller.getCostCenters = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = []
+
+        whereClauses.push(`company_id = $1`)
+        values.push(info.company_id);
+
+        if(info.allowedCostCenters != undefined){
+            whereClauses.push(`id = ANY($${values.length +1})`);
+            values.push(info.allowedCostCenters);
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
         let sentence = `
             SELECT *
             FROM
                 "Ecosystem"."costCenters"
-            WHERE
-                company_id = $1 AND id != 1
+            ${whereQuery}
             ORDER BY
                 path ASC; 
         `
-        let consulta = await useDataBase(sentence,[
-            info.company_id
-        ],1);
+        let consulta = await useDataBase(sentence,values,1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -366,18 +378,30 @@ controller.getBussines = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`company_id = $1`);
+        values.push(info.company_id)
+
+        if(info.allowedBussines != undefined){
+            whereClauses.push(`id = ANY($${values.length +1})`);
+            values.push(info.allowedBussines);
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
         let sentence = `
             SELECT *
             FROM 
                 "Ecosystem".bussines
-            WHERE
-                company_id = $1
+            ${whereQuery}
             ORDER BY
                 name ASC ; 
         `;
-        let consulta = await useDataBase(sentence,[
-            info.company_id
-        ],1)
+        let consulta = await useDataBase(sentence,values,1)
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -1222,6 +1246,21 @@ controller.getPaymentMethods = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`company_id = $1`);
+        values.push(info.company_id)
+
+        if(info.allowedPaymentMethods != undefined){
+            whereClauses.push(`id = ANY($${values.length +1})`);
+            values.push(info.allowedPaymentMethods);
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
         let sentence = `
             SELECT
                 id,
@@ -1232,11 +1271,10 @@ controller.getPaymentMethods = (req,res)=>{
                 account_id
             FROM
                 "Ecosystem".payment_methods
-            WHERE
-                company_id = $1
+            ${whereQuery}
             ORDER BY name ASC;
         `;
-        let consulta = await useDataBase(sentence,[info.company_id],1);;
+        let consulta = await useDataBase(sentence,values,1);;
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })

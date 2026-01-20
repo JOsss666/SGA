@@ -44,11 +44,30 @@ let userConfig = {
                 "onlyOwnInformation":false
             }
         },
+        "payments":{
+            "can_pay":true,
+            "payment_methods":{
+                "overAll":true,
+                "enabled":[]
+            }
+        },
+        "process_instances":{
+            "overAll":true,
+            "enabled":[]
+        },
         "stores":{
             "overAll":true,
             "enabled":[]
         },
         "cellars":{
+            "overAll":true,
+            "enabled":[]
+        },
+        "bussines":{
+            "overAll":true,
+            "enabled":[]
+        },
+        "costCenters":{
             "overAll":true,
             "enabled":[]
         },
