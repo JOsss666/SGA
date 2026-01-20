@@ -8,6 +8,8 @@ import path from "path";
 import contabiltyController from '../controllers/contabilityController.js';
 import inventoryController from '../controllers/inventoryController.js'
 import { uploadMiddleware } from '../uploadMiddleWare.js';
+import facturationController from '../controllers/facturationController.js';
+
 const router = express.Router();
 
 // temporal folder for chunks
@@ -189,6 +191,10 @@ router.post('/contability/contabiltyController', contabiltyController.getBalance
 // SGA treasury
 
 router.post('/treasury/getTreasury',controller.getAccounts); //PENDIENTE IMPLEMENTAR 
+
+// SGA Facturation
+
+router.post('/facturation/newCashRecipt',facturationController.newCashRecipt);
 
 export default router;
 

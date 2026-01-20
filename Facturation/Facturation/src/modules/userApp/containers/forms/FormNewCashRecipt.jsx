@@ -71,7 +71,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
     const handleUserConfig = async()=>{
         setDisabled(true)
         setLoading(true)
-        getThirdParties();
+        await getThirdParties();
         let temInfo = {}
         if(userConfig.access != undefined){
             console.log(userConfig.access)
@@ -82,6 +82,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
                     await getStores(userConfig.access.stores.enabled);
                 }else{
                     temInfo.store_id = userConfig.access.stores.enabled[0]
+                    setStore_id(userConfig.access.stores.enabled[0])
                 }
             }else{
                 // GetStores sin filtro
@@ -95,6 +96,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
                     await getBussines(userConfig.access.bussines.enabled)
                 }else{
                     temInfo.bussines_id = userConfig.access.bussines.enabled[0]
+                    setBussines_id(userConfig.access.bussines.enabled[0])
                 }
             }else{
                 // GetBussines sin filtro
@@ -108,6 +110,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
                     await getCostCenters(userConfig.access.costCenters.enabled)
                 }else{
                     temInfo.costCenter_id = userConfig.access.costCenters.enabled[0]
+                    setCostCenter_id(userConfig.access.costCenters.enabled[0])
                 }
             }else{
                 // GetCostCenterSinFiltro
@@ -120,6 +123,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
                     //Getprocess_instances con array de filtro
                 }else{
                     temInfo.instance_id = userConfig.access.process_instances.enabled[0]
+                    setInstance_id(userConfig.access.process_instances.enabled[0])
                 }
             }else{
                 //Getprocess_instances completos
@@ -143,6 +147,10 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
         setLoading(false);
         setDisabled(false);
     }
+
+    useEffect(()=>{
+        console.log('Valor de store_id -->',store_id);
+    },[store_id])
 
     useEffect(()=>{
         handleUserConfig();
@@ -223,18 +231,20 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
     // Control functions
 
     const addPaymentMethod = (newPayment) => {
-    setPaymentMethod(prev => {
-            // Verificamos si ya existe un objeto con ese ID
-            const exists = prev.some(item => item.id === newPayment.id);
-            if (exists) {
-                // Opcional: Podrías lanzar una alerta o simplemente no hacer nada
-                console.warn("Este método de pago ya ha sido agregado.");
-                alert(`El metodo de pago ${newPayment.name} ya fue agregado`)
-                return prev; 
-            }
-            // Si no existe, lo agregamos al array
-            return [...prev, newPayment];
-        });
+        if(newPayment.id != undefined){
+            setPaymentMethod(prev => {
+                // Verificamos si ya existe un objeto con ese ID
+                const exists = prev.some(item => item.id === newPayment.id);
+                if (exists) {
+                    // Opcional: Podrías lanzar una alerta o simplemente no hacer nada
+                    console.warn("Este método de pago ya ha sido agregado.");
+                    alert(`El metodo de pago ${newPayment.name} ya fue agregado`)
+                    return prev; 
+                }
+                // Si no existe, lo agregamos al array
+                return [...prev, newPayment];
+            });
+        }
     };
     const removePaymentMethod = (id) => {
         setPaymentMethod(prev => prev.filter(item => item.id !== id));
@@ -265,6 +275,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
     }
 
     useEffect(()=>{
+        console.log(paymentMethod)
         let newTTl = 0;
         paymentMethod.forEach(element => {
             console.log(element.value)
@@ -276,6 +287,28 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
     },[paymentMethod])
 
     // Creation Function
+
+    const createCashRecipt = async()=>{
+        setDisabled(true)
+        setLoading(true)
+        let res = await postInfo('/facturation/newCashRecipt',FormInfo);
+        if(res[0]){
+            addNotification({
+                type:'aproved',
+                title:`Recibo de caja # creado correctamente`,
+                description:`El recibo de caja # fue creado correctamente`
+            })
+        }else{
+            addNotification({
+                type:'error',
+                title:`Error al crear recibo de caja #`,
+                description:`Hubo un problema al crear el recibo de caja #.`
+            })
+        }
+        popOutAlert();
+        setLoading(false);
+        setDisabled(false);
+    }
 
 
     return(
@@ -294,6 +327,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
                 <form action="" disabled={disabled} onSubmit={(e)=>{
                     e.preventDefault();
                     console.log(FormInfo)
+                    createCashRecipt();
                 }}>
                     {info.store_id == undefined && (
                         <SearchinList action={setStore_id} title={'Tienda'} placeHolder={'Seleccione el proceso (opcional)'} list={stores} disabled={disabled}/>
