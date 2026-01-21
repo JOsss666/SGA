@@ -571,4 +571,69 @@ processController.deleteDocument =(req,res)=>{
     })
 }
 
+
+// --- new controllers for new version of process
+
+processController.getProcessInstances =(req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`"Process".process_instance.company_id = $1`);
+        values.push(info.company_id)
+
+        if(info.id != undefined){
+            whereClauses.push(`"Process".process_instance.id = $${values.length +1}`);
+            values.push(info.id);
+        }
+
+        if(info.process_id != undefined){
+            whereClauses.push(`"Process".process_instance.process_id = $${values.length +1}`);
+            values.push(info.process_id)
+        }
+
+        if(info.allowedInstances != undefined){
+            whereClauses.push(`"Process".process_instance.id = ANY($${values.length +1})`);
+            values.push(info.allowedInstances);
+        }
+
+        if(info.allowedTypes != undefined){
+            whereClauses.push(`"Process".process_instance.process_id = ANY($${values.length +1})`);
+            values.push(info.allowedTypes);
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+        let sentence = `
+            SELECT
+                "Process".process_instance.*,
+                "Process".processes.name AS process_name,
+                "Process".processes.code AS process_code,
+                "Process".processes.id AS process_id
+            FROM
+                "Process".process_instance
+            LEFT JOIN
+                "Process".processes
+            ON
+                "Process".process_instance.process_id = "Process".processes.id
+            ${whereQuery}
+            ORDER BY
+                "Process".process_instance.id DESC
+        ;`;
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err))
+    })
+}
+
 export default processController;

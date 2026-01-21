@@ -165,6 +165,8 @@ router.post('/inventory/getKardex',inventoryController.getKardex);
 
 // SGA - PROCESS
 
+router.post('/process/getProcessInstances', processController.getProcessInstances);
+
 router.post('/process/createOP', processController.createOp);
 
 router.post('/process/getOp', processController.getOp);

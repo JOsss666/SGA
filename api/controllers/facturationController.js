@@ -21,13 +21,13 @@ facturationController.newCashRecipt = (req,res)=>{
                 description, 
                 attached, 
                 instance_id)
-	    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11);
+	    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id;
     `;
         let consulta = await useDataBase(docCreation,[
             info.company_id,
             info.store_id,
-            info.thirdparty_id,
-            info.document_type,
+            info.thirdParty_id,
+            info.doc_type,
             info.status,
             info.subTotal,
             info.total,
@@ -35,7 +35,7 @@ facturationController.newCashRecipt = (req,res)=>{
             info.description,
             JSON.stringify(info.attached),
             undefined
-        ],2);
+        ],3);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })

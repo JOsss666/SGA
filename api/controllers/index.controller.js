@@ -1353,7 +1353,7 @@ controller.createTransaction = (req,res)=>{
             info.company_id,
             info.store_id,
             info.concept_id,
-            info.doc_date.replace(/\//g, '-'),
+            info.doc_date != undefined ? info.doc_date.replace(/\//g, '-'):undefined,
             info.doc_type,
             info.doc_id,
             info.subTotal,

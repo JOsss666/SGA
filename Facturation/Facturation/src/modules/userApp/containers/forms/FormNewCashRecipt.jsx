@@ -33,7 +33,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
     const [disabled,setDisabled] = useState();
     
     // form info
-    const [thirdparty_id,setThirdParty_id] = useState();
+    const [thirdParty_id,setThirdParty_id] = useState();
     const [paymentMethod,setPaymentMethod] = useState([]);
     const [bussines_id,setBussines_id] = useState();
     const [store_id,setStore_id] = useState();
@@ -43,6 +43,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
     const [attached,setAttached] = useState();
     const [instance_id,setInstance_id] = useState();
     const [concept_id,setConcept_id] = useState();
+    const [conceptAccount_id,setConcept_account_id] = useState();
     const [status,setStatus] = useState('active');
 
     // Object FormInfo
@@ -54,9 +55,9 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
         concept_id,
         company_id:appInfo.company_id,
         created_by:userInfo.user_id,
-        thirdparty_id,
+        thirdParty_id,
         bussines_id,
-        document_type:'Cash Recipt',
+        doc_type:'Cash Recipt',
         status,
         subTotal:total,
         total,
@@ -72,6 +73,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
         setDisabled(true)
         setLoading(true)
         await getThirdParties();
+        await getConcepts();
         let temInfo = {}
         if(userConfig.access != undefined){
             console.log(userConfig.access)
@@ -120,13 +122,13 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
             // Filtro para busqueda de Instancias de Procesos
             if(!userConfig.access.process_instances.overAll){
                 if(userConfig.access.process_instances.enabled.length > 1){
-                    //Getprocess_instances con array de filtro
+                    await getInstances(userConfig.access.process_instances.enabled,undefined);
                 }else{
                     temInfo.instance_id = userConfig.access.process_instances.enabled[0]
                     setInstance_id(userConfig.access.process_instances.enabled[0])
                 }
             }else{
-                //Getprocess_instances completos
+                await getInstances()
             }
 
             // Filtro para busqueda de Metodos de pago
@@ -148,6 +150,11 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
         setDisabled(false);
     }
 
+    let handleConceptChange = (element)=>{
+        setConcept_id(element.id);
+        setConcept_account_id(element.account_id);
+    }
+
     useEffect(()=>{
         console.log('Valor de store_id -->',store_id);
     },[store_id])
@@ -157,6 +164,23 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
     },[])
 
     // Getters of info
+
+    const getInstances = async(allowedInstances,allowedTypes)=>{
+        let res = await postInfo('/process/getProcessInstances',{
+            company_id:appInfo.company_id
+        })
+        console.log(res);
+        if(res[0]){
+            let C = [];
+            res[1].forEach(element => {
+                C.push({
+                    text:`${element.process_code}#${element.ownSerial}`,
+                    value:element.id
+                })
+            });
+            setInstances(C);
+        }
+    }
 
     const getStores = async(allowedStores)=>{
         let res = await postInfo('/getStores',{
@@ -209,6 +233,27 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
             
         }
     }
+    
+    const getConcepts = async()=>{
+        let res = await postInfo('/getConcepts',{
+            company_id:appInfo.company_id,
+            typePlanAccount:appInfo.accountPlanType
+        })
+        console.log(res)
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:`SGA#${element.id} ${element.name}`,
+                    value:element
+                })
+                setConcepts(C)
+            });
+        }else{
+            setConcepts([])
+        }
+    }
+    
 
     const getPaymentMethods = async(allowedPaymentMethods)=>{
         let res = await postInfo('/getPaymentMethods',{
@@ -291,13 +336,33 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
     const createCashRecipt = async()=>{
         setDisabled(true)
         setLoading(true)
-        let res = await postInfo('/facturation/newCashRecipt',FormInfo);
-        if(res[0]){
+        let res = await postInfo('/facturation/newCashRecipt',FormInfo);;
+        if(typeof(parseInt(res.id)) == 'number'){
             addNotification({
                 type:'aproved',
-                title:`Recibo de caja # creado correctamente`,
-                description:`El recibo de caja # fue creado correctamente`
+                title:`Recibo de caja #${res.id} creado correctamente`,
+                description:`El recibo de caja #${res.id} fue creado correctamente`
             })
+            FormInfo["doc_id"] = res.id
+            FormInfo["user_id"] = userInfo.user_id,
+            FormInfo['transactionDetails'] = []
+            paymentMethod.forEach(element => {
+                FormInfo.transactionDetails.push({
+                    account_id:element.account_id,
+                    subtotal:element.value,
+                    total:element.value,
+                    type:'payment',
+                    nature:'DB'
+                })
+            });
+            FormInfo.transactionDetails.push({
+                account_id:concept_id,
+                subtotal:total,
+                total:total,
+                type:'operation',
+                nature:'CR'
+            })
+            toAccount();
         }else{
             addNotification({
                 type:'error',
@@ -308,6 +373,40 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
         popOutAlert();
         setLoading(false);
         setDisabled(false);
+    }
+
+    const toAccount = async()=>{
+        let res = await postInfo('/createTransaction',FormInfo);
+        const insertId = parseInt(res[0]);
+        if(typeof(insertId) == 'number' && insertId != NaN && insertId != undefined){
+            addNotification({
+                type:'aproved',
+                title:`Movimiento contabilizado correctamente`,
+                description:`La transacción ${insertId} fue contabilizada correctamente.`
+            })
+            updateTransactions(insertId);
+        }else{
+            addNotification({
+                type:'error',
+                title:`Error al contabilizar movimiento`,
+                description:`Hubo un problema al intentar contabilizar el movimiento ${FormInfo.doc_id} de inventario`
+            })
+        }
+        popOutAlert();
+    }
+
+    const updateTransactions = async(id)=>{
+        let res = await postInfo('/updateTransactionState',{
+            status:FormInfo.status == 'active'? 'posted':'draft',
+            transaction_id:id
+        })
+        if(res[0]){
+            addNotification({
+                type:'aproved',
+                title:'Transacciones Actualziadas',
+                description:'Totas las transacciónes fueron actualizadas correctamente.'
+            })
+        }
     }
 
 
@@ -330,24 +429,25 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
                     createCashRecipt();
                 }}>
                     {info.store_id == undefined && (
-                        <SearchinList action={setStore_id} title={'Tienda'} placeHolder={'Seleccione el proceso (opcional)'} list={stores} disabled={disabled}/>
+                        <SearchinList action={setStore_id} title={'Tienda'} placeHolder={'Seleccione la tienda'} list={stores} disabled={disabled}/>
                     )}
                     {info.bussines_id == undefined && (
-                        <SearchinList action={setBussines_id} title={'Negocio'} placeHolder={'Seleccione el proceso (opcional)'} list={bussines} disabled={disabled}/>
+                        <SearchinList action={setBussines_id} title={'Negocio'} placeHolder={'Seleccione el negocio'} list={bussines} disabled={disabled}/>
                     )}
                     {info.costCenter_id == undefined && (
-                        <SearchinList action={setCostCenter_id} title={'Centro de costo'} placeHolder={'Seleccione el proceso (opcional)'} list={costCenters} disabled={disabled}/>
+                        <SearchinList action={setCostCenter_id} title={'Centro de costo'} placeHolder={'Seleccione el centro de costo'} list={costCenters} disabled={disabled}/>
                     )}
                     {info.instance_id == undefined && (
                         <SearchinList action={setInstance_id} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={disabled}/>
                     )}
-                    {info.thirdparty_id == undefined && (
+                    {info.thirdParty_id == undefined && (
                         <SearchinList action={setThirdParty_id} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdparties} disabled={disabled} specialOption={
                             <NewElementSelect title={'Crear nuevo'} onClick={()=>{
                                 popInAlert(<FormNewThirdParties reloadFun={getThirdParties}/>)
                             }}/>
                         }/>
                     )}
+                    <SearchinList action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
                     <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
                     {info.paymentMethod == undefined && (
                         <div className="paymentMehtodsContainer">
