@@ -1422,10 +1422,11 @@ controller.createTransactionDetail = (req,res)=>{
                     account_type,
                     type,
                     subtotal,
-                    total
+                    total,
+                    "paymentMethod_id"
                 )
             VALUES
-            ($1,$2,$3,$4,$5,$6);
+            ($1,$2,$3,$4,$5,$6,$7);
         `
         let consulta = await useDataBase(sentence,[
             info.transaction_id,
@@ -1433,6 +1434,7 @@ controller.createTransactionDetail = (req,res)=>{
             info.account_type,
             info.type,
             info.subtotal,
+            info.paymentMethod_id != undefined? info.paymentMethod_id:undefined
             (info.total).toFixed(5)
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
@@ -1610,7 +1612,7 @@ controller.getTransactionDetails = (req,res)=>{
             LEFT JOIN
                 "Ecosystem".payment_methods
             ON 
-                "Ecosystem".transaction_detail.account_id = "Ecosystem".payment_methods.account_id
+                "Ecosystem".transaction_detail."paymentMethod_id" = "Ecosystem".payment_methods.id
             LEFT JOIN
                 "Ecosystem".thirdparties
             ON

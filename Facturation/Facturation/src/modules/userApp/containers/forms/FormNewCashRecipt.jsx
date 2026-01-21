@@ -352,11 +352,12 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
                     subtotal:element.value,
                     total:element.value,
                     type:'payment',
+                    paymentMethod_id:element.id,
                     nature:'DB'
                 })
             });
             FormInfo.transactionDetails.push({
-                account_id:concept_id,
+                account_id:conceptAccount_id,
                 subtotal:total,
                 total:total,
                 type:'operation',
