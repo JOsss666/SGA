@@ -1375,9 +1375,10 @@ controller.createTransaction = (req,res)=>{
                         type,
                         "subTotal",
                         total,
-                        nature
+                        nature,
+                        "paymentMethod_id"
                     )
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
                 `
                 console.log('---> ',transId);
                 console.log('---> ',element);
@@ -1389,7 +1390,8 @@ controller.createTransaction = (req,res)=>{
                     element.type,
                     element.subtotal,
                     element.total,
-                    element.nature
+                    element.nature,
+                    element.paymentMethod_id != undefined? element.paymentMethod_id:undefined
                 ],2);
                 resultDetails.push([postConsulta]);
             }
@@ -1434,8 +1436,8 @@ controller.createTransactionDetail = (req,res)=>{
             info.account_type,
             info.type,
             info.subtotal,
+            (info.total).toFixed(5),
             info.paymentMethod_id != undefined? info.paymentMethod_id:undefined
-            (info.total).toFixed(5)
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
