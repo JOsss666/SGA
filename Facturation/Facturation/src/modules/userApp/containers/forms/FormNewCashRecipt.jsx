@@ -13,7 +13,7 @@ import { postInfo } from "../../../../utils/functions";
 import { NewElementSelect } from "../../components/NewElementSelect";
 import { FormNewThirdParties } from "./FormNewThirdParties";
 
-export function FormNewCashRecipt({InfoParams,reloadFun}){
+export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
 
     // Requieremnets
     const [info,setInfo] = useState(InfoParams != undefined? InfoParams:{})
@@ -42,6 +42,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
     const [description,setDescription] = useState();
     const [attached,setAttached] = useState();
     const [instance_id,setInstance_id] = useState();
+    const [step_id,setStep_id] = useState();
     const [concept_id,setConcept_id] = useState();
     const [conceptAccount_id,setConcept_account_id] = useState();
     const [status,setStatus] = useState('active');
@@ -62,7 +63,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
         subTotal:total,
         total,
         attached,
-        instance_id
+        instance_id,
+        step_id
     }
 
     const formatCurrency = (value) =>
@@ -165,6 +167,11 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
 
     // Getters of info
 
+    const handleSelectInstance = (element)=>{
+        setInstance_id(element.id)
+        setStep_id(element.step_id)
+    }
+
     const getInstances = async(allowedInstances,allowedTypes)=>{
         let res = await postInfo('/process/getProcessInstances',{
             company_id:appInfo.company_id
@@ -175,7 +182,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
             res[1].forEach(element => {
                 C.push({
                     text:`${element.process_code}#${element.ownSerial}`,
-                    value:element.id
+                    value:element
                 })
             });
             setInstances(C);
@@ -346,6 +353,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
             FormInfo["doc_id"] = res.id
             FormInfo["user_id"] = userInfo.user_id,
             FormInfo['transactionDetails'] = []
+            
+            
             paymentMethod.forEach(element => {
                 FormInfo.transactionDetails.push({
                     account_id:element.account_id,
@@ -439,7 +448,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
                         <SearchinList action={setCostCenter_id} title={'Centro de costo'} placeHolder={'Seleccione el centro de costo'} list={costCenters} disabled={disabled}/>
                     )}
                     {info.instance_id == undefined && (
-                        <SearchinList action={setInstance_id} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={disabled}/>
+                        <SearchinList action={handleSelectInstance} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={disabled}/>
                     )}
                     {info.thirdParty_id == undefined && (
                         <SearchinList action={setThirdParty_id} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdparties} disabled={disabled} specialOption={

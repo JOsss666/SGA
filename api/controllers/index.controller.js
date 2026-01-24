@@ -1679,8 +1679,49 @@ controller.updateTransactionState = (req,res)=>{
     })
 }
 
+controller.getDocuments = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
 
-// SGA - Inventory (Cambiar de archivo despues)
+        whereClauses.push(`company_id = $1`);
+        values.push(info.company_id)
+
+        if(info.allowedTypes != undefined){
+            whereClauses.push(`document_type = ANY($${values.length +1})`);
+            values.push(info.allowedTypes);
+        }
+
+        if(info.instance_id != undefined){
+            whereClauses.push(`instance_id = $${values.length +1}`);
+            values.push(info.instance_id);
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
+        let sentence = `
+            SELECT * FROM
+                "Ecosystem".documents
+            ${whereQuery}
+            ORDER BY document_type ASC
+        ;`;
+
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
 
 controller.getSalute = (req,res)=>{
     console.log('Recibido')

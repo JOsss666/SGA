@@ -16,6 +16,7 @@ import { FormNewPaymentMethod } from "./forms/FormNewPaymentMethod";
 import './New.css'
 import { FormNewDC } from "./forms/FormNewDC";
 import { FormNewCashRecipt } from "./forms/FormNewCashRecipt";
+import { ProcessStatusAlert } from "./Alerts/ProcessStatusAlert";
 
 
 export function New(){
@@ -23,9 +24,10 @@ export function New(){
     const {popInAlert} = useAlert();
 
     const options = [
-        {text:'Crear orden de trabajo',children:<SelectTpeNewDoc/>,icon:<i className="fa-solid fa-bell-concierge"/>},
+        //{text:'Crear orden de trabajo',children:<SelectTpeNewDoc/>,icon:<i className="fa-solid fa-bell-concierge"/>},
+        {text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         {text:'Crear recibo de caja',children:<FormNewCashRecipt/>,icon:<i className="fa-solid fa-receipt"/>},
-        {text:'Crear documento de compra',children:<FormNewDC/>,icon:<i className="fa-regular fa-file"/>},
+        {text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
         {text:'Crear usuario',children:<FormNewUser/>,icon:<i className="fa-solid fa-person-circle-plus"/>},
         {text:'Crear tercero',children:<FormNewThirdParties/>,icon:<i className="fa-regular fa-user"/>},
         //{text:'Crear metodo de pago',children:<FormNewPaymentMethod/>,icon:<i className="fa-regular fa-credit-card"/>},

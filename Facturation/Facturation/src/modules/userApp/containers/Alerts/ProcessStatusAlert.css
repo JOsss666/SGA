@@ -1,0 +1,243 @@
+.ProcessStatusAlert{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    width: 30vw;
+}
+
+.ProcessStatusAlert .headProcess{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+
+}
+
+.ProcessStatusAlert .headProcess .BoldTitle{
+    margin: 0 auto;
+    margin-bottom: 2vh;
+}
+
+.ProcessStatusAlert .headProcess .instanceContainer{
+    padding: 2vh;
+    border-top: solid .1vh var(--inputsBorder);
+    border-bottom: solid .1vh var(--inputsBorder);
+    position: relative;
+}
+
+.ProcessStatusAlert .headProcess .instanceContainer .InstanceProceesIndicator{
+    color: var(--descriptionText);
+    font-size: clamp(2.5px,2.5vh,25px);
+}
+
+.ProcessStatusAlert .headProcess .instanceContainer .InstanceProceesIndicator b{
+    margin-left: 1vh;
+    font-weight: 500;
+    color: var(--mainText);
+}
+
+.ProcessStatusAlert .headProcess .instanceContainer .infoAbourProcess{
+    position: absolute;
+    top: 2vh;
+    right: 4vh;
+    cursor: pointer;
+    color: var(--descriptionText);
+    transition: .3s;
+}
+
+.ProcessStatusAlert .headProcess .instanceContainer .infoAbourProcess:hover{
+    color: #007AFF;
+}
+
+.ProcessStatusAlert .gridStepsProces{
+    margin-top: 2vh;
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    list-style: none;
+    color: var(--descriptionText);
+    gap: 4vh;
+    margin-left: 2vh;
+    border-left: dashed .1vh var(--descriptionText);
+    position: relative;
+}
+
+.ProcessStatusAlert .gridStepsProces .steepIndicator{
+    position: absolute;
+    left: -3vh;
+    top: .5vh;
+    height: 2vh;
+    width: 2vh;
+    outline: solid .3vh var(--cardHover);
+    border-radius: 100%;
+    background-color: var(--inputsBorder);
+    display: flex;
+}
+
+.ProcessStatusAlert .gridStepsProces .completedStep{
+    background-color: #C6D2FF;
+    outline: solid .3vh #E0E7FF;
+}
+
+.ProcessStatusAlert .gridStepsProces .completedStep i{
+    font-size: clamp(1.8px,1.5vh,18px);
+    margin: auto;
+    color: var(--mainText);
+}
+
+.ProcessStatusAlert .gridStepsProces .step_item{
+    font-size:clamp(2.5px,2.5vh,25px);
+    display: flex;
+    flex-direction: column;
+    padding-left: 2vh;
+    position: relative;
+}
+
+.ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    font-size: clamp(1.8px,1.8vh,18px);
+    font-weight: 400;
+    padding: 1vh 2vh;
+}
+
+.ProcessStatusAlert .gridStepsProces .leftBarProgress{
+    width: .25vw;
+    background-color: #007AFF;
+    position: absolute;
+    left: -.1125vw;
+    top: 0;
+}
+
+.ProcessStatusAlert .gridStepsProces .ActualStep{
+    color: #007AFF;
+    font-weight: 600;
+}
+
+.ProcessStatusAlert .gridStepsProces .ActualStep .steepIndicator{
+    background-color: #007AFF;
+    outline: solid .6vh #8EC5FF;
+}
+
+.ProcessStatusAlert .gridStepsProces .PendingStep{
+    opacity: 60%;
+    cursor: not-allowed;
+}
+
+.ProcessStatusAlert .optionsProcessCotnainer{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh 0;
+    margin-top: 2vh;
+    gap: 2vh;
+}
+
+.ProcessStatusAlert .optionsProcessCotnainer .nextStepProcess, .ProcessStatusAlert .optionsProcessCotnainer .passProcessStep{
+    width: 100%;
+    margin: 0 auto;
+    padding: 1.5vh 2vh;
+    padding-left: 4vh;
+    text-align: left;
+    background-color: #121212;
+    border:hidden;
+    border-radius: 1vh;
+    cursor: pointer;
+    display: flex;
+    outline: solid .1vh var(--descriptionText);
+}
+
+.ProcessStatusAlert .optionsProcessCotnainer .nextStepProcess .infoNextStep{
+    display: flex;
+    flex-direction: column;
+    gap: .25vh;
+}
+
+.ProcessStatusAlert .optionsProcessCotnainer .nextStepProcess .infoNextStep strong{
+    color: #fff;
+    font-weight: 500;
+    font-size: clamp(2.5px,25px,2.5vh);
+}
+
+.ProcessStatusAlert .optionsProcessCotnainer .nextStepProcess .infoNextStep span{
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 400;
+    color: #ddd;
+}
+
+.ProcessStatusAlert .optionsProcessCotnainer .nextStepProcess .infoNextStep span i{
+    margin:auto 1vh;
+}
+
+.ProcessStatusAlert .optionsProcessCotnainer .iconProcessC{
+    margin: auto;
+    margin-right: 3vh;
+    color: #fff;
+    font-size: clamp(3px,3vh,30px);
+}
+
+.ProcessStatusAlert .optionsProcessCotnainer .passProcessStep{
+    background-color: #fafafa;
+    height: 8vh;
+    gap: 1vh;
+}
+
+.ProcessStatusAlert .optionsProcessCotnainer .passProcessStep strong{
+    margin: auto;
+    margin-right: 0;
+    font-weight: 400;
+    font-size: clamp(2.5px,25px,2.5vh);
+    color: #636363;
+}
+
+.ProcessStatusAlert .optionsProcessCotnainer .passProcessStep i{
+    margin: auto;
+    margin-left: 1vh;
+    font-size: clamp(3px,3vh,30px);
+    color: #636363;
+}
+
+.ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .attachedDoc, .ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .requiredDocAlert{
+    font-size: clamp(1.8px,1.8vh,18px);
+    font-weight: 400;
+    color: var(--descriptionText);
+    cursor: pointer;
+    width: fit-content;
+}
+
+.ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .attachedDoc i{
+    margin-right: 1vh;
+}
+
+.ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .attachedDoc:hover{
+    color: var(--mainText);
+}
+
+.ProcessStatusAlert .NoAviableRoll{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background-color: var(--cardHover);
+    padding: 2vh;
+    border-radius: 2vh;
+    outline: dashed .1vh var(--descriptionText);
+    margin: auto;
+    margin-top: 4vh;
+}
+
+.ProcessStatusAlert .NoAviableRoll h5{
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 500;
+    color: var(--descriptionText);
+}
+
+.ProcessStatusAlert .NoAviableRoll h5 i{
+    margin-right: 1vh;
+}
+
+.ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .requiredDocAlert {
+    color: #FF6467;
+}
+
+.ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .requiredDocAlert i{
+    margin-right: 1vh;
+}

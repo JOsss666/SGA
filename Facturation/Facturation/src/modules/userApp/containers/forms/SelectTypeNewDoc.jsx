@@ -8,6 +8,7 @@ import { FormNewOc } from "./FormNewOc";
 import './SelectTypeNewDoc.css'
 import { SearchBar } from "../../components/SearchBar";
 import { FormNewMovement } from "./FormNewMovement";
+import { FormNewClientOrder } from "./FormNewClientOrder";
 
 export function SelectTpeNewDoc({info,reloadFun}){
 
@@ -27,7 +28,7 @@ export function SelectTpeNewDoc({info,reloadFun}){
     }
 
     const documents = [
-        {title:'Orden de Cliente',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_5_she308.png',alert:<FormNewDC info={info} reloadFun={endProcess}/>},
+        {title:'Orden de Cliente',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_5_she308.png',alert:<FormNewClientOrder reloadFun={endProcess}/>},
         {title:'Factura de venta',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766014163/ChatGPT_Image_17_dic_2025_18_27_41_1_a3acbd.png',alert:<FormNewFV info={info} reloadFun={endProcess}/>},
         {title:'Documento de compra',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_3_nph10p.png',alert:<FormNewDC info={info} reloadFun={endProcess}/>},
         {title:'Recibo de caja',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_4_ioz7jp.png',alert:<span>No disponible aún</span>},

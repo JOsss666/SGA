@@ -636,4 +636,163 @@ processController.getProcessInstances =(req,res)=>{
     })
 }
 
+
+processController.getProcessState = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`pi.company_id = $1`);
+        values.push(info.company_id);
+
+        if(info.id != undefined){
+            whereClauses.push(`pi.id = $${values.length +1}`);
+            values.push(info.id)
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+        
+        let sentence = `
+            SELECT
+                pi.*,
+                pr.name AS process_name,
+                pr.description AS process_description,
+                pr.id AS process_id,
+                JSON_AGG(
+                    JSON_BUILD_OBJECT(
+                        'id', ps.id,
+                        'name', ps.name,
+                        'order', ps."order",
+                        'required_roll', ps.required_roll,
+                        'subprocess_id', ps.id,
+                        -- Aquí integramos los documentos requeridos para este paso
+                        'required_docs', COALESCE(docs.list, '[]'::json)
+                    ) ORDER BY ps."order" ASC
+                ) AS steps
+            FROM "Process".process_instance pi
+            LEFT JOIN "Process".processes pr ON pi.process_id = pr.id
+            LEFT JOIN "Process".process_steps ps ON pr.id = ps.process_id
+            -- Subconsulta para agrupar documentos por step_id
+            LEFT JOIN (
+                SELECT 
+                    step_id, 
+                    JSON_AGG(
+                        JSON_BUILD_OBJECT(
+                            'docType', "docType",
+                            'required', required,
+                            'min', min_number,
+                            'max', max_number
+                        )
+                    ) AS list
+                FROM "Process".step_doc_realtion
+                GROUP BY step_id
+            ) docs ON ps.id = docs.step_id
+            ${whereQuery}
+            GROUP BY
+                pi.id, pr.id
+            ORDER BY
+                pi.created_at DESC;
+        `;
+
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err))
+    })
+}
+
+processController.nextProcessStep = async (req, res) => {
+    let data = '';
+    req.on('data', chunk => { data += chunk; });
+    req.on('end', async () => {
+        try {
+            let info = JSON.parse(data);
+
+            // 1. Obtener información de la instancia actual y su proceso
+            const instanceQuery = `
+                SELECT pi.id, pi.step_id, pi.process_id, ps.order as current_order
+                FROM "Process".process_instance pi
+                JOIN "Process".process_steps ps ON pi.step_id = ps.id
+                WHERE pi.id = $1
+            `;
+            const instanceQ = await useDataBase(instanceQuery, [info.instance_id], 1);
+
+            if (!instanceQ[0]) throw new Error("Instancia no encontrada");
+
+            const instance = instanceQ[1][0]
+
+            // 2. Buscar el paso que sigue en el orden
+            const nextStepQuery = `
+                SELECT id, name, required_roll, "order"
+                FROM "Process".process_steps
+                WHERE process_id = $1 AND "order" > $2
+                ORDER BY "order" ASC
+                LIMIT 1
+            `;
+            const nextStepQ = await useDataBase(nextStepQuery, [instance.process_id, instance.current_order], 1);
+
+            if (!nextStepQ[0]) {
+                res.writeHead(200);
+                return res.end(JSON.stringify({ success:false,message: "El proceso ya ha finalizado." }));
+            }
+            const nextStep = nextStepQ[1][0];
+
+            // 3. Validar Permisos (required_roll es un array en la DB)
+            // Usamos .some para ver si el rol del usuario está en el array permitido
+            console.log('Roles habilitados: ',nextStep.required_roll)
+            console.log('Rol usuario: ',info.user_roll)
+            const hasPermission = nextStep.required_roll.includes(info.user_roll);
+            
+            if (!hasPermission) {
+                res.writeHead(200);
+                return res.end(JSON.stringify({success:false,error: "No tienes el rol necesario para autorizar este paso." }));
+            }
+
+            // 4. Actualizar la instancia al nuevo paso
+            const updateQuery = `
+                UPDATE "Process".process_instance 
+                SET step_id = $1, updated_at = CURRENT_TIMESTAMP
+                WHERE id = $2
+            `;
+
+            await useDataBase(updateQuery, [nextStep.id, info.instance_id], 2);
+
+            // 5. (Opcional) Registrar en el historial para auditoría
+            await useDataBase(`
+                INSERT INTO "Process".process_historial(
+                    company_id, instance_id, previous_step, next_step, user_id description)
+                VALUES (?, ?, ?, ?, ?, ?);
+            `, [
+                info.company_id,
+                info.instance_id,
+                info.previous_step,
+                info.next_step,
+                info.user_id,
+                info.description
+            ], 2);
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+                success: true, 
+                message: `el proceso a avanzado a: ${nextStep.name}`,
+                nextStepId: nextStep.id 
+            }));
+
+        } catch (error) {
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: error.message }));
+        }
+    });
+};
+
 export default processController;

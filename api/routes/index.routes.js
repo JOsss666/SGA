@@ -38,6 +38,8 @@ const upload = multer({ dest: CHUNKS_DIR });
 
     router.post('/getRoles',controller.getRoles);
 
+    router.post('/getDocuments',controller.getDocuments);
+
 router.post('/getCompanyInfo',controller.getCompanyInfo);
 
 router.post('/getUserInfo',controller.getUserInfo);
@@ -167,6 +169,10 @@ router.post('/inventory/getKardex',inventoryController.getKardex);
 
 router.post('/process/getProcessInstances', processController.getProcessInstances);
 
+router.post('/process/getProcessState', processController.getProcessState);
+
+router.post('/process/nextProcessStep',processController.nextProcessStep);
+
 router.post('/process/createOP', processController.createOp);
 
 router.post('/process/getOp', processController.getOp);
@@ -197,6 +203,8 @@ router.post('/treasury/getTreasury',controller.getAccounts); //PENDIENTE IMPLEME
 // SGA Facturation
 
 router.post('/facturation/newCashRecipt',facturationController.newCashRecipt);
+
+router.post('/facturation/newClientOrder',facturationController.newClientOrder);
 
 export default router;
 
