@@ -142,7 +142,7 @@ facturation.use == true){
             {!loadingAppData && statusPage=='page' &&(
                 <>
                     <header className='headApp'>
-                    <SearchBar placeholder={"Buscar en SGA - Procesos"} action={setQuickSearch}/>
+                    <SearchBar placeholder={"Buscar en SGA - Ventas"} action={setQuickSearch}/>
                     {visibleResultsSearch && (
                         <div className="resultsQuickSerch">
                             {quickSearch != "" && routesApp.map((element,index)=>(

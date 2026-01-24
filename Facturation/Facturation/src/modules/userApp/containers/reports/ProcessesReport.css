@@ -1,0 +1,13 @@
+
+.ProcessesReport .gridResults{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    padding-left: 2vh;
+}
+
+.ProcessesReport .gridResults span{
+    display: flex;
+    color: var(--descriptionText);
+    cursor: pointer;
+}

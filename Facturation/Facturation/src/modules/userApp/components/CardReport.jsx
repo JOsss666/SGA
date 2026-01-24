@@ -24,6 +24,10 @@ export function CardReport({type, title, description, onClick}){
         contable: {
             icon: "fa-solid fa-file-invoice-dollar",
             color: "#05D57E" 
+        },
+        processes: {
+            icon: "fa-solid fa-people-carry-box",
+            color: '#AD46FF'
         }
     };
 

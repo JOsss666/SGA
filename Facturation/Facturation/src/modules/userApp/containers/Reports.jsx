@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import { ReportKardex } from './reports/ReportKardex';
 import { PathLocation } from '../components/PathLocation';
 import { ReportAccountTransactions } from './reports/ReportAccountTransactions';
+import { ProcessesReport } from './reports/ProcessesReport';
 
 export function Reports(){
 
@@ -60,13 +61,6 @@ export function Reports(){
                                         {title:'Informe Costos Operativos',children:<i className="fa-solid fa-book"/>}
                                     ]}
                                 ]}/>
-                                <DespleList children={<i className="fa-solid fa-calendar-check"/>} father={{
-                                    title:'Informes de aplicación'
-                                }} options={[
-                                    {title:'Productividad usuarios',children:<i className="fa-solid fa-chart-line"/>},
-                                    {title:'Eficiencia procesos',children:<i className="fa-solid fa-business-time"/>},
-                                    {title:'Estado de ejecución',children:<i class="fa-solid fa-list-check"/>}
-                                ]}/>
                             </div>
                             <div className="optionsBar">
                                 <i className="fa-solid fa-bars IconList"/>
@@ -98,8 +92,11 @@ export function Reports(){
                             <CardReport type={'contable'} title={'Balance de prueba'} description={'Genera un balance de prueba de la contabilidad de tu empresa'} onClick={()=>{
                                 handleNavigate('Balance')
                             }}/>
-                            <CardReport type={'inventarios'} title={'Informe de movimientos (Kardex)'} description={'Visualiza todos los movimientos por referencia de tu inventario'} onClick={()=>{
+                            <CardReport type={'inventarios'} title={'Movimiento Inventario (Kardex)'} description={'Visualiza todos los movimientos por referencia de tu inventario'} onClick={()=>{
                                 handleNavigate('Kardex')
+                            }}/>
+                            <CardReport type={'processes'} title={'Informe de procesos'} description={'Visualiza los procesos de tu empresa'} onClick={()=>{
+                                handleNavigate('Processes')
                             }}/>
                         </div>
                     </>
@@ -115,6 +112,7 @@ export function Reports(){
                 <Route path='/Balance' element={<ReportBalance/>}/>
                 <Route path='/Balance/:account_id' element={<ReportAccountTransactions/>}/>
                 <Route path='/Kardex' element={<ReportKardex/>}/>
+                <Route path='/Processes' element={<ProcessesReport/>}/>
             </Routes>
         </div>
     )
