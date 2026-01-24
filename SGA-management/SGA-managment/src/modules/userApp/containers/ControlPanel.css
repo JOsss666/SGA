@@ -1,0 +1,198 @@
+
+
+.ControlPanel {
+    width: 100%;
+    display: flex;
+    gap: 2vh;
+    padding: 2vh;
+    box-sizing: border-box;
+}
+
+/* CENTRAL PANEL */
+
+.ControlPanel .CentralPanel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.CentralPanel .TopActions {
+    display: flex;
+    gap: 1.5vh;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.CentralPanel .PanelCards {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 2vh;
+    flex-wrap: wrap;
+}
+
+.CentralPanel .PanelCards > div {
+    flex: 1;
+    min-width: 20vh;
+}
+
+.CentralPanel .ContentGraph {
+    display: flex;
+    flex-direction: row;
+    gap: 2vh;
+}
+
+.CentralPanel .ContentGraph .ContentGraphLeft{
+    width: 92vh;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.ControlPanel .ContentGraph .ContentGraphLeft .GraphSearchBar{
+    display: flex;
+    width: fit-content;
+    gap: 1vh;
+    justify-content: center;
+    align-items: center;
+}
+
+.ControlPanel .ContentGraph .ContentGraphLeft .GraphSearchBar .SearchBar{
+    width: 25vh;
+}
+.ControlPanel .ContentGraph .ContentGraphLeft .GraphSearchBar .rangeInput {
+    display: flex;
+    margin: auto 0;
+    width: 45vh;
+}
+.ControlPanel .ContentGraph .ContentGraphLeft .GraphSearchBar .rangeInput span{
+    margin: auto .5vh;
+    color: #aaa;
+}
+.ControlPanel .ContentGraph .ContentGraphLeft .GraphSearchBar .rangeInput .FormInput{
+    margin: auto 1vh;
+    position: relative;
+    min-width: 10vw;
+}
+.ControlPanel .ContentGraph .ContentGraphLeft .GraphSearchBar .rangeInput .FormInput .inputContainer input{
+    box-shadow: none;
+}
+.ControlPanel .ContentGraph .ContentGraphLeft .GraphSearchBar .rangeInput .FormInput label{
+    position: absolute;
+    top: -3vh;
+    display: none;
+}
+
+.ControlPanel .ContentGraph .ContentGraphLeft .GraphSearchBar .SelectOptions{
+    margin: 2vh;
+} 
+
+
+
+.CentralPanel .ContentGraph .ContentGraphRight{
+    width: 51vh;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+.CentralPanel .ContentGraph .ContentGraphRight .GraphBars{
+    width: 57vh;
+    display: flex;
+    flex-direction: row;
+    gap: 2vh;
+}
+.CentralPanel .ContentGraph .ContentGraphRight .GraphBars .ChartCard{
+    width: 24.3vh;
+}
+
+.CentralPanel .Graph {
+    flex: 3;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 2vh;
+}
+
+
+.CentralPanel .Charts {
+    display: flex;
+    gap: 2vh;
+}
+
+.ChartCard {
+    flex: 1;
+    background-color: var(--menuAside);
+    border-radius: 2vh;
+    padding: 2vh;
+    min-height: 22vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.CentralPanel .SidePanel {
+    flex: 1;
+    background-color: var(--menuAside);
+    border-radius: 2vh;
+    padding: 2vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+}
+
+
+/* INDICATORS */
+
+.ControlPanel .Indicators {
+    width: 46vh;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.ControlPanel .Indicators .CardIndicator {
+    background-color: var(--menuAside);
+    padding: 1.5vh;
+    border-radius: 2vh;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.ControlPanel .Indicators .CardIndicator:hover {
+    background-color: var(--bg);
+    transform: scale(1.02);
+    cursor: pointer;
+}
+
+.ControlPanel .Indicators .HeadCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ControlPanel .Indicators .Percentage {
+    font-weight: bold;
+}
+
+.ControlPanel .Indicators .Progress {
+    width: 100%;
+    height: 1vh;
+    background-color: var(--bg);
+    border-radius: 3vh;
+    overflow: hidden;
+}
+
+.ControlPanel .Indicators .ProgressBar {
+    height: 100%;
+    border-radius: 3vh;
+    transition: width 0.3s ease;
+}
+
+/* GRAFICA PIE */
+
+.ControlPanel .Indicators .PieChartWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2vh;
+}

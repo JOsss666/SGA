@@ -1,0 +1,41 @@
+.ChartCard {
+    flex: 1;
+    width: 45vh;
+    height: 26vh;
+    min-height: 22vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--menuAside);
+    border-radius: 2vh;
+    padding: 2vh;
+    transition: transform 0.25s ease,box-shadow 0.25s ease;
+}
+
+.ChartCard:hover {
+    transform: translateY(-.4vh);
+    box-shadow: 0 1.2vh 2.4vh rgba(0, 0, 0, 0.08);
+}
+
+/* HEADER */
+.ChartHeader {
+    margin-bottom: 1vh;
+}
+
+.ChartTitle {
+    font-size: 1.5vh;
+    font-weight: 600;
+    color: var(--mainText);
+}
+
+/* CONTENIDO */
+.ChartContent {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ChartPlaceholder {
+    font-size: 2vh;
+    color: var(--descriptionText);
+}

@@ -1,0 +1,42 @@
+.Indicators {
+    width: 46vh;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.CardIndicator {
+    background-color: var(--menuAside);
+    padding: 1.5vh;
+    border-radius: 2vh;
+}
+
+.HeadCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.Percentage {
+    font-weight: bold;
+}
+
+.Progress {
+    width: 100%;
+    height: 1vh;
+    background-color: var(--bg);
+    border-radius: 3vh;
+    overflow: hidden;
+}
+
+.ProgressBar {
+    height: 100%;
+    border-radius: 3vh;
+    transition: width 0.3s ease;
+}
+
+.PieChartWrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 2vh;
+}

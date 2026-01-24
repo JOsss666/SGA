@@ -41,6 +41,7 @@ import { New } from './New';
 import { Messages } from './Messages';
 import { Calendar } from './Calendar';
 import { CellarDetail } from './CellarDetail';
+import { ControlPanel } from './ControlPanel';
 import { BoldTitle } from '../components/BoldTitle';
 import { DescriptionSpan } from '../components/DescriptionSpan';
 import { NoAccess } from './NoAccess';
@@ -197,7 +198,7 @@ export function UserApp(){
                             <Route path='/myBussines/Units' element={<MyBussinesUnits/>}/>
                             <Route path='/myBussines/Units/:store_id' element={<StoreDetail/>}/>
                             <Route path='/myBussines/Units/:store_id/:cellar_id' element={<CellarDetail/>}/>
-                            <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
+                            <Route path='/controlPanel/' element={<ControlPanel/>}/>
                             <Route path='/modules/*' element={<Modules/>}/>
                             <Route path='/services' element={<Services/>}/>
                             <Route path='/services/:serviceRequierd' element={<PathLocation/>}/>
