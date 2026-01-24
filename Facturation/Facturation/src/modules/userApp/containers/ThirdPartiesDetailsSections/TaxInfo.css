@@ -1,0 +1,123 @@
+
+.TaxInfo{
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.TaxInfo .paramsContainer{
+    margin: 1vh auto;
+    margin-left: 0;
+    display: flex;
+    width: 55%;
+}
+
+.TaxInfo .paramsContainer form{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.TaxInfo .paramsContainer form .SelOp, .TaxInfo .paramsContainer form .LabelValue{
+    width: 20vw;
+    margin: 1vh 0;
+    margin-right: 4vh;
+}
+
+.TaxInfo form .SelOp{
+    display: flex;
+    flex-direction: column;
+}
+
+.TaxInfo form .SelOp h6{
+    margin-bottom: 1vh;
+    font-size: clamp(2.2px,2.5vh,25px);
+    font-weight: 500;
+    color: var(--descriptionText);
+}
+
+.TaxInfo form .SelOp .contentOptions{
+    box-shadow: none;
+}
+
+
+.TaxInfo form .LabelValue{
+    flex-direction: column;
+    margin: 1vh 0;
+    margin-right: 4vh;
+    width: fit-content;
+    margin-bottom: 0;
+    padding: 0;
+}
+
+.TaxInfo form .LabelValue .lab, .TaxInfo form .LabelValue .val{
+    width:  100%;
+    margin-top: .5vh;
+    margin-bottom: 0;
+}
+
+
+.TaxInfo .attachedDocumentsContainer{
+    display: flex;
+    flex-direction: column;
+    width: 40%;
+    margin: 1vh auto;
+}
+
+.TaxInfo .attachedDocumentsContainer h6{
+    margin-bottom: 3vh;
+    font-size: clamp(2.2px,2.5vh,25px);
+    font-weight: 500;
+    color: var(--descriptionText);
+}
+
+.TaxInfo .attachedDocumentsContainer .RutContainer{
+    display: flex;
+    height: 25vh;
+    width: 20vw;
+    border-radius: 3vh;
+    overflow: hidden;
+}
+
+.TaxInfo .attachedDocumentsContainer .actualRut{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    background-image: url('https://caracol.com.co/resizer/v2/EQ7VIAFLG5AANDY4LDJFBFMWNU.jpg?auth=3281068672af34464e653d5abba85feda8792f64c3f705ce3d97df2c4e9e2d9b&width=650&height=488&quality=70&smart=true');
+    background-size: 100% 100%;
+    border-radius:3vh;
+    cursor: pointer;
+}
+
+.TaxInfo .attachedDocumentsContainer .actualRut .noRutAttached{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color:#00000090;
+}
+
+.TaxInfo .attachedDocumentsContainer .actualRut .noRutAttached i{
+    margin: auto;
+    margin-bottom: 2vh;
+    color: #fff;
+    font-size: clamp(3px,4vh,40px);
+}
+
+.TaxInfo .attachedDocumentsContainer .actualRut .noRutAttached h6{
+    margin: auto;
+    margin-top: 0;
+    color: #fff;
+    font-weight: 500;
+}
+
+.TaxInfo .attachedDocumentsContainer .RutContainer .FileInput{
+    display: none;
+}
+
+.TaxInfo .attachedDocumentsContainer .RutContainer:hover .actualRut{
+    display: none;
+}
+
+.TaxInfo .attachedDocumentsContainer .RutContainer:hover .FileInput{
+    display: flex;
+}

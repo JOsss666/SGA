@@ -1,0 +1,6 @@
+
+.PreviewDocument{
+    height: 100dvh;
+    width: 100dvw;
+    background-color: var(--bg);
+}

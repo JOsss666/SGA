@@ -8,6 +8,8 @@ import path from "path";
 import contabiltyController from '../controllers/contabilityController.js';
 import inventoryController from '../controllers/inventoryController.js'
 import { uploadMiddleware } from '../uploadMiddleWare.js';
+import facturationController from '../controllers/facturationController.js';
+
 const router = express.Router();
 
 // temporal folder for chunks
@@ -33,6 +35,8 @@ const upload = multer({ dest: CHUNKS_DIR });
     router.post('/signUp',controller.signUp);
 
     router.post('/deleteUser',controller.deleteUser);
+
+    router.post('/getRoles',controller.getRoles);
 
 router.post('/getCompanyInfo',controller.getCompanyInfo);
 
@@ -68,6 +72,8 @@ router.post('/getBussines',controller.getBussines);
 
 router.post('/getAccountsPlan',controller.getAccountsPlan);
 
+router.post('/getAccounts',controller.getAccounts);
+
 router.post('/insertNewAccount',controller.insertNewAccount);
 
 router.post('/createTax',controller.createTax);
@@ -87,6 +93,8 @@ router.post('/createConcept',controller.createConcept);
 router.post('/deleteConcept',controller.deleteConcept);
 
 router.post('/getConcepts',controller.getConcepts);
+
+router.post('/getDocParams',controller.getDocParams);
 
 router.post('/createPaymentMethod',controller.createPaymentMethod);
 
@@ -142,7 +150,7 @@ router.post('/inventory/newEntry',inventoryController.newEntry);
 
 router.post('/inventory/newDeparture',inventoryController.newDeparture);
 
-router.post('/inventory/newMovement',inventoryController.newMovement);
+router.post('/inventory/newMovement',inventoryController.newMovement2);
 
 router.post('/inventory/getMovements',inventoryController.getMovements);
 
@@ -152,8 +160,12 @@ router.post('/inventory/getDepartures',inventoryController.getDepartures);
 
 router.post('/inventory/getRotation',inventoryController.getRotation);
 
+router.post('/inventory/getKardex',inventoryController.getKardex);
+
 
 // SGA - PROCESS
+
+router.post('/process/getProcessInstances', processController.getProcessInstances);
 
 router.post('/process/createOP', processController.createOp);
 
@@ -176,6 +188,15 @@ router.post('/process/searchDocument',processController.searchDocument);
 // SGA contability
 
 router.post('/contability/contabiltyController', contabiltyController.getBalance);
+
+
+// SGA treasury
+
+router.post('/treasury/getTreasury',controller.getAccounts); //PENDIENTE IMPLEMENTAR 
+
+// SGA Facturation
+
+router.post('/facturation/newCashRecipt',facturationController.newCashRecipt);
 
 export default router;
 

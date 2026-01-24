@@ -35,11 +35,11 @@ export function FormInput({action,title,placeholder,children,type,disabled,textA
                     }} disabled={disabled} type={type} placeholder={placeholder}/>
                 )}
                 {textArea && (
-                    <textArea onChange={()=>{
+                    <textarea onChange={()=>{
                         if(action != null){
                             action(inRef.current.value)
                         }
-                    }} ref={inRef} placeholder={placeholder} disabled={disabled}></textArea>
+                    }} ref={inRef} placeholder={placeholder} disabled={disabled}></textarea>
                 )}
                 {children}
             </div>

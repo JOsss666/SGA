@@ -1,0 +1,127 @@
+
+.CellarDetail{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+}
+
+.CellarDetail .headSection{
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+    padding-left: 2vh;
+}
+
+.CellarDetail .headSection .PathLocation{
+    padding-left: 0;
+}
+
+.CellarDetail .headSection .BoldTitle{
+    margin-bottom: .5vh;
+}
+
+.CellarDetail .filtersStock{
+    display: flex;
+    gap: 3vh;
+    padding: 1vh 2vh;
+    margin-top: 2vh;
+}
+
+.CellarDetail .filtersStock .ButtonDownload{
+    width: 10vw;
+    margin: auto;
+    margin-right: 2vh;
+}
+
+.CellarDetail .filtersStock .SearchBar{
+    width: 30vw;
+}
+
+.CellarDetail .stockGrid{
+    padding: .2vh 2vh;
+    height: 63vh;
+    overflow-y: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.CellarDetail .stockGrid .stockCard{
+    display: flex;
+    width: 100%;
+    padding: 1.5vh 2vh;
+    border: solid .1vh var(--inputsBorder);
+    border-top: none;
+    cursor: pointer;
+}
+
+.CellarDetail .stockGrid .stockCard:first-child{
+    border-top: solid .1vh var(--inputsBorder);
+    border-top-left-radius: 4vh;
+    border-top-right-radius: 4vh;
+}
+
+.CellarDetail .stockGrid .stockCard:last-child{
+    border-bottom-left-radius: 4vh;
+    border-bottom-right-radius: 4vh;
+}
+
+.CellarDetail .stockGrid .stockCard .productC{
+    display: flex;
+    margin: auto 1vh;
+    width: 30%;
+}
+
+.CellarDetail .stockGrid .stockCard:hover{
+    background-color: var(--menuAside);
+}
+
+.CellarDetail .stockGrid .stockCard .productC img{
+    height: 6vh;
+    width: 6vh;
+    object-fit: contain;
+    border-radius: 1vh;
+    background-color: var(--cardHover);
+    padding: .5vh;
+    margin-right: 1vh;
+}
+
+.CellarDetail .stockGrid .stockCard .productInfo{
+    display: flex;
+    flex-direction: column;
+    margin: auto 1vh;
+}
+
+.CellarDetail .stockGrid .stockCard .productInfo strong{
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+    color: var(--mainText);
+    margin-bottom: .5vh;
+}
+
+.CellarDetail .stockGrid .stockCard .productInfo span{
+    font-size: clamp(1.6px,1.6vh,16px);
+    color: var(--descriptionText);
+}
+
+.CellarDetail .stockGrid .stockCard .productInfo span i{
+    margin-right: 1vh;
+    font-size: clamp(2px,2vh,20px);
+}
+
+.CellarDetail .stockGrid .stockCard .stockVal{
+    margin: auto 2vh;
+    min-width: 10%;
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.CellarDetail .stockGrid .stockCard .stockVal b{
+    font-weight: 500;
+    margin: auto;
+    margin-top: 1vh;
+    color: var(--mainText);
+}

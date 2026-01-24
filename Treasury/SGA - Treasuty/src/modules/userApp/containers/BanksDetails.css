@@ -1,0 +1,109 @@
+.BanksDetails{
+    padding: 2vh;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+
+.BanksDetails .CarrouselOptions{
+    width: 100%;
+    display: flex;
+    margin: 2vh 0;
+    position: relative;
+}
+
+.BanksDetails .CarrouselOptions h4{
+    width: 14vw;
+    text-align: center;
+    padding: 1vh 0;
+    cursor: pointer;
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 500;
+    color: var(--descriptionText);
+    transition: .3s;
+}
+
+.BanksDetails .CarrouselOptions .activeSec{
+    color: var(--mainText);
+}
+
+.BanksDetails .CarrouselOptions .CarrouselIndicator{
+    position: absolute;
+    bottom: 0;
+    width: 14vw;
+    height: .15vh;
+    background-color: var(--mainText);
+    border: .5vh;
+    transition: .3s;
+}
+
+
+
+.BanksDetails .MenuBarDetailBank{
+    display: flex;
+    width: fit-content;
+    gap: 2vh;
+    align-items: center;
+}
+
+.BanksDetails .MenuBarDetailBank .SearchBar{
+    width: 38vh;
+    padding-right: 1.5vh;
+}
+
+
+.BanksDetails .MenuBarDetailBank .rangeInput{
+    display: flex;
+    margin: auto 0;
+    width: 45vh;
+}
+
+.BanksDetails .MenuBarDetailBank .rangeInput span{
+    margin: auto .5vh;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: #aaa;
+}
+
+.BanksDetails .MenuBarDetailBank .rangeInput .FormInput{
+    margin: auto 1vh;
+    position: relative;
+    min-width: 10vw;
+}
+
+.BanksDetails .MenuBarDetailBank .rangeInput .FormInput .inputContainer input{
+    box-shadow: none;
+}
+
+.BanksDetails .MenuBarDetailBank .FormInput label{
+    position: absolute;
+    top: -3vh;
+    font-size: clamp(2px,2.2vh,22px);
+    display: none;
+}
+
+.BanksDetails .MenuBarDetailBank .IconList{
+    background-color: var(--inputsBg);
+    border-radius: 1vh;
+    height: fit-content;
+    box-shadow: 0 .2vh .8vh #0003;
+    font-size: 3.5vh;
+    align-content: center;
+    position: relative;
+    font-size: 3vh;
+    position: relative;
+    padding: 1vh;
+    color: var(--descriptionText);
+    cursor: pointer;
+}
+
+.BanksDetails .MenuBarDetailBank .IconList:hover{
+    background-color: var(--cardHover);
+}
+
+
+.BanksDetails .MenuBarDetailBank .SelectOptions .contentOptions{
+    width: 26vh;
+    box-shadow: 0 .2vh .8vh #0003;
+    padding-left: 1.5vh;
+}

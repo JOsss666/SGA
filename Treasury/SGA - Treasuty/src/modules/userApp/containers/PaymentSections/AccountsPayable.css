@@ -1,0 +1,23 @@
+
+
+.AccountsPayable .settingsReport{
+    display: flex;
+    position: relative;
+}
+
+.AccountsPayable .settingsReport .SearchBar{
+    margin: auto 0;
+    margin-top: .5vh;
+    width: 15vw;
+}
+
+.AccountsPayable .settingsReport .SearchBar input{
+    height: 5vh;
+}
+
+.AccountsPayable .settingsReport .ButtonDownload{
+    position: absolute;
+    right: 0vh;
+    bottom: 8vh;
+    z-index: 20;
+}

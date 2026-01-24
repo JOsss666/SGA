@@ -13,7 +13,7 @@ import { CheckSquare } from '../components/CheckSquare'
 import { FormNewUser } from './forms/FormNewUser'
 
 export function Users(){
-
+    const {userConfig} = useAppInfo();
     const {popInAlert} = useAlert();
     const [users,setUsers] = useState([]);
     const [loading,setLoading]= useState(false);
@@ -49,9 +49,11 @@ export function Users(){
                     <SearchBar placeholder={'Buscar'}/>
                     <SelectOptions title={'Filtro'} options={['ninguno']}/>
                     <SelectOptions title={'Orden'} options={['Alfabetico','Fecha de Creación','Rol']}/>
-                    <FormButton onClick={()=>{
-                        popInAlert(<FormNewUser reloadFun={getUsers}/>)
-                    }} text={'Crear usuario'} children={<i className="fa-solid fa-plus"/>}/>
+                    {userConfig.access.sections.users.can_create && (
+                        <FormButton onClick={()=>{
+                            popInAlert(<FormNewUser reloadFun={getUsers}/>)
+                        }} text={'Crear usuario'} children={<i className="fa-solid fa-plus"/>}/>
+                    )}
                 </div>
             </div>
             <div className="tableUsers">

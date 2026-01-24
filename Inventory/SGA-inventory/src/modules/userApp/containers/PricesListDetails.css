@@ -17,9 +17,7 @@
 
 .PricesListDetails .contentDetailsList .containerMainList{
     height: 100%;
-    width: 80%;
-    background-color: #fff;
+    width: 100%;
+    background-color: var(--bg);
     border-radius: 2vh;
-    outline: solid 1vh #fff9;
-    box-shadow: 0 0 2vh #ccc8;
 }

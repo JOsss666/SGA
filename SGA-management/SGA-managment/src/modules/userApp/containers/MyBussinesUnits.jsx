@@ -19,18 +19,21 @@ import { ButtonMenu } from '../components/ButtonMenu';
 export function MyBussinesUnits(){
 
     const {popInAlert} = useAlert();
-    const {appInfo} = useAppInfo();
+    const {appInfo,userConfig} = useAppInfo();
     const navigate = useNavigate();
     const params = useParams();
     const [disabled,setDisabled] = useState(false);
     const [loading,setLoading] = useState(false);
     const [stores,setStores] = useState([]);
+
+    console.log(userConfig.access.stores)
     
     const getStores = async()=>{
         setDisabled(true);
         setLoading(true);
         let res = await postInfo('/getStores',{
-            company_id:appInfo.company_id
+            company_id:appInfo.company_id,
+            allowedStores:userConfig.access.stores.overAll ? undefined:userConfig.access.stores.enabled
         })
         if(res[0]){
             setStores(res[1])

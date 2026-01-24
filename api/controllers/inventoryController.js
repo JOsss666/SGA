@@ -71,6 +71,8 @@ inventoryController.getProducts = (req, res) => {
         const sentence = `
             SELECT
                 ps.*,
+                c_exit.account_id AS exit_account,
+                c_entry.account_id AS entry_account,
                 array_remove(array_agg(c.name), NULL) AS categories
             FROM
                 "Inventory"."products&services" AS ps
@@ -80,11 +82,21 @@ inventoryController.getProducts = (req, res) => {
             LEFT JOIN
                 "Inventory".categories AS c
                 ON pc.category_id = c.id
+            LEFT JOIN 
+                "Ecosystem".concepts AS c_exit
+            ON 
+                ps.exit_concept = c_exit.id
+            LEFT JOIN 
+                "Ecosystem".concepts AS c_entry
+            ON 
+                ps.entry_concept = c_entry.id
             WHERE
                 ps.company_id = $1
                 ${whereExtra}
             GROUP BY
-                ps.id;
+                ps.id,
+                c_entry.account_id,
+                c_exit.account_id;
         `;
 
         const consulta = await useDataBase(sentence, values, 1);
@@ -110,20 +122,26 @@ inventoryController.createProduct = (req,res)=>{
                     name,
                     stock,
                     units,
-                    entry_account,
-                    exit_account,
+                    entry_concept,
+                    exit_concept,
+                    taxed,
+                    tax_id,
                     img,
+                    type,
                     description)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id ;`
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id ;`
         let consulta = await useDataBase(sentence,[
                     info.company_id,
                     info.code,
                     info.name,
                     info.stock,
                     info.units,
-                    info.inventotyAccount,
-                    info.costAccount,
+                    info.purchaseConcept,
+                    info.sellConcept,
+                    info.taxed,
+                    info.tax_id,
                     info.photo,
+                    info.type_product,
                     info.description],3);
         console.log('---> ',consulta);
         let insert_id = parseInt(consulta.id);
@@ -489,122 +507,207 @@ inventoryController.newDeparture = (req,res)=>{
     })
 }
 
+// Handlers y funciones para movimientos de inventario
 
-inventoryController.newMovement = (req,res)=>{
-    let data = '';
+async function createMainDocument(info){
+    let senMainDoc = `
+        INSERT INTO "Ecosystem".documents(
+            company_id,
+            store_id,
+            "thirdParty_id",
+            document_type,
+            status,
+            "subTotal",
+            total,
+            created_by,
+            description,
+            attached)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id;
+    `;
+    let valuesMainDoc = [
+        info.company_id,
+        info.store_id,
+        info.thirdParty_id,
+        info.movement_type,
+        info.status,
+        info.totalProducts,
+        info.totalProducts,
+        info.created_by,
+        info.description,
+        info.attached_document
+    ];
+    let createMainDoc = await useDataBase(senMainDoc,valuesMainDoc,3);
+    let idMainDoc = parseInt(createMainDoc.id);
+    return idMainDoc;
+}
+
+async function insertMovement(info,element,idMainDoc){
+    console.log("Información movimientos ---> ",info)
+    let sentence = `
+        INSERT INTO
+            "Inventory"."inventoryMovements"(
+                company_id,
+                "thirdParty_id",
+                store_id,
+                cellar_id,
+                "product&service_id",
+                movement_type,
+                units,
+                value,
+                movement_group_id,
+                attached_document,
+                status,
+                description, 
+                created_by)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13);
+        `;
+    let consulta = await useDataBase(sentence,[
+                info.company_id,
+                info.thirdParty_id,
+                info.store_id,
+                info.cellar_id,
+                element.id,
+                info.movement_type,
+                info.movement_type == 'Inventory Entry'? (element.movementsUnits):(element.movementsUnits * -1),
+                element.unit_cost != undefined ? element.unit_cost:element.avg_cost,
+                idMainDoc,
+                info.attached_document,
+                info.status,
+                info.description,
+                info.created_by,],2);
+    return consulta;
+}
+
+async function updateStocks(info,element){
+    let sentence = `
+        INSERT INTO "Inventory".stocks(
+            company_id,
+            store_id,
+            cellar_id,
+            product_id,
+            stock,
+            min_stock,
+            max_stock,
+            avg_cost)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+        ON CONFLICT (company_id, store_id, cellar_id, product_id)
+        DO UPDATE SET
+            avg_cost = (
+            ("Inventory"."stocks".stock * "Inventory"."stocks".avg_cost)
+            + (EXCLUDED.stock * EXCLUDED.avg_cost)
+        ) / ("Inventory"."stocks".stock + EXCLUDED.stock),
+        stock = "Inventory"."stocks".stock + EXCLUDED.stock, 
+        updated_at = NOW();
+    `;
+    let consulta = await useDataBase(sentence,[
+        info.company_id,
+        info.store_id,
+        info.cellar_id,
+        element.id,
+        info.movement_type == 'Inventory Entry'? (element.movementsUnits):(element.movementsUnits * -1),
+        0,
+        0,
+        element.unit_cost != undefined ? element.unit_cost:element.avg_cost
+    ],2);
+    return consulta;
+}
+
+async function inventoryOutHandler(info,idMainDoc){
+    let results = [];
+    for (const element of info.listProducts) {
+        let movement = await insertMovement(info,element,idMainDoc)
+        let stockUpdate = await updateStocks(info,element)
+        results.push({
+            movement:movement,
+            stock:stockUpdate
+        });
+    }
+    return results;
+}
+
+async function inventoryEntryHandler(info,idMainDoc){
+    let results = [];
+    for (const element of info.listProducts) {
+        let movement = await insertMovement(info,element,idMainDoc)
+        let stockUpdate = await updateStocks(info,element)
+        results.push({
+            movement:movement,
+            stock:stockUpdate
+        });
+    }
+    return results;
+}
+
+async function inventoryTransferHandler(info){
+    // documento salida
+    const exit_id = await createMainDocument({
+        ...info,
+        movement_type: 'Inventory Out',
+        store_id: info.origin_store_id,
+        cellar_id: info.origin_cellar_id,
+    });
+
+    const exitResult = await inventoryOutHandler({
+        ...info,
+        movement_type: 'Inventory Out',
+        store_id: info.origin_store_id,
+        cellar_id: info.origin_cellar_id,
+    }, exit_id);
+
+    // documento entrada
+    const entry_id = await createMainDocument({
+        ...info,
+        movement_type: 'Inventory Entry',
+        store_id: info.destiny_store_id,
+        cellar_id: info.destiny_cellar_id,
+    });
+
+    const entryResult = await inventoryEntryHandler({
+        ...info,
+        movement_type: 'Inventory Entry',
+        store_id: info.destiny_store_id,
+        cellar_id: info.destiny_cellar_id,
+    }, entry_id);
+
+    return { exit: exitResult, entry: entryResult };
+}
+
+
+
+inventoryController.newMovement2 = async (req, res) => {
+    let data = ''
     req.on('data',chunk=>{
         data += chunk;
     })
     req.on('end',async()=>{
-        let info = JSON.parse(data);
-        console.log(info);
-        let resultsMovements = [];
-        let senMainDoc = `
-            INSERT INTO "Ecosystem".documents(
-                company_id,
-                store_id,
-                "thirdParty_id",
-                document_type,
-                status,
-                "subTotal",
-                total,
-                created_by,
-                description,
-                attached)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id;
-        `;
-        let valuesMainDoc = [
-            info.company_id,
-            info.store_id,
-            info.thirdParty_id,
-            info.movement_type,
-            info.status,
-            info.totalProducts,
-            info.totalProducts,
-            info.created_by,
-            info.description,
-            info.attached_document
-        ];
-        let createMainDoc = await useDataBase(senMainDoc,valuesMainDoc,3);
-        let idMainDoc = parseInt(createMainDoc.id);
-        console.log('Documento padre --> ',idMainDoc)
-        if(typeof(idMainDoc) == 'number' && idMainDoc != NaN){
-            let sentence = `
-            INSERT INTO
-                "Inventory"."inventoryMovements"(
-                    company_id,
-                    "thirdParty_id",
-                    store_id,
-                    cellar_id,
-                    "product&service_id",
-                    movement_type,
-                    units,
-                    value,
-                    movement_group_id,
-                    attached_document,
-                    status,
-                    description, 
-                    created_by)
-                VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13);`;
+        const info = JSON.parse(data);
+        const docId = await createMainDocument(info);
+        let result;
+        if(typeof(docId) === 'number'){
+            switch (info.movement_type) {
+                case 'Inventory Entry':
+                result = await inventoryEntryHandler(info, docId);
+                break;
 
-            let stockSen = `
-                INSERT INTO "Inventory".stocks(
-                    company_id,
-                    store_id,
-                    cellar_id,
-                    product_id,
-                    stock,
-                    min_stock,
-                    max_stock,
-                    avg_cost)
-                VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-                ON CONFLICT (company_id, store_id, cellar_id, product_id)
-                DO UPDATE SET
-                    avg_cost = (
-                    ("Inventory"."stocks".stock * "Inventory"."stocks".avg_cost)
-                    + (EXCLUDED.stock * EXCLUDED.avg_cost)
-                ) / ("Inventory"."stocks".stock + EXCLUDED.stock),
-                stock = "Inventory"."stocks".stock + EXCLUDED.stock, 
-                updated_at = NOW();
-            `
+                case 'Inventory Out':
+                result = await inventoryOutHandler(info, docId);
+                break;
 
-            for (const element of info.listProducts) {
-                let values = [
-                    info.company_id,
-                    info.thirdParty_id,
-                    info.store_id,
-                    info.cellar_id,
-                    element.id,
-                    info.movement_type,
-                    element.stock,
-                    element.unit_cost,
-                    idMainDoc,
-                    info.attached_document,
-                    info.status,
-                    info.description,
-                    info.created_by,]
-                let consulta = await useDataBase(sentence,values,2);
-                let stockUpdate = await useDataBase(stockSen,[
-                    info.company_id,
-                    info.store_id,
-                    info.cellar_id,
-                    element.id,
-                    element.stock,
-                    0,
-                    0,
-                    element.unit_cost
-                ],2);
-                resultsMovements.push({
-                    movement:consulta,
-                    stock:stockUpdate
-                });
+                case 'Inventory Consume':
+                result = await inventoryOutHandler(info, docId);
+                break;
+
+                case 'Inventory Transfer':
+                result = await inventoryTransferHandler(info,docId);
+                break;
+
+                default:
+                throw new Error('Tipo de movimiento no soportado');
             }
-            console.log(resultsMovements)
-            console.log('---------------------')
             res.writeHead(200,{'Content-Type':'text/plain'});
             res.end(JSON.stringify([true,{
-                doc_id:idMainDoc,
-                lines:resultsMovements
+                doc_id:docId,
+                lines:result
             }]));
         }else{
             res.writeHead(200,{'Content-Type':'text/plain'});
@@ -615,8 +718,7 @@ inventoryController.newMovement = (req,res)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
-}
-
+};
 
 inventoryController.getMovements = (req,res)=>{
     let data = '';
@@ -706,15 +808,33 @@ inventoryController.getStocks = (req,res)=>{
             values.push(cellarIdParsed);
         }
 
+        whereClauses.push(`"Inventory".stocks.stock > $${values.length +1}`);
+        values.push(info.minStock != undefined? info.minStock:0)
+
         const whereQuery = whereClauses.length > 0
             ? `WHERE ${whereClauses.join(" AND ")}`
             : "";
 
         let sentence = `
             SELECT
-                "Inventory".stocks.*,
+                "Inventory".stocks.company_id,
+                "Inventory".stocks.store_id,
+                "Inventory".stocks.cellar_id,
+                "Inventory".stocks.product_id AS id,
+                "Inventory".stocks.id AS stock_id,
+                "Inventory".stocks.stock,
+                "Inventory".stocks.min_stock,
+                "Inventory".stocks.max_stock,
+                "Inventory".stocks.updated_at,
+                "Inventory".stocks.avg_cost,
                 "Inventory"."products&services".name,
                 "Inventory"."products&services".code,
+                "Inventory"."products&services".taxed,
+                "Inventory"."products&services".tax_id,
+                "Inventory"."products&services".stock AS globalStock,
+                c_exit.account_id AS exit_account,
+                c_entry.account_id AS entry_account,
+                
                 "Inventory"."products&services".img
             FROM
                 "Inventory".stocks
@@ -722,8 +842,17 @@ inventoryController.getStocks = (req,res)=>{
                 "Inventory"."products&services"
             ON
                 "Inventory".stocks.product_id = "Inventory"."products&services".id
+            LEFT JOIN 
+                "Ecosystem".concepts AS c_exit
+            ON 
+                "Inventory"."products&services".exit_concept = c_exit.id
+            LEFT JOIN 
+                "Ecosystem".concepts AS c_entry
+            ON 
+                "Inventory"."products&services".entry_concept = c_entry.id
+
             ${whereQuery}
-            ORDER BY "Inventory"."products&services".name ASC ;
+            ORDER BY "Inventory"."products&services".name ASC;
         `;
         let consulta = await useDataBase(sentence,values,1)
         res.writeHead(200,{'Content-Type':'text/plain'});
@@ -906,7 +1035,78 @@ inventoryController.getCategories = (req,res)=>{
     })
 }
 
-[true,[{}]]
+inventoryController.getKardex = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+        const start = info.start_date || null;
+        const end = info.end_date || null;
+        const columnDate = '"Inventory"."inventoryMovements".created_at';
+
+        whereClauses.push(`"Inventory"."inventoryMovements".company_id = $1`)
+        values.push(info.company_id)
+
+        if (start && end) {
+            values.push(start, end);
+            whereClauses.push(
+                `${columnDate} >= $${values.length - 1}::timestamp
+                AND ${columnDate} < ($${values.length}::timestamp + INTERVAL '1 day')`
+            );
+
+        } else if (start) {
+            values.push(start);
+            whereClauses.push(
+                `${columnDate} >= $${values.length}::timestamp`
+            );
+
+        } else if (end) {
+            values.push(end);
+            whereClauses.push(
+                `${columnDate} < ($${values.length}::timestamp + INTERVAL '1 day')`
+            );
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
+        let sentence = `
+            SELECT
+                "Inventory"."inventoryMovements".*,
+                "Inventory"."products&services".name AS product_name,
+                "Inventory"."products&services".img,
+                "Inventory"."products&services".code AS product_SKU,
+                "Ecosystem"."thirdparties".names AS thirdparty_name,
+                "Ecosystem"."thirdparties".img AS thirdparty_img,
+                "Inventory"."products&services".description AS product_description
+            FROM
+                "Inventory"."inventoryMovements"
+            LEFT JOIN
+                "Inventory"."products&services"
+            ON
+                "Inventory"."inventoryMovements"."product&service_id" = "Inventory"."products&services".id
+            LEFT JOIN
+                "Ecosystem"."thirdparties"
+            ON
+                "Inventory"."inventoryMovements"."thirdParty_id" = "Ecosystem"."thirdparties".id
+            ${whereQuery}
+            ORDER BY "Inventory"."inventoryMovements".created_at DESC;
+        `;
+
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
 
 export default inventoryController;
 
