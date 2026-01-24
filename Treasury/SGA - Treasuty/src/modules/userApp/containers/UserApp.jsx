@@ -47,6 +47,9 @@ import { Payments } from './Payments';
 import { Collections } from './Collections';
 import {NoAccess} from './NoAccess'
 import {SuspendedAccount} from './SuspendedAcount'
+import { Movements } from './Movements'; 
+import { MovementsRecord } from './MovementsRecord'; 
+
 
 export function UserApp(){
 
@@ -197,7 +200,11 @@ export function UserApp(){
                             <Route path='/thirdparties/*' element={<ThirdParties/>} />
                             <Route path='/thirdparties/:thirdparty_id' element={<ThirdPartyDetail/>} />
 
-                            <Route path='/movements' element={<span>Movimientos</span>}/>
+                            <Route path='/movements'>
+                                <Route index element={<Movements/>} />
+                                <Route path='details' element={<MovementsRecord/>} /> 
+                            </Route>
+
                             <Route path='/treasury' element={<Treasury/>}/>
                             <Route path='/banks' element={<Banks/>}/>
                                 <Route path='/banks/:bank_id' element={<BanksDetails/>}/>
