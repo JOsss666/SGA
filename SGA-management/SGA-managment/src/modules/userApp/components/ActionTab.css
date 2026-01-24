@@ -1,0 +1,39 @@
+.ActionTab {
+    display: flex;
+    align-items: center;
+    gap: 1vh;
+    padding: 1.2vh 2vh;
+    border-radius: 2vh;
+    background-color: var(--menuAside);
+    color: var(--descriptionText);
+    font-weight: 500;
+    font-size: 1.8vh;
+    cursor: pointer;
+    user-select: none;
+    transition: 
+        background-color 0.25s ease,
+        color 0.25s ease,
+        transform 0.2s ease;
+}
+
+.ActionTab svg {
+    font-size: 2.4vh;
+    color: inherit;
+}
+
+.ActionTab:hover {
+    background-color: var(--descriptionText);
+    color: #ffffff;
+    transform: translateY(-.5vh);
+}
+
+.ActionTab.active {
+    background-color: var(--descriptionText);
+    color: #ffffff;
+}
+
+.ActionTab.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
