@@ -24,7 +24,7 @@ export function Users(){
         let res = await 
         postInfo('/getUsers',{
             company_id:appInfo.company_id,
-            //status:'active'
+            status:'active'
         });
         console.log(res)
         if(res[0]){

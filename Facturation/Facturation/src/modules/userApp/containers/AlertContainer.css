@@ -13,6 +13,7 @@
     animation-fill-mode: both;
     animation-timing-function: ease;
     width: 100%;
+    z-index: 30;
 }
 
 .AlertContainer .optionsAlert{

@@ -1,7 +1,7 @@
 import './FormNewUser.css'
 import {BoldTitle} from '../../components/BoldTitle'
 import { FileInput } from '../../components/FileInput'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FormInput } from '../../components/FormInput';
 import { FormButton } from '../../components/FormButton';
 import { postInfo } from '../../../../utils/functions';
@@ -18,14 +18,14 @@ export function FormNewUser({info,reloadFun}){
     const [stage,setStage] = useState(0);
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
-    const [roles,setRoles] = useState();
-
+    const [roles,setRoles] = useState([]);
+    
     // Datos formulario
     const [userPhoto,setUserPhoto] = useState('https://i.pinimg.com/1200x/ba/8d/7a/ba8d7a6364bf8ce99756686cba83c695.jpg');
     const [name,setName] = useState('');
     const [mail,setMail] = useState('');
     const [pass,setPass] = useState('');
-    const [userRol,setUserRol] = useState('');
+    const [userRol,setUserRol] = useState();
     const [accessInventory,setAccessInventory] = useState(false)
     const [accessContability,setAccessContability] = useState(false)
     const [accessProcess,setAccessProcess] = useState(false)
@@ -49,12 +49,33 @@ export function FormNewUser({info,reloadFun}){
         accessCtools
     }
 
+    const getRoles = async()=>{
+        console.log('Cargando roles')
+        let res = await postInfo('/getRoles',{
+            company_id:appInfo.company_id
+        })
+        console.log(res)
+        if(res[0]){
+            let C = [];
+            res[1].forEach(element => {
+                C.push({
+                    text:element.name,
+                    value:element.id
+                })
+            });
+            setRoles(C);
+        }
+    }
+
+    useEffect(()=>{
+        console.log(userRol)
+    },[userRol])
+
     const createUser = async()=>{
         setDisabled(true)
         setLoading(true)
         let res = await postInfo('/signUp',formInfo);
-        console.log(res)
-        if(res == true){
+        if(res){
             addNotification({
                 type:'aproved',
                 title:`Usuario ${name} creado correctamente`,
@@ -69,13 +90,16 @@ export function FormNewUser({info,reloadFun}){
             addNotification({
                 type:'error',
                 title:`Error al crear usuario "${name}"`,
-                description:res[1].code == "23505"? `El correo ${mail} ya esta registrado`:
-                `Hubo un problema al crear el usuario "${name}", intentelo de nuevo.`
+                description:`Hubo un problema al crear el usuario "${name}", intentelo de nuevo.`
             })
         }
         setLoading(false)
         setDisabled(false);
     }
+
+    useEffect(()=>{
+        getRoles();
+    },[])
 
     return(
         <div className="FormNewUser">
@@ -95,18 +119,14 @@ export function FormNewUser({info,reloadFun}){
                             <i className="fa-solid fa-camera"/>
                         </FileInput>
                     </div>
-                    <FormInput action={setName} value={name} title={'Nombre'} placeholder={'Nombre del usuario'} disabled={disabled}/>
-                    <FormInput action={setMail} value={mail} title={'Correo'} type={'email'} placeholder={'....@gmail.com'} disabled={disabled}/>
-                    <FormInput action={setPass} value={pass} title={'Contraseña'} type={'text'} placeholder={'*****'} disabled={disabled}/>
+                    <FormInput action={setName} title={'Nombre'} placeholder={'Nombre del usuario'} disabled={disabled}/>
+                    <FormInput action={setMail} title={'Correo'} type={'email'} placeholder={'....@gmail.com'} disabled={disabled}/>
+                    <FormInput action={setPass} title={'Contraseña'} type={'text'} placeholder={'*****'} disabled={disabled}/>
                 </form>
             )}
             {stage == 1 && (
                 <form action="">
-                    <SearchinList action={setUserRol} title={'Cargo del usuario'} placeHolder={'Seleccionar Cargo'} list={[
-                        {text:'Operador',value:1},
-                        {text:'Administrador',value:1},
-                        {text:'Personalizado 1',value:1}
-                    ]} specialOption={<NewElementSelect title={'Crear nuevo roll'}/>}/>
+                    <SearchinList action={setUserRol} title={'Cargo del usuario'} placeHolder={'Seleccionar Cargo'} list={roles} specialOption={<NewElementSelect title={'Crear nuevo roll'}/>}/>
                     <div className="accessSwitch">
                         <h6>Acceso a inventarios</h6>
                         <SwitchOption action={setAccessInventory}/>

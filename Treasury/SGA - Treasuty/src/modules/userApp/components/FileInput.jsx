@@ -1,12 +1,17 @@
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import {uploadFiles} from '../../../utils/functions'
 import './FileInput.css'
 
-export function FileInput({action,disabled,placeholder,children,multiple}){
+export function FileInput({action,disabled,setDisabled,placeholder,children,multiple}){
 
     const inRef = useRef();
+    const [loading,setLoading] = useState(false);
+    const [urls,setUrls] = useState([]);
 
     const uplF = async(files)=>{
+        setDisabled?.(true);
+        console.log('Accion')
+        setLoading(true);
         let res = await uploadFiles(files);
         console.log(res)
         if(action != undefined){
@@ -16,24 +21,48 @@ export function FileInput({action,disabled,placeholder,children,multiple}){
                 action(res.urls[0]);
             }
         }
+        setUrls(res.urls)
+        setLoading(false);
+        setDisabled?.(false);
     }
 
     return(
         <div className="FileInput">
-            <div className="spaceInput" onClick={()=>{
-                inRef.current.click();
-            }}>
-                {children? children:(
-                    <i className="fa-regular fa-folder-open"/>
-                )}
-                <strong>{placeholder? placeholder:'Seleccionar archivo'}</strong>
-            </div>
-            <input disabled={disabled} ref={inRef} type="file" hidden multiple={multiple} onChange={(e)=>{
-                console.log(inRef.current.files)
-                if(action != undefined){
-                    uplF(inRef.current.files)
-                }
-            }}/>
+            {!loading && urls.length == 0 && (
+                <>
+                    <div className="spaceInput" onClick={()=>{
+                        inRef.current.click();
+                    }}>
+                        {children? children:(
+                            <i className="fa-regular fa-folder-open"/>
+                        )}
+                        <strong>{placeholder? placeholder:'Seleccionar archivo'}</strong>
+                    </div>
+                    <input disabled={disabled} ref={inRef} type="file" hidden multiple={multiple} onChange={(e)=>{
+                        if(action != undefined){
+                            uplF(inRef.current.files)
+                        }
+                    }}/>
+                </>
+            )}
+            {loading && (
+                <div className="LoadingUpload">
+                    <i className="fa-solid fa-spinner fa-spin"/>
+                    <strong>Subiendo archivo...</strong>
+                </div>
+            )}
+            {!loading && urls.length > 0 && (
+                <div className="urlsContainer">
+                    <h5>{urls.length} Archivos subidos</h5>
+                    <ul className="gridUrl">
+                        {urls.map((element,index)=>(
+                            <li key={index}>
+                                <a href={element} target="NBLANK">{element}</a>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </div>
     )
 }

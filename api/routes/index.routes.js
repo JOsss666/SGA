@@ -8,6 +8,8 @@ import path from "path";
 import contabiltyController from '../controllers/contabilityController.js';
 import inventoryController from '../controllers/inventoryController.js'
 import { uploadMiddleware } from '../uploadMiddleWare.js';
+import facturationController from '../controllers/facturationController.js';
+
 const router = express.Router();
 
 // temporal folder for chunks
@@ -33,6 +35,10 @@ const upload = multer({ dest: CHUNKS_DIR });
     router.post('/signUp',controller.signUp);
 
     router.post('/deleteUser',controller.deleteUser);
+
+    router.post('/getRoles',controller.getRoles);
+
+    router.post('/getDocuments',controller.getDocuments);
 
 router.post('/getCompanyInfo',controller.getCompanyInfo);
 
@@ -161,12 +167,23 @@ router.post('/inventory/getKardex',inventoryController.getKardex);
 
 // SGA - PROCESS
 
+router.post('/process/getProcessInstances', processController.getProcessInstances);
+
+router.post('/process/getProcessState', processController.getProcessState);
+
+router.post('/process/getAviableProceses',processController.getAviableProcess);
+
+router.post('/process/createProcessInstace',processController.createProcessInstace);
+
+router.post('/process/updateProcessInstanceStatus',processController.updateProcessInstanceStatus);
+
+router.post('/process/nextProcessStep',processController.nextProcessStep);
+
 router.post('/process/createOP', processController.createOp);
 
 router.post('/process/getOp', processController.getOp);
 
 router.post('/process/getDocuments', processController.getDocuments);
-
 
 router.post('/process/getOpAttached',processController.getOpAttached);
 
@@ -187,6 +204,12 @@ router.post('/contability/contabiltyController', contabiltyController.getBalance
 // SGA treasury
 
 router.post('/treasury/getTreasury',controller.getAccounts); //PENDIENTE IMPLEMENTAR 
+
+// SGA Facturation
+
+router.post('/facturation/newCashRecipt',facturationController.newCashRecipt);
+
+router.post('/facturation/newClientOrder',facturationController.newClientOrder);
 
 export default router;
 

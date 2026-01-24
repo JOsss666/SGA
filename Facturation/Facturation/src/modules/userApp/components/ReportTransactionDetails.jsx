@@ -52,6 +52,7 @@ export function ReportTransactionDetails() {
         setLoading(true);
         try {
             const res = await postInfo("/getTransactionDetails", settingsReport);
+            console.log(res);
             if (res && res[0]) {
                 setThirdparty_name(res[1][0].thirdparty_name)
                 setInfo(res[1]);
