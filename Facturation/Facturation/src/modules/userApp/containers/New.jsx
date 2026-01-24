@@ -17,6 +17,7 @@ import './New.css'
 import { FormNewDC } from "./forms/FormNewDC";
 import { FormNewCashRecipt } from "./forms/FormNewCashRecipt";
 import { ProcessStatusAlert } from "./Alerts/ProcessStatusAlert";
+import { FormSelectNewProcess } from "./forms/FormSelectNewProcess";
 
 
 export function New(){
@@ -25,7 +26,8 @@ export function New(){
 
     const options = [
         //{text:'Crear orden de trabajo',children:<SelectTpeNewDoc/>,icon:<i className="fa-solid fa-bell-concierge"/>},
-        {text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
+        //{text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
+        {text:'Crear orden de trabajo',children:<FormSelectNewProcess/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         {text:'Crear recibo de caja',children:<FormNewCashRecipt/>,icon:<i className="fa-solid fa-receipt"/>},
         {text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
         {text:'Crear usuario',children:<FormNewUser/>,icon:<i className="fa-solid fa-person-circle-plus"/>},

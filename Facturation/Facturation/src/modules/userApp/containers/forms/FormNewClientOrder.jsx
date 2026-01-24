@@ -25,6 +25,7 @@ export function FormNewClientOrder({params,reloadFun}){
     const [disabled,setDisabled] = useState(false);
     const [loading,setLoading] = useState(false);
     const [cotizationView,setCotizationView] = useState(true);
+    const [canSetManualValue,setCanSetManualValue] = useState(false);
 
     // formInfo
 
@@ -191,14 +192,20 @@ export function FormNewClientOrder({params,reloadFun}){
             }
 
             // Filtro para busqueda de Instancias de Procesos
-            if(!userConfig.access.process_instances.overAll){
+            if(!userConfig.access.process_instances.overAll && info.instance_id == undefined){
                 if(userConfig.access.process_instances.enabled.length > 1){
                     await getInstances(userConfig.access.process_instances.enabled,undefined);
                 }else{
-                    temInfo.instance_id = userConfig.access.process_instances.enabled[0]
-                    setInstace_id(userConfig.access.process_instances.enabled[0])
+                        temInfo.instance_id = userConfig.access.process_instances.enabled[0]
+                        setInstace_id(userConfig.access.process_instances.enabled[0])
                 }
-            }else{
+            }else if(info.instance_id != undefined){
+                temInfo.instance_id = info.instance_id;
+                temInfo.step_id = info.step_id;
+                setInstace_id(info.instance_id);
+                setStep_id(info.step_id);
+            }
+            else{
                 await getInstances()
             }
         }
@@ -266,12 +273,14 @@ export function FormNewClientOrder({params,reloadFun}){
                         {info.thirdParty_id == undefined && (
                             <SearchinList title={'Cliente'} action={setThirdParty_id} list={thirdParties} placeHolder={'Seleccione el tercero'} disabled={disabled}/>
                         )}
-                        <div className="SwitchValCot" onClick={()=>{
-                            setCotizationView(!cotizationView)
-                        }}>
-                            <strong className={cotizationView? 'activeStichH':''}>Cotización</strong>
-                            <strong className={!cotizationView? 'activeStichH':''}>Valor</strong>
-                        </div>
+                        {canSetManualValue && (
+                            <div className="SwitchValCot" onClick={()=>{
+                                setCotizationView(!cotizationView)
+                            }}>
+                                <strong className={cotizationView? 'activeStichH':''}>Cotización</strong>
+                                <strong className={!cotizationView? 'activeStichH':''}>Valor</strong>
+                            </div>
+                        )}
                         {!cotizationView && (
                             <FormInput title={'Valor'} type={'number'} disabled={disabled} action={setTotal} placeholder={'$ 0'}/>
                         )}

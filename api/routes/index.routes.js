@@ -171,6 +171,12 @@ router.post('/process/getProcessInstances', processController.getProcessInstance
 
 router.post('/process/getProcessState', processController.getProcessState);
 
+router.post('/process/getAviableProceses',processController.getAviableProcess);
+
+router.post('/process/createProcessInstace',processController.createProcessInstace);
+
+router.post('/process/updateProcessInstanceStatus',processController.updateProcessInstanceStatus);
+
 router.post('/process/nextProcessStep',processController.nextProcessStep);
 
 router.post('/process/createOP', processController.createOp);
@@ -178,7 +184,6 @@ router.post('/process/createOP', processController.createOp);
 router.post('/process/getOp', processController.getOp);
 
 router.post('/process/getDocuments', processController.getDocuments);
-
 
 router.post('/process/getOpAttached',processController.getOpAttached);
 

@@ -574,6 +574,98 @@ processController.deleteDocument =(req,res)=>{
 
 // --- new controllers for new version of process
 
+processController.getAviableProcess = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+        
+        whereClauses.push(`pi.company_id = $1`);
+        values.push(info.company_id);
+
+        if(info.alloweProcesses != undefined){
+            whereClauses.push(`pi.id = ANY($${values.length +1})`);
+            values.push(info.alloweProcesses);
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+        
+        let sentence = `
+            SELECT 
+                pi.*,
+                JSON_AGG(
+                    JSON_BUILD_OBJECT(
+                        'id', ps.id,
+                        'name', ps.name,
+                        'order', ps."order"
+                    ) ORDER BY ps."order" ASC
+                ) AS steps
+	        FROM
+                "Process".processes pi
+            LEFT JOIN
+                "Process".process_steps ps
+            ON
+                pi.id = ps.process_id
+            ${whereQuery}
+            GROUP BY
+                pi.id, pi.company_id, ps.process_id
+            ORDER BY name ASC
+        `;
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err))
+    })
+}
+
+processController.createProcessInstace = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            INSERT INTO "Process".process_instance(
+                company_id, 
+                process_id, 
+                step_id,
+                status, 
+                parent_id, 
+                parent_step, 
+                start_date, 
+                "delivery_date")
+	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;
+        `;
+
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.process_id,
+            info.step_id,
+            info.status,
+            info.parent_id,
+            info.parent_step,
+            info.start_date,
+            info.delivery_date
+        ],3);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err))
+    })
+}
+
 processController.getProcessInstances =(req,res)=>{
     let data = '';
     req.on('data',chunk=>{
@@ -636,6 +728,37 @@ processController.getProcessInstances =(req,res)=>{
     })
 }
 
+processController.updateProcessInstanceStatus = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            UPDATE
+                "Process".process_instance
+            SET
+                start_date = $1,
+                delivery_date = $2,
+                status = $3
+            WHERE company_id = $4 AND id = $5;
+        `;
+        let consulta = await useDataBase(sentence,[
+            info.start_date,
+            info.delivery_date,
+            info.status,
+            info.company_id,
+            info.id
+        ],2);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    });
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err))
+    })
+}
 
 processController.getProcessState = (req,res)=>{
     let data = '';
@@ -663,6 +786,7 @@ processController.getProcessState = (req,res)=>{
             SELECT
                 pi.*,
                 pr.name AS process_name,
+                pr.code AS process_code,
                 pr.description AS process_description,
                 pr.id AS process_id,
                 JSON_AGG(
