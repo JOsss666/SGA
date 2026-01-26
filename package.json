@@ -38,6 +38,7 @@
     "react-virtualized-auto-sizer": "^1.0.26",
     "react-window": "^2.2.1",
     "recharts": "^3.2.1",
+    "socket.io": "^4.8.3",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

@@ -9,11 +9,6 @@ import './FormNewClientOrder.css'
 import { postInfo } from "../../../../utils/functions";
 
 export function FormNewClientOrder({params,reloadFun}){
-    
-    if(params != undefined){
-        console.log(`Parametros asignados: ${params}`)
-        console.log(`Tercero asignados: ${params.thirdParty_id}`)
-    }
 
     // requirements
     const [info,setInfo] = useState(params != undefined? params:{})
@@ -270,6 +265,7 @@ export function FormNewClientOrder({params,reloadFun}){
             });
         }
         popOutAlert();
+        reloadFun?.();
     }
 
     return(
