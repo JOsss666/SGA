@@ -180,8 +180,20 @@ facturation.use == true){
                     <SwitchColorMode/>
                 </header>
                 <aside ref={asideMenuC}  className='asideMenuApp'>
-                    <div className={`menusHolder ${visibleMenu? 'activeMenusHolder':''}`}>
-                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1761514001/ChatGPT_Image_26_oct_2025_16_24_57_hgpkmn.png'} visbleInfo={visibleMenu} title={'Administración'} desc={'SGA - Desarrollos'} />
+                    <div className={`menusHolder ${visibleMenu? 'activeMenusHolder':'hiddenAsideMenu'}`}>
+                        {!visibleMenu && (
+                            <div className='openMenuMobileIcon' onClick={()=>{
+                                    setVisibleMenu(true)
+                                }}>
+                                <i className="fa-solid fa-bars"/>
+                            </div>
+                        )}
+                        <div className='closeMenuMobileIcon' onClick={()=>{
+                                setVisibleMenu(false)
+                            }}>
+                            <i className="fa-solid fa-xmark"/>
+                        </div>
+                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1761514001/ChatGPT_Image_26_oct_2025_16_24_57_hgpkmn.png'} visbleInfo={visibleMenu} title={'Ventas'} desc={'SGA - Desarrollos'} />
                         <MenuApp visibleMenu={visibleMenu} title={'General'} options={optionsMenu}/>
                         <MenuApp visibleMenu={visibleMenu} title={'Ajustes'} options={secondOptionsMenu}/>
                     </div>

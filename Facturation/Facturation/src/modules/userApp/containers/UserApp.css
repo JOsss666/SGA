@@ -220,3 +220,121 @@
     background-color: var(--bg);
     overflow: hidden;
 }
+
+.UserApp .closeMenuMobileIcon{
+    display: none;
+}
+
+/*  Responsive Design -> Mobile  */
+
+@media (max-width:500px) {
+
+    .UserApp .headApp .UserCard,
+    .UserApp .headApp .SearchBar{
+        display: none;
+    }
+
+    .UserApp .headApp .ServicesGrid{
+        position: absolute;
+        top: 40dvh;
+        height: 60dvh;
+        right: 0;
+        width: 100%;
+        max-width: 100%;
+        flex-wrap: wrap;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .UserApp .headApp .ServicesGrid .serviceBubble{
+        margin: 2vh auto;
+        width: 30vw;
+        overflow-x: hidden;
+    }
+
+    .UserApp .asideMenuApp{
+        height: fit-content;
+        position: relative;
+        height: 100%;
+    }
+
+    .UserApp .asideMenuApp .MenuApp{
+        display: none;
+    }
+
+    .UserApp .asideMenuApp .ServiceSgaCard{
+        display: none;
+    }
+
+    .UserApp .asideMenuApp .menusHolder {
+        padding-top: 2vh;
+        position: absolute;
+        height: fit-content;
+        width: fit-content;
+        background-color: var(--menuAside);
+        backdrop-filter: blur(1vh);
+        z-index: 40; /* Eliminado el duplicado */
+        transition: .3s;
+        overflow-y: auto;
+        border-top-right-radius: 0vh;
+        border-bottom-right-radius: 0vh;
+        
+        /* Firefox: Por defecto oculto, pero permite scroll */
+        scrollbar-width: none; 
+    }
+
+    .UserApp .asideMenuApp .activeMenusHolder{
+        width: 100dvw;
+        height: 100%;
+        position: relative;
+    }
+
+    .UserApp .asideMenuApp .activeMenusHolder .MenuApp{
+        display: flex;
+    }
+
+    .UserApp .asideMenuApp .activeMenusHolder .closeMenuMobileIcon{
+        display: flex;
+        position: absolute;
+        top: 3vh;
+        right: 3vh;
+        font-size: clamp(3px,3vh,30px);
+        color: var(--mainText);
+        padding: 1vh;
+        height: 5vh;
+        width: 5vh;
+        text-align: center;
+        border-radius: 100%;
+        background-color: var(--cardHover);
+    }
+
+    .UserApp .asideMenuApp .activeMenusHolder .ServiceSgaCard{
+        display: flex;
+    }
+
+    .UserApp .asideMenuApp .menusHolder .openMenuMobileIcon{
+        display: flex;
+        font-size: clamp(3px,3vh,30px);
+        color: var(--mainText);
+        padding: 1vh;
+        height: 5vh;
+        width: 5vh;
+        text-align: center;
+        border-radius: 100%;
+        background-color: var(--cardHover);
+        margin-top: .5vh;
+        margin-left: 2vh;
+    }
+    .UserApp .asideMenuApp .menusHolder .openMenuMobileIcon i{
+        margin: auto;
+    }
+
+    .UserApp .asideMenuApp .activeMenusHolder .closeMenuMobileIcon i{
+        margin: auto;
+    }
+
+    .UserApp .asideMenuApp .hiddenAsideMenu{
+        background-color: transparent;
+    }
+
+}
