@@ -707,13 +707,29 @@ processController.getProcessInstances =(req,res)=>{
                 "Process".process_instance.*,
                 "Process".processes.name AS process_name,
                 "Process".processes.code AS process_code,
-                "Process".processes.id AS process_id
+                "Process".processes.id AS process_id,
+                "Ecosystem".thirdparties.names AS "thirdParty_name",
+                "Process".process_steps.name AS step_name,
+                "Process".process_steps.order AS current_step_order,
+                -- Contamos el total de pasos para este proceso específico
+                (SELECT COUNT(*) 
+                FROM "Process".process_steps 
+                WHERE "Process".process_steps.process_id = "Process".processes.id
+                ) AS total_steps
             FROM
                 "Process".process_instance
             LEFT JOIN
                 "Process".processes
             ON
                 "Process".process_instance.process_id = "Process".processes.id
+            LEFT JOIN
+                "Ecosystem".thirdparties
+            ON 
+                "Process".process_instance."thirdParty_id" = "Ecosystem".thirdparties.id
+            LEFT JOIN
+                "Process".process_steps
+            ON
+                "Process".process_instance.step_id = "Process".process_steps.id
             ${whereQuery}
             ORDER BY
                 "Process".process_instance.id DESC

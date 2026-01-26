@@ -1,0 +1,91 @@
+.TableReportProcesses{
+    display: flex;
+    flex-direction: column;
+    overflow-x: auto;
+    padding: 1vh;
+}
+
+.TableReportProcesses .headTable{
+    display: flex;
+    width: fit-content;
+    border-radius: 1vh;
+    padding: 1vh;
+    background-color: var(--menuAside);
+    outline: solid .1vh var(--inputsBorder);
+    gap: 1vw;
+}
+
+.TableReportProcesses .headTable span{
+    padding: 1vh;
+    margin: auto 0;
+    color: var(--mainText);
+    width: 12vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: none;
+    text-wrap: nowrap;
+    font-size: clamp(2.2px,2.2vh,22px);
+    text-align: center;
+}
+
+.TableReportProcesses .gridResultsTable{
+    display: flex;
+    flex-direction: column;
+    max-height: 55vh;
+    width: fit-content;
+    overflow-y: auto;
+}
+
+.TableReportProcesses .gridResultsTable .RowResults{
+    display: flex;
+    padding: 1.5vh 1vh;
+    border-bottom: solid .1vh var(--inputsBorder);
+    cursor: pointer;
+    gap: 1vw;
+    transition: .3s;
+}
+
+.TableReportProcesses .gridResultsTable .RowResults:hover{
+    background-color: var(--cardHover);
+}
+
+.TableReportProcesses .gridResultsTable .RowResults .elementRow{
+    margin: auto 0;
+    color: var(--descriptionText);
+    width: 12vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: none;
+    text-wrap: nowrap;
+    font-size: clamp(2.2px,2vh,22px);
+    text-align: right;
+}
+
+.TableReportProcesses .headTable .TH_ID,
+.TableReportProcesses .gridResultsTable .RowResults .TH_ID
+{
+    width: 5vw;
+    text-align: center;
+}
+
+.TableReportProcesses .headTable .TH_Estado,
+.TableReportProcesses .gridResultsTable .RowResults .TH_Estado{
+    text-align: right;
+    width: 8vw;
+}
+
+:root .TableReportProcesses .gridResultsTable .rowStatus_pending{
+    background-color: #FEFCE8;
+}
+
+:root.dark .TableReportProcesses .gridResultsTable .rowStatus_pending{
+    background-color: #894B0A40;
+}
+
+:root .TableReportProcesses .gridResultsTable .rowStatus_cancelled{
+    background-color: #FFE2E2;
+}
+
+:root.dark .TableReportProcesses .gridResultsTable .rowStatus_cancelled{
+    background-color: #82181A90;
+}

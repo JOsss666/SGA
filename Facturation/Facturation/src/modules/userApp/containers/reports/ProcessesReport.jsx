@@ -17,6 +17,7 @@ import { FilterReports } from "./FilterReports";
 import './ReportDocuments.css'
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
 import './ProcessesReport.css'
+import { TableReportProcesses } from "../TableReportProcesses";
 
 export function ProcessesReport(){
      // Prev Info
@@ -24,6 +25,7 @@ export function ProcessesReport(){
     const { appInfo } = useAppInfo();
     const {popInAlert} = useAlert();
     const [searchValue,setSearchValue] = useState();
+    const [reportView,setReportView] = useState('row');
 
     // Control
     const [loading, setLoading] = useState(false);
@@ -36,14 +38,14 @@ export function ProcessesReport(){
 
     const columsTr = [
         "ID",
-        "Tercero",
         "Proceso",
-        "Instancia",
+        "Tercero",
         "Etapa",
-        "Fecha de creación",
+        "Avance",
+        "Fecha de inicio",
         "Fecha de entrega",
-        "Ultima modificación",
-        "Estado"
+        "Estado",
+        "Ultima modificación"
     ];
 
     const filters = {
@@ -148,13 +150,7 @@ export function ProcessesReport(){
         </div>
         <div className="SpaceReport">
             {!loading && (
-                <div className="gridResults">
-                    {info.map((element,index)=>(
-                        <span onClick={()=>{
-                            popInAlert(<ProcessStatusAlert instance_id={element.id}/>)
-                        }} key={index}>#{element.ownSerial}</span>
-                    ))}
-                </div>
+                <TableReportProcesses searchValue={searchValue} settingsReport={settingsReport} info={info}/>
             )}
             {loading && (
             <LoadingSpace title={"Cargando información"} description={"Esto no debe tardar mucho..."} />
