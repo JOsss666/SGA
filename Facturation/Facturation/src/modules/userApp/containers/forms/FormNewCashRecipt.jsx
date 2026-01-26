@@ -170,6 +170,10 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const handleSelectInstance = (element)=>{
         setInstance_id(element.id)
         setStep_id(element.step_id)
+        setInfo(prevInfo => ({
+            ...prevInfo,            // Mantenemos todas las propiedades actuales (nombre, fecha, etc.)
+            thirdParty_id: element.thirdParty_id // Sobrescribimos solo el ID del tercero
+        }));
     }
 
     const getInstances = async(allowedInstances,allowedTypes)=>{

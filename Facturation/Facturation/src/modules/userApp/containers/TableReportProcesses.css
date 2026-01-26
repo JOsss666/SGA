@@ -89,3 +89,27 @@
 :root.dark .TableReportProcesses .gridResultsTable .rowStatus_cancelled{
     background-color: #82181A90;
 }
+
+@media (max-width:500px) {
+
+    .TableReportProcesses .headTable span{
+        width: 40vw;
+    }
+
+    .TableReportProcesses .gridResultsTable .RowResults .elementRow{
+        width: 40vw;
+    }
+
+    .TableReportProcesses .headTable .TH_ID,
+    .TableReportProcesses .gridResultsTable .RowResults .TH_ID
+    {
+        width: 20vw;
+        text-align: center;
+    }
+
+    .TableReportProcesses .headTable .TH_Estado,
+    .TableReportProcesses .gridResultsTable .RowResults .TH_Estado{
+        text-align: right;
+        width: 30vw;
+    }
+}

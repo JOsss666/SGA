@@ -643,8 +643,10 @@ processController.createProcessInstace = (req,res)=>{
                 parent_id, 
                 parent_step, 
                 start_date, 
-                "delivery_date")
-	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;
+                "delivery_date",
+                "thirdParty_id"
+                )
+	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id;
         `;
 
         let consulta = await useDataBase(sentence,[
@@ -655,7 +657,8 @@ processController.createProcessInstace = (req,res)=>{
             info.parent_id,
             info.parent_step,
             info.start_date,
-            info.delivery_date
+            info.delivery_date,
+            info.thirdParty_id
         ],3);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -757,13 +760,15 @@ processController.updateProcessInstanceStatus = (req,res)=>{
             SET
                 start_date = $1,
                 delivery_date = $2,
-                status = $3
-            WHERE company_id = $4 AND id = $5;
+                status = $3,
+                "thirdParty_id" = $4
+            WHERE company_id = $5 AND id = $6;
         `;
         let consulta = await useDataBase(sentence,[
             info.start_date,
             info.delivery_date,
             info.status,
+            info.thirdParty_id,
             info.company_id,
             info.id
         ],2);

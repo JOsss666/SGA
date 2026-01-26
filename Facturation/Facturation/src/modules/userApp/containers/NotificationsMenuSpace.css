@@ -104,3 +104,42 @@
     animation-fill-mode: both;
     animation-timing-function: ease;
 }
+
+@keyframes appearBottom {
+    0% {
+        transform: translateY(100%); /* Empieza abajo, fuera de pantalla */
+    }
+    100% {
+        transform: translateY(0);    /* Llega a su posición original */
+    }
+}
+
+@keyframes disappearBottom {
+    0% {
+        transform: translateY(0);    /* Empieza donde está */
+    }
+    100% {
+        transform: translateY(100%); /* Se va hacia abajo */
+    }
+}
+
+@media (max-width:500px) {
+    .visibleSpaceNoti{
+        width: 100%;
+        animation-name: appearBottom;
+        animation-duration: 1s;
+        animation-fill-mode: both;
+        animation-timing-function: ease;
+    }
+
+    .hiddenSpaceNoti{
+        animation-name: disappearBottom;
+        animation-duration: 1s;
+        animation-fill-mode: both;
+        animation-timing-function: ease;
+    }
+
+    .NotificationsMenuSpace .optionsSpaceNoti .ButtonMenu:first-child{
+        display: none;
+    }
+}

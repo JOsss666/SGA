@@ -138,3 +138,13 @@
     margin: auto;
     margin-right: 2vh;
 }
+
+@media (max-width:500px) {
+    .FormNewThirdParties{
+        width: 100dvw;
+    }
+
+    .FormNewThirdParties form .BoldTitle{
+        display: none;
+    }
+}

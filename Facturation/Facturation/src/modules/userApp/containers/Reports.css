@@ -98,7 +98,7 @@
 
     .Reports .galleryReports{
         display: flex;
-        max-height: 60vh;
+        max-height: 68vh;
         overflow-y: scroll;
         padding-top: 4vh;
     }
@@ -107,20 +107,24 @@
         margin: auto;
     }
 
+    .Reports .optionsBar{
+        margin: 0;
+    }
+
     .Reports .optionsBar .IconList{
         display: none;
     }
     
     .Reports .menuBar{
-        
         padding: 0;
         width: 100%;
         left: 0;
-        top: 7vh;
+        top: 4.5vh;
     }
 
     .Reports .menuBar .optionsBar .SearchBar{
         width: 80vw;
+        left: -1.5vh;
     }
 
     .Reports .optionsBar .SelectOptions{

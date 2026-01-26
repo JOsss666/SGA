@@ -115,3 +115,10 @@
     color: #FF6467;
     transform: rotateZ(-10deg);
 }
+
+@media (max-width:500px) {
+    .FormNewClientOrder{
+        width: 100%;
+        padding-top: 10vh;
+    }
+}

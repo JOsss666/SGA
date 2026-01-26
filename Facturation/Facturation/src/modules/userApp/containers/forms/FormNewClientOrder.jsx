@@ -10,6 +10,11 @@ import { postInfo } from "../../../../utils/functions";
 
 export function FormNewClientOrder({params,reloadFun}){
     
+    if(params != undefined){
+        console.log(`Parametros asignados: ${params}`)
+        console.log(`Tercero asignados: ${params.thirdParty_id}`)
+    }
+
     // requirements
     const [info,setInfo] = useState(params != undefined? params:{})
     const {appInfo,userInfo,userConfig} = useAppInfo();
@@ -29,7 +34,7 @@ export function FormNewClientOrder({params,reloadFun}){
 
     // formInfo
 
-    const [thirdParty_id,setThirdParty_id] = useState(false);
+    const [thirdParty_id,setThirdParty_id] = useState(params != undefined? params.thirdParty_id:undefined);
     const [status,setStatus] = useState('active');
     const [total,setTotal] = useState(0);
     const [description,setDescription] = useState('');
@@ -60,8 +65,14 @@ export function FormNewClientOrder({params,reloadFun}){
         new Intl.NumberFormat("es-CO").format(value);
 
     const handleInstnaceSelect = (element)=>{
+        console.log(`Elemento seleccionado: ${element}`)
         setInstace_id(element.id);
         setStep_id(element.step_id);
+        setThirdParty_id(element.thirdParty_id);
+        setInfo(prevInfo => ({
+            ...prevInfo,            // Mantenemos todas las propiedades actuales (nombre, fecha, etc.)
+            thirdParty_id: element.thirdParty_id // Sobrescribimos solo el ID del tercero
+        }));
     }
 
     const addPService = (newPayment) => {
@@ -169,6 +180,7 @@ export function FormNewClientOrder({params,reloadFun}){
     }
 
     // PreProcess functions
+
     const handleUserConfig = async()=>{
         setDisabled(true)
         setLoading(true)
@@ -210,6 +222,8 @@ export function FormNewClientOrder({params,reloadFun}){
             }
         }
 
+        temInfo.thirdParty_id = info.thirdParty_id;
+
         if(temInfo != {}){
             console.log(temInfo);
             setInfo(temInfo);
@@ -233,6 +247,10 @@ export function FormNewClientOrder({params,reloadFun}){
     useEffect(()=>{
         handleUserConfig();
     },[])
+
+    useEffect(()=>{
+        console.log(`---> ${thirdParty_id}`)
+    },[thirdParty_id])
 
     // create function
 
