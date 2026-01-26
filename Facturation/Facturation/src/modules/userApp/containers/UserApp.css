@@ -221,7 +221,7 @@
     overflow: hidden;
 }
 
-.UserApp .closeMenuMobileIcon{
+.UserApp .closeMenuMobileIcon, .UserApp .openMenuMobileIcon{
     display: none;
 }
 
@@ -312,7 +312,7 @@
         display: flex;
     }
 
-    .UserApp .asideMenuApp .menusHolder .openMenuMobileIcon{
+    .UserApp .asideMenuApp .hiddenAsideMenu .openMenuMobileIcon{
         display: flex;
         font-size: clamp(3px,3vh,30px);
         color: var(--mainText);
@@ -336,6 +336,17 @@
     .UserApp .asideMenuApp .hiddenAsideMenu{
         background-color: transparent;
         backdrop-filter: none;
+    }
+
+    .UserApp .bodyApp{
+        height: 100dvh;
+        width: 100dvw;
+        padding-left: 0;
+        border-radius: 0;
+        padding-top: 8vh;
+        transition: .3s;
+        background-color: var(--bg);
+        overflow: hidden;
     }
 
 }

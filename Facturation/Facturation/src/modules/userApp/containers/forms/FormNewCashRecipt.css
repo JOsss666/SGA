@@ -117,3 +117,30 @@
     color: #FF6467;
     transform: rotateZ(-10deg);
 }
+
+
+@media (max-width:500px) {
+    .FormNewCashRecipt{
+        width: 100dvw;
+        overflow-y: auto;
+    }
+
+    .FormNewCashRecipt .headForm{
+        flex-direction: column;
+        padding-left: 9vh;
+    }
+
+    .FormNewCashRecipt .headForm .valueCashRecipt{
+        margin: 0;
+    }
+
+    .FormNewCashRecipt .headForm .closeFormBtn{
+        position: absolute;
+        top: 4vh;
+        right: 1vh;
+    }
+
+    .FormNewCashRecipt form{
+        margin-top: 12vh;
+    }
+}

@@ -72,3 +72,10 @@
     flex-direction: column;
     gap: 2vh;
 }
+
+@media (max-width:500px) {
+    .FormSelectNewProcess{
+        width: 100dvw;
+        padding-top: 10vh;
+    }
+}
