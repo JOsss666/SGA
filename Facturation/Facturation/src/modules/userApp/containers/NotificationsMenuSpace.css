@@ -127,14 +127,14 @@
     .visibleSpaceNoti{
         width: 100%;
         animation-name: appearBottom;
-        animation-duration: 1s;
+        animation-duration: .5s;
         animation-fill-mode: both;
         animation-timing-function: ease;
     }
 
     .hiddenSpaceNoti{
         animation-name: disappearBottom;
-        animation-duration: 1s;
+        animation-duration: .5s;
         animation-fill-mode: both;
         animation-timing-function: ease;
     }
