@@ -335,6 +335,7 @@
 
     .UserApp .asideMenuApp .hiddenAsideMenu{
         background-color: transparent;
+        backdrop-filter: none;
     }
 
 }

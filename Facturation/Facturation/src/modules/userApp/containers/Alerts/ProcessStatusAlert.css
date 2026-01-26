@@ -241,3 +241,9 @@
 .ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .requiredDocAlert i{
     margin-right: 1vh;
 }
+
+@media (max-width:500px) {
+    .ProcessStatusAlert{
+        width: 100dvw;
+    }
+}
