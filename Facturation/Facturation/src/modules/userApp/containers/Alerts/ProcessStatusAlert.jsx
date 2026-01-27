@@ -6,34 +6,39 @@ import { useAlert, useAppInfo, useNotifications } from "../../../../context/cont
 import { FormInput } from "../../components/FormInput";
 import { LoadingSpace } from "../LoadingSpace";
 
-export function ProcessStatusAlert({instance_id}){
+export function ProcessStatusAlert({instance_id,reloadFun}){
 
     // requirements
     const {popOutAlert} = useAlert();
     const {addNotification} = useNotifications();
     const {appInfo,userInfo,userConfig} = useAppInfo();
     const [info,setInfo] = useState({});
-    const [processInfo, setProcessInfo] = useState({});
+    const [processInfo, setProcessInfo] = useState({steps:[]});
     const [attachedDocuments,setAttachedDocuments] = useState([]);
-    let checkDocs;
 
     // control
     const [disabled,setDisabled] = useState(false);
     const [loading,setLoading] = useState(false);
+    const [docsCompleted,setDocsCompleted] = useState(false);
+    const [loadingDocuments,setLoadingDocuments] = useState(false);
 
     // Form Content
     const [description,setDescription] = useState('');
 
-    // Buscamos el objeto del paso donde está el usuario actualmente
+    // Identificar paso en el cual se encuentra el usuario.
+    
     const currentStepData = processInfo.steps?.find(s => s.id == processInfo.step_id);
     const nextStepData = processInfo.steps
         ?.filter(s => s.order > (currentStepData?.order ?? -1)) // Filtramos los que siguen
         .sort((a, b) => a.order - b.order)[0];
     const currentOrder = currentStepData ? currentStepData.order : 0;
-    // Es vital ordenar los pasos por 'order' antes de mapear para que la lista sea lógica
+
+    // Ordenar los pasos de cada secuencia
     const sortedSteps = [...(processInfo.steps || [])].sort((a, b) => a.order - b.order);
     const progressPercentage = ((currentOrder+ .5) / (sortedSteps.length)) * 100;
 
+
+    // Getters of info
     const getInstanceInfo = async()=>{
         setDisabled(true);
         setLoading(true);
@@ -61,49 +66,24 @@ export function ProcessStatusAlert({instance_id}){
         }
     }
 
-    const advanceNextStep = async()=>{
-        setDisabled(true);
-        setLoading(true);
-        let res = await postInfo('/process/nextProcessStep',{
-            company_id:appInfo.company_id,
-            user_id:userInfo.user_id,
-            instance_id:info.id,
-            previous_step:currentStepData.id,
-            next_step:nextStepData.id,
-            user_roll:userInfo.role,
-            description
-        })
-        console.log(res);
-        if(res.success){
-            addNotification({
-                type:'aproved',
-                title:`${info.process_code}#${info.ownSerial} actualizado correctamente`,
-                description:res.message
-            })
-            getInstanceInfo();
-        }else{
-            addNotification({
-                type:'error',
-                title:`Erorr al actualiza ${info.process_code}#${info.ownSerial}`,
-                description:res.error
-            })
-            popOutAlert();
-        }
-        setLoading(false);
-        setDisabled(false);
-    }
-
     const getAttachedDocuments = async()=>{
+        setDisabled(true)
+        setLoadingDocuments(true)
         let res = await postInfo('/getDocuments',{
             company_id:appInfo.company_id,
             //allowedTypes:types,
             instance_id:info.id
         })
-        console.log(res);
         if(res[0]){
             setAttachedDocuments(res[1])
-        }
+        }else(
+            setAttachedDocuments([])
+        )
+        setDisabled(false)
+        setLoadingDocuments(false)
     }
+
+    // Control functions
 
     const validateStepDocuments = (step) => {
         // Si el paso no tiene requerimientos, se considera habilitado por defecto
@@ -135,8 +115,66 @@ export function ProcessStatusAlert({instance_id}){
         }
     };
 
+    const reviewSteps = (steps,currentOrder,currentStepId)=>{
+        let newSteps = [];
+        steps.map((element)=>{
+            let nStep = element;
+            console.log(`${element.id} --- ${currentStepId}`)
+            nStep.isCompleted = element.order < currentOrder;
+            nStep.isPending = element.order > currentOrder;
+            if(element.id == currentStepId){
+                let checkDocs = validateStepDocuments(element);
+                element.checkDocs = checkDocs;
+                setDocsCompleted(checkDocs)
+                nStep.isActual = true;
+            }
+            newSteps.push(nStep)
+        })
+        console.log('---> ',newSteps);
+        return newSteps
+    }
+
+    // Advance to next Step
+    const advanceNextStep = async()=>{
+        setDisabled(true);
+        setLoading(true);
+        let res = await postInfo('/process/nextProcessStep',{
+            company_id:appInfo.company_id,
+            user_id:userInfo.user_id,
+            instance_id:info.id,
+            previous_step:currentStepData.id,
+            next_step:nextStepData.id,
+            user_roll:userInfo.role,
+            description
+        })
+        console.log(res);
+        if(res.success){
+            addNotification({
+                type:'aproved',
+                title:`${info.process_code}#${info.ownSerial} actualizado correctamente`,
+                description:res.message
+            })
+            getInstanceInfo();
+        }else{
+            addNotification({
+                type:'error',
+                title:`Erorr al actualiza ${info.process_code}#${info.ownSerial}`,
+                description:res.error
+            })
+            popOutAlert();
+        }
+        setLoading(false);
+        setDisabled(false);
+        reloadFun?.();
+    }
+
+    useEffect(()=>{
+        console.log(`cambio en el sortedSteps`,sortedSteps)
+    },[sortedSteps])
+
     useEffect(() => {
-        if (attachedDocuments.length > 0 && processInfo.steps) {
+        console.log('Intentando solucionar los problemas')
+        if (attachedDocuments.length != undefined && processInfo.steps) {
             // 1. Agrupamos los documentos por step_id para no iterar de más
             const docsByStep = attachedDocuments.reduce((acc, doc) => {
                 if (!acc[doc.step_instance]) acc[doc.step_instance] = [];
@@ -144,15 +182,17 @@ export function ProcessStatusAlert({instance_id}){
                 console.log(acc)
                 return acc;
             }, {});
+            const stepsWithDocs = processInfo.steps.map(step => ({
+                ...step,
+                attached_Docs: docsByStep[step.id] || []
+            }));
 
+            // 3. Ahora que tienen docs, pasamos esos pasos por la revisión de lógica
+            const verifiedSteps = reviewSteps(stepsWithDocs, currentOrder,  processInfo.step_id,);
             // 2. Actualizamos el estado una sola vez mapeando los pasos
             setProcessInfo(prev => ({
                 ...prev,
-                steps: prev.steps.map(step => ({
-                    ...step,
-                    // Si hay documentos para este ID, los asignamos; si no, array vacío
-                    attached_Docs: docsByStep[step.id] || []
-                }))
+                steps: verifiedSteps
             }));
         }
     }, [attachedDocuments]);
@@ -172,7 +212,6 @@ export function ProcessStatusAlert({instance_id}){
         getInstanceInfo();
     },[])
 
-
     return(
         <div className="ProcessStatusAlert">
             <div className="headProcess">
@@ -187,65 +226,61 @@ export function ProcessStatusAlert({instance_id}){
             </div>
             {!loading && (
                 <>
-                    <ul className="gridStepsProces">
-                        {/* Barra de progreso dinámica */}
-                        <div className="leftBarProgress" style={{ height: `${progressPercentage}%` }} />
-                        
-                        {sortedSteps.map((element) => {
-                            // Lógica de estados
-                            const isActual = element.id == processInfo.step_id;
-                            const isCompleted = element.order < currentOrder;
-                            const isPending = element.order > currentOrder;
+                    {!loadingDocuments && (
+                        <ul className="gridStepsProces">
+                            {/* Barra de progreso dinámica */}
+                            <div className="leftBarProgress" style={{ height: `${progressPercentage}%` }} />
                             
-                            if(isActual){
-                                checkDocs = validateStepDocuments(element)
-                            }
-
-                            return (
-                                <li 
-                                    key={element.id} 
-                                    className={`
-                                        step_item
-                                        ${isActual ? 'ActualStep' : ''}
-                                        ${isCompleted ? 'CompletedStep' : ''}
-                                        ${isPending ? 'PendingStep' : ''}
-                                    `}
-                                >
-                                    <div className={`steepIndicator ${isCompleted? 'completedStep':''}`}>
-                                        {isCompleted && <i className="fa-solid fa-check" />}
-                                    </div>
-                                    <span className="stepName">
-                                        {element.name}
-                                    </span>
-                                    <div className="attachedDocsC">
-                                        {isActual && !checkDocs && element.required_docs.map((attReqDoc,index)=>(
-                                            (
-                                                <span key={index}className="requiredDocAlert">
-                                                    <i className="fa-solid fa-triangle-exclamation"/>
-                                                    Requiere al menos {attReqDoc.min} {attReqDoc.docType}
+                            {sortedSteps.map((element) => {
+                                return (
+                                    <li 
+                                        key={element.id} 
+                                        className={`
+                                            step_item
+                                            ${element.isActual ? 'ActualStep' : ''}
+                                            ${element.isCompleted ? 'CompletedStep' : ''}
+                                            ${element.isPending ? 'PendingStep' : ''}
+                                        `}
+                                    >
+                                        <div className={`steepIndicator ${element.isCompleted? 'completedStep':''}`}>
+                                            {element.isCompleted && <i className="fa-solid fa-check" />}
+                                        </div>
+                                        <span className="stepName">
+                                            {element.name}
+                                        </span>
+                                        <div className="attachedDocsC">
+                                            {element.isActual && !docsCompleted && element.required_docs?.map((attReqDoc,index)=>(
+                                                (
+                                                    <span key={index}className="requiredDocAlert">
+                                                        <i className="fa-solid fa-triangle-exclamation"/>
+                                                        Requiere al menos {attReqDoc.min} {attReqDoc.docType}
+                                                    </span>
+                                                )
+                                            ))}
+                                            {element.attached_Docs != undefined && element.attached_Docs?.map((attDoc,index)=>(
+                                                <span key={index} className="attachedDoc">
+                                                    <i className="fa-solid fa-file-circle-check"/>
+                                                    {`${attDoc.document_type} #${attDoc.ownSerial}`}
                                                 </span>
-                                            )
-                                        ))}
-                                        {element.attached_Docs != undefined && element.attached_Docs.map((attDoc,index)=>(
-                                            <span key={index} className="attachedDoc">
-                                                <i className="fa-solid fa-file-circle-check"/>
-                                                {`${attDoc.document_type} #${attDoc.ownSerial}`}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </li>
-                            );
-                        })}
-                    </ul>
+                                            ))}
+                                        </div>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    )}
+                    {loadingDocuments && (
+                        <LoadingSpace title={'Cargando documentos adjuntos'}/>
+                    )}
                     {nextStepData != undefined && nextStepData.required_roll.includes(parseInt(userInfo.role)) && (
                         <div className="optionsProcessCotnainer">
                             <FormInput textArea={true} title={'Descripción'} disabled={disabled} placeholder={'Descripción de la acción'}/>
-                            <button className="nextStepProcess" disabled={disabled? true:!checkDocs} onClick={()=>{
-                                advanceNextStep();
-                            }}>
+                            <button className={`nextStepProcess ${!docsCompleted? 'pendingDocBtn':''}`} disabled={disabled? true:!docsCompleted} onClick={()=>{
+                                    advanceNextStep();
+                                }}>
                                 <div className="infoNextStep">
                                     <strong>
-                                        {checkDocs? 'Avanzar a siguiente etapa':'Pendiente de documentación'}
+                                        {docsCompleted? 'Avanzar a siguiente etapa':'Pendiente de documentación'}
                                     </strong>
                                     {processInfo.steps != undefined && (
                                         <span>

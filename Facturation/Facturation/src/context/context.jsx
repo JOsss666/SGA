@@ -30,10 +30,13 @@ export function useAiAssistant(){
 
 export function NotificationsProvider({children}){
     const [notifications,setNotifications] = useState([]);
-    
+    let localIndexOfNoti = 0;
+
     const addNotification = (newNotification)=>{
         let C = []
         notifications.map((element)=>{
+            localIndexOfNoti += 1;
+            element.id = localIndexOfNoti
             C.push(element)
         })
         C.push(newNotification)
@@ -43,7 +46,7 @@ export function NotificationsProvider({children}){
     const deleteNotification = (indexDel)=>{
         let C = []
         notifications.map((element,index)=>{
-            if(index != indexDel){
+            if(element.index != indexDel){
                 C.push(element)
             }
         })

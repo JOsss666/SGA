@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import './NotificationCard.css'
 import { useNotifications } from "../../../context/context";
 
-export function NotificationCard({type,title,description,index,fixed}){
+export function NotificationCard({type,title,description,id,fixed}){
 
     const [fixedNotification,setFixedNotification] = useState(fixed != undefined? fixed:false);
     const [visibleDescription,setVisibleDescription] = useState(true);
@@ -47,6 +47,7 @@ export function NotificationCard({type,title,description,index,fixed}){
                     )}
                     <i onClick={()=>{
                         setDesapearCard(true);
+                        deleteNotification(id)
                     }} title="Eliminar notificación" className="fa-solid fa-xmark"/>
                 </div>
             </div>

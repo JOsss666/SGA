@@ -146,6 +146,11 @@
     outline: solid .1vh var(--descriptionText);
 }
 
+.ProcessStatusAlert .optionsProcessCotnainer .pendingDocBtn{
+    background-color: #FB2C36;
+}
+
+
 .ProcessStatusAlert .optionsProcessCotnainer .nextStepProcess .infoNextStep{
     display: flex;
     flex-direction: column;

@@ -11,6 +11,11 @@ import { SelectTpeNewDoc } from "./SelectTypeNewDoc";
 import { NewElementSelect } from "../../components/NewElementSelect";
 import { FormNewThirdParties } from "./FormNewThirdParties";
 
+let creationLock = {
+    isTriggered: false,
+    lastInstanceId: null
+};
+
 export function FormSelectNewProcess (){
 
     // Requierements
@@ -42,9 +47,9 @@ export function FormSelectNewProcess (){
         console.log(res);
         if(res[0]){
             setAviableProcess(res[1]);
-            if(res[1].length == 1){
-                createProcessInstance(res[1][0]);
-                setFormStep(1);
+            if(res[1].length === 1 && !creationLock.isTriggered) {
+                creationLock.isTriggered = true; // Bloqueo global inmediato
+                await createProcessInstance(res[1][0]);
             }
         }
         setLoading(false);
@@ -68,6 +73,8 @@ export function FormSelectNewProcess (){
     const createProcessInstance = async(element)=>{
         setDisabled(true);
         setLoading(true);
+        // Doble verificación por seguridad
+        if (creationLock.lastInstanceId) return;
         let res = await postInfo('/process/createProcessInstace',{
             company_id:appInfo.company_id,
             process_id:element.id,
@@ -80,6 +87,7 @@ export function FormSelectNewProcess (){
         console.log(res)
         if(res.id != undefined){
             console.log('Estancia de proceso creado');
+            creationLock.lastInstanceId = res.id;
             let getInfoNewInstance = await postInfo('/process/getProcessState',{
                 company_id:appInfo.company_id,
                 id:res.id
@@ -90,6 +98,8 @@ export function FormSelectNewProcess (){
                 await getThirdParties();
             }
             setFormStep(1);
+        }else{
+            creationLock.isTriggered = false;
         }
         setLoading(false);
         setDisabled(false);
@@ -104,7 +114,7 @@ export function FormSelectNewProcess (){
             id:newInstanceInfo.id,
             thirdParty_id
         });
-        console.log(res)
+        await popOutAlert();
         if(res[0]){
             console.log('Intancia de proceso confirmada');
             if(newInstanceInfo.steps[0].required_docs.length > 0){

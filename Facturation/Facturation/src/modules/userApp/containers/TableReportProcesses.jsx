@@ -26,7 +26,7 @@ export function TableReportProcesses({settingsReport,info,searchValue}){
             'Descripción':<span>{info.id}</span>,
             'Tercero':<span>{info.thirdParty_name}</span>,
             'Etapa':<span>{info.step_name}</span>,
-            'Avance':<ProgressBar progress={((info.current_step_order/info.total_steps)*100).toFixed(1)}/>,
+            'Avance':<ProgressBar progress={((info.current_step_order/(info.total_steps - 1))*100).toFixed(1)}/>,
             'Fecha de entrega':<span>{formatDate(info.start_date)}</span>,
             'Fecha de inicio':<span>{formatDate(info.start_date)}</span>,
             'Ultima modificación':<span>{formatDate(info.updated_at)}</span>,

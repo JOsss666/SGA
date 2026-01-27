@@ -12,6 +12,7 @@ import { LoadingSpace } from "../LoadingSpace";
 import { postInfo } from "../../../../utils/functions";
 import { NewElementSelect } from "../../components/NewElementSelect";
 import { FormNewThirdParties } from "./FormNewThirdParties";
+import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
 
 export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
 
@@ -377,7 +378,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 type:'operation',
                 nature:'CR'
             })
-            toAccount();
+            await toAccount();
         }else{
             addNotification({
                 type:'error',
@@ -388,6 +389,10 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         popOutAlert();
         setLoading(false);
         setDisabled(false);
+        reloadFun?.();
+        if(instance_id != undefined){
+            popInAlert(<ProcessStatusAlert instance_id={instance_id} reloadFun={reloadFun}/>)
+        }
     }
 
     const toAccount = async()=>{

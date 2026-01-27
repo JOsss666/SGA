@@ -7,6 +7,7 @@ import { FormButton } from "../../components/FormButton";
 import { LoadingSpace } from "../LoadingSpace";
 import './FormNewClientOrder.css'
 import { postInfo } from "../../../../utils/functions";
+import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
 
 export function FormNewClientOrder({params,reloadFun}){
 
@@ -266,6 +267,9 @@ export function FormNewClientOrder({params,reloadFun}){
         }
         popOutAlert();
         reloadFun?.();
+        if(instance_id != undefined){
+            popInAlert(<ProcessStatusAlert instance_id={instance_id} reloadFun={reloadFun}/>)
+        }
     }
 
     return(
