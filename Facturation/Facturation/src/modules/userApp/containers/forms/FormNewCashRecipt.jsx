@@ -28,10 +28,12 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const [bussines,setBussines] = useState([]);
     const [costCenters,setCostCenters] = useState([]);
     const [concepts,setConcepts] = useState([]);
+    const [documents,setDocuments] = useState([]);
 
     // control
     const [loading,setLoading] = useState();
     const [disabled,setDisabled] = useState();
+    const [disabledByValue,setDisabledByValue] = useState(false);
     
     // form info
     const [thirdParty_id,setThirdParty_id] = useState();
@@ -40,6 +42,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const [store_id,setStore_id] = useState();
     const [costCenter_id,setCostCenter_id] = useState();
     const [total,setTotal] = useState(0);
+        // Valor indicativo d a pagar
+        const [totalToPay,setTotalToPay] = useState(0);
     const [description,setDescription] = useState();
     const [attached,setAttached] = useState();
     const [instance_id,setInstance_id] = useState();
@@ -159,10 +163,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     }
 
     useEffect(()=>{
-        console.log('Valor de store_id -->',store_id);
-    },[store_id])
-
-    useEffect(()=>{
         handleUserConfig();
     },[])
 
@@ -176,11 +176,16 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             ...prevInfo,            // Mantenemos todas las propiedades actuales (nombre, fecha, etc.)
             thirdParty_id: element.thirdParty_id // Sobrescribimos solo el ID del tercero
         }));
+        if(element.id != undefined){
+            getDocuments(element.id);
+        }
+        calcTotalFromPayments();
     }
 
     const getInstances = async(allowedInstances,allowedTypes)=>{
         let res = await postInfo('/process/getProcessInstances',{
-            company_id:appInfo.company_id
+            company_id:appInfo.company_id,
+            status:'active'
         })
         console.log(res);
         if(res[0]){
@@ -286,6 +291,34 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         }
     }
 
+    const getDocuments = async(instance_id)=>{
+        let res = await postInfo('/getDocuments',{
+            company_id:appInfo.company_id,
+            instance_id,
+            status:'active',
+            // Arreglo temporal de tipo de documentos
+            allowedTypes:['Client Order']
+        })
+        if(res[0]){
+            setDocuments(res[1]);
+        }
+    }
+
+     const getThirdParties = async()=>{
+        let res = await postInfo('/getThirdParties',{company_id:appInfo.company_id});
+        if(res[0]){
+            let C = [];
+            res[1].forEach(element => {
+                C.push({
+                    text:`${element.names}  ${element.indentification_type}_${element.indentification_number}`,
+                    value:element.id
+                })
+            });
+            setThirdParties(C);
+        }
+    }
+
+
     // Control functions
 
     const addPaymentMethod = (newPayment) => {
@@ -308,6 +341,28 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         setPaymentMethod(prev => prev.filter(item => item.id !== id));
     };
 
+    const calcTotalFromPayments = ()=>{
+        let newTTl = 0;
+        paymentMethod.forEach(element => {
+            console.log(element.value)
+            if(element.value != "" && element.value != undefined){
+                newTTl += parseFloat(element.value)
+            }
+        });
+        console.log(`${newTTl} -- ${totalToPay}`)
+        if(instance_id != undefined){
+            if(newTTl > totalToPay){
+                setDisabled(true);
+                setDisabledByValue(true);
+            }else{
+                setDisabled(false);
+                setDisabledByValue(false);
+            }
+        }
+        setTotal(newTTl)
+        return(newTTl)
+    }
+
     const updatePaymentValue = (id, key, newValue) => {
         setPaymentMethod(prev => 
             prev.map(item => 
@@ -318,31 +373,41 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         );
     };
 
-    const getThirdParties = async()=>{
-        let res = await postInfo('/getThirdParties',{company_id:appInfo.company_id});
-        if(res[0]){
-            let C = [];
-            res[1].forEach(element => {
-                C.push({
-                    text:`${element.names}  ${element.indentification_type}_${element.indentification_number}`,
-                    value:element.id
-                })
-            });
-            setThirdParties(C);
-        }
+    useEffect(()=>{
+        calcTotalFromPayments();
+    },[paymentMethod])
+
+    const setAplyVoucher = (id,value)=>{
+        setPaymentMethod(prev=>
+            prev.map(item =>
+                item.id === id
+                    ?{...item,["aplyVoucher"]:value}
+                    :item
+            )
+        )
+    }
+
+    const updateVoucher = (id,voucher)=>{
+        setPaymentMethod(prev =>
+            prev.map(item => 
+                item.id === id 
+                    ? { ...item, ["voucher"]: voucher } 
+                    : item
+            )
+        )
     }
 
     useEffect(()=>{
-        console.log(paymentMethod)
-        let newTTl = 0;
-        paymentMethod.forEach(element => {
-            console.log(element.value)
-            if(element.value != "" && element.value != undefined){
-                newTTl += parseFloat(element.value)
-            }
-        });
-        setTotal(newTTl);
-    },[paymentMethod])
+        console.log(documents)
+        if(documents.length > 0){
+            let newTotalToPay = 0;
+            documents.forEach(element => {
+                newTotalToPay += parseInt(element.total);
+            });
+            setTotalToPay(newTotalToPay);
+        }
+        calcTotalFromPayments();
+    },[documents])
 
     // Creation Function
 
@@ -436,8 +501,12 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 <BoldTitle text={'Recibo de caja'}>
                     <i className="fa-solid fa-receipt"/>
                 </BoldTitle>
-
-                <h6 className="valueCashRecipt">Valor: $ {formatCurrency(total)}</h6>
+                <div className="valuesCashRecipt">
+                    {instance_id != undefined && (
+                        <h6 className="valueCashRecipt">Valor a cobrar: $ {formatCurrency(totalToPay)}</h6>
+                    )}
+                    <h6 className="valueCashRecipt">Valor: $ {formatCurrency(total)}</h6>
+                </div>
                 <i className="fa-solid fa-xmark closeFormBtn" onClick={()=>{
                     popOutAlert();
                 }}/>
@@ -473,22 +542,51 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                         <div className="paymentMehtodsContainer">
                             <SearchinList title={'Metodos de pago'} action={addPaymentMethod} noActVal={true} placeHolder={'Selecione metodos de pago'} list={paymentMehtods}/>
                             <div className="gridPaymentMethods">
+                                {disabledByValue && (
+                                    <span className="warnByValue">
+                                        El valor ingresado supera el monto maximo del documento,
+                                        modifique el valor o agrege un metodo de pago para saldo a favor.
+                                    </span>
+                                )}
                                 {paymentMethod.map((element,index)=>(
-                                    <div key={index} className="PaymentMethodCard">
-                                        <strong>{element.name}</strong>
-                                        <input step={0.001} type="number" placeholder="$0" onChange={(e)=>{
-                                            updatePaymentValue(element.id,"value",e.target.value)
-                                        }}/>
-                                        <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
-                                            removePaymentMethod(element.id)
-                                        }}/>
+                                    <div key={index} className={`PaymentMethodCard ${disabledByValue? 'disabledPaymentMethodCard':''}`}>
+                                        <div className="payMC">
+                                            <strong>{element.name}</strong>
+                                            <input step={0.001} type="number" placeholder="$0" onChange={(e)=>{
+                                                updatePaymentValue(element.id,"value",e.target.value)
+                                            }}/>
+                                            <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
+                                                removePaymentMethod(element.id)
+                                            }}/>
+                                        </div>
+                                        {!element.aplyVoucher && (
+                                            <button className="addVoucherToPayment" onClick={()=>{
+                                            setAplyVoucher(element.id,true)
+                                            }}>
+                                                <i className="fa-solid fa-plus"/>
+                                                Añadir voucher o referencia a {element.name}
+                                            </button>
+                                        )}
+                                        {element.aplyVoucher && (
+                                            <div className="voucherC">
+                                                <strong>
+                                                    Voucher o referencia
+                                                </strong>
+                                                <input type="text" placeholder="Ej: AR23..." onChange={(e)=>{
+                                                    updateVoucher(element.id,e.target.value);
+                                                }}/>
+                                                <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
+                                                    setAplyVoucher(element.id,false)
+                                                }}/>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
                         </div>
                     )}
                     <FileInput action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
-                    <FormButton text={'Crear recibo de caja'}/>
+                    <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor excede el monto max':'Crear recibo de caja'} disabled={disabled} loading={loading}/>
                 </form>
             )}
             {loading && (

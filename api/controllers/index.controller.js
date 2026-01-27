@@ -1376,9 +1376,10 @@ controller.createTransaction = (req,res)=>{
                         "subTotal",
                         total,
                         nature,
-                        "paymentMethod_id"
+                        "paymentMethod_id",
+                        voucher
                     )
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
                 `
                 console.log('---> ',transId);
                 console.log('---> ',element);
@@ -1391,7 +1392,8 @@ controller.createTransaction = (req,res)=>{
                     element.subtotal,
                     element.total,
                     element.nature,
-                    element.paymentMethod_id != undefined? element.paymentMethod_id:undefined
+                    element.paymentMethod_id != undefined? element.paymentMethod_id:undefined,
+                    element.voucher
                 ],2);
                 resultDetails.push([postConsulta]);
             }
@@ -1689,6 +1691,8 @@ controller.getDocuments = (req,res)=>{
         let values = [];
         let whereClauses = [];
 
+        console.log(info)
+
         whereClauses.push(`company_id = $1`);
         values.push(info.company_id)
 
@@ -1700,6 +1704,11 @@ controller.getDocuments = (req,res)=>{
         if(info.instance_id != undefined){
             whereClauses.push(`instance_id = $${values.length +1}`);
             values.push(info.instance_id);
+        }
+
+        if(info.id != undefined){
+            whereClauses.push(`id = $${values.length + 1}`);
+            values.push(info.id)
         }
 
         const whereQuery = whereClauses.length > 0

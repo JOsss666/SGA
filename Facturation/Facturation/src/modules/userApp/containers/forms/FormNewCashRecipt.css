@@ -2,7 +2,7 @@
 .FormNewCashRecipt{
     display: flex;
     flex-direction: column;
-    height: 100dvh;
+    height: 100%;
     width: 40vw;
     position: relative;
     overflow-x: hidden;
@@ -12,26 +12,35 @@
     position: fixed;
     z-index: 30;
     top: 0;
+    gap: .5vh;
     padding: 2vh;
     background-color: var(--bg);
     width: inherit;
     box-shadow: 0 .5vh 1vh var(--menuAside);
     display: flex;
+    border-bottom: solid .1vh var(--inputsBorder);
+    flex-direction: column;
     border-bottom-left-radius: 1vh;
     border-bottom-right-radius: 1vh;
 }
 
+.FormNewCashRecipt .headForm .valuesCashRecipt{
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+}
+
 .FormNewCashRecipt .headForm .valueCashRecipt{
-    margin: auto;
-    margin-right: 4vh;
+    margin: auto 0;
     font-size: clamp(3px,3vh,30px);
-    font-weight: 500;
+    font-weight: 400;
     color: var(--descriptionText);
 }
 
 .FormNewCashRecipt .headForm .closeFormBtn{
-    margin: auto 0;
-    margin-right: 2vh;
+    position: absolute;
+    top: 3vh;
+    right: 3vh;
     font-size: clamp(3px,3vh,30px);
     cursor: pointer;
     color: var(--mainText);
@@ -45,7 +54,7 @@
     gap: 2vh;
     padding: 2vh 3vh;
     padding-bottom: 5vh;
-    margin-top: 8vh;
+    margin-top: 14vh;
 }
 
 .FormNewCashRecipt .LoadingSpace{
@@ -67,11 +76,43 @@
 
 .FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .PaymentMethodCard{
     display: flex;
+    flex-direction: column;
     width: 100%;
-    gap: 1vw;
-    padding: 1vh;
+    gap: 1vh;
     padding-bottom: 2vh;
     border-bottom: dashed .3vh var(--inputsBorder);
+}
+
+.FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .PaymentMethodCard .payMC, 
+.FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .PaymentMethodCard .voucherC
+{
+    display: flex;
+    gap: 1vw;
+    padding: 1vh;
+}
+
+.FormNewCashRecipt form .gridPaymentMethods .PaymentMethodCard:hover > .addVoucherToPayment{
+    display: block;
+}
+
+.FormNewCashRecipt form .gridPaymentMethods .addVoucherToPayment{
+    display: none;
+    padding: 1vh;
+    margin: auto 1vh;
+    background-color: var(--bg);
+    color: #007AFF;
+    font-size: clamp(2px,2vh,20px);
+    cursor: pointer;
+    border-radius: 1vh;
+    border: hidden;
+}
+
+.FormNewCashRecipt form .gridPaymentMethods .addVoucherToPayment:hover{
+    background-color: #BEDBFF;
+}
+
+.FormNewCashRecipt form .gridPaymentMethods .addVoucherToPayment i{
+    margin-right: .5vw;
 }
 
 .FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .PaymentMethodCard strong{
@@ -118,6 +159,23 @@
     transform: rotateZ(-10deg);
 }
 
+.FormNewCashRecipt form .disabledByValueBtn{
+    background-color: #FFA2A2;
+    color: #C11007;
+    cursor: not-allowed;
+}
+
+.FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .warnByValue{
+    font-size: clamp(2px,2vh,20px);
+    color: #C11007;
+    padding: 1vh 2vh;
+}
+
+.FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .disabledPaymentMethodCard .payMC input{
+    background-color: #FFC9C9;
+    border: solid .1vh #FF6467;
+    color: #C11007;
+}
 
 @media (max-width:500px) {
     .FormNewCashRecipt{
@@ -136,11 +194,11 @@
 
     .FormNewCashRecipt .headForm .closeFormBtn{
         position: absolute;
-        top: 4vh;
-        right: 1vh;
+        top: 3vh;
+        right: 3vh;
     }
 
     .FormNewCashRecipt form{
-        margin-top: 12vh;
+        margin-top: 16vh;
     }
 }
