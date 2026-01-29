@@ -9,6 +9,7 @@ import { postInfo } from "../../../utils/functions";
 import { useAppInfo } from "../../../context/context";
 import './CashBoxes.css'
 import { useNavigate, useParams } from "react-router-dom";
+import { LoadingSpace } from "./LoadingSpace";
 
 export function CashBoxes(){
 
@@ -18,11 +19,15 @@ export function CashBoxes(){
     const params = useParams();
 
     // control
+    const [loading,setLoading] = useState(false);
+    const [disabled,setDisabled] = useState(false);
     const [cashBoxes,setCashBoxes] = useState([]);
     const [searchValue,setSearchVal] = useState('');
     const [displayGird,setDisplayGrid] = useState('grid')
 
     const getCashBoxes = async()=>{
+        setDisabled(true);
+        setLoading(true);
         let res = await postInfo('/facturation/getCashBoxes',{
             company_id:appInfo.company_id
             //user_id:userInfo.user_id
@@ -30,6 +35,8 @@ export function CashBoxes(){
         if(res[0]){
             setCashBoxes(res[1]);
         }
+        setLoading(false);
+        setDisabled(false);
     }
 
     const handleNavigate = (path)=>{
@@ -55,19 +62,24 @@ export function CashBoxes(){
                     }} title={'Cambiar distribución'}><i className={displayGird == 'grid'? 'fa-solid fa-border-all':'fa-solid fa-folder-tree'}/>
                 </ButtonMenu>
             </div>
-            <div className="gridCashBoxes">
-                    {cashBoxes.map((element,index)=>(
-                        <NormalCard 
-                            title={element.name}
-                            key={index}
-                            img={'https://res.cloudinary.com/djjxugmni/image/upload/v1769618368/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.png'}
-                            onlyTitle={true}
-                            onClick={()=>{
-                                handleNavigate(element.id)
-                            }}
-                        />
-                    ))}
-            </div>
+            {!loading && (
+                <div className="gridCashBoxes">
+                        {cashBoxes.map((element,index)=>(
+                            <NormalCard 
+                                title={element.name}
+                                key={index}
+                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1769618368/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.png'}
+                                onlyTitle={true}
+                                onClick={()=>{
+                                    handleNavigate(element.id)
+                                }}
+                            />
+                        ))}
+                </div>
+            )}
+            {loading && (
+                <LoadingSpace title={'Cargando cajas'} description={'Esto no debe tardar mucho...'}/>
+            )}
         </div>
     )
 }

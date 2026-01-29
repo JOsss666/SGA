@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { postInfo } from "../../../../utils/functions";
 import './CashRegisterReport.css'
 import { BoldTitle } from "../../components/BoldTitle";
@@ -8,8 +8,11 @@ import { TagIndicator } from "../../components/TagIndicator";
 import { LoadingSpace } from "../LoadingSpace";
 import { FormInput } from "../../components/FormInput";
 import { ButtonMenu } from "../../components/ButtonMenu";
+import { useReactToPrint } from "react-to-print";
 
 export function CashRegisterReport({shift_id}){
+
+    const containerReport = useRef();
 
     // Requirements
     const {appInfo,userInfo,userConfig} = useAppInfo();
@@ -24,8 +27,22 @@ export function CashRegisterReport({shift_id}){
     // Control
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
+    const [hiddeToPrint,setHideToPrint] = useState(false);
     
     // Utils functions
+
+    const reportRef = useRef(null);
+
+    // 2. Configuramos el hook
+    const handlePrint = useReactToPrint({
+        // Aquí es donde la librería te pide el 'contentRef'
+        contentRef: reportRef, 
+        documentTitle: `Informe cierre de ${cashBoxInfo.name} - ${localISOTime}`,
+    });
+
+    useEffect(()=>{
+        console.log(containerReport.current)
+    },[containerReport.current])
 
     const formatCurrency = (value) =>
             new Intl.NumberFormat("es-CO").format(value);
@@ -138,7 +155,7 @@ export function CashRegisterReport({shift_id}){
     },[reportInfo])
 
     return(
-        <div className="CashRegisterReport">
+        <div className="CashRegisterReport" ref={reportRef}>
             {!loading && (
                 <>
                     <div className="headReport">
@@ -146,17 +163,23 @@ export function CashRegisterReport({shift_id}){
                         <BoldTitle text={`Cierre de ${cashBoxInfo.name}`}/>
                         <DescriptionSpan text={`SGA - ${appInfo.legal_name}`}/>
                     </div>
-                    <div className="printButton">
-                        <ButtonMenu title={'Imprimir'}>
-                            <i className="fa-solid fa-print"/>
-                        </ButtonMenu>
-                         <ButtonMenu title={'Descargar'}>
-                            <i className="fa-solid fa-file-arrow-down"/>
-                        </ButtonMenu>
-                         <ButtonMenu title={'Compartir'}>
-                            <i className="fa-solid fa-arrow-up-from-bracket"/>
-                        </ButtonMenu>
-                    </div>
+                    {!hiddeToPrint && (
+                        <div className="printButton">
+                            <ButtonMenu title={'Imprimir'} onClick={()=>{
+                                setHideToPrint(true);
+                                handlePrint();
+                                setHideToPrint(false);
+                            }}>
+                                <i className="fa-solid fa-print"/>
+                            </ButtonMenu>
+                            <ButtonMenu title={'Descargar'}>
+                                <i className="fa-solid fa-file-arrow-down"/>
+                            </ButtonMenu>
+                            <ButtonMenu title={'Compartir'}>
+                                <i className="fa-solid fa-arrow-up-from-bracket"/>
+                            </ButtonMenu>
+                        </div>
+                    )}
                     <div className="datesContainer">
                         <div className="dateReport">
                             <span>Feha de inicio</span>

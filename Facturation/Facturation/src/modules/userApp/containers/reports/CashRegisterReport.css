@@ -23,7 +23,8 @@
 }
 
 .CashRegisterReport .headReport .printButton .ButtonMenu{
-    box-shadow:  0 0 1vh #51A2FF;
+    box-shadow:  0 0 1vh #D4D4D4;
+    background-color: var(--bg);
 }
 
 .CashRegisterReport .headReport .ttlreport{
@@ -34,6 +35,11 @@
     border-right: solid .2vh var(--inputsBorder);
     padding-right: 2vh;
 }
+
+.CashRegisterReport .headReport .BoldTitle{
+    font-size: clamp(3px,3vh,30px);
+}
+
 
 .CashRegisterReport .headReport .datesContainer{
     display: flex;
@@ -190,13 +196,13 @@
 }
 
 .CashRegisterReport .authAndDetails .authC .FormInput{
-    width: 60%;
+    width: 50%;
 }
 
 .CashRegisterReport .authAndDetails .authC .signatureContainer{
     display: flex;
     flex-direction: column;
-    margin: auto;
+    margin: auto 2vh;
     gap: 4vh;
 }
 
