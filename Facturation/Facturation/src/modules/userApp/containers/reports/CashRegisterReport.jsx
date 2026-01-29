@@ -7,6 +7,7 @@ import { DescriptionSpan } from "../../components/DescriptionSpan";
 import { TagIndicator } from "../../components/TagIndicator";
 import { LoadingSpace } from "../LoadingSpace";
 import { FormInput } from "../../components/FormInput";
+import { ButtonMenu } from "../../components/ButtonMenu";
 
 export function CashRegisterReport({shift_id}){
 
@@ -18,6 +19,7 @@ export function CashRegisterReport({shift_id}){
     const nowDate = new Date();
     const offset = nowDate.getTimezoneOffset() * 60000;
     const localISOTime = new Date(nowDate - offset).toISOString().slice(0, 19);
+    const [total,setTotal] = useState(0);
 
     // Control
     const [loading,setLoading] = useState(false);
@@ -117,6 +119,16 @@ export function CashRegisterReport({shift_id}){
     }
 
     useEffect(()=>{
+        if(reportInfo.length > 0){
+            let newttl = 0;
+            reportInfo.forEach(element => {
+                newttl += element.net_balance;
+            });
+            setTotal(newttl);
+        }
+    },[reportInfo])
+
+    useEffect(()=>{
         generateReportCashRegister();
         getShiftInfo()
     },[])
@@ -133,6 +145,17 @@ export function CashRegisterReport({shift_id}){
                     <div className="ttlreport">
                         <BoldTitle text={`Cierre de ${cashBoxInfo.name}`}/>
                         <DescriptionSpan text={`SGA - ${appInfo.legal_name}`}/>
+                    </div>
+                    <div className="printButton">
+                        <ButtonMenu title={'Imprimir'}>
+                            <i className="fa-solid fa-print"/>
+                        </ButtonMenu>
+                         <ButtonMenu title={'Descargar'}>
+                            <i className="fa-solid fa-file-arrow-down"/>
+                        </ButtonMenu>
+                         <ButtonMenu title={'Compartir'}>
+                            <i className="fa-solid fa-arrow-up-from-bracket"/>
+                        </ButtonMenu>
                     </div>
                     <div className="datesContainer">
                         <div className="dateReport">
@@ -205,6 +228,10 @@ export function CashRegisterReport({shift_id}){
                     <div className="authC">
                         <FormInput textArea={true} placeholder={'Observaciones del cierre'} title={'Observaciones'}/>
                         <div className="signatureContainer">
+                            <div className="signature">
+                                <span>Valor total:</span>
+                                <strong>$ {formatCurrency(total)}</strong>
+                            </div>
                             <div className="signature">
                                 <span>Nombre de Cajero u operador:</span>
                                 <strong>{shiftInfo.responsable}</strong>

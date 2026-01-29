@@ -13,6 +13,19 @@
     gap: 2vw;
 }
 
+.CashRegisterReport .headReport .printButton{
+    position: absolute;
+    right: 4vh;
+    top: 14vh;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.CashRegisterReport .headReport .printButton .ButtonMenu{
+    box-shadow:  0 0 1vh #51A2FF;
+}
+
 .CashRegisterReport .headReport .ttlreport{
     display: flex;
     flex-direction: column;
@@ -184,12 +197,21 @@
     display: flex;
     flex-direction: column;
     margin: auto;
-    gap: 5vh;
+    gap: 4vh;
 }
 
 .CashRegisterReport .authAndDetails .authC .signatureContainer .signature{
     display: flex;
     gap: 1vw;
     font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--mainText);
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer .signature span{
+    color: var(--descriptionText);
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer .signature strong{
+    font-weight: 500;
     color: var(--mainText);
 }
