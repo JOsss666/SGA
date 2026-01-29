@@ -43,6 +43,8 @@ import { Calendar } from './Calendar';
 import { CellarDetail } from './CellarDetail';
 import {NoAccess} from './NoAccess';
 import {SuspendedAccount} from './SuspendedAcount'
+import { CashBoxes } from './CashBoxes';
+import { CashBoxesDeetail } from './CashBoxesDetail';
 
 export function UserApp(){
 
@@ -212,6 +214,8 @@ facturation.use == true){
                             <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
                             <Route path='/modules/*' element={<Modules/>}/>
                             <Route path='/services' element={<Services/>}/>
+                            <Route path='/cashBoxes' element={<CashBoxes/>}/>
+                                <Route path='/cashBoxes/:cashBox_id' element={<CashBoxesDeetail/>}/>
                             <Route path='/services/:serviceRequierd' element={<PathLocation/>}/>
                             <Route path='/billing' element={<span>Facturación</span>}/>
                             <Route path='/messages/*' element={<Messages/>} />

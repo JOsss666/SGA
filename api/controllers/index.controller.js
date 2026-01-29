@@ -1363,6 +1363,7 @@ controller.createTransaction = (req,res)=>{
         ],3)
         const transId = parseInt(consulta.id)
         console.log('- ',transId)
+        const cashBoxTypes = ['Cash Recipt'];
         if(typeof(transId) == 'number'){
             let resultDetails = [];
             for(const element of info.transactionDetails){
@@ -1377,10 +1378,9 @@ controller.createTransaction = (req,res)=>{
                         total,
                         nature,
                         "paymentMethod_id",
-                        voucher
-                    )
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
-                `
+                        voucher)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;
+                `;
                 console.log('---> ',transId);
                 console.log('---> ',element);
                 let postConsulta = await useDataBase(sentence,[
@@ -1394,9 +1394,33 @@ controller.createTransaction = (req,res)=>{
                     element.nature,
                     element.paymentMethod_id != undefined? element.paymentMethod_id:undefined,
                     element.voucher
-                ],2);
-                resultDetails.push([postConsulta]);
+                ],3);
+                console.log(`ID detalle transacción: ${postConsulta.id}`)
+                console.log(`Es doc de caja: ${cashBoxTypes.includes(info.docType)}`)
+                console.log(`Comparación tipos de documento: ${JSON.stringify(cashBoxTypes)} -- ${info.doc_type}`)
+                console.log(`Es pago en caja: ${element.type == 'payment'}`)
+                if(cashBoxTypes.includes(info.doc_type) && element.type == 'payment' && postConsulta.id != undefined){
+                    console.log('Insertando movimiento de caja')
+                    let srSentence = `
+                        INSERT INTO "Facturation".shift_settlement_details(
+                            company_id, 
+                            user_id,
+                            "cashBox_id",
+                            "transactionDetail_id",
+                            shift_id)
+                        VALUES ($1, $2, $3, $4, $5);
+                    `;
+                    let setElementRegister = await useDataBase(srSentence,[
+                        info.company_id,
+                        info.user_id,
+                        element.cashBox_id,
+                        postConsulta.id,
+                        element.shift_id
+                    ],2);
+                }
+                resultDetails.push([postConsulta.id != undefined,postConsulta.id]);
             }
+            await useDataBase(`REFRESH MATERIALIZED VIEW CONCURRENTLY "Facturation".mv_shift_payment_summaries`,[],1);
             res.writeHead(200,{'Content-Type':'text/plain'})
             res.end(JSON.stringify([consulta.id,resultDetails]));
         }else{

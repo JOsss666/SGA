@@ -211,5 +211,17 @@ router.post('/facturation/newCashRecipt',facturationController.newCashRecipt);
 
 router.post('/facturation/newClientOrder',facturationController.newClientOrder);
 
+router.post('/facturation/getCashBoxes',facturationController.getCashBoxes);
+
+router.post('/facturation/getLastRegisterShift',facturationController.getLastRegisterShift);
+
+router.post('/facturation/openCashRegister',facturationController.openCashRegister);
+
+router.post('/facturation/closeCashRegister',facturationController.closeCashRegister);
+
+router.post('/facturation/getCashRegisterReport',facturationController.getCashRegisterReport);
+
+router.post('/facturation/getTransactionsOfCashRecord',facturationController.getTransactionsOfCashRecord);
+
 export default router;
 

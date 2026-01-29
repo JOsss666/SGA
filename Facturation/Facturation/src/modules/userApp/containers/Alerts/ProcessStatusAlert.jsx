@@ -221,7 +221,12 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                         {`${info.process_name} - `}
                         <b>{`${info.process_code}#${info.ownSerial}`}</b>
                     </span>
-                    <i title={`Mas información de ${info.process_name}`} className="fa-solid fa-circle-info infoAbourProcess"/>
+                    <span className="InstanceProceesIndicator">
+                        {info.thirdParty_name}
+                    </span>
+                    <i title={`Mas información de ${info.process_name}`} className="fa-solid fa-arrow-rotate-right infoAbourProcess" onClick={()=>{
+                        getInstanceInfo();
+                    }}/>
                 </div>
             </div>
             {!loading && (

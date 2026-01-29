@@ -815,6 +815,7 @@ processController.getProcessState = (req,res)=>{
                 pr.code AS process_code,
                 pr.description AS process_description,
                 pr.id AS process_id,
+                tp.names AS thirdParty_name,
                 JSON_AGG(
                     JSON_BUILD_OBJECT(
                         'id', ps.id,
@@ -828,6 +829,7 @@ processController.getProcessState = (req,res)=>{
                 ) AS steps
             FROM "Process".process_instance pi
             LEFT JOIN "Process".processes pr ON pi.process_id = pr.id
+            LEFT JOIN "Ecosystem".thirdparties tp ON pi."thirdParty_id" = tp.id 
             LEFT JOIN "Process".process_steps ps ON pr.id = ps.process_id
             -- Subconsulta para agrupar documentos por step_id
             LEFT JOIN (
@@ -846,7 +848,7 @@ processController.getProcessState = (req,res)=>{
             ) docs ON ps.id = docs.step_id
             ${whereQuery}
             GROUP BY
-                pi.id, pr.id
+                pi.id, pr.id, tp.names
             ORDER BY
                 pi.created_at DESC;
         `;
@@ -920,7 +922,7 @@ processController.nextProcessStep = async (req, res) => {
             // 5. (Opcional) Registrar en el historial para auditoría
             await useDataBase(`
                 INSERT INTO "Process".process_historial(
-                    company_id, instance_id, previous_step, next_step, user_id description)
+                    company_id, instance_id, previous_step, next_step, user_id, description)
                 VALUES (?, ?, ?, ?, ?, ?);
             `, [
                 info.company_id,

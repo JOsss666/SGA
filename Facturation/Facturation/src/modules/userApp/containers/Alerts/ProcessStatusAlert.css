@@ -22,6 +22,9 @@
     border-top: solid .1vh var(--inputsBorder);
     border-bottom: solid .1vh var(--inputsBorder);
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
 }
 
 .ProcessStatusAlert .headProcess .instanceContainer .InstanceProceesIndicator{
@@ -37,15 +40,17 @@
 
 .ProcessStatusAlert .headProcess .instanceContainer .infoAbourProcess{
     position: absolute;
-    top: 2vh;
+    top: 3.5vh;
     right: 4vh;
     cursor: pointer;
     color: var(--descriptionText);
     transition: .3s;
+    font-size: clamp(3px,3vh,30px);
 }
 
 .ProcessStatusAlert .headProcess .instanceContainer .infoAbourProcess:hover{
     color: #007AFF;
+    transform: rotateZ(170deg);
 }
 
 .ProcessStatusAlert .gridStepsProces{

@@ -29,6 +29,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const [costCenters,setCostCenters] = useState([]);
     const [concepts,setConcepts] = useState([]);
     const [documents,setDocuments] = useState([]);
+    const [cashBoxes,setCashBoxes] = useState([]);
 
     // control
     const [loading,setLoading] = useState();
@@ -45,11 +46,13 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         // Valor indicativo d a pagar
         const [totalToPay,setTotalToPay] = useState(0);
     const [description,setDescription] = useState();
-    const [attached,setAttached] = useState();
+    const [attached,setAttached] = useState('-');
     const [instance_id,setInstance_id] = useState();
     const [step_id,setStep_id] = useState();
     const [concept_id,setConcept_id] = useState();
     const [conceptAccount_id,setConcept_account_id] = useState();
+    const [cashBox_id,setCashBox_id] = useState();
+    const [shift_id,setShift_id] = useState();
     const [status,setStatus] = useState('active');
 
     // Object FormInfo
@@ -81,6 +84,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         setLoading(true)
         await getThirdParties();
         await getConcepts();
+        await getCashBoxes();
         let temInfo = {}
         if(userConfig.access != undefined){
             console.log(userConfig.access)
@@ -162,6 +166,11 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         setConcept_account_id(element.account_id);
     }
 
+    const handleCashBoxChange = (element)=>{
+        setCashBox_id(element.id)
+        setShift_id(element.shift_id)
+    }
+
     useEffect(()=>{
         handleUserConfig();
     },[])
@@ -197,6 +206,25 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 })
             });
             setInstances(C);
+        }
+    }
+
+    const getCashBoxes = async()=>{
+        let res = await postInfo('/facturation/getCashBoxes',{
+            company_id:appInfo.company_id
+            //user_id:userInfo.user_id
+        })
+        console.log(res);
+        if(res[0]){
+            let C = [];
+            res[1].forEach(element => {
+                console.log(element);
+                C.push({
+                    text:element.name,
+                    value:element
+                })
+            });
+            setCashBoxes(C);
         }
     }
 
@@ -433,7 +461,10 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                     total:element.value,
                     type:'payment',
                     paymentMethod_id:element.id,
-                    nature:'DB'
+                    nature:'DB',
+                    voucher:element.voucher,
+                    cashBox_id,
+                    shift_id
                 })
             });
             FormInfo.transactionDetails.push({
@@ -536,6 +567,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                             }}/>
                         }/>
                     )}
+                    <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja'} list={cashBoxes} disabled={disabled}/>
                     <SearchinList action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
                     <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
                     {info.paymentMethod == undefined && (
