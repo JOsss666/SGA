@@ -191,12 +191,14 @@
 
 .CashRegisterReport .authAndDetails .authC{
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
     gap: 2vh;
 }
 
 .CashRegisterReport .authAndDetails .authC .FormInput{
-    width: 50%;
+    width: 100%;
+    margin: 0 auto;
 }
 
 .CashRegisterReport .authAndDetails .authC .signatureContainer{
@@ -204,6 +206,13 @@
     flex-direction: column;
     margin: auto 2vh;
     gap: 4vh;
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer .resumeTotalsC{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh 0;
+    gap: 1vh;
 }
 
 .CashRegisterReport .authAndDetails .authC .signatureContainer .signature{
@@ -220,4 +229,26 @@
 .CashRegisterReport .authAndDetails .authC .signatureContainer .signature strong{
     font-weight: 500;
     color: var(--mainText);
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer .resumeTotalsC .signature{
+    padding: .5vh 0;
+    border-bottom: solid .1vh var(--descriptionText);
+    width: fit-content;
+    padding-bottom: 1vh;
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer .resumeTotalsC .signature span,
+.CashRegisterReport .authAndDetails .authC .signatureContainer .resumeTotalsC .signature h5
+{
+    width: 30dvw;
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer .resumeTotalsC .signature strong{
+    width: 10dvw;
+    text-align: right;
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer .resumeTotalsC .signature h5 i{
+    margin-right: 1vh;
 }

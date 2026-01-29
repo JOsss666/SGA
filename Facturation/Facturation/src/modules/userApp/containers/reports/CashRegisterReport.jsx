@@ -33,11 +33,21 @@ export function CashRegisterReport({shift_id}){
 
     const reportRef = useRef(null);
 
+    const formatDate = (date)=>{
+        if(date != undefined){
+            let x = date.split('T');
+            let newDate = `${x[0]}`;
+            newDate += `    ${x[1].substring(0,5)}`
+            return newDate;
+        }
+        return `--/--/--`
+    }
+
     // 2. Configuramos el hook
     const handlePrint = useReactToPrint({
         // Aquí es donde la librería te pide el 'contentRef'
         contentRef: reportRef, 
-        documentTitle: `Informe cierre de ${cashBoxInfo.name} - ${localISOTime}`,
+        documentTitle: `Informe cierre de ${cashBoxInfo.name} - ${formatDate(localISOTime)}`,
     });
 
     useEffect(()=>{
@@ -57,16 +67,6 @@ export function CashRegisterReport({shift_id}){
         cash_onDelivery:<i className="fa-solid fa-hand-holding-dollar"/>,
         crypto_currency:<i className="fa-brands fa-bitcoin"/>,
         "balances favor":<i className="fa-solid fa-id-card"/>
-    }
-
-    const formatDate = (date)=>{
-        if(date != undefined){
-            let x = date.split('T');
-            let newDate = `${x[0]}`;
-            newDate += `    ${x[1].substring(0,5)}`
-            return newDate;
-        }
-        return `--/--/--`
     }
 
      const updatePaymentValue = (id, attTrs) => {
@@ -249,12 +249,23 @@ export function CashRegisterReport({shift_id}){
                 </div>
                 <div className="authAndDetails">
                     <div className="authC">
-                        <FormInput textArea={true} placeholder={'Observaciones del cierre'} title={'Observaciones'}/>
                         <div className="signatureContainer">
-                            <div className="signature">
-                                <span>Valor total:</span>
-                                <strong>$ {formatCurrency(total)}</strong>
+                            <div className="resumeTotalsC">
+                                {reportInfo != undefined && reportInfo.map((element,index)=>(
+                                    <div key={index} className="signature">
+                                        <span>{element.paymentMethod_name}:</span>
+                                        <strong>$ {formatCurrency(element.net_balance)}</strong>
+                                    </div>
+                                ))}
+                                <div className="signature">
+                                    <h5>
+                                        <i className="fa-solid fa-angles-right"/>
+                                        ::. VALOR TOTAL
+                                    </h5>
+                                    <strong>$ {formatCurrency(total)}</strong>
+                                </div>
                             </div>
+                            
                             <div className="signature">
                                 <span>Nombre de Cajero u operador:</span>
                                 <strong>{shiftInfo.responsable}</strong>
@@ -263,6 +274,7 @@ export function CashRegisterReport({shift_id}){
                                 <span>Firma</span>
                                 <strong>__________________</strong>
                             </div>
+                            <FormInput textArea={true} placeholder={'Observaciones del cierre'} title={'Observaciones'}/>
                         </div>
                     </div>
                 </div>
