@@ -141,6 +141,15 @@
     gap: 1.5vh;
 }
 
+.CentralPanel .SidePanel .GeneralSettings .SettingLine .iconContainer{
+    width: 4vh;
+    height: 4vh;
+}
+
+.CentralPanel .SidePanel .GeneralSettings .SettingLine strong,
+.CentralPanel .SidePanel .GeneralSettings .SettingLine span{
+    font-size: 1.5vh;
+}
 
 /* INDICATORS */
 

@@ -7,6 +7,17 @@ import { IndicatorsPanel } from "../components/IndicatorsPanel";
 import { SearchBar } from "../components/SearchBar";
 import { SelectOptions } from "../components/SelectOptions";
 import { FormInput } from "../components/FormInput";
+import { Routes } from "react-router-dom";
+import { Route } from "react-router-dom";
+import { GeneralSettings } from "./SettingsSections/GeneralSettings";
+import { AccountSettings } from "./SettingsSections/AccountSettings";
+import { AlertsSettings } from "./SettingsSections/AlertsSettings";
+import { StylesSettings } from "./SettingsSections/StylesSettings";
+import { BillingSettings } from "./SettingsSections/BillingSettings";
+import { SecuritySettings } from "./SettingsSections/SecuritySettings";
+import { NoResults } from "./NoResults";
+import { SystemSettings } from "./SettingsSections/SystemSettings";
+
 import "./ControlPanel.css";
 
 function BarChartMock() {
@@ -132,10 +143,9 @@ export function ControlPanel() {
                         </div>
 
                         <div className="SidePanel">
-                            <SideItem text="Ciclos de compras y ventas" />
-                            <SideItem text="Eficiencia" />
-                            <SideItem text="Balance general" />
-                            <SideItem text="Estado de inventario" />
+                            <Routes>
+                                <Route path="" element={<GeneralSettings/>} />
+                            </Routes>
                         </div>
                     </div>
 
