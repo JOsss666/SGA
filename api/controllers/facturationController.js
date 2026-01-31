@@ -8,6 +8,7 @@ facturationController.newClientOrder = (req,res)=>{
         data += chunk    })
     req.on('end',async()=>{
         let info = JSON.parse(data)
+        console.log(info)
         let docCreation = `
             INSERT INTO "Ecosystem".documents(
                 company_id,
@@ -38,6 +39,36 @@ facturationController.newClientOrder = (req,res)=>{
             info.instance_id != "" && info.instance_id != undefined? info.instance_id:undefined,
             info.instance_id != "" && info.instance_id != undefined? info.step_id:undefined
         ],3);
+
+        if(info.productsServices != undefined){
+            for(const element of info.productsServices){
+                let insertMovSen = `
+                    INSERT INTO "Inventory".services_movement(
+                        company_id,
+                        store_id,
+                        "thirdParty_id",
+                        service_id,
+                        units,
+                        unit_value,
+                        total,
+                        description,
+                        instance_id)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+                `
+                let inserServMovement = await useDataBase(insertMovSen,[
+                    info.company_id,
+                    info.store_id,
+                    info.thirdParty_id,
+                    element.id,
+                    element.units,
+                    element.unit_value,
+                    element.total,
+                    element.description,
+                    info.instance_id != "" && info.instance_id != undefined? info.instance_id:undefined,
+                ],2);
+                console.log(inserServMovement)
+            }
+        }
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })

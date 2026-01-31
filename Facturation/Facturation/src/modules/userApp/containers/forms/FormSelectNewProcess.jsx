@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { BoldTitle } from "../../components/BoldTitle";
 import { postInfo } from "../../../../utils/functions";
-import { useAlert, useAppInfo } from "../../../../context/context";
+import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import './FormSelectNewProcess.css'
 import { LoadingSpace } from "../LoadingSpace";
 import { FormInput } from "../../components/FormInput";
@@ -19,6 +19,7 @@ let creationLock = {
 export function FormSelectNewProcess (){
 
     // Requierements
+    const {addNotification} = useNotifications();
     const {popInAlert,popOutAlert} = useAlert();
     const {appInfo,userInfo,userConfig} = useAppInfo();
     const [aviableProcess,setAviableProcess] = useState([]);
@@ -82,7 +83,8 @@ export function FormSelectNewProcess (){
             status:'pending', 
             parent_id:undefined, 
             parent_step:undefined,
-            thirdParty_id
+            thirdParty_id,
+            user_id:userInfo.user_id
         });
         console.log(res)
         if(res.id != undefined){
@@ -112,6 +114,7 @@ export function FormSelectNewProcess (){
             delivery_date,
             status:statusNewInstance,
             id:newInstanceInfo.id,
+            user_id:userInfo.user_id,
             thirdParty_id
         });
         await popOutAlert();
@@ -130,6 +133,27 @@ export function FormSelectNewProcess (){
             }
         }
     }
+
+    const cancellProcess = async()=>{
+        let res = await postInfo('/process/updateProcessInstanceStatus',{
+            company_id:appInfo.company_id,
+            start_date,
+            delivery_date,
+            status:'cancelled',
+            id:newInstanceInfo.id,
+            user_id:userInfo.user_id,
+            thirdParty_id
+        });
+        await popOutAlert();
+        if(res[0]){
+            addNotification({
+                type:'error',
+                title:`${newInstanceInfo.process_code}#${newInstanceInfo.ownSerial} cancelado`,
+                description:`La instancia de proceso ${newInstanceInfo.process_code}#${newInstanceInfo.ownSerial} fue cancelada correctamente.`
+            })
+        }
+    }
+
 
     useEffect(()=>{
         getAviableProcess();
@@ -177,6 +201,10 @@ export function FormSelectNewProcess (){
                         }/>
                         <FormButton text={`Confirmar ${newInstanceInfo.process_code}#${newInstanceInfo.ownSerial}`} onClick={()=>{
                             updateProcessInstance();
+                        }}/>
+                        <FormButton text={`Cancelar`} negative={true} onClick={()=>{
+                            setStatusNewInstance('cancelled')
+                            cancellProcess();
                         }}/>
                     </form>
                 </>

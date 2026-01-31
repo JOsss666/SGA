@@ -18,6 +18,7 @@ import './ReportDocuments.css'
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
 import './ProcessesReport.css'
 import { TableReportProcesses } from "../TableReportProcesses";
+import { useRealtime } from "../../../../utils/useRealTime";
 
 export function ProcessesReport(){
      // Prev Info
@@ -41,11 +42,12 @@ export function ProcessesReport(){
         "Proceso",
         "Tercero",
         "Etapa",
+        "Responsable",
         "Avance",
-        "Fecha de inicio",
         "Fecha de entrega",
-        "Estado",
-        "Ultima modificación"
+        "Ultima modificación",
+        "Fecha de inicio",
+        "Estado"
     ];
 
     const filters = {
@@ -99,6 +101,12 @@ export function ProcessesReport(){
         }
         setLoading(false)
     };
+
+    useRealtime(appInfo.company_id, (payload) => {
+        if (payload.table === 'process_instance') {
+            getInstances();
+        }
+    });
 
     useEffect(()=>{
         getInstances();

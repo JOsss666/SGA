@@ -91,16 +91,50 @@ export function FormNewClientOrder({params,reloadFun}){
             setProductsServices(prev => prev.filter(item => item.id !== id));
         };
     
-        const updatePServiceValue = (id, key, newValue) => {
+       const updatePServiceValue = (id, key, newValue) => {
             setProductsServices(prev => 
-                prev.map(item => 
-                    item.id === id 
-                        ? { ...item, [key]: newValue } 
-                        : item
+                prev.map(item => {
+                    if (item.id === id) {
+                        // Creamos el nuevo valor para el campo específico
+                        const updatedItem = { ...item, [key]: newValue };
+                        
+                        // Calculamos el total usando los datos más recientes
+                        const units = updatedItem.units || 0;
+                        const price = updatedItem.unit_value || 0;
+                        
+                        return { ...updatedItem, total: units * price };
+                    }
+                    return item;
+                })
+            );
+        };
+
+        const updatePServiceUnits = (id, newValue) => {
+            setProductsServices(prev => 
+                prev.map(item => {
+                    if (item.id === id) {
+                        const updatedItem = { ...item, units: newValue };
+                        
+                        const units = updatedItem.units || 0;
+                        const price = updatedItem.unit_value || 0;
+                        
+                        return { ...updatedItem, total: units * price };
+                    }
+                    return item;
+                })
+            );
+        };
+
+        const updatePServiceDescription = (id, newValue) => {
+            setProductsServices(prev =>
+                prev.map(item =>
+                item.id === id
+                ? { ...item, ['description']: newValue }
+                : item
                 )
             );
         };
-    
+            
 
     // getters of info
 
@@ -121,10 +155,6 @@ export function FormNewClientOrder({params,reloadFun}){
                 setProductsServicesArray(C)
             });
         }
-    }
-
-    const getRequierements = async()=>{
-        await getProducts();
     }
 
     const getStores = async(allowedStores)=>{
@@ -231,10 +261,11 @@ export function FormNewClientOrder({params,reloadFun}){
     // Envents Hooks
 
     useEffect(()=>{
+        console.log(productsServices)
         let newTtl = 0;
         productsServices.forEach(element => {
-            if(element.value != "" && element.value != undefined){
-                newTtl += parseFloat(element.value);
+            if(element.total != "" && element.total != undefined){
+                newTtl += parseFloat(element.total);
             }
         });
         setTotal(newTtl);
@@ -251,6 +282,8 @@ export function FormNewClientOrder({params,reloadFun}){
     // create function
 
     const createClientOrder = async()=>{
+        setDisabled(true);
+        setLoading(true)
         let res = await postInfo('/facturation/newClientOrder',formInfo);
         if(typeof(parseInt(res.id)) == 'number'){
             addNotification({
@@ -265,6 +298,8 @@ export function FormNewClientOrder({params,reloadFun}){
                 description:`Hubo un problema al crear la orden de cliente, intentelo de nuevo.`
             });
         }
+        setDisabled(false);
+        setLoading(false);
         popOutAlert();
         reloadFun?.();
         if(instance_id != undefined){
@@ -314,9 +349,16 @@ export function FormNewClientOrder({params,reloadFun}){
                                     {productsServices.map((element,index)=>(
                                         <div key={index} className="PaymentMethodCard">
                                             <strong>{element.name}</strong>
-                                            <input step={0.001} type="number" placeholder="$0" onChange={(e)=>{
-                                                updatePServiceValue(element.id,"value",e.target.value)
+                                            <input className="unitsInp" step={1} required type="number" min={1} placeholder="unidades" onChange={(e)=>{
+                                                updatePServiceUnits(element.id,e.target.value)
                                             }}/>
+                                            <input step={0.001} type="number" required placeholder="Valor unitatio: $0" onChange={(e)=>{
+                                                updatePServiceValue(element.id,"unit_value",e.target.value)
+                                            }}/>
+                                            <input step={0.001} type="text" placeholder="Descripción" onChange={(e)=>{
+                                                updatePServiceDescription(element.id,e.target.value)
+                                            }}/>
+                                            <span className="ttlValUnitIndicator">{formatCurrency(element.total || 0)}</span>
                                             <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
                                                 removePService(element.id)
                                             }}/>

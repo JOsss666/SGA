@@ -152,7 +152,7 @@
 }
 
 .ProcessStatusAlert .optionsProcessCotnainer .pendingDocBtn{
-    background-color: #FB2C36;
+    background-color: #E1712B;
 }
 
 
@@ -244,12 +244,46 @@
     margin-right: 1vh;
 }
 
-.ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .requiredDocAlert {
-    color: #FF6467;
+.ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .reqAttD {
+    color: #FB2C36;
+}
+
+.ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .optReqDoc {
+    color: #E1712B;
 }
 
 .ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .requiredDocAlert i{
     margin-right: 1vh;
+}
+
+.ProcessStatusAlert .bottonProcessIndicator{
+    display: flex;
+    width: 100%;
+    margin: 1vh auto;
+    padding: 2vh;
+    border-radius: 1vh;
+}
+
+.ProcessStatusAlert .CanceledIndicator{
+    background-color: #FFA2A2;
+    color: #FB2C36;
+}
+
+.ProcessStatusAlert .PendingIndicator{
+    background-color: #FEE685;
+    color: #E1712B;
+}
+
+.ProcessStatusAlert .bottonProcessIndicator strong{
+    text-align: center;
+    margin: auto;
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 500;
+}
+
+.ProcessStatusAlert .bottonProcessIndicator strong i{
+    margin-right: 1vh;
+    font-size: clamp(3px,3vh,30px);
 }
 
 @media (max-width:500px) {

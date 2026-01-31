@@ -644,9 +644,10 @@ processController.createProcessInstace = (req,res)=>{
                 parent_step, 
                 start_date, 
                 "delivery_date",
-                "thirdParty_id"
+                "thirdParty_id",
+                responsable
                 )
-	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id;
+	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;
         `;
 
         let consulta = await useDataBase(sentence,[
@@ -658,7 +659,8 @@ processController.createProcessInstace = (req,res)=>{
             info.parent_step,
             info.start_date,
             info.delivery_date,
-            info.thirdParty_id
+            info.thirdParty_id,
+            info.user_id
         ],3);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -713,6 +715,7 @@ processController.getProcessInstances =(req,res)=>{
         let sentence = `
             SELECT
                 "Process".process_instance.*,
+                "Ecosystem".users.user_name AS responsable_name,
                 "Process".processes.name AS process_name,
                 "Process".processes.code AS process_code,
                 "Process".processes.id AS process_id,
@@ -730,6 +733,10 @@ processController.getProcessInstances =(req,res)=>{
                 "Process".processes
             ON
                 "Process".process_instance.process_id = "Process".processes.id
+            LEFT JOIN
+                "Ecosystem".users
+            ON
+                "Process".process_instance.responsable = "Ecosystem".users.user_id
             LEFT JOIN
                 "Ecosystem".thirdparties
             ON 
@@ -766,14 +773,16 @@ processController.updateProcessInstanceStatus = (req,res)=>{
                 start_date = $1,
                 delivery_date = $2,
                 status = $3,
-                "thirdParty_id" = $4
-            WHERE company_id = $5 AND id = $6;
+                "thirdParty_id" = $4,
+                responsable = $5
+            WHERE company_id = $6 AND id = $7;
         `;
         let consulta = await useDataBase(sentence,[
             info.start_date,
             info.delivery_date,
             info.status,
-            info.thirdParty_id,
+            (info.thirdParty_id === '' || info.thirdParty_id === undefined) ? null : info.thirdParty_id,
+            info.user_id,
             info.company_id,
             info.id
         ],2);
@@ -863,6 +872,62 @@ processController.getProcessState = (req,res)=>{
     })
 }
 
+const validateStepRequirements = async (instanceId, nextStepId, companyId) => {
+    // 1. Buscamos qué documentos son obligatorios para el paso al que se intenta avanzar
+    // OJO: Validamos los requerimientos del paso actual y anteriores que sean obligatorios
+    const requirementsQuery = `
+        SELECT 
+            r."docType", 
+            r.min_number, 
+            r.step_id,
+            ps.name as step_name
+        FROM "Process".step_doc_realtion r
+        JOIN "Process".process_steps ps ON r.step_id = ps.id
+        WHERE r.company_id = $1 
+          AND r.required = true
+          AND ps."order" <= (SELECT "order" FROM "Process".process_steps WHERE id = $2);
+    `;
+
+    const requirementsQ = await useDataBase(requirementsQuery, [companyId, nextStepId], 1);
+    
+    if (!requirementsQ[0] || requirementsQ[1].length === 0) return { success: true };
+
+    const requirements = requirementsQ[1];
+
+    // 2. Consultamos qué documentos ya han sido cargados para esta instancia
+    // Basado en tu tabla de transacciones o donde guardes la relación doc <-> instancia
+    const attachedQuery = `
+        SELECT "document_type", COUNT(*) as total
+        FROM "Ecosystem".documents 
+        WHERE instance_id = $1 AND company_id = $2
+        GROUP BY "document_type"
+    `;
+    
+    const attachedQ = await useDataBase(attachedQuery, [instanceId, companyId], 1);
+    const attachedDocs = attachedQ[0] ? attachedQ[1] : [];
+
+    // 3. Comparar requerimientos vs realidad
+    let missingDocs = [];
+    requirements.forEach(req => {
+        // Cambiamos d.docType por d.document_type
+        const found = attachedDocs.find(d => d.document_type === req.docType);
+        const count = found ? parseInt(found.total) : 0;
+        
+        if (count < req.min_number) {
+            missingDocs.push(`${req.min_number} ${req.docType} (requerido en: ${req.step_name})`);
+        }
+    });
+
+    if (missingDocs.length > 0) {
+        return { 
+            success: false, 
+            error: `No se puede avanzar. Faltan los siguientes documentos: ${missingDocs.join(', ')}` 
+        };
+    }
+
+    return { success: true };
+};
+
 processController.nextProcessStep = async (req, res) => {
     let data = '';
     req.on('data', chunk => { data += chunk; });
@@ -885,12 +950,13 @@ processController.nextProcessStep = async (req, res) => {
 
             // 2. Buscar el paso que sigue en el orden
             const nextStepQuery = `
-                SELECT id, name, required_roll, "order"
+                SELECT id, name, required_roll, "order", end_process
                 FROM "Process".process_steps
                 WHERE process_id = $1 AND "order" > $2
                 ORDER BY "order" ASC
                 LIMIT 1
             `;
+
             const nextStepQ = await useDataBase(nextStepQuery, [instance.process_id, instance.current_order], 1);
 
             if (!nextStepQ[0]) {
@@ -903,27 +969,42 @@ processController.nextProcessStep = async (req, res) => {
             // Usamos .some para ver si el rol del usuario está en el array permitido
             console.log('Roles habilitados: ',nextStep.required_roll)
             console.log('Rol usuario: ',info.user_roll)
+            // Para verificar si el siguiente paso es el ultimo y disparar la validación de documentos
+            console.log(nextStep.end_process)
             const hasPermission = nextStep.required_roll.includes(info.user_roll);
-            
+                        
             if (!hasPermission) {
                 res.writeHead(200);
                 return res.end(JSON.stringify({success:false,error: "No tienes el rol necesario para autorizar este paso." }));
             }
 
+            if(nextStep.end_process){
+                const validation = await validateStepRequirements(info.instance_id, nextStep.id, info.company_id);
+                if (!validation.success) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ 
+                        success: false, 
+                        error: validation.error 
+                    }));
+                }
+            }
+
             // 4. Actualizar la instancia al nuevo paso
             const updateQuery = `
                 UPDATE "Process".process_instance 
-                SET step_id = $1, updated_at = CURRENT_TIMESTAMP
+                SET step_id = $1,
+                updated_at = CURRENT_TIMESTAMP,
+                responsable = $3
                 WHERE id = $2
             `;
 
-            await useDataBase(updateQuery, [nextStep.id, info.instance_id], 2);
+            await useDataBase(updateQuery, [nextStep.id, info.instance_id, info.user_id], 2);
 
             // 5. (Opcional) Registrar en el historial para auditoría
             await useDataBase(`
                 INSERT INTO "Process".process_historial(
                     company_id, instance_id, previous_step, next_step, user_id, description)
-                VALUES (?, ?, ?, ?, ?, ?);
+                VALUES ($1, $2, $3, $4, $5, $6);
             `, [
                 info.company_id,
                 info.instance_id,
