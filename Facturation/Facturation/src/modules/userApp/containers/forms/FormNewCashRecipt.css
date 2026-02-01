@@ -3,7 +3,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    width: 40vw;
+    width: 50vw;
     position: relative;
     overflow-x: hidden;
 }
@@ -176,6 +176,69 @@
     border: solid .1vh #FF6467;
     color: #C11007;
 }
+
+.FormNewCashRecipt form .aviableBriefCaseContainer{
+    display: flex;
+    flex-direction: column;
+}
+
+.FormNewCashRecipt form .aviableBriefCaseContainer h6{
+    margin-bottom: 2vh;
+    font-size: clamp(2.2px,2.5vh,25px);
+    font-weight: 500;
+    color: var(--mainText);
+}
+
+.FormNewCashRecipt form .aviableBriefCaseContainer .gridBirefCaseBills{
+    display: flex;
+    flex-direction:column;
+    gap: 1vh;
+    padding: 2vh;
+    border-radius: 1vh;
+    background-color: var(--cardHover);
+}
+
+.FormNewCashRecipt form .aviableBriefCaseContainer .gridBirefCaseBills .briefCaseCard{
+    display: flex;
+    padding: 1vh;
+    padding-bottom: 2vh;
+    border-bottom: dashed .1vh var(--inputsBorder);
+    gap: 1vh;
+}
+
+.FormNewCashRecipt form .aviableBriefCaseContainer .gridBirefCaseBills .briefCaseCard strong{
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 500;
+    color: var(--mainText);
+    margin: auto 0;
+    cursor: pointer;
+}
+
+.FormNewCashRecipt form .aviableBriefCaseContainer .gridBirefCaseBills .briefCaseCard span{
+    font-size: clamp(2.2px,2.2vh,22px);
+    margin: auto 1vh;
+    color: var(--descriptionText);
+}
+ 
+.FormNewCashRecipt form .aviableBriefCaseContainer .gridBirefCaseBills .briefCaseCard input{
+    padding: 1vh;
+    border-radius: 1vh;
+    border: hidden;
+    outline:solid .1vh var(--inputsBg);
+    font-size: clamp(2px,2vh,20px);
+    width: 30%;
+    margin: auto;
+    margin-right: 1vh;
+    color: var(--descriptionText);
+    background-color: var(--inputsBg);
+}
+
+.FormNewCashRecipt form .aviableBriefCaseContainer .gridBirefCaseBills .briefCaseCard input:focus{
+    outline: solid .3vh #007AFF;
+    color: var(--mainText);
+}
+
+
 
 @media (max-width:500px) {
     .FormNewCashRecipt{

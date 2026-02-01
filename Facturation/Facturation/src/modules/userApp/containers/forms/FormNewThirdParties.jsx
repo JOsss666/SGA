@@ -163,7 +163,7 @@ export function FormNewThirdParties({reloadFun}){
                     {credit && (
                         <>
                             <FormInput type={'number'} title={'Plazo de credito en días'} min={0} disabled={disabled} value={credit_term} action={setCredit_term}/>
-                            <FormInput type={'number'} moneyF={true} title={'Valor maximo de credito'} min={0} disabled={disabled} value={credit_value} action={setCredit_value}/>
+                            <FormInput type={'number'} title={'Valor maximo de credito'} min={0} disabled={disabled} value={credit_value} action={setCredit_value}/>
                             <FormInput type={'number'} title={'Tasa de interes diario por mora'} min={0} disabled={disabled} value={interest_rate} action={setInterest_rate}/>
                         </>
                     )}

@@ -30,14 +30,17 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const [concepts,setConcepts] = useState([]);
     const [documents,setDocuments] = useState([]);
     const [cashBoxes,setCashBoxes] = useState([]);
+    const [briefCaseBills,setBriefCaseBills] = useState([]);
 
     // control
+    const [mode,setMode] = useState('process_instance');
     const [loading,setLoading] = useState();
     const [disabled,setDisabled] = useState();
     const [disabledByValue,setDisabledByValue] = useState(false);
     
     // form info
     const [thirdParty_id,setThirdParty_id] = useState();
+    const [thirdPartyInfo,setThirdPartyInfo] = useState({});
     const [paymentMethod,setPaymentMethod] = useState([]);
     const [bussines_id,setBussines_id] = useState();
     const [store_id,setStore_id] = useState();
@@ -75,10 +78,29 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         step_id
     }
 
+    // PreProcess functions
+
+
     const formatCurrency = (value) =>
             new Intl.NumberFormat("es-CO").format(value);
 
-    // PreProcess functions
+    const formatDate = (date)=>{
+        if(date != undefined){
+            let x = date.split('T');
+            let newDate = `${x[0]}`;
+            return newDate;
+        }
+        return `--/--/--`
+    }
+
+    const addDaysToCurrentDate = (days) => {
+        const date = new Date(); // Obtiene la fecha y hora actual del sistema  
+        // Sumamos los días usando setDate y getDate para manejar cambios de mes/año automáticamente
+        date.setDate(date.getDate() + parseInt(days)); 
+        // Retornamos en formato ISO (YYYY-MM-DD) 
+        return date.toISOString().split('T')[0];
+    };
+
     const handleUserConfig = async()=>{
         setDisabled(true)
         setLoading(true)
@@ -162,8 +184,21 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     }
 
     let handleConceptChange = (element)=>{
-        setConcept_id(element.id);
-        setConcept_account_id(element.account_id);
+        if(element.id != undefined){
+            setConcept_id(element.id);
+            setConcept_account_id(element.account_id);
+            if(element.for_wallet){
+                setMode('briefcase_payment')
+                getBriefcasesBills();
+            }else{
+                setMode('process_instance')
+            }
+        }
+    }
+
+    const handleThirdPartyChange = (element)=>{
+        setThirdParty_id(element.id);
+        setThirdPartyInfo(element);
     }
 
     const handleCashBoxChange = (element)=>{
@@ -332,18 +367,35 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         }
     }
 
-     const getThirdParties = async()=>{
-        let res = await postInfo('/getThirdParties',{company_id:appInfo.company_id});
+     const getThirdParties = async(id,limit)=>{
+        let res = await postInfo('/getThirdParties',{
+            company_id:appInfo.company_id,
+            comercialInfo:true,
+            id:id,
+            limit:limit
+        });
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
                 C.push({
                     text:`${element.names}  ${element.indentification_type}_${element.indentification_number}`,
-                    value:element.id
+                    value:element
                 })
             });
             setThirdParties(C);
+            if(limit == 1){
+                setThirdPartyInfo(C[0].value);
+            }
         }
+    }
+
+    const getBriefcasesBills = async()=>{
+        let res = await postInfo('/facturation/getBriefcaseBills',{
+            company_id:appInfo.company_id,
+            thirdParty_id
+        })
+        console.log(res);
+        setBriefCaseBills(res[1]);
     }
 
 
@@ -372,12 +424,10 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const calcTotalFromPayments = ()=>{
         let newTTl = 0;
         paymentMethod.forEach(element => {
-            console.log(element.value)
             if(element.value != "" && element.value != undefined){
                 newTTl += parseFloat(element.value)
             }
         });
-        console.log(`${newTTl} -- ${totalToPay}`)
         if(instance_id != undefined){
             if(newTTl > totalToPay){
                 setDisabled(true);
@@ -452,7 +502,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             FormInfo["doc_id"] = res.id
             FormInfo["user_id"] = userInfo.user_id,
             FormInfo['transactionDetails'] = []
-            
+            FormInfo['instance_id'] = instance_id;
             
             paymentMethod.forEach(element => {
                 FormInfo.transactionDetails.push({
@@ -462,6 +512,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                     type:'payment',
                     paymentMethod_id:element.id,
                     nature:'DB',
+                    due_date:addDaysToCurrentDate(thirdPartyInfo.credit_term != undefined? thirdPartyInfo.credit_term:0),
+                    for_wallet:element.for_wallet,
                     voucher:element.voucher,
                     cashBox_id,
                     shift_id
@@ -492,6 +544,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     }
 
     const toAccount = async()=>{
+        console.log(FormInfo)
         let res = await postInfo('/createTransaction',FormInfo);
         const insertId = parseInt(res[0]);
         if(typeof(insertId) == 'number' && insertId != NaN && insertId != undefined){
@@ -524,6 +577,17 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             })
         }
     }
+    
+
+    useEffect(()=>{
+        console.log(thirdPartyInfo);
+    },[thirdPartyInfo])
+
+    useEffect(()=>{
+        if(instance_id != undefined && instance_id != ''){
+            getThirdParties(thirdParty_id,1)
+        }
+    },[instance_id])
 
 
     return(
@@ -561,15 +625,29 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                         <SearchinList action={handleSelectInstance} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={disabled}/>
                     )}
                     {info.thirdParty_id == undefined && (
-                        <SearchinList action={setThirdParty_id} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdparties} disabled={disabled} specialOption={
+                        <SearchinList action={handleThirdPartyChange} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdparties} disabled={disabled} specialOption={
                             <NewElementSelect title={'Crear nuevo'} onClick={()=>{
                                 popInAlert(<FormNewThirdParties reloadFun={getThirdParties}/>)
                             }}/>
                         }/>
                     )}
-                    <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja'} list={cashBoxes} disabled={disabled}/>
                     <SearchinList action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
-                    <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
+                    <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja'} list={cashBoxes} disabled={disabled}/>
+                    {mode == 'briefcase_payment' && (
+                        <div className="aviableBriefCaseContainer">
+                            <h6>Cuentas por cobrar</h6>
+                            <div className="gridBirefCaseBills">
+                                {briefCaseBills.map((element,index)=>(
+                                    <div key={index} className="briefCaseCard">
+                                        <strong>{`${element.process_code}#${element.instance_id}`}</strong>
+                                        <span>Valor: {formatCurrency(element.pending_amount)}</span>
+                                        <span>Vence: {formatDate(element.due_date)}</span>
+                                        <input type="number" min={0} max={element.pending_amount} step={0.1} disabled={disabled} placeHolder={'$ 0'} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                     {info.paymentMethod == undefined && (
                         <div className="paymentMehtodsContainer">
                             <SearchinList title={'Metodos de pago'} action={addPaymentMethod} noActVal={true} placeHolder={'Selecione metodos de pago'} list={paymentMehtods}/>
@@ -617,6 +695,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                             </div>
                         </div>
                     )}
+                    <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
                     <FileInput action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
                     <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor excede el monto max':'Crear recibo de caja'} disabled={disabled} loading={loading}/>
                 </form>

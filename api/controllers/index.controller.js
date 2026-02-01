@@ -1268,7 +1268,8 @@ controller.getPaymentMethods = (req,res)=>{
                 name,
                 currency,
                 status,
-                account_id
+                account_id,
+                for_wallet
             FROM
                 "Ecosystem".payment_methods
             ${whereQuery}
@@ -1417,6 +1418,29 @@ controller.createTransaction = (req,res)=>{
                         postConsulta.id,
                         element.shift_id
                     ],2);
+                }
+                console.log('---> ',element);
+                if(element.for_wallet == true){
+                    let senInsBreafcase = `
+                        INSERT INTO "Treasury".accounts_receivable(
+                           company_id,
+                           "thirdParty_id",
+                           document_id,
+                           total,
+                           paid_amount,
+                           due_date,
+                           instance_id)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7);
+                    `;
+                    let insertBreafCaseBill = await useDataBase(senInsBreafcase,[
+                        info.company_id,
+                        info.thirdParty_id,
+                        info.doc_id,
+                        element.total,
+                        0,
+                        element.due_date,
+                        info.instance_id
+                    ])
                 }
                 resultDetails.push([postConsulta.id != undefined,postConsulta.id]);
             }
@@ -1770,14 +1794,60 @@ controller.getThirdParties = (req,res)=>{
     req.on('data',chunk=>{
         data += chunk
     })
-    req.on('end',async()=>{
-        console.log(data);
-        let info = data != undefined? JSON.parse(data):'';
-        let sentence = `SELECT * FROM "Ecosystem".thirdParties WHERE company_id = $1 ;`; 
-        let consulta = await useDataBase(sentence,[info.company_id],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
+    req.on('end', async () => {
+        let info = data !== undefined ? JSON.parse(data) : {};
+        let values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`"Ecosystem".thirdparties.company_id = $1`);
+        values.push(info.company_id);
+
+        if(info.id != undefined){
+            whereClauses.push(`"Ecosystem".thirdparties.id = $${values.length +1}`)
+            values.push(info.id)
+        }
+
+        const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
+        
+        // 1. Columnas básicas
+        let selectColumns = `
+            "Ecosystem".thirdParties.*
+        `;
+
+        // 2. Joins dinámicos
+        let joinClause = "";
+        
+        // Si se requiere información comercial, añadimos las columnas y el JOIN
+        if (info.comercialInfo === true) {
+            selectColumns += `,
+                "Ecosystem"."thirdPartyComercialInfo".credit,
+                "Ecosystem"."thirdPartyComercialInfo".credit_term,
+                "Ecosystem"."thirdPartyComercialInfo".comercial_state,
+                "Ecosystem"."thirdPartyComercialInfo".aviable_credit
+            `;
+            
+            joinClause = `
+                LEFT JOIN "Ecosystem"."thirdPartyComercialInfo"
+                ON "Ecosystem".thirdParties.id = "Ecosystem"."thirdPartyComercialInfo"."thirdParty_id"
+            `;
+        }
+
+        // 3. Construcción de la sentencia final
+        let sentence = `
+            SELECT
+                ${selectColumns}
+            FROM
+                "Ecosystem".thirdParties
+            ${joinClause}
+            ${whereQuery}
+            ${info.limit != undefined? `Limit ${info.limit}`:''}
+            ;
+        `; 
+
+        let consulta = await useDataBase(sentence, values, 1);
+        res.writeHead(200, { 'Content-Type': 'application/json' }); // application/json es más profesional
         res.end(JSON.stringify(consulta));
-    })
+    });
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));

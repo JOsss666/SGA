@@ -440,4 +440,45 @@ facturationController.getTransactionsOfCashRecord = (req,res)=>{
     })
 }
 
+facturationController.getBriefcaseBills = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            SELECT
+                "Treasury".accounts_receivable.*,
+                "Process".process_instance.process_id, 
+                "Process".processes.code AS process_code
+            FROM
+                "Treasury".accounts_receivable
+            LEFT JOIN
+                "Process".process_instance
+            ON
+                "Treasury".accounts_receivable.instance_id = "Process".process_instance.id
+            LEFT JOIN
+                "Process".processes
+            ON
+                "Process".process_instance.process_id = "Process".processes.id
+            WHERE
+                "Treasury".accounts_receivable.company_id = $1 
+                AND "Treasury".accounts_receivable."thirdParty_id" = $2
+            ORDER BY "Treasury".accounts_receivable.created_at DESC
+            ;
+        `;
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.thirdParty_id
+        ],1)
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 export default facturationController;

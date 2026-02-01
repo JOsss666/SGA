@@ -8,6 +8,7 @@ import { LoadingSpace } from "../LoadingSpace";
 import './FormNewClientOrder.css'
 import { postInfo } from "../../../../utils/functions";
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
+import { FileInput } from "../../components/FileInput";
 
 export function FormNewClientOrder({params,reloadFun}){
 
@@ -371,6 +372,7 @@ export function FormNewClientOrder({params,reloadFun}){
                             </div>
                         )}
                         <FormInput title={'Descripción'} textArea={true} disabled={disabled} action={setDescription} placeholder={'Referencia de la orden'}/>
+                        <FileInput placeholder={'Adjuntar archivo'} action={setAttached}/>
                         <SearchinList title={'Estado'} action={setStatus} list={[
                             {text:'active'},
                             {text:'disabled'},

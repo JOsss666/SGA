@@ -223,5 +223,7 @@ router.post('/facturation/getCashRegisterReport',facturationController.getCashRe
 
 router.post('/facturation/getTransactionsOfCashRecord',facturationController.getTransactionsOfCashRecord);
 
+router.post('/facturation/getBriefcaseBills',facturationController.getBriefcaseBills);
+
 export default router;
 
