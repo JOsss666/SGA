@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import './NotificationCard.css'
 import { useNotifications } from "../../../context/context";
 
-export function NotificationCard({type,title,description,id,fixed}){
+export function NotificationCard({type,title,description,id,fixed,onClick}){
 
     const [fixedNotification,setFixedNotification] = useState(fixed != undefined? fixed:false);
     const [visibleDescription,setVisibleDescription] = useState(true);
@@ -35,7 +35,7 @@ export function NotificationCard({type,title,description,id,fixed}){
     },[])
 
     return(
-        <div className={`NotificationCard ${desapearCard? 'despearNotificationCard':''}`}>
+        <div className={`NotificationCard ${desapearCard? 'despearNotificationCard':''}`} onClick={onClick} >
             <div className="headNotification">
                 <div className="iconC">
                     {typeNotifications[type]}

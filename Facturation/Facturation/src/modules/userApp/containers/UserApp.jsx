@@ -4,7 +4,7 @@ import { SearchBar } from '../components/SearchBar';
 import { ButtonMenu } from '../components/ButtonMenu';
 import { UserCard } from '../components/UserCard';
 import { MenuApp } from './MenuApp';
-import { useAiAssistant, useAlert, useAppInfo, usePreview } from '../../../context/context';
+import { useAiAssistant, useAlert, useAppInfo, useNotifications, usePreview } from '../../../context/context';
 import { useEffect, useRef, useState } from 'react';
 import { ServiceSgaCard } from '../components/ServiceSgaCard';
 import { LoadingAppDataPage } from './LoadingAppDataPage';
@@ -45,13 +45,16 @@ import {NoAccess} from './NoAccess';
 import {SuspendedAccount} from './SuspendedAcount'
 import { CashBoxes } from './CashBoxes';
 import { CashBoxesDeetail } from './CashBoxesDetail';
+import { useRealtime } from '../../../utils/useRealTime';
+import { ProcessStatusAlert } from './Alerts/ProcessStatusAlert';
 
 export function UserApp(){
 
     // Context Info
     const {appInfo,userInfo,loadingAppData,darkMode,getAppData,optionsMenu,secondOptionsMenu,routesApp,userConfig} = useAppInfo();
     const {openPreview,setOpenPreview} = usePreview();
-    const {openAlert,popOutAlert} = useAlert();
+    const {addNotification} = useNotifications();
+    const {openAlert,popInAlert,popOutAlert} = useAlert();
     const {visibleChatAi,setVisibleChatAi} = useAiAssistant();
     const [statusPage,setStatusPage] = useState('loading');
 
@@ -138,6 +141,21 @@ facturation.use == true){
         }
     },[userConfig])
 
+    useRealtime(appInfo.company_id, (payload) => {
+        const infoPayload = typeof payload === 'string' ? JSON.parse(payload) : payload;
+        console.log("Payload procesado:", infoPayload);
+        if (infoPayload.table === 'process_instance') {
+            let handleOpenProcess = ()=>{
+                popInAlert(<ProcessStatusAlert instance_id={infoPayload.data.id}/>)
+            }
+            addNotification({
+                type: 'info',
+                title: `Actualización en proceso #${infoPayload.data.ownSerial}`,
+                description: `Instancia #${infoPayload.data.ownSerial} actualizada.`,
+                onClick:handleOpenProcess
+            });
+        }
+    });
 
     return(
         <div className={`UserApp`}>

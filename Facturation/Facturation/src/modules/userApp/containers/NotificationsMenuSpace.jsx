@@ -79,7 +79,7 @@ export function NotificationsMenuSpace({visible}){
             </div>
             <div className="notiResGrid">
                 {notiList.map((element,index)=>(
-                    <NotificationCard key={index} title={element.title} type={element.type} description={element.description} fixed={true}/>
+                    <NotificationCard key={index} title={element.title} type={element.type} description={element.description} fixed={true} onClick={element.onClick}/>
                 ))}
             </div>
         </div>

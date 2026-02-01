@@ -32,26 +32,21 @@ export function NotificationsProvider({children}){
     const [notifications,setNotifications] = useState([]);
     let localIndexOfNoti = 0;
 
-    const addNotification = (newNotification)=>{
-        let C = []
-        notifications.map((element)=>{
-            localIndexOfNoti += 1;
-            element.id = localIndexOfNoti
-            C.push(element)
-        })
-        C.push(newNotification)
-        setNotifications(C);
-    }
+   const addNotification = (newNotification) => {
+        // 1. Generamos un ID único basado en el tiempo para que no colisionen
+        const id = Date.now() + Math.random(); 
+        
+        // 2. Usamos la sintaxis de actualización funcional para asegurar el estado más reciente
+        setNotifications(prev => [
+            ...prev, 
+            { ...newNotification, id } // Agregamos el ID al objeto
+        ]);
+    };
 
-    const deleteNotification = (indexDel)=>{
-        let C = []
-        notifications.map((element,index)=>{
-            if(element.index != indexDel){
-                C.push(element)
-            }
-        })
-        setNotifications(C);
-    }
+    const deleteNotification = (idToDelete) => {
+        // 3. Filtramos por el ID único, no por el índice
+        setNotifications(prev => prev.filter(element => element.id !== idToDelete));
+    };
 
     const clearNotifications = ()=>{
         setNotifications([])

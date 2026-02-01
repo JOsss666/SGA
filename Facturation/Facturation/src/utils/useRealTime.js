@@ -15,14 +15,6 @@ export const useRealtime = (companyId, onUpdate) => {
         });
 
         socket.on('db_change', (payload) => {
-            console.log('Cambio detectado en base de datos:', JSON.stringify(payload));
-            socket.on('db_change',()=>{
-                addNotification({
-                    type:'info',
-                    title:'Cambio en la base de datos',
-                    description:'Se detecto un cambio en la base de datos'
-                })
-            })
             onUpdate(payload);
         });
 
