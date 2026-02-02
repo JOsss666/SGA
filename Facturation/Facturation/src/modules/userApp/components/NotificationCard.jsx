@@ -3,7 +3,6 @@ import './NotificationCard.css'
 import { useNotifications } from "../../../context/context";
 
 export function NotificationCard({type,title,description,id,fixed,onClick}){
-
     const [fixedNotification,setFixedNotification] = useState(fixed != undefined? fixed:false);
     const [visibleDescription,setVisibleDescription] = useState(true);
     const [desapearCard,setDesapearCard] = useState(false)

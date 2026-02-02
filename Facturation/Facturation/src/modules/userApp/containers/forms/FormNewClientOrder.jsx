@@ -9,6 +9,8 @@ import './FormNewClientOrder.css'
 import { postInfo } from "../../../../utils/functions";
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
 import { FileInput } from "../../components/FileInput";
+import { NewElementSelect } from "../../components/NewElementSelect";
+import { FormNewThirdParties } from "./FormNewThirdParties";
 
 export function FormNewClientOrder({params,reloadFun}){
 
@@ -325,7 +327,11 @@ export function FormNewClientOrder({params,reloadFun}){
                             <SearchinList title={'Proceso'} action={handleInstnaceSelect} list={processInstances} placeHolder={'Seleccione el proceso (opcional)'} disabled={disabled}/>
                         )}
                         {info.thirdParty_id == undefined && (
-                            <SearchinList title={'Cliente'} action={setThirdParty_id} list={thirdParties} placeHolder={'Seleccione el tercero'} disabled={disabled}/>
+                            <SearchinList title={'Cliente'} action={setThirdParty_id} list={thirdParties} placeHolder={'Seleccione el tercero'} disabled={disabled} specialOption={
+                                <NewElementSelect title={'Crear nuevo tercero'} onClick={()=>{
+                                    popInAlert(<FormNewThirdParties quickCreation={true} reloadFun={handleUserConfig}/>)
+                                }}/>
+                            }/>
                         )}
                         {canSetManualValue && (
                             <div className="SwitchValCot" onClick={()=>{

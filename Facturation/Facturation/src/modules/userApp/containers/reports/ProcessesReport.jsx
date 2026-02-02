@@ -36,6 +36,10 @@ export function ProcessesReport(){
     const [visibleSettings,setVisibleSettings] = useState(false);
     const [totalCredit,setTotalCredit] = useState(0)
     const [totalDebit,setTotalDebit] = useState(0)
+        // Control of filters
+        const [allowedStatus,setAllowedStatus] = useState([
+            'active','pending'
+        ]);
 
     const columsTr = [
         "ID",
@@ -52,14 +56,20 @@ export function ProcessesReport(){
 
     const filters = {
         "Saldo":[
-            {title:'Valor',
+            {title:'Valor',type:'selectList',
                 options:[
                     {text:'Todas',value:true},
                     {text:'Distinto de 0',value:false}
                 ],
                 action:setAllAccounts
             }
+        ],
+       /* "Estado":[
+            {title:'Activos',type:'checkList',value:'active',array:allowedStatus,action:setAllAccounts},
+            {title:'Pendientes',type:'checkList',value:'pending',array:allowedStatus,action:setAllAccounts},
+            {title:'Cancelados',type:'checkList',value:'cancelled',array:allowedStatus,action:setAllAccounts},
         ]
+        */
     }
 
     const settingsReport = {
@@ -68,7 +78,8 @@ export function ProcessesReport(){
         typePlanAccount:appInfo.accountPlanType,
         start_date,
         end_date,
-        allAccounts
+        allAccounts,
+        status:allowedStatus
     };
 
     const calcTotals = ()=>{
@@ -116,6 +127,7 @@ export function ProcessesReport(){
         setVisibleSettings(false)
         getInstances();
     }, [start_date,end_date,allAccounts]);
+
 
     return (
         <div className="ProcessesReport ReportDocument">

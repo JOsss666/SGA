@@ -31,7 +31,7 @@ export function New(){
         {text:'Crear recibo de caja',children:<FormNewCashRecipt/>,icon:<i className="fa-solid fa-receipt"/>},
         {text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
         {text:'Crear usuario',children:<FormNewUser/>,icon:<i className="fa-solid fa-person-circle-plus"/>},
-        {text:'Crear tercero',children:<FormNewThirdParties/>,icon:<i className="fa-regular fa-user"/>},
+        {text:'Crear tercero',children:<FormNewThirdParties quickCreation={true}/>,icon:<i className="fa-regular fa-user"/>},
         //{text:'Crear metodo de pago',children:<FormNewPaymentMethod/>,icon:<i className="fa-regular fa-credit-card"/>},
         //{text:'Crear Concepto',children:<FormNewConcept/>,icon:<i className="fa-solid fa-scale-balanced"/>},
         //{text:'Crear Producto',children:<FormNewProduct/>,icon:<i className="fa-solid fa-shirt"/>},

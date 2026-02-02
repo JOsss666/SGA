@@ -37,6 +37,9 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const [loading,setLoading] = useState();
     const [disabled,setDisabled] = useState();
     const [disabledByValue,setDisabledByValue] = useState(false);
+        // control of credit conditions of thirdParty
+        const [ableCredit,setAbleCredit] = useState(false);
+        const [aviableCredit,setAviableCredit] = useState(0);
     
     // form info
     const [thirdParty_id,setThirdParty_id] = useState();
@@ -162,15 +165,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 }
             }else{
                 await getInstances()
-            }
-
-            // Filtro para busqueda de Metodos de pago
-            if(!userConfig.access.payments.payment_methods.overAll){
-                // GetPaymentMethods con filtro
-                await getPaymentMethods(userConfig.access.payments.payment_methods.enabled)
-            }else{
-                //GetPaymentMethods completos
-                await getPaymentMethods();
             }
 
         }
@@ -339,7 +333,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const getPaymentMethods = async(allowedPaymentMethods)=>{
         let res = await postInfo('/getPaymentMethods',{
             company_id:appInfo.company_id,
-            allowedPaymentMethods
+            allowedPaymentMethods,
+            for_wallet:ableCredit ? undefined:false
         })
         console.log(res)
         if(res[0]){
@@ -580,8 +575,20 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     
 
     useEffect(()=>{
-        console.log(thirdPartyInfo);
+        if(thirdPartyInfo.id != undefined){
+            // Update of crefit conditions of thirdParty
+            setAbleCredit(thirdPartyInfo.credit != undefined ? thirdPartyInfo.credit:0);
+            setAviableCredit(thirdPartyInfo.aviable_credit != undefined? thirdPartyInfo.aviableCredit:0);
+            
+        }
     },[thirdPartyInfo])
+
+
+    useEffect(()=>{
+        if(thirdPartyInfo.id != undefined){
+            getPaymentMethods();
+        }
+    },[aviableCredit,ableCredit])
 
     useEffect(()=>{
         if(instance_id != undefined && instance_id != ''){

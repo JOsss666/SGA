@@ -3,7 +3,8 @@
     display: flex;
     flex-direction: column;
     padding: 2vh;
-    width: 25vw;
+    width: 40vw;
+    margin: 0 auto;
 }
 
 .FormNewThirdParties .BoldTitle{

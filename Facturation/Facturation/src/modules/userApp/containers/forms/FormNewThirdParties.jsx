@@ -13,7 +13,7 @@ import { NewElementSelect } from '../../components/NewElementSelect';
 import { FileInput } from '../../components/FileInput';
 
 
-export function FormNewThirdParties({reloadFun}){
+export function FormNewThirdParties({reloadFun,quickCreation}){
 
     const {addNotification} = useNotifications();
     const {popOutAlert} = useAlert();
@@ -43,10 +43,10 @@ export function FormNewThirdParties({reloadFun}){
     const [comercial_state,setComercial_state] = useState('active');
     // info tributaria
     const [attachedRut,setAttachedRut] = useState();
-    const [regime,seRregime] = useState('');
-    const [IVA_responsability,setIVA_responsability] = useState('');
-    const [retention_type,setRetention_type] = useState('');
-    const [economic_activity,setEconomic_activity] = useState('');
+    const [regime,seRregime] = useState('-');
+    const [IVA_responsability,setIVA_responsability] = useState('-');
+    const [retention_type,setRetention_type] = useState('-');
+    const [economic_activity,setEconomic_activity] = useState('-');
 
     const formInfo = {
         company_id:appInfo.company_id,
@@ -148,7 +148,7 @@ export function FormNewThirdParties({reloadFun}){
             {stage === 2 &&(
                 <form action="">
                     <BoldTitle text={'Información Comercial'}/>
-                    <SearchinList action={setType} title={'Tipo de Proveedor'} placeHolder={'Tipo de Proveedor'} list={[
+                    <SearchinList action={setType} title={'Relación con el tercero'} placeHolder={'Tipo de Proveedor'} list={[
                         {text:'Cliente',value:'client'},
                         {text:'Proveedor',value:'supplier'},
                         {text:'Empleado',value:'employee'},
@@ -156,11 +156,13 @@ export function FormNewThirdParties({reloadFun}){
                         {text:'Socio',value:'partner'},
                         {text:'Otro',value:'other'}
                     ]}/>
-                    <div className="accessSwitch">
-                        <h6>Pago a credito</h6>
-                        <SwitchOption action={setCredit}/>
-                    </div>
-                    {credit && (
+                    {!quickCreation && (
+                        <div className="accessSwitch">
+                            <h6>Pago a credito</h6>
+                            <SwitchOption action={setCredit}/>
+                        </div>
+                    )}
+                    {!quickCreation && credit && (
                         <>
                             <FormInput type={'number'} title={'Plazo de credito en días'} min={0} disabled={disabled} value={credit_term} action={setCredit_term}/>
                             <FormInput type={'number'} title={'Valor maximo de credito'} min={0} disabled={disabled} value={credit_value} action={setCredit_value}/>
@@ -175,7 +177,7 @@ export function FormNewThirdParties({reloadFun}){
                     ]}/>
                 </form>
             )}
-            {stage === 3 && (
+            {!quickCreation && stage === 3 && (
                 <form action="">
                     <BoldTitle text={'Información tributaria'}/>
                     <div className="setAutomaticTaxIndo" onClick={()=>{
@@ -200,8 +202,8 @@ export function FormNewThirdParties({reloadFun}){
                     )}
                 </form>
             )}
-            <FormButton disabled={disabled} loading={loading} text={stage== 4? 'Registrar Proveedor':'Siguiente'} onClick={()=>{
-                if(stage < 4){
+            <FormButton disabled={disabled} loading={loading} text={stage== (quickCreation? 3:4)? 'Registrar Proveedor':'Siguiente'} onClick={()=>{
+                if(stage < (quickCreation? 3:4)){
                     setStage(stage +1)
                 }else{
                     console.log(formInfo)
@@ -209,8 +211,8 @@ export function FormNewThirdParties({reloadFun}){
                 }
             }}/>
             {stage > 0 && (
-                <FormButton disabled={disabled} loading={loading} negative={true} text={stage== 4? 'Cancelar':'Volver'} onClick={()=>{
-                    if(stage < 4){
+                <FormButton disabled={disabled} loading={loading} negative={true} text={stage== (quickCreation? 3:4)? 'Cancelar':'Volver'} onClick={()=>{
+                    if(stage < (quickCreation? 3:4)){
                         setStage(stage -1)
                     }else{
                         setStage(0)
