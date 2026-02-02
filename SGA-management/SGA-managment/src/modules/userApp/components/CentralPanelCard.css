@@ -1,0 +1,57 @@
+
+.CentralPanelCard {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    padding: 2vh;
+    border-radius: 2vh;
+
+    background-color: var(--menuAside);
+    min-width: 18vh;
+    min-height: 12vh;
+
+    box-shadow: 0 .8vh 2vh rgba(0, 0, 0, 0.08);
+
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.CentralPanelCard:hover {
+    transform: translateY(-.4vh);
+    box-shadow: 0 1.2vh 2.8vh rgba(0, 0, 0, 0.15);
+}
+
+.CentralPanelCard .card-title {
+    font-size: 1.8vh;
+    color: var(--descriptionText);
+    opacity: 0.8;
+}
+
+.CentralPanelCard .card-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.CentralPanelCard .card-value {
+    font-size: 3vh;
+    font-weight: 600;
+    color: var(--mainText);
+}
+
+.CentralPanelCard .card-delta {
+    font-size: 1.2vh;
+    font-weight: 600;
+    padding: 0.4vh 1vh;
+    border-radius: 1vh;
+}
+
+.CentralPanelCard .card-delta.positive {
+    background-color: rgba(0, 200, 150, 0.15);
+    color: #00c896;
+}
+
+.CentralPanelCard .card-delta.negative {
+    background-color: rgba(255, 80, 80, 0.15);
+    color: #ff5050;
+}

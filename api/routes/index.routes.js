@@ -38,6 +38,8 @@ const upload = multer({ dest: CHUNKS_DIR });
 
     router.post('/getRoles',controller.getRoles);
 
+    router.post('/getDocuments',controller.getDocuments);
+
 router.post('/getCompanyInfo',controller.getCompanyInfo);
 
 router.post('/getUserInfo',controller.getUserInfo);
@@ -167,12 +169,21 @@ router.post('/inventory/getKardex',inventoryController.getKardex);
 
 router.post('/process/getProcessInstances', processController.getProcessInstances);
 
+router.post('/process/getProcessState', processController.getProcessState);
+
+router.post('/process/getAviableProceses',processController.getAviableProcess);
+
+router.post('/process/createProcessInstace',processController.createProcessInstace);
+
+router.post('/process/updateProcessInstanceStatus',processController.updateProcessInstanceStatus);
+
+router.post('/process/nextProcessStep',processController.nextProcessStep);
+
 router.post('/process/createOP', processController.createOp);
 
 router.post('/process/getOp', processController.getOp);
 
 router.post('/process/getDocuments', processController.getDocuments);
-
 
 router.post('/process/getOpAttached',processController.getOpAttached);
 
@@ -197,6 +208,22 @@ router.post('/treasury/getTreasury',controller.getAccounts); //PENDIENTE IMPLEME
 // SGA Facturation
 
 router.post('/facturation/newCashRecipt',facturationController.newCashRecipt);
+
+router.post('/facturation/newClientOrder',facturationController.newClientOrder);
+
+router.post('/facturation/getCashBoxes',facturationController.getCashBoxes);
+
+router.post('/facturation/getLastRegisterShift',facturationController.getLastRegisterShift);
+
+router.post('/facturation/openCashRegister',facturationController.openCashRegister);
+
+router.post('/facturation/closeCashRegister',facturationController.closeCashRegister);
+
+router.post('/facturation/getCashRegisterReport',facturationController.getCashRegisterReport);
+
+router.post('/facturation/getTransactionsOfCashRecord',facturationController.getTransactionsOfCashRecord);
+
+router.post('/facturation/getBriefcaseBills',facturationController.getBriefcaseBills);
 
 export default router;
 

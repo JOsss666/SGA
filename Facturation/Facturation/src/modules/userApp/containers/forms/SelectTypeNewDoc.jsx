@@ -8,8 +8,10 @@ import { FormNewOc } from "./FormNewOc";
 import './SelectTypeNewDoc.css'
 import { SearchBar } from "../../components/SearchBar";
 import { FormNewMovement } from "./FormNewMovement";
+import { FormNewClientOrder } from "./FormNewClientOrder";
+import { FormNewCashRecipt } from "./FormNewCashRecipt";
 
-export function SelectTpeNewDoc({info,reloadFun}){
+export function SelectTpeNewDoc({info,docType,reloadFun}){
 
     const {popInAlert,popOutAlert} = useAlert();
     const [searchValue,setSearchVal] = useState('');
@@ -27,10 +29,10 @@ export function SelectTpeNewDoc({info,reloadFun}){
     }
 
     const documents = [
-        {title:'Orden de Cliente',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_5_she308.png',alert:<FormNewDC info={info} reloadFun={endProcess}/>},
+        {title:'Orden de Cliente',docType:'Client Order',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_5_she308.png',alert:<FormNewClientOrder params={info} reloadFun={endProcess}/>},
         {title:'Factura de venta',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766014163/ChatGPT_Image_17_dic_2025_18_27_41_1_a3acbd.png',alert:<FormNewFV info={info} reloadFun={endProcess}/>},
         {title:'Documento de compra',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_3_nph10p.png',alert:<FormNewDC info={info} reloadFun={endProcess}/>},
-        {title:'Recibo de caja',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_4_ioz7jp.png',alert:<span>No disponible aún</span>},
+        {title:'Recibo de caja',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_4_ioz7jp.png',alert:<FormNewCashRecipt InfoParams={info} reloadFun={endProcess} />},
         {title:'Recibo de salida',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_5_fvbrtz.png',alert:<span>No disponible aún</span>},
         {title:'Comprobante contable',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_6_uh2t9n.png',alert:<span>No disponible aún</span>},
         {title:'Nota débito',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072386/ChatGPT_Image_17_dic_2025_18_27_41_7_jpbmlq.png',alert:<span>No disponible aún</span>},
@@ -54,25 +56,37 @@ export function SelectTpeNewDoc({info,reloadFun}){
         {title:'Transacciónes',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_6_fvpiav.png',alert:<span>No disponible aún</span>},
     ]
 
+    const handleAutoSelectDocType = (type)=>{
+        console.log('Encontrando tipo: ',type)
+        const document = documents.find(doc => doc.docType === type);
+        console.log('Formulario entontrado: ',document);
+        // Retornamos el alert si existe, de lo contrario un mensaje por defecto o null
+        return document ? document.alert : <span>Documento no encontrado</span>;
+    }
 
-    return(
-        <div className="SelectTpeNewDoc">
-            <BoldTitle text={'Seleccione documento'}/>
-            <SearchBar placeholder={'Buscar documentos'} action={setSearchVal}/>
-            <div className="gridTypes">
-                {documents.map((element,index)=>(
-                    <div className={`typeDoc ${!filterOptions(element.title)? 'hiddenDoc':''}`} key={index} onClick={()=>{
-                        popInAlert(element.alert)
-                    }}>
-                        <img src={element.img} alt="" className="typeSerI" />
-                        <div className="infoContaier">
-                            <strong>{element.title}</strong>
-                            <span>Añadir un nuevo {element.title}.</span>
+    if(docType == undefined){
+        return(
+            <div className="SelectTpeNewDoc">
+                <BoldTitle text={'Seleccione documento'}/>
+                <SearchBar placeholder={'Buscar documentos'} action={setSearchVal}/>
+                <div className="gridTypes">
+                    {documents.map((element,index)=>(
+                        <div className={`typeDoc ${!filterOptions(element.title)? 'hiddenDoc':''}`} key={index} onClick={()=>{
+                            popInAlert(element.alert)
+                        }}>
+                            <img src={element.img} alt="" className="typeSerI" />
+                            <div className="infoContaier">
+                                <strong>{element.title}</strong>
+                                <span>Añadir un nuevo {element.title}.</span>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
 
+                </div>
             </div>
-        </div>
-    )
+        )
+    }else{
+        return  handleAutoSelectDocType(docType);
+    }
+    
 }

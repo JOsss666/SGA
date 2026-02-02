@@ -1,0 +1,136 @@
+
+.FormNewClientOrder{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    padding-top: 4vh;
+    width:80vw;
+    gap: 2vh;
+}
+
+.FormNewClientOrder form{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.FormNewClientOrder form .SwitchValCot{
+    display: flex;
+    width: 100%;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 1vh;
+}
+
+.FormNewClientOrder form .SwitchValCot strong{
+    width: 50%;
+    text-align: center;
+    padding: 1vh;
+    transition: .3s;
+    cursor: pointer;
+    border-radius: 1vh;
+    color: var(--descriptionText);
+}
+
+.FormNewClientOrder form .SwitchValCot strong:hover{
+    background-color: var(--cardHover);
+}
+
+.FormNewClientOrder form .SwitchValCot .activeStichH{
+    background-color: var(--menuAside);
+    color: var(--mainText);
+}
+
+.FormNewClientOrder form .gridServicesProductsContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    padding: 2vh;
+    border-radius: 2vh;
+    background-color: var(--cardHover);
+}
+
+.FormNewClientOrder form .gridServicesProductsContainer .IndicatorTotalValue{
+    font-size: clamp(2.2px,2.2vh,22px);
+    color: var(--mainText);
+    font-weight: 500;
+    padding: 0 2vh;
+}
+
+.FormNewClientOrder form .gridServicesProductsContainer .gridPaymentMethods{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.FormNewClientOrder form .gridServicesProductsContainer .gridPaymentMethods .PaymentMethodCard{
+    display: flex;
+    width: 100%;
+    gap: 1vw;
+    padding: 1vh;
+    padding-bottom: 2vh;
+    border-bottom: dashed .3vh var(--inputsBorder);
+}
+
+.FormNewClientOrder form .gridServicesProductsContainer .gridPaymentMethods .PaymentMethodCard strong{
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 400;
+    width: 50%;
+    overflow: hidden;
+    white-space: none;
+    text-overflow: ellipsis;
+    padding-left: 1vh;
+    text-wrap: nowrap;
+    margin: auto 0;
+    color: var(--descriptionText);
+}
+
+.FormNewClientOrder form .gridServicesProductsContainer .gridPaymentMethods .PaymentMethodCard input{
+    border: hidden;
+    outline: solid .1vh var(--inputsBorder);
+    font-size: clamp(2.2px,2.2vh,22px);
+    border-radius: 1vh;
+    height: 100%;
+    width: 30%;
+    padding: .5vh 1vh;
+    padding-left: 2vh;
+    color: var(--descriptionText);
+    background-color: var(--inputsBg);
+}
+
+.FormNewClientOrder form .gridServicesProductsContainer .gridPaymentMethods .PaymentMethodCard .unitsInp{
+    width: 15%;
+}
+
+.FormNewClientOrder form .gridServicesProductsContainer .gridPaymentMethods .PaymentMethodCard .ttlValUnitIndicator{
+    width: 10%;
+    color: var(--descriptionText);
+    margin: auto 0;
+    text-align: right;
+    padding-right: 2vh;
+}
+
+.FormNewClientOrder form .gridServicesProductsContainer .gridPaymentMethods .PaymentMethodCard input:focus{
+    
+    color: var(--mainText);
+    outline: solid .3vh #007AFF;
+}
+
+.FormNewClientOrder form .gridServicesProductsContainer .gridPaymentMethods .PaymentMethodCard .delPaymentBtn{
+    margin: auto;
+    cursor: pointer;
+    color: var(--mainText);
+    transition: .3s;
+    font-size: clamp(2.2px,2.2vh,22px);
+}
+
+.FormNewClientOrder form .gridServicesProductsContainer .gridPaymentMethods .PaymentMethodCard .delPaymentBtn:hover{
+    color: #FF6467;
+    transform: rotateZ(-10deg);
+}
+
+@media (max-width:500px) {
+    .FormNewClientOrder{
+        width: 100%;
+        padding-top: 10vh;
+    }
+}

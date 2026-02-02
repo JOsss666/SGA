@@ -99,3 +99,19 @@
     position: absolute;
     left: 32.5%;
 }
+
+@media (max-width:500px) {
+
+    .HomeProcess{
+        background-image: var(--mobileBgImage);
+    }
+
+    .HomeProcess .AiResume{
+        display: none;
+    }
+
+    .HomeProcess .HomeSearch{
+        width:90dvw;
+        left: 5dvw;
+    }
+}

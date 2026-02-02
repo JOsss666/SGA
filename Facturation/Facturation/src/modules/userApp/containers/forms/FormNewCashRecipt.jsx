@@ -12,8 +12,9 @@ import { LoadingSpace } from "../LoadingSpace";
 import { postInfo } from "../../../../utils/functions";
 import { NewElementSelect } from "../../components/NewElementSelect";
 import { FormNewThirdParties } from "./FormNewThirdParties";
+import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
 
-export function FormNewCashRecipt({InfoParams,reloadFun}){
+export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
 
     // Requieremnets
     const [info,setInfo] = useState(InfoParams != undefined? InfoParams:{})
@@ -27,23 +28,37 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
     const [bussines,setBussines] = useState([]);
     const [costCenters,setCostCenters] = useState([]);
     const [concepts,setConcepts] = useState([]);
+    const [documents,setDocuments] = useState([]);
+    const [cashBoxes,setCashBoxes] = useState([]);
+    const [briefCaseBills,setBriefCaseBills] = useState([]);
 
     // control
+    const [mode,setMode] = useState('process_instance');
     const [loading,setLoading] = useState();
     const [disabled,setDisabled] = useState();
+    const [disabledByValue,setDisabledByValue] = useState(false);
+        // control of credit conditions of thirdParty
+        const [ableCredit,setAbleCredit] = useState(false);
+        const [aviableCredit,setAviableCredit] = useState(0);
     
     // form info
     const [thirdParty_id,setThirdParty_id] = useState();
+    const [thirdPartyInfo,setThirdPartyInfo] = useState({});
     const [paymentMethod,setPaymentMethod] = useState([]);
     const [bussines_id,setBussines_id] = useState();
     const [store_id,setStore_id] = useState();
     const [costCenter_id,setCostCenter_id] = useState();
     const [total,setTotal] = useState(0);
+        // Valor indicativo d a pagar
+        const [totalToPay,setTotalToPay] = useState(0);
     const [description,setDescription] = useState();
-    const [attached,setAttached] = useState();
+    const [attached,setAttached] = useState('-');
     const [instance_id,setInstance_id] = useState();
+    const [step_id,setStep_id] = useState();
     const [concept_id,setConcept_id] = useState();
     const [conceptAccount_id,setConcept_account_id] = useState();
+    const [cashBox_id,setCashBox_id] = useState();
+    const [shift_id,setShift_id] = useState();
     const [status,setStatus] = useState('active');
 
     // Object FormInfo
@@ -62,18 +77,39 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
         subTotal:total,
         total,
         attached,
-        instance_id
+        instance_id,
+        step_id
     }
+
+    // PreProcess functions
+
 
     const formatCurrency = (value) =>
             new Intl.NumberFormat("es-CO").format(value);
 
-    // PreProcess functions
+    const formatDate = (date)=>{
+        if(date != undefined){
+            let x = date.split('T');
+            let newDate = `${x[0]}`;
+            return newDate;
+        }
+        return `--/--/--`
+    }
+
+    const addDaysToCurrentDate = (days) => {
+        const date = new Date(); // Obtiene la fecha y hora actual del sistema  
+        // Sumamos los días usando setDate y getDate para manejar cambios de mes/año automáticamente
+        date.setDate(date.getDate() + parseInt(days)); 
+        // Retornamos en formato ISO (YYYY-MM-DD) 
+        return date.toISOString().split('T')[0];
+    };
+
     const handleUserConfig = async()=>{
         setDisabled(true)
         setLoading(true)
         await getThirdParties();
         await getConcepts();
+        await getCashBoxes();
         let temInfo = {}
         if(userConfig.access != undefined){
             console.log(userConfig.access)
@@ -131,15 +167,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
                 await getInstances()
             }
 
-            // Filtro para busqueda de Metodos de pago
-            if(!userConfig.access.payments.payment_methods.overAll){
-                // GetPaymentMethods con filtro
-                await getPaymentMethods(userConfig.access.payments.payment_methods.enabled)
-            }else{
-                //GetPaymentMethods completos
-                await getPaymentMethods();
-            }
-
         }
         
         if(temInfo != {}){
@@ -151,13 +178,27 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
     }
 
     let handleConceptChange = (element)=>{
-        setConcept_id(element.id);
-        setConcept_account_id(element.account_id);
+        if(element.id != undefined){
+            setConcept_id(element.id);
+            setConcept_account_id(element.account_id);
+            if(element.for_wallet){
+                setMode('briefcase_payment')
+                getBriefcasesBills();
+            }else{
+                setMode('process_instance')
+            }
+        }
     }
 
-    useEffect(()=>{
-        console.log('Valor de store_id -->',store_id);
-    },[store_id])
+    const handleThirdPartyChange = (element)=>{
+        setThirdParty_id(element.id);
+        setThirdPartyInfo(element);
+    }
+
+    const handleCashBoxChange = (element)=>{
+        setCashBox_id(element.id)
+        setShift_id(element.shift_id)
+    }
 
     useEffect(()=>{
         handleUserConfig();
@@ -165,9 +206,24 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
 
     // Getters of info
 
+    const handleSelectInstance = (element)=>{
+        setInstance_id(element.id)
+        setStep_id(element.step_id)
+        setThirdParty_id(element.thirdParty_id)
+        setInfo(prevInfo => ({
+            ...prevInfo,            // Mantenemos todas las propiedades actuales (nombre, fecha, etc.)
+            thirdParty_id: element.thirdParty_id // Sobrescribimos solo el ID del tercero
+        }));
+        if(element.id != undefined){
+            getDocuments(element.id);
+        }
+        calcTotalFromPayments();
+    }
+
     const getInstances = async(allowedInstances,allowedTypes)=>{
         let res = await postInfo('/process/getProcessInstances',{
-            company_id:appInfo.company_id
+            company_id:appInfo.company_id,
+            status:'active'
         })
         console.log(res);
         if(res[0]){
@@ -175,10 +231,29 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
             res[1].forEach(element => {
                 C.push({
                     text:`${element.process_code}#${element.ownSerial}`,
-                    value:element.id
+                    value:element
                 })
             });
             setInstances(C);
+        }
+    }
+
+    const getCashBoxes = async()=>{
+        let res = await postInfo('/facturation/getCashBoxes',{
+            company_id:appInfo.company_id
+            //user_id:userInfo.user_id
+        })
+        console.log(res);
+        if(res[0]){
+            let C = [];
+            res[1].forEach(element => {
+                console.log(element);
+                C.push({
+                    text:element.name,
+                    value:element
+                })
+            });
+            setCashBoxes(C);
         }
     }
 
@@ -258,7 +333,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
     const getPaymentMethods = async(allowedPaymentMethods)=>{
         let res = await postInfo('/getPaymentMethods',{
             company_id:appInfo.company_id,
-            allowedPaymentMethods
+            allowedPaymentMethods,
+            for_wallet:ableCredit ? undefined:false
         })
         console.log(res)
         if(res[0]){
@@ -272,6 +348,51 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
             setPaymentMethods(C);
         }
     }
+
+    const getDocuments = async(instance_id)=>{
+        let res = await postInfo('/getDocuments',{
+            company_id:appInfo.company_id,
+            instance_id,
+            status:'active',
+            // Arreglo temporal de tipo de documentos
+            allowedTypes:['Client Order']
+        })
+        if(res[0]){
+            setDocuments(res[1]);
+        }
+    }
+
+     const getThirdParties = async(id,limit)=>{
+        let res = await postInfo('/getThirdParties',{
+            company_id:appInfo.company_id,
+            comercialInfo:true,
+            id:id,
+            limit:limit
+        });
+        if(res[0]){
+            let C = [];
+            res[1].forEach(element => {
+                C.push({
+                    text:`${element.names}  ${element.indentification_type}_${element.indentification_number}`,
+                    value:element
+                })
+            });
+            setThirdParties(C);
+            if(limit == 1){
+                setThirdPartyInfo(C[0].value);
+            }
+        }
+    }
+
+    const getBriefcasesBills = async()=>{
+        let res = await postInfo('/facturation/getBriefcaseBills',{
+            company_id:appInfo.company_id,
+            thirdParty_id
+        })
+        console.log(res);
+        setBriefCaseBills(res[1]);
+    }
+
 
     // Control functions
 
@@ -295,6 +416,26 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
         setPaymentMethod(prev => prev.filter(item => item.id !== id));
     };
 
+    const calcTotalFromPayments = ()=>{
+        let newTTl = 0;
+        paymentMethod.forEach(element => {
+            if(element.value != "" && element.value != undefined){
+                newTTl += parseFloat(element.value)
+            }
+        });
+        if(instance_id != undefined){
+            if(newTTl > totalToPay){
+                setDisabled(true);
+                setDisabledByValue(true);
+            }else{
+                setDisabled(false);
+                setDisabledByValue(false);
+            }
+        }
+        setTotal(newTTl)
+        return(newTTl)
+    }
+
     const updatePaymentValue = (id, key, newValue) => {
         setPaymentMethod(prev => 
             prev.map(item => 
@@ -305,31 +446,41 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
         );
     };
 
-    const getThirdParties = async()=>{
-        let res = await postInfo('/getThirdParties',{company_id:appInfo.company_id});
-        if(res[0]){
-            let C = [];
-            res[1].forEach(element => {
-                C.push({
-                    text:`${element.names}  ${element.indentification_type}_${element.indentification_number}`,
-                    value:element.id
-                })
-            });
-            setThirdParties(C);
-        }
+    useEffect(()=>{
+        calcTotalFromPayments();
+    },[paymentMethod])
+
+    const setAplyVoucher = (id,value)=>{
+        setPaymentMethod(prev=>
+            prev.map(item =>
+                item.id === id
+                    ?{...item,["aplyVoucher"]:value}
+                    :item
+            )
+        )
+    }
+
+    const updateVoucher = (id,voucher)=>{
+        setPaymentMethod(prev =>
+            prev.map(item => 
+                item.id === id 
+                    ? { ...item, ["voucher"]: voucher } 
+                    : item
+            )
+        )
     }
 
     useEffect(()=>{
-        console.log(paymentMethod)
-        let newTTl = 0;
-        paymentMethod.forEach(element => {
-            console.log(element.value)
-            if(element.value != "" && element.value != undefined){
-                newTTl += parseFloat(element.value)
-            }
-        });
-        setTotal(newTTl);
-    },[paymentMethod])
+        console.log(documents)
+        if(documents.length > 0){
+            let newTotalToPay = 0;
+            documents.forEach(element => {
+                newTotalToPay += parseInt(element.total);
+            });
+            setTotalToPay(newTotalToPay);
+        }
+        calcTotalFromPayments();
+    },[documents])
 
     // Creation Function
 
@@ -346,6 +497,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
             FormInfo["doc_id"] = res.id
             FormInfo["user_id"] = userInfo.user_id,
             FormInfo['transactionDetails'] = []
+            FormInfo['instance_id'] = instance_id;
+            
             paymentMethod.forEach(element => {
                 FormInfo.transactionDetails.push({
                     account_id:element.account_id,
@@ -353,7 +506,12 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
                     total:element.value,
                     type:'payment',
                     paymentMethod_id:element.id,
-                    nature:'DB'
+                    nature:'DB',
+                    due_date:addDaysToCurrentDate(thirdPartyInfo.credit_term != undefined? thirdPartyInfo.credit_term:0),
+                    for_wallet:element.for_wallet,
+                    voucher:element.voucher,
+                    cashBox_id,
+                    shift_id
                 })
             });
             FormInfo.transactionDetails.push({
@@ -363,7 +521,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
                 type:'operation',
                 nature:'CR'
             })
-            toAccount();
+            await toAccount();
         }else{
             addNotification({
                 type:'error',
@@ -374,9 +532,14 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
         popOutAlert();
         setLoading(false);
         setDisabled(false);
+        reloadFun?.();
+        if(instance_id != undefined){
+            popInAlert(<ProcessStatusAlert instance_id={instance_id} reloadFun={reloadFun}/>)
+        }
     }
 
     const toAccount = async()=>{
+        console.log(FormInfo)
         let res = await postInfo('/createTransaction',FormInfo);
         const insertId = parseInt(res[0]);
         if(typeof(insertId) == 'number' && insertId != NaN && insertId != undefined){
@@ -409,6 +572,29 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
             })
         }
     }
+    
+
+    useEffect(()=>{
+        if(thirdPartyInfo.id != undefined){
+            // Update of crefit conditions of thirdParty
+            setAbleCredit(thirdPartyInfo.credit != undefined ? thirdPartyInfo.credit:0);
+            setAviableCredit(thirdPartyInfo.aviable_credit != undefined? thirdPartyInfo.aviableCredit:0);
+            
+        }
+    },[thirdPartyInfo])
+
+
+    useEffect(()=>{
+        if(thirdPartyInfo.id != undefined){
+            getPaymentMethods();
+        }
+    },[aviableCredit,ableCredit])
+
+    useEffect(()=>{
+        if(instance_id != undefined && instance_id != ''){
+            getThirdParties(thirdParty_id,1)
+        }
+    },[instance_id])
 
 
     return(
@@ -417,8 +603,12 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
                 <BoldTitle text={'Recibo de caja'}>
                     <i className="fa-solid fa-receipt"/>
                 </BoldTitle>
-
-                <h6 className="valueCashRecipt">Valor: $ {formatCurrency(total)}</h6>
+                <div className="valuesCashRecipt">
+                    {instance_id != undefined && (
+                        <h6 className="valueCashRecipt">Valor a cobrar: $ {formatCurrency(totalToPay)}</h6>
+                    )}
+                    <h6 className="valueCashRecipt">Valor: $ {formatCurrency(total)}</h6>
+                </div>
                 <i className="fa-solid fa-xmark closeFormBtn" onClick={()=>{
                     popOutAlert();
                 }}/>
@@ -439,37 +629,82 @@ export function FormNewCashRecipt({InfoParams,reloadFun}){
                         <SearchinList action={setCostCenter_id} title={'Centro de costo'} placeHolder={'Seleccione el centro de costo'} list={costCenters} disabled={disabled}/>
                     )}
                     {info.instance_id == undefined && (
-                        <SearchinList action={setInstance_id} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={disabled}/>
+                        <SearchinList action={handleSelectInstance} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={disabled}/>
                     )}
                     {info.thirdParty_id == undefined && (
-                        <SearchinList action={setThirdParty_id} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdparties} disabled={disabled} specialOption={
+                        <SearchinList action={handleThirdPartyChange} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdparties} disabled={disabled} specialOption={
                             <NewElementSelect title={'Crear nuevo'} onClick={()=>{
                                 popInAlert(<FormNewThirdParties reloadFun={getThirdParties}/>)
                             }}/>
                         }/>
                     )}
                     <SearchinList action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
-                    <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
-                    {info.paymentMethod == undefined && (
-                        <div className="paymentMehtodsContainer">
-                            <SearchinList title={'Metodos de pago'} action={addPaymentMethod} noActVal={true} placeHolder={'Selecione metodos de pago'} list={paymentMehtods}/>
-                            <div className="gridPaymentMethods">
-                                {paymentMethod.map((element,index)=>(
-                                    <div key={index} className="PaymentMethodCard">
-                                        <strong>{element.name}</strong>
-                                        <input step={0.001} type="number" placeholder="$0" onChange={(e)=>{
-                                            updatePaymentValue(element.id,"value",e.target.value)
-                                        }}/>
-                                        <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
-                                            removePaymentMethod(element.id)
-                                        }}/>
+                    <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja'} list={cashBoxes} disabled={disabled}/>
+                    {mode == 'briefcase_payment' && (
+                        <div className="aviableBriefCaseContainer">
+                            <h6>Cuentas por cobrar</h6>
+                            <div className="gridBirefCaseBills">
+                                {briefCaseBills.map((element,index)=>(
+                                    <div key={index} className="briefCaseCard">
+                                        <strong>{`${element.process_code}#${element.instance_id}`}</strong>
+                                        <span>Valor: {formatCurrency(element.pending_amount)}</span>
+                                        <span>Vence: {formatDate(element.due_date)}</span>
+                                        <input type="number" min={0} max={element.pending_amount} step={0.1} disabled={disabled} placeHolder={'$ 0'} />
                                     </div>
                                 ))}
                             </div>
                         </div>
                     )}
+                    {info.paymentMethod == undefined && (
+                        <div className="paymentMehtodsContainer">
+                            <SearchinList title={'Metodos de pago'} action={addPaymentMethod} noActVal={true} placeHolder={'Selecione metodos de pago'} list={paymentMehtods}/>
+                            <div className="gridPaymentMethods">
+                                {disabledByValue && (
+                                    <span className="warnByValue">
+                                        El valor ingresado supera el monto maximo del documento,
+                                        modifique el valor o agrege un metodo de pago para saldo a favor.
+                                    </span>
+                                )}
+                                {paymentMethod.map((element,index)=>(
+                                    <div key={index} className={`PaymentMethodCard ${disabledByValue? 'disabledPaymentMethodCard':''}`}>
+                                        <div className="payMC">
+                                            <strong>{element.name}</strong>
+                                            <input step={0.001} type="number" placeholder="$0" onChange={(e)=>{
+                                                updatePaymentValue(element.id,"value",e.target.value)
+                                            }}/>
+                                            <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
+                                                removePaymentMethod(element.id)
+                                            }}/>
+                                        </div>
+                                        {!element.aplyVoucher && (
+                                            <button className="addVoucherToPayment" onClick={()=>{
+                                            setAplyVoucher(element.id,true)
+                                            }}>
+                                                <i className="fa-solid fa-plus"/>
+                                                Añadir voucher o referencia a {element.name}
+                                            </button>
+                                        )}
+                                        {element.aplyVoucher && (
+                                            <div className="voucherC">
+                                                <strong>
+                                                    Voucher o referencia
+                                                </strong>
+                                                <input type="text" placeholder="Ej: AR23..." onChange={(e)=>{
+                                                    updateVoucher(element.id,e.target.value);
+                                                }}/>
+                                                <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
+                                                    setAplyVoucher(element.id,false)
+                                                }}/>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
                     <FileInput action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
-                    <FormButton text={'Crear recibo de caja'}/>
+                    <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor excede el monto max':'Crear recibo de caja'} disabled={disabled} loading={loading}/>
                 </form>
             )}
             {loading && (

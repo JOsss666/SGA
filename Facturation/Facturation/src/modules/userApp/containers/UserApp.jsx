@@ -4,7 +4,7 @@ import { SearchBar } from '../components/SearchBar';
 import { ButtonMenu } from '../components/ButtonMenu';
 import { UserCard } from '../components/UserCard';
 import { MenuApp } from './MenuApp';
-import { useAiAssistant, useAlert, useAppInfo, usePreview } from '../../../context/context';
+import { useAiAssistant, useAlert, useAppInfo, useNotifications, usePreview } from '../../../context/context';
 import { useEffect, useRef, useState } from 'react';
 import { ServiceSgaCard } from '../components/ServiceSgaCard';
 import { LoadingAppDataPage } from './LoadingAppDataPage';
@@ -43,13 +43,18 @@ import { Calendar } from './Calendar';
 import { CellarDetail } from './CellarDetail';
 import {NoAccess} from './NoAccess';
 import {SuspendedAccount} from './SuspendedAcount'
+import { CashBoxes } from './CashBoxes';
+import { CashBoxesDeetail } from './CashBoxesDetail';
+import { useRealtime } from '../../../utils/useRealTime';
+import { ProcessStatusAlert } from './Alerts/ProcessStatusAlert';
 
 export function UserApp(){
 
     // Context Info
     const {appInfo,userInfo,loadingAppData,darkMode,getAppData,optionsMenu,secondOptionsMenu,routesApp,userConfig} = useAppInfo();
     const {openPreview,setOpenPreview} = usePreview();
-    const {openAlert,popOutAlert} = useAlert();
+    const {addNotification} = useNotifications();
+    const {openAlert,popInAlert,popOutAlert} = useAlert();
     const {visibleChatAi,setVisibleChatAi} = useAiAssistant();
     const [statusPage,setStatusPage] = useState('loading');
 
@@ -136,13 +141,28 @@ facturation.use == true){
         }
     },[userConfig])
 
+    useRealtime(appInfo.company_id, (payload) => {
+        const infoPayload = typeof payload === 'string' ? JSON.parse(payload) : payload;
+        console.log("Payload procesado:", infoPayload);
+        if (infoPayload.table === 'process_instance') {
+            let handleOpenProcess = ()=>{
+                popInAlert(<ProcessStatusAlert instance_id={infoPayload.data.id}/>)
+            }
+            addNotification({
+                type: 'info',
+                title: `Actualización en proceso #${infoPayload.data.ownSerial}`,
+                description: `Instancia #${infoPayload.data.ownSerial} actualizada.`,
+                onClick:handleOpenProcess
+            });
+        }
+    });
 
     return(
         <div className={`UserApp`}>
             {!loadingAppData && statusPage=='page' &&(
                 <>
                     <header className='headApp'>
-                    <SearchBar placeholder={"Buscar en SGA - Procesos"} action={setQuickSearch}/>
+                    <SearchBar placeholder={"Buscar en SGA - Ventas"} action={setQuickSearch}/>
                     {visibleResultsSearch && (
                         <div className="resultsQuickSerch">
                             {quickSearch != "" && routesApp.map((element,index)=>(
@@ -180,10 +200,22 @@ facturation.use == true){
                     <SwitchColorMode/>
                 </header>
                 <aside ref={asideMenuC}  className='asideMenuApp'>
-                    <div className={`menusHolder ${visibleMenu? 'activeMenusHolder':''}`}>
-                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1761514001/ChatGPT_Image_26_oct_2025_16_24_57_hgpkmn.png'} visbleInfo={visibleMenu} title={'Administración'} desc={'SGA - Desarrollos'} />
-                        <MenuApp visibleMenu={visibleMenu} title={'General'} options={optionsMenu}/>
-                        <MenuApp visibleMenu={visibleMenu} title={'Ajustes'} options={secondOptionsMenu}/>
+                    <div className={`menusHolder ${visibleMenu? 'activeMenusHolder':'hiddenAsideMenu'}`}>
+                        {!visibleMenu && (
+                            <div className='openMenuMobileIcon' onClick={()=>{
+                                    setVisibleMenu(true)
+                                }}>
+                                <i className="fa-solid fa-bars"/>
+                            </div>
+                        )}
+                        <div className='closeMenuMobileIcon' onClick={()=>{
+                                setVisibleMenu(false)
+                            }}>
+                            <i className="fa-solid fa-xmark"/>
+                        </div>
+                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1761514001/ChatGPT_Image_26_oct_2025_16_24_57_hgpkmn.png'} visbleInfo={visibleMenu} title={'Ventas'} desc={'SGA - Desarrollos'} />
+                        <MenuApp setVisibleMenu={setVisibleMenu} visibleMenu={visibleMenu} title={'General'} options={optionsMenu}/>
+                        <MenuApp setVisibleMenu={setVisibleMenu} visibleMenu={visibleMenu} title={'Ajustes'} options={secondOptionsMenu}/>
                     </div>
                 </aside>
                 <main className='bodyApp'>
@@ -200,6 +232,8 @@ facturation.use == true){
                             <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
                             <Route path='/modules/*' element={<Modules/>}/>
                             <Route path='/services' element={<Services/>}/>
+                            <Route path='/cashBoxes' element={<CashBoxes/>}/>
+                                <Route path='/cashBoxes/:cashBox_id' element={<CashBoxesDeetail/>}/>
                             <Route path='/services/:serviceRequierd' element={<PathLocation/>}/>
                             <Route path='/billing' element={<span>Facturación</span>}/>
                             <Route path='/messages/*' element={<Messages/>} />

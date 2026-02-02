@@ -30,25 +30,23 @@ export function useAiAssistant(){
 
 export function NotificationsProvider({children}){
     const [notifications,setNotifications] = useState([]);
-    
-    const addNotification = (newNotification)=>{
-        let C = []
-        notifications.map((element)=>{
-            C.push(element)
-        })
-        C.push(newNotification)
-        setNotifications(C);
-    }
+    let localIndexOfNoti = 0;
 
-    const deleteNotification = (indexDel)=>{
-        let C = []
-        notifications.map((element,index)=>{
-            if(index != indexDel){
-                C.push(element)
-            }
-        })
-        setNotifications(C);
-    }
+   const addNotification = (newNotification) => {
+        // 1. Generamos un ID único basado en el tiempo para que no colisionen
+        const id = Date.now() + Math.random(); 
+        
+        // 2. Usamos la sintaxis de actualización funcional para asegurar el estado más reciente
+        setNotifications(prev => [
+            ...prev, 
+            { ...newNotification, id } // Agregamos el ID al objeto
+        ]);
+    };
+
+    const deleteNotification = (idToDelete) => {
+        // 3. Filtramos por el ID único, no por el índice
+        setNotifications(prev => prev.filter(element => element.id !== idToDelete));
+    };
 
     const clearNotifications = ()=>{
         setNotifications([])
@@ -240,6 +238,7 @@ export function AppInfoProvider({children}){
         {text:'Crear',path:'new',icon:<i className="fa-solid fa-plus"/>,action:handleNavigate},
         //{text:'Mensajes',path:'messages',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913446/MensajesLogo2_y4fjoa.png'/>,action:handleNavigate},
         {text:'Terceros',path:'thirdparties',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Cajas POS',path:'cashBoxes',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1769618368/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.png'/>,action:handleNavigate},
         {text:'Usuarios',path:'users',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png'/>,action:handleNavigate},
         {text:'Informes',path:'reports',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
         //{text:'Estadisticas',path:'analytics',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579216/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.png'/>,action:handleNavigate},

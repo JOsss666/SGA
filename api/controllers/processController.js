@@ -574,6 +574,103 @@ processController.deleteDocument =(req,res)=>{
 
 // --- new controllers for new version of process
 
+processController.getAviableProcess = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+        
+        whereClauses.push(`pi.company_id = $1`);
+        values.push(info.company_id);
+
+        if(info.alloweProcesses != undefined){
+            whereClauses.push(`pi.id = ANY($${values.length +1})`);
+            values.push(info.alloweProcesses);
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+        
+        let sentence = `
+            SELECT 
+                pi.*,
+                JSON_AGG(
+                    JSON_BUILD_OBJECT(
+                        'id', ps.id,
+                        'name', ps.name,
+                        'order', ps."order"
+                    ) ORDER BY ps."order" ASC
+                ) AS steps
+	        FROM
+                "Process".processes pi
+            LEFT JOIN
+                "Process".process_steps ps
+            ON
+                pi.id = ps.process_id
+            ${whereQuery}
+            GROUP BY
+                pi.id, pi.company_id, ps.process_id
+            ORDER BY name ASC
+        `;
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err))
+    })
+}
+
+processController.createProcessInstace = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            INSERT INTO "Process".process_instance(
+                company_id, 
+                process_id, 
+                step_id,
+                status, 
+                parent_id, 
+                parent_step, 
+                start_date, 
+                "delivery_date",
+                "thirdParty_id",
+                responsable
+                )
+	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;
+        `;
+
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.process_id,
+            info.step_id,
+            info.status,
+            info.parent_id,
+            info.parent_step,
+            info.start_date,
+            info.delivery_date,
+            info.thirdParty_id,
+            info.user_id
+        ],3);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err))
+    })
+}
+
 processController.getProcessInstances =(req,res)=>{
     let data = '';
     req.on('data',chunk=>{
@@ -607,21 +704,47 @@ processController.getProcessInstances =(req,res)=>{
             values.push(info.allowedTypes);
         }
 
+        if(info.status != undefined){
+            whereClauses.push(`"Process".process_instance.status = $${values.length + 1}`);
+            values.push(info.status)
+        }
+
         const whereQuery = whereClauses.length > 0
             ? `WHERE ${whereClauses.join(" AND ")}`
             : "";
         let sentence = `
             SELECT
                 "Process".process_instance.*,
+                "Ecosystem".users.user_name AS responsable_name,
                 "Process".processes.name AS process_name,
                 "Process".processes.code AS process_code,
-                "Process".processes.id AS process_id
+                "Process".processes.id AS process_id,
+                "Ecosystem".thirdparties.names AS "thirdParty_name",
+                "Process".process_steps.name AS step_name,
+                "Process".process_steps.order AS current_step_order,
+                -- Contamos el total de pasos para este proceso específico
+                (SELECT COUNT(*) 
+                FROM "Process".process_steps 
+                WHERE "Process".process_steps.process_id = "Process".processes.id
+                ) AS total_steps
             FROM
                 "Process".process_instance
             LEFT JOIN
                 "Process".processes
             ON
                 "Process".process_instance.process_id = "Process".processes.id
+            LEFT JOIN
+                "Ecosystem".users
+            ON
+                "Process".process_instance.responsable = "Ecosystem".users.user_id
+            LEFT JOIN
+                "Ecosystem".thirdparties
+            ON 
+                "Process".process_instance."thirdParty_id" = "Ecosystem".thirdparties.id
+            LEFT JOIN
+                "Process".process_steps
+            ON
+                "Process".process_instance.step_id = "Process".process_steps.id
             ${whereQuery}
             ORDER BY
                 "Process".process_instance.id DESC
@@ -635,5 +758,274 @@ processController.getProcessInstances =(req,res)=>{
         res.end(JSON.stringify(err))
     })
 }
+
+processController.updateProcessInstanceStatus = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            UPDATE
+                "Process".process_instance
+            SET
+                start_date = $1,
+                delivery_date = $2,
+                status = $3,
+                "thirdParty_id" = $4,
+                responsable = $5
+            WHERE company_id = $6 AND id = $7;
+        `;
+        let consulta = await useDataBase(sentence,[
+            info.start_date,
+            info.delivery_date,
+            info.status,
+            (info.thirdParty_id === '' || info.thirdParty_id === undefined) ? null : info.thirdParty_id,
+            info.user_id,
+            info.company_id,
+            info.id
+        ],2);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    });
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err))
+    })
+}
+
+processController.getProcessState = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`pi.company_id = $1`);
+        values.push(info.company_id);
+
+        if(info.id != undefined){
+            whereClauses.push(`pi.id = $${values.length +1}`);
+            values.push(info.id)
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+        
+        let sentence = `
+            SELECT
+                pi.*,
+                pr.name AS process_name,
+                pr.code AS process_code,
+                pr.description AS process_description,
+                pr.id AS process_id,
+                tp.names AS thirdParty_name,
+                JSON_AGG(
+                    JSON_BUILD_OBJECT(
+                        'id', ps.id,
+                        'name', ps.name,
+                        'order', ps."order",
+                        'required_roll', ps.required_roll,
+                        'subprocess_id', ps.id,
+                        -- Aquí integramos los documentos requeridos para este paso
+                        'required_docs', COALESCE(docs.list, '[]'::json)
+                    ) ORDER BY ps."order" ASC
+                ) AS steps
+            FROM "Process".process_instance pi
+            LEFT JOIN "Process".processes pr ON pi.process_id = pr.id
+            LEFT JOIN "Ecosystem".thirdparties tp ON pi."thirdParty_id" = tp.id 
+            LEFT JOIN "Process".process_steps ps ON pr.id = ps.process_id
+            -- Subconsulta para agrupar documentos por step_id
+            LEFT JOIN (
+                SELECT 
+                    step_id, 
+                    JSON_AGG(
+                        JSON_BUILD_OBJECT(
+                            'docType', "docType",
+                            'required', required,
+                            'min', min_number,
+                            'max', max_number
+                        )
+                    ) AS list
+                FROM "Process".step_doc_realtion
+                GROUP BY step_id
+            ) docs ON ps.id = docs.step_id
+            ${whereQuery}
+            GROUP BY
+                pi.id, pr.id, tp.names
+            ORDER BY
+                pi.created_at DESC;
+        `;
+
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err))
+    })
+}
+
+const validateStepRequirements = async (instanceId, nextStepId, companyId) => {
+    // 1. Buscamos qué documentos son obligatorios para el paso al que se intenta avanzar
+    // OJO: Validamos los requerimientos del paso actual y anteriores que sean obligatorios
+    const requirementsQuery = `
+        SELECT 
+            r."docType", 
+            r.min_number, 
+            r.step_id,
+            ps.name as step_name
+        FROM "Process".step_doc_realtion r
+        JOIN "Process".process_steps ps ON r.step_id = ps.id
+        WHERE r.company_id = $1 
+          AND r.required = true
+          AND ps."order" <= (SELECT "order" FROM "Process".process_steps WHERE id = $2);
+    `;
+
+    const requirementsQ = await useDataBase(requirementsQuery, [companyId, nextStepId], 1);
+    
+    if (!requirementsQ[0] || requirementsQ[1].length === 0) return { success: true };
+
+    const requirements = requirementsQ[1];
+
+    // 2. Consultamos qué documentos ya han sido cargados para esta instancia
+    // Basado en tu tabla de transacciones o donde guardes la relación doc <-> instancia
+    const attachedQuery = `
+        SELECT "document_type", COUNT(*) as total
+        FROM "Ecosystem".documents 
+        WHERE instance_id = $1 AND company_id = $2
+        GROUP BY "document_type"
+    `;
+    
+    const attachedQ = await useDataBase(attachedQuery, [instanceId, companyId], 1);
+    const attachedDocs = attachedQ[0] ? attachedQ[1] : [];
+
+    // 3. Comparar requerimientos vs realidad
+    let missingDocs = [];
+    requirements.forEach(req => {
+        // Cambiamos d.docType por d.document_type
+        const found = attachedDocs.find(d => d.document_type === req.docType);
+        const count = found ? parseInt(found.total) : 0;
+        
+        if (count < req.min_number) {
+            missingDocs.push(`${req.min_number} ${req.docType} (requerido en: ${req.step_name})`);
+        }
+    });
+
+    if (missingDocs.length > 0) {
+        return { 
+            success: false, 
+            error: `No se puede avanzar. Faltan los siguientes documentos: ${missingDocs.join(', ')}` 
+        };
+    }
+
+    return { success: true };
+};
+
+processController.nextProcessStep = async (req, res) => {
+    let data = '';
+    req.on('data', chunk => { data += chunk; });
+    req.on('end', async () => {
+        try {
+            let info = JSON.parse(data);
+
+            // 1. Obtener información de la instancia actual y su proceso
+            const instanceQuery = `
+                SELECT pi.id, pi.step_id, pi.process_id, ps.order as current_order
+                FROM "Process".process_instance pi
+                JOIN "Process".process_steps ps ON pi.step_id = ps.id
+                WHERE pi.id = $1
+            `;
+            const instanceQ = await useDataBase(instanceQuery, [info.instance_id], 1);
+
+            if (!instanceQ[0]) throw new Error("Instancia no encontrada");
+
+            const instance = instanceQ[1][0]
+
+            // 2. Buscar el paso que sigue en el orden
+            const nextStepQuery = `
+                SELECT id, name, required_roll, "order", end_process
+                FROM "Process".process_steps
+                WHERE process_id = $1 AND "order" > $2
+                ORDER BY "order" ASC
+                LIMIT 1
+            `;
+
+            const nextStepQ = await useDataBase(nextStepQuery, [instance.process_id, instance.current_order], 1);
+
+            if (!nextStepQ[0]) {
+                res.writeHead(200);
+                return res.end(JSON.stringify({ success:false,message: "El proceso ya ha finalizado." }));
+            }
+            const nextStep = nextStepQ[1][0];
+
+            // 3. Validar Permisos (required_roll es un array en la DB)
+            // Usamos .some para ver si el rol del usuario está en el array permitido
+            console.log('Roles habilitados: ',nextStep.required_roll)
+            console.log('Rol usuario: ',info.user_roll)
+            // Para verificar si el siguiente paso es el ultimo y disparar la validación de documentos
+            console.log(nextStep.end_process)
+            const hasPermission = nextStep.required_roll.includes(info.user_roll);
+                        
+            if (!hasPermission) {
+                res.writeHead(200);
+                return res.end(JSON.stringify({success:false,error: "No tienes el rol necesario para autorizar este paso." }));
+            }
+
+            if(nextStep.end_process){
+                const validation = await validateStepRequirements(info.instance_id, nextStep.id, info.company_id);
+                if (!validation.success) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ 
+                        success: false, 
+                        error: validation.error 
+                    }));
+                }
+            }
+
+            // 4. Actualizar la instancia al nuevo paso
+            const updateQuery = `
+                UPDATE "Process".process_instance 
+                SET step_id = $1,
+                updated_at = CURRENT_TIMESTAMP,
+                responsable = $3
+                WHERE id = $2
+            `;
+
+            await useDataBase(updateQuery, [nextStep.id, info.instance_id, info.user_id], 2);
+
+            // 5. (Opcional) Registrar en el historial para auditoría
+            await useDataBase(`
+                INSERT INTO "Process".process_historial(
+                    company_id, instance_id, previous_step, next_step, user_id, description)
+                VALUES ($1, $2, $3, $4, $5, $6);
+            `, [
+                info.company_id,
+                info.instance_id,
+                info.previous_step,
+                info.next_step,
+                info.user_id,
+                info.description
+            ], 2);
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+                success: true, 
+                message: `el proceso a avanzado a: ${nextStep.name}`,
+                nextStepId: nextStep.id 
+            }));
+
+        } catch (error) {
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: error.message }));
+        }
+    });
+};
 
 export default processController;

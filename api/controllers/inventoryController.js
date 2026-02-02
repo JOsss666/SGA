@@ -60,13 +60,25 @@ inventoryController.getProducts = (req, res) => {
 
     req.on('end', async () => {
         const info = JSON.parse(data);
-        const values = [info.company_id];
-        let whereExtra = "";
+        const values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`ps.company_id = $1`);
+        values.push(info.company_id)
 
         if (info.category_id != null) {
+            whereClauses.push(`AND c.id = $${values.length +1}`);
             values.push(info.category_id);
-            whereExtra = `AND c.id = $${values.length}`;
         }
+        
+        if(info.type != undefined){
+            whereClauses.push(`ps.type = $${values.length +1}`)
+            values.push(info.type)
+        }
+
+        const whereQuery = whereClauses.length > 0
+        ? `WHERE ${whereClauses.join(" AND ")}`
+        : "";
 
         const sentence = `
             SELECT
@@ -90,9 +102,7 @@ inventoryController.getProducts = (req, res) => {
                 "Ecosystem".concepts AS c_entry
             ON 
                 ps.entry_concept = c_entry.id
-            WHERE
-                ps.company_id = $1
-                ${whereExtra}
+            ${whereQuery}
             GROUP BY
                 ps.id,
                 c_entry.account_id,

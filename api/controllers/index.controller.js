@@ -1268,7 +1268,8 @@ controller.getPaymentMethods = (req,res)=>{
                 name,
                 currency,
                 status,
-                account_id
+                account_id,
+                for_wallet
             FROM
                 "Ecosystem".payment_methods
             ${whereQuery}
@@ -1363,6 +1364,7 @@ controller.createTransaction = (req,res)=>{
         ],3)
         const transId = parseInt(consulta.id)
         console.log('- ',transId)
+        const cashBoxTypes = ['Cash Recipt'];
         if(typeof(transId) == 'number'){
             let resultDetails = [];
             for(const element of info.transactionDetails){
@@ -1376,10 +1378,10 @@ controller.createTransaction = (req,res)=>{
                         "subTotal",
                         total,
                         nature,
-                        "paymentMethod_id"
-                    )
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
-                `
+                        "paymentMethod_id",
+                        voucher)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;
+                `;
                 console.log('---> ',transId);
                 console.log('---> ',element);
                 let postConsulta = await useDataBase(sentence,[
@@ -1391,10 +1393,58 @@ controller.createTransaction = (req,res)=>{
                     element.subtotal,
                     element.total,
                     element.nature,
-                    element.paymentMethod_id != undefined? element.paymentMethod_id:undefined
-                ],2);
-                resultDetails.push([postConsulta]);
+                    element.paymentMethod_id != undefined? element.paymentMethod_id:undefined,
+                    element.voucher
+                ],3);
+                console.log(`ID detalle transacción: ${postConsulta.id}`)
+                console.log(`Es doc de caja: ${cashBoxTypes.includes(info.docType)}`)
+                console.log(`Comparación tipos de documento: ${JSON.stringify(cashBoxTypes)} -- ${info.doc_type}`)
+                console.log(`Es pago en caja: ${element.type == 'payment'}`)
+                if(cashBoxTypes.includes(info.doc_type) && element.type == 'payment' && postConsulta.id != undefined){
+                    console.log('Insertando movimiento de caja')
+                    let srSentence = `
+                        INSERT INTO "Facturation".shift_settlement_details(
+                            company_id, 
+                            user_id,
+                            "cashBox_id",
+                            "transactionDetail_id",
+                            shift_id)
+                        VALUES ($1, $2, $3, $4, $5);
+                    `;
+                    let setElementRegister = await useDataBase(srSentence,[
+                        info.company_id,
+                        info.user_id,
+                        element.cashBox_id,
+                        postConsulta.id,
+                        element.shift_id
+                    ],2);
+                }
+                console.log('---> ',element);
+                if(element.for_wallet == true){
+                    let senInsBreafcase = `
+                        INSERT INTO "Treasury".accounts_receivable(
+                           company_id,
+                           "thirdParty_id",
+                           document_id,
+                           total,
+                           paid_amount,
+                           due_date,
+                           instance_id)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7);
+                    `;
+                    let insertBreafCaseBill = await useDataBase(senInsBreafcase,[
+                        info.company_id,
+                        info.thirdParty_id,
+                        info.doc_id,
+                        element.total,
+                        0,
+                        element.due_date,
+                        info.instance_id
+                    ])
+                }
+                resultDetails.push([postConsulta.id != undefined,postConsulta.id]);
             }
+            await useDataBase(`REFRESH MATERIALIZED VIEW CONCURRENTLY "Facturation".mv_shift_payment_summaries`,[],1);
             res.writeHead(200,{'Content-Type':'text/plain'})
             res.end(JSON.stringify([consulta.id,resultDetails]));
         }else{
@@ -1679,8 +1729,56 @@ controller.updateTransactionState = (req,res)=>{
     })
 }
 
+controller.getDocuments = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
 
-// SGA - Inventory (Cambiar de archivo despues)
+        console.log(info)
+
+        whereClauses.push(`company_id = $1`);
+        values.push(info.company_id)
+
+        if(info.allowedTypes != undefined){
+            whereClauses.push(`document_type = ANY($${values.length +1})`);
+            values.push(info.allowedTypes);
+        }
+
+        if(info.instance_id != undefined){
+            whereClauses.push(`instance_id = $${values.length +1}`);
+            values.push(info.instance_id);
+        }
+
+        if(info.id != undefined){
+            whereClauses.push(`id = $${values.length + 1}`);
+            values.push(info.id)
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
+        let sentence = `
+            SELECT * FROM
+                "Ecosystem".documents
+            ${whereQuery}
+            ORDER BY document_type ASC
+        ;`;
+
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
 
 controller.getSalute = (req,res)=>{
     console.log('Recibido')
@@ -1696,14 +1794,60 @@ controller.getThirdParties = (req,res)=>{
     req.on('data',chunk=>{
         data += chunk
     })
-    req.on('end',async()=>{
-        console.log(data);
-        let info = data != undefined? JSON.parse(data):'';
-        let sentence = `SELECT * FROM "Ecosystem".thirdParties WHERE company_id = $1 ;`; 
-        let consulta = await useDataBase(sentence,[info.company_id],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
+    req.on('end', async () => {
+        let info = data !== undefined ? JSON.parse(data) : {};
+        let values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`"Ecosystem".thirdparties.company_id = $1`);
+        values.push(info.company_id);
+
+        if(info.id != undefined){
+            whereClauses.push(`"Ecosystem".thirdparties.id = $${values.length +1}`)
+            values.push(info.id)
+        }
+
+        const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
+        
+        // 1. Columnas básicas
+        let selectColumns = `
+            "Ecosystem".thirdParties.*
+        `;
+
+        // 2. Joins dinámicos
+        let joinClause = "";
+        
+        // Si se requiere información comercial, añadimos las columnas y el JOIN
+        if (info.comercialInfo === true) {
+            selectColumns += `,
+                "Ecosystem"."thirdPartyComercialInfo".credit,
+                "Ecosystem"."thirdPartyComercialInfo".credit_term,
+                "Ecosystem"."thirdPartyComercialInfo".comercial_state,
+                "Ecosystem"."thirdPartyComercialInfo".aviable_credit
+            `;
+            
+            joinClause = `
+                LEFT JOIN "Ecosystem"."thirdPartyComercialInfo"
+                ON "Ecosystem".thirdParties.id = "Ecosystem"."thirdPartyComercialInfo"."thirdParty_id"
+            `;
+        }
+
+        // 3. Construcción de la sentencia final
+        let sentence = `
+            SELECT
+                ${selectColumns}
+            FROM
+                "Ecosystem".thirdParties
+            ${joinClause}
+            ${whereQuery}
+            ${info.limit != undefined? `Limit ${info.limit}`:''}
+            ;
+        `; 
+
+        let consulta = await useDataBase(sentence, values, 1);
+        res.writeHead(200, { 'Content-Type': 'application/json' }); // application/json es más profesional
         res.end(JSON.stringify(consulta));
-    })
+    });
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));

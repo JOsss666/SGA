@@ -13,6 +13,7 @@
     animation-fill-mode: both;
     animation-timing-function: ease;
     width: 100%;
+    z-index: 30;
 }
 
 .AlertContainer .optionsAlert{
@@ -35,5 +36,15 @@
 
     100%{
         top: 0;
+    }
+}
+
+@media (max-width:500px) {
+    .AlertContainer{
+        padding: 0;
+    }
+
+    .AlertContainer .optionsAlert{
+        padding: 0;
     }
 }

@@ -1,0 +1,21 @@
+
+
+/* CONTENEDOR GENERAL */
+.PieChartContainer {
+    width: 100%;
+    max-width: 45vh;          /* controla el tamaño máximo */
+    height: 45vh;             /* altura fija para evitar deformaciones */
+    margin: 0 auto;           /* centra la gráfica */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--menuAside);
+    border-radius: 2vh;
+    padding: 2vh;
+}
+
+/* CANVAS */
+.PieChartContainer canvas {
+    width: 100% !important;
+    height: 100% !important;
+}

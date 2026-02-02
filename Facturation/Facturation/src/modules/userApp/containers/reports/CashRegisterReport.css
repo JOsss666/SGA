@@ -1,0 +1,254 @@
+.CashRegisterReport{
+    width: 92dvw;
+    display: flex;
+    flex-direction: column;
+}
+
+.CashRegisterReport .headReport{
+    display: flex;
+    padding: 2vh;
+    background-color: var(--cardHover);
+    border-radius: 1vh;
+    outline: solid .1vh var(--inputsBorder);
+    gap: 2vw;
+}
+
+.CashRegisterReport .headReport .printButton{
+    position: absolute;
+    right: 4vh;
+    top: 14vh;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.CashRegisterReport .headReport .printButton .ButtonMenu{
+    box-shadow:  0 0 1vh #D4D4D4;
+    background-color: var(--bg);
+}
+
+.CashRegisterReport .headReport .ttlreport{
+    display: flex;
+    flex-direction: column;
+    margin: auto 1vh;
+    gap: .5vh;
+    border-right: solid .2vh var(--inputsBorder);
+    padding-right: 2vh;
+}
+
+.CashRegisterReport .headReport .BoldTitle{
+    font-size: clamp(3px,3vh,30px);
+}
+
+
+.CashRegisterReport .headReport .datesContainer{
+    display: flex;
+    gap: 2vw;
+    border-right: solid .2vh var(--inputsBorder);
+    padding-right: 4vh;
+    margin: auto 0;
+}
+
+.CashRegisterReport .headReport .datesContainer .dateReport{
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    gap: .5vh;
+}
+
+.CashRegisterReport .headReport .datesContainer .dateReport span{
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+}
+
+.CashRegisterReport .headReport .datesContainer .dateReport strong{
+    font-size: clamp(2px,2.2vh,22px);
+    color: var(--mainText);
+    font-weight: 500;
+}
+
+.CashRegisterReport .contentReport{
+    margin-top: 2vh;
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+}
+
+.CashRegisterReport .contentReport .movementTotals{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.CashRegisterReport .contentReport .movementTotals .cardTotalPaymentType{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh 2vh;
+    border-radius: 1vh;
+    transition: .3s ease;
+}
+
+.CashRegisterReport .contentReport .movementTotals .cardTotalPaymentType h6{
+    font-size: clamp(2.5px,2.5vh,25px);
+    font-weight: 500;
+    color: var(--mainText);
+}
+
+.CashRegisterReport .contentReport .movementTotals .cardTotalPaymentType h6 i{
+    margin-right: 1vw;
+    color: var(--descriptionText);
+}
+
+.CashRegisterReport .contentReport .cardTotalPaymentType .mainInfoOfPayment{
+    display: flex;
+    padding-left: 4vh;
+    margin-top: 1vh;
+}
+
+.CashRegisterReport .contentReport .cardTotalPaymentType .mainInfoOfPayment i{
+    margin: auto 0;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--descriptionText);
+}
+
+.CashRegisterReport .contentReport .cardTotalPaymentType .mainInfoOfPayment span{
+    margin: auto 1vh;
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 400;
+    color: var(--descriptionText);
+}
+
+.CashRegisterReport .contentReport .cardTotalPaymentType .mainInfoOfPayment span b{
+    font-weight: 500;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: #155DFC;
+    margin-left: 1vh;
+}
+
+.CashRegisterReport .contentReport .cardTotalPaymentType .loadTransactions{
+    margin-left: 4vh;
+    margin-top: 2vh;
+    padding: 1vh 2vh;
+    border-radius: 1vh;
+    cursor: pointer;
+    color: #155DFC;
+    background-color: #BEDBFF;
+    width: fit-content;
+    font-size: clamp(2.2px,2vh,22px);
+    font-weight: 400;
+    display: none;
+}
+
+.CashRegisterReport .contentReport .cardTotalPaymentType:hover .loadTransactions{
+    display: block;
+}
+
+.CashRegisterReport .contentReport .cardTotalPaymentType .loadTransactions i{
+    margin-right: 1vh;
+}
+
+.CashRegisterReport .contentReport .cardTotalPaymentType .attachedTrsContainer{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh ;
+    margin-left: 6vh;
+    gap: 1vh;
+    margin-top: 1vh;
+}
+
+.CashRegisterReport .contentReport .cardTotalPaymentType .attachedTrsContainer .transactionLine{
+    display: flex;
+    padding: 1vh;
+    border-radius: .5vh;
+    gap: 1vw;
+    padding-bottom: 2vh;
+    border-bottom: dashed .2vh var(--inputsBorder);
+}
+
+.CashRegisterReport .contentReport .cardTotalPaymentType .attachedTrsContainer .transactionLine span,
+.CashRegisterReport .contentReport .cardTotalPaymentType .attachedTrsContainer .transactionLine strong{
+    font-size: clamp(2px,2vh,20px);
+    margin: auto 0;
+    color: var(--descriptionText);
+}
+
+.CashRegisterReport .contentReport .cardTotalPaymentType .attachedTrsContainer .transactionLine strong{
+    color: var(--mainText);
+    font-weight: 500;
+}
+
+.CashRegisterReport .LoadingSpace{
+    height: 100dvh;
+    width: 100%;
+}
+
+
+.CashRegisterReport .authAndDetails{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh 4vh;
+}
+
+.CashRegisterReport .authAndDetails .authC{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 2vh;
+}
+
+.CashRegisterReport .authAndDetails .authC .FormInput{
+    width: 100%;
+    margin: 0 auto;
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer{
+    display: flex;
+    flex-direction: column;
+    margin: auto 2vh;
+    gap: 4vh;
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer .resumeTotalsC{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh 0;
+    gap: 1vh;
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer .signature{
+    display: flex;
+    gap: 1vw;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--mainText);
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer .signature span{
+    color: var(--descriptionText);
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer .signature strong{
+    font-weight: 500;
+    color: var(--mainText);
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer .resumeTotalsC .signature{
+    padding: .5vh 0;
+    border-bottom: solid .1vh var(--descriptionText);
+    width: fit-content;
+    padding-bottom: 1vh;
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer .resumeTotalsC .signature span,
+.CashRegisterReport .authAndDetails .authC .signatureContainer .resumeTotalsC .signature h5
+{
+    width: 30dvw;
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer .resumeTotalsC .signature strong{
+    width: 10dvw;
+    text-align: right;
+}
+
+.CashRegisterReport .authAndDetails .authC .signatureContainer .resumeTotalsC .signature h5 i{
+    margin-right: 1vh;
+}
