@@ -30,7 +30,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const [concepts,setConcepts] = useState([]);
     const [documents,setDocuments] = useState([]);
     const [cashBoxes,setCashBoxes] = useState([]);
-    const [briefCaseBills,setBriefCaseBills] = useState([]);
+        // BirefCase Bills requirements
+        const [briefCaseBills,setBriefCaseBills] = useState([]);
 
     // control
     const [mode,setMode] = useState('process_instance');
@@ -78,7 +79,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         total,
         attached,
         instance_id,
-        step_id
+        step_id,
+        payedBills:briefCaseBills
     }
 
     // PreProcess functions
@@ -186,6 +188,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 getBriefcasesBills();
             }else{
                 setMode('process_instance')
+                setBriefCaseBills([]);
             }
         }
     }
@@ -223,7 +226,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const getInstances = async(allowedInstances,allowedTypes)=>{
         let res = await postInfo('/process/getProcessInstances',{
             company_id:appInfo.company_id,
-            status:'active'
+            status:['active']
         })
         console.log(res);
         if(res[0]){
@@ -470,6 +473,22 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         )
     }
 
+
+    // Function for control payments of BirefCaseBills
+    const updateBriefCasePayedValue = (newValue,id)=>{
+        setBriefCaseBills(prev => 
+            prev.map(item => 
+                item.id === id 
+                    ? { ...item, ["paid_value"]: newValue } 
+                    : item
+            )
+        );
+    }
+
+    useEffect(()=>{
+        console.log(briefCaseBills)
+    },[briefCaseBills])
+
     useEffect(()=>{
         console.log(documents)
         if(documents.length > 0){
@@ -498,7 +517,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             FormInfo["user_id"] = userInfo.user_id,
             FormInfo['transactionDetails'] = []
             FormInfo['instance_id'] = instance_id;
-            
             paymentMethod.forEach(element => {
                 FormInfo.transactionDetails.push({
                     account_id:element.account_id,
@@ -511,7 +529,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                     for_wallet:element.for_wallet,
                     voucher:element.voucher,
                     cashBox_id,
-                    shift_id
+                    shift_id,
                 })
             });
             FormInfo.transactionDetails.push({
@@ -649,7 +667,13 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                                         <strong>{`${element.process_code}#${element.instance_id}`}</strong>
                                         <span>Valor: {formatCurrency(element.pending_amount)}</span>
                                         <span>Vence: {formatDate(element.due_date)}</span>
-                                        <input type="number" min={0} max={element.pending_amount} step={0.1} disabled={disabled} placeHolder={'$ 0'} />
+                                        <input type="number" min={0} max={element.pending_amount} step={0.1} disabled={disabled} placeHolder={'$ 0'} onChange={(e)=>{
+                                            if(e.target.value != '' && e.target.value != undefined){
+                                                updateBriefCasePayedValue(e.target.value,element.id)
+                                            }else{
+                                                updateBriefCasePayedValue(0,element.id);
+                                            }
+                                        }} />
                                     </div>
                                 ))}
                             </div>
