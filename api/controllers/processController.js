@@ -705,8 +705,8 @@ processController.getProcessInstances =(req,res)=>{
         }
 
         if(info.status != undefined){
-            whereClauses.push(`"Process".process_instance.status = $${values.length + 1}`);
-            values.push(info.status)
+            whereClauses.push(`"Process".process_instance.status = ANY($${values.length +1})`);
+            values.push(info.status);
         }
 
         const whereQuery = whereClauses.length > 0

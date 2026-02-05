@@ -1257,6 +1257,11 @@ controller.getPaymentMethods = (req,res)=>{
             values.push(info.allowedPaymentMethods);
         }
 
+        if(info.for_wallet != undefined){
+            whereClauses.push(`for_wallet = $${values.length + 1}`);
+            values.push(info.for_wallet)
+        }
+
         const whereQuery = whereClauses.length > 0
             ? `WHERE ${whereClauses.join(" AND ")}`
             : "";

@@ -7,7 +7,6 @@ import { InputFiles } from "../../components/InputFiles";
 import { FormButton } from "../../components/FormButton";
 import './FormNewCashRecipt.css'
 import { FileInput } from "../../components/FileInput";
-import { id } from "date-fns/locale";
 import { LoadingSpace } from "../LoadingSpace";
 import { postInfo } from "../../../../utils/functions";
 import { NewElementSelect } from "../../components/NewElementSelect";
@@ -498,8 +497,15 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             });
             setTotalToPay(newTotalToPay);
         }
+        if(briefCaseBills.length >0 && documents.length == 0){
+            let newTotalToPay = 0;
+            briefCaseBills.forEach(element => {
+                newTotalToPay += (element.paid_value != undefined && element.paid_value != "" ? element.paid_value:0);
+            });
+            setTotalToPay(newTotalToPay)
+        }
         calcTotalFromPayments();
-    },[documents])
+    },[documents,briefCaseBills])
 
     // Creation Function
 
@@ -622,7 +628,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                     <i className="fa-solid fa-receipt"/>
                 </BoldTitle>
                 <div className="valuesCashRecipt">
-                    {instance_id != undefined && (
+                    {(instance_id != undefined || mode == 'briefcase_payment')&& (
                         <h6 className="valueCashRecipt">Valor a cobrar: $ {formatCurrency(totalToPay)}</h6>
                     )}
                     <h6 className="valueCashRecipt">Valor: $ {formatCurrency(total)}</h6>
@@ -664,7 +670,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                             <div className="gridBirefCaseBills">
                                 {briefCaseBills.map((element,index)=>(
                                     <div key={index} className="briefCaseCard">
-                                        <strong>{`${element.process_code}#${element.instance_id}`}</strong>
+                                        <strong>{`${element.process_code != undefined? element.process_code:'--'}#${element.instance_id != undefined? element.instance_id:'---'}`}</strong>
                                         <span>Valor: {formatCurrency(element.pending_amount)}</span>
                                         <span>Vence: {formatDate(element.due_date)}</span>
                                         <input type="number" min={0} max={element.pending_amount} step={0.1} disabled={disabled} placeHolder={'$ 0'} onChange={(e)=>{

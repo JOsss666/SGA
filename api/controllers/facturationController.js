@@ -84,6 +84,7 @@ facturationController.newCashRecipt = (req,res)=>{
         data += chunk    })
     req.on('end',async()=>{
         let info = JSON.parse(data)
+        console.log(info)
         let docCreation = `
             INSERT INTO "Ecosystem".documents(
 	            company_id,
@@ -114,6 +115,43 @@ facturationController.newCashRecipt = (req,res)=>{
             info.instance_id != "" && info.instance_id != undefined? info.instance_id:undefined,
             info.instance_id != "" && info.instance_id != undefined? info.step_id:undefined
         ],3);
+        if((info.payedBills != undefined || info.payedBills.length > 0) && consulta.id != undefined){
+            for(const element of info.payedBills){
+                let senUPB = `
+                    UPDATE
+                        "Treasury".accounts_receivable
+                    SET
+                        paid_amount = paid_amount + $2
+                    WHERE id = $1 ;
+                `;
+                let updatePaymentBills = await useDataBase(senUPB,[
+                    element.id,
+                    element.paid_value
+                ],2)
+
+                let senIPP = `
+                    INSERT INTO "Treasury".portfolio_payments(
+                       company_id,
+                       store_id,
+                       "thirdParty_id",
+                       document_id,
+                       instance_id,
+                       paid_value, 
+                       "creationDocument_id")
+                    VALUES ($1, $2, $3, $4, $5, $6, $7);
+                `;
+
+                let insertPortfolioPayment = await useDataBase(senIPP,[
+                    info.company_id,
+                    info.store_id,
+                    info.thirdParty_id,
+                    element.document_id,
+                    element.instance_id,
+                    element.paid_value,
+                    consulta.id
+                ],2)
+            }
+        }
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -465,6 +503,7 @@ facturationController.getBriefcaseBills = (req,res)=>{
             WHERE
                 "Treasury".accounts_receivable.company_id = $1 
                 AND "Treasury".accounts_receivable."thirdParty_id" = $2
+                AND pending_amount > 0
             ORDER BY "Treasury".accounts_receivable.created_at DESC
             ;
         `;
