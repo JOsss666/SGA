@@ -1,304 +1,317 @@
-let userConfig = {
-    "account":{
-        "recordSesion":false,
-        "status":"active",
-        "locked":false
+let unserConfic = {
+  "meta": {
+    "version": "1.0",
+    "updatedAt": "2026-01-10"
+  },
+  "access": {
+    "stores": {
+      "enabled": [
+        6
+      ],
+      "overAll": false
     },
-    "system":{
-        "language":"spanish",
-        "region":"Colombia",
-        "hour":"local"
+    "cellars": {
+      "enabled": [],
+      "overAll": true
     },
-    "security":{
-        "authentication":{
-            "logIn":{
-                "allways":false,
-                "backUpMethod":false,
-                "keyWord":""
-            },
-            "logOut":{
-                "never":false,
-                "frecuncy":"dayly"
-            },
-            "two-steps-verification":{
-                "enable":false,
-                "default-method":"email-code",
-                "backup-method":"tel-code"
-            },
-            "biometricData":{
-                "enable":false,
-                "requirePin":false
-            },
-            "devices":{
-                "allow-multiple":true,
-                "limit":3
-            }
+    "modules": {
+      "ctools": {
+        "use": false,
+        "expires": "never",
+        "instance": "alpha"
+      },
+      "process": {
+        "use": true,
+        "expires": "10/01/2026",
+        "instance": "full"
+      },
+      "sga-home": {
+        "use": true,
+        "expires": "never",
+        "instance": "full"
+      },
+      "treasury": {
+        "use": true,
+        "expires": "10/01/2026",
+        "instance": "full",
+        "facturation": true
+      },
+      "inventory": {
+        "use": true,
+        "expires": "10/01/2026",
+        "instance": "full"
+      },
+      "certicloud": {
+        "use": false,
+        "expires": "never",
+        "instance": "alpha"
+      },
+      "management": {
+        "use": true,
+        "expires": "10/01/2026",
+        "instance": "full"
+      },
+      "contability": {
+        "use": true,
+        "expires": "10/01/2026",
+        "instance": "full"
+      },
+      "facturation": {
+        "use": true,
+        "expires": "10/01/2026",
+        "instance": "full"
+      }
+    },
+    "bussines": {
+      "enabled": [
+        4
+      ],
+      "overAll": false
+    },
+    "payments": {
+      "can_pay": true,
+      "payment_methods": {
+        "enabled": [],
+        "overAll": true
+      }
+    },
+    "sections": {
+      "new": {
+        "overAll": true
+      },
+      "help": {
+        "overAll": true
+      },
+      "users": {
+        "overAll": false,
+        "can_edit": false,
+        "can_create": false,
+        "can_delete": false
+      },
+      "search": {
+        "overAll": false
+      },
+      "stores": {
+        "overAll": false
+      },
+      "billing": {
+        "overAll": false
+      },
+      "modules": {
+        "overAll": false
+      },
+      "reports": {
+        "company": {
+          "testBalane": true,
+          "executionState": true,
+          "operative-cost": true,
+          "processEfficiency": true,
+          "usersProductivity": true
+        },
+        "overAll": true,
+        "documents": {
+          "sells": true,
+          "consume": true,
+          "overAll": true,
+          "purchase": true,
+          "clientOrders": true,
+          "reportedDocs": true,
+          "transactions": true,
+          "productionOrders": true,
+          "clientOrdersVolume": true
         }
+      },
+      "accounts": {
+        "overAll": true
+      },
+      "concepts": {
+        "overAll": true,
+        "enabled": [35,36,37]
+      },
+      "products": {
+        "overAll": true
+      },
+      "services": {
+        "overAll": true
+      },
+      "settings": {
+        "overAll": true
+      },
+      "analytics": {
+        "overAll": true
+      },
+      "movements": {
+        "overAll": true
+      },
+      "tutorials": {
+        "overAll": true
+      },
+      "categories": {
+        "overAll": true
+      },
+      "myBussines": {
+        "overAll": true
+      },
+      "pricesList": {
+        "overAll": true
+      },
+      "newDocument": {
+        "overAll": true,
+        "can_edit": false,
+        "can_create": true,
+        "can_delete": false,
+        "can_report": false,
+        "can_comment": false,
+        "allowedDocuments": []
+      },
+      "controlPanel": {
+        "overAll": false
+      },
+      "thirdparties": {
+        "overAll": true,
+        "can_edit": false,
+        "can_create": false,
+        "can_delete": false
+      }
     },
-    "access":{
-        "suspended":false,
-        "information":{
-            "utilities":{
-                "overAll":true,
-                "thirdParties":true,
-                "onlyOwnInformation":false
-            }
+    "services": {
+      "sga": {
+        "AI": {
+          "use": true,
+          "expires": "never",
+          "instance": "full"
         },
-        "payments":{
-            "can_pay":true,
-            "payment_methods":{
-                "overAll":true,
-                "enabled":[]
-            }
+        "mail": {
+          "use": false,
+          "expires": "never",
+          "instance": "full"
         },
-        "process_instances":{
-            "overAll":true,
-            "enabled":[]
+        "calendar": {
+          "use": false,
+          "expires": "never",
+          "instance": "full"
         },
-        "stores":{
-            "overAll":true,
-            "enabled":[]
+        "analytics": {
+          "use": false,
+          "expires": "never",
+          "instance": "full"
         },
-        "cellars":{
-            "overAll":true,
-            "enabled":[]
+        "messaging": {
+          "use": true,
+          "expires": "never",
+          "instance": "full"
         },
-        "bussines":{
-            "overAll":true,
-            "enabled":[]
+        "advertising": {
+          "use": false,
+          "expires": "never",
+          "instance": "full"
         },
-        "costCenters":{
-            "overAll":true,
-            "enabled":[]
-        },
-        "modules":{
-            "management":{
-                "use":true,
-                "instance":"full",
-                "expires":"10/01/2026"
-            },
-            "inventory":{
-                "use":true,
-                "instance":"full",
-                "expires":"10/01/2026"
-            },
-            "process":{
-                "use":true,
-                "instance":"full",
-                "expires":"10/01/2026"
-            },
-            "sga-home":{
-                "use":true,
-                "instance":"full",
-                "expires":"never"
-            },
-            "facturation":{
-                "use":true,
-                "instance":"full",
-                "expires":"10/01/2026"
-            },
-            "contability":{
-                "use":true,
-                "instance":"full",
-                "expires":"10/01/2026"
-            },
-            "treasury":{
-                "use":true,
-                "instance":"full",
-                "expires":"10/01/2026"
-            },
-            "ctools":{
-                "use":false,
-                "instance":"alpha",
-                "expires":"never"
-            },
-            "certicloud":{
-                "use":false,
-                "instance":"alpha",
-                "expires":"never"
-            }
-        },
-        "sections":{
-
-            "new":{
-                "overAll":true
-            },
-            "myBussines":{
-                "overAll":true
-            },
-            "controlPanel":{
-                "overAll":true
-            },
-            "modules":{
-                "overAll":true
-            },
-            "services":{
-                "overAll":true
-            },
-            "billing":{
-                "overAll":true
-            },
-            "thirdparties":{
-                "overAll":true,
-                "can_create":false,
-                "can_delete":false,
-                "can_edit":false
-            },
-            "users":{
-                "overAll":true,
-                "can_create":true,
-                "can_delete":false,
-                "can_edit":false
-            },
-            "reports":{
-                "overAll":true,
-                "documents":{
-                    "overAll":true,
-                    "clientOrders":true,
-                    "productionOrders":true,
-                    "purchase":true,
-                    "consume":true,
-                    "sells":true,
-                    "transactions":true,
-                    "reportedDocs":true,
-                    "clientOrdersVolume":true
-                },
-                "company":{
-                    "operative-cost":true,
-                    "testBalane":true,
-                    "usersProductivity":true,
-                    "processEfficiency":true,
-                    "executionState":true
-                }
-            },
-            "analytics":{
-                "overAll":true
-            },
-            "concepts":{
-                "overAll":true
-            },
-            "accounts":{
-                "overAll":true
-            },
-            "search":{
-                "overAll":true
-            },
-            "stores":{
-                "overAll":true
-            },
-            "products":{
-                "overAll":true
-            },
-            "categories":{
-                "overAll":true
-            },
-            "pricesList":{
-                "overAll":true
-            },
-            "movements":{
-                "overAll":true
-            },
-            "newDocument":{
-                "overAll":true
-            },
-            "settings":{
-                "overAll":true
-            },
-            "tutorials":{
-                "overAll":true
-            },
-            "help":{
-                "overAll":true
-            }
-        },
-        "services":{
-            "sga":{
-                "messaging":{
-                    "use":true,
-                    "instance":"full",
-                    "expires":"never"
-                },
-                "AI":{
-                    "use":true,
-                    "instance":"full",
-                    "expires":"never"
-                },
-                "mail":{
-                    "use":true,
-                    "instance":"full",
-                    "expires":"never"
-                },
-                "calendar":{
-                    "use":true,
-                    "instance":"full",
-                    "expires":"never"
-                },
-                "cloud-storage":{
-                    "use":true,
-                    "instance":"full",
-                    "expires":"never",
-                    "limint":"never-"
-                },
-                "advertising":{
-                    "use":true,
-                    "instance":"full",
-                    "expires":"never"
-                },
-                "analytics":{
-                    "use":true,
-                    "instance":"full",
-                    "expires":"never"
-                }
-            },
-            "personalized":{}
+        "cloud-storage": {
+          "use": true,
+          "limint": "never-",
+          "expires": "never",
+          "instance": "full"
         }
+      },
+      "personalized": {}
     },
-    "notifications":{
-        "mode":"float",
-        "focus":"disabled",
-        "sound&efects":false,
-        "programedResume":"disabled",
-        "groupNotifications":false
+    "suspended": false,
+    "costCenters": {
+      "enabled": [
+        41
+      ],
+      "overAll": false
     },
-    "styles":{
-        "theme":{
-            "default":"light",
-            "ligthImg":"https://i.pinimg.com/1200x/23/5f/8d/235f8df39cf98153029b9cc09495f390.jpg",
-            "darkImg":"https://i.pinimg.com/1200x/80/d1/bd/80d1bd8f8c9777a8ff1a8b4ed534418e.jpg",
-            "colorPalete":"default"
-        },
-        "typography":{
-            "style":"normal",
-            "font-size":"normal",
-            "line-height":"auto",
-            "line-width":"auto",
-            "contrast":"normal"
-        },
-        "iconography":{
-            "show-imgs":true,
-            "only-icons":false,
-            "icons-size":"normal"
-        },
-        "dashboard":{
-            "distribution":"normal",
-            "editable":false
-        },
-        "widgets":{
-            "show-widgets":true,
-            "only-escentials":false,
-            "editable":false
-        },
-        "tables":{
-            "editable":false
-        },
-        "animations":{
-            "active":true,
-            "only-escentials":false,
-            "speed":"normal"
-        }
+    "information": {
+      "utilities": {
+        "overAll": true,
+        "thirdParties": true,
+        "onlyOwnInformation": false
+      }
     },
-    "meta": {
-        "version": "1.0",
-        "updatedAt": "2026-01-10"
-        }
+    "process_instances": {
+      "enabled": [],
+      "overAll": true
+    }
+  },
+  "styles": {
+    "theme": {
+      "darkImg": "https://i.pinimg.com/1200x/80/d1/bd/80d1bd8f8c9777a8ff1a8b4ed534418e.jpg",
+      "default": "light",
+      "ligthImg": "https://i.pinimg.com/1200x/23/5f/8d/235f8df39cf98153029b9cc09495f390.jpg",
+      "colorPalete": "default"
+    },
+    "tables": {
+      "editable": false
+    },
+    "widgets": {
+      "editable": false,
+      "show-widgets": true,
+      "only-escentials": false
+    },
+    "dashboard": {
+      "editable": false,
+      "distribution": "normal"
+    },
+    "animations": {
+      "speed": "normal",
+      "active": true,
+      "only-escentials": false
+    },
+    "typography": {
+      "style": "normal",
+      "contrast": "normal",
+      "font-size": "normal",
+      "line-width": "auto",
+      "line-height": "auto"
+    },
+    "iconography": {
+      "show-imgs": true,
+      "icons-size": "normal",
+      "only-icons": false
+    }
+  },
+  "system": {
+    "hour": "local",
+    "region": "Colombia",
+    "language": "es"
+  },
+  "account": {
+    "locked": false,
+    "status": "active",
+    "recordSesion": false
+  },
+  "security": {
+    "authentication": {
+      "logIn": {
+        "allways": false,
+        "keyWord": "",
+        "backUpMethod": false
+      },
+      "logOut": {
+        "never": false,
+        "frecuncy": "dayly"
+      },
+      "devices": {
+        "limit": 3,
+        "allow-multiple": true
+      },
+      "biometricData": {
+        "enable": false,
+        "requirePin": false
+      },
+      "two-steps-verification": {
+        "enable": false,
+        "backup-method": "tel-code",
+        "default-method": "email-code"
+      }
+    }
+  },
+  "notifications": {
+    "mode": "float",
+    "focus": "disabled",
+    "sound&efects": false,
+    "programedResume": "disabled",
+    "groupNotifications": false
+  }
 }

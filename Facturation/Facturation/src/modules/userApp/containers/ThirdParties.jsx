@@ -133,7 +133,7 @@ export function ThirdParties() {
                                         />
                                         <FormButton onClick={()=>{
                                             popInAlert(<FormNewThirdParties reloadFun={fetchThirdParties}/>)
-                                            }}text={'Crear Proveedor'} children={<i className="fa-solid fa-plus"/>}/>
+                                            }}text={'Crear Tercero'} children={<i className="fa-solid fa-plus"/>}/>
                                     </div>
                                 </div>
                             </div>

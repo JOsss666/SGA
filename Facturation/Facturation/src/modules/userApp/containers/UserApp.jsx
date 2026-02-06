@@ -130,7 +130,7 @@ export function UserApp(){
         if(userConfig.access != undefined){
             if(!userConfig.access.suspended){
                 if(userConfig.access.modules.
-facturation.use == true){
+                    facturation.use == true){
                     setStatusPage('page')
                 }else{
                     setStatusPage('noAccess');
@@ -239,7 +239,9 @@ facturation.use == true){
                             <Route path='/messages/*' element={<Messages/>} />
                             <Route path='/thirdparties/*' element={<ThirdParties/>} />
                             <Route path='/thirdparties/:thirdparty_id' element={<ThirdPartyDetail/>} />
-                            <Route path='/users/' element={<Users/>} />
+                            {userConfig.access != undefined && userConfig.access.sections.users.overAll && (
+                                <Route path='/users/' element={<Users/>} />
+                            )}
                             <Route path='/users/:user_id' element={<DetailsUser/>} />
                             <Route path='/reports/*' element={<Reports/>} />
                             <Route path='/analytics' element={<Analytics/>} />
