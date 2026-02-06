@@ -83,11 +83,20 @@ inventoryController.getProducts = (req, res) => {
         const sentence = `
             SELECT
                 ps.*,
+                ac.name AS tax_name,
+                t.base AS tax_base,
+                t.rate AS tax_rate,
                 c_exit.account_id AS exit_account,
                 c_entry.account_id AS entry_account,
                 array_remove(array_agg(c.name), NULL) AS categories
             FROM
                 "Inventory"."products&services" AS ps
+            LEFT JOIN 
+                "Ecosystem".taxes AS t
+                ON ps.tax_id = t.id
+            LEFT JOIN 
+                "Ecosystem".contable_accounts AS ac
+                ON t.account_id = ac.id
             LEFT JOIN
                 "Inventory".product_categories AS pc
                 ON pc.product_id = ps.id
@@ -106,6 +115,9 @@ inventoryController.getProducts = (req, res) => {
             GROUP BY
                 ps.id,
                 c_entry.account_id,
+                ac.name,
+                t.base,
+                t.rate,
                 c_exit.account_id;
         `;
 

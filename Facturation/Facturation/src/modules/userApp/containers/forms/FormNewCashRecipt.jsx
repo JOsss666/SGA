@@ -612,6 +612,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     
 
     useEffect(()=>{
+        console.log(thirdPartyInfo)
         if(thirdPartyInfo.id != undefined){
             // Update of crefit conditions of thirdParty
             setAbleCredit(thirdPartyInfo.credit != undefined ? thirdPartyInfo.credit:0);
@@ -632,7 +633,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             getThirdParties(thirdParty_id,1)
         }
     },[instance_id])
-
 
     return(
         <div className="FormNewCashRecipt">
@@ -716,9 +716,16 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                                     <div key={index} className={`PaymentMethodCard ${disabledByValue? 'disabledPaymentMethodCard':''}`}>
                                         <div className="payMC">
                                             <strong>{element.name}</strong>
-                                            <input step={0.001} type="number" placeholder="$0" onChange={(e)=>{
-                                                updatePaymentValue(element.id,"value",e.target.value)
-                                            }}/>
+                                            {!element.for_balance && (
+                                                <input step={0.001} type="number" placeholder="$0" onChange={(e)=>{
+                                                    updatePaymentValue(element.id,"value",e.target.value)
+                                                }}/>
+                                            )}
+                                            {element.for_balance && (
+                                                <input step={0.001} max={thirdPartyInfo.thirdParty_balance} type="number" placeholder={`Max $ ${formatCurrency(thirdPartyInfo.thirdParty_balance)}`} onChange={(e)=>{
+                                                    updatePaymentValue(element.id,"value",e.target.value)
+                                                }}/>
+                                            )}
                                             <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
                                                 removePaymentMethod(element.id)
                                             }}/>

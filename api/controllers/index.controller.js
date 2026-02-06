@@ -1279,7 +1279,8 @@ controller.getPaymentMethods = (req,res)=>{
                 currency,
                 status,
                 account_id,
-                for_wallet
+                for_wallet,
+                for_balance
             FROM
                 "Ecosystem".payment_methods
             ${whereQuery}
@@ -1372,6 +1373,13 @@ controller.createTransaction = (req,res)=>{
             info.costCenter_id,
             info.bussines_id
         ],3)
+
+        let updateDocPaidValue = useDataBase(`
+            UPDATE "Ecosystem".documents
+                SET paid_amount = paid_amount + $1
+            WHERE id = $2;
+        `,[info.total,info.doc_id],2);
+        
         const transId = parseInt(consulta.id)
         console.log('- ',transId)
         const cashBoxTypes = ['Cash Recipt'];
@@ -1454,7 +1462,8 @@ controller.createTransaction = (req,res)=>{
                 }
                 resultDetails.push([postConsulta.id != undefined,postConsulta.id]);
             }
-            await useDataBase(`REFRESH MATERIALIZED VIEW CONCURRENTLY "Facturation".mv_shift_payment_summaries`,[],1);
+            useDataBase(`REFRESH MATERIALIZED VIEW CONCURRENTLY "Facturation".mv_shift_payment_summaries`,[],1);
+            useDataBase(`REFRESH MATERIALIZED VIEW CONCURRENTLY "Ecosystem".mv_thirdparty_account_balances`,[],1)
             res.writeHead(200,{'Content-Type':'text/plain'})
             res.end(JSON.stringify([consulta.id,resultDetails]));
         }else{
@@ -1833,12 +1842,19 @@ controller.getThirdParties = (req,res)=>{
                 "Ecosystem"."thirdPartyComercialInfo".credit,
                 "Ecosystem"."thirdPartyComercialInfo".credit_term,
                 "Ecosystem"."thirdPartyComercialInfo".comercial_state,
-                "Ecosystem"."thirdPartyComercialInfo".aviable_credit
+                "Ecosystem"."thirdPartyComercialInfo".aviable_credit,
+                COALESCE("balances".total_db, 0) AS "thirdParty_balanceDb",
+                COALESCE("balances".total_cr, 0) AS "thirdParty_balanceCr",
+                COALESCE("balances".balance, 0) AS "thirdParty_balance"
             `;
             
             joinClause = `
                 LEFT JOIN "Ecosystem"."thirdPartyComercialInfo"
-                ON "Ecosystem".thirdParties.id = "Ecosystem"."thirdPartyComercialInfo"."thirdParty_id"
+                    ON "Ecosystem".thirdParties.id = "Ecosystem"."thirdPartyComercialInfo"."thirdParty_id"
+                LEFT JOIN "Ecosystem".mv_thirdparty_account_balances AS "balances"
+                    ON "Ecosystem".thirdParties.id = "balances"."thirdParty_id"
+                    AND "Ecosystem".thirdParties.company_id = "balances".company_id
+
             `;
         }
 
