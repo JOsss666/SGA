@@ -110,7 +110,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         setLoading(true)
         await getThirdParties();
         await getConcepts();
-        await getCashBoxes();
         let temInfo = {}
         if(userConfig.access != undefined){
             console.log(userConfig.access)
@@ -140,6 +139,18 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             }else{
                 // GetBussines sin filtro
                 await getBussines();
+            }
+
+            if(userConfig.access.sections.cashBoxes.overAll){
+                if(userConfig.access.bussines.enabled.length > 1){
+                    //getCashBoxes con filtro
+                    await getCashBoxes(userConfig.access.sections.cashBoxes.enabled)
+                }else{
+                    temInfo.cashBox_id = userConfig.access.sections.cashBoxes.enabled[0]
+                    setBussines_id(userConfig.access.sections.cashBoxes.enabled[0])
+                }
+            }else{
+                await getCashBoxes();
             }
 
             // Filtro para busqueda de Centros de costo
@@ -240,7 +251,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         }
     }
 
-    const getCashBoxes = async()=>{
+    const getCashBoxes = async(allowedCashBoxes)=>{
         let res = await postInfo('/facturation/getCashBoxes',{
             company_id:appInfo.company_id
             //user_id:userInfo.user_id
@@ -252,7 +263,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 console.log(element);
                 C.push({
                     text:element.name,
-                    value:element
+                    value:element,
+                    allowedCashBoxes:allowedCashBoxes
                 })
             });
             setCashBoxes(C);
@@ -314,7 +326,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const getConcepts = async()=>{
         let res = await postInfo('/getConcepts',{
             company_id:appInfo.company_id,
-            typePlanAccount:appInfo.accountPlanType
+            typePlanAccount:appInfo.accountPlanType,
+            allowedConcepts:userConfig.access.sections.concepts.overAll ? undefined:userConfig.access.sections.concepts.enabled
         })
         console.log(res)
         if(res[0]){
@@ -662,8 +675,12 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                             }}/>
                         }/>
                     )}
-                    <SearchinList action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
-                    <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja'} list={cashBoxes} disabled={disabled}/>
+                    {info.concept_id == undefined && (
+                        <SearchinList action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
+                    )}
+                    {info.cashBox_id == undefined && (
+                        <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja'} list={cashBoxes} disabled={disabled}/>
+                    )}
                     {mode == 'briefcase_payment' && (
                         <div className="aviableBriefCaseContainer">
                             <h6>Cuentas por cobrar</h6>

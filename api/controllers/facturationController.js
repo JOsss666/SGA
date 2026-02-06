@@ -190,6 +190,12 @@ facturationController.getCashBoxes = (req,res)=>{
             values.push(info.id)
         }
 
+        if(info.allowedCashBoxes != undefined){
+            whereClauses.push(`"Treasury".cash_boxes.id = ANY($${values.length +1})`);
+            values.push(info.allowedCashBoxes);
+        }
+
+
          const whereQuery = whereClauses.length > 0
             ? `WHERE ${whereClauses.join(" AND ")}`
             : "";

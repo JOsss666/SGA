@@ -1142,6 +1142,11 @@ controller.getConcepts = (req,res)=>{
             values.push(info.id)
         }
 
+        if(info.allowedConcepts != undefined){
+            whereClauses.push(`"Ecosystem".concepts.id = ANY($${values.length +1})`);
+            values.push(info.allowedConcepts);
+        }
+
         const whereQuery = whereClauses.length > 0
                 ? `WHERE ${whereClauses.join(" AND ")}`
                 : "";
