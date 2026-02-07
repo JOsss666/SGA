@@ -3,13 +3,16 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "mainPrintApp.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "start": "node ./api/server.js",
     "server-dev": "nodemon ./api/server.js",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron-dev": "electron .",
+    "electron-pack": "electron-builder build --win --publish never"
   },
   "dependencies": {
     "@lightningchart/lcjs": "^8.1.1",
@@ -49,6 +52,8 @@
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^40.2.1",
+    "electron-updater": "^6.7.3",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",

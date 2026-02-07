@@ -357,3 +357,22 @@ export const arrayToTree = (flatArray, rootIdValue = null) => {
     return tree;
 };
 
+export function printCashRecipt(info){
+    if (window.require) {
+        alert('Imprimiendo recibo');
+        const { ipcRenderer } = window.require('electron');
+        
+        const contenidoHTML = `
+            <div style="text-align: center; font-family: sans-serif;">
+                <h1>SGA - RECIBO</h1>
+                <p>Impresión desde Escritorio</p>
+                <hr>
+                <p>Prueba de conexión exitosa</p>
+            </div>
+        `;
+        ipcRenderer.send('print-receipt', contenidoHTML);
+    } else {
+        alert("Esta función solo está disponible en la App de Escritorio.");
+    }
+}
+

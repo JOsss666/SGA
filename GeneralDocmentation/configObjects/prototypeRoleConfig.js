@@ -212,7 +212,8 @@ let userConfig = {
                 "overAll":true
             },
             "cashBoxes":{
-                "overAll":true
+                "overAll":true,
+                "enabled":[]
             }
         },
         "services":{
