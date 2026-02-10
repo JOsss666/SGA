@@ -57,11 +57,11 @@ let userConfig = {
         },
         "stores":{
             "overAll":true,
-            "enabled":[]
+            "enabled":[1,2,4]
         },
         "cellars":{
             "overAll":true,
-            "enabled":[]
+            "enabled":[2]
         },
         "bussines":{
             "overAll":true,

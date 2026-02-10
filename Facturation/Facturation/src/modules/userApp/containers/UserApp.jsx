@@ -95,7 +95,6 @@ export function UserApp(){
             }
         }
     });
-
         
     const filterOptions = (value) => {
         if (!quickSearch) return true; 

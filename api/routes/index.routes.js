@@ -28,6 +28,8 @@ const upload = multer({ dest: CHUNKS_DIR });
 
     router.post('/processAiRequest',controller.processAiRequest);
 
+    router.post('/getAttachedFiles',controller.getAttachedFiles);
+
     router.post('/logIn',controller.logIn);
 
     router.post('/logOut',controller.logOut);
@@ -163,6 +165,8 @@ router.post('/inventory/getDepartures',inventoryController.getDepartures);
 router.post('/inventory/getRotation',inventoryController.getRotation);
 
 router.post('/inventory/getKardex',inventoryController.getKardex);
+
+router.post('/getServiceMovements',inventoryController.getServicesMovements);
 
 
 // SGA - PROCESS

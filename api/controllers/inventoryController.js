@@ -1130,6 +1130,44 @@ inventoryController.getKardex = (req,res)=>{
     })
 }
 
+inventoryController.getServicesMovements = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        console.log(info)
+        let sentence = `
+            SELECT
+                "Inventory".services_movement.*,
+                "Inventory"."products&services".name AS service_name,
+                "Inventory"."products&services".img AS service_img,
+                "Inventory"."products&services".type
+                 AS service_type
+            FROM
+                "Inventory".services_movement
+            LEFT JOIN
+                "Inventory"."products&services"
+            ON
+                "Inventory".services_movement.service_id = "Inventory"."products&services".id
+            WHERE
+                "Inventory".services_movement.company_id = $1 AND "Inventory".services_movement.doc_id = $2
+            ;
+        `;
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.doc_id
+        ],1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 export default inventoryController;
 
 

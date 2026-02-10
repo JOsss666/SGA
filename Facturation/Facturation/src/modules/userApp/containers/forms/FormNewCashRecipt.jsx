@@ -79,7 +79,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         attached,
         instance_id,
         step_id,
-        payedBills:briefCaseBills
+        payedBills:briefCaseBills,
+        cashBox_id
     }
 
     // PreProcess functions

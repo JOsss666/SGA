@@ -1,5 +1,9 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import path from 'path'
+import unixPrinter from 'unix-print'; 
+import ptp from 'pdf-to-printer'; // 🚩 Faltaba esta importación
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
 let mainWindow;
 
@@ -8,66 +12,48 @@ function createWindow() {
         width: 1200,
         height: 800,
         webPreferences: {
-            // Esto es clave: permite que la web de Render acceda a funciones de Node
             nodeIntegration: true, 
             contextIsolation: false,
-            // Permite cargar scripts locales desde una web remota
             webSecurity: false 
         }
     });
 
-    // Cargamos tu app desde la nube
-    
     //mainWindow.loadURL('https://facturation.sga360.co');
-    mainWindow.loadURL('http://localhost:5173/SGA_management/logIn');
-
+    mainWindow.loadURL('http://localhost:5173/');
     mainWindow.on('closed', () => { mainWindow = null; });
 }
 
-// Función para listar impresoras y encontrar la térmica
-ipcMain.handle('get-printers', async () => {
-    let aviablePrinters = await mainWindow.webContents.getPrintersAsync()
-    console.log('Impresoras: ',aviablePrinters)
-    return aviablePrinters;
-});
-
-// Escuchamos la petición de impresión que viene desde la NUBE
 ipcMain.on('print-receipt', async (event, htmlContent) => {
-    console.log("--- Iniciando proceso de impresión ---"); // Verás esto en la Terminal
-
-    let workerWindow = new BrowserWindow({ show: false });
-    workerWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
-
-    const printers = await workerWindow.webContents.getPrintersAsync();
+    let tempWindow = new BrowserWindow({ show: false });
     
-    // 🚩 LOG: Ver todas las impresoras detectadas por el sistema
-    console.log("Impresoras detectadas:", printers.map(p => p.name));
+    try {
+        await tempWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
 
-    const thermalPrinter = printers.find(p => 
-        p.name.toUpperCase().includes('POS') || 
-        p.name.includes('80')
-    );
-
-    if (thermalPrinter) {
-        console.log(`Impresora seleccionada: ${thermalPrinter.name}`);
-    } else {
-        console.warn("No se encontró impresora térmica. Se usará la predeterminada.");
-    }
-
-    workerWindow.webContents.on('did-finish-load', () => {
-        workerWindow.webContents.print({
-            silent: true,
-            deviceName: thermalPrinter ? thermalPrinter.name : ''
-        }, (success, failureReason) => {
-            // 🚩 LOG: Saber si la orden llegó a la impresora
-            if (!success) {
-                console.error(`Error de impresión: ${failureReason}`);
-            } else {
-                console.log("Orden enviada a la cola de impresión exitosamente.");
-            }
-            setTimeout(() => { workerWindow.close(); }, 1000);
+        const tempPath = path.join(os.tmpdir(), `recibo-${Date.now()}.pdf`);
+        
+        // Generamos PDF optimizado para ticket térmico
+        const data = await tempWindow.webContents.printToPDF({
+            marginsType: 1, // Sin márgenes
+            pageSize: { width: 80000, height: 150000 }, // 80mm x 150mm
+            printBackground: true
         });
-    });
+
+        fs.writeFileSync(tempPath, data);
+
+        if (process.platform === 'win32') {
+            // Configuración para el PC de la oficina
+            await ptp.print(tempPath, { printer: "SGA_Termica" });
+        } else {
+            // Configuración para tu MacBook Air de desarrollo
+            await unixPrinter.print(tempPath, 'SGA_Termica', ['-o raw']);
+        }
+        
+        console.log("Impresión enviada correctamente");
+    } catch (error) {
+        console.error("Fallo en el proceso de impresión:", error);
+    } finally {
+        tempWindow.close(); // Cerramos siempre la ventana temporal
+    }
 });
 
 app.whenReady().then(createWindow);

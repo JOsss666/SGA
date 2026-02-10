@@ -40,7 +40,7 @@ facturationController.newClientOrder = (req,res)=>{
             info.instance_id != "" && info.instance_id != undefined? info.step_id:undefined
         ],3);
 
-        if(info.productsServices != undefined){
+        if(info.productsServices != undefined && consulta.id != undefined){
             for(const element of info.productsServices){
                 let insertMovSen = `
                     INSERT INTO "Inventory".services_movement(
@@ -52,8 +52,9 @@ facturationController.newClientOrder = (req,res)=>{
                         unit_value,
                         total,
                         description,
-                        instance_id)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+                        instance_id,
+                        doc_id)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
                 `
                 let inserServMovement = await useDataBase(insertMovSen,[
                     info.company_id,
@@ -65,6 +66,7 @@ facturationController.newClientOrder = (req,res)=>{
                     element.total,
                     element.description,
                     info.instance_id != "" && info.instance_id != undefined? info.instance_id:undefined,
+                    consulta.id
                 ],2);
                 console.log(inserServMovement)
             }

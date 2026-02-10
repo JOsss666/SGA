@@ -45,7 +45,7 @@ controller.uploadFile = async (req, res) => {
     console.log("Archivo recibido");
     try {
         const archivos = req.files;
-
+        const info = JSON.parse(req.body.info);
         if (!archivos || archivos.length === 0) {
             return res.status(400).json({ mensaje: "No se enviaron archivos" });
         }
@@ -54,9 +54,26 @@ controller.uploadFile = async (req, res) => {
 
         // Subir archivos uno por uno
         for (const archivo of archivos) {
+            console.log(archivo);
             const resultado = await uploadToCloudinary(archivo.buffer, archivo.originalname);
-            urls.push(resultado.secure_url);
+            let insertUpload = await useDataBase(`
+                INSERT INTO "Ecosystem".attached(
+                    company_id, uploaded_by, name, size, type,url)
+                VALUES ($1,$2,$3,$4,$5,$6) RETURNING id;
+            `,[
+                info.company_id,
+                info.user_id,
+                archivo.originalname,
+                archivo.size,
+                archivo.mimetype,
+                resultado.secure_url
+            ],3);
+            if(insertUpload.id != undefined){
+                urls.push({id:insertUpload.id,url:resultado.secure_url})   
+            }
         }
+
+        // Espacio para insertar en la base de datos,
 
         res.json({ urls });
 
@@ -65,6 +82,45 @@ controller.uploadFile = async (req, res) => {
         res.status(500).json({ mensaje: e.message });
     }
 };
+
+
+controller.getAttachedFiles = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let whereClauses = [];
+        let values = []
+
+        whereClauses.push(`company_id = $1`)
+        values.push(info.company_id)
+
+       if(info.allowedDocs != undefined){
+            whereClauses.push(`id = ANY($${values.length +1})`);
+            values.push(info.allowedDocs);
+        }
+
+        const whereQuery = whereClauses.length > 0
+        ? `WHERE ${whereClauses.join(" AND ")}`
+        : "";
+
+        let sentence = `
+            SELECT * 
+            FROM "Ecosystem".attached
+            ${whereQuery} ORDER BY name ASC;
+        `;
+
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
 
 controller.createCompany = (req,res)=>{
     let data = '';

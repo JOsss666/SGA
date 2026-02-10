@@ -1,6 +1,201 @@
 
 .PreviewDocument{
-    height: 100dvh;
-    width: 100dvw;
+    height: 100%;
+    width: 93dvw;
     background-color: var(--bg);
+    padding: 2vh 4vh;
+    display: flex;
+    flex-direction:column;
+}
+
+.PreviewDocument .DescriptionSpan{
+    padding-left: 2vh;
+}
+
+.PreviewDocument .titleDocContainer{
+    display: flex;
+    margin: 1vh 0;
+    padding: 0 1vh;
+    margin-top: 3vh;
+    margin-bottom: 2vh;
+}
+
+.PreviewDocument .titleDocContainer .BoldTitle{
+    margin: auto 1vh;
+}
+
+.PreviewDocument .thirdPartyAndCompanyInfo{
+    display: flex;
+    margin: 0;
+    margin-bottom: 3vh;
+    padding-left: 2vh;
+}
+
+.PreviewDocument .thirdPartyAndCompanyInfo .UserCard{
+    padding: 0;
+    margin: 0;
+    width: fit-content;
+}
+
+.PreviewDocument .titleDocContainer i{
+    font-size: clamp(3px,3.5vh,35px);
+    margin: auto 0;
+    margin-right: 1vh;
+    color: var(--mainText);
+    transition: .3s;
+}
+
+.PreviewDocument .attachedDocuments{
+    display: flex;
+    flex-direction: column;
+    margin-top: 2vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.PreviewDocument .attachedDocuments h6{
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 400;
+    color: var(--descriptionText);
+    margin-left: 2vh;
+}
+
+.PreviewDocument .detailsDocument{
+    height: fit-content;
+    margin: 2vh 0;
+    width: 100%;
+    border-radius: 2vh;
+    background-color: var(--cardHover);
+    padding: 2vh;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.PreviewDocument .detailsDocument .serviceDescriptionCard{
+    display: flex;
+    width: 100%;
+    border-bottom: dashed .2vh var(--inputsBorder);
+    padding-bottom: 1vh;
+}
+
+.PreviewDocument .detailsDocument .serviceDescriptionCard .UserCard{
+    width: 45%;
+    margin: auto 0;
+}
+
+.PreviewDocument .detailsDocument .serviceDescriptionCard .jobDesc{
+    display: flex;
+    flex-direction: column;
+    margin: auto 4vh;
+} 
+
+.PreviewDocument .detailsDocument .serviceDescriptionCard .jobDesc span{
+    font-size: clamp(2.2px,2.2vh,22px);
+    color: var(--descriptionText);
+    margin-bottom: .5vh;
+}
+
+.PreviewDocument .detailsDocument .serviceDescriptionCard .jobDesc strong{
+    font-size: clamp(2.5px,2.5vh,25px);
+    font-weight: 500;
+    color: var(--mainText);
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid{
+    display: flex;
+    flex-direction: column;
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard{
+    display: flex;
+    padding: 1.5vh 2vh;
+    cursor: pointer;
+    border-bottom: solid .1vh var(--inputsBorder);
+    transition: .3s;
+    position: relative;
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard .MoreOptions{
+    margin: auto;
+    margin-right: 2vh;
+}
+
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard .fileIcon{
+    font-size: clamp(3px,3vh,30px);
+    color: var(--descriptionText);
+    margin: auto 0;
+    margin-right: 1vh;
+    width: 3vh;
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard .fa-file-image{
+    color: #2B7FFF;
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard .fa-file-word{
+    color: #1447E6;
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard .fa-file-pdf{
+    color: #FB2C36;
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard .fa-file-excel{
+    color: #18786F;
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard .fa-file-powerpoint{
+    color: #F54927;
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard .fa-file-lines{
+    color: var(--mainText);
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard .fa-file-zipper{
+    color: #D0872E;
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard .fa-photo-film{
+    color: #615FFF;
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard:hover{
+    border-radius: 1vh;
+    background-color: var(--cardHover);
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard strong,
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard span{
+    margin: auto 2vh;
+    width: max-content;
+    font-weight: 400;
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard .fileName{
+    width: 30%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+    white-space: none;
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .noResults{
+    display: flex;
+    padding: 2vh;
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .noResults strong{
+    font-size: clamp(2.5px,2.5vh,25px);
+    font-weight: 400;
+    color: var(--descriptionText);
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard:hover strong{
+    color: var(--mainText);
 }
