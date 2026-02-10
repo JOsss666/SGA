@@ -37,6 +37,8 @@ import {StoreDetail} from './StoreDetail'
 import { Categories } from './Categories';
 import { Products } from './Products';
 import { CategoriesDetail } from './CategoriesDetail';
+import { NoAccess } from '../../../../../../Treasury/SGA - Treasuty/src/modules/userApp/containers/NoAccess';
+import { useRealtime } from '../../../utils/useRealTime';
 import './UserApp.css';
 import { Calendar } from './Calendar';
 
@@ -44,10 +46,11 @@ import { Calendar } from './Calendar';
 export function UserApp(){
 
     // Context Info
-    const {appInfo,userInfo,loadingAppData,darkMode,getAppData,optionsMenu,secondOptionsMenu,routesApp} = useAppInfo();
+    const {appInfo,userInfo,loadingAppData,darkMode,getAppData,optionsMenu,secondOptionsMenu,routesApp,userConfig} = useAppInfo();
     const {openPreview,setOpenPreview} = usePreview();
     const {openAlert,popOutAlert} = useAlert();
     const {visibleChatAi,setVisibleChatAi} = useAiAssistant();
+    const [statusPage,setStatusPage] = useState('loading');
 
     // Container Params
     const [visibleMenu,setVisibleMenu] = useState(false);
@@ -116,6 +119,20 @@ export function UserApp(){
             setVisibleChatAi(false);
         }
     }, [visibleNotifications]);
+
+    useEffect(()=>{
+        if(userConfig.access != undefined){
+            if(!userConfig.access.suspended){
+                if(userConfig.access.modules.treasury.use == true){
+                    setStatusPage('page')
+                }else{
+                    setStatusPage('noAccess');
+                }
+            }else{
+                setStatusPage('suspended')
+            }
+        }
+    },[userConfig])
 
 
     return(
@@ -208,6 +225,12 @@ export function UserApp(){
             )}
             {loadingAppData && (
                 <LoadingAppDataPage/>
+            )}
+            {!loadingAppData && statusPage == 'noAccess' && (
+                <NoAccess/>
+            )}
+            {!loadingAppData && statusPage == 'suspended' && (
+                <SuspendedAccount/>
             )}
         </div>
     )
