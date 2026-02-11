@@ -32,7 +32,7 @@ export function NotificationsProvider({children}){
     const [notifications,setNotifications] = useState([]);
     let localIndexOfNoti = 0;
 
-   const addNotification = (newNotification) => {
+    const addNotification = (newNotification) => {
         // 1. Generamos un ID único basado en el tiempo para que no colisionen
         const id = Date.now() + Math.random(); 
         
