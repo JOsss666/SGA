@@ -149,6 +149,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 }else{
                     temInfo.cashBox_id = userConfig.access.sections.cashBoxes.enabled[0]
                     setBussines_id(userConfig.access.sections.cashBoxes.enabled[0])
+                    getCashBoxes(userConfig.access.sections.cashBoxes.enabled)
                 }
             }else{
                 await getCashBoxes();
@@ -210,8 +211,12 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     }
 
     const handleCashBoxChange = (element)=>{
-        setCashBox_id(element.id)
-        setShift_id(element.shift_id)
+        console.log('zzzzz ',element)
+        if(element.id != undefined){
+            console.log('Elemento actualizado correctamente')
+            setCashBox_id(element.id)
+            setShift_id(element.shift_id)
+        }
     }
 
     useEffect(()=>{
@@ -268,6 +273,10 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                     allowedCashBoxes:allowedCashBoxes
                 })
             });
+            console.log(C)
+            if(C.length == 1){
+                handleCashBoxChange(C[0].value);
+            }
             setCashBoxes(C);
         }
     }
