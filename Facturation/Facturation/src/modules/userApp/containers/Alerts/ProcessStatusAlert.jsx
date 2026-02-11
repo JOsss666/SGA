@@ -5,11 +5,12 @@ import { postInfo } from "../../../../utils/functions";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { FormInput } from "../../components/FormInput";
 import { LoadingSpace } from "../LoadingSpace";
+import { PreviewDocument } from "../Preview/PreviewDocument";
 
 export function ProcessStatusAlert({instance_id,reloadFun}){
 
     // requirements
-    const {popOutAlert} = useAlert();
+    const {popOutAlert, popInAlert} = useAlert();
     const {addNotification} = useNotifications();
     const {appInfo,userInfo,userConfig} = useAppInfo();
     const [info,setInfo] = useState({});
@@ -284,7 +285,9 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                                 ) : null;
                                             })}
                                             {element.attached_Docs != undefined && element.attached_Docs?.map((attDoc,index)=>(
-                                                <span key={index} className="attachedDoc">
+                                                <span key={index} className="attachedDoc" onClick={()=>{
+                                                        popInAlert(<PreviewDocument id={attDoc.id}/>)
+                                                    }}>
                                                     <i className="fa-solid fa-file-circle-check"/>
                                                     {`${attDoc.document_type} #${attDoc.ownSerial}`}
                                                 </span>

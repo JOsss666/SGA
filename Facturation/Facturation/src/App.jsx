@@ -42,7 +42,7 @@ function App() {
                         </AlertProvider>
                       </AppInfoProvider>
                     </>} />
-                    <Route path='/preview' element={<PreviewDocument/>}/>
+                    <Route path='/preview/:company_key/:doc_id' element={<PreviewDocument/>}/>
                 </Routes>
             </Router>
         </div>

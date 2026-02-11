@@ -7,6 +7,8 @@ export function ServicesGrid(){
     const params = useParams();
     const {userConfig} = useAppInfo();
 
+    console.log(userConfig)
+
     let services = [
         ...(userConfig.access.modules.management.use == true ? [{
             text:'Administración',
@@ -31,7 +33,7 @@ export function ServicesGrid(){
         ...(userConfig.access.modules.facturation.use == true ? [{
             text:'Facturación',
             img:'https://res.cloudinary.com/djjxugmni/image/upload/v1761582962/ChatGPT_Image_7_sept_2025_16_22_25_vtvxph.png',
-            path:`https://www.process.sga360.co/SGA_process/${params.company_key}/${params.user_key}/`
+            path:`https://facturation.sga360.co/SGA_management/${params.company_key}/${params.user_key}/`
         }] : []),
         ...(userConfig.access.modules.contability.use == true ? [{
             text:'Contabilidad',
@@ -43,12 +45,12 @@ export function ServicesGrid(){
             img:'https://i.pinimg.com/1200x/0a/5b/83/0a5b8348a20c7f9e2eb608fd76719ed4.jpg',
             path:`https://www.process.sga360.co/SGA_process/${params.company_key}/${params.user_key}/`
         }] : []),
-        ...(userConfig.access.modules.ctools.use == false ? [{
+        ...(userConfig.access.modules.ctools.use == true ? [{
             text:'Ctools',
             img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044183/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.png',
             path:`https://www.process.sga360.co/SGA_process/${params.company_key}/${params.user_key}/`
         },] : []),
-        ...(userConfig.access.modules.certicloud.use == false ? [{
+        ...(userConfig.access.modules.certicloud.use == true ? [{
             text:'CertiCloud',
             img:'https://res.cloudinary.com/djjxugmni/image/upload/v1759160717/logo_certicloud-_perfil_azul_2_ljka0q.png',
             path:`https://www.process.sga360.co/SGA_process/${params.company_key}/${params.user_key}/`

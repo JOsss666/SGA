@@ -11,6 +11,9 @@ import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
 import { FileInput } from "../../components/FileInput";
 import { NewElementSelect } from "../../components/NewElementSelect";
 import { FormNewThirdParties } from "./FormNewThirdParties";
+import { LabelValue } from "../../components/LabelValue";
+import { SwitchOption } from "../../components/SwitchOption";
+import { TagIndicator } from "../../components/TagIndicator";
 
 export function FormNewClientOrder({params,reloadFun}){
 
@@ -24,6 +27,7 @@ export function FormNewClientOrder({params,reloadFun}){
     const [processInstances,setProcessInstances] = useState([]);
     const [step_id,setStep_id] = useState();
     const [productsServicesArray,setProductsServicesArray] = useState([]);
+    const [taxedTransactions,setTaxedTransactions] = useState(false);
 
     // control
     const [disabled,setDisabled] = useState(false);
@@ -346,6 +350,9 @@ export function FormNewClientOrder({params,reloadFun}){
                         )}
                         {cotizationView && (
                             <div className="gridServicesProductsContainer">
+                                <LabelValue title={"Factura electronica"}>
+                                    <SwitchOption action={setTaxedTransactions}/>    
+                                </LabelValue> 
                                 <SearchinList title={'Productos - Servicios'}
                                     action={addPService}
                                     list={productsServicesArray}
@@ -354,22 +361,34 @@ export function FormNewClientOrder({params,reloadFun}){
                                 />
                                 <div className="gridPaymentMethods">
                                     {productsServices.map((element,index)=>(
-                                        <div key={index} className="PaymentMethodCard">
-                                            <strong>{element.name}</strong>
-                                            <input className="unitsInp" step={1} required type="number" min={1} placeholder="unidades" onChange={(e)=>{
-                                                updatePServiceUnits(element.id,e.target.value)
-                                            }}/>
-                                            <input step={0.001} type="number" required placeholder="Valor unitatio: $0" onChange={(e)=>{
-                                                updatePServiceValue(element.id,"unit_value",e.target.value)
-                                            }}/>
-                                            <input step={0.001} type="text" placeholder="Descripción" onChange={(e)=>{
-                                                updatePServiceDescription(element.id,e.target.value)
-                                            }}/>
-                                            <span className="ttlValUnitIndicator">{formatCurrency(element.total || 0)}</span>
-                                            <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
-                                                removePService(element.id)
-                                            }}/>
-                                        </div>
+                                        <>
+                                            {taxedTransactions && element.taxed && (
+                                                <div className="taxInfoC">
+                                                    <div className="taxIndicator">
+                                                        <i className="fa-solid fa-sack-dollar"/>
+                                                        <span>{element.tax_name}</span>
+                                                        <TagIndicator title={`${element.tax_rate}%`}/>
+                                                        <strong>$ {formatCurrency(element.units * parseFloat(element.unit_value) * (parseFloat(element.tax_rate) / 100))}</strong>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            <div key={index} className="PaymentMethodCard">
+                                                <strong>{element.name}</strong>
+                                                <input className="unitsInp" step={1} required type="number" min={1} placeholder="unidades" onChange={(e)=>{
+                                                    updatePServiceUnits(element.id,e.target.value)
+                                                }}/>
+                                                <input step={0.001} type="number" required placeholder="Valor unitatio: $0" onChange={(e)=>{
+                                                    updatePServiceValue(element.id,"unit_value",e.target.value)
+                                                }}/>
+                                                <input step={0.001} type="text" placeholder="Descripción" onChange={(e)=>{
+                                                    updatePServiceDescription(element.id,e.target.value)
+                                                }}/>
+                                                <span className="ttlValUnitIndicator">{formatCurrency(element.total || 0)}</span>
+                                                <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
+                                                    removePService(element.id)
+                                                }}/>
+                                            </div>
+                                        </>
                                     ))}
                                 </div>
                                 <h5 className="IndicatorTotalValue">
@@ -378,7 +397,7 @@ export function FormNewClientOrder({params,reloadFun}){
                             </div>
                         )}
                         <FormInput title={'Descripción'} textArea={true} disabled={disabled} action={setDescription} placeholder={'Referencia de la orden'}/>
-                        <FileInput placeholder={'Adjuntar archivo'} action={setAttached}/>
+                        <FileInput placeholder={'Adjuntar archivo'} action={setAttached} multiple={true}/>
                         <SearchinList title={'Estado'} action={setStatus} list={[
                             {text:'active'},
                             {text:'disabled'},

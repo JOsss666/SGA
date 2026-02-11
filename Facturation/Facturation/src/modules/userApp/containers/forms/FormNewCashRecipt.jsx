@@ -7,7 +7,6 @@ import { InputFiles } from "../../components/InputFiles";
 import { FormButton } from "../../components/FormButton";
 import './FormNewCashRecipt.css'
 import { FileInput } from "../../components/FileInput";
-import { id } from "date-fns/locale";
 import { LoadingSpace } from "../LoadingSpace";
 import { postInfo } from "../../../../utils/functions";
 import { NewElementSelect } from "../../components/NewElementSelect";
@@ -30,7 +29,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const [concepts,setConcepts] = useState([]);
     const [documents,setDocuments] = useState([]);
     const [cashBoxes,setCashBoxes] = useState([]);
-    const [briefCaseBills,setBriefCaseBills] = useState([]);
+        // BirefCase Bills requirements
+        const [briefCaseBills,setBriefCaseBills] = useState([]);
 
     // control
     const [mode,setMode] = useState('process_instance');
@@ -78,7 +78,9 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         total,
         attached,
         instance_id,
-        step_id
+        step_id,
+        payedBills:briefCaseBills,
+        cashBox_id
     }
 
     // PreProcess functions
@@ -109,7 +111,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         setLoading(true)
         await getThirdParties();
         await getConcepts();
-        await getCashBoxes();
         let temInfo = {}
         if(userConfig.access != undefined){
             console.log(userConfig.access)
@@ -139,6 +140,18 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             }else{
                 // GetBussines sin filtro
                 await getBussines();
+            }
+
+            if(userConfig.access.sections.cashBoxes.overAll){
+                if(userConfig.access.bussines.enabled.length > 1){
+                    //getCashBoxes con filtro
+                    await getCashBoxes(userConfig.access.sections.cashBoxes.enabled)
+                }else{
+                    temInfo.cashBox_id = userConfig.access.sections.cashBoxes.enabled[0]
+                    setBussines_id(userConfig.access.sections.cashBoxes.enabled[0])
+                }
+            }else{
+                await getCashBoxes();
             }
 
             // Filtro para busqueda de Centros de costo
@@ -186,6 +199,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 getBriefcasesBills();
             }else{
                 setMode('process_instance')
+                setBriefCaseBills([]);
             }
         }
     }
@@ -223,7 +237,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const getInstances = async(allowedInstances,allowedTypes)=>{
         let res = await postInfo('/process/getProcessInstances',{
             company_id:appInfo.company_id,
-            status:'active'
+            status:['active']
         })
         console.log(res);
         if(res[0]){
@@ -238,7 +252,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         }
     }
 
-    const getCashBoxes = async()=>{
+    const getCashBoxes = async(allowedCashBoxes)=>{
         let res = await postInfo('/facturation/getCashBoxes',{
             company_id:appInfo.company_id
             //user_id:userInfo.user_id
@@ -250,7 +264,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 console.log(element);
                 C.push({
                     text:element.name,
-                    value:element
+                    value:element,
+                    allowedCashBoxes:allowedCashBoxes
                 })
             });
             setCashBoxes(C);
@@ -312,7 +327,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const getConcepts = async()=>{
         let res = await postInfo('/getConcepts',{
             company_id:appInfo.company_id,
-            typePlanAccount:appInfo.accountPlanType
+            typePlanAccount:appInfo.accountPlanType,
+            allowedConcepts:userConfig.access.sections.concepts.overAll ? undefined:userConfig.access.sections.concepts.enabled
         })
         console.log(res)
         if(res[0]){
@@ -470,6 +486,22 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         )
     }
 
+
+    // Function for control payments of BirefCaseBills
+    const updateBriefCasePayedValue = (newValue,id)=>{
+        setBriefCaseBills(prev => 
+            prev.map(item => 
+                item.id === id 
+                    ? { ...item, ["paid_value"]: newValue } 
+                    : item
+            )
+        );
+    }
+
+    useEffect(()=>{
+        console.log(briefCaseBills)
+    },[briefCaseBills])
+
     useEffect(()=>{
         console.log(documents)
         if(documents.length > 0){
@@ -479,8 +511,15 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             });
             setTotalToPay(newTotalToPay);
         }
+        if(briefCaseBills.length >0 && documents.length == 0){
+            let newTotalToPay = 0;
+            briefCaseBills.forEach(element => {
+                newTotalToPay += (element.paid_value != undefined && element.paid_value != "" ? element.paid_value:0);
+            });
+            setTotalToPay(newTotalToPay)
+        }
         calcTotalFromPayments();
-    },[documents])
+    },[documents,briefCaseBills])
 
     // Creation Function
 
@@ -498,7 +537,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             FormInfo["user_id"] = userInfo.user_id,
             FormInfo['transactionDetails'] = []
             FormInfo['instance_id'] = instance_id;
-            
             paymentMethod.forEach(element => {
                 FormInfo.transactionDetails.push({
                     account_id:element.account_id,
@@ -511,7 +549,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                     for_wallet:element.for_wallet,
                     voucher:element.voucher,
                     cashBox_id,
-                    shift_id
+                    shift_id,
                 })
             });
             FormInfo.transactionDetails.push({
@@ -575,6 +613,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     
 
     useEffect(()=>{
+        console.log(thirdPartyInfo)
         if(thirdPartyInfo.id != undefined){
             // Update of crefit conditions of thirdParty
             setAbleCredit(thirdPartyInfo.credit != undefined ? thirdPartyInfo.credit:0);
@@ -596,7 +635,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         }
     },[instance_id])
 
-
     return(
         <div className="FormNewCashRecipt">
             <div className="headForm">
@@ -604,7 +642,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                     <i className="fa-solid fa-receipt"/>
                 </BoldTitle>
                 <div className="valuesCashRecipt">
-                    {instance_id != undefined && (
+                    {(instance_id != undefined || mode == 'briefcase_payment')&& (
                         <h6 className="valueCashRecipt">Valor a cobrar: $ {formatCurrency(totalToPay)}</h6>
                     )}
                     <h6 className="valueCashRecipt">Valor: $ {formatCurrency(total)}</h6>
@@ -638,18 +676,28 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                             }}/>
                         }/>
                     )}
-                    <SearchinList action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
-                    <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja'} list={cashBoxes} disabled={disabled}/>
+                    {info.concept_id == undefined && (
+                        <SearchinList action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
+                    )}
+                    {info.cashBox_id == undefined && (
+                        <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja'} list={cashBoxes} disabled={disabled}/>
+                    )}
                     {mode == 'briefcase_payment' && (
                         <div className="aviableBriefCaseContainer">
                             <h6>Cuentas por cobrar</h6>
                             <div className="gridBirefCaseBills">
                                 {briefCaseBills.map((element,index)=>(
                                     <div key={index} className="briefCaseCard">
-                                        <strong>{`${element.process_code}#${element.instance_id}`}</strong>
+                                        <strong>{`${element.process_code != undefined? element.process_code:'--'}#${element.instance_id != undefined? element.instance_id:'---'}`}</strong>
                                         <span>Valor: {formatCurrency(element.pending_amount)}</span>
                                         <span>Vence: {formatDate(element.due_date)}</span>
-                                        <input type="number" min={0} max={element.pending_amount} step={0.1} disabled={disabled} placeHolder={'$ 0'} />
+                                        <input type="number" min={0} max={element.pending_amount} step={0.1} disabled={disabled} placeHolder={'$ 0'} onChange={(e)=>{
+                                            if(e.target.value != '' && e.target.value != undefined){
+                                                updateBriefCasePayedValue(e.target.value,element.id)
+                                            }else{
+                                                updateBriefCasePayedValue(0,element.id);
+                                            }
+                                        }} />
                                     </div>
                                 ))}
                             </div>
@@ -669,9 +717,16 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                                     <div key={index} className={`PaymentMethodCard ${disabledByValue? 'disabledPaymentMethodCard':''}`}>
                                         <div className="payMC">
                                             <strong>{element.name}</strong>
-                                            <input step={0.001} type="number" placeholder="$0" onChange={(e)=>{
-                                                updatePaymentValue(element.id,"value",e.target.value)
-                                            }}/>
+                                            {!element.for_balance && (
+                                                <input step={0.001} type="number" placeholder="$0" onChange={(e)=>{
+                                                    updatePaymentValue(element.id,"value",e.target.value)
+                                                }}/>
+                                            )}
+                                            {element.for_balance && (
+                                                <input step={0.001} max={thirdPartyInfo.thirdParty_balance} type="number" placeholder={`Max $ ${formatCurrency(thirdPartyInfo.thirdParty_balance)}`} onChange={(e)=>{
+                                                    updatePaymentValue(element.id,"value",e.target.value)
+                                                }}/>
+                                            )}
                                             <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
                                                 removePaymentMethod(element.id)
                                             }}/>

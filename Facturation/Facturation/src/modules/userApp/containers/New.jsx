@@ -1,4 +1,4 @@
-import { useAlert } from "../../../context/context"
+import { useAlert, useAppInfo } from "../../../context/context"
 import { BoldTitle } from "../components/BoldTitle";
 import { DescriptionSpan } from "../components/DescriptionSpan";
 import { FormNewBussines } from "./forms/FormNewBussines";
@@ -18,20 +18,26 @@ import { FormNewDC } from "./forms/FormNewDC";
 import { FormNewCashRecipt } from "./forms/FormNewCashRecipt";
 import { ProcessStatusAlert } from "./Alerts/ProcessStatusAlert";
 import { FormSelectNewProcess } from "./forms/FormSelectNewProcess";
+import { FormNewClientOrder } from "./forms/FormNewClientOrder";
+import { printCashRecipt } from "../../../utils/functions";
 
 
 export function New(){
-
+    const {userConfig} = useAppInfo();
     const {popInAlert} = useAlert();
 
     const options = [
         //{text:'Crear orden de trabajo',children:<SelectTpeNewDoc/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         {text:'Crear orden de trabajo',children:<FormSelectNewProcess/>,icon:<i className="fa-solid fa-bell-concierge"/>},
-        {text:'Crear recibo de caja',children:<FormNewCashRecipt/>,icon:<i className="fa-solid fa-receipt"/>},
-        {text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
-        {text:'Crear usuario',children:<FormNewUser/>,icon:<i className="fa-solid fa-person-circle-plus"/>},
+        ...(userConfig.access != undefined && userConfig.access.sections.cashBoxes.overAll ? [{text:'Crear recibo de caja',children:<FormNewCashRecipt/>,icon:<i className="fa-solid fa-receipt"/>}]:[]),
+        //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
+        {text:'Crear nueva orden de cliente',children:<FormNewClientOrder/>,icon:<i className="fa-regular fa-file"/>},
+        ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Crear usuario',children:<FormNewUser/>,icon:<i className="fa-solid fa-person-circle-plus"/>}]:[]),
         {text:'Crear tercero',children:<FormNewThirdParties quickCreation={true}/>,icon:<i className="fa-regular fa-user"/>},
+        {text:'Imprimir recibo',children:<button onClick={()=>{
+            printCashRecipt();
+        }}>Imprimir recibo</button>,icon:<i className="fa-regular fa-user"/>},
         //{text:'Crear metodo de pago',children:<FormNewPaymentMethod/>,icon:<i className="fa-regular fa-credit-card"/>},
         //{text:'Crear Concepto',children:<FormNewConcept/>,icon:<i className="fa-solid fa-scale-balanced"/>},
         //{text:'Crear Producto',children:<FormNewProduct/>,icon:<i className="fa-solid fa-shirt"/>},
@@ -40,8 +46,7 @@ export function New(){
         //{text:'Crear Centro de costo',children:<FormNewCostCenter/>,icon:<i className="fa-solid fa-folder-tree"/>},
         //{text:'Crear Bodega',children:<FormNewCellar/>,icon:<i className="fa-solid fa-dolly"/>},
         //{text:'Crear línea de negocio',children:<FormNewBussines/>,icon:<i className="fa-solid fa-briefcase"/>},
-        //{text:'Crear lista de precios',children:<CreatePricesList/>,icon:<i className="fa-regular fa-file-excel"/>},
-        
+        //{text:'Crear lista de precios',children:<CreatePricesList/>,icon:<i className="fa-regular fa-file-excel"/>},   
     ]
 
     return(

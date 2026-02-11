@@ -29,7 +29,8 @@ export function CashBoxes(){
         setDisabled(true);
         setLoading(true);
         let res = await postInfo('/facturation/getCashBoxes',{
-            company_id:appInfo.company_id
+            company_id:appInfo.company_id,
+            allowedCashBoxes:userConfig.access.sections.cashBoxes.overAll ? undefined:userConfig.access.sections.cashBoxes.enabled
             //user_id:userInfo.user_id
         })
         if(res[0]){

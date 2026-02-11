@@ -45,7 +45,7 @@ controller.uploadFile = async (req, res) => {
     console.log("Archivo recibido");
     try {
         const archivos = req.files;
-
+        const info = JSON.parse(req.body.info);
         if (!archivos || archivos.length === 0) {
             return res.status(400).json({ mensaje: "No se enviaron archivos" });
         }
@@ -54,9 +54,26 @@ controller.uploadFile = async (req, res) => {
 
         // Subir archivos uno por uno
         for (const archivo of archivos) {
+            console.log(archivo);
             const resultado = await uploadToCloudinary(archivo.buffer, archivo.originalname);
-            urls.push(resultado.secure_url);
+            let insertUpload = await useDataBase(`
+                INSERT INTO "Ecosystem".attached(
+                    company_id, uploaded_by, name, size, type,url)
+                VALUES ($1,$2,$3,$4,$5,$6) RETURNING id;
+            `,[
+                info.company_id,
+                info.user_id,
+                archivo.originalname,
+                archivo.size,
+                archivo.mimetype,
+                resultado.secure_url
+            ],3);
+            if(insertUpload.id != undefined){
+                urls.push({id:insertUpload.id,url:resultado.secure_url})   
+            }
         }
+
+        // Espacio para insertar en la base de datos,
 
         res.json({ urls });
 
@@ -65,6 +82,45 @@ controller.uploadFile = async (req, res) => {
         res.status(500).json({ mensaje: e.message });
     }
 };
+
+
+controller.getAttachedFiles = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let whereClauses = [];
+        let values = []
+
+        whereClauses.push(`company_id = $1`)
+        values.push(info.company_id)
+
+       if(info.allowedDocs != undefined){
+            whereClauses.push(`id = ANY($${values.length +1})`);
+            values.push(info.allowedDocs);
+        }
+
+        const whereQuery = whereClauses.length > 0
+        ? `WHERE ${whereClauses.join(" AND ")}`
+        : "";
+
+        let sentence = `
+            SELECT * 
+            FROM "Ecosystem".attached
+            ${whereQuery} ORDER BY name ASC;
+        `;
+
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
 
 controller.createCompany = (req,res)=>{
     let data = '';
@@ -1142,6 +1198,11 @@ controller.getConcepts = (req,res)=>{
             values.push(info.id)
         }
 
+        if(info.allowedConcepts != undefined){
+            whereClauses.push(`"Ecosystem".concepts.id = ANY($${values.length +1})`);
+            values.push(info.allowedConcepts);
+        }
+
         const whereQuery = whereClauses.length > 0
                 ? `WHERE ${whereClauses.join(" AND ")}`
                 : "";
@@ -1257,6 +1318,11 @@ controller.getPaymentMethods = (req,res)=>{
             values.push(info.allowedPaymentMethods);
         }
 
+        if(info.for_wallet != undefined){
+            whereClauses.push(`for_wallet = $${values.length + 1}`);
+            values.push(info.for_wallet)
+        }
+
         const whereQuery = whereClauses.length > 0
             ? `WHERE ${whereClauses.join(" AND ")}`
             : "";
@@ -1269,7 +1335,8 @@ controller.getPaymentMethods = (req,res)=>{
                 currency,
                 status,
                 account_id,
-                for_wallet
+                for_wallet,
+                for_balance
             FROM
                 "Ecosystem".payment_methods
             ${whereQuery}
@@ -1362,6 +1429,13 @@ controller.createTransaction = (req,res)=>{
             info.costCenter_id,
             info.bussines_id
         ],3)
+
+        let updateDocPaidValue = useDataBase(`
+            UPDATE "Ecosystem".documents
+                SET paid_amount = paid_amount + $1
+            WHERE id = $2;
+        `,[info.total,info.doc_id],2);
+        
         const transId = parseInt(consulta.id)
         console.log('- ',transId)
         const cashBoxTypes = ['Cash Recipt'];
@@ -1444,7 +1518,8 @@ controller.createTransaction = (req,res)=>{
                 }
                 resultDetails.push([postConsulta.id != undefined,postConsulta.id]);
             }
-            await useDataBase(`REFRESH MATERIALIZED VIEW CONCURRENTLY "Facturation".mv_shift_payment_summaries`,[],1);
+            useDataBase(`REFRESH MATERIALIZED VIEW CONCURRENTLY "Facturation".mv_shift_payment_summaries`,[],1);
+            useDataBase(`REFRESH MATERIALIZED VIEW CONCURRENTLY "Ecosystem".mv_thirdparty_account_balances`,[],1)
             res.writeHead(200,{'Content-Type':'text/plain'})
             res.end(JSON.stringify([consulta.id,resultDetails]));
         }else{
@@ -1823,12 +1898,19 @@ controller.getThirdParties = (req,res)=>{
                 "Ecosystem"."thirdPartyComercialInfo".credit,
                 "Ecosystem"."thirdPartyComercialInfo".credit_term,
                 "Ecosystem"."thirdPartyComercialInfo".comercial_state,
-                "Ecosystem"."thirdPartyComercialInfo".aviable_credit
+                "Ecosystem"."thirdPartyComercialInfo".aviable_credit,
+                COALESCE("balances".total_db, 0) AS "thirdParty_balanceDb",
+                COALESCE("balances".total_cr, 0) AS "thirdParty_balanceCr",
+                COALESCE("balances".balance, 0) AS "thirdParty_balance"
             `;
             
             joinClause = `
                 LEFT JOIN "Ecosystem"."thirdPartyComercialInfo"
-                ON "Ecosystem".thirdParties.id = "Ecosystem"."thirdPartyComercialInfo"."thirdParty_id"
+                    ON "Ecosystem".thirdParties.id = "Ecosystem"."thirdPartyComercialInfo"."thirdParty_id"
+                LEFT JOIN "Ecosystem".mv_thirdparty_account_balances AS "balances"
+                    ON "Ecosystem".thirdParties.id = "balances"."thirdParty_id"
+                    AND "Ecosystem".thirdParties.company_id = "balances".company_id
+
             `;
         }
 
