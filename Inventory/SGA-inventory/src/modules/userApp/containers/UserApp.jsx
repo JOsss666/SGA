@@ -37,7 +37,7 @@ import {StoreDetail} from './StoreDetail'
 import { Categories } from './Categories';
 import { Products } from './Products';
 import { CategoriesDetail } from './CategoriesDetail';
-import { NoAccess } from '../../../../../../Treasury/SGA - Treasuty/src/modules/userApp/containers/NoAccess';
+import { NoAccess } from './NoAccess';
 import { useRealtime } from '../../../utils/useRealTime';
 import './UserApp.css';
 import { Calendar } from './Calendar';
@@ -137,7 +137,7 @@ export function UserApp(){
 
     return(
         <div className={`UserApp`}>
-            {!loadingAppData && (
+            {!loadingAppData && statusPage=='page' &&(
                 <>
                     <header className='headApp'>
                     <BigTitle title={appInfo.legal_name}/>
