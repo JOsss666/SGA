@@ -370,7 +370,7 @@ export function printCashRecipt(info){
                 <p>Prueba de conexión exitosa</p>
             </div>
         `;
-        ipcRenderer.send('print-receipt', contenidoHTML);
+        ipcRenderer.send('test-print-simple', contenidoHTML);
     } else {
         alert("Esta función solo está disponible en la App de Escritorio.");
     }
