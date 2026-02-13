@@ -15,6 +15,7 @@ import { ReportKardex } from './reports/ReportKardex';
 import { PathLocation } from '../components/PathLocation';
 import { ReportAccountTransactions } from './reports/ReportAccountTransactions';
 import { ProcessesReport } from './reports/ProcessesReport';
+import { EficiencyReport } from './reports/eficiencyReport';
 
 export function Reports(){
 
@@ -98,6 +99,9 @@ export function Reports(){
                             <CardReport type={'processes'} title={'Informe de procesos'} description={'Visualiza los procesos de tu empresa'} onClick={()=>{
                                 handleNavigate('Processes')
                             }}/>
+                             <CardReport type={'processes'} title={'Eficiencia usuarios'} description={'Visualiza la eficiencia de los usuarios de tu empresa'} onClick={()=>{
+                                handleNavigate('Eficiency')
+                            }}/>
                         </div>
                     </>
                 }/>
@@ -113,6 +117,7 @@ export function Reports(){
                 <Route path='/Balance/:account_id' element={<ReportAccountTransactions/>}/>
                 <Route path='/Kardex' element={<ReportKardex/>}/>
                 <Route path='/Processes' element={<ProcessesReport/>}/>
+                <Route path='/Eficiency' element={<EficiencyReport/>}/>
             </Routes>
         </div>
     )

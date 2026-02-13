@@ -40,6 +40,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         // control of credit conditions of thirdParty
         const [ableCredit,setAbleCredit] = useState(false);
         const [aviableCredit,setAviableCredit] = useState(0);
+        // Control of the conditions of the document
+        const [documentNature,setDocumentNature] = useState('DB');
     
     // form info
     const [thirdParty_id,setThirdParty_id] = useState();
@@ -202,8 +204,16 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 setMode('process_instance')
                 setBriefCaseBills([]);
             }
+
+            if(element.for_cashExit){
+                setDocumentNature('CR');
+            }
         }
     }
+
+    useEffect(()=>{
+        console.log(documentNature);
+    },[documentNature])
 
     const handleThirdPartyChange = (element)=>{
         setThirdParty_id(element.id);
@@ -553,7 +563,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                     total:element.value,
                     type:'payment',
                     paymentMethod_id:element.id,
-                    nature:'DB',
+                    nature: documentNature,
                     due_date:addDaysToCurrentDate(thirdPartyInfo.credit_term != undefined? thirdPartyInfo.credit_term:0),
                     for_wallet:element.for_wallet,
                     voucher:element.voucher,
@@ -566,7 +576,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 subtotal:total,
                 total:total,
                 type:'operation',
-                nature:'CR'
+                nature: documentNature == 'DB'? 'CR':'DB'
             })
             await toAccount();
         }else{
@@ -647,7 +657,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     return(
         <div className="FormNewCashRecipt">
             <div className="headForm">
-                <BoldTitle text={'Recibo de caja'}>
+                <BoldTitle text={documentNature == 'DB'? 'Recibo de caja':'Nuevo Egreso'}>
                     <i className="fa-solid fa-receipt"/>
                 </BoldTitle>
                 <div className="valuesCashRecipt">
@@ -681,7 +691,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                     {info.thirdParty_id == undefined && (
                         <SearchinList action={handleThirdPartyChange} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdparties} disabled={disabled} specialOption={
                             <NewElementSelect title={'Crear nuevo'} onClick={()=>{
-                                popInAlert(<FormNewThirdParties reloadFun={getThirdParties}/>)
+                                popInAlert(<FormNewThirdParties reloadFun={getThirdParties} quickCreation={true}/>)
                             }}/>
                         }/>
                     )}
