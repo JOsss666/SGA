@@ -15,7 +15,7 @@ import { ReportKardex } from './reports/ReportKardex';
 import { PathLocation } from '../components/PathLocation';
 import { ReportAccountTransactions } from './reports/ReportAccountTransactions';
 import { ProcessesReport } from './reports/ProcessesReport';
-import { EficiencyReport } from './reports/eficiencyReport';
+import { EficiencyReport } from './reports/EficiencyReport';
 
 export function Reports(){
 

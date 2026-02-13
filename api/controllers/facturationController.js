@@ -437,10 +437,13 @@ facturationController.getTransactionsOfCashRecord = (req,res)=>{
             SELECT
                 "Facturation".shift_settlement_details.id AS shift_settlement_id,
                 "Ecosystem".transaction_detail.*,
-                "Ecosystem".contable_accounts.name AS concept_name,
+                "Ecosystem".concepts.name AS concept_name,
                 "Ecosystem".contable_accounts.code AS account_code,
                 "Ecosystem".transactions.doc_type,
                 "Ecosystem".transactions.doc_id,
+                "Ecosystem".documents.instance_id,
+                "Process".process_instance."ownSerial" AS instance_serial,
+                "Process".processes.code AS process_code,
                 "Ecosystem".payment_methods.name AS payment_name,
                 "Ecosystem".thirdparties.names AS thirdParty_name,
                 "Ecosystem".thirdparties.img AS thirdParty_img
@@ -448,12 +451,20 @@ facturationController.getTransactionsOfCashRecord = (req,res)=>{
                 "Facturation".shift_settlement_details
             LEFT JOIN
                 "Ecosystem".transaction_detail
+             LEFT JOIN
+                "Ecosystem".transactions
+            ON
+                "Ecosystem".transaction_detail.transaction_id = "Ecosystem".transactions.id
             ON
                 "Facturation".shift_settlement_details."transactionDetail_id" = "Ecosystem".transaction_detail.id
             LEFT JOIN
-                "Ecosystem".contable_accounts
+                "Ecosystem".concepts
             ON 
-                "Ecosystem".transaction_detail.account_id = "Ecosystem".contable_accounts.id
+                "Ecosystem".transactions.concept_id = "Ecosystem".concepts.id
+            LEFT JOIN
+                "Ecosystem".contable_accounts
+            ON
+                "Ecosystem".concepts.account_id = "Ecosystem".contable_accounts.id
             LEFT JOIN
                 "Ecosystem".payment_methods
             ON 
@@ -463,9 +474,17 @@ facturationController.getTransactionsOfCashRecord = (req,res)=>{
             ON
                 "Ecosystem".transaction_detail."thirdParty_id" = "Ecosystem".thirdparties.id
             LEFT JOIN
-                "Ecosystem".transactions
+                "Ecosystem".documents
             ON
-                "Ecosystem".transaction_detail.transaction_id = "Ecosystem".transactions.id
+                "Ecosystem".transactions.doc_id = "Ecosystem".documents.id
+            LEFT JOIN
+                "Process".process_instance
+            ON
+                "Ecosystem".documents.instance_id = "Process".process_instance.id
+            LEFT JOIN
+                "Process".processes
+            ON
+                "Process".process_instance.process_id = "Process".processes.id
             WHERE
                 "Facturation".shift_settlement_details.company_id = $1 AND
                 "Facturation".shift_settlement_details.shift_id = $2 AND
