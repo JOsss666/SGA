@@ -12,6 +12,7 @@ import { postInfo, printCashRecipt } from "../../../../utils/functions";
 import { NewElementSelect } from "../../components/NewElementSelect";
 import { FormNewThirdParties } from "./FormNewThirdParties";
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
+import { isElectron } from "../../../../App";
 
 export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
 
@@ -552,8 +553,10 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 title:`Recibo de caja #${res.id} creado correctamente`,
                 description:`El recibo de caja #${res.id} fue creado correctamente`
             })
-            FormInfo["ownSerial"] = res.id;
-            printCashRecipt(FormInfo)
+            FormInfo["ownSerial"] = res.ownSerial;
+            if(isElectron){
+                printCashRecipt(FormInfo);
+            }
             FormInfo["doc_id"] = res.id
             FormInfo["user_id"] = userInfo.user_id,
             FormInfo['transactionDetails'] = []

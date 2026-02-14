@@ -280,15 +280,17 @@ export function AppInfoProvider({children}){
         }else{
             handleRedirect();
         }
-        let userI = await postInfo('/getUserInfo',data[3]);
-        console.log(userI);
-        if(userI[0] && userI[1][0].user_session == 1){
-            setUserInfo(userI[1][0])
-            if(userI[1][0].config != undefined){
-                setUserConfig(userI[1][0].config)
+        if(!location.pathname.startsWith('/preview/')){
+            let userI = await postInfo('/getUserInfo',data[3]);
+            console.log(userI);
+            if(userI[0] && userI[1][0].user_session == 1){
+                setUserInfo(userI[1][0])
+                if(userI[1][0].config != undefined){
+                    setUserConfig(userI[1][0].config)
+                }
+            }else{
+                handleRedirect();
             }
-        }else{
-            handleRedirect();
         }
         setLoadingAppData(false);
     }

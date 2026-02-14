@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useParams } from 'react-router-dom';
 import './App.css'
 import { UserApp } from './modules/userApp/containers/UserApp';
 import { AiAssistanProvider, AlertProvider, AppInfoProvider, NotificationsProvider, PreviewProvider } from './context/context';
@@ -7,6 +7,7 @@ import { SignUp } from './modules/Login/SignUp';
 import { PreviewDocument } from './modules/userApp/containers/Preview/PreviewDocument';
 //export const urlSer = 'http://localhost:3000';
 export const urlSer = 'https://sga-2zgp.onrender.com';
+export const isElectron = navigator.userAgent.toLowerCase().includes('electron');
 
 function App() {
   return (
@@ -42,7 +43,9 @@ function App() {
                         </AlertProvider>
                       </AppInfoProvider>
                     </>} />
-                    <Route path='/preview/:company_key/:doc_id' element={<PreviewDocument/>}/>
+                    <Route path='/preview/:company_key/:doc_id' element={<AppInfoProvider>
+                        <PreviewDocument/>
+                    </AppInfoProvider>}/>
                 </Routes>
             </Router>
         </div>

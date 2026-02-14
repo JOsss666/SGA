@@ -363,7 +363,10 @@ export function printCashRecipt(info){
         alert("Esta función solo está disponible en la App de Escritorio.");
         return;
     }
-
+    const qrUrl = `${urlSer}/preview/${appInfo.company_key}/${info.doc_id}`;
+    if(info.instance_id != undefined){
+        const procesqrUrl = `${urlSer}/preview/${appInfo.company_key}/340`;
+    }
     const { ipcRenderer } = window.require('electron');
 
     const contenidoHTML = `
@@ -376,13 +379,36 @@ export function printCashRecipt(info){
             padding:2mm;
             font-family:sans-serif;
         ">
+            <div style="
+                display:flex;
+                justify-content:center;
+                margin-bottom:4mm;
+                padding:2mm;
+            ">
+                <img 
+                    src="${qrUrl}" 
+                    style="width:32mm;height:32mm;"
+                />
+            </div>
+
+            <h1 style="
+                font-size:16px;
+                text-align:center;
+                margin:0;
+            ">
+                Z&J S.A.S
+            </h1>
             <h3 style="
                 font-size:14px;
                 font-family:monospace;
                 margin:0;
             ">
-                Recibo de caja #349
+                ${info.document_type}#${info.ownSerial}
             </h3>
+
+            <span style="font-size:12px;">
+                Concepto: Servicio de impresión digital
+            </span>
 
             <span style="font-size:12px;">
                 Tercero: José Murillo
@@ -443,6 +469,39 @@ export function printCashRecipt(info){
             <span style="font-size:12px;">
                 Nota:  ${info.description}
             </span>
+
+            <span style="
+                margin-top:8mm;
+                width:100%;
+                border-bottom:solid .2mm #000;
+                display:block;
+            "></span>
+
+            ${info.instance_id != undefined && `
+                <div style="
+                    display:flex;
+                    flex-direction:column;
+                    justify-content:center;
+                    margin-bottom:4mm;
+                    padding:4mm 2mm;
+                ">
+                    <img 
+                        src="${procesqrUrl}" 
+                        style="width:32mm;height:32mm;margin:2mm auto;"
+                    />
+
+                    <h3 style="
+                        font-size:14px;
+                        font-family:monospace;
+                        text-align:center;
+                        margin-top:2mm;
+                    ">
+                        Orden de trabajo #${instance_id}
+                    </h3>
+                </div>
+    
+            `}
+
         </div>
     `;
 

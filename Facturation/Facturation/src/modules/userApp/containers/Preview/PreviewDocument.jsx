@@ -7,8 +7,16 @@ import { DescriptionSpan } from "../../components/DescriptionSpan";
 import { UserCard } from "../../components/UserCard";
 import { csCZ, esES } from "@mui/x-date-pickers/locales";
 import { MoreOptions } from "../../components/MoreOptions";
+import { useParams } from "react-router-dom";
 
 export function PreviewDocument({id}){
+    
+    if(location.pathname.startsWith('/preview/')){
+        const params = useParams();
+        console.log(params)
+        id = params.doc_id
+    }    
+
     // Requirements
     const {appInfo} = useAppInfo();
     const [docInfo,setDocInfo] = useState({})
@@ -98,15 +106,18 @@ export function PreviewDocument({id}){
 */
 
     useEffect(()=>{
-        getDocumentInfo();
-    },[])
+        if(appInfo.company_id != undefined){
+            getDocumentInfo();
+        }
+    },[appInfo])
 
     useEffect(()=>{
         console.log(docInfo)
         if(docInfo.id != undefined){
             getAttachedServices();
             let attArray = []
-            let docsAtt = JSON.parse(docInfo.attached)
+            let docsAtt = JSON.parse(typeof(JSON.parse(docInfo.attached)) == "object"? docInfo.attached:"[]");
+            console.log(docsAtt)
             if(docsAtt != undefined && docsAtt.length > 0){
                 docsAtt.forEach(element => {
                     attArray.push(element.id);

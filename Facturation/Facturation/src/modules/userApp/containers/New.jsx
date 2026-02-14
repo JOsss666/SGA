@@ -21,13 +21,12 @@ import { FormSelectNewProcess } from "./forms/FormSelectNewProcess";
 import { FormNewClientOrder } from "./forms/FormNewClientOrder";
 import { printCashRecipt } from "../../../utils/functions";
 import { CashReciptDesign } from "./Alerts/CashReciptDesign";
+import { isElectron } from "../../../App";
 
 
 export function New(){
     const {userConfig} = useAppInfo();
     const {popInAlert} = useAlert();
-    const isElectron = navigator.userAgent.toLowerCase().includes('electron');
-
     const options = [
         //{text:'Crear orden de trabajo',children:<SelectTpeNewDoc/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
