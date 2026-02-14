@@ -88,7 +88,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
 
     // PreProcess functions
 
-
     const formatCurrency = (value) =>
             new Intl.NumberFormat("es-CO").format(value);
 
@@ -546,7 +545,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const createCashRecipt = async()=>{
         setDisabled(true)
         setLoading(true)
-        let res = await postInfo('/facturation/newCashRecipt',FormInfo);;
+        let res = await postInfo('/facturation/newCashRecipt',FormInfo);
+        console.log(res);
         if(typeof(parseInt(res.id)) == 'number'){
             addNotification({
                 type:'aproved',
@@ -555,7 +555,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             })
             FormInfo["ownSerial"] = res.ownSerial;
             if(isElectron){
-                printCashRecipt(FormInfo);
+                printCashRecipt(FormInfo,appInfo);
             }
             FormInfo["doc_id"] = res.id
             FormInfo["user_id"] = userInfo.user_id,

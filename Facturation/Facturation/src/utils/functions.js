@@ -4,6 +4,7 @@ import Papa from 'papaparse';
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { useAppInfo } from "../context/context";
 
 export async function postInfo(route,informacion){
     console.log('Funcion post');
@@ -358,14 +359,19 @@ export const arrayToTree = (flatArray, rootIdValue = null) => {
     return tree;
 };
 
-export function printCashRecipt(info){
+export function printCashRecipt(info,appInfo){
+
+    console.log(info)
+    return;
+
     if (!window.require) {
         alert("Esta función solo está disponible en la App de Escritorio.");
         return;
     }
     const qrUrl = `${urlSer}/preview/${appInfo.company_key}/${info.doc_id}`;
+    let procesqrUrl;
     if(info.instance_id != undefined){
-        const procesqrUrl = `${urlSer}/preview/${appInfo.company_key}/340`;
+        procesqrUrl= `${urlSer}/preview/${appInfo.company_key}/340`;
     }
     const { ipcRenderer } = window.require('electron');
 
@@ -403,7 +409,7 @@ export function printCashRecipt(info){
                 font-family:monospace;
                 margin:0;
             ">
-                ${info.document_type}#${info.ownSerial}
+                ${info.doc_type}#${info.ownSerial}
             </h3>
 
             <span style="font-size:12px;">
@@ -444,7 +450,8 @@ export function printCashRecipt(info){
                         </strong>
                     </div>
                 `)
-            }).join('')}
+            }).join('')}cls
+            nom rubn
             </div>
 
             <span style="
@@ -496,7 +503,7 @@ export function printCashRecipt(info){
                         text-align:center;
                         margin-top:2mm;
                     ">
-                        Orden de trabajo #${instance_id}
+                        Orden de trabajo #${info.instance_id}
                     </h3>
                 </div>
     
