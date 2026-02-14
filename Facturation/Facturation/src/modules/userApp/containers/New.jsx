@@ -23,7 +23,6 @@ import { printCashRecipt } from "../../../utils/functions";
 import { CashReciptDesign } from "./Alerts/CashReciptDesign";
 import { isElectron } from "../../../App";
 
-
 export function New(){
     const {userConfig} = useAppInfo();
     const {popInAlert} = useAlert();
