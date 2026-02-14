@@ -5,6 +5,7 @@ import { AiAssistanProvider, AlertProvider, AppInfoProvider, NotificationsProvid
 import { Login } from './modules/Login/Login';
 import { SignUp } from './modules/Login/SignUp';
 import { PreviewDocument } from './modules/userApp/containers/Preview/PreviewDocument';
+import { ProcessStatusAlert } from './modules/userApp/containers/Alerts/ProcessStatusAlert';
 //export const urlSer = 'http://localhost:3000';
 export const urlSer = 'https://sga-2zgp.onrender.com';
 export const isElectron = navigator.userAgent.toLowerCase().includes('electron');
@@ -43,8 +44,13 @@ function App() {
                         </AlertProvider>
                       </AppInfoProvider>
                     </>} />
-                    <Route path='/preview/:company_key/:doc_id' element={<AppInfoProvider>
+                    <Route path='/preview/:company_key/:doc_id' element={
+                      <AppInfoProvider>
                         <PreviewDocument/>
+                    </AppInfoProvider>}/>
+                    <Route path='/previewProcess/:company_key/:instance_id' element={
+                      <AppInfoProvider>
+                        <ProcessStatusAlert/>
                     </AppInfoProvider>}/>
                 </Routes>
             </Router>

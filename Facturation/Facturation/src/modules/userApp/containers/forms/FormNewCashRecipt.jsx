@@ -553,14 +553,14 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 title:`Recibo de caja #${res.id} creado correctamente`,
                 description:`El recibo de caja #${res.id} fue creado correctamente`
             })
+            FormInfo["doc_id"] = res.id
+            FormInfo['instance_id'] = instance_id;
             FormInfo["ownSerial"] = res.ownSerial;
             if(isElectron){
                 printCashRecipt(FormInfo,appInfo);
             }
-            FormInfo["doc_id"] = res.id
             FormInfo["user_id"] = userInfo.user_id,
             FormInfo['transactionDetails'] = []
-            FormInfo['instance_id'] = instance_id;
             paymentMethod.forEach(element => {
                 FormInfo.transactionDetails.push({
                     account_id:element.account_id,

@@ -4,7 +4,7 @@ import Papa from 'papaparse';
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { useAppInfo } from "../context/context";
+import QRCode from 'qrcode';
 
 export async function postInfo(route,informacion){
     console.log('Funcion post');
@@ -359,19 +359,15 @@ export const arrayToTree = (flatArray, rootIdValue = null) => {
     return tree;
 };
 
-export function printCashRecipt(info,appInfo){
-
-    console.log(info)
-    return;
-
+export async function printCashRecipt(info,appInfo){
+    console.log(info);
     if (!window.require) {
         alert("Esta función solo está disponible en la App de Escritorio.");
-        return;
     }
-    const qrUrl = `${urlSer}/preview/${appInfo.company_key}/${info.doc_id}`;
+    const qrUrl = await QRCode.toDataURL(`https://facturation.sga360.co/preview/${appInfo.company_key}/${info.doc_id}`);
     let procesqrUrl;
     if(info.instance_id != undefined){
-        procesqrUrl= `${urlSer}/preview/${appInfo.company_key}/340`;
+        procesqrUrl= await QRCode.toDataURL(`https://facturation.sga360.co/preview/${appInfo.company_key}/340`)
     }
     const { ipcRenderer } = window.require('electron');
 
@@ -450,8 +446,7 @@ export function printCashRecipt(info,appInfo){
                         </strong>
                     </div>
                 `)
-            }).join('')}cls
-            nom rubn
+            }).join('')}
             </div>
 
             <span style="

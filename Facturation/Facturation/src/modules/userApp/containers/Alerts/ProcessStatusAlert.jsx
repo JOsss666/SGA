@@ -5,12 +5,11 @@ import { postInfo } from "../../../../utils/functions";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { FormInput } from "../../components/FormInput";
 import { LoadingSpace } from "../LoadingSpace";
-import { PreviewDocument } from "../Preview/PreviewDocument";
 
 export function ProcessStatusAlert({instance_id,reloadFun}){
 
     // requirements
-    const {popOutAlert, popInAlert} = useAlert();
+    const {popOutAlert} = useAlert();
     const {addNotification} = useNotifications();
     const {appInfo,userInfo,userConfig} = useAppInfo();
     const [info,setInfo] = useState({});
@@ -67,7 +66,6 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
         }
     }
 
-
     const getAttachedDocuments = async()=>{
         setDisabled(true)
         setLoadingDocuments(true)
@@ -117,39 +115,24 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
         }
     };
 
-    const reviewSteps = (steps, currentOrder, currentStepId) => {
+    const reviewSteps = (steps,currentOrder,currentStepId)=>{
         let newSteps = [];
-        let isEverythingCompleted = true; // Asumimos que todo está ok hasta encontrar un fallo
-
-        steps.forEach((element) => {
-            let nStep = { ...element }; // Clonamos para evitar mutaciones directas
-            
-            // 1. Definir estados de navegación
+        steps.map((element)=>{
+            let nStep = element;
+            console.log(`${element.id} --- ${currentStepId}`)
             nStep.isCompleted = element.order < currentOrder;
             nStep.isPending = element.order > currentOrder;
-            nStep.isActual = element.id == currentStepId;
-
-            // 2. VALIDACIÓN GLOBAL DE DOCUMENTOS
-            // Validamos documentos si es el paso actual O si es un paso anterior (historial)
-            if (nStep.isActual || nStep.isCompleted) {
-                const hasDocsForThisStep = validateStepDocuments(nStep);
-                nStep.checkDocs = hasDocsForThisStep;
-
-                // Si este paso (actual o anterior) falla, el proceso global falla
-                if (!hasDocsForThisStep) {
-                    isEverythingCompleted = false;
-                }
+            if(element.id == currentStepId){
+                let checkDocs = validateStepDocuments(element);
+                element.checkDocs = checkDocs;
+                setDocsCompleted(checkDocs)
+                nStep.isActual = true;
             }
-
-            newSteps.push(nStep);
-        });
-
-        // 3. Actualizar el estado global que controla el botón y su color
-        console.log(`¿Proceso completo documentalmente?: ${isEverythingCompleted}`);
-        setDocsCompleted(isEverythingCompleted);
-
-        return newSteps;
-    };
+            newSteps.push(nStep)
+        })
+        console.log('---> ',newSteps);
+        return newSteps
+    }
 
     // Advance to next Step
     const advanceNextStep = async()=>{
@@ -271,23 +254,16 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                             {element.name}
                                         </span>
                                         <div className="attachedDocsC">
-                                            {element.required_docs?.map((attReqDoc, index) => {
-                                                // Validamos si este requerimiento específico ya se cumplió
-                                                const currentCount = element.attached_Docs?.filter(
-                                                    d => d.document_type === attReqDoc.docType
-                                                ).length || 0;
-
-                                                return currentCount < attReqDoc.min ? (
-                                                    <span key={index} className={`requiredDocAlert ${attReqDoc.required? 'reqAttD':'optReqDoc'}`}>
+                                            {element.isActual && !docsCompleted && element.required_docs?.map((attReqDoc,index)=>(
+                                                (
+                                                    <span key={index}className="requiredDocAlert">
                                                         <i className="fa-solid fa-triangle-exclamation"/>
-                                                        Se necesita al menos: {attReqDoc.min - currentCount} {attReqDoc.docType}
+                                                        Requiere al menos {attReqDoc.min} {attReqDoc.docType}
                                                     </span>
-                                                ) : null;
-                                            })}
+                                                )
+                                            ))}
                                             {element.attached_Docs != undefined && element.attached_Docs?.map((attDoc,index)=>(
-                                                <span key={index} className="attachedDoc" onClick={()=>{
-                                                        popInAlert(<PreviewDocument id={attDoc.id}/>)
-                                                    }}>
+                                                <span key={index} className="attachedDoc">
                                                     <i className="fa-solid fa-file-circle-check"/>
                                                     {`${attDoc.document_type} #${attDoc.ownSerial}`}
                                                 </span>
@@ -301,66 +277,40 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                     {loadingDocuments && (
                         <LoadingSpace title={'Cargando documentos adjuntos'}/>
                     )}
-                    {info.status == 'active' && (
-                        <>
-                            {nextStepData != undefined && nextStepData.required_roll.includes(parseInt(userInfo.role)) && (
-                                <div className="optionsProcessCotnainer">
-                                    <FormInput textArea={true} title={'Descripción'} disabled={disabled} placeholder={'Descripción de la acción'} action={setDescription}/>
-                                    <button 
-                                        className={`nextStepProcess ${!docsCompleted ? 'pendingDocBtn' : ''}`} 
-                                        disabled={disabled} // 🚩 QUITAMOS: !docsCompleted para que no bloquee
-                                        onClick={() => {
-                                            advanceNextStep();
-                                        }}
-                                    >
-                                        <div className="infoNextStep">
-                                            <strong>
-                                                {/* Texto informativo, pero el botón ya no se bloquea */}
-                                                {docsCompleted ? 'Avanzar a siguiente etapa' : 'Avanzar (Documentación pendiente)'}
-                                            </strong>
-                                            {processInfo.steps != undefined && (
-                                                <span>
-                                                    {sortedSteps[currentOrder]?.name}
-                                                    <i className="fa-solid fa-arrow-right-long"/>
-                                                    {sortedSteps[currentOrder + 1]?.name}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <i className="fa-solid fa-circle-arrow-up iconProcessC"/>
-                                    </button>
-                                    <button className="passProcessStep" disabled={disabled} onClick={()=>{
-                                        popOutAlert();
-                                    }}>
-                                        <strong>Permanecer en esta etapa</strong>
-                                        <i className="fa-solid fa-pause"/>
-                                    </button>
+                    {nextStepData != undefined && nextStepData.required_roll.includes(parseInt(userInfo.role)) && (
+                        <div className="optionsProcessCotnainer">
+                            <FormInput textArea={true} title={'Descripción'} disabled={disabled} placeholder={'Descripción de la acción'}/>
+                            <button className={`nextStepProcess ${!docsCompleted? 'pendingDocBtn':''}`} disabled={disabled? true:!docsCompleted} onClick={()=>{
+                                    advanceNextStep();
+                                }}>
+                                <div className="infoNextStep">
+                                    <strong>
+                                        {docsCompleted? 'Avanzar a siguiente etapa':'Pendiente de documentación'}
+                                    </strong>
+                                    {processInfo.steps != undefined && (
+                                        <span>
+                                            {sortedSteps[currentOrder].name}
+                                            <i className="fa-solid fa-arrow-right-long"/>
+                                            {sortedSteps[currentOrder +1].name}
+                                        </span>
+                                    )}
                                 </div>
-                            )}
-                            {nextStepData != undefined && !nextStepData.required_roll.includes(parseInt(userInfo.role)) && (
-                                <div className="NoAviableRoll">
-                                    <h5>
-                                        <i className="fa-solid fa-triangle-exclamation"/>
-                                        No esta habilitado para continuar con el proceso
-                                    </h5>
-                                </div>
-                            )}
-                        </>
-                    )}
-                    {info.status == 'cancelled' && (
-                        <div className="CanceledIndicator bottonProcessIndicator">
-                            <strong>
-                                <i className="fa-solid fa-ban"/>
-                                Proceso cancelado
-                            </strong>
+                                <i className="fa-solid fa-circle-arrow-up iconProcessC"/>
+                            </button>
+                            <button className="passProcessStep" disabled={disabled} onClick={()=>{
+                                popOutAlert();
+                            }}>
+                                <strong>Permanecer en esta etapa</strong>
+                                <i className="fa-solid fa-pause"/>
+                            </button>
                         </div>
                     )}
-
-                    {info.status == 'pending' && (
-                        <div className="PendingIndicator bottonProcessIndicator">
-                            <strong>
+                    {nextStepData != undefined && !nextStepData.required_roll.includes(parseInt(userInfo.role)) && (
+                        <div className="NoAviableRoll">
+                            <h5>
                                 <i className="fa-solid fa-triangle-exclamation"/>
-                                Pendiente de confirmación
-                            </strong>
+                                No esta habilitado para continuar con el proceso
+                            </h5>
                         </div>
                     )}
                 </>
