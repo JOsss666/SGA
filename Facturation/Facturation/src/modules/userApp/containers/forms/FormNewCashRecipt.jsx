@@ -8,7 +8,7 @@ import { FormButton } from "../../components/FormButton";
 import './FormNewCashRecipt.css'
 import { FileInput } from "../../components/FileInput";
 import { LoadingSpace } from "../LoadingSpace";
-import { postInfo } from "../../../../utils/functions";
+import { postInfo, printCashRecipt } from "../../../../utils/functions";
 import { NewElementSelect } from "../../components/NewElementSelect";
 import { FormNewThirdParties } from "./FormNewThirdParties";
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
@@ -552,6 +552,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 title:`Recibo de caja #${res.id} creado correctamente`,
                 description:`El recibo de caja #${res.id} fue creado correctamente`
             })
+            FormInfo["ownSerial"] = res.id;
+            printCashRecipt(FormInfo)
             FormInfo["doc_id"] = res.id
             FormInfo["user_id"] = userInfo.user_id,
             FormInfo['transactionDetails'] = []

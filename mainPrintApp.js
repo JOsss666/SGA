@@ -24,61 +24,119 @@ async function getTargetPrinter() {
 }
 
 // 2. PRUEBA DE "HOLA MUNDO" (Texto Plano)
-// Usa este evento para probar si la impresora reacciona sin basura de código PDF
-ipcMain.on('test-print-simple', async () => {
-    try {
-        const printerName = await getTargetPrinter();
-        if (!printerName) return;
 
-        const tempPath = path.join(os.tmpdir(), `test-simple.txt`);
-        // Agregamos un caracter de "Form Feed" (\f) al final para forzar el corte/salida
-        const content = "HOLA MUNDO\nPRUEBA DIRECTA POS80\nSGA 360\n\f";
-        
-        fs.writeFileSync(tempPath, content);
-
-        if (process.platform === 'win32') {
-            exec(`type "${tempPath}" > "\\\\localhost\\${printerName}"`);
-        } else {
-            console.log('Usando mac - Forzando modo texto crudo');
-            // Usamos 'lpr' en lugar de 'lp' con el parámetro '-l' (literal)
-            // Esto evita que CUPS intente filtrar el archivo como documento
-            exec(`lpr -P "${printerName}" -l "${tempPath}"`, (error) => {
-                if (error) console.error("Error lpr:", error);
-            });
-        }
-    } catch (err) {
-        console.error("Error en test:", err);
-    }
-});
-
-// 3. EVENTO DE IMPRESIÓN PDF (El que ya tenías)
-ipcMain.on('print-receipt', async (event, htmlContent) => {
+ipcMain.on('print-test', async () => {
     let tempWindow = new BrowserWindow({ show: false });
-    try {
-        const printerName = await getTargetPrinter();
-        await tempWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
 
-        const tempPath = path.join(os.tmpdir(), `recibo-${Date.now()}.pdf`);
-        const data = await tempWindow.webContents.printToPDF({
-            marginsType: 1,
-            pageSize: { width: 80000, height: 200000 },
+    try {
+        console.log('Paso 1');
+
+        await tempWindow.loadURL('about:blank');
+        console.log('Paso 2');
+
+        await tempWindow.webContents.executeJavaScript(`
+            document.body.innerHTML = "<h1 style='font-size:40px'>HOLA MUNDO</h1>";
+        `);
+
+        console.log('Paso 3');
+
+        tempWindow.webContents.print({
+            silent: false,   // muestra diálogo para confirmar
             printBackground: true
         });
 
-        fs.writeFileSync(tempPath, data);
-
-        if (process.platform === 'win32') {
-            await ptp.print(tempPath, { printer: printerName, scale: "fit" });
-        } else {
-            // En Mac para PDF NO USES "-o raw", deja que CUPS procese el PDF
-            exec(`lp -d "${printerName}" "${tempPath}"`);
-        }
     } catch (e) {
-        console.error(e);
-    } finally {
-        tempWindow.destroy();
+        console.error('Error:', e);
     }
 });
+
+
+// Usa este evento para probar si la impresora reacciona sin basura de código PDF
+ipcMain.on('print-test', async () => {
+    let tempWindow = new BrowserWindow({ show: false });
+
+    try {
+        console.log('Paso 1');
+
+        await tempWindow.loadURL('about:blank');
+        console.log('Paso 2');
+
+        await tempWindow.webContents.executeJavaScript(`
+            document.body.innerHTML = "<h1 style='font-size:40px'>SGA Factturation Test</h1>";
+        `);
+
+        console.log('Paso 3');
+
+        tempWindow.webContents.print({
+            silent: true,
+            deviceName: 'POS-80',
+            printBackground: true
+        }, (success, errorType) => {
+            if (!success) {
+                console.error('Falló impresión:', errorType);
+            } else {
+                console.log('Impresión enviada sin diálogo');
+            }
+        });
+
+    } catch (e) {
+        console.error('Error:', e);
+    }
+});
+
+
+ipcMain.on('print-receipt', async (event, htmlContent) => {
+    let tempWindow = new BrowserWindow({ show: false });
+
+    try {
+        console.log('Paso 1');
+        const printerName = await getTargetPrinter();
+        console.log('Printer:', printerName);
+        console.log('Paso 2');
+
+        // Página limpia
+        await tempWindow.loadURL('about:blank');
+
+        // Reset total del body + inyección HTML
+        await tempWindow.webContents.executeJavaScript(`
+            document.body.style.margin = "0";
+            document.body.style.padding = "0";
+            document.body.style.width = "100%";
+            document.body.style.boxSizing = "border-box";
+            document.body.innerHTML = \`${htmlContent}\`;
+        `);
+
+        console.log('Paso 3');
+
+        if (process.platform === 'win32') {
+
+            tempWindow.webContents.print({
+                silent: true,
+                deviceName: printerName,
+                printBackground: true,
+                margins: { marginType: 'none' } // 👈 elimina margen físico
+            }, (success, errorType) => {
+                if (!success) {
+                    console.error('Falló impresión:', errorType);
+                } else {
+                    console.log('Job enviado sin diálogo');
+                }
+            });
+
+        } else {
+            // Mac/Linux igual que antes
+        }
+
+    } catch (e) {
+        console.error('Error:', e);
+    } finally {
+        setTimeout(() => {
+            if (!tempWindow.isDestroyed()) tempWindow.destroy();
+        }, 2000);
+    }
+});
+
+
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -89,7 +147,7 @@ function createWindow() {
             contextIsolation: false,
         }
     });
-    mainWindow.loadURL('http://localhost:5173/');
+    mainWindow.loadURL('http://localhost:5173/SGA_management/123/f62e9cc238ebfeba80e67d22/new');
 }
 
 app.whenReady().then(createWindow);

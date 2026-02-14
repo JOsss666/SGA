@@ -359,20 +359,93 @@ export const arrayToTree = (flatArray, rootIdValue = null) => {
 };
 
 export function printCashRecipt(info){
-    if (window.require) {
-        alert('Imprimiendo recibo');
-        const { ipcRenderer } = window.require('electron');
-       const contenidoHTML = `
-            <div style="width: 280px; margin: 0 auto; font-family: sans-serif; font-size: 12px;">
-                <h1 style="font-size: 16px; text-align: center;">SGA - RECIBO</h1>
-                <p style="text-align: center;">Impresión desde Escritorio</p>
-                <hr>
-                <p>Prueba de conexión exitosa</p>
-            </div>
-        `;
-        ipcRenderer.send('test-print-simple', contenidoHTML);
-    } else {
+    if (!window.require) {
         alert("Esta función solo está disponible en la App de Escritorio.");
+        return;
     }
+
+    const { ipcRenderer } = window.require('electron');
+
+    const contenidoHTML = `
+        <div style="
+            margin:0;
+            width:72mm;
+            display:flex;
+            flex-direction:column;
+            box-sizing:border-box;
+            padding:2mm;
+            font-family:sans-serif;
+        ">
+            <h3 style="
+                font-size:14px;
+                font-family:monospace;
+                margin:0;
+            ">
+                Recibo de caja #349
+            </h3>
+
+            <span style="font-size:12px;">
+                Tercero: José Murillo
+            </span>
+
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
+
+            <div style="
+                display:flex;
+                flex-direction:column;
+                padding:1mm;
+                gap:.5mm;
+            ">
+                ${info.paymentMethod.map((element)=>{
+                return(`
+                    <div style="display:flex;font-size:12px;">
+                        <span style="
+                            display:inline-block;
+                            max-width:50%;
+                            white-space:nowrap;
+                            overflow:hidden;
+                            text-overflow:ellipsis;
+                        ">
+                            ${element.name}:
+                        </span>
+                        <strong style="margin-left:auto;">
+                            ${Number(element.value).toLocaleString()}
+                        </strong>
+                    </div>
+                `)
+            }).join('')}
+            </div>
+
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
+
+            <div style="display:flex;font-size:12px;">
+                <span>TOTAL:</span>
+                <strong style="margin-left:auto;">${Number(info.total).toLocaleString()}</strong>
+            </div>
+
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
+
+            <span style="font-size:12px;">
+                Nota:  ${info.description}
+            </span>
+        </div>
+    `;
+
+    ipcRenderer.send('print-receipt', contenidoHTML);
 }
 
