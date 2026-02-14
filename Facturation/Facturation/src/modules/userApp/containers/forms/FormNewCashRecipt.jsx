@@ -674,7 +674,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 <form action="" disabled={disabled} onSubmit={(e)=>{
                     e.preventDefault();
                     console.log(FormInfo)
-                    createCashRecipt();
+                    //createCashRecipt();
                 }}>
                     {info.store_id == undefined && (
                         <SearchinList action={setStore_id} title={'Tienda'} placeHolder={'Seleccione la tienda'} list={stores} disabled={disabled}/>
