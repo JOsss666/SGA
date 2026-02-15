@@ -364,10 +364,10 @@ export async function printCashRecipt(info,appInfo){
     if (!window.require) {
         alert("Esta función solo está disponible en la App de Escritorio.");
     }
-    const qrUrl = await QRCode.toDataURL(`https://facturation.sga360.co/preview/${appInfo.company_key}/${info.doc_id}`);
+    const qrUrl = await QRCode.toDataURL(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${info.doc_id}`);
     let procesqrUrl;
     if(info.instance_id != undefined){
-        procesqrUrl= await QRCode.toDataURL(`https://facturation.sga360.co/preview/${appInfo.company_key}/340`)
+        procesqrUrl= await QRCode.toDataURL(`https://facturation.sga360.co/preview/Process/${appInfo.company_key}/145`)
     }
     const { ipcRenderer } = window.require('electron');
 
