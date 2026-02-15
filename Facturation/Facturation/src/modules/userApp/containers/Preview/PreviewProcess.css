@@ -1,0 +1,241 @@
+.PreviewProcess{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    height: 100dvh;
+    width: 100dvw;
+    position: relative;
+    overflow: hidden;
+}
+
+.PreviewProcess .optionsProcessPreview{
+    display: flex;
+    padding: 1vh;
+    width: 100%;
+    margin-bottom: 2vh;
+}
+
+.PreviewProcess .optionsProcessPreview .btnHead{
+    border: hidden;
+    border-radius: 2vh;
+    display: flex;
+    padding: 1vh;
+    background-color: var(--cardHover);
+    cursor: pointer;
+    color: var(--descriptionText);
+}
+
+.PreviewProcess .optionsProcessPreview .btnHead i{
+    font-size: clamp(2.2px,2.2vh,22px);
+    color: var(--mainText);
+    margin: auto;
+}
+
+.PreviewProcess .optionsProcessPreview .btnHead span{
+    font-size: clamp(2px,2vh,20px);
+}
+
+.PreviewProcess .optionsProcessPreview .btnHead:nth-child(1){
+    width: 4vh;
+}
+
+.PreviewProcess .optionsProcessPreview .btnHead:nth-child(2){
+    margin: auto;
+    margin-right: 0;
+    padding: .5vh 2vh;
+}
+
+.PreviewProcess .headProcessPreview{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+}
+
+.PreviewProcess .headProcessPreview .BoldTitle{
+    font-weight: 500;
+    margin-bottom: .5vh;
+}
+
+.PreviewProcess .headProcessPreview .DescriptionSpan{
+    font-weight: 400;
+}
+
+.PreviewProcess .headProcessPreview h5{
+    margin-top: 1vh;
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+    color: var(--mainText);
+}
+
+.PreviewProcess .ProcesSteps{
+    padding: 1vh 2vh;
+    display: flex;
+    flex-direction: column;
+    margin-top: 1vh;
+    gap: 4vh;
+    max-height: 45vh;
+    height: fit-content;
+    overflow-y: auto;
+    position: relative;
+}
+
+.PreviewProcess .ProcesSteps .lineProgress{
+    position: absolute;
+    left: 7.5vw;
+    top: 0%;
+    height: 100%;
+    width: 1vw;
+    background-color: var(--menuAside);
+    border-radius: 2vh;
+    z-index: 1;
+}
+
+.PreviewProcess .ProcesSteps .lineProgress .progressIndicador{
+    width: 100%;
+    background-color: #05DF72;
+    border-radius: 1vh;
+}
+
+.PreviewProcess .ProcesSteps .processStep{
+    display: flex;
+    width: 100%;
+    gap: 1vh;
+    z-index: 4;
+}
+
+.PreviewProcess .ProcesSteps .processStep .bubbleStep{
+    height: 4vh;
+    width: 4vh;
+    background-color: var(--cardHover);
+    border: solid .1vh var(--inputsBorder);
+    outline: solid .5vh var(--bg);
+    display: flex;
+    border-radius: 100%;
+}
+
+.PreviewProcess .ProcesSteps .processStep .bubbleStep i{
+    margin: auto;
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+}
+
+.PreviewProcess .ProcesSteps .processStep h6{
+    margin: auto 1vh;
+    font-weight: 400;
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+}
+
+.PreviewProcess .processAttached{
+    position: absolute;
+    width: 100dvw;
+    bottom: 0;
+    left: 0;
+    background-color: var(--bg);
+    outline: solid .1vh var(--inputsBorder);
+    border-top-left-radius: 4vh;
+    border-top-right-radius: 4vh;
+    box-shadow: 0 -.5vh 1vh var(--settingsHover);
+    padding: 2vh;
+    padding-top: 3vh;
+    max-height: 70vh;
+    overflow-y: auto;
+    z-index: 10;
+
+    height: 70vh;              /* altura máxima */
+    min-height: 20vh;         /* altura colapsada */
+    box-shadow: 0 -4px 20px rgba(0,0,0,.15);
+    
+    transition: transform .25s ease;
+    touch-action: none;
+}
+
+.PreviewProcess .processAttached .headPAtt{
+    display: flex;
+    width: 100%;
+    padding: 0 3vh;
+    margin-bottom: 2vh;
+}
+
+.PreviewProcess .processAttached .headPAtt .iconC{
+    display: flex;
+    height: 5vh;
+    width: 5vh;
+    border-radius: 100%;
+    background-color: var(--cardHover);
+}
+
+.PreviewProcess .processAttached .headPAtt .iconC i{
+    margin: auto;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--mainText);
+}
+
+.PreviewProcess .processAttached .headPAtt h5{
+    margin: auto 1vh;
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+    color: var(--mainText);
+    margin-left: 2vh;
+}
+
+.PreviewProcess .processAttached .gridAttDocs{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh 0;
+    gap: .5vh;
+}
+
+.PreviewProcess .processAttached .gridAttDocs .attDocCard{
+    display: flex;
+    padding: 2vh;
+    background-color: var(--cardHover);
+    border-radius: 1vh;
+}
+
+.PreviewProcess .processAttached .gridAttDocs .attDocCard i{
+    margin: auto 0;
+    font-size: clamp(2.5px,2.5vh,25px);
+    margin-right: 1vh;
+}
+
+.PreviewProcess .processAttached .gridAttDocs .attDocCard strong,
+.PreviewProcess .processAttached .gridAttDocs .attDocCard span{
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+    margin: auto 1vh;
+    color: var(--mainText);
+}
+
+.PreviewProcess .processAttached .gridAttDocs .attDocCard span{
+    font-weight: 400;
+    color: var(--descriptionText);
+}
+
+.PreviewProcess .processAttached .shareProcess{
+    width: 100%;
+    padding: 2vh;
+    border-radius: 3vh;
+    border: hidden;
+    font-weight: 500;
+    font-size: clamp(2px,2vh,20px);
+    cursor: pointer;
+    background-color: #05DF72;
+    color: #fff;
+    margin-top: 1vh;
+}
+
+.PreviewProcess .processAttached .sizeAdjust{
+    position: absolute;
+    height: .25vh;
+    width: 20vw;
+    background-color: var(--cardHover);
+    top: 1vh;
+    left: 40vw;
+    border-radius: 1vh;
+    box-shadow: 0 .2vh .5vh var(--settingsHover);
+}
+
+.PreviewProcess .processAttached .shareProcess i{
+    margin-right: 1vh;
+}

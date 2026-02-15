@@ -11,12 +11,6 @@ import { useParams } from "react-router-dom";
 import { LoadingAppDataPage } from "../LoadingAppDataPage";
 
 export function PreviewDocument({id}){
-    
-    if(location.pathname.startsWith('/preview/')){
-        const params = useParams();
-        console.log(params)
-        id = params.doc_id
-    }    
 
     // Requirements
     const {appInfo} = useAppInfo();
