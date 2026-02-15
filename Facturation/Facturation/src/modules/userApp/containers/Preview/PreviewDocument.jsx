@@ -10,13 +10,15 @@ import { MoreOptions } from "../../components/MoreOptions";
 import { useParams } from "react-router-dom";
 import { LoadingAppDataPage } from "../LoadingAppDataPage";
 
-export function PreviewDocument({id}){
+export function PreviewDocument({doc_id}){
 
     // Requirements
     const {appInfo} = useAppInfo();
     const [docInfo,setDocInfo] = useState({})
     const [attachedServices,setAttacedServices] = useState([]);
     const [attachedFiles,setAttachedFiles] = useState([]);
+    const params = useParams();
+    const [id,setId] = useState(doc_id? doc_id:params.doc_id);
 
     // Control
     const [loading,setLoading] = useState(true);

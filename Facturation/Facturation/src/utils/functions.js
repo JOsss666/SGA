@@ -367,7 +367,7 @@ export async function printCashRecipt(info,appInfo){
     const qrUrl = await QRCode.toDataURL(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${info.doc_id}`);
     let procesqrUrl;
     if(info.instance_id != undefined){
-        procesqrUrl= await QRCode.toDataURL(`https://facturation.sga360.co/preview/Process/${appInfo.company_key}/145`)
+        procesqrUrl= await QRCode.toDataURL(`https://facturation.sga360.co/preview/Process/${appInfo.company_key}/${info.instance_id}`)
     }
     const { ipcRenderer } = window.require('electron');
 
