@@ -150,6 +150,25 @@ export function PreviewProcess({id}){
         else if (sheetY > 70) setSheetY(90); // expandido
     };
 
+    const handleShare = async (info) => {
+        // 1. Verificamos si el navegador soporta la API
+        if (navigator.share) {
+        try {
+            await navigator.share({
+            title: info.title, // Título del contenido
+            text: info.description,   // Descripción breve
+            url: info.link      // El link que quieres compartir
+            });
+        } catch (error) {
+            console.log("Error al compartir:", error);
+        }
+        } else {
+        // 2. Fallback: Si el navegador no lo soporta (ej. navegadores viejos o sin HTTPS)
+        alert("Tu navegador no soporta la función de compartir. Copia el link: " + url);
+        // Aquí podrías abrir un modal propio o copiar al portapapeles
+        }
+    };
+
 
     return(
         <div className="PreviewProcess">
@@ -205,7 +224,9 @@ export function PreviewProcess({id}){
                     </div>
                     <div className="gridAttDocs">
                         {attachedDocuments.map((element,index)=>(
-                            <div className={`attDocCard`} key={index}>
+                            <div className={`attDocCard`} key={index} onClick={()=>{
+                                window.open(`https://facturation.sga360.co/preview/Document/${params.company_key}/${element.id}`,'_blank','noopener,noreferrer')
+                            }}>
                                 <i className="fa-solid fa-file-image fileIcon"/>
                                 <strong className="fileName">
                                     {`${element.document_type}#${element.ownSerial}`}
@@ -214,7 +235,13 @@ export function PreviewProcess({id}){
                             </div>
                         ))}
                     </div>
-                    <button className="shareProcess">
+                    <button className="shareProcess" onClick={()=>{
+                        handleShare({
+                            title:`${processInfo.process_name}#${processInfo.ownSerial}`,
+                            description:`Consulta el estado de tu orden de trabajo en ${appInfo.company_name}`,
+                            link:`https://facturation.sga360.co/preview/Process/${params.company_key}/${processInfo.id}`
+                        })
+                    }}>
                         <i className="fa-solid fa-arrow-up-from-bracket"/>
                         Compartir
                     </button>
