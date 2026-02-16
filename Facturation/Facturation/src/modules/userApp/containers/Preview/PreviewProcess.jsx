@@ -32,7 +32,6 @@ export function PreviewProcess({id}){
     const currentOrder = currentStepData ? currentStepData.order : 0;
     const sortedSteps = [...(processInfo.steps || [])].sort((a, b) => a.order - b.order);
     const progressPercentage = ((currentOrder+ .5) / (sortedSteps.length)) * 100;
-    console.log(sortedSteps);
    // Getters of info
 
    const getProcessState = async()=>{
@@ -150,6 +149,10 @@ export function PreviewProcess({id}){
         else if (sheetY > 70) setSheetY(90); // expandido
     };
 
+    const hideAttD = ()=>{
+        setSheetY(10);
+    }
+
     const handleShare = async (info) => {
         // 1. Verificamos si el navegador soporta la API
         if (navigator.share) {
@@ -168,7 +171,6 @@ export function PreviewProcess({id}){
         // Aquí podrías abrir un modal propio o copiar al portapapeles
         }
     };
-
 
     return(
         <div className="PreviewProcess">
@@ -214,6 +216,7 @@ export function PreviewProcess({id}){
                     onTouchStart={onStart}
                     onTouchMove={onMove}
                     onTouchEnd={onEnd}
+                    onMouseLeave={hideAttD}
                     >
                     <div className="sizeAdjust"/>
                     <div className="headPAtt">
