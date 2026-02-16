@@ -20,6 +20,7 @@ export function PreviewProcess({id}){
 
     // control
     const [loading,setLoading] = useState(true);
+    const [loadingDocuments,setLoadingDocuments] = useState(false);
     const [disabled,setDisabled] = useState(true);
     const sheetRef = useRef(null);
     const [sheetY, setSheetY] = useState(60); // % visible (60% inicial)
@@ -28,9 +29,6 @@ export function PreviewProcess({id}){
 
     // Ordenar los pasos de cada secuencia
     const currentStepData = processInfo.steps?.find(s => s.id == processInfo.step_id);
-    const nextStepData = processInfo.steps
-        ?.filter(s => s.order > (currentStepData?.order ?? -1)) // Filtramos los que siguen
-        .sort((a, b) => a.order - b.order)[0];
     const currentOrder = currentStepData ? currentStepData.order : 0;
     const sortedSteps = [...(processInfo.steps || [])].sort((a, b) => a.order - b.order);
     const progressPercentage = ((currentOrder+ .5) / (sortedSteps.length)) * 100;
@@ -42,7 +40,7 @@ export function PreviewProcess({id}){
             company_id:appInfo.company_id,
             id:instance_id
         });
-        console.log(res)
+        console.log('--- ',res)
         if(res[0]){
             setProcessInfo(res[1][0])
         }
@@ -56,6 +54,7 @@ export function PreviewProcess({id}){
             //allowedTypes:types,
             instance_id:instance_id
         })
+        console.log(res)
         if(res[0]){
             setAttachedDocuments(res[1])
         }else(
@@ -165,7 +164,7 @@ export function PreviewProcess({id}){
                     </button>
                 </div>
                 <div className="headProcessPreview">
-                    <BoldTitle text={'Orden de trabajo #13'}/>
+                    <BoldTitle text={`${processInfo.process_name} #${processInfo.ownSerial}`}/>
                     <DescriptionSpan text={'Entrega estimada:'}/>
                     <h5>{(info.delivery_date).substring(0,10)}</h5>
                 </div>
@@ -176,7 +175,7 @@ export function PreviewProcess({id}){
                         }}/>
                     </div>
                     {sortedSteps.map((element,index)=>(
-                        <div className="processStep" key={index}>
+                        <div className={`processStep ${element.id == processInfo.step_id ? 'actualStep':''} ${element.order < currentOrder ? 'checkedStep':''}`} key={index}>
                             <div className="bubbleStep">
                                 <i className="fa-solid fa-box-open"/>
                             </div>
@@ -204,21 +203,16 @@ export function PreviewProcess({id}){
                         </div>
                         <h5>Documentos Adjuntos</h5>
                     </div>
-                <div className="gridAttDocs">
+                    <div className="gridAttDocs">
                         {attachedDocuments.map((element,index)=>(
-                            <div className="attDocCard">
+                            <div className={`attDocCard`} key={index}>
                                 <i className="fa-solid fa-file-image fileIcon"/>
-                                <strong className="fileName">{element.docType}</strong>
-                                <span>app/pdf</span>
-                                <span>532kb</span>
+                                <strong className="fileName">
+                                    {`${element.document_type}#${element.ownSerial}`}
+                                </strong>
+                                <span>{(element.created_at).substring(0,10)}</span>
                             </div>
                         ))}
-                        <div className="attDocCard">
-                            <i className="fa-solid fa-file-image fileIcon"/>
-                            <strong className="fileName">Nombre</strong>
-                            <span>app/pdf</span>
-                            <span>532kb</span>
-                        </div>
                     </div>
                     <button className="shareProcess">
                         <i className="fa-solid fa-arrow-up-from-bracket"/>
