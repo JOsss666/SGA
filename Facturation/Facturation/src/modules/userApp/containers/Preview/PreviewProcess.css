@@ -125,11 +125,11 @@
 }
 
 .PreviewProcess .ProcesSteps .checkedStep .bubbleStep{
-    background-color: var(--descriptionText);
+    background-color: #B9F8CF;
 }
 
 .PreviewProcess .ProcesSteps .checkedStep .bubbleStep i{
-    color: var(--mainText);
+    color: #034F3B;
 }
 
 .PreviewProcess .ProcesSteps .actualStep .bubbleStep i{

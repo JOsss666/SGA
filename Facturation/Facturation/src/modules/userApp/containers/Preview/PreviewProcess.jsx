@@ -88,7 +88,7 @@ export function PreviewProcess({id}){
     },[appInfo])
 
     useEffect(()=>{
-        setDarkMode(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        setDarkMode(!window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
     },[])
 
     // Utils functions
