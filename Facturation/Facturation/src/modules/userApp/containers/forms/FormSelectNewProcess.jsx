@@ -185,8 +185,8 @@ export function FormSelectNewProcess (){
                     <form className="formProcessConfirmartion" action="" onSubmit={(e)=>{
                         e.preventDefault();
                     }}>
-                        <FormInput title={'Fecha de inicio'} type={'date'} disabled={disabled} value={start_date} action={setStart_date} />
-                        <FormInput title={'Fecha de entrega'} type={'date'} disabled={disabled} value={delivery_date} action={setDelivery_date} />
+                        <FormInput title={'Fecha de inicio'} type={'datetime-local'} disabled={disabled} value={start_date} action={setStart_date} />
+                        <FormInput title={'Fecha de entrega'} type={'datetime-local'} disabled={disabled} value={delivery_date} action={setDelivery_date} />
                         <SearchinList title={'Estado'} placeHolder={'Seleccione el estado'} action={setStatusNewInstance} disabled={disabled} list={[
                             {text:'Activo',value:'active'},
                             {text:'Pendiente',value:'pending'},

@@ -5,7 +5,6 @@ import { postInfo } from "../../../../utils/functions";
 import { useAppInfo } from "../../../../context/context";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
 import { UserCard } from "../../components/UserCard";
-import { csCZ, esES } from "@mui/x-date-pickers/locales";
 import { MoreOptions } from "../../components/MoreOptions";
 import { useParams } from "react-router-dom";
 import { LoadingAppDataPage } from "../LoadingAppDataPage";
