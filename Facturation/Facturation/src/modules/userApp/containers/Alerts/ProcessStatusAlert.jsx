@@ -214,7 +214,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
     },[])
 
     useEffect(()=>{
-        if(nextStepData.id != undefined){
+        if(nextStepData != undefined && nextStepData.id != undefined){
             console.log(nextStepData.required_roll);
             console.log(userInfo.role)
             nextStepData.required_roll.includes(parseInt(userInfo.role))
