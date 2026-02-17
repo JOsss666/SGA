@@ -20,24 +20,31 @@ import { ProcessStatusAlert } from "./Alerts/ProcessStatusAlert";
 import { FormSelectNewProcess } from "./forms/FormSelectNewProcess";
 import { FormNewClientOrder } from "./forms/FormNewClientOrder";
 import { printCashRecipt } from "../../../utils/functions";
-
+import { CashReciptDesign } from "./Alerts/CashReciptDesign";
+import { isElectron } from "../../../App";
 
 export function New(){
     const {userConfig} = useAppInfo();
     const {popInAlert} = useAlert();
-
     const options = [
         //{text:'Crear orden de trabajo',children:<SelectTpeNewDoc/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         {text:'Crear orden de trabajo',children:<FormSelectNewProcess/>,icon:<i className="fa-solid fa-bell-concierge"/>},
+        {text:'Ver recibo',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         ...(userConfig.access != undefined && userConfig.access.sections.cashBoxes.overAll ? [{text:'Crear recibo de caja',children:<FormNewCashRecipt/>,icon:<i className="fa-solid fa-receipt"/>}]:[]),
         //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
         {text:'Crear nueva orden de cliente',children:<FormNewClientOrder/>,icon:<i className="fa-regular fa-file"/>},
         ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Crear usuario',children:<FormNewUser/>,icon:<i className="fa-solid fa-person-circle-plus"/>}]:[]),
         {text:'Crear tercero',children:<FormNewThirdParties quickCreation={true}/>,icon:<i className="fa-regular fa-user"/>},
-        {text:'Imprimir recibo',children:<button onClick={()=>{
-            printCashRecipt();
-        }}>Imprimir recibo</button>,icon:<i className="fa-regular fa-user"/>},
+        ...(isElectron ? [{
+            text: 'Imprimir recibo',
+            children: (
+                <button onClick={() => printCashRecipt()}>
+                    Imprimir recibo
+                </button>
+            ),
+            icon: <i className="fa-regular fa-user"/>
+        }] : []),
         //{text:'Crear metodo de pago',children:<FormNewPaymentMethod/>,icon:<i className="fa-regular fa-credit-card"/>},
         //{text:'Crear Concepto',children:<FormNewConcept/>,icon:<i className="fa-solid fa-scale-balanced"/>},
         //{text:'Crear Producto',children:<FormNewProduct/>,icon:<i className="fa-solid fa-shirt"/>},

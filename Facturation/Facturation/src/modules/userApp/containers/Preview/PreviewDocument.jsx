@@ -7,15 +7,21 @@ import { DescriptionSpan } from "../../components/DescriptionSpan";
 import { UserCard } from "../../components/UserCard";
 import { csCZ, esES } from "@mui/x-date-pickers/locales";
 import { MoreOptions } from "../../components/MoreOptions";
+import { useParams } from "react-router-dom";
+import { LoadingAppDataPage } from "../LoadingAppDataPage";
 
-export function PreviewDocument({id}){
+export function PreviewDocument({doc_id}){
+
     // Requirements
     const {appInfo} = useAppInfo();
     const [docInfo,setDocInfo] = useState({})
     const [attachedServices,setAttacedServices] = useState([]);
     const [attachedFiles,setAttachedFiles] = useState([]);
+    const params = useParams();
+    const [id,setId] = useState(doc_id? doc_id:params.doc_id);
 
     // Control
+    const [loading,setLoading] = useState(true);
     const [darkMode, setDarkMode] = useState(
         window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
     );
@@ -60,6 +66,7 @@ export function PreviewDocument({id}){
 
     // Functions
     const getDocumentInfo = async()=>{
+        setLoading(true)
         let res = await postInfo('/getDocuments',{
             company_id:appInfo.company_id,
             id:id
@@ -67,6 +74,7 @@ export function PreviewDocument({id}){
         if(res[0]){
             setDocInfo(res[1][0])
         }
+        setLoading(false);
     }
 
     const getAttachedDodcs = async(attArray)=>{
@@ -98,15 +106,18 @@ export function PreviewDocument({id}){
 */
 
     useEffect(()=>{
-        getDocumentInfo();
-    },[])
+        if(appInfo.company_id != undefined){
+            getDocumentInfo();
+        }
+    },[appInfo])
 
     useEffect(()=>{
         console.log(docInfo)
         if(docInfo.id != undefined){
             getAttachedServices();
             let attArray = []
-            let docsAtt = JSON.parse(docInfo.attached)
+            let docsAtt = JSON.parse(typeof(JSON.parse(docInfo.attached)) == "object"? docInfo.attached:"[]");
+            console.log(docsAtt)
             if(docsAtt != undefined && docsAtt.length > 0){
                 docsAtt.forEach(element => {
                     attArray.push(element.id);
@@ -118,63 +129,70 @@ export function PreviewDocument({id}){
 
     return(
         <div className="PreviewDocument">
-            <div className="titleDocContainer">
-                <i className="fa-regular fa-file-lines"/>
-                <BoldTitle text={`${docInfo.document_type} #${docInfo.ownSerial}`}/>
-            </div>
-            <div className="thirdPartyAndCompanyInfo">
-                <UserCard name={'Nombre del tercero'} desc={'Cliente'} imgSrc={'https://i.pinimg.com/736x/55/62/fb/5562fb835d1de1ea974bdf0039726208.jpg'}/>
-            </div>
-            <DescriptionSpan text={`Descripción: ${docInfo.description}`}/>
-            {docInfo.document_type == 'Client Order' && (
-                <div className="detailsDocument">
-                    {attachedServices.length > 0 && attachedServices.map((element,index)=>(
-                        <div className="serviceDescriptionCard" key={index}>
-                            <UserCard imgSrc={element.service_img} name={element.service_name} desc={element.service_type}/>
-                            <div className="jobDesc">
-                                <span>Unidades</span>
-                                <strong>{element.units}</strong>
-                            </div>
-                            <div className="jobDesc">
-                                <span>Descripción</span>
-                                <strong>{element.description}</strong>
-                            </div>
-                            <div className="jobDesc">
-                                <span>Fecha</span>
-                                <strong>{(element.created_at).substring(0,10)}</strong>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-            <div className="attachedDocuments"> 
-                <h6>Archivos adjuntos</h6>
-                <div className="attachedDocumentsGrid">
-                    {attachedFiles.map((element,index)=>(
-                        <div className="attDocCard" key={index}>
-                            {iconDocsContainer[`${element.type}`]}
-                            <strong className="fileName">{element.name}</strong>
-                            <span>{element.type}</span>
-                            <span>{formatBytes(element.size)}</span>
-                            <span>{(element.created_at).substring(0,10)}</span>
-                            <MoreOptions options={[
-                                {text:'Descargar',icon:<i className="fa-solid fa-download"/>},
-                                {text:'Previsualizar',icon:<i className="fa-regular fa-eye"/>},
-                                {text:'Reportar',icon:<i className="fa-regular fa-flag"/>},
-                                {text:'Eliminar',icon:<i className="fa-solid fa-trash-can"/>}
-                            ]}/>
-                        </div>
-                    ))}
-                    {attachedFiles.length == 0 && (
-                        <div className="noResults">
-                            <strong>
-                                <i className="fa-solid fa-ghost"/>
-                                No hay documentos adjuntos
-                            </strong>
+            {!loading && (
+                <>
+                    <div className="titleDocContainer">
+                        <i className="fa-regular fa-file-lines"/>
+                        <BoldTitle text={`${docInfo.document_type} #${docInfo.ownSerial}`}/>
+                    </div>
+                    <div className="thirdPartyAndCompanyInfo">
+                        <UserCard name={'Nombre del tercero'} desc={'Cliente'} imgSrc={'https://i.pinimg.com/736x/55/62/fb/5562fb835d1de1ea974bdf0039726208.jpg'}/>
+                    </div>
+                    <DescriptionSpan text={`Descripción: ${docInfo.description}`}/>
+                    {docInfo.document_type == 'Client Order' && (
+                        <div className="detailsDocument">
+                            {attachedServices.length > 0 && attachedServices.map((element,index)=>(
+                                <div className="serviceDescriptionCard" key={index}>
+                                    <UserCard imgSrc={element.service_img} name={element.service_name} desc={element.service_type}/>
+                                    <div className="jobDesc">
+                                        <span>Unidades</span>
+                                        <strong>{element.units}</strong>
+                                    </div>
+                                    <div className="jobDesc">
+                                        <span>Descripción</span>
+                                        <strong>{element.description}</strong>
+                                    </div>
+                                    <div className="jobDesc">
+                                        <span>Fecha</span>
+                                        <strong>{(element.created_at).substring(0,10)}</strong>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     )}
-                </div>
-            </div>
+                    <div className="attachedDocuments"> 
+                        <h6>Archivos adjuntos</h6>
+                        <div className="attachedDocumentsGrid">
+                            {attachedFiles.map((element,index)=>(
+                                <div className="attDocCard" key={index}>
+                                    {iconDocsContainer[`${element.type}`]}
+                                    <strong className="fileName">{element.name}</strong>
+                                    <span>{element.type}</span>
+                                    <span>{formatBytes(element.size)}</span>
+                                    <span>{(element.created_at).substring(0,10)}</span>
+                                    <MoreOptions options={[
+                                        {text:'Descargar',icon:<i className="fa-solid fa-download"/>},
+                                        {text:'Previsualizar',icon:<i className="fa-regular fa-eye"/>},
+                                        {text:'Reportar',icon:<i className="fa-regular fa-flag"/>},
+                                        {text:'Eliminar',icon:<i className="fa-solid fa-trash-can"/>}
+                                    ]}/>
+                                </div>
+                            ))}
+                            {attachedFiles.length == 0 && (
+                                <div className="noResults">
+                                    <strong>
+                                        <i className="fa-solid fa-ghost"/>
+                                        No hay documentos adjuntos
+                                    </strong>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </>
+            )}
+            {loading && (
+                <LoadingAppDataPage/>
+            )}
         </div>
     )
 }

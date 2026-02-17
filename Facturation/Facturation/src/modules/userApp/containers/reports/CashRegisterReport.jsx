@@ -23,6 +23,7 @@ export function CashRegisterReport({shift_id}){
     const offset = nowDate.getTimezoneOffset() * 60000;
     const localISOTime = new Date(nowDate - offset).toISOString().slice(0, 19);
     const [total,setTotal] = useState(0);
+    const [totalMinorExpenses,setTotalMinorExpenses] = useState(0);
 
     // Control
     const [loading,setLoading] = useState(false);
@@ -138,10 +139,13 @@ export function CashRegisterReport({shift_id}){
     useEffect(()=>{
         if(reportInfo.length > 0){
             let newttl = 0;
+            let newMEttl = 0;
             reportInfo.forEach(element => {
-                newttl += element.net_balance;
+                newttl += element.total_db;
+                newMEttl += element.total_cr;
             });
             setTotal(newttl);
+            setTotalMinorExpenses(newMEttl);
         }
     },[reportInfo])
 
@@ -228,14 +232,17 @@ export function CashRegisterReport({shift_id}){
                                         Ver transacciones
                                     </h5>
                                 )}
-                                <div className="attachedTrsContainer">
+                                <div className={`attachedTrsContainer`}>
                                     {element.attached_trs != undefined && element.attached_trs.map((element,index)=>(
-                                        <div  className={'transactionLine'} key={index}>
+                                        <div  className={`transactionLine ${element.nature == 'CR'? 'negativeTrans':''}`} key={index}>
+                                            {element.process_code != undefined && (
+                                                <strong>{`${element.process_code}#${element.instance_serial}`}</strong>
+                                            )}
                                             <strong>{element.doc_type}</strong>
                                             <span>{element.concept_name}</span>
                                             <strong>{element.thirdparty_name}</strong>
-                                            <span>Sub-total: $ {formatCurrency(element.subTotal)}</span>
-                                            <span>Total: $ {formatCurrency(element.subTotal)}</span>
+                                            <span>Sub-total: $ {element.nature == 'CR'? '-':''}{formatCurrency(element.subTotal)}</span>
+                                            <span>Total: $ {element.nature == 'CR'? '-':''}{formatCurrency(element.subTotal)}</span>
                                             <span>{formatDate(element.created_at)}</span>
                                             {element.voucher != undefined && (
                                                 <span>Voucher/ref: {element.voucher}</span>
@@ -257,6 +264,13 @@ export function CashRegisterReport({shift_id}){
                                         <strong>$ {formatCurrency(element.net_balance)}</strong>
                                     </div>
                                 ))}
+                                <div className="signature">
+                                    <h5>
+                                        <i className="fa-solid fa-list-check"/>
+                                        GASTOS MENORES
+                                    </h5>
+                                    <strong>$ {formatCurrency(totalMinorExpenses)}</strong>
+                                </div>
                                 <div className="signature">
                                     <h5>
                                         <i className="fa-solid fa-angles-right"/>

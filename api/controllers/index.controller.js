@@ -239,13 +239,23 @@ controller.getUsers = (req,res)=>{
         let sentence = `
             SELECT
                 "Ecosystem".users.*,
-                "Ecosystem".users_access.*
+                "Ecosystem".users_access.*,
+                "Ecosystem".users_config.role AS role_id,
+                "Ecosystem".roles.name AS user_roll
             FROM
                 "Ecosystem".users
             LEFT JOIN
                 "Ecosystem".users_access
             ON
                 "Ecosystem".users.user_id = "Ecosystem".users_access.user_id
+            LEFT JOIN
+                "Ecosystem".users_config
+            ON
+                "Ecosystem".users.user_id = "Ecosystem".users_config.user_id
+            LEFT JOIN
+                "Ecosystem".roles
+            ON
+                "Ecosystem".users_config.role = "Ecosystem".roles.id
             ${whereQuery}
             ORDER BY "Ecosystem".users.user_name ASC;  
         `;

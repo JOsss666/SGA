@@ -8,10 +8,11 @@ import { FormButton } from "../../components/FormButton";
 import './FormNewCashRecipt.css'
 import { FileInput } from "../../components/FileInput";
 import { LoadingSpace } from "../LoadingSpace";
-import { postInfo } from "../../../../utils/functions";
+import { postInfo, printCashRecipt } from "../../../../utils/functions";
 import { NewElementSelect } from "../../components/NewElementSelect";
 import { FormNewThirdParties } from "./FormNewThirdParties";
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
+import { isElectron } from "../../../../App";
 
 export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
 
@@ -40,6 +41,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         // control of credit conditions of thirdParty
         const [ableCredit,setAbleCredit] = useState(false);
         const [aviableCredit,setAviableCredit] = useState(0);
+        // Control of the conditions of the document
+        const [documentNature,setDocumentNature] = useState('DB');
     
     // form info
     const [thirdParty_id,setThirdParty_id] = useState();
@@ -84,7 +87,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     }
 
     // PreProcess functions
-
 
     const formatCurrency = (value) =>
             new Intl.NumberFormat("es-CO").format(value);
@@ -202,8 +204,16 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 setMode('process_instance')
                 setBriefCaseBills([]);
             }
+
+            if(element.for_cashExit){
+                setDocumentNature('CR');
+            }
         }
     }
+
+    useEffect(()=>{
+        console.log(documentNature);
+    },[documentNature])
 
     const handleThirdPartyChange = (element)=>{
         setThirdParty_id(element.id);
@@ -535,7 +545,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const createCashRecipt = async()=>{
         setDisabled(true)
         setLoading(true)
-        let res = await postInfo('/facturation/newCashRecipt',FormInfo);;
+        let res = await postInfo('/facturation/newCashRecipt',FormInfo);
+        console.log(res);
         if(typeof(parseInt(res.id)) == 'number'){
             addNotification({
                 type:'aproved',
@@ -543,9 +554,13 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 description:`El recibo de caja #${res.id} fue creado correctamente`
             })
             FormInfo["doc_id"] = res.id
+            FormInfo['instance_id'] = instance_id;
+            FormInfo["ownSerial"] = res.ownSerial;
+            if(isElectron){
+                printCashRecipt(FormInfo,appInfo);
+            }
             FormInfo["user_id"] = userInfo.user_id,
             FormInfo['transactionDetails'] = []
-            FormInfo['instance_id'] = instance_id;
             paymentMethod.forEach(element => {
                 FormInfo.transactionDetails.push({
                     account_id:element.account_id,
@@ -553,7 +568,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                     total:element.value,
                     type:'payment',
                     paymentMethod_id:element.id,
-                    nature:'DB',
+                    nature: documentNature,
                     due_date:addDaysToCurrentDate(thirdPartyInfo.credit_term != undefined? thirdPartyInfo.credit_term:0),
                     for_wallet:element.for_wallet,
                     voucher:element.voucher,
@@ -566,7 +581,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 subtotal:total,
                 total:total,
                 type:'operation',
-                nature:'CR'
+                nature: documentNature == 'DB'? 'CR':'DB'
             })
             await toAccount();
         }else{
@@ -647,7 +662,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     return(
         <div className="FormNewCashRecipt">
             <div className="headForm">
-                <BoldTitle text={'Recibo de caja'}>
+                <BoldTitle text={documentNature == 'DB'? 'Recibo de caja':'Nuevo Egreso'}>
                     <i className="fa-solid fa-receipt"/>
                 </BoldTitle>
                 <div className="valuesCashRecipt">
@@ -681,7 +696,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                     {info.thirdParty_id == undefined && (
                         <SearchinList action={handleThirdPartyChange} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdparties} disabled={disabled} specialOption={
                             <NewElementSelect title={'Crear nuevo'} onClick={()=>{
-                                popInAlert(<FormNewThirdParties reloadFun={getThirdParties}/>)
+                                popInAlert(<FormNewThirdParties reloadFun={getThirdParties} quickCreation={true}/>)
                             }}/>
                         }/>
                     )}

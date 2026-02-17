@@ -73,6 +73,12 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
         attachedRut
     }
 
+    const handleUserPhotoChange = (elements)=>{  
+        if(elements.length >0 &&  elements[0].id != undefined){
+            setUserPhoto(elements[0].url)
+        }
+    }
+
 
     const createThirdParty = async()=>{
         setDisabled(true)
@@ -120,7 +126,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                         <div className="actualPhoto">
                             <img src={userPhoto} alt="" />
                         </div>
-                        <FileInput placeholder={'Seleccionar nueva foto'} action={setUserPhoto}>
+                        <FileInput placeholder={'Seleccionar nueva foto'} action={handleUserPhotoChange}>
                             <i className="fa-solid fa-camera"/>
                         </FileInput>
                     </div>

@@ -242,6 +242,8 @@
 .CashRegisterReport .authAndDetails .authC .signatureContainer .resumeTotalsC .signature h5
 {
     width: 30dvw;
+    font-weight: 600;
+    color: var(--mainText);
 }
 
 .CashRegisterReport .authAndDetails .authC .signatureContainer .resumeTotalsC .signature strong{
@@ -251,4 +253,8 @@
 
 .CashRegisterReport .authAndDetails .authC .signatureContainer .resumeTotalsC .signature h5 i{
     margin-right: 1vh;
+}
+
+.CashRegisterReport .contentReport .cardTotalPaymentType .attachedTrsContainer .negativeTrans span{
+    color: #FB2C36;
 }
