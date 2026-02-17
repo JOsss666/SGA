@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "dist": "npm run build && electron-builder",
     "start": "node ./api/server.js",
     "server-dev": "nodemon ./api/server.js",
     "lint": "eslint .",
@@ -58,6 +59,7 @@
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
     "electron": "^40.2.1",
+    "electron-builder": "^26.7.0",
     "electron-updater": "^6.7.3",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",
@@ -65,5 +67,24 @@
     "globals": "^15.15.0",
     "nodemon": "^3.1.10",
     "vite": "^6.2.0"
+  },
+  "build": {
+    "appId": "SGA 360",
+    "productName": "SGA 360",
+    "files": [
+      "dist/**/*",
+      "mainPrintApp.js",
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "appIcon.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true
+    }
   }
 }

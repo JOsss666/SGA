@@ -1028,4 +1028,72 @@ processController.nextProcessStep = async (req, res) => {
     });
 };
 
+
+processController.getEficincyUsers = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`h.company_id = $1`);
+        values.push(info.company_id)
+
+        if(info.user_id != undefined){
+            whereClauses.push(`h.user_id = $${values.length + 1}`);
+            values.push(info.user_id);
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
+        let sentence = `
+            WITH CalculoTiempos AS (
+                SELECT 
+                    h.user_id,
+                    p.name AS process_name,
+                    p.code AS process_code,
+                    s.name AS step_name,
+                    s.order AS step_order,
+                    h.instance_id,
+                    h.created_at AS fecha_inicio_accion,
+                    -- Obtenemos la fecha del siguiente movimiento para calcular la duración
+                    LEAD(h.created_at) OVER (PARTITION BY h.instance_id ORDER BY h.created_at) AS fecha_fin_accion
+                FROM "Process".process_historial h
+                JOIN "Process".process_instance i ON h.instance_id = i.id
+                JOIN "Process".processes p ON i.process_id = p.id
+                JOIN "Process".process_steps s ON h.next_step = s.id
+                ${whereQuery}
+            )
+            SELECT 
+                user_id,
+                process_name,
+                process_code,
+                step_name,
+                step_order,
+                COUNT(instance_id) AS total_tasks,
+                -- Tiempo promedio en formato intervalo (días, horas, minutos)
+                AVG(fecha_fin_accion - fecha_inicio_accion) AS average_time,
+                -- Tiempo mínimo y máximo para detectar valores atípicos
+                MIN(fecha_fin_accion - fecha_inicio_accion) AS record_time,
+                MAX(fecha_fin_accion - fecha_inicio_accion) AS max_time
+            FROM CalculoTiempos
+            WHERE fecha_fin_accion IS NOT NULL -- Solo contamos pasos terminados
+            GROUP BY user_id, process_name, step_name, step_order, process_code
+            ORDER BY step_order, total_tasks DESC;
+        `;
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err))
+    })
+}
+
 export default processController;

@@ -27,15 +27,16 @@
     "jspdf": "^3.0.3",
     "lightweight-charts": "^5.0.9",
     "papaparse": "^5.5.3",
-    "react": "^19.2.0",
+    "react": "^19.2.3",
     "react-apexcharts": "^1.9.0",
     "react-datepicker": "^9.1.0",
-    "react-dom": "^19.2.0",
+    "react-dom": "^19.2.3",
     "react-pdf": "^10.2.0",
     "react-router-dom": "^7.4.0",
     "react-virtualized-auto-sizer": "^1.0.26",
     "react-window": "^2.2.1",
     "recharts": "^3.2.1",
+    "socket.io-client": "^4.8.3",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

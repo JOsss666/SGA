@@ -32,7 +32,7 @@ export function NotificationsProvider({children}){
     const [notifications,setNotifications] = useState([]);
     let localIndexOfNoti = 0;
 
-   const addNotification = (newNotification) => {
+    const addNotification = (newNotification) => {
         // 1. Generamos un ID único basado en el tiempo para que no colisionen
         const id = Date.now() + Math.random(); 
         
@@ -273,22 +273,26 @@ export function AppInfoProvider({children}){
     const getAppData = async()=>{
         let data = location.pathname.split('/')
         setLoadingAppData(true);
-        let appI = await postInfo('/getCompanyInfo',data[2]);
+        let appI = await postInfo('/getCompanyInfo',params.company_key);
         if(appI[0]){
             setAppInfo(appI[1][0]);
             setAppConfig(appI[1][0].config);
         }else{
+            console.log('No se encontro info compa')
             handleRedirect();
         }
-        let userI = await postInfo('/getUserInfo',data[3]);
-        console.log(userI);
-        if(userI[0] && userI[1][0].user_session == 1){
-            setUserInfo(userI[1][0])
-            if(userI[1][0].config != undefined){
-                setUserConfig(userI[1][0].config)
+        if(!location.pathname.startsWith('/preview/')){
+            console.log('No es preview')
+            let userI = await postInfo('/getUserInfo',params.user_key);
+            console.log(userI);
+            if(userI[0] && userI[1][0].user_session == 1){
+                setUserInfo(userI[1][0])
+                if(userI[1][0].config != undefined){
+                    setUserConfig(userI[1][0].config)
+                }
+            }else{
+                handleRedirect();
             }
-        }else{
-            handleRedirect();
         }
         setLoadingAppData(false);
     }

@@ -255,7 +255,13 @@ let userConfig = {
                     "expires":"never"
                 }
             },
-            "personalized":{}
+            "personalized":{
+                "custom-modules":{
+                    "z&j_clicksControl":{
+                        "access":false
+                    }
+                }
+            }
         }
     },
     "notifications":{

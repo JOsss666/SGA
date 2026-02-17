@@ -42,7 +42,7 @@ export function Login() {
         <div className="Card">
             <div className="CardTitle">
             <BoldTitle text={'Iniciar Sesión'} />
-            <h2>SGA - Administrativo</h2>
+            <h2>SGA - Facturación</h2>
             </div>
             <form className="Form" id="loginForm" autoComplete="off" onSubmit={(e) => {
                     e.preventDefault();

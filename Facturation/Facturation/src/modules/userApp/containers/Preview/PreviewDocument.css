@@ -193,9 +193,61 @@
 .PreviewDocument .attachedDocuments .attachedDocumentsGrid .noResults strong{
     font-size: clamp(2.5px,2.5vh,25px);
     font-weight: 400;
-    color: var(--descriptionText);
+    color: var(--mainText);
+}
+
+.PreviewDocument .attachedDocuments .attachedDocumentsGrid .noResults strong i{
+    margin-right: 2vh;
 }
 
 .PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard:hover strong{
     color: var(--mainText);
+}
+
+
+@media (max-width:500px) {
+    .PreviewDocument{
+        width: 100dvw;
+    }
+
+    .PreviewDocument .detailsDocument{
+        width: 100%;
+        gap: 4vh;
+    }
+
+    .PreviewDocument .detailsDocument .serviceDescriptionCard{
+        flex-wrap: wrap;
+        flex-direction: column;
+        gap: 2vh;
+    }
+
+    .PreviewDocument .detailsDocument .UserCard{
+        width: 100% !important;
+    }
+
+    .PreviewDocument .detailsDocument .UserCard strong{
+        font-size: clamp(2px,2vh,20px);
+    }
+
+    .PreviewDocument .attachedDocuments{
+        padding-bottom: 5vh;
+    }
+
+    .PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard strong,
+    .PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard span{
+        margin: auto 1vh;
+    }
+
+    .PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard .fileIcon{
+        margin-right: 0;
+    }
+
+    .PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard .MoreOptions{
+        display: none;
+    }
+
+    .PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard span:nth-child(4),
+    .PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard span:nth-child(5){
+        display: none;
+    }
 }
