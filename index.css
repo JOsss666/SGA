@@ -1,0 +1,86 @@
+
+
+.traficModulesHandler{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+}
+
+.traficModulesHandler .welcomeMessagre{
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    margin-bottom: 4%;
+    margin-top: 18%;
+    position: relative;
+}
+
+.traficModulesHandler .welcomeMessagre h1{
+    text-align: center;
+    width: fit-content;
+    margin: 1vh auto;
+    font-family: sans-serif;
+    font-size: clamp(4px,4vh,40px);
+}
+
+.traficModulesHandler .welcomeMessagre span{
+    font-size: clamp(2px,2vh,20px);
+    font-family: sans-serif;
+    margin: 0 auto;
+}
+
+.traficModulesHandler .welcomeMessagre img{
+    position: absolute;
+    width: 100%;
+    height: auto;
+    top: -260%;
+}
+
+.traficModulesHandler .menuModules{
+    display: flex;
+    flex-wrap: wrap;
+    width: fit-content;
+    margin: auto;
+    margin-top: 0;
+    gap: 2vh;
+    max-width: 60%;
+}
+
+.traficModulesHandler .menuModules .card{
+    width: 15vw;
+    height: 8vh;
+    border-radius: 2vh;
+    background-color: #F1F5F9;
+    padding: 2vh;
+    text-align:center;
+    text-decoration: none;
+    font-family: sans-serif;
+    margin: auto;
+    display: flex;
+    transition: .3s ease;
+}
+
+.traficModulesHandler .menuModules .card:hover{
+    background-color: #155DFC;
+}
+
+.traficModulesHandler .menuModules .card h2{
+    font-weight: 400;
+    font-size: clamp(2.5px,2.5vh,25px);
+    margin: auto;
+    color: #121212;
+    transition: .3s ease;
+}
+
+.traficModulesHandler .menuModules .card:hover h2{
+    color: #fff;
+}
+
+.traficModulesHandler .menuModules .disabledCard{
+    opacity: 40%;
+    cursor: not-allowed;
+}
+
+.traficModulesHandler .menuModules .disabledCard:hover{
+    background-color: #79716B;
+}

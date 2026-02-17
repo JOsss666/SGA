@@ -136,7 +136,7 @@ ipcMain.on('print-receipt', async (event, htmlContent) => {
     }
 });
 
-
+const isDev = !app.isPackaged;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -147,7 +147,15 @@ function createWindow() {
             contextIsolation: false,
         }
     });
-    mainWindow.loadURL('http://localhost:5173/SGA_management/123/f62e9cc238ebfeba80e67d22/new');
+
+    if (isDev) {
+        // En desarrollo: usas tu servidor local
+        mainWindow.loadURL('https://facturation.sga360.co');
+    } else {
+        // En producción: cargamos el archivo generado por Vite en la carpeta dist
+        // Nota: Ajusta la ruta según necesites cargar la raíz o un módulo
+        mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
+    }
 }
 
 app.whenReady().then(createWindow);
