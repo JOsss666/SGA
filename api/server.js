@@ -9,7 +9,11 @@ const asignedPort  = process.env.PORT || 3000;
 const server = http.createServer(app);
 
 app.use(cors({
-    origin: "https://facturation.sga360.co",
+    origin: [
+        "https://facturation.sga360.co",
+        "http://localhost:5173", // <--- FALTA ESTE (Vite en desarrollo)
+        "http://localhost:3000"
+    ],
     methods: ["GET", "POST"],
     credentials: true
 }));

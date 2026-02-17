@@ -213,6 +213,14 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
         getInstanceInfo();
     },[])
 
+    useEffect(()=>{
+        if(nextStepData.id != undefined){
+            console.log(nextStepData.required_roll);
+            console.log(userInfo.role)
+            nextStepData.required_roll.includes(parseInt(userInfo.role))
+        }
+    },[nextStepData])
+
     return(
         <div className="ProcessStatusAlert">
             <div className="headProcess">
@@ -252,7 +260,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                         <div className={`steepIndicator ${element.isCompleted? 'completedStep':''}`}>
                                             {element.isCompleted && <i className="fa-solid fa-check" />}
                                         </div>
-                                        <span className="stepName">
+                                        <span className="stepName"s>
                                             {element.name}
                                         </span>
                                         <div className="attachedDocsC">
