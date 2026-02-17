@@ -1,6 +1,7 @@
 import { Client } from 'pg';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
+import { allowedOrigins } from './server';
 
 // Datos Conexion MYSQL
 const PG_HOST  = process.env.MYSQL_HOST;
@@ -11,11 +12,13 @@ const PG_PORT = process.env.MYSQL_PORT;
 
 export const setupRealtime = (server) => {
     // 1. Configurar Socket.io
+    
     const io = new Server(server, {
-        cors: { origin: [
-            "http://localhost:5173",
-            "https://sga360.co"
-        ] } // Tu URL de Vite
+        cors: { 
+            origin: allowedOrigins, // Usa la lista completa
+            methods: ["GET", "POST"],
+            credentials: true // Esto debe coincidir con tu cliente y Express
+        }
     });
 
     // 2. Manejar conexiones y salas (Rooms)
