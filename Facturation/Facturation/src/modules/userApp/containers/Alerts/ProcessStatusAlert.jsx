@@ -213,14 +213,6 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
         getInstanceInfo();
     },[])
 
-    useEffect(()=>{
-        if(nextStepData != undefined && nextStepData.id != undefined){
-            console.log(nextStepData.required_roll);
-            console.log(userInfo.role)
-            nextStepData.required_roll.includes(parseInt(userInfo.role))
-        }
-    },[nextStepData])
-
     return(
         <div className="ProcessStatusAlert">
             <div className="headProcess">
