@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { BoldTitle } from "../../components/BoldTitle";
 import './ProcessStatusAlert.css'
 import { postInfo } from "../../../../utils/functions";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { FormInput } from "../../components/FormInput";
 import { LoadingSpace } from "../LoadingSpace";
+import { useEffectEvent } from "react";
 
 export function ProcessStatusAlert({instance_id,reloadFun}){
 
@@ -122,13 +123,14 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
             console.log(`${element.id} --- ${currentStepId}`)
             nStep.isCompleted = element.order < currentOrder;
             nStep.isPending = element.order > currentOrder;
+            let checkDocs = validateStepDocuments(element);
+            element.checkDocs = checkDocs;
             if(element.id == currentStepId){
-                let checkDocs = validateStepDocuments(element);
-                element.checkDocs = checkDocs;
                 setDocsCompleted(checkDocs)
                 nStep.isActual = true;
             }
             newSteps.push(nStep)
+            console.log('XX ',nStep)
         })
         console.log('---> ',newSteps);
         return newSteps
@@ -147,7 +149,6 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
             user_roll:userInfo.role,
             description
         })
-        console.log(res);
         if(res.success){
             addNotification({
                 type:'aproved',
@@ -179,7 +180,6 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
             const docsByStep = attachedDocuments.reduce((acc, doc) => {
                 if (!acc[doc.step_instance]) acc[doc.step_instance] = [];
                 acc[doc.step_instance].push(doc);
-                console.log(acc)
                 return acc;
             }, {});
             const stepsWithDocs = processInfo.steps.map(step => ({
@@ -190,6 +190,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
             // 3. Ahora que tienen docs, pasamos esos pasos por la revisión de lógica
             const verifiedSteps = reviewSteps(stepsWithDocs, currentOrder,  processInfo.step_id,);
             // 2. Actualizamos el estado una sola vez mapeando los pasos
+            console.log(verifiedSteps)
             setProcessInfo(prev => ({
                 ...prev,
                 steps: verifiedSteps
@@ -237,6 +238,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                             <div className="leftBarProgress" style={{ height: `${progressPercentage}%` }} />
                             
                             {sortedSteps.map((element) => {
+                                console.log('--- ',element)
                                 return (
                                     <li 
                                         key={element.id} 
@@ -254,7 +256,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                             {element.name}
                                         </span>
                                         <div className="attachedDocsC">
-                                            {element.isActual && !docsCompleted && element.required_docs?.map((attReqDoc,index)=>(
+                                            {!element.checkDocs && element.required_docs?.map((attReqDoc,index)=>(
                                                 (
                                                     <span key={index}className="requiredDocAlert">
                                                         <i className="fa-solid fa-triangle-exclamation"/>
@@ -280,7 +282,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                     {nextStepData != undefined && nextStepData.required_roll.includes(parseInt(userInfo.role)) && (
                         <div className="optionsProcessCotnainer">
                             <FormInput textArea={true} title={'Descripción'} disabled={disabled} placeholder={'Descripción de la acción'}/>
-                            <button className={`nextStepProcess ${!docsCompleted? 'pendingDocBtn':''}`} disabled={disabled? true:!docsCompleted} onClick={()=>{
+                            <button className={`nextStepProcess ${!docsCompleted? 'pendingDocBtn':''}`} disabled={disabled} onClick={()=>{
                                     advanceNextStep();
                                 }}>
                                 <div className="infoNextStep">

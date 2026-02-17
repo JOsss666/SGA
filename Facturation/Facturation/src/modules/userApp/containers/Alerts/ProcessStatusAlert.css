@@ -209,9 +209,13 @@
 .ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .attachedDoc, .ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .requiredDocAlert{
     font-size: clamp(1.8px,1.8vh,18px);
     font-weight: 400;
-    color: var(--descriptionText);
+    color: #FB2C36;
     cursor: pointer;
     width: fit-content;
+}
+
+.ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .attachedDoc, .ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .attachedDoc{
+    color: var(--descriptionText);
 }
 
 .ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .attachedDoc i{
