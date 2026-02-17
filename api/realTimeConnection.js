@@ -1,7 +1,7 @@
 import { Client } from 'pg';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
-import { allowedOrigins } from './server';
+import { allowedOrigins } from './server.js';
 
 // Datos Conexion MYSQL
 const PG_HOST  = process.env.MYSQL_HOST;
