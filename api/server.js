@@ -8,7 +8,11 @@ const app = express();
 const asignedPort  = process.env.PORT || 3000;
 const server = http.createServer(app);
 
-app.use(cors());
+app.use(cors({
+    origin: "https://facturation.sga360.co",
+    methods: ["GET", "POST"],
+    credentials: true
+}));
 app.use(routes);
 
 setupRealtime(server)
