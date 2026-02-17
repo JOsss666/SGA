@@ -32,6 +32,7 @@ import { NotificationsMenuSpace } from './NotificationsMenuSpace';
 import { NoAccess } from './NoAccess';
 import { SuspendedAccount } from './SuspendedAcount';
 import { useRealtime } from '../../../utils/useRealTime';
+import { Users } from './Users';
 
 export function UserApp(){
 
@@ -196,7 +197,8 @@ export function UserApp(){
                     <Routes>
                             <Route path='/' element={<HomeProcess/>} />
                             <Route path='/newDocument' element={<CreateDocument/>} />
-                            <Route path='/users' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
+                            <Route path='/users' element={<Users/>} />
+                            {/*<Route path='/users' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />*/}
                             <Route path='/concepts' element={<ConceptsPlan/>} />
                             <Route path='/analytics' element={<Analytics/>} />
                             <Route path='/analytics/*' element={<AnalyticDocDetail/>} />
