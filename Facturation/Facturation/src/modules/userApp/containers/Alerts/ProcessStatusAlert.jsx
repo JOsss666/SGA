@@ -256,7 +256,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                             {element.name}
                                         </span>
                                         <div className="attachedDocsC">
-                                            {!element.checkDocs && element.required_docs?.map((attReqDoc,index)=>(
+                                            {element.order <= currentStepData.order && !element.checkDocs && element.required_docs?.map((attReqDoc,index)=>(
                                                 (
                                                     <span key={index}className="requiredDocAlert">
                                                         <i className="fa-solid fa-triangle-exclamation"/>
