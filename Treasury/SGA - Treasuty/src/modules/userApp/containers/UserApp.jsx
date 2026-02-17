@@ -209,6 +209,7 @@ export function UserApp(){
                             <Route path='/banks' element={<Banks/>}/>
                                 <Route path='/banks/:bank_id' element={<BanksDetails/>}/>
                             <Route path='/transfers' element={<span>Transferencias</span>}/>
+                            <Route path='/cashRecipt/historial' element={<span>Historial cierres de caja</span>}/>
                             <Route path='/payments' element={<span><Payments/></span>}/>
                             <Route path='/collections' element={<span><Collections/></span>}/>
                             <Route path='/minorExpenses' element={<span>Gastos menores</span>}/>
