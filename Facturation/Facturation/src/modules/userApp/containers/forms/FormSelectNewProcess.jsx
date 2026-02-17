@@ -48,7 +48,10 @@ export function FormSelectNewProcess (){
         console.log(res);
         if(res[0]){
             setAviableProcess(res[1]);
+            console.log(creationLock.isTriggered);
+            console.log(res[1].length)
             if(res[1].length === 1 && !creationLock.isTriggered) {
+                console.log('Ejecutando primer proceso')
                 creationLock.isTriggered = true; // Bloqueo global inmediato
                 await createProcessInstance(res[1][0]);
             }
@@ -74,8 +77,6 @@ export function FormSelectNewProcess (){
     const createProcessInstance = async(element)=>{
         setDisabled(true);
         setLoading(true);
-        // Doble verificación por seguridad
-        if (creationLock.lastInstanceId) return;
         let res = await postInfo('/process/createProcessInstace',{
             company_id:appInfo.company_id,
             process_id:element.id,
@@ -100,6 +101,7 @@ export function FormSelectNewProcess (){
                 await getThirdParties();
             }
             setFormStep(1);
+            creationLock.isTriggered =false;
         }else{
             creationLock.isTriggered = false;
         }
@@ -117,6 +119,7 @@ export function FormSelectNewProcess (){
             user_id:userInfo.user_id,
             thirdParty_id
         });
+        creationLock.isTriggered = false;
         await popOutAlert();
         if(res[0]){
             console.log('Intancia de proceso confirmada');
@@ -144,6 +147,8 @@ export function FormSelectNewProcess (){
             user_id:userInfo.user_id,
             thirdParty_id
         });
+        creationLock.isTriggered = false;
+        creationLock.lastInstanceId = null;
         await popOutAlert();
         if(res[0]){
             addNotification({
@@ -158,6 +163,10 @@ export function FormSelectNewProcess (){
     useEffect(()=>{
         getAviableProcess();
     },[]);
+
+    useEffect(()=>{
+        console.log(creationLock)
+    },[creationLock])
 
     return(
         <div className="FormSelectNewProcess">
