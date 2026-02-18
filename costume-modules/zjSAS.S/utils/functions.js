@@ -1,8 +1,9 @@
-const urlSer = 'http://localhost:3000';
-//const urlSer = 'https://sga-2zgp.onrender.com';
+//const urlSer = 'http://localhost:3000';
+const urlSer = 'https://sga-2zgp.onrender.com';
 
 export async function postInfo(route,informacion){
     console.log('Funcion post');
+    console.log(informacion)
     return new Promise((resolve, reject) => {
         console.log(urlSer+route)
         fetch(urlSer + route ,{
