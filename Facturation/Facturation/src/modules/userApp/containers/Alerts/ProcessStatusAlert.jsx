@@ -1,12 +1,10 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { BoldTitle } from "../../components/BoldTitle";
 import './ProcessStatusAlert.css'
 import { postInfo } from "../../../../utils/functions";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { FormInput } from "../../components/FormInput";
 import { LoadingSpace } from "../LoadingSpace";
-import { useEffectEvent } from "react";
-import e from "cors";
 
 export function ProcessStatusAlert({instance_id,reloadFun}){
 
