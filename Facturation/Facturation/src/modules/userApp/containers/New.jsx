@@ -21,10 +21,11 @@ import { FormSelectNewProcess } from "./forms/FormSelectNewProcess";
 import { FormNewClientOrder } from "./forms/FormNewClientOrder";
 import { printCashRecipt } from "../../../utils/functions";
 import { CashReciptDesign } from "./Alerts/CashReciptDesign";
+import {FormClicksControl} from '../../../../../../costume-modules/z&jSAS.S/src/containers/forms/FormClicksControl'
 import { isElectron } from "../../../App";
 
 export function New(){
-    const {userConfig} = useAppInfo();
+    const {userConfig,appInfo,userInfo} = useAppInfo();
     const {popInAlert} = useAlert();
 
     console.log("Acceso a terceros: ",userConfig.access.sections.thirdparties.can_create)
@@ -33,6 +34,7 @@ export function New(){
         //{text:'Crear orden de trabajo',children:<SelectTpeNewDoc/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         {text:'Crear orden de trabajo',children:<FormSelectNewProcess/>,icon:<i className="fa-solid fa-bell-concierge"/>},
+        {text:'Cierre de clicks',children:<FormClicksControl appInfo={appInfo} userConfig={userConfig} userInfo={userInfo}/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Ver recibo',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         ...(userConfig.access != undefined && userConfig.access.sections.cashBoxes.overAll ? [{text:'Crear recibo de caja',children:<FormNewCashRecipt/>,icon:<i className="fa-solid fa-receipt"/>}]:[]),
         //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},

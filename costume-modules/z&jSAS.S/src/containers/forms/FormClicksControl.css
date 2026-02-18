@@ -1,0 +1,23 @@
+
+.FormClicksControl{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    margin-top: 6vh;
+    gap: 2vh;
+    width: 30vw;
+}
+
+.FormClicksControl .BoldTitle{
+    margin: 0 auto;
+}
+
+.FormClicksControl form{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.FormClicksControl .LoadingSpace{
+    height: 80dvh;
+}
