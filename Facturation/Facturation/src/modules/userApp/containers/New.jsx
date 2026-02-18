@@ -26,16 +26,19 @@ import { isElectron } from "../../../App";
 export function New(){
     const {userConfig} = useAppInfo();
     const {popInAlert} = useAlert();
+
+    console.log("Acceso a terceros: ",userConfig.access.sections.thirdparties.can_create)
+
     const options = [
         //{text:'Crear orden de trabajo',children:<SelectTpeNewDoc/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         {text:'Crear orden de trabajo',children:<FormSelectNewProcess/>,icon:<i className="fa-solid fa-bell-concierge"/>},
-        {text:'Ver recibo',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-bell-concierge"/>},
+        //{text:'Ver recibo',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         ...(userConfig.access != undefined && userConfig.access.sections.cashBoxes.overAll ? [{text:'Crear recibo de caja',children:<FormNewCashRecipt/>,icon:<i className="fa-solid fa-receipt"/>}]:[]),
         //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
         {text:'Crear nueva orden de cliente',children:<FormNewClientOrder/>,icon:<i className="fa-regular fa-file"/>},
         ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Crear usuario',children:<FormNewUser/>,icon:<i className="fa-solid fa-person-circle-plus"/>}]:[]),
-        {text:'Crear tercero',children:<FormNewThirdParties quickCreation={true}/>,icon:<i className="fa-regular fa-user"/>},
+        {text:'Crear tercero',children:<FormNewThirdParties quickCreation={!userConfig.access.sections.thirdparties.can_create}/>,icon:<i className="fa-regular fa-user"/>},
         ...(isElectron ? [{
             text: 'Imprimir recibo',
             children: (
