@@ -21,7 +21,7 @@ import { FormSelectNewProcess } from "./forms/FormSelectNewProcess";
 import { FormNewClientOrder } from "./forms/FormNewClientOrder";
 import { printCashRecipt } from "../../../utils/functions";
 import { CashReciptDesign } from "./Alerts/CashReciptDesign";
-import {FormClicksControl} from '../../../../../../costume-modules/z&jSAS.S/src/containers/forms/FormClicksControl'
+import {FormClicksControl} from '../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormClicksControl'
 import { isElectron } from "../../../App";
 
 export function New(){
