@@ -24,6 +24,46 @@ export async function postInfo(route,informacion){
     })
 }
 
+export function copyToClipBoard(text){
+    navigator.clipboard.writeText(text)
+    .catch(err => {
+        console.error('Error al copiar:', err);
+    });
+}
+
+
+export function moneyFormat(number){
+    if(number != undefined){
+        let testN = number>0 ? number:number * -1
+        let n = JSON.stringify(testN);
+        let data = ''
+        let counter = 1;
+        for(let i = n.length -1;i >= 0;i--){
+            if(n[i] != '.'){
+                data += n[i];
+                if(counter%3 == 0 && i != 0){
+                    data += '.'
+                }
+                counter ++;
+            }
+            if(n[i] == '.'){
+                data += ','
+                counter = 1;
+            }
+        }
+        let x = '';
+        if(number < 0){
+            x += '- '
+        }
+        for(let i = data.length -1;i >= 0;i--){
+            x += data[i];
+        }
+        return(x)
+    }else{
+        return('0')
+    }
+}
+
 export async function uploadFileInChunks(file,setAdvancePercent){
     
     const chunkSize = 5 * 1024 * 1024; // 5MB
@@ -61,21 +101,6 @@ export async function uploadFileInChunks(file,setAdvancePercent){
     return await finalizeRes.json();
 }
 
-
-export async function ScreenShotElement(elemet,name){
-    domtoimage.toPng(elemet)
-    .then((dataUrl) => {
-        const link = document.createElement('a');
-        link.download = name != undefined? name:'captura.png';
-        link.href = dataUrl;
-        link.click();
-    })
-    .catch((error) => {
-        console.error('Error al generar la imagen:', error);
-    });
-}
-
-
 export const uploadFiles = async (files,info) => {
     console.log(info)
     if (!files || files.length === 0) {
@@ -108,6 +133,4 @@ export const uploadFiles = async (files,info) => {
         throw error;
     }
 };
-
-
 
