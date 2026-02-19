@@ -257,6 +257,7 @@ export function AppInfoProvider({children}){
         {text:'Transferencias',path:'transfers',icon:<DebitCardIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
         {text:'Pagos',path:'payments',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
         {text:'Cobros',path:'collections',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        {text:'Historial Caja',path:'/cashBoxes/historial',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
         //{text:'Conciliación Bancaria',path:'bankReconciliation',icon:<ConciliationIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
         {text:'Gastos menores',path:'minorExpenses',icon:<CartShopIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
         //
