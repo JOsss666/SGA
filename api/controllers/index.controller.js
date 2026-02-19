@@ -1230,6 +1230,7 @@ controller.getConcepts = (req,res)=>{
             ON
                 "Ecosystem".concepts.account_id = "Ecosystem".contable_accounts.id
             ${whereQuery}
+            ORDER BY "Ecosystem".concepts.order_index ASC , "Ecosystem".concepts.name ASC
             ;
         `;
 

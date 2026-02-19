@@ -118,7 +118,9 @@ inventoryController.getProducts = (req, res) => {
                 ac.name,
                 t.base,
                 t.rate,
-                c_exit.account_id;
+                c_exit.account_id
+            ORDER BY
+                ps.order_index ASC, ps.name ASC
         `;
 
         const consulta = await useDataBase(sentence, values, 1);
