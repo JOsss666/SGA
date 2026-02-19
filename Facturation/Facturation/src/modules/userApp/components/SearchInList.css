@@ -68,6 +68,11 @@
     color: var(--mainText);
 }
 
+.SearchinList .SlistC .listElementsContainer .focused-item{
+    background-color: #007AFF;
+    padding-left: 3vh;
+    color: #fff;
+}
 
 @keyframes appearList {
     0%{
