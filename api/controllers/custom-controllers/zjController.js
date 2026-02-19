@@ -24,10 +24,11 @@ zjController.getlastClickControl = (req,res)=>{
                 status,
                 attached
 	        FROM "Custom"."z&j_clickControl" 
+            WHERE asset_id = $1
             ORDER BY created_at DESC
             LIMIT 1;
         `;
-        let consulta = await useDataBase(sentence,[],1);
+        let consulta = await useDataBase(sentence,[info.asset_id],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -52,8 +53,9 @@ zjController.openClickControl = (req,res)=>{
                "finalClicks",
                updated_by,
                attached,
-               description)
-            VALUES ($1, $2, $3, $4, $5, $6, $7);
+               description,
+               asset_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -62,7 +64,8 @@ zjController.openClickControl = (req,res)=>{
             info.finalClicks,
             info.user_id,
             info.attached,
-            info.description
+            info.description,
+            info.asset_id
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
