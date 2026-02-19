@@ -9,10 +9,14 @@ const asignedPort  = process.env.PORT || 3000;
 const server = http.createServer(app);
 
 export const allowedOrigins = [
-        "https://facturation.sga360.co",
-        "http://localhost:5173", // <--- FALTA ESTE (Vite en desarrollo)
-        "http://localhost:3000",
-        "https://sga-1-wv7x.onrender.com"
+        "http://localhost:5173", // Developer
+        "http://localhost:3000", // localHost
+        "https://sga-1-wv7x.onrender.com", // Tesoreria
+        "https://facturation.sga360.co", // Facturación
+        "https://www.inventory.sga360.co/", // Inventario
+        "https://www.management.sga360.co/", // Administración
+        "https://www.process.sga360.co/", // Procesos
+
     ]
 
 app.use(cors({
