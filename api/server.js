@@ -11,7 +11,8 @@ const server = http.createServer(app);
 export const allowedOrigins = [
         "https://facturation.sga360.co",
         "http://localhost:5173", // <--- FALTA ESTE (Vite en desarrollo)
-        "http://localhost:3000"
+        "http://localhost:3000",
+        "https://sga-1-wv7x.onrender.com"
     ]
 
 app.use(cors({
