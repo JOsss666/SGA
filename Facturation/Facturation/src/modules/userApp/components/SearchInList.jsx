@@ -63,12 +63,15 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
         } else if (e.key === 'Enter') {
             e.preventDefault();
             if (focusedIndex >= 0) handleSelect(filteredList[focusedIndex]);
+            if(focusedIndex <= 0) setVisibleList(true);
+            setVisibleList(false);
         } else if (e.key === 'Escape') {
             setVisibleList(false);
         }
     };
 
     useEffect(() => {
+        console.log(selectedOption)
         if(selectedOption !== undefined && action !== undefined){
             action(selectedOption);
         }
@@ -101,7 +104,10 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
                         {filteredList.map((element, index) => (
                             <li 
                                 className={focusedIndex === index ? 'focused-item' : ''}
-                                onClick={() => handleSelect(element)} 
+                                onMouseDown={(e) => {
+                                    e.preventDefault(); // Evita que el input pierda el foco inmediatamente
+                                    handleSelect(element);
+                                }}
                                 key={index}
                                 // Opcional: sincronizar el foco del mouse con el teclado
                                 onMouseEnter={() => setFocusedIndex(index)}

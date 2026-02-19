@@ -363,7 +363,7 @@ export function FormNewClientOrder({params,reloadFun}){
                                     {productsServices.map((element,index)=>(
                                         <>
                                             {taxedTransactions && element.taxed && (
-                                                <div className="taxInfoC">
+                                                <div className="taxInfoC" key={`ti_${index}`}>
                                                     <div className="taxIndicator">
                                                         <i className="fa-solid fa-sack-dollar"/>
                                                         <span>{element.tax_name}</span>
