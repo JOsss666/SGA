@@ -1,0 +1,28 @@
+
+.FormSelectMachine{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    margin-top: 4vh;
+    width: 40vw;
+}
+
+.FormSelectMachine form{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.FormSelectMachine form .gridServicesSelectMachine{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.FormSelectMachine form .gridServicesSelectMachine .serviceSelectMCard{
+    display: flex;
+    padding: 2vh;
+    flex-wrap: wrap;
+    border-radius: 2vh;
+    background-color: var(--cardHover);
+}
