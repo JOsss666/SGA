@@ -4,7 +4,15 @@
     flex-direction: column;
     padding: 2vh;
     margin-top: 4vh;
-    width: 40vw;
+    width: 35vw;
+}
+
+.FormSelectMachine .BoldTitle{
+    margin-bottom: 1vh;
+}
+
+.FormSelectMachine .DescriptionSpan{
+    margin-bottom: 2vh;
 }
 
 .FormSelectMachine form{
@@ -16,13 +24,55 @@
 .FormSelectMachine form .gridServicesSelectMachine{
     display: flex;
     flex-direction: column;
-    gap: 1vh;
+    gap: 2vh;
+    margin-top: 2vh;
+    max-height: 70vh;
+    min-height: 25vh;
+    
 }
 
 .FormSelectMachine form .gridServicesSelectMachine .serviceSelectMCard{
     display: flex;
+    flex-direction: column;
     padding: 2vh;
-    flex-wrap: wrap;
     border-radius: 2vh;
+    gap: .5vh;
     background-color: var(--cardHover);
+}
+
+.FormSelectMachine form .gridServicesSelectMachine .serviceSelectMCard h5{
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 500;
+    color: var(--mainText);
+}
+
+.FormSelectMachine form .gridServicesSelectMachine .serviceSelectMCard span{
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
+}
+
+.FormSelectMachine form .gridServicesSelectMachine .serviceSelectMCard span b{
+    font-weight: 600;
+    color: var(--mainText);
+    margin-left: 1vh;
+}
+
+.FormSelectMachine form .gridServicesSelectMachine .alertCard{
+    outline: solid .2vh #FFC9C9;
+}
+
+.FormSelectMachine form .gridServicesSelectMachine .alertCard input{
+    outline: solid .1vh #E7180B;
+}
+
+.FormSelectMachine .alertComplete{
+    padding: 2vh 4vh;
+    border-radius: 1vh;
+    background-color: #FFE2E2;
+    font-size: clamp(1.9px,1.9vh,19px);
+    color: #E7180B;
+}
+
+.FormSelectMachine .alertComplete i{
+    margin-right: 1vh;
 }

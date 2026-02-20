@@ -1933,6 +1933,7 @@ controller.getThirdParties = (req,res)=>{
                 "Ecosystem".thirdParties
             ${joinClause}
             ${whereQuery}
+            ORDER BY "Ecosystem".thirdParties.names ASC
             ${info.limit != undefined? `Limit ${info.limit}`:''}
             ;
         `; 

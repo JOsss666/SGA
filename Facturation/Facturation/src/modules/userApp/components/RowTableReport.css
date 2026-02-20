@@ -62,10 +62,15 @@
 
 .RowTableReport .idHolder{
     width: 5vw;
+    text-align: center;
 }
 
 .RowTableReport .mediumCol{
     width: 7vw;
+}
+
+.RowTableReport .UserCard{
+    padding: 1vh 0;
 }
 
 .RowTableReport .UserCard img{
@@ -74,8 +79,8 @@
 }
 
 .RowTableReport .UserCard strong{
-    font-size: clamp(2px,1.8vh,20px);
-    font-weight: 500;
+    font-size: clamp(2px,1.8vh,18px) !important;
+    font-weight: 400 !important;
     text-overflow: ellipsis;
     white-space: none;
     text-wrap: nowrap;

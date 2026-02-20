@@ -74,6 +74,14 @@ export function RowTableReport({columns,info,hidden,navigation}){
         'Saldo inicial':<span className="rowSpan">{info.opening_balance != undefined? moneyFormat(info.opening_balance):0}</span>,
         'Saldo':<span className="rowSpan">{info.final_balance != undefined? moneyFormat(info.final_balance):0}</span>,
         "Ver Detalles": <span className="Redirect rowSpan" onClick={() => handleNavigate(`${info.id}`)}> Ver Detalles </span>,
+        "Terceros": <UserCard name={info.names} imgSrc={info.img}/> ,
+        "Habilitado": <span className="rowSpan idHolder">{info.credit? "si":"no"}</span>,
+        "Cartera":<span className="rowSpan rightAl">{moneyFormat(parseFloat(info.thirdParty_balance).toFixed(2))}</span>,
+        "Corriente":<span className="rowSpan rightAl">{moneyFormat(parseFloat(info.aviable_credit? info.aviable_credit:0).toFixed(2))}</span>,
+        "Plazo":<span className="rowSpan idHolder">{`${info.credit_term ? info.credit_term:0} días`}</span>,
+        "Vencido":<span className="rowSpan rightAl">{moneyFormat(parseFloat(info.aviable_credit? info.aviable_credit:0).toFixed(2))}</span>,
+        "Cupo_max":<span className="rowSpan rightAl">{moneyFormat(parseFloat(info.aviable_credit? info.aviable_credit:0).toFixed(2))}</span>,
+        "Cupo_disponible":<span className="rowSpan rightAl">{moneyFormat(parseFloat(info.aviable_credit? info.aviable_credit:0).toFixed(2))}</span>,
     }
 
     if(!hidden){

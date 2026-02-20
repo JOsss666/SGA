@@ -16,6 +16,7 @@ import { PathLocation } from '../components/PathLocation';
 import { ReportAccountTransactions } from './reports/ReportAccountTransactions';
 import { ProcessesReport } from './reports/ProcessesReport';
 import { EficiencyReport } from './reports/EficiencyReport';
+import { BriefCaseReport } from './reports/BriefCaseReport';
 
 export function Reports(){
 
@@ -99,8 +100,11 @@ export function Reports(){
                             <CardReport type={'processes'} title={'Informe de procesos'} description={'Visualiza los procesos de tu empresa'} onClick={()=>{
                                 handleNavigate('Processes')
                             }}/>
-                             <CardReport type={'processes'} title={'Eficiencia usuarios'} description={'Visualiza la eficiencia de los usuarios de tu empresa'} onClick={()=>{
+                            <CardReport type={'processes'} title={'Eficiencia usuarios'} description={'Visualiza la eficiencia de los usuarios de tu empresa'} onClick={()=>{
                                 handleNavigate('Eficiency')
+                            }}/>
+                            <CardReport type={'contable'} title={'Informe de cartera (Alpha)'} description={'Versión de prueba Alpha V 0.1'} onClick={()=>{
+                                handleNavigate('BriefCases')
                             }}/>
                         </div>
                     </>
@@ -118,6 +122,7 @@ export function Reports(){
                 <Route path='/Kardex' element={<ReportKardex/>}/>
                 <Route path='/Processes' element={<ProcessesReport/>}/>
                 <Route path='/Eficiency' element={<EficiencyReport/>}/>
+                <Route path='/BriefCases' element={<BriefCaseReport/>}/>
             </Routes>
         </div>
     )

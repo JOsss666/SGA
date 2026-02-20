@@ -236,6 +236,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     // Getters of info
 
     const handleSelectInstance = (element)=>{
+        console.log(element)
         setInstance_id(element.id)
         setStep_id(element.step_id)
         setThirdParty_id(element.thirdParty_id)
@@ -404,6 +405,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             id:id,
             limit:limit
         });
+        console.log('Ter ',res)
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
@@ -649,6 +651,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
 
     useEffect(()=>{
         if(thirdPartyInfo.id != undefined){
+            console.log('Obteniedo metodos de pago')
             getPaymentMethods();
         }
     },[aviableCredit,ableCredit])

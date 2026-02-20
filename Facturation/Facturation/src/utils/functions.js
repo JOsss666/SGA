@@ -168,36 +168,16 @@ export function copyToClipBoard(text){
 }
 
 
-export function moneyFormat(number){
-    if(number != undefined){
-        let testN = number>0 ? number:number * -1
-        let n = JSON.stringify(testN);
-        let data = ''
-        let counter = 1;
-        for(let i = n.length -1;i >= 0;i--){
-            if(n[i] != '.'){
-                data += n[i];
-                if(counter%3 == 0 && i != 0){
-                    data += '.'
-                }
-                counter ++;
-            }
-            if(n[i] == '.'){
-                data += ','
-                counter = 1;
-            }
-        }
-        let x = '';
-        if(number < 0){
-            x += '- '
-        }
-        for(let i = data.length -1;i >= 0;i--){
-            x += data[i];
-        }
-        return(x)
-    }else{
-        return('0')
+export function moneyFormat(value){
+  // Manejo de undefined, null o valores no numéricos
+    if (value === undefined || value === null || isNaN(value) || value === '') {
+        return '0'; // O puedes retornar 'N/A' según tu preferencia
     }
+
+    // Usamos Intl.NumberFormat para máxima eficiencia
+    // 'de-DE' usa el punto como separador de miles
+    return new Intl.NumberFormat('de-DE').format(value);
+
 }
 
 export async function uploadFileInChunks(file,setAdvancePercent){
