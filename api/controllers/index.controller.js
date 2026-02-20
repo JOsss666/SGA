@@ -1934,6 +1934,7 @@ controller.getThirdParties = (req,res)=>{
             ${joinClause}
             ${whereQuery}
             ${info.limit != undefined? `Limit ${info.limit}`:''}
+            ORDER BY "Ecosystem".thirdParties.names ASC
             ;
         `; 
 
