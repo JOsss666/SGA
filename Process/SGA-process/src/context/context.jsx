@@ -199,8 +199,10 @@ export function PreviewProvider({children}){
 
 export function AppInfoProvider({children}){
     const [appInfo,setAppInfo] = useState({});
+    const [appConfig,setAppConfig] = useState({});
     const [darkMode,setDarkMode] = useState(false);
     const [userInfo,setUserInfo] = useState({});
+    const [userConfig,setUserConfig] = useState({});
     const [loadingAppData,setLoadingAppData] = useState(true);
     const location = useLocation();
     const params = useParams();
@@ -216,12 +218,13 @@ export function AppInfoProvider({children}){
 
     const optionsMenu = [
         {text:'Inicio',path:'',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914614/LogoInicio1_nsuzaj.png' />,action:handleNavigate},
-        {text:'Crear Documento',path:'newDocument',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914611/LogoCrearDoc_vqirqo.png'/>,action:handleNavigate},
+        ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Crear Documento',path:'newDocument',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914611/LogoCrearDoc_vqirqo.png'/>,action:handleNavigate}]:[]),
         {text:'Buscar Documento',path:'searchDocument',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760909160/BuscarLogo1_jf8ij8.png'/>,action:handleNavigate},
-        {text:'Informes',path:'reports',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
-        {text:'Estadisticas',path:'analytics',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate},
-        {text:'Conceptos e impuestos',path:'concepts',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914608/LogoConceptosImpuestos_w0klzj.png'/>,action:handleNavigate},
-        {text:'Usuarios',path:'users',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png'/>,action:handleNavigate}
+        ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Informes',path:'reports',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate}]:[]),
+        ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Estadisticas',path:'analytics',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate}]:[]),
+        ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Conceptos e impuestos',path:'concepts',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914608/LogoConceptosImpuestos_w0klzj.png'/>,action:handleNavigate}]:[]),
+        ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Usuarios',path:'users',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png'/>,action:handleNavigate}]:[])
+        
     ]
 
     const secondOptionsMenu = [
@@ -233,23 +236,23 @@ export function AppInfoProvider({children}){
 
     const routesApp = [
         {text:'Inicio',path:'',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914614/LogoInicio1_nsuzaj.png' />,action:handleNavigate},
-        {text:'Crear Documento',path:'newDocument',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914611/LogoCrearDoc_vqirqo.png'/>,action:handleNavigate},
+        ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Crear Documento',path:'newDocument',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914611/LogoCrearDoc_vqirqo.png'/>,action:handleNavigate}]:[]),
         {text:'Buscar Documento',path:'searchDocument',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760909160/BuscarLogo1_jf8ij8.png'/>,action:handleNavigate},
-        {text:'Informes',path:'reports',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
+        ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Informes',path:'reports',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate}]:[]),
             {text:'Informe Ordenes de Cliente',path:'reports/OCS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
             {text:'Informe Ordenes de Producción',path:'reports/OPS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
             {text:'Informe Documentos de Compra',path:'reports/DCS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
             {text:'Informe Facturas de Venta',path:'reports/FVS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
             {text:'Informe Consumos de Inventario',path:'reports/CIS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
             {text:'Informe Transacciónes',path:'reports/TRS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
-        {text:'Estadisticas',path:'analytics',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate},
+        ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Estadisticas',path:'analytics',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate}]:[]),
             {text:'Estadisticas Ordenes de Cliente (OCS)',path:'analytics/OCS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate},
             {text:'Estadisticas Ordenes de Producción (OPS)',path:'analytics/OPS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate},
             {text:'Estadisticas Documentos de Compra (DCS)',path:'analytics/DCS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate},
             {text:'Estadisticas Facturas de Venta (FVS)',path:'analytics/FVS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate},
             {text:'Estadisticas  Consumos de inventarios (CIS)',path:'analytics/CIS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'/>,action:handleNavigate},
-        {text:'Conceptos e impuestos',path:'concepts',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914608/LogoConceptosImpuestos_w0klzj.png'/>,action:handleNavigate},
-        {text:'Usuarios',path:'users',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png'/>,action:handleNavigate}
+        ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Conceptos e impuestos',path:'concepts',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914608/LogoConceptosImpuestos_w0klzj.png'/>,action:handleNavigate}]:[]),
+        ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Usuarios',path:'users',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png'/>,action:handleNavigate}]:[])
     ]
 
 
@@ -259,6 +262,7 @@ export function AppInfoProvider({children}){
         let appI = await postInfo('/getCompanyInfo',data[2]);
         if(appI[0]){
             setAppInfo(appI[1][0]);
+            setAppConfig(appI[1][0].config);
         }else{
             handleRedirect();
         }
@@ -266,11 +270,20 @@ export function AppInfoProvider({children}){
         console.log(userI);
         if(userI[0] && userI[1][0].user_session == 1){
             setUserInfo(userI[1][0])
+            if(userI[1][0].config != undefined){
+                setUserConfig(userI[1][0].config)
+            }
         }else{
             handleRedirect();
         }
         setLoadingAppData(false);
     }
+
+    useEffect(()=>{
+        if(userConfig.account != undefined){
+            setDarkMode(userConfig.styles.theme.default != 'light')
+        }
+    },[userConfig])
 
     useEffect(()=>{
         if(location.pathname != '/SGA_process/logIn' && location.pathname != '/SGA_process/SignUp' && location.pathname != '/'){
@@ -280,8 +293,10 @@ export function AppInfoProvider({children}){
 
         const value = {
         appInfo,
+        appConfig,
         setAppInfo,
         userInfo,
+        userConfig,
         setUserInfo,
         darkMode,
         setDarkMode,

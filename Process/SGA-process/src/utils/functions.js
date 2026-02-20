@@ -169,7 +169,8 @@ export function copyToClipBoard(text){
 
 export function moneyFormat(number){
     if(number != undefined){
-        let n = JSON.stringify(number);
+        let testN = number>0 ? number:number * -1
+        let n = JSON.stringify(testN);
         let data = ''
         let counter = 1;
         for(let i = n.length -1;i >= 0;i--){
@@ -186,6 +187,9 @@ export function moneyFormat(number){
             }
         }
         let x = '';
+        if(number < 0){
+            x += '- '
+        }
         for(let i = data.length -1;i >= 0;i--){
             x += data[i];
         }
@@ -280,16 +284,16 @@ export async function ScreenShotElement(elemet,name){
 }
 
 
-export const uploadFiles = async (files) => {
+export const uploadFiles = async (files,info) => {
+    console.log(info)
     if (!files || files.length === 0) {
         throw new Error("Debe proporcionar al menos un archivo.");
     }
 
     const formData = new FormData();
-
+    formData.append('info', JSON.stringify(info));
     // Append de varios archivos
     for (let i = 0; i < files.length; i++) {
-        console.log("Agregando:", files[i].name);
         formData.append("files", files[i]); // CORRECTO
     }
 
@@ -303,6 +307,7 @@ export const uploadFiles = async (files) => {
             const errorData = await respuesta.json().catch(() => ({}));
             throw new Error(errorData.mensaje || `Error HTTP: ${respuesta.status}`);
         }
+        // Espacio para insertar el adunto en la base de datos
 
         return await respuesta.json();
 
@@ -352,4 +357,22 @@ export const arrayToTree = (flatArray, rootIdValue = null) => {
 
     return tree;
 };
+
+export function printCashRecipt(info){
+    if (window.require) {
+        alert('Imprimiendo recibo');
+        const { ipcRenderer } = window.require('electron');
+       const contenidoHTML = `
+            <div style="width: 280px; margin: 0 auto; font-family: sans-serif; font-size: 12px;">
+                <h1 style="font-size: 16px; text-align: center;">SGA - RECIBO</h1>
+                <p style="text-align: center;">Impresión desde Escritorio</p>
+                <hr>
+                <p>Prueba de conexión exitosa</p>
+            </div>
+        `;
+        ipcRenderer.send('print-receipt', contenidoHTML);
+    } else {
+        alert("Esta función solo está disponible en la App de Escritorio.");
+    }
+}
 
