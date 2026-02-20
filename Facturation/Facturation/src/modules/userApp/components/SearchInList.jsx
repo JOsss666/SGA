@@ -78,7 +78,9 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
     }, [selectedOption]);
 
     return(
-        <div className="SearchinList" onBlur={(e) => {
+        <div className="SearchinList" onClick={()=>{
+            setVisibleList(true)
+        }} onBlur={(e) => {
             if (!e.currentTarget.contains(e.relatedTarget)) {
                 setVisibleList(false);
             }
@@ -87,7 +89,7 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
             <div className="SlistC">
                 <input 
                     ref={inRef} 
-                    type="text" 
+                    type="text"
                     placeholder={disabled ? "Sin opciones disponibles" : placeHolder} 
                     disabled={disabled} 
                     onFocus={() => setVisibleList(true)}

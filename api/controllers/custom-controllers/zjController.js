@@ -125,4 +125,41 @@ zjController.closeClickControl = (req, res) => {
 };
 
 
+zjController.registerServiceMachine = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        const values = info.services
+            .filter(element => element.asset_id !== undefined)
+            .map(element => {
+                const clicks = element.clicks ? element.clicks : 0;
+                return `(${element.id}, ${element.asset_id}, ${clicks})`;
+            })
+            .join(', ');
+
+        if (values.length === 0) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ error: "No hay servicios válidos para insertar" }));
+        }
+        let sentence = `
+            INSERT INTO "Custom"."z&j_serviceExecutionControl"(
+                "serviceMovement_id",
+                machine_id,
+                clicks)
+            VALUES ${values};
+        `;
+        let consulta = await useDataBase(sentence,[],2);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error', (err) => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(err));
+    });
+}
+
+
 export default zjController;

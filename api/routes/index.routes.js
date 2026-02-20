@@ -242,11 +242,13 @@ router.post('/assets/getAssets',assetsController.getAssets);
 
     // Z&J S.A.S 901167852
     
-    router.post('/getlastClickControl',zjController.getlastClickControl);
+    router.post('/zj852/getlastClickControl',zjController.getlastClickControl);
 
-    router.post('/openClickControl',zjController.openClickControl);
+    router.post('/zj852/openClickControl',zjController.openClickControl);
 
-    router.post('/closeClickControl',zjController.closeClickControl);
+    router.post('/zj852/closeClickControl',zjController.closeClickControl);
+
+    router.post('/zj582/registerServiceMachine',zjController.registerServiceMachine);
 
 export default router;
 

@@ -41,7 +41,7 @@ export function FormClicksControl({appInfo,userInfo,userConfig,action,popOutAler
     const getLastInstance = async()=>{
         setDisabled(true);
         setLoading(true);
-        let res = await postInfo('/getlastClickControl',{
+        let res = await postInfo('/zj852/getlastClickControl',{
             company_id:appInfo.company_id,
             asset_id:selectedAsset.id
         })
@@ -79,7 +79,7 @@ export function FormClicksControl({appInfo,userInfo,userConfig,action,popOutAler
     const openClickControl = async()=>{
         setDisabled(true);
         setLoading(true);
-        let res = await postInfo('/openClickControl',formInfo);
+        let res = await postInfo('/zj852/openClickControl',formInfo);
         console.log(res);
         setLoading(false);
         setDisabled(false);   
@@ -89,7 +89,7 @@ export function FormClicksControl({appInfo,userInfo,userConfig,action,popOutAler
     const closeClickControl = async()=>{
         setDisabled(true);
         setLoading(true);
-        let res = await postInfo('/closeClickControl',formInfo);
+        let res = await postInfo('/zj852/closeClickControl',formInfo);
         console.log(res);
         setLoading(false);
         setDisabled(false);
