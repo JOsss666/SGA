@@ -100,7 +100,11 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
                 />
                 {visibleList && (
                     <ul ref={listE} className="listElementsContainer">
-                        {specialOption}
+                        <div onMouseDown={(e)=>{
+                            e.preventDefault();
+                        }}>
+                            {specialOption}
+                        </div>
                         {filteredList.map((element, index) => (
                             <li 
                                 className={focusedIndex === index ? 'focused-item' : ''}
