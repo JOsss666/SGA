@@ -9,6 +9,9 @@ import contabiltyController from '../controllers/contabilityController.js';
 import inventoryController from '../controllers/inventoryController.js'
 import { uploadMiddleware } from '../uploadMiddleWare.js';
 import facturationController from '../controllers/facturationController.js';
+// Custom controllers import
+    import zjController from '../controllers/custom-controllers/zjController.js';
+import assetsController from '../controllers/assetsController.js';
 
 const router = express.Router();
 
@@ -230,6 +233,20 @@ router.post('/facturation/getCashRegisterReport',facturationController.getCashRe
 router.post('/facturation/getTransactionsOfCashRecord',facturationController.getTransactionsOfCashRecord);
 
 router.post('/facturation/getBriefcaseBills',facturationController.getBriefcaseBills);
+
+// Assets Controller
+
+router.post('/assets/getAssets',assetsController.getAssets);
+
+// CUSTOM MODULES !!!
+
+    // Z&J S.A.S 901167852
+    
+    router.post('/getlastClickControl',zjController.getlastClickControl);
+
+    router.post('/openClickControl',zjController.openClickControl);
+
+    router.post('/closeClickControl',zjController.closeClickControl);
 
 export default router;
 

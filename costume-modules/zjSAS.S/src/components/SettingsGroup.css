@@ -1,0 +1,17 @@
+
+.SettingsGroup{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.SettingsGroup .SettingLine:first-child {
+    border-top-right-radius: 2vh;
+    border-top-left-radius: 2vh;
+}
+
+.SettingsGroup .SettingLine:last-child {
+    border-bottom: none;
+    border-bottom-right-radius: 2vh;
+    border-bottom-left-radius: 2vh;
+}

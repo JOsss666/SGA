@@ -21,21 +21,24 @@ import { FormSelectNewProcess } from "./forms/FormSelectNewProcess";
 import { FormNewClientOrder } from "./forms/FormNewClientOrder";
 import { printCashRecipt } from "../../../utils/functions";
 import { CashReciptDesign } from "./Alerts/CashReciptDesign";
+import {FormClicksControl} from '../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormClicksControl'
+import {FormSelectMachine} from '../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormSelectMachine'
 import { isElectron } from "../../../App";
 
 export function New(){
-    const {userConfig} = useAppInfo();
-    const {popInAlert} = useAlert();
+    const {userConfig,appInfo,userInfo} = useAppInfo();
+    const {popInAlert,popOutAlert} = useAlert();
+
+    console.log("Acceso a terceros: ",userConfig.access.sections.thirdparties.can_create)
+
     const options = [
-        //{text:'Crear orden de trabajo',children:<SelectTpeNewDoc/>,icon:<i className="fa-solid fa-bell-concierge"/>},
-        //{text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         {text:'Crear orden de trabajo',children:<FormSelectNewProcess/>,icon:<i className="fa-solid fa-bell-concierge"/>},
-        {text:'Ver recibo',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-bell-concierge"/>},
+        //{text:'Seleccionar Maquinaria',children:<FormSelectMachine appInfo={appInfo} userConfig={userConfig} userInfo={userInfo}/>,icon:<i className="fa-solid fa-tractor"/>},
+        //{text:'Cierre de clicks',children:<FormClicksControl appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} popOutAlert={popOutAlert}/>,icon:<i className="fa-solid fa-arrow-pointer"/>},
         ...(userConfig.access != undefined && userConfig.access.sections.cashBoxes.overAll ? [{text:'Crear recibo de caja',children:<FormNewCashRecipt/>,icon:<i className="fa-solid fa-receipt"/>}]:[]),
-        //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
         {text:'Crear nueva orden de cliente',children:<FormNewClientOrder/>,icon:<i className="fa-regular fa-file"/>},
         ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Crear usuario',children:<FormNewUser/>,icon:<i className="fa-solid fa-person-circle-plus"/>}]:[]),
-        {text:'Crear tercero',children:<FormNewThirdParties quickCreation={true}/>,icon:<i className="fa-regular fa-user"/>},
+        {text:'Crear tercero',children:<FormNewThirdParties quickCreation={!userConfig.access.sections.thirdparties.can_create}/>,icon:<i className="fa-regular fa-user"/>},
         ...(isElectron ? [{
             text: 'Imprimir recibo',
             children: (
@@ -45,6 +48,10 @@ export function New(){
             ),
             icon: <i className="fa-regular fa-user"/>
         }] : []),
+        //{text:'Crear orden de trabajo',children:<SelectTpeNewDoc/>,icon:<i className="fa-solid fa-bell-concierge"/>},
+        //{text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
+        //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
+        //{text:'Ver recibo',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Crear metodo de pago',children:<FormNewPaymentMethod/>,icon:<i className="fa-regular fa-credit-card"/>},
         //{text:'Crear Concepto',children:<FormNewConcept/>,icon:<i className="fa-solid fa-scale-balanced"/>},
         //{text:'Crear Producto',children:<FormNewProduct/>,icon:<i className="fa-solid fa-shirt"/>},

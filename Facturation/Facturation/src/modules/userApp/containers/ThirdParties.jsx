@@ -7,12 +7,13 @@ import { useState, useEffect } from 'react';
 import { SearchBar } from '../components/SearchBar';
 import { SelectOptions } from '../components/SelectOptions';
 import { FormButton } from '../components/FormButton';
-import { useAlert } from '../../../context/context';
+import { useAlert, useAppInfo } from '../../../context/context';
 import { FormNewThirdParties } from './forms/FormNewThirdParties';
 
 export function ThirdParties() {
     const navigate = useNavigate();
     const params = useParams();
+    const {appInfo,userConfig} = useAppInfo();
     const [thirdPartiesData, setThirdPartiesData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -132,7 +133,7 @@ export function ThirdParties() {
                                             ]}
                                         />
                                         <FormButton onClick={()=>{
-                                            popInAlert(<FormNewThirdParties reloadFun={fetchThirdParties}/>)
+                                            popInAlert(<FormNewThirdParties reloadFun={fetchThirdParties} quickCreation={!userConfig.access.sections.thirdparties.can_create}/>)
                                             }}text={'Crear Tercero'} children={<i className="fa-solid fa-plus"/>}/>
                                     </div>
                                 </div>

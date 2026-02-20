@@ -1,0 +1,19 @@
+{
+  "name": "zjsas.s",
+  "version": "1.0.0",
+  "description": "costume modules for zj",
+  "license": "ISC",
+  "author": "SGA 360 | KXA S.A.S",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.1.0",
+    "papaparse": "^5.5.3",
+    "qrcode": "^1.5.4",
+    "xlsx": "^0.18.5"
+  }
+}

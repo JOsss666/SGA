@@ -29,14 +29,19 @@ import { LoadingSpace } from './LoadingSpace';
 import { LogOut } from '../../Login/LogOut';
 import { AppIcon } from '../components/AppIcon';
 import { NotificationsMenuSpace } from './NotificationsMenuSpace';
+import { NoAccess } from './NoAccess';
+import { SuspendedAccount } from './SuspendedAcount';
+import { useRealtime } from '../../../utils/useRealTime';
+import { Users } from './Users';
 
 export function UserApp(){
 
     // Context Info
-    const {appInfo,userInfo,loadingAppData,darkMode,getAppData,optionsMenu,secondOptionsMenu,routesApp} = useAppInfo();
+    const {appInfo,userInfo,loadingAppData,darkMode,getAppData,optionsMenu,secondOptionsMenu,routesApp,userConfig} = useAppInfo();
     const {openPreview,setOpenPreview} = usePreview();
     const {openAlert,popOutAlert} = useAlert();
     const {visibleChatAi,setVisibleChatAi} = useAiAssistant();
+    const [statusPage,setStatusPage] = useState('loading');
 
     // Container Params
     const [visibleMenu,setVisibleMenu] = useState(false);
@@ -106,10 +111,41 @@ export function UserApp(){
         }
     }, [visibleNotifications]);
 
+    useEffect(()=>{
+        if(userConfig.access != undefined){
+            if(!userConfig.access.suspended){
+                if(userConfig.access.modules.
+                    facturation.use == true){
+                    setStatusPage('page')
+                }else{
+                    setStatusPage('noAccess');
+                }
+            }else{
+                setStatusPage('suspended')
+            }
+        }
+    },[userConfig])
+
+    useRealtime(appInfo.company_id, (payload) => {
+        const infoPayload = typeof payload === 'string' ? JSON.parse(payload) : payload;
+        console.log("Payload procesado:", infoPayload);
+        if (infoPayload.table === 'process_instance') {
+            let handleOpenProcess = ()=>{
+                popInAlert(<ProcessStatusAlert instance_id={infoPayload.data.id}/>)
+            }
+            addNotification({
+                type: 'info',
+                title: `Actualización en proceso #${infoPayload.data.ownSerial}`,
+                description: `Instancia #${infoPayload.data.ownSerial} actualizada.`,
+                onClick:handleOpenProcess
+            });
+        }
+    });
+
 
     return(
         <div className={`UserApp`}>
-            {!loadingAppData && (
+            {!loadingAppData && statusPage=='page' &&(
                 <>
                     <header className='headApp'>
                     <BigTitle title={appInfo.legal_name}/>
@@ -161,7 +197,8 @@ export function UserApp(){
                     <Routes>
                             <Route path='/' element={<HomeProcess/>} />
                             <Route path='/newDocument' element={<CreateDocument/>} />
-                            <Route path='/users' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
+                            <Route path='/users' element={<Users/>} />
+                            {/*<Route path='/users' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />*/}
                             <Route path='/concepts' element={<ConceptsPlan/>} />
                             <Route path='/analytics' element={<Analytics/>} />
                             <Route path='/analytics/*' element={<AnalyticDocDetail/>} />
@@ -182,6 +219,12 @@ export function UserApp(){
             )}
             {loadingAppData && (
                 <LoadingAppDataPage/>
+            )}
+            {!loadingAppData && statusPage == 'noAccess' && (
+                <NoAccess/>
+            )}
+            {!loadingAppData && statusPage == 'suspended' && (
+                <SuspendedAccount/>
             )}
         </div>
     )

@@ -1,11 +1,10 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { BoldTitle } from "../../components/BoldTitle";
 import './ProcessStatusAlert.css'
 import { postInfo } from "../../../../utils/functions";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { FormInput } from "../../components/FormInput";
 import { LoadingSpace } from "../LoadingSpace";
-import { useEffectEvent } from "react";
 
 export function ProcessStatusAlert({instance_id,reloadFun}){
 
@@ -252,11 +251,11 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                         <div className={`steepIndicator ${element.isCompleted? 'completedStep':''}`}>
                                             {element.isCompleted && <i className="fa-solid fa-check" />}
                                         </div>
-                                        <span className="stepName">
+                                        <span className="stepName"s>
                                             {element.name}
                                         </span>
                                         <div className="attachedDocsC">
-                                            {!element.checkDocs && element.required_docs?.map((attReqDoc,index)=>(
+                                            {element.order <= currentStepData.order && !element.checkDocs && element.required_docs?.map((attReqDoc,index)=>(
                                                 (
                                                     <span key={index}className="requiredDocAlert">
                                                         <i className="fa-solid fa-triangle-exclamation"/>
@@ -265,7 +264,10 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                                 )
                                             ))}
                                             {element.attached_Docs != undefined && element.attached_Docs?.map((attDoc,index)=>(
-                                                <span key={index} className="attachedDoc">
+                                                <span key={index} className="attachedDoc" onClick={()=>{
+                                                    console.log(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${attDoc.id}`);
+                                                    window.open(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${attDoc.id}`,'_blank','noopener,noreferrer')
+                                                }}>
                                                     <i className="fa-solid fa-file-circle-check"/>
                                                     {`${attDoc.document_type} #${attDoc.ownSerial}`}
                                                 </span>

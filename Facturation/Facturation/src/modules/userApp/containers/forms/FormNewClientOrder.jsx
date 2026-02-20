@@ -361,7 +361,7 @@ export function FormNewClientOrder({params,reloadFun}){
                                 />
                                 <div className="gridPaymentMethods">
                                     {productsServices.map((element,index)=>(
-                                        <>
+                                        <div key={index}>
                                             {taxedTransactions && element.taxed && (
                                                 <div className="taxInfoC">
                                                     <div className="taxIndicator">
@@ -372,7 +372,7 @@ export function FormNewClientOrder({params,reloadFun}){
                                                     </div>
                                                 </div>
                                             )}
-                                            <div key={index} className="PaymentMethodCard">
+                                            <div className="PaymentMethodCard">
                                                 <strong>{element.name}</strong>
                                                 <input className="unitsInp" step={1} required type="number" min={1} placeholder="unidades" onChange={(e)=>{
                                                     updatePServiceUnits(element.id,e.target.value)
@@ -388,7 +388,7 @@ export function FormNewClientOrder({params,reloadFun}){
                                                     removePService(element.id)
                                                 }}/>
                                             </div>
-                                        </>
+                                        </div>
                                     ))}
                                 </div>
                                 <h5 className="IndicatorTotalValue">

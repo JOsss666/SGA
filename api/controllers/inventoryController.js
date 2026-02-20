@@ -118,7 +118,9 @@ inventoryController.getProducts = (req, res) => {
                 ac.name,
                 t.base,
                 t.rate,
-                c_exit.account_id;
+                c_exit.account_id
+            ORDER BY
+                ps.order_index ASC, ps.name ASC
         `;
 
         const consulta = await useDataBase(sentence, values, 1);
@@ -1137,7 +1139,25 @@ inventoryController.getServicesMovements = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        console.log(info)
+        const values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`"Inventory".services_movement.company_id = $1`);
+        values.push(info.company_id);
+
+        if(info.doc_id != undefined){
+            whereClauses.push(`"Inventory".services_movement.doc_id = $${values.length + 1}`);
+            values.push(info.doc_id)
+        }
+
+        if(info.instance_id != undefined){
+            whereClauses.push(`"Inventory".services_movement.instance_id = $${values.length + 1}`);
+            values.push(info.instance_id);
+        }
+
+        const whereQuery = whereClauses.length > 0
+        ? `WHERE ${whereClauses.join(" AND ")}`
+        : "";
         let sentence = `
             SELECT
                 "Inventory".services_movement.*,
@@ -1151,14 +1171,12 @@ inventoryController.getServicesMovements = (req,res)=>{
                 "Inventory"."products&services"
             ON
                 "Inventory".services_movement.service_id = "Inventory"."products&services".id
-            WHERE
-                "Inventory".services_movement.company_id = $1 AND "Inventory".services_movement.doc_id = $2
+            ${whereQuery}
+            ORDER BY
+                "Inventory"."products&services".order_index ASC, "Inventory"."products&services".name ASC
             ;
         `;
-        let consulta = await useDataBase(sentence,[
-            info.company_id,
-            info.doc_id
-        ],1);
+        let consulta = await useDataBase(sentence,values,1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })

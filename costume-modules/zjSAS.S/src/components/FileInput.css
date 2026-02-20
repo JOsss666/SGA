@@ -1,0 +1,92 @@
+
+
+.FileInput{
+    padding: 2vh;
+    border-radius: 2vh;
+    outline: dashed .2vh var(--inputsBorder);
+    transition: .3s;
+    cursor: pointer;
+    height: 100%;
+    width: 100%;
+}
+
+.FileInput .spaceInput{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.FileInput .spaceInput i{
+    margin: auto;
+    margin-bottom: .5vh;
+    font-size: clamp(3.5px,3.5vh,35px);
+    color: var(--descriptionText);
+}
+
+.FileInput .spaceInput strong{
+    margin: auto;
+    margin-top: 1vh;
+    font-size: clamp(2.5px,2.2vh,25px);
+    font-weight: 400;
+    color:var(--sectionTitle) ;
+    text-align: center;
+}
+
+.FileInput:hover{
+    background-color: var(--iconHover);
+}
+
+.FileInput .LoadingUpload{
+    display: flex;
+    padding: 1vh;
+}
+
+.FileInput .LoadingUpload i{
+    font-size: clamp(3px,3vh,30px);
+    margin: auto;
+    margin-right: 1vh;
+    color: #007AFF;
+}
+
+.FileInput .LoadingUpload strong{
+    font-size: clamp(2.2px,2.2vh,22px);
+    margin: auto;
+    margin-left: 1vh;
+    font-weight: 400;
+    color: var(--descriptionText);
+}
+
+.FileInput .urlsContainer{
+    display: flex;
+    height: fit-content;
+    flex-direction: column;
+}
+
+.FileInput .urlsContainer h5{
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+    color: var(--descriptionText);
+    margin-bottom: 2vh;
+}
+
+.FileInput .gridUrl{
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+}
+
+.FileInput .gridUrl li{
+    width: 100%;
+    text-wrap: nowrap;
+    overflow: hidden;
+    white-space: none;
+    text-overflow: ellipsis;
+    color: #007AFF;
+}
+
+.FileInput .gridUrl li a{
+    font-size: clamp(1.8px,1.8vh,18px);
+    width: 5vh;
+    color: #007AFF;
+}
