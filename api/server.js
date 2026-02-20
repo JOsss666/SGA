@@ -13,10 +13,9 @@ export const allowedOrigins = [
         "http://localhost:3000", // localHost
         "https://sga-1-wv7x.onrender.com", // Tesoreria
         "https://facturation.sga360.co", // Facturación
-        "https://www.inventory.sga360.co/", // Inventario
-        "https://www.management.sga360.co/", // Administración
-        "https://www.process.sga360.co/", // Procesos
-
+        "https://www.inventory.sga360.co", // Inventario
+        "https://www.management.sga360.co", // Administración
+        "https://www.process.sga360.co", // Procesos
     ]
 
 app.use(cors({
