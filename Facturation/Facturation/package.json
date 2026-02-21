@@ -16,7 +16,7 @@
     "@fullcalendar/interaction": "^6.1.20",
     "@fullcalendar/react": "^6.1.20",
     "@fullcalendar/timegrid": "^6.1.20",
-    "@mui/x-date-pickers": "^8.23.0",
+    "@mui/x-date-pickers": "^8.27.2",
     "axios": "^1.11.0",
     "date-fns": "^4.1.0",
     "dom-to-image-more": "^3.7.1",

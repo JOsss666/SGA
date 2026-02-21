@@ -54,23 +54,15 @@ export function ThirdParties() {
 
     // Función de búsqueda
     const handleSearch = (thirdParty) => {
-        if (searchVal === '') return true;
-        
-        const searchLower = searchVal.toLowerCase();
-        
-        const searchableFields = [
-            thirdParty.name,
-            thirdParty.legal_name,
-            thirdParty.trade_name,
-            thirdParty.email,
-            thirdParty.company_mail,
-            thirdParty.phone,
-            thirdParty.contact_phone
-        ].filter(Boolean);
+        if (!searchVal.trim()) return true;
 
-        return searchableFields.some(field => 
-            field.toString().toLowerCase().includes(searchLower)
-        );
+        const searchLower = searchVal.toLowerCase();
+
+        return Object.values(thirdParty)
+            .filter(v => typeof v === "string" || typeof v === "number")
+            .some(v =>
+                v.toString().toLowerCase().includes(searchLower)
+            );
     };
 
 
@@ -113,8 +105,9 @@ export function ThirdParties() {
                                 <div className="header-right">
                                     <div className="thirdparties-search">
                                         <SearchBar
-                                            action={setSearchVal} 
-                                            placeholder={'Buscar...'}
+                                            value={searchVal}
+                                            action={setSearchVal}
+                                            placeholder="Buscar..."
                                         />
                                         <SelectOptions
                                             title={'Orden'}
