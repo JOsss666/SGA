@@ -547,4 +547,6 @@ facturationController.getBriefcaseBills = (req,res)=>{
     })
 }
 
+
+
 export default facturationController;
