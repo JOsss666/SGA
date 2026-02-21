@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
     base: isElectron ? './' : '/', 
     build: {
       rollupOptions: {
-        input:{}
+        input:inputs
       },
       outDir: 'dist',
       // Es recomendable vaciar la carpeta de salida en cada build
