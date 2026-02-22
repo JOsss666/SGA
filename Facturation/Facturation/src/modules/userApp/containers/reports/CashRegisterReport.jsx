@@ -120,6 +120,7 @@ export function CashRegisterReport({shift_id}){
         setDisabled(false);
     };
 
+    {/*}
     const getAttachedTransactions = async(paymentMethod_id)=>{
         setDisabled(true);
         setLoading(true);
@@ -134,7 +135,29 @@ export function CashRegisterReport({shift_id}){
         }
         setLoading(false);
         setDisabled(false);
+    }*/}
+    const getAttachedTransactions = async(doc_id)=>{
+        setLoading(true);
+
+        const res = await postInfo('/facturation/getTransactionsOfCashRecord',{
+            company_id: appInfo.company_id,
+            doc_id
+        });
+
+        if(res?.[0]){
+            setTransactions(res[1]);
+        }
+
+        setLoading(false);
     }
+
+    useEffect(()=>{
+        if(!docInfo?.id) return;
+
+        getAttachedServices();
+        getAttachedTransactions(docInfo.id);
+
+    },[docInfo]);
 
     useEffect(()=>{
         if(reportInfo.length > 0){

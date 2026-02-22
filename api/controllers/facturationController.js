@@ -451,7 +451,7 @@ facturationController.getTransactionsOfCashRecord = (req,res)=>{
                 "Facturation".shift_settlement_details
             LEFT JOIN
                 "Ecosystem".transaction_detail
-             LEFT JOIN
+            LEFT JOIN
                 "Ecosystem".transactions
             ON
                 "Ecosystem".transaction_detail.transaction_id = "Ecosystem".transactions.id
@@ -491,10 +491,14 @@ facturationController.getTransactionsOfCashRecord = (req,res)=>{
                 "Ecosystem".transaction_detail."paymentMethod_id" = $3
             ORDER BY "Ecosystem".transaction_detail.created_at DESC;
         `;
-        let consulta = await useDataBase(sentence,[
+        {/*let consulta = await useDataBase(sentence,[
             info.company_id,
             info.shift_id,
             info.paymentMethod_id
+        ],1);*/}
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.doc_id
         ],1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -504,6 +508,7 @@ facturationController.getTransactionsOfCashRecord = (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
+
 
 facturationController.getBriefcaseBills = (req,res)=>{
     let data = '';
