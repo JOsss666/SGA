@@ -435,61 +435,54 @@ facturationController.getTransactionsOfCashRecord = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             SELECT
-                "Facturation".shift_settlement_details.id AS shift_settlement_id,
-                "Ecosystem".transaction_detail.*,
-                "Ecosystem".concepts.name AS concept_name,
-                "Ecosystem".contable_accounts.code AS account_code,
-                "Ecosystem".transactions.doc_type,
-                "Ecosystem".transactions.doc_id,
-                "Ecosystem".documents.instance_id,
-                "Process".process_instance."ownSerial" AS instance_serial,
-                "Process".processes.code AS process_code,
-                "Ecosystem".payment_methods.name AS payment_name,
-                "Ecosystem".thirdparties.names AS thirdParty_name,
-                "Ecosystem".thirdparties.img AS thirdParty_img
-            FROM
-                "Facturation".shift_settlement_details
-            LEFT JOIN
-                "Ecosystem".transaction_detail
-            LEFT JOIN
-                "Ecosystem".transactions
-            ON
-                "Ecosystem".transaction_detail.transaction_id = "Ecosystem".transactions.id
-            ON
-                "Facturation".shift_settlement_details."transactionDetail_id" = "Ecosystem".transaction_detail.id
-            LEFT JOIN
-                "Ecosystem".concepts
-            ON 
-                "Ecosystem".transactions.concept_id = "Ecosystem".concepts.id
-            LEFT JOIN
-                "Ecosystem".contable_accounts
-            ON
-                "Ecosystem".concepts.account_id = "Ecosystem".contable_accounts.id
-            LEFT JOIN
-                "Ecosystem".payment_methods
-            ON 
-                "Ecosystem".transaction_detail."paymentMethod_id" = "Ecosystem".payment_methods.id
-            LEFT JOIN
-                "Ecosystem".thirdparties
-            ON
-                "Ecosystem".transaction_detail."thirdParty_id" = "Ecosystem".thirdparties.id
-            LEFT JOIN
-                "Ecosystem".documents
-            ON
-                "Ecosystem".transactions.doc_id = "Ecosystem".documents.id
-            LEFT JOIN
-                "Process".process_instance
-            ON
-                "Ecosystem".documents.instance_id = "Process".process_instance.id
-            LEFT JOIN
-                "Process".processes
-            ON
-                "Process".process_instance.process_id = "Process".processes.id
+                td.*,
+                tr.doc_id,
+                tr.doc_type,
+                tr.created_at AS transaction_date,
+
+                c.name AS concept_name,
+                acc.code AS account_code,
+
+                pm.name AS payment_method,
+
+                tp.names AS thirdparty_name,
+                tp.img AS thirdparty_img,
+
+                d.instance_id,
+                pi."ownSerial" AS instance_serial,
+                pr.code AS process_code
+
+            FROM "Ecosystem".transaction_detail td
+
+            LEFT JOIN "Ecosystem".transactions tr
+                ON td.transaction_id = tr.id
+
+            LEFT JOIN "Ecosystem".concepts c
+                ON tr.concept_id = c.id
+
+            LEFT JOIN "Ecosystem".contable_accounts acc
+                ON c.account_id = acc.id
+
+            LEFT JOIN "Ecosystem".payment_methods pm
+                ON td."paymentMethod_id" = pm.id
+
+            LEFT JOIN "Ecosystem".thirdparties tp
+                ON td."thirdParty_id" = tp.id
+
+            LEFT JOIN "Ecosystem".documents d
+                ON tr.doc_id = d.id
+
+            LEFT JOIN "Process".process_instance pi
+                ON d.instance_id = pi.id
+
+            LEFT JOIN "Process".processes pr
+                ON pi.process_id = pr.id
+
             WHERE
-                "Facturation".shift_settlement_details.company_id = $1 AND
-                "Facturation".shift_settlement_details.shift_id = $2 AND
-                "Ecosystem".transaction_detail."paymentMethod_id" = $3
-            ORDER BY "Ecosystem".transaction_detail.created_at DESC;
+                td.company_id = $1
+                AND tr.doc_id = $2
+
+            ORDER BY td.created_at DESC;
         `;
         {/*let consulta = await useDataBase(sentence,[
             info.company_id,

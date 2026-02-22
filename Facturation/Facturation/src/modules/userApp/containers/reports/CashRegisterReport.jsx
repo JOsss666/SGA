@@ -120,44 +120,26 @@ export function CashRegisterReport({shift_id}){
         setDisabled(false);
     };
 
-    {/*}
     const getAttachedTransactions = async(paymentMethod_id)=>{
         setDisabled(true);
         setLoading(true);
+
         let res = await postInfo('/facturation/getTransactionsOfCashRecord',{
             company_id:appInfo.company_id,
             shift_id,
             paymentMethod_id
-        })
-        console.log(res);
+        });
+
+        console.log("RESPUESTA COMPLETA:", res);
+        console.log("DATOS TRANSACCIONES:", res?.[1]);
+
         if(res[0]){
             updatePaymentValue(paymentMethod_id,res[1]);
         }
+
         setLoading(false);
         setDisabled(false);
-    }*/}
-    const getAttachedTransactions = async(doc_id)=>{
-        setLoading(true);
-
-        const res = await postInfo('/facturation/getTransactionsOfCashRecord',{
-            company_id: appInfo.company_id,
-            doc_id
-        });
-
-        if(res?.[0]){
-            setTransactions(res[1]);
-        }
-
-        setLoading(false);
     }
-
-    useEffect(()=>{
-        if(!docInfo?.id) return;
-
-        getAttachedServices();
-        getAttachedTransactions(docInfo.id);
-
-    },[docInfo]);
 
     useEffect(()=>{
         if(reportInfo.length > 0){
