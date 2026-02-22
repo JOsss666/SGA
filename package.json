@@ -1,7 +1,9 @@
 {
-  "name": "sga-inventory",
+  "name": "sga360",
   "private": true,
   "version": "0.0.0",
+  "author": "KXA S.A.S",
+  "description": "Sistema de gestion administrativa SGA360",
   "type": "module",
   "main": "mainPrintApp.js",
   "scripts": {
@@ -69,22 +71,32 @@
     "vite": "^6.2.0"
   },
   "build": {
-    "appId": "SGA 360",
-    "productName": "SGA 360",
-    "files": [
-      "dist/**/*",
-      "mainPrintApp.js",
-      "package.json",
-      "node_modules/**/*"
-    ],
-    "win": {
-      "target": "nsis",
-      "icon": "appIcon.png"
-    },
-    "nsis": {
-      "oneClick": true,
-      "allowToChangeInstallationDirectory": false,
-      "createDesktopShortcut": true
+      "appId": "com.limo.sga360",
+      "productName": "SGA 360",
+      "copyright": "Copyright © 2026 SGA",
+      "directories": {
+        "output": "dist_electron"
+      },
+      "files": [
+        "dist/**/*",
+        "mainPrintApp.js",
+        "package.json",
+        "node_modules/**/*"
+      ],
+      "win": {
+        "target": [
+          {
+            "target": "nsis",
+            "arch": ["x64"]
+          }
+        ],
+        "icon": "appIcon.ico"
+      },
+      "nsis": {
+        "oneClick": true,
+        "allowToChangeInstallationDirectory": false,
+        "createDesktopShortcut": true,
+        "shortcutName": "SGA 360"
+      }
     }
-  }
 }

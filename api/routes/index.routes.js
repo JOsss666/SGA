@@ -246,8 +246,6 @@ router.post('/assets/getAssets',assetsController.getAssets);
 
     router.post('/zj852/openClickControl',zjController.openClickControl);
 
-    router.post('/zj852/closeClickControl',zjController.closeClickControl);
-
     router.post('/zj582/registerServiceMachine',zjController.registerServiceMachine);
 
 export default router;
