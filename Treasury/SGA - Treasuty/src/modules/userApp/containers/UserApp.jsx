@@ -49,7 +49,8 @@ import {NoAccess} from './NoAccess'
 import {SuspendedAccount} from './SuspendedAcount'
 import { Movements } from './Movements'; 
 import { MovementsRecord } from './MovementsRecord'; 
-
+import { CashHistory } from './CashHistory';
+import { Transactions } from './Transactions';
 
 export function UserApp(){
 
@@ -208,11 +209,11 @@ export function UserApp(){
                             <Route path='/treasury' element={<Treasury/>}/>
                             <Route path='/banks' element={<Banks/>}/>
                                 <Route path='/banks/:bank_id' element={<BanksDetails/>}/>
-                            <Route path='/transfers' element={<span>Transferencias</span>}/>
-                            <Route path='/cashBoxes/historial' element={<span>Historial cierres de caja</span>}/>
+                            <Route path='/transfers' element={<span><Transactions/></span>}/>
+                            <Route path='/cashBoxes/historial' element={<span><CashHistory/></span>}/>
                             <Route path='/payments' element={<span><Payments/></span>}/>
                             <Route path='/collections' element={<span><Collections/></span>}/>
-                            <Route path='/minorExpenses' element={<span>Gastos menores</span>}/>
+                            <Route path='/minorExpenses' element={<span></span>}/>
 
                             <Route path='/messages/*' element={<Messages/>} />
                             <Route path='/calendar' element={<Calendar/>} />
