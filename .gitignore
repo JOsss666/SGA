@@ -8,6 +8,7 @@ pnpm-debug.log*
 # Build
 dist/
 build/
+dist_electron/
 
 # Environment variables
 .env

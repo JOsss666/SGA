@@ -766,26 +766,45 @@ processController.updateProcessInstanceStatus = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `
-            UPDATE
-                "Process".process_instance
-            SET
-                start_date = $1,
-                delivery_date = $2,
-                status = $3,
-                "thirdParty_id" = $4,
-                responsable = $5
-            WHERE company_id = $6 AND id = $7;
-        `;
-        let consulta = await useDataBase(sentence,[
-            info.start_date,
-            info.delivery_date,
-            info.status,
-            (info.thirdParty_id === '' || info.thirdParty_id === undefined) ? null : info.thirdParty_id,
-            info.user_id,
-            info.company_id,
-            info.id
-        ],2);
+        let sentence;
+        let consulta;
+        if(info.status != 'cancelled'){
+            sentence = `
+                UPDATE
+                    "Process".process_instance
+                SET
+                    start_date = $1,
+                    delivery_date = $2,
+                    status = $3,
+                    "thirdParty_id" = $4,
+                    responsable = $5
+                WHERE company_id = $6 AND id = $7;
+            `;
+            consulta = await useDataBase(sentence,[
+                info.start_date,
+                info.delivery_date,
+                info.status,
+                (info.thirdParty_id === '' || info.thirdParty_id === undefined) ? null : info.thirdParty_id,
+                info.user_id,
+                info.company_id,
+                info.id
+            ],2);
+        }else{
+            sentence = `
+                UPDATE
+                    "Process".process_instance
+                SET
+                    status = $1,
+                    responsable = $2
+                WHERE company_id = $3 AND id = $4;
+            `;
+            consulta = await useDataBase(sentence,[
+                info.status,
+                info.user_id,
+                info.company_id,
+                info.id
+            ],2);
+        }
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     });

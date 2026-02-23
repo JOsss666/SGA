@@ -103,6 +103,58 @@
     color: var(--mainText);
 }
 
+.PreviewDocument .deatialCashRecipt{
+    padding: 2vh;
+    display:flex;
+    flex-direction: column;
+    gap:2vh;
+}
+
+.PreviewDocument .deatialCashRecipt .paymentCard{
+    display:flex;
+    width: 100%;
+    min-width: 40vh;
+    border-radius:1vh;
+    padding:1vh 2vh;
+    gap:1vh;
+    box-shadow:0 1vh 3vh rgba(0,0,0,0.08);
+    transition:all .25s ease;
+    border:.15vh solid rgba(0,0,0,0.05);
+    border-bottom: dashed .2vh var(--inputsBorder);
+}
+
+.PreviewDocument .paymentName{
+    font-size:clamp(2.2px,2.2vh,22px);
+    font-weight:400;
+    color: var(--lightGradient1);
+    letter-spacing:.1vh;
+    color: var(--descriptionText);
+    margin: auto 0;
+}
+
+.PreviewDocument .paymentValue{
+    font-size:2.5vh;
+    font-weight:600;
+    margin: auto;
+    margin-right: 2vh;
+    color: var(--mainText);
+}
+
+.PreviewDocument .paymentTotalCard{
+    border-radius:1vh;
+    padding:1vh 2.5vh;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:3.5vh;
+    font-weight:500;
+    color: var(--mainText);
+}
+
+.PreviewDocument .paymentTotalCard strong{
+    font-size:3vh;
+}
+
 .PreviewDocument .attachedDocuments .attachedDocumentsGrid{
     display: flex;
     flex-direction: column;
@@ -210,6 +262,10 @@
         width: 100dvw;
     }
 
+    .PreviewDocument .titleDocContainer .BoldTitle{
+        font-size: clamp(3px,3vh,30px);
+    }
+
     .PreviewDocument .detailsDocument{
         width: 100%;
         gap: 4vh;
@@ -249,5 +305,27 @@
     .PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard span:nth-child(4),
     .PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard span:nth-child(5){
         display: none;
+    }
+
+    .PreviewDocument .deatialCashRecipt .paymentCard{
+        padding: 1vh;
+        border-radius: 0;
+    }
+
+    .PreviewDocument .paymentName{
+        font-size: clamp(1.8px,1.8vh,18px);
+    }
+
+    .PreviewDocument .paymentCard strong{
+        font-size: clamp(2px,2vh,20px);
+    }
+
+    .PreviewDocument .paymentTotalCard {
+        padding: 1vh;
+        font-size: clamp(2.2px,2.2vh,22px);
+    }
+
+    .PreviewDocument .paymentTotalCard strong{
+        font-size: clamp(2.2px,2.2vh,22px);
     }
 }

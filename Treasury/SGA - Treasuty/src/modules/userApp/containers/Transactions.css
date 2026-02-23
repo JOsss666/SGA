@@ -1,0 +1,441 @@
+.Transactions {
+    padding: 2vh 2vw;
+    background-color: var(--bg);
+    display: flex;
+    flex-direction: column;
+    gap: 10vh;
+}
+
+.Transactions .HeadTransactions {
+    margin-bottom: -1vh;
+}
+
+.Transactions .descriptionRow {
+    margin-left: 0;
+    margin-top: -0.5vh;
+}
+
+.Transactions .BoldTitle {
+    font-size: 4vh !important;
+    color: var(--sectionTitle);
+    margin-bottom: 0.5dvh;
+}
+
+.Transactions .DescriptionSpan {
+    color: var(--descriptionText);
+    font-size: 2vh;
+}
+
+.Transactions .filtersBar {
+    display: flex;
+    align-items: center;
+    gap: 1vw;                  
+    flex-wrap: wrap;
+    margin-bottom: 0vh;
+    margin-top: -6.5vh;
+    position: relative;
+}
+
+.Transactions .filtersBar .SearchBar {
+    width: 15vw;
+    min-width: 180px;
+}
+
+
+.Transactions .filtersBar .rangeInput {
+    display: flex;
+    align-items: center;
+    gap: 0.5vw;
+}
+
+.Transactions .filtersBar .rangeInput .FormInput {
+    width: 10vw;
+    min-width: 120px;
+    margin-top: -1.5vh; 
+}
+
+.Transactions .filtersBar .SelectOptions {
+    min-width: 140px;
+}
+
+.Transactions .filtersBar .filterButtons {
+    display: flex;
+    align-items: center;
+    gap: 0.5vw;
+    margin-left: auto;
+}
+
+.Transactions .filtersBar .filterButtons .ButtonMenu,
+.Transactions .filtersBar .filterButtons .ButtonDownload {
+    height: 5vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.Transactions .filtersBar .filterButtons .ButtonDownload {
+    position: static; 
+    margin-left: 0;
+    position: relative; 
+    width: auto;      
+    min-width: 40px;    
+    height: 5vh;         
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0;
+    padding: 0 1vh;
+}
+
+.Transactions .TableTransactions {
+    border-radius: 1.5vh;
+    overflow: hidden;
+    box-shadow: none;
+    margin-top: -8vh;
+}
+
+.Transactions .headTable {
+    padding: 2vh;
+    display: flex;
+    align-items: center;
+    background-color: var(--menuAside);
+    border: solid 0.1vh var(--inputsBorder); 
+    border-bottom: solid 0.1vh var(--inputsBorder);
+    position: relative;
+    z-index: 2; 
+    border-top-left-radius: 1.5vh;
+    border-top-right-radius: 1.5vh;
+    box-shadow: none !important;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.Transactions .TitleColumns {
+    font-size: 1.45vh;
+    font-weight: 600;
+    color: var(--descriptionText);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.Transactions .col-id { width: 8vw; }
+.Transactions .col-transaction { width: 20vw; }
+.Transactions .col-thirdParty { width: 15vw; }
+.Transactions .col-category { width: 12vw; }
+.Transactions .col-responsible { width: 15vw; }
+.Transactions .col-status { width: 10vw; }
+.Transactions .col-value { width: 8vw; text-align: right; }
+
+.Transactions .noResults {
+    border: solid 0.1vh var(--inputsBorder);
+    background-color: var(--bg);
+    padding: 5vh 2.5vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2vh;
+    border-bottom-left-radius: 1.5vh;
+    border-bottom-right-radius: 1.5vh;
+    color: var(--descriptionText);
+}
+
+.Transactions .noResults i {
+    font-size: 5vh;
+    opacity: 0.3;
+}
+
+.Transactions .noResults p {
+    font-size: 1.8vh;
+    margin: 0;
+}
+
+.Transactions .paginationSection {
+    margin-top: -9vh;
+}
+
+.Transactions .paginationWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.Transactions .showingText {
+    font-size: 1.6vh;
+    color: var(--descriptionText);
+    background-color: var(--cardHover);
+    padding: 0.8vh 2vh;
+    border-radius: 4vh;
+    border: solid 0.1vh var(--inputsBorder);
+}
+
+.Transactions .paginationControls {
+    display: flex;
+    gap: 0.8vh;
+}
+
+.Transactions .paginationNumber {
+    min-width: 4vh;
+    height: 4vh;
+    border-radius: 0.8vh;
+    border: 0.1vh solid var(--inputsBorder);
+    background-color: var(--bg);
+    color: var(--descriptionText);
+    font-size: 1.6vh;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.Transactions .paginationNumber:hover {
+    background-color: var(--cardHover);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.Transactions .paginationNumber.active {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.Transactions .paginationArrow {
+    width: 4vh;
+    height: 4vh;
+    border-radius: 0.8vh;
+    border: 0.1vh solid var(--inputsBorder);
+    background-color: var(--bg);
+    color: var(--descriptionText);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.Transactions .paginationArrow:hover:not(:disabled) {
+    background-color: var(--cardHover);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.Transactions .paginationArrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.Transactions .paginationArrow i {
+    font-size: 1.6vh;
+}
+
+@media (max-width: 75em) {
+    .Transactions .col-id { width: 9vw; }
+    .Transactions .col-transaction { width: 20vw; }
+    .Transactions .col-thirdParty { width: 14vw; }
+    .Transactions .col-category { width: 12vw; }
+    .Transactions .col-responsible { width: 14vw; }
+    .Transactions .col-status { width: 11vw; }
+    .Transactions .col-value { width: 9vw; }
+}
+
+@media (max-width: 56.25em) {
+    .Transactions .filtersBar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 40vh;
+    }
+    .Transactions .filtersBar .SearchBar,
+    .Transactions .filtersBar .rangeInput,
+    .Transactions .filtersBar .SelectOptions,
+    .Transactions .filtersBar .filterButtons {
+        width: 100%;
+    }
+    .Transactions .filtersBar .rangeInput {
+        flex-wrap: wrap;
+    }
+    .Transactions .filtersBar .rangeInput .FormInput {
+        width: calc(50% - 0.5vw);
+    }
+    .Transactions .filtersBar .filterButtons {
+        justify-content: flex-end;
+        margin-left: 0;
+    }
+    .Transactions .TableTransactions {
+        overflow-x: auto;
+    }
+    .Transactions .headTable,
+    .roundedBottom {
+        min-width: 900px;
+    }
+}
+
+@media (max-width: 48em) {
+    .Transactions {
+        padding: 1.5vh 1.5vw;
+    }
+    .Transactions .paginationWrapper {
+        flex-direction: column;
+        gap: 1.5vh;
+    }
+    .Transactions .filtersBar .rangeInput .FormInput {
+        width: 100%;
+    }
+}
+
+@media (max-width: 37.5em) {
+    .Transactions .filtersBar .rangeInput {
+        flex-direction: column;
+        gap: 1vh;
+    }
+    .Transactions .filtersBar .rangeInput span {
+        display: none;
+    }
+}
+
+.Transactions .metricsSection {
+    margin-bottom: -1vh;
+    margin-top: -7vh;
+}
+
+.Transactions .metricsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2vh;
+}
+
+.Transactions .metricCard {
+    background-color: var(--bg);
+    border: solid 0.1vh var(--inputsBorder);
+    border-radius: 2vh;
+    padding: 2vh;
+    transition: all 0.3s ease;
+    height: 35vh;
+    display: flex;
+    flex-direction: column;
+
+}
+
+.Transactions .metricCard:hover {
+    transform: translateY(-0.2vh);
+    box-shadow: 0 0.4vh 1.2vh rgba(0, 0, 0, 0.1);
+    border-color: var(--primary);
+}
+
+.Transactions .metricCard .metricLabel {
+    font-size: 1.4vh;
+    color: var(--descriptionText);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.5vh;
+}
+
+.Transactions .metricCard .metricValue {
+    font-size: 3.2vh;
+    font-weight: 700;
+    color: var(--mainText);
+    margin: 0.5vh 0; 
+    line-height: 1;
+}
+
+.Transactions .metricCard .metricChange {
+    font-size: 1.6vh;
+    font-weight: 600;
+    margin-top: 0.5vh;
+    display: inline-block;
+}
+
+.Transactions .metricCard .metricChange.positive {
+    color: #28D97B;
+}
+
+.Transactions .metricCard .metricChange.negative {
+    color: #D92828;
+}
+
+@media (max-width: 56.25em) {
+    .Transactions .metricsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 37.5em) {
+    .Transactions .metricsGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.Transactions .chartContainer {
+    width: 100%;
+    height: 30vh; 
+    margin-bottom: 2vh;
+    background-color: var(--bg);
+    border: solid 0.1vh var(--inputsBorder);
+    border-radius: 1.5vh;
+    padding: 1vh;
+    box-sizing: border-box;
+}
+
+.Transactions .metricCard .miniChart {
+    height: 45vh; 
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.Transactions .metricCard .miniChart svg {
+    width: 100%;
+    height: 100%;
+}
+
+.Transactions .metricCard .metricHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5vh;
+    width: 100%;
+}
+
+.Transactions .metricCard .metricHeader .metricLabel {
+    font-size: 1.4vh;
+    color: var(--descriptionText);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-bottom: 0; 
+}
+
+.Transactions .metricCard .metricHeader .metricChange {
+    font-size: 1.6vh;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.Transactions .metricCard .metricValue {
+    font-size: 3.2vh;
+    font-weight: 700;
+    color: var(--mainText);
+    display: block;
+    line-height: 1.2;
+    margin-bottom: -6vh;
+}
+
+.Transactions .metricCard {
+    background-color: var(--bg);
+    border: solid 0.1vh var(--inputsBorder);
+    border-radius: 2vh;
+    padding: 2vh;
+    height: 30vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; 
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+

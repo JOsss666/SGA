@@ -358,6 +358,7 @@ export function FormNewClientOrder({params,reloadFun}){
                                     list={productsServicesArray}
                                     placeHolder={'Agregar producto o servicio'}
                                     disabled={disabled}
+                                    //canClear={true}
                                 />
                                 <div className="gridPaymentMethods">
                                     {productsServices.map((element,index)=>(

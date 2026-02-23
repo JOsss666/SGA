@@ -17,7 +17,9 @@ export function PreviewDocument({doc_id}){
     const [attachedServices,setAttacedServices] = useState([]);
     const [attachedFiles,setAttachedFiles] = useState([]);
     const params = useParams();
+    const [thirdParyInfo, setThirdPartyInfo] = useState({});
     const [id,setId] = useState(doc_id? doc_id:params.doc_id);
+    const [attachedTransactions,setAttachedTransactions] = useState([]);
 
     // Control
     const [loading,setLoading] = useState(true);
@@ -63,7 +65,51 @@ export function PreviewDocument({doc_id}){
         "application/json": <i className="fa-solid fa-code fileIcon"/>
     };
 
+    const dictionaryDocTypes = {
+        "Sell Invoice": "Factura de Venta",
+        "Purchase Invoice": "Factura de Compra",
+        "Cash Recipt": "Recibo de Caja",
+        "Exit Recipt": "Recibo de Egreso",
+        "Accounting Recipt": "Comprobante Contable",
+        "Debit Note": "Nota Débito",
+        "Credit Note": "Nota Crédito",
+        "Beginning Balance": "Saldo Inicial",
+        "Price Recipt": "Recibo de Precio",
+        "Sales Order": "Orden de Venta",
+        "Product Shipment": "Envío de Producto",
+        "Sales Returns": "Devolución de Venta",
+        "Inventory Booking": "Registro de Inventario",
+        "Inventory Transfer": "Transferencia de Inventario",
+        "Inventory Entry": "Entrada de Inventario",
+        "Inventory Out": "Salida de Inventario",
+        "Inventory Return": "Devolución de Inventario",
+        "Inventory Donation": "Donación de Inventario",
+        "Inventory Loss": "Pérdida de Inventario",
+        "Inventory Consume": "Consumo de Inventario",
+        "Production Order": "Orden de Producción",
+        "Client Order": "Pedido de Cliente",
+        "Purchase Document": "Documento de Compra",
+        "Transaction": "Transacción",
+        "Portfolio Adjustment": "Ajuste de Cartera",
+        "Bank Deposit": "Depósito Bancario",
+        "Purchase Order": "Orden de Compra",
+        "Sales Quotation": "Cotización de Venta",
+        "Inventory Adjustment": "Ajuste de Inventario",
+        "Cost Transfer": "Transferencia de Costos",
+        "Payroll Voucher": "Comprobante de Nómina",
+        "Payroll Provision": "Provisión de Nómina",
+        "Payroll Adjustment": "Ajuste de Nómina",
+        "Amortization": "Amortización",
+        "Depreciation": "Depreciación",
+        "NIIF Adjustment": "Ajuste NIIF",
+        "Equivalent Purchase Document": "Documento Equivalente de Compra",
+        "Machine use": "Uso de Máquina"
+    };
+
+
     // Functions
+
+
     const getDocumentInfo = async()=>{
         setLoading(true)
         let res = await postInfo('/getDocuments',{
@@ -76,6 +122,13 @@ export function PreviewDocument({doc_id}){
         setLoading(false);
     }
 
+    const getThirdParties = async()=>{
+        let res = await postInfo('/getThirdParties',{company_id:appInfo.company_id, id:docInfo.thirdParty_id});
+        if(res[0]){
+            setThirdPartyInfo(res[1][0]);
+        }
+    }
+
     const getAttachedDodcs = async(attArray)=>{
         let res = await postInfo('/getAttachedFiles',{
             company_id:appInfo.company_id,
@@ -86,6 +139,20 @@ export function PreviewDocument({doc_id}){
             setAttachedFiles(res[1]);
         }
     }
+
+    const getAttachedTransactions = async(paymentMethod_id)=>{
+        setLoading(true);
+        let res = await postInfo('/facturation/getTransactionsOfCashRecord',{
+            company_id:appInfo.company_id,
+            doc_id:docInfo.id
+        })
+        console.log(res);
+        if(res[0]){
+            setAttachedTransactions(res[1]);
+        }
+        setLoading(false);
+    }
+    
 
     const getAttachedServices = async()=>{
         let res = await postInfo('/getServiceMovements',{
@@ -113,7 +180,11 @@ export function PreviewDocument({doc_id}){
     useEffect(()=>{
         console.log(docInfo)
         if(docInfo.id != undefined){
-            getAttachedServices();
+            getThirdParties();
+            switch(docInfo.document_type){
+                case "Cash Recipt": getAttachedTransactions();
+                case "Client Order": getAttachedServices();;
+            }
             let attArray = []
             let docsAtt = JSON.parse(typeof(JSON.parse(docInfo.attached)) == "object"? docInfo.attached:"[]");
             console.log(docsAtt)
@@ -132,10 +203,10 @@ export function PreviewDocument({doc_id}){
                 <>
                     <div className="titleDocContainer">
                         <i className="fa-regular fa-file-lines"/>
-                        <BoldTitle text={`${docInfo.document_type} #${docInfo.ownSerial}`}/>
+                        <BoldTitle text={`${dictionaryDocTypes[docInfo.document_type]} #${docInfo.ownSerial}`}/>
                     </div>
                     <div className="thirdPartyAndCompanyInfo">
-                        <UserCard name={'Nombre del tercero'} desc={'Cliente'} imgSrc={'https://i.pinimg.com/736x/55/62/fb/5562fb835d1de1ea974bdf0039726208.jpg'}/>
+                        <UserCard name={thirdParyInfo.names} desc={thirdParyInfo.type} imgSrc={thirdParyInfo.img? thirdParyInfo.img:'https://i.pinimg.com/736x/55/62/fb/5562fb835d1de1ea974bdf0039726208.jpg'}/>
                     </div>
                     <DescriptionSpan text={`Descripción: ${docInfo.description}`}/>
                     {docInfo.document_type == 'Client Order' && (
@@ -159,6 +230,34 @@ export function PreviewDocument({doc_id}){
                             ))}
                         </div>
                     )}
+ 
+                    {docInfo.document_type == 'Cash Recipt' && attachedTransactions.length > 0 && (
+                        <div className="deatialCashRecipt">
+
+                            {attachedTransactions.map((tx,index)=>(
+                                <div className="paymentCard" key={index}>
+                                    <span className="paymentName">
+                                        {tx.payment_name}
+                                    </span>
+
+                                    <strong className="paymentValue">
+                                        ${Number(tx.total).toLocaleString()}
+                                    </strong>
+                                </div>
+                            ))}
+
+                            <div className="paymentTotalCard">
+                                <span>Total</span>
+                                <strong>
+                                    ${attachedTransactions
+                                        .reduce((sum,t)=>sum + Number(t.total),0)
+                                        .toLocaleString()}
+                                </strong>
+                            </div>
+
+                        </div>
+                    )}
+
                     <div className="attachedDocuments"> 
                         <h6>Archivos adjuntos</h6>
                         <div className="attachedDocumentsGrid">
