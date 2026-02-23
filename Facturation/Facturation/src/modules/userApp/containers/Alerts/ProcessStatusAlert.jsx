@@ -147,6 +147,24 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
         reloadFun?.();
     }
 
+    
+    const cancellProcess = async()=>{
+        let res = await postInfo('/process/updateProcessInstanceStatus',{
+            company_id:appInfo.company_id,
+            id:info.id,
+            status:'cancelled',
+            user_id:userInfo.user_id
+        });
+        await popOutAlert();
+        if(res[0]){
+            addNotification({
+                type:'error',
+                title:`${info.process_code}#${info.ownSerial} cancelado`,
+                description:`La instancia de proceso ${info.process_code}#${info.ownSerial} fue cancelada correctamente.`
+            })
+        }
+    }
+
     // Funcion para ordenar los pasos
     const enrichedSteps = useMemo(() => {
         if (!processInfo.steps) return [];
@@ -203,6 +221,8 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
         return current?.checkDocs ?? false;
     }, [enrichedSteps]);
 
+    const canCancel = true;
+
     return(
         <div className="ProcessStatusAlert">
             <div className="headProcess">
@@ -215,7 +235,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                     <span className="InstanceProceesIndicator">
                         {info.thirdParty_name}
                     </span>
-                    <i title={`Mas información de ${info.process_name}`} className="fa-solid fa-arrow-rotate-right infoAbourProcess" onClick={()=>{
+                    <i title={`Refescar ${info.process_name}`} className="fa-solid fa-arrow-rotate-right infoAbourProcess" onClick={()=>{
                         getInstanceInfo();
                     }}/>
                 </div>
@@ -296,6 +316,14 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                 <strong>Permanecer en esta etapa</strong>
                                 <i className="fa-solid fa-pause"/>
                             </button>
+                            {canCancel && (
+                                <button className="passProcessStep cancelButton" disabled={disabled} onClick={()=>{
+                                    cancellProcess();
+                                }}>
+                                    <strong>Cancelar proceso</strong>
+                                    <i className="fa-solid fa-trash cancelIcon"/>
+                                </button>
+                            )}
                         </div>
                     )}
                     {nextStepData != undefined && !nextStepData.required_roll.includes(parseInt(userInfo.role)) && (

@@ -290,6 +290,18 @@
     font-size: clamp(3px,3vh,30px);
 }
 
+.ProcessStatusAlert .optionsProcessCotnainer .cancelButton{
+    background-color: #FB2C36 ;
+}
+
+.ProcessStatusAlert .optionsProcessCotnainer .cancelButton strong,
+.ProcessStatusAlert .optionsProcessCotnainer .cancelButton span{
+    color: #fff;
+}
+.ProcessStatusAlert .optionsProcessCotnainer .cancelButton .cancelIcon{
+    color: #fff !important;
+}
+
 @media (max-width:500px) {
     .ProcessStatusAlert{
         width: 100dvw;
