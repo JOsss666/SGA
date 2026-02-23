@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './SearchInList.css'
 
-export function SearchinList({title, placeHolder, list, disabled, action, children, specialOption, noActVal}){
+export function SearchinList({title, placeHolder, list, disabled, action, children, specialOption, noActVal,canClear}){
     
     const [searchValue, setSearchValue] = useState('');
     const [visibleList, setVisibleList] = useState(false);
@@ -49,6 +49,16 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
         }
         setVisibleList(false);
         setFocusedIndex(-1);
+    };
+
+    const clearSelection = () => {
+        setFocusedIndex(-1);
+        setVisibleList(false);
+        setSearchValue('');
+        setSelectedOption(undefined); // o "" según tu lógica
+        if (inRef.current) {
+            inRef.current.value = "";
+        }
     };
 
     const handleKeyDown = (e) => {
@@ -100,6 +110,15 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
                         setFocusedIndex(-1);
                     }}
                 />
+                {canClear && (
+                    <i 
+                        className="fa-solid fa-xmark clearSelectedOptionBtn"
+                        onClick={(e)=>{
+                            e.stopPropagation(); // 🔥 CLAVE
+                            clearSelection();
+                        }}
+                    />
+                )}
                 {visibleList && (
                     <ul ref={listE} className="listElementsContainer">
                         <div onMouseDown={(e)=>{
