@@ -103,6 +103,68 @@
     color: var(--mainText);
 }
 
+.PreviewDocument .detailDoctype{
+    padding: 2vh;
+    display:flex;
+    flex-direction: column;
+    gap:2vh;
+}
+
+.PreviewDocument .paymentCard{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items: center;
+    width: fit-content;
+    min-width: 40vh;
+    height: 12vh;
+    background: var(--text);
+    border-radius:2vh;
+    padding:2.5vh;
+    gap:1vh;
+
+    box-shadow:0 1vh 3vh rgba(0,0,0,0.08);
+    transition:all .25s ease;
+    border:.15vh solid rgba(0,0,0,0.05);
+}
+
+.PreviewDocument .paymentCard:hover{
+    transform:translateY(-0.5vh);
+    box-shadow:0 2vh 4vh rgba(0,0,0,0.15);
+}
+
+.PreviewDocument .paymentName{
+    font-size:3vh;
+    font-weight:600;
+    color: var(--lightGradient1);
+    letter-spacing:.1vh;
+}
+
+.PreviewDocument .paymentValue{
+    font-size:2.5vh;
+    font-weight:600;
+    color: var(--cardHover);
+}
+
+.PreviewDocument .paymentTotalCard{
+    background:linear-gradient(135deg, var(--descriptionText), var(--sectionTitle));
+    color:var(--cardHover);
+    border-radius:3vh;
+    padding:3vh;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    font-size:3.5vh;
+    font-weight:700;
+
+    box-shadow:0 1.5vh 4vh rgba(0,0,0,.2);
+}
+
+.PreviewDocument .paymentTotalCard strong{
+    font-size:3vh;
+}
+
 .PreviewDocument .attachedDocuments .attachedDocumentsGrid{
     display: flex;
     flex-direction: column;

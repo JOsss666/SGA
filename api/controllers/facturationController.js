@@ -198,7 +198,7 @@ facturationController.getCashBoxes = (req,res)=>{
         }
 
 
-         const whereQuery = whereClauses.length > 0
+        const whereQuery = whereClauses.length > 0
             ? `WHERE ${whereClauses.join(" AND ")}`
             : "";
 
@@ -426,84 +426,112 @@ facturationController.getCashRegisterReport = (req,res)=>{
     })
 }
 
-facturationController.getTransactionsOfCashRecord = (req,res)=>{
+facturationController.getTransactionsOfCashRecord = (req, res) => {
     let data = '';
-    req.on('data',chunk=>{
+
+    req.on('data', chunk => {
         data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            SELECT
-                "Facturation".shift_settlement_details.id AS shift_settlement_id,
-                "Ecosystem".transaction_detail.*,
-                "Ecosystem".concepts.name AS concept_name,
-                "Ecosystem".contable_accounts.code AS account_code,
-                "Ecosystem".transactions.doc_type,
-                "Ecosystem".transactions.doc_id,
-                "Ecosystem".documents.instance_id,
-                "Process".process_instance."ownSerial" AS instance_serial,
-                "Process".processes.code AS process_code,
-                "Ecosystem".payment_methods.name AS payment_name,
-                "Ecosystem".thirdparties.names AS thirdParty_name,
-                "Ecosystem".thirdparties.img AS thirdParty_img
-            FROM
-                "Facturation".shift_settlement_details
-            LEFT JOIN
-                "Ecosystem".transaction_detail
-             LEFT JOIN
-                "Ecosystem".transactions
-            ON
-                "Ecosystem".transaction_detail.transaction_id = "Ecosystem".transactions.id
-            ON
-                "Facturation".shift_settlement_details."transactionDetail_id" = "Ecosystem".transaction_detail.id
-            LEFT JOIN
-                "Ecosystem".concepts
-            ON 
-                "Ecosystem".transactions.concept_id = "Ecosystem".concepts.id
-            LEFT JOIN
-                "Ecosystem".contable_accounts
-            ON
-                "Ecosystem".concepts.account_id = "Ecosystem".contable_accounts.id
-            LEFT JOIN
-                "Ecosystem".payment_methods
-            ON 
-                "Ecosystem".transaction_detail."paymentMethod_id" = "Ecosystem".payment_methods.id
-            LEFT JOIN
-                "Ecosystem".thirdparties
-            ON
-                "Ecosystem".transaction_detail."thirdParty_id" = "Ecosystem".thirdparties.id
-            LEFT JOIN
-                "Ecosystem".documents
-            ON
-                "Ecosystem".transactions.doc_id = "Ecosystem".documents.id
-            LEFT JOIN
-                "Process".process_instance
-            ON
-                "Ecosystem".documents.instance_id = "Process".process_instance.id
-            LEFT JOIN
-                "Process".processes
-            ON
-                "Process".process_instance.process_id = "Process".processes.id
-            WHERE
-                "Facturation".shift_settlement_details.company_id = $1 AND
-                "Facturation".shift_settlement_details.shift_id = $2 AND
-                "Ecosystem".transaction_detail."paymentMethod_id" = $3
-            ORDER BY "Ecosystem".transaction_detail.created_at DESC;
-        `;
-        let consulta = await useDataBase(sentence,[
-            info.company_id,
-            info.shift_id,
-            info.paymentMethod_id
-        ],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
+    });
+
+    req.on('end', async () => {
+        try {
+            const info = JSON.parse(data);
+
+            let values = [];
+            let whereClauses = [];
+
+            if (info.shift_id != undefined) {
+                whereClauses.push(`"Facturation".shift_settlement_details.shift_id = $${values.length + 1}`);
+                values.push(info.shift_id);
+            }
+
+            if (info.paymentMethod_id != undefined) {
+                whereClauses.push(`"Ecosystem".transaction_detail."paymentMethod_id" = $${values.length + 1}`);
+                values.push(info.paymentMethod_id);
+            }
+
+            if (info.doc_id != undefined) {
+                whereClauses.push(`"Ecosystem".transactions.doc_id = $${values.length + 1}`);
+                values.push(info.doc_id);
+            }
+
+            const whereQuery = whereClauses.length > 0
+                ? `WHERE ${whereClauses.join(" AND ")}`
+                : "";
+
+            let sentence = `
+                SELECT
+                    "Facturation".shift_settlement_details.id AS shift_settlement_id,
+                    "Ecosystem".transaction_detail.*,
+                    "Ecosystem".concepts.name AS concept_name,
+                    "Ecosystem".contable_accounts.code AS account_code,
+                    "Ecosystem".transactions.doc_type,
+                    "Ecosystem".transactions.doc_id,
+                    "Ecosystem".documents.instance_id,
+                    "Process".process_instance."ownSerial" AS instance_serial,
+                    "Process".processes.code AS process_code,
+                    "Ecosystem".payment_methods.name AS payment_name,
+                    "Ecosystem".thirdparties.names AS thirdParty_name,
+                    "Ecosystem".thirdparties.img AS thirdParty_img
+                FROM
+                    "Facturation".shift_settlement_details
+                LEFT JOIN
+                    "Ecosystem".transaction_detail
+                LEFT JOIN
+                    "Ecosystem".transactions
+                ON
+                    "Ecosystem".transaction_detail.transaction_id = "Ecosystem".transactions.id
+                ON
+                    "Facturation".shift_settlement_details."transactionDetail_id" = "Ecosystem".transaction_detail.id
+                LEFT JOIN
+                    "Ecosystem".concepts
+                ON 
+                    "Ecosystem".transactions.concept_id = "Ecosystem".concepts.id
+                LEFT JOIN
+                    "Ecosystem".contable_accounts
+                ON
+                    "Ecosystem".concepts.account_id = "Ecosystem".contable_accounts.id
+                LEFT JOIN
+                    "Ecosystem".payment_methods
+                ON 
+                    "Ecosystem".transaction_detail."paymentMethod_id" = "Ecosystem".payment_methods.id
+                LEFT JOIN
+                    "Ecosystem".thirdparties
+                ON
+                    "Ecosystem".transaction_detail."thirdParty_id" = "Ecosystem".thirdparties.id
+                LEFT JOIN
+                    "Ecosystem".documents
+                ON
+                    "Ecosystem".transactions.doc_id = "Ecosystem".documents.id
+                LEFT JOIN
+                    "Process".process_instance
+                ON
+                    "Ecosystem".documents.instance_id = "Process".process_instance.id
+                LEFT JOIN
+                    "Process".processes
+                ON
+                    "Process".process_instance.process_id = "Process".processes.id
+                ${whereQuery}
+                ORDER BY "Ecosystem".transaction_detail.created_at DESC;
+            `;
+
+            const consulta = await useDataBase(sentence, values, 1);
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(consulta));
+
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        }
+    });
+
+    req.on('error', err => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(err));
-    })
-}
+    });
+};
+
 
 facturationController.getBriefcaseBills = (req,res)=>{
     let data = '';
