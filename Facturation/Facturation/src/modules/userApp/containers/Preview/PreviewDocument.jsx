@@ -17,6 +17,7 @@ export function PreviewDocument({doc_id}){
     const [attachedServices,setAttacedServices] = useState([]);
     const [attachedFiles,setAttachedFiles] = useState([]);
     const params = useParams();
+    const [thirdParyInfo, setThirdPartyInfo] = useState({});
     const [id,setId] = useState(doc_id? doc_id:params.doc_id);
     const [attachedTransactions,setAttachedTransactions] = useState([]);
 
@@ -121,6 +122,13 @@ export function PreviewDocument({doc_id}){
         setLoading(false);
     }
 
+    const getThirdParties = async()=>{
+        let res = await postInfo('/getThirdParties',{company_id:appInfo.company_id, id:docInfo.thirdParty_id});
+        if(res[0]){
+            setThirdPartyInfo(res[1][0]);
+        }
+    }
+
     const getAttachedDodcs = async(attArray)=>{
         let res = await postInfo('/getAttachedFiles',{
             company_id:appInfo.company_id,
@@ -172,9 +180,11 @@ export function PreviewDocument({doc_id}){
     useEffect(()=>{
         console.log(docInfo)
         if(docInfo.id != undefined){
-            
-            getAttachedTransactions();
-            getAttachedServices();
+            getThirdParties();
+            switch(docInfo.document_type){
+                case "Cash Recipt": getAttachedTransactions();
+                case "Client Order": getAttachedServices();;
+            }
             let attArray = []
             let docsAtt = JSON.parse(typeof(JSON.parse(docInfo.attached)) == "object"? docInfo.attached:"[]");
             console.log(docsAtt)
@@ -196,7 +206,7 @@ export function PreviewDocument({doc_id}){
                         <BoldTitle text={`${dictionaryDocTypes[docInfo.document_type]} #${docInfo.ownSerial}`}/>
                     </div>
                     <div className="thirdPartyAndCompanyInfo">
-                        <UserCard name={'Nombre del tercero'} desc={'Cliente'} imgSrc={'https://i.pinimg.com/736x/55/62/fb/5562fb835d1de1ea974bdf0039726208.jpg'}/>
+                        <UserCard name={thirdParyInfo.names} desc={thirdParyInfo.type} imgSrc={thirdParyInfo.img? thirdParyInfo.img:'https://i.pinimg.com/736x/55/62/fb/5562fb835d1de1ea974bdf0039726208.jpg'}/>
                     </div>
                     <DescriptionSpan text={`Descripción: ${docInfo.description}`}/>
                     {docInfo.document_type == 'Client Order' && (
@@ -220,9 +230,9 @@ export function PreviewDocument({doc_id}){
                             ))}
                         </div>
                     )}
-
+ 
                     {docInfo.document_type == 'Cash Recipt' && attachedTransactions.length > 0 && (
-                        <div className="detailDoctype">
+                        <div className="deatialCashRecipt">
 
                             {attachedTransactions.map((tx,index)=>(
                                 <div className="paymentCard" key={index}>
