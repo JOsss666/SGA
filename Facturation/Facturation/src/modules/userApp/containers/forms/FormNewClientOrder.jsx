@@ -15,7 +15,7 @@ import { LabelValue } from "../../components/LabelValue";
 import { SwitchOption } from "../../components/SwitchOption";
 import { TagIndicator } from "../../components/TagIndicator";
 
-export function FormNewClientOrder({params,reloadFun}){
+export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
 
     // requirements
     const [info,setInfo] = useState(params != undefined? params:{})
@@ -83,7 +83,7 @@ export function FormNewClientOrder({params,reloadFun}){
                 setProductsServices(prev => {
                     // Verificamos si ya existe un objeto con ese ID
                     const exists = prev.some(item => item.id === newPayment.id);
-                    if (exists) {
+                    if (!canRepeatServices && exists) {
                         // Opcional: Podrías lanzar una alerta o simplemente no hacer nada
                         console.warn("Este método de pago ya ha sido agregado.");
                         alert(`El metodo de pago ${newPayment.name} ya fue agregado`)
@@ -358,6 +358,7 @@ export function FormNewClientOrder({params,reloadFun}){
                                     list={productsServicesArray}
                                     placeHolder={'Agregar producto o servicio'}
                                     disabled={disabled}
+                                    noActVal={true}
                                     //canClear={true}
                                 />
                                 <div className="gridPaymentMethods">

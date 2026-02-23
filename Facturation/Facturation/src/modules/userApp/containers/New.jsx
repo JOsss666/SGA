@@ -36,7 +36,7 @@ export function New(){
         {text:'Crear reporte uso maquinaria',children:<FormSelectMachine appInfo={appInfo} userConfig={userConfig} popOutAlert={popOutAlert} userInfo={userInfo}/>,icon:<i className="fa-solid fa-tractor"/>},
         //{text:'Cierre de clicks',children:<FormClicksControl appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} popOutAlert={popOutAlert}/>,icon:<i className="fa-solid fa-arrow-pointer"/>},
         ...(userConfig.access != undefined && userConfig.access.sections.cashBoxes.overAll ? [{text:'Crear recibo de caja',children:<FormNewCashRecipt/>,icon:<i className="fa-solid fa-receipt"/>}]:[]),
-        {text:'Crear nueva orden de cliente',children:<FormNewClientOrder/>,icon:<i className="fa-regular fa-file"/>},
+        {text:'Crear nueva orden de cliente',children:<FormNewClientOrder canRepeatServices={true}/>,icon:<i className="fa-regular fa-file"/>},
         ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Crear usuario',children:<FormNewUser/>,icon:<i className="fa-solid fa-person-circle-plus"/>}]:[]),
         {text:'Crear tercero',children:<FormNewThirdParties quickCreation={!userConfig.access.sections.thirdparties.can_create}/>,icon:<i className="fa-regular fa-user"/>},
         ...(isElectron ? [{
