@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { BoldTitle } from "../../components/BoldTitle";
 import './ProcessStatusAlert.css'
 import { postInfo } from "../../../../utils/functions";
@@ -19,7 +19,6 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
     // control
     const [disabled,setDisabled] = useState(false);
     const [loading,setLoading] = useState(false);
-    const [docsCompleted,setDocsCompleted] = useState(false);
     const [loadingDocuments,setLoadingDocuments] = useState(false);
 
     // Form Content
@@ -115,26 +114,6 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
         }
     };
 
-    const reviewSteps = (steps,currentOrder,currentStepId)=>{
-        let newSteps = [];
-        steps.map((element)=>{
-            let nStep = element;
-            console.log(`${element.id} --- ${currentStepId}`)
-            nStep.isCompleted = element.order < currentOrder;
-            nStep.isPending = element.order > currentOrder;
-            let checkDocs = validateStepDocuments(element);
-            element.checkDocs = checkDocs;
-            if(element.id == currentStepId){
-                setDocsCompleted(checkDocs)
-                nStep.isActual = true;
-            }
-            newSteps.push(nStep)
-            console.log('XX ',nStep)
-        })
-        console.log('---> ',newSteps);
-        return newSteps
-    }
-
     // Advance to next Step
     const advanceNextStep = async()=>{
         setDisabled(true);
@@ -168,34 +147,40 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
         reloadFun?.();
     }
 
-    useEffect(()=>{
-        console.log(`cambio en el sortedSteps`,sortedSteps)
-    },[sortedSteps])
+    // Funcion para ordenar los pasos
+    const enrichedSteps = useMemo(() => {
+        if (!processInfo.steps) return [];
 
-    useEffect(() => {
-        console.log('Intentando solucionar los problemas')
-        if (attachedDocuments.length != undefined && processInfo.steps) {
-            // 1. Agrupamos los documentos por step_id para no iterar de más
-            const docsByStep = attachedDocuments.reduce((acc, doc) => {
-                if (!acc[doc.step_instance]) acc[doc.step_instance] = [];
-                acc[doc.step_instance].push(doc);
-                return acc;
-            }, {});
-            const stepsWithDocs = processInfo.steps.map(step => ({
+        // Agrupar docs por step
+        const docsByStep = attachedDocuments.reduce((acc, doc) => {
+            if (!acc[doc.step_instance]) acc[doc.step_instance] = [];
+            acc[doc.step_instance].push(doc);
+            return acc;
+        }, {});
+
+        return processInfo.steps.map(step => {
+            const attached = docsByStep[step.id] || [];
+
+            const checkDocs = !step.required_docs?.length
+                ? true
+                : step.required_docs.every(req => {
+                    const count = attached.filter(
+                        d => d.document_type === req.docType
+                    ).length;
+                    return count >= req.min;
+                });
+
+            return {
                 ...step,
-                attached_Docs: docsByStep[step.id] || []
-            }));
+                attached_Docs: attached,
+                checkDocs,
+                isCompleted: step.order < currentOrder,
+                isPending: step.order > currentOrder,
+                isActual: step.id == processInfo.step_id
+            };
+        });
 
-            // 3. Ahora que tienen docs, pasamos esos pasos por la revisión de lógica
-            const verifiedSteps = reviewSteps(stepsWithDocs, currentOrder,  processInfo.step_id,);
-            // 2. Actualizamos el estado una sola vez mapeando los pasos
-            console.log(verifiedSteps)
-            setProcessInfo(prev => ({
-                ...prev,
-                steps: verifiedSteps
-            }));
-        }
-    }, [attachedDocuments]);
+    }, [processInfo.steps, attachedDocuments, currentOrder, processInfo.step_id]);
 
 
     useEffect(()=>{
@@ -211,6 +196,12 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
     useEffect(()=>{
         getInstanceInfo();
     },[])
+
+    // Final validation of required Documents
+    const docsCompleted = useMemo(() => {
+        const current = enrichedSteps.find(s => s.isActual);
+        return current?.checkDocs ?? false;
+    }, [enrichedSteps]);
 
     return(
         <div className="ProcessStatusAlert">
@@ -235,10 +226,9 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                         <ul className="gridStepsProces">
                             {/* Barra de progreso dinámica */}
                             <div className="leftBarProgress" style={{ height: `${progressPercentage}%` }} />
-                            
-                            {sortedSteps.map((element) => {
-                                console.log('--- ',element)
-                                return (
+                            {enrichedSteps
+                                    .sort((a, b) => a.order - b.order)
+                                    .map((element) => (
                                     <li 
                                         key={element.id} 
                                         className={`
@@ -255,27 +245,26 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                             {element.name}
                                         </span>
                                         <div className="attachedDocsC">
-                                            {element.order <= currentStepData.order && !element.checkDocs && element.required_docs?.map((attReqDoc,index)=>(
-                                                (
-                                                    <span key={index}className="requiredDocAlert">
+                                            {element.order <= currentOrder && !element.checkDocs &&
+                                                element.required_docs?.map((req, i) => (
+                                                    <span key={i}className="requiredDocAlert">
                                                         <i className="fa-solid fa-triangle-exclamation"/>
-                                                        Requiere al menos {attReqDoc.min} {attReqDoc.docType}
+                                                        Requiere al menos {req.min} {req.docType}
                                                     </span>
-                                                )
-                                            ))}
-                                            {element.attached_Docs != undefined && element.attached_Docs?.map((attDoc,index)=>(
-                                                <span key={index} className="attachedDoc" onClick={()=>{
+                                                ))}
+                                            {element.attached_Docs.map((doc, i) => (
+                                                <span key={i} className="attachedDoc" onClick={()=>{
                                                     console.log(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${attDoc.id}`);
                                                     window.open(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${attDoc.id}`,'_blank','noopener,noreferrer')
                                                 }}>
                                                     <i className="fa-solid fa-file-circle-check"/>
-                                                    {`${attDoc.document_type} #${attDoc.ownSerial}`}
+                                                    {`${doc.document_type} #${doc.ownSerial}`}
                                                 </span>
                                             ))}
                                         </div>
                                     </li>
-                                );
-                            })}
+                                )
+                            )}
                         </ul>
                     )}
                     {loadingDocuments && (
