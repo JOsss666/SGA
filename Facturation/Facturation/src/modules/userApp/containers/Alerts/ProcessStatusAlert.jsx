@@ -5,11 +5,12 @@ import { postInfo } from "../../../../utils/functions";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { FormInput } from "../../components/FormInput";
 import { LoadingSpace } from "../LoadingSpace";
+import { SelectTpeNewDoc } from "../forms/SelectTypeNewDoc";
 
 export function ProcessStatusAlert({instance_id,reloadFun}){
 
     // requirements
-    const {popOutAlert} = useAlert();
+    const {popOutAlert,popInAlert} = useAlert();
     const {addNotification} = useNotifications();
     const {appInfo,userInfo,userConfig} = useAppInfo();
     const [info,setInfo] = useState({});
@@ -267,15 +268,20 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                         <div className="attachedDocsC">
                                             {element.order <= currentOrder && !element.checkDocs &&
                                                 element.required_docs?.map((req, i) => (
-                                                    <span key={i}className="requiredDocAlert">
+                                                    <span key={i}className="requiredDocAlert" onClick={()=>{
+                                                        console.log(`Abriendo formulario para: ${req.docType}`)
+                                                        popInAlert(<SelectTpeNewDoc docType={req.docType} info={{
+                                                            instance_id:info.id
+                                                        }}/>)
+                                                    }}>
                                                         <i className="fa-solid fa-triangle-exclamation"/>
                                                         Requiere al menos {req.min} {req.docType}
                                                     </span>
                                                 ))}
                                             {element.attached_Docs.map((doc, i) => (
                                                 <span key={i} className="attachedDoc" onClick={()=>{
-                                                    console.log(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${attDoc.id}`);
-                                                    window.open(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${attDoc.id}`,'_blank','noopener,noreferrer')
+                                                    console.log(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${doc.id}`);
+                                                    window.open(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${doc.id}`,'_blank','noopener,noreferrer')
                                                 }}>
                                                     <i className="fa-solid fa-file-circle-check"/>
                                                     {`${doc.document_type} #${doc.ownSerial}`}

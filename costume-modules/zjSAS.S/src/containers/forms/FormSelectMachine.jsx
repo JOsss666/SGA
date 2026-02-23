@@ -7,7 +7,7 @@ import {DescriptionSpan} from '../../components/DescriptionSpan'
 import {FormButton} from '../../components/FormButton'
 import './FormSelectMachine.css'
 
-export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert}){
+export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,instance_id}){
 
     // Requirements
     const [assets,setAssets] = useState([]);
@@ -34,17 +34,24 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert}){
         setDisabled(true);
         setLoading(true);
         let res = await postInfo('/process/getProcessInstances',{
-            company_id:appInfo.company_id
+            company_id:appInfo.company_id,
+            id:instance_id
         })
+        console.log(res)
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
                 C.push({
                     text:`${element.process_code}#${element.ownSerial}`,
-                    value:element
+                    value:element,
+                    id:element.id
                 })
             });
             setProcessInstances(C);
+            console.log(C)
+            if(C.length == 1){
+                setInstanceInfo(C[0]);
+            }
         }
         setLoading(false);
         setDisabled(false);
@@ -76,7 +83,7 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert}){
             res[1].forEach(element => {
                 C.push({
                     text:`${element.internal_code} - ${element.name}`,
-                    value:element.id
+                    value:element.id,
                 })
             });
             setAssets(C);
@@ -134,6 +141,7 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert}){
     },[services])
 
     useEffect(()=>{
+        console.log(instanceInfo);
         if(instanceInfo.id != undefined){
             console.log(instanceInfo.id)
             getServicesMovements();
