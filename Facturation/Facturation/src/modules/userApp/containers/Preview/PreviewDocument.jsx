@@ -1,157 +1,286 @@
 import { useEffect,useState } from "react";
+import { BoldTitle } from "../../components/BoldTitle";
+import './PreviewDocument.css'
 import { postInfo } from "../../../../utils/functions";
 import { useAppInfo } from "../../../../context/context";
+import { DescriptionSpan } from "../../components/DescriptionSpan";
+import { UserCard } from "../../components/UserCard";
+import { MoreOptions } from "../../components/MoreOptions";
 import { useParams } from "react-router-dom";
+import { LoadingAppDataPage } from "../LoadingAppDataPage";
 
 export function PreviewDocument({doc_id}){
 
+    // Requirements
     const {appInfo} = useAppInfo();
-    const params = useParams();
-
-    const [id,setId] = useState(doc_id ?? params.doc_id);
-
-    const [docInfo,setDocInfo] = useState(null);
-    const [attachedServices,setAttachedServices] = useState([]);
+    const [docInfo,setDocInfo] = useState({})
+    const [attachedServices,setAttacedServices] = useState([]);
     const [attachedFiles,setAttachedFiles] = useState([]);
+    const params = useParams();
+    const [id,setId] = useState(doc_id? doc_id:params.doc_id);
+    const [attachedTransactions,setAttachedTransactions] = useState([]);
 
-    console.log("%c[PreviewDocument Render]","color:#00bcd4",{
-        id,
-        company:appInfo.company_id
-    });
+    // Control
+    const [loading,setLoading] = useState(true);
+    const [darkMode, setDarkMode] = useState(
+        window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    );
 
-    // detectar cambios externos
-    useEffect(()=>{
-        if(doc_id){
-            console.log("%cProp doc_id cambió","color:orange",doc_id);
-            setId(doc_id);
-        }
-    },[doc_id]);
+    const formatBytes = (bytes, decimales = 2) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const dm = decimales < 0 ? 0 : decimales;
+        const tamaños = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
+        // Calculamos el índice del tamaño (0 para bytes, 1 para KB, etc.)
+        // Usamos logaritmos para saber a qué potencia de 1024 pertenece el número
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-    // -------- DOCUMENTO ----------
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + tamaños[i];
+    };
+
+    const iconDocsContainer = {
+        "image/jpeg": <i className="fa-solid fa-file-image fileIcon"/>,
+        "image/png": <i className="fa-solid fa-file-image fileIcon"/>,
+        "image/gif": <i className="fa-solid fa-file-image fileIcon"/>,
+        "image/webp": <i className="fa-solid fa-file-image fileIcon"/>,
+        "image/svg+xml": <i className="fa-solid fa-file-image fileIcon"/>,
+        "application/pdf": <i className="fa-solid fa-file-pdf fileIcon"/>,
+        "application/msword": <i className="fa-regular fa-file-word fileIcon"/>,
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": <i className="fa-regular fa-file-excel fileIcon"/>,
+        "application/vnd.ms-excel": <i className="fa-regular fa-file-excel fileIcon"/>,
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": <i className="fa-regular fa-file-excel fileIcon"/>,
+        "application/vnd.ms-powerpoint": <i className="fa-solid fa-file-powerpoint fileIcon"/>,
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation": <i className="fa-solid fa-file-powerpoint fileIcon"/>,
+        "text/plain": <i className="fa-solid fa-file-lines fileIcon"/>,
+        "text/csv": <i className="fa-solid fa-file-image fileIcon"/>,
+        "application/zip": <i className="fa-solid fa-file-zipper fileIcon"/>,
+        "application/x-rar-compressed": <i className="fa-solid fa-file-zipper fileIcon"/>,
+        "application/x-7z-compressed": <i className="fa-solid fa-file-zipper fileIcon"/>,
+        "video/mp4": <i className="fa-solid fa-photo-film fileIcon"/>,
+        "video/mpeg": <i className="fa-solid fa-photo-film fileIcon"/>,
+        "video/quicktime": <i className="fa-solid fa-photo-film fileIcon"/>,
+        "audio/mpeg":<i className="fa-solid fa-file-audio fileIcon"/>,
+        "audio/wav": <i className="fa-solid fa-file-audio fileIcon"/>,
+        "application/json": <i className="fa-solid fa-code fileIcon"/>
+    };
+
+    const dictionaryDocTypes = {
+        "Sell Invoice": "Factura de Venta",
+        "Purchase Invoice": "Factura de Compra",
+        "Cash Recipt": "Recibo de Caja",
+        "Exit Recipt": "Recibo de Egreso",
+        "Accounting Recipt": "Comprobante Contable",
+        "Debit Note": "Nota Débito",
+        "Credit Note": "Nota Crédito",
+        "Beginning Balance": "Saldo Inicial",
+        "Price Recipt": "Recibo de Precio",
+        "Sales Order": "Orden de Venta",
+        "Product Shipment": "Envío de Producto",
+        "Sales Returns": "Devolución de Venta",
+        "Inventory Booking": "Registro de Inventario",
+        "Inventory Transfer": "Transferencia de Inventario",
+        "Inventory Entry": "Entrada de Inventario",
+        "Inventory Out": "Salida de Inventario",
+        "Inventory Return": "Devolución de Inventario",
+        "Inventory Donation": "Donación de Inventario",
+        "Inventory Loss": "Pérdida de Inventario",
+        "Inventory Consume": "Consumo de Inventario",
+        "Production Order": "Orden de Producción",
+        "Client Order": "Pedido de Cliente",
+        "Purchase Document": "Documento de Compra",
+        "Transaction": "Transacción",
+        "Portfolio Adjustment": "Ajuste de Cartera",
+        "Bank Deposit": "Depósito Bancario",
+        "Purchase Order": "Orden de Compra",
+        "Sales Quotation": "Cotización de Venta",
+        "Inventory Adjustment": "Ajuste de Inventario",
+        "Cost Transfer": "Transferencia de Costos",
+        "Payroll Voucher": "Comprobante de Nómina",
+        "Payroll Provision": "Provisión de Nómina",
+        "Payroll Adjustment": "Ajuste de Nómina",
+        "Amortization": "Amortización",
+        "Depreciation": "Depreciación",
+        "NIIF Adjustment": "Ajuste NIIF",
+        "Equivalent Purchase Document": "Documento Equivalente de Compra",
+        "Machine use": "Uso de Máquina"
+    };
+
+
+    // Functions
+
+
     const getDocumentInfo = async()=>{
-        console.group("📄 REQUEST DOCUMENTO");
-
-        console.log("ID enviado:",id);
-        console.log("Company:",appInfo.company_id);
-
+        setLoading(true)
         let res = await postInfo('/getDocuments',{
             company_id:appInfo.company_id,
-            id
+            id:id
         });
-
-        console.log("Respuesta cruda:",res);
-
-        if(res?.[0]){
-            console.log("Documento obtenido:");
-            console.table(res[1]);
-            setDocInfo(res[1][0]);
-        }else{
-            console.warn("No se obtuvo documento");
+        if(res[0]){
+            setDocInfo(res[1][0])
         }
+        setLoading(false);
+    }
 
-        console.groupEnd();
-    };
-
-    // -------- SERVICIOS ----------
-    const getAttachedServices = async(docId)=>{
-        let res = await postInfo('/getServiceMovements',{
-            company_id:appInfo.company_id,
-            doc_id:docId
-        });
-
-        console.log("Respuesta servicios RAW:",res);
-
-        if(!res?.[0]){
-            console.warn("⚠️ Backend dice que no hay servicios para este documento");
-            setAttachedServices([]);
-            return;
-        }
-
-        console.log("Servicios cargados:",res[1]);
-        setAttachedServices(res[1]);
-    };
-
-    // -------- ARCHIVOS ----------
-    const getAttachedDocs = async(ids)=>{
-        console.group("📎 REQUEST ARCHIVOS");
-
-        console.log("IDs enviados:",ids);
-
+    const getAttachedDodcs = async(attArray)=>{
         let res = await postInfo('/getAttachedFiles',{
             company_id:appInfo.company_id,
-            allowedDocs:ids
-        });
-
-        console.log("Respuesta:",res);
-
-        if(res?.[0]){
-            console.table(res[1]);
+            allowedDocs:attArray
+        })
+        console.log(res);
+        if(res[0]){
             setAttachedFiles(res[1]);
-        }else{
-            console.warn("Sin archivos");
         }
+    }
 
-        console.groupEnd();
-    };
+    const getAttachedTransactions = async(paymentMethod_id)=>{
+        setLoading(true);
+        let res = await postInfo('/facturation/getTransactionsOfCashRecord',{
+            company_id:appInfo.company_id,
+            doc_id:docInfo.id
+        })
+        console.log(res);
+        if(res[0]){
+            setAttachedTransactions(res[1]);
+        }
+        setLoading(false);
+    }
+    
 
-    // cargar documento
+    const getAttachedServices = async()=>{
+        let res = await postInfo('/getServiceMovements',{
+            company_id:appInfo.company_id,
+            doc_id:docInfo.id
+        })
+        if(res[0]){
+            setAttacedServices(res[1])
+        }
+    }
+/*
+    useEffect(() => {
+        const root = document.documentElement; // <html>
+        if (darkMode) root.classList.add('dark');
+        else root.classList.remove('dark');
+    }, [darkMode]);
+*/
+
     useEffect(()=>{
-        if(appInfo.company_id && id){
-            console.log("%cEmpresa lista → solicitando documento","color:green");
+        if(appInfo.company_id != undefined){
             getDocumentInfo();
         }
-    },[appInfo.company_id,id]);
+    },[appInfo])
 
-    // cuando llega docInfo
     useEffect(()=>{
-        if(!docInfo) return;
-
-        console.group("📦 DOCUMENTO CARGADO");
-        console.log("Objeto documento:",docInfo);
-
-        getAttachedServices(docInfo.id);
-
-        let docsAtt=[];
-
-        try{
-            const parsed = JSON.parse(docInfo.attached ?? "[]");
-
-            if(Array.isArray(parsed)){
-                docsAtt = parsed;
-            }else{
-                console.warn("Adjuntos no es array:",parsed);
-                docsAtt = [];
+        console.log(docInfo)
+        if(docInfo.id != undefined){
+            
+            getAttachedTransactions();
+            getAttachedServices();
+            let attArray = []
+            let docsAtt = JSON.parse(typeof(JSON.parse(docInfo.attached)) == "object"? docInfo.attached:"[]");
+            console.log(docsAtt)
+            if(docsAtt != undefined && docsAtt.length > 0){
+                docsAtt.forEach(element => {
+                    attArray.push(element.id);
+                });
+                getAttachedDodcs(attArray)
             }
-
-        }catch(err){
-            console.warn("Error parseando adjuntos:",err);
-            docsAtt=[];
         }
+    },[docInfo])
 
-        console.log("Adjuntos parseados:",docsAtt);
+    return(
+        <div className="PreviewDocument">
+            {!loading && (
+                <>
+                    <div className="titleDocContainer">
+                        <i className="fa-regular fa-file-lines"/>
+                        <BoldTitle text={`${dictionaryDocTypes[docInfo.document_type]} #${docInfo.ownSerial}`}/>
+                    </div>
+                    <div className="thirdPartyAndCompanyInfo">
+                        <UserCard name={'Nombre del tercero'} desc={'Cliente'} imgSrc={'https://i.pinimg.com/736x/55/62/fb/5562fb835d1de1ea974bdf0039726208.jpg'}/>
+                    </div>
+                    <DescriptionSpan text={`Descripción: ${docInfo.description}`}/>
+                    {docInfo.document_type == 'Client Order' && (
+                        <div className="detailsDocument">
+                            {attachedServices.length > 0 && attachedServices.map((element,index)=>(
+                                <div className="serviceDescriptionCard" key={index}>
+                                    <UserCard imgSrc={element.service_img} name={element.service_name} desc={element.service_type}/>
+                                    <div className="jobDesc">
+                                        <span>Unidades</span>
+                                        <strong>{element.units}</strong>
+                                    </div>
+                                    <div className="jobDesc">
+                                        <span>Descripción</span>
+                                        <strong>{element.description}</strong>
+                                    </div>
+                                    <div className="jobDesc">
+                                        <span>Fecha</span>
+                                        <strong>{(element.created_at).substring(0,10)}</strong>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
-        if(docsAtt.length){
-            getAttachedDocs(docsAtt.map(x=>x.id));
-        }else{
-            console.warn("No hay adjuntos en documento");
-        }
+                    {docInfo.document_type == 'Cash Recipt' && attachedTransactions.length > 0 && (
+                        <div className="detailDoctype">
 
-        console.groupEnd();
+                            {attachedTransactions.map((tx,index)=>(
+                                <div className="paymentCard" key={index}>
+                                    <span className="paymentName">
+                                        {tx.payment_name}
+                                    </span>
 
-    },[docInfo]);
+                                    <strong className="paymentValue">
+                                        ${Number(tx.total).toLocaleString()}
+                                    </strong>
+                                </div>
+                            ))}
 
-    // ver cambios finales
-    useEffect(()=>{
-        console.group("📊 ESTADO SERVICIOS");
-        console.table(attachedServices);
-        console.groupEnd();
-    },[attachedServices]);
+                            <div className="paymentTotalCard">
+                                <span>Total</span>
+                                <strong>
+                                    ${attachedTransactions
+                                        .reduce((sum,t)=>sum + Number(t.total),0)
+                                        .toLocaleString()}
+                                </strong>
+                            </div>
 
-    useEffect(()=>{
-        console.group("📁 ESTADO ARCHIVOS");
-        console.table(attachedFiles);
-        console.groupEnd();
-    },[attachedFiles]);
+                        </div>
+                    )}
 
-    return null;
+                    <div className="attachedDocuments"> 
+                        <h6>Archivos adjuntos</h6>
+                        <div className="attachedDocumentsGrid">
+                            {attachedFiles.map((element,index)=>(
+                                <div className="attDocCard" key={index}>
+                                    {iconDocsContainer[`${element.type}`]}
+                                    <strong className="fileName">{element.name}</strong>
+                                    <span>{element.type}</span>
+                                    <span>{formatBytes(element.size)}</span>
+                                    <span>{(element.created_at).substring(0,10)}</span>
+                                    <MoreOptions options={[
+                                        {text:'Descargar',icon:<i className="fa-solid fa-download"/>},
+                                        {text:'Previsualizar',icon:<i className="fa-regular fa-eye"/>},
+                                        {text:'Reportar',icon:<i className="fa-regular fa-flag"/>},
+                                        {text:'Eliminar',icon:<i className="fa-solid fa-trash-can"/>}
+                                    ]}/>
+                                </div>
+                            ))}
+                            {attachedFiles.length == 0 && (
+                                <div className="noResults">
+                                    <strong>
+                                        <i className="fa-solid fa-ghost"/>
+                                        No hay documentos adjuntos
+                                    </strong>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </>
+            )}
+            {loading && (
+                <LoadingAppDataPage/>
+            )}
+        </div>
+    )
 }

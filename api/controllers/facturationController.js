@@ -198,7 +198,7 @@ facturationController.getCashBoxes = (req,res)=>{
         }
 
 
-         const whereQuery = whereClauses.length > 0
+        const whereQuery = whereClauses.length > 0
             ? `WHERE ${whereClauses.join(" AND ")}`
             : "";
 
@@ -426,81 +426,111 @@ facturationController.getCashRegisterReport = (req,res)=>{
     })
 }
 
-facturationController.getTransactionsOfCashRecord = (req,res)=>{
+facturationController.getTransactionsOfCashRecord = (req, res) => {
     let data = '';
-    req.on('data',chunk=>{
+
+    req.on('data', chunk => {
         data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            SELECT
-                td.*,
-                tr.doc_id,
-                tr.doc_type,
-                tr.created_at AS transaction_date,
+    });
 
-                c.name AS concept_name,
-                acc.code AS account_code,
+    req.on('end', async () => {
+        try {
+            const info = JSON.parse(data);
 
-                pm.name AS payment_method,
+            let values = [];
+            let whereClauses = [];
 
-                tp.names AS thirdparty_name,
-                tp.img AS thirdparty_img,
+            if (info.shift_id != undefined) {
+                whereClauses.push(`"Facturation".shift_settlement_details.shift_id = $${values.length + 1}`);
+                values.push(info.shift_id);
+            }
 
-                d.instance_id,
-                pi."ownSerial" AS instance_serial,
-                pr.code AS process_code
+            if (info.paymentMethod_id != undefined) {
+                whereClauses.push(`"Ecosystem".transaction_detail."paymentMethod_id" = $${values.length + 1}`);
+                values.push(info.paymentMethod_id);
+            }
 
-            FROM "Ecosystem".transaction_detail td
+            if (info.doc_id != undefined) {
+                whereClauses.push(`"Ecosystem".transactions.doc_id = $${values.length + 1}`);
+                values.push(info.doc_id);
+            }
 
-            LEFT JOIN "Ecosystem".transactions tr
-                ON td.transaction_id = tr.id
+            const whereQuery = whereClauses.length > 0
+                ? `WHERE ${whereClauses.join(" AND ")}`
+                : "";
 
-            LEFT JOIN "Ecosystem".concepts c
-                ON tr.concept_id = c.id
+            let sentence = `
+                SELECT
+                    "Facturation".shift_settlement_details.id AS shift_settlement_id,
+                    "Ecosystem".transaction_detail.*,
+                    "Ecosystem".concepts.name AS concept_name,
+                    "Ecosystem".contable_accounts.code AS account_code,
+                    "Ecosystem".transactions.doc_type,
+                    "Ecosystem".transactions.doc_id,
+                    "Ecosystem".documents.instance_id,
+                    "Process".process_instance."ownSerial" AS instance_serial,
+                    "Process".processes.code AS process_code,
+                    "Ecosystem".payment_methods.name AS payment_name,
+                    "Ecosystem".thirdparties.names AS thirdParty_name,
+                    "Ecosystem".thirdparties.img AS thirdParty_img
+                FROM
+                    "Facturation".shift_settlement_details
+                LEFT JOIN
+                    "Ecosystem".transaction_detail
+                LEFT JOIN
+                    "Ecosystem".transactions
+                ON
+                    "Ecosystem".transaction_detail.transaction_id = "Ecosystem".transactions.id
+                ON
+                    "Facturation".shift_settlement_details."transactionDetail_id" = "Ecosystem".transaction_detail.id
+                LEFT JOIN
+                    "Ecosystem".concepts
+                ON 
+                    "Ecosystem".transactions.concept_id = "Ecosystem".concepts.id
+                LEFT JOIN
+                    "Ecosystem".contable_accounts
+                ON
+                    "Ecosystem".concepts.account_id = "Ecosystem".contable_accounts.id
+                LEFT JOIN
+                    "Ecosystem".payment_methods
+                ON 
+                    "Ecosystem".transaction_detail."paymentMethod_id" = "Ecosystem".payment_methods.id
+                LEFT JOIN
+                    "Ecosystem".thirdparties
+                ON
+                    "Ecosystem".transaction_detail."thirdParty_id" = "Ecosystem".thirdparties.id
+                LEFT JOIN
+                    "Ecosystem".documents
+                ON
+                    "Ecosystem".transactions.doc_id = "Ecosystem".documents.id
+                LEFT JOIN
+                    "Process".process_instance
+                ON
+                    "Ecosystem".documents.instance_id = "Process".process_instance.id
+                LEFT JOIN
+                    "Process".processes
+                ON
+                    "Process".process_instance.process_id = "Process".processes.id
+                ${whereQuery}
+                ORDER BY "Ecosystem".transaction_detail.created_at DESC;
+            `;
 
-            LEFT JOIN "Ecosystem".contable_accounts acc
-                ON c.account_id = acc.id
+            const consulta = await useDataBase(sentence, values, 1);
 
-            LEFT JOIN "Ecosystem".payment_methods pm
-                ON td."paymentMethod_id" = pm.id
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(consulta));
 
-            LEFT JOIN "Ecosystem".thirdparties tp
-                ON td."thirdParty_id" = tp.id
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        }
+    });
 
-            LEFT JOIN "Ecosystem".documents d
-                ON tr.doc_id = d.id
-
-            LEFT JOIN "Process".process_instance pi
-                ON d.instance_id = pi.id
-
-            LEFT JOIN "Process".processes pr
-                ON pi.process_id = pr.id
-
-            WHERE
-                td.company_id = $1
-                AND tr.doc_id = $2
-
-            ORDER BY td.created_at DESC;
-        `;
-        {/*let consulta = await useDataBase(sentence,[
-            info.company_id,
-            info.shift_id,
-            info.paymentMethod_id
-        ],1);*/}
-        let consulta = await useDataBase(sentence,[
-            info.company_id,
-            info.doc_id
-        ],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
+    req.on('error', err => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(err));
-    })
-}
+    });
+};
 
 
 facturationController.getBriefcaseBills = (req,res)=>{

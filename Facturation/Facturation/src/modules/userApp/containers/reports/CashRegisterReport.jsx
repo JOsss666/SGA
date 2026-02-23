@@ -123,20 +123,15 @@ export function CashRegisterReport({shift_id}){
     const getAttachedTransactions = async(paymentMethod_id)=>{
         setDisabled(true);
         setLoading(true);
-
         let res = await postInfo('/facturation/getTransactionsOfCashRecord',{
             company_id:appInfo.company_id,
             shift_id,
             paymentMethod_id
-        });
-
-        console.log("RESPUESTA COMPLETA:", res);
-        console.log("DATOS TRANSACCIONES:", res?.[1]);
-
+        })
+        console.log(res);
         if(res[0]){
             updatePaymentValue(paymentMethod_id,res[1]);
         }
-
         setLoading(false);
         setDisabled(false);
     }

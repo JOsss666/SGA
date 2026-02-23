@@ -71,32 +71,34 @@
     "vite": "^6.2.0"
   },
   "build": {
-      "appId": "com.limo.sga360",
-      "productName": "SGA 360",
-      "copyright": "Copyright © 2026 SGA",
-      "directories": {
-        "output": "dist_electron"
-      },
-      "files": [
-        "dist/**/*",
-        "mainPrintApp.js",
-        "package.json",
-        "node_modules/**/*"
+    "appId": "com.limo.sga360",
+    "productName": "SGA 360",
+    "copyright": "Copyright © 2026 SGA",
+    "directories": {
+      "output": "dist_electron"
+    },
+    "files": [
+      "dist/**/*",
+      "mainPrintApp.js",
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
-      "win": {
-        "target": [
-          {
-            "target": "nsis",
-            "arch": ["x64"]
-          }
-        ],
-        "icon": "appIcon.ico"
-      },
-      "nsis": {
-        "oneClick": true,
-        "allowToChangeInstallationDirectory": false,
-        "createDesktopShortcut": true,
-        "shortcutName": "SGA 360"
-      }
+      "icon": "appIcon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "shortcutName": "SGA 360"
     }
+  }
 }
