@@ -121,7 +121,7 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
         if(!selectedAll) return;
         setDisabled(true);
         setLoading(true);
-        let res = await postInfo('/zj582/registerServiceMachine',formInfo);
+        let res = await postInfo('/zj852/registerServiceMachine',formInfo);
         console.log(res);
         setLoading(false);
         setDisabled(false);

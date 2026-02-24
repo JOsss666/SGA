@@ -1,11 +1,9 @@
 
 import { useEffect } from 'react';
 import { io } from 'socket.io-client';
-import { urlSer } from '../App';
-import { useNotifications } from '../context/context';
+import {urlSer} from './functions'
 
 export const useRealtime = (companyId, onUpdate) => {
-    const {addNotification} = useNotifications()
     
     useEffect(() => {
         if (!companyId) return;

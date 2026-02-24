@@ -1,4 +1,4 @@
-//const urlSer = 'http://localhost:3000';
+//export const urlSer = 'http://localhost:3000';
 const urlSer = 'https://sga-2zgp.onrender.com';
 
 export async function postInfo(route,informacion){
