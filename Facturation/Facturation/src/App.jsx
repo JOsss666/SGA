@@ -10,7 +10,6 @@ import { PreviewProcess } from './modules/userApp/containers/Preview/PreviewProc
 export const urlSer = 'https://sga-2zgp.onrender.com';
 export const isElectron = navigator.userAgent.toLowerCase().includes('electron');
 
-
 function App() {
   return (
     <NotificationsProvider>
