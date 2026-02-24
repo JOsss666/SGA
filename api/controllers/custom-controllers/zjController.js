@@ -10,24 +10,40 @@ zjController.getlastClickControl = (req,res)=>{
     req.on('end',async()=>{
         console.log(data);
         let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        if(info.asset_id != undefined){
+            whereClauses.push(`"Custom"."z&j_clickControl".asset_id = $${values.length +1}`);
+            values.push(info.asset_id);
+        }
+
+        const whereQuery = whereClauses.length > 0
+        ? `WHERE ${whereClauses.join(" AND ")}`
+        : "";
+
         let sentence = `
             SELECT 
-                id, 
-                company_id,
-                created_by,
-                "initialClicks",
-                created_at,
-                updated_at,
-                updated_by,
-                description,
-                status,
-                attached
-	        FROM "Custom"."z&j_clickControl" 
-            WHERE asset_id = $1
+                "Custom"."z&j_clickControl" .*,
+                "Ecosystem".users.user_name AS responsable,
+                "AssetManagement".assets.name AS asset_name,
+                "AssetManagement".assets.model AS asset_model,
+                "AssetManagement".assets.img AS asset_img
+	        FROM 
+                "Custom"."z&j_clickControl" 
+            LEFT JOIN
+                "Ecosystem".users
+            ON 
+                "Custom"."z&j_clickControl".updated_by = "Ecosystem".users.user_id
+            LEFT JOIN
+                "AssetManagement".assets
+            ON
+                "Custom"."z&j_clickControl".asset_id = "AssetManagement".assets.id
+            ${whereQuery}
             ORDER BY created_at DESC
             LIMIT 1;
         `;
-        let consulta = await useDataBase(sentence,[info.asset_id],1);
+        let consulta = await useDataBase(sentence,values,1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -108,6 +124,7 @@ zjController.registerServiceMachine = (req,res)=>{
         res.end(JSON.stringify(err));
     });
 }
+
 
 
 export default zjController;

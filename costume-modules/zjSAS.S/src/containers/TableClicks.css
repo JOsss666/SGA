@@ -1,0 +1,74 @@
+
+.TableClicks{
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    height: 60vh;
+    width: fit-content;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.TableClicks .headTable{
+    display: flex;
+    gap: 1vh;
+    padding: 2vh;
+    width: fit-content;
+    background-color: var(--menuAside);
+    border-radius: 1vh;
+    position: fixed;
+    box-shadow: 0 .1vh 1vh var(--translucidMenu);
+}
+
+.TableClicks .headTable{
+    outline: solid .1vh var(--inputsBorder);
+}
+
+.TableClicks .headTable .thTitle{
+    margin: auto .6vh;
+    width: 10vw;
+    color: var(--mainText);
+    font-size: clamp(2px,2vh,20px);
+}
+
+.TableClicks .headTable .thTitle:first-child{
+    width: 15vw;
+}
+
+.TableClicks .bodyTable{
+    display: flex;
+    flex-direction: column;
+    padding-top: 6vh;
+    width: 100%;
+}
+
+.TableClicks .bodyTable .rowClicks{
+    width: 100%;
+    padding: 1vh 2vh;
+    border-bottom: dashed .1vh var(--inputsBorder);
+    display: flex;
+}
+
+.TableClicks .bodyTable .rowClicks .rowTable{
+    margin: auto 1vh;
+    width: 10vw;
+    color: var(--descriptionText);
+}
+
+.TableClicks .bodyTable .rowClicks .UserCard{
+    width: 15vw;
+    margin: auto 1vh;
+}
+
+.TableClicks .bodyTable .rowClicks .UserCard img{
+    height: 5vh;
+    width: 5vh;
+    border: hidden;
+    outline: none;
+    border-radius: .5vh;
+}
+
+.TableClicks .bodyTable .rowClicks .UserCard strong{
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+}
