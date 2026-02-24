@@ -14,6 +14,7 @@
     "jspdf": "^4.1.0",
     "papaparse": "^5.5.3",
     "qrcode": "^1.5.4",
+    "react-router-dom": "^7.13.1",
     "xlsx": "^0.18.5"
   }
 }
