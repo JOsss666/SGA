@@ -1,5 +1,5 @@
 
-import { useLocation, useNavigate } from "../../../../react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import './PathLocation.css'
 
 export function PathLocation(){
