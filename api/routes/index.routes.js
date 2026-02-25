@@ -222,7 +222,7 @@ router.post('/facturation/newClientOrder',facturationController.newClientOrder);
 
 router.post('/facturation/getCashBoxes',facturationController.getCashBoxes);
 
-router.post('/facturation/getLastRegisterShift',facturationController.getLastRegisterShift);
+router.post('/facturation/getRegisterShift',facturationController.getRegisterShift);
 
 router.post('/facturation/openCashRegister',facturationController.openCashRegister);
 

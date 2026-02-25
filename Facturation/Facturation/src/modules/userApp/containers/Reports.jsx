@@ -19,6 +19,7 @@ import { ProcessesReport } from './reports/ProcessesReport';
 import { EficiencyReport } from './reports/EficiencyReport';
 import { BriefCaseReport } from './reports/BriefCaseReport';
 import { useAppInfo,useAiAssistant } from '../../../context/context';
+import { CashBoxesCloseReport } from './reports/CashBoxesCloseReport';
 
 // Costume modules
 
@@ -131,6 +132,9 @@ export function Reports(){
                                     handleNavigate('zjServicesReport')
                                 }}/>
                             )}
+                            <CardReport type={'contable'} title={'Informe Cierres de caja'} description={'Consulte los cierres de caja'} onClick={()=>{
+                                handleNavigate('CashBoxesCloseReport')
+                            }}/>
                         </div>
                     </>
                 }/>
@@ -148,6 +152,7 @@ export function Reports(){
                 <Route path='/Processes' element={<ProcessesReport/>}/>
                 <Route path='/Eficiency' element={<EficiencyReport/>}/>
                 <Route path='/BriefCases' element={<BriefCaseReport/>}/>
+                <Route path='/CashBoxesCloseReport' element={<CashBoxesCloseReport/>}/>
                 {userConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
                     <Route path='/zjClicksReport' element={
                     <Suspense fallback={<div>Cargando componente pesado...</div>}>

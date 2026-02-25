@@ -1,14 +1,22 @@
 import { CheckSquare } from "../components/CheckSquare";
 import { RowTableReport } from "../components/RowTableReport";
 import { NoResults } from "./NoResults";
+import { useMemo } from "react";
 import './TableReport.css'
 
 export function TableReport({columns,info,type,searchValue,navigation}){
 
-    const filterOptions = (value) => {
-        if (!searchValue) return true; 
-            return value.toLowerCase().includes(searchValue.toLowerCase());
-    }
+    const filteredInfo = useMemo(() => {
+        if (!searchValue?.trim()) return info;
+
+        const lower = searchValue.toLowerCase();
+
+        return info.filter(row =>
+            Object.values(row).some(val =>
+                val?.toString().toLowerCase().includes(lower)
+            )
+        );
+    }, [info, searchValue]);
     
     return(
         <div className="TableReport">
@@ -19,8 +27,8 @@ export function TableReport({columns,info,type,searchValue,navigation}){
                 ))}
             </div>
             <div className="bodyTable">
-                {info.length >0 && info.map((element,index)=>(
-                    <RowTableReport hidden={!filterOptions(JSON.stringify(element))} type={type} columns={columns} info={element} key={index} navigation={navigation}/>
+                {info.length >0 && filteredInfo.map((element,index)=>(
+                    <RowTableReport type={type} columns={columns} info={element} key={index} navigation={navigation}/>
                 ))}
                 {info.length == 0 && (
                     <NoResults title={'No hay resultados disponibles'}/>

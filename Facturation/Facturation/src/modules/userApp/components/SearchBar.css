@@ -8,9 +8,8 @@
 }
 
 .SearchBar input{
-    width: 20VH;
+    width: 100%;
     border-radius: 1vh;
-
     font-size: clamp(.75rem, 2vh, 1.3rem);
     font-family: 'Inter', sans-serif;
 
