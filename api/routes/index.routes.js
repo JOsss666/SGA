@@ -204,6 +204,8 @@ router.post('/process/searchDocument',processController.searchDocument);
 
 router.post('/process/getEficincyUsers',processController.getEficincyUsers);
 
+router.post('/process/getInstanceHistorial',processController.getInstanceHistorial);
+
 
 // SGA contability
 

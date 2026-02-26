@@ -20,6 +20,7 @@ import { EficiencyReport } from './reports/EficiencyReport';
 import { BriefCaseReport } from './reports/BriefCaseReport';
 import { useAppInfo,useAiAssistant } from '../../../context/context';
 import { CashBoxesCloseReport } from './reports/CashBoxesCloseReport';
+import { ReportHistorialInstance } from './reports/ReportHIstorialInstance';
 
 // Costume modules
 
@@ -135,6 +136,9 @@ export function Reports(){
                             <CardReport type={'contable'} title={'Informe Cierres de caja'} description={'Consulte los cierres de caja'} onClick={()=>{
                                 handleNavigate('CashBoxesCloseReport')
                             }}/>
+                            <CardReport type={'processes'} title={'Historial de procesos'} description={'Consulte el historial de acciones en los procesos'} onClick={()=>{
+                                handleNavigate('ProcessInstanceHistorial')
+                            }}/>
                         </div>
                     </>
                 }/>
@@ -152,6 +156,7 @@ export function Reports(){
                 <Route path='/Processes' element={<ProcessesReport/>}/>
                 <Route path='/Eficiency' element={<EficiencyReport/>}/>
                 <Route path='/BriefCases' element={<BriefCaseReport/>}/>
+                <Route path='/ProcessInstanceHistorial' element={<ReportHistorialInstance/>}/>
                 <Route path='/CashBoxesCloseReport' element={<CashBoxesCloseReport/>}/>
                 {userConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
                     <Route path='/zjClicksReport' element={
