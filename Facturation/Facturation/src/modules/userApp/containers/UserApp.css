@@ -90,8 +90,8 @@
 .UserApp .headApp .SearchBar i{
     color: var(--descriptionText);
     font-size: clamp(2px,2vh,20px);
-    top: 1.8vh;
     left: 2.5vh;
+    top: 2.5vh !important;
 }
 
 .UserApp .headApp .SearchBar input{

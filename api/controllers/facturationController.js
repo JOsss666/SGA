@@ -231,7 +231,7 @@ facturationController.getCashBoxes = (req,res)=>{
 }
 
 
-facturationController.getLastRegisterShift = (req,res)=>{
+facturationController.getRegisterShift = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
         data += chunk;
@@ -267,15 +267,22 @@ facturationController.getLastRegisterShift = (req,res)=>{
                 "Facturation".register_shifts.created_at,
                 "Facturation".register_shifts.updated_at, 
                 "Facturation".register_shifts."cashBox_id",
-                "Ecosystem".users.user_name AS responsable
+                "Treasury".cash_boxes.name AS "cashBox_name",
+                "Ecosystem".users.user_name AS responsable,
+                "Ecosystem".users.img AS user_img
 	        FROM 
                 "Facturation".register_shifts
             LEFT JOIN
                 "Ecosystem".users
             ON
                 "Facturation".register_shifts.user_id = "Ecosystem".users.user_id
+            LEFT JOIN
+                "Treasury".cash_boxes
+            ON
+                "Facturation".register_shifts."cashBox_id" = "Treasury".cash_boxes.id
             ${whereQuery}
-            ORDER BY "Facturation".register_shifts.created_at DESC LIMIT 1
+            ORDER BY "Facturation".register_shifts.created_at DESC
+            ${info.limit != undefined? 'LIMIT 1':''}
             ;
         `;
 

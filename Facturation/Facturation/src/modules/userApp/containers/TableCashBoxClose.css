@@ -1,5 +1,5 @@
 
-.TableClicks{
+.TableCashBoxClose{
     display: flex;
     flex-direction: column;
     position: relative;
@@ -9,7 +9,7 @@
     padding: .1vh;
 }
 
-.TableClicks .headTable{
+.TableCashBoxClose .headTable{
     display: flex;
     gap: .5vw;
     padding: 2vh;
@@ -20,18 +20,24 @@
     outline: solid .1vh var(--inputsBorder);
 }
 
-.TableClicks .headTable .thTitle{
+.TableCashBoxClose .headTable .thTitle{
     margin: auto .5vw;
     width: 10vw;
     color: var(--mainText);
     font-size: clamp(2px,2vh,20px);
 }
 
-.TableClicks .headTable .thTitle:first-child{
+.TableCashBoxClose .headTable .thTitle:first-child{
     width: 15vw;
 }
 
-.TableClicks .bodyTable{
+.TableCashBoxClose .headTable .thTitle:nth-child(3),
+.TableCashBoxClose .headTable .thTitle:nth-child(4),
+.TableCashBoxClose .headTable .thTitle:nth-child(5){
+    text-align: right;
+}
+
+.TableCashBoxClose .bodyTable{
     display: flex;
     flex-direction: column;
     width: fit-content;
@@ -39,28 +45,34 @@
     overflow-y: auto;
 }
 
-.TableClicks .bodyTable .rowClicks{
+.TableCashBoxClose .bodyTable .rowTable{
     gap: .5vw;
     width: 100%;
     padding: 1vh 2vh;
     border-bottom: dashed .1vh var(--inputsBorder);
     display: flex;
+    cursor: pointer;
+    transition: .3s;
 }
 
-.TableClicks .bodyTable .rowClicks .rowTable{
+.TableCashBoxClose .bodyTable .rowTable:hover{
+    background-color: var(--cardHover);
+}
+
+.TableCashBoxClose .bodyTable .rowTable .rowElement{
     margin: auto.5vw;
     padding: 0 1vh;
     width: 10vw;
     color: var(--descriptionText);
 }
 
-.TableClicks .bodyTable .rowClicks .UserCard{
+.TableCashBoxClose .bodyTable .rowTable .UserCard{
     width: 25vw;
     margin: auto 1vh;
     max-width: 15vw;
 }
 
-.TableClicks .bodyTable .rowClicks .UserCard img{
+.TableCashBoxClose .bodyTable .rowTable .UserCard img{
     height: 5vh;
     width: 5vh;
     border: hidden;
@@ -68,32 +80,32 @@
     border-radius: .5vh;
 }
 
-.TableClicks .bodyTable .rowClicks .UserCard strong{
+.TableCashBoxClose .bodyTable .rowTable .UserCard strong{
     font-size: clamp(2px,2vh,20px);
     font-weight: 500;
 }
 
 
-.TableClicks .bodyTable .rowClicks .rightAl{
+.TableCashBoxClose .bodyTable .rowTable .rightAl{
     text-align: right;
 }
 
-.TableClicks .bodyTable .rowClicks .leftAl{
+.TableCashBoxClose .bodyTable .rowTable .leftAl{
     text-align: left;
 }
 
-.TableClicks .bodyTable .rowClicks .idHolder{
+.TableCashBoxClose .bodyTable .rowTable .idHolder{
     width: 5vw;
 }
 
 
-.TableClicks .bodyTable .rowClicks .redirect{
+.TableCashBoxClose .bodyTable .rowTable .redirect{
     font-weight: 500;
     color: var(--mainText);
     cursor: pointer;
 }
 
 
-.TableClicks .bodyTable .rowClicks .redirect:hover{
+.TableCashBoxClose .bodyTable .rowTable .redirect:hover{
     color: #155DFC;
 }

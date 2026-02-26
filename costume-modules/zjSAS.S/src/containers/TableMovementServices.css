@@ -1,0 +1,21 @@
+
+.TableMovmentServices .headTable .thTitle{
+    text-align: center;
+}
+
+.TableMovmentServices .headTable .thTitle:nth-child(2),
+.TableMovmentServices .headTable .thTitle:nth-child(4),
+.TableMovmentServices .headTable .thTitle:nth-child(5){
+    width: 5vw;
+}
+
+.TableMovmentServices .headTable .thTitle:nth-child(4),
+.TableMovmentServices .headTable .thTitle:nth-child(5),
+.TableMovmentServices .headTable .thTitle:nth-child(6),
+.TableMovmentServices .headTable .thTitle:nth-child(7){
+    text-align: right;
+}
+
+.TableMovmentServices .headTable .thTitle:nth-child(9){
+    width: 15vw;
+}

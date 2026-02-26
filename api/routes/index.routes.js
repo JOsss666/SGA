@@ -204,6 +204,8 @@ router.post('/process/searchDocument',processController.searchDocument);
 
 router.post('/process/getEficincyUsers',processController.getEficincyUsers);
 
+router.post('/process/getInstanceHistorial',processController.getInstanceHistorial);
+
 
 // SGA contability
 
@@ -222,7 +224,7 @@ router.post('/facturation/newClientOrder',facturationController.newClientOrder);
 
 router.post('/facturation/getCashBoxes',facturationController.getCashBoxes);
 
-router.post('/facturation/getLastRegisterShift',facturationController.getLastRegisterShift);
+router.post('/facturation/getRegisterShift',facturationController.getRegisterShift);
 
 router.post('/facturation/openCashRegister',facturationController.openCashRegister);
 
@@ -246,7 +248,9 @@ router.post('/assets/getAssets',assetsController.getAssets);
 
     router.post('/zj852/openClickControl',zjController.openClickControl);
 
-    router.post('/zj582/registerServiceMachine',zjController.registerServiceMachine);
+    router.post('/zj852/registerServiceMachine',zjController.registerServiceMachine);
+
+    router.post('/zj852/getServiceMovements',zjController.getServiceMovements);
 
 export default router;
 

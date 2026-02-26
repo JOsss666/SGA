@@ -891,6 +891,68 @@ processController.getProcessState = (req,res)=>{
     })
 }
 
+processController.getInstanceHistorial = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values= [];
+        let whereClauses = [];
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
+        let sentence = `
+            SELECT
+                "Process".process_historial.*,
+                prevstep.name AS prevstep_name,
+                nextstep.name AS nextstep_name,
+                "Process".processes.name AS process_name,
+                "Process".processes.code AS process_code,
+                "Process".process_instance.process_id,
+                "Process".process_instance.status,
+                "Ecosystem".users.user_name,
+                "Ecosystem".users.img AS user_img
+            FROM
+                "Process".process_historial
+            LEFT JOIN
+                "Process".process_steps AS prevstep
+            ON
+                "Process".process_historial.previous_step = prevstep.id
+            LEFT JOIN
+                "Process".process_steps AS nextstep
+            ON
+                "Process".process_historial.next_step = nextstep.id
+            LEFT JOIN
+                "Process".process_instance
+            ON
+                "Process".process_historial.instance_id = "Process".process_instance.id
+            LEFT JOIN
+                "Process".processes
+            ON
+                "Process".process_instance.process_id = "Process".processes.id
+            LEFT JOIN
+                "Ecosystem".users
+            ON
+                "Process".process_historial.user_id = "Ecosystem".users.user_id
+            ${whereQuery}
+            ORDER BY "Process".process_historial.id DESC
+            ${info.limint != undefined ? `LIMIT ${info.limint}`:''}
+        `;
+
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    });
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err))
+    })
+}
+
 const validateStepRequirements = async (instanceId, nextStepId, companyId) => {
     // 1. Buscamos qué documentos son obligatorios para el paso al que se intenta avanzar
     // OJO: Validamos los requerimientos del paso actual y anteriores que sean obligatorios
