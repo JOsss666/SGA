@@ -74,6 +74,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
             //allowedTypes:types,
             instance_id:info.id
         })
+        console.log('DDDDD ',res)
         if(res[0]){
             setAttachedDocuments(res[1])
         }else(

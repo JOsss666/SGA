@@ -95,6 +95,34 @@ zjController.registerServiceMachine = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        const valuesPre = info.services
+            .filter(element => element.company_id !== undefined)
+            .map(element => {
+                const doubleFace = element.double_face ? element.double_face : false;
+                return `(${info.company_id},6,52,'Machine use','active',0,0, ${info.user_id},'${info.description}',${info.instance_id},5)`;
+            })
+            .join(', ');
+
+        if (valuesPre.length === 0) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ error: "No hay servicios válidos para insertar" }));
+        }
+        let preSentence = `
+            INSERT INTO "Ecosystem".documents(
+                company_id,
+                store_id,
+                "thirdParty_id",
+                document_type,
+                status,
+                "subTotal",
+                total,
+                created_by,
+                description,
+                instance_id,
+                step_instance)
+            VALUES ${valuesPre};
+        `;
+        let preConsulta = await useDataBase(preSentence,[],2);
         const values = info.services
             .filter(element => element.asset_id !== undefined)
             .map(element => {

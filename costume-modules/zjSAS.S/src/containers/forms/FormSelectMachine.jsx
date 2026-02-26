@@ -5,6 +5,7 @@ import { SearchinList } from "../../components/SearchInList";
 import { LoadingSpace } from "../LoadingSpace";
 import {DescriptionSpan} from '../../components/DescriptionSpan'
 import {FormButton} from '../../components/FormButton'
+import {FormInput} from '../../components/FormInput'
 import './FormSelectMachine.css'
 
 export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,instance_id}){
@@ -18,14 +19,17 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
     const [selectedAll,setSelectedAll] = useState(false);
+    const [description,setDescription] = useState('');
 
     //formInfo
     const [instanceInfo,setInstanceInfo] = useState({});
     const formInfo = {
+        instance_id:instance_id,
         document_type:"Machine use",
         company_id:appInfo.company_id,
         user_id:userInfo.user_id,
-        services:services
+        services:services,
+        description:description
     }
 
     // getters of info
@@ -182,6 +186,7 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
                                 Selecione una maquina en cada servicio para continuar
                             </span>
                         )}
+                        <FormInput textArea={true} title={'Descripcion'} placeholder={'Observaciones (Opcoinal)'} action={setDescription} disabled={disabled}/>
                         <FormButton text={'Guardar registro'} disabled={disabled? selectedAll:disabled}/>
                     </form>
                 </>
