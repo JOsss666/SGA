@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAlert } from "../../../../context/context";
+import { useAlert, useAppInfo } from "../../../../context/context";
 import { BoldTitle } from "../../components/BoldTitle";
 import { FormNewDC } from "./FormNewDC";
 import { FormNewDocument } from "./FormNewDocument";
@@ -10,9 +10,10 @@ import { SearchBar } from "../../components/SearchBar";
 import { FormNewMovement } from "./FormNewMovement";
 import { FormNewClientOrder } from "./FormNewClientOrder";
 import { FormNewCashRecipt } from "./FormNewCashRecipt";
+import { FormSelectMachine } from "../../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormSelectMachine";
 
 export function SelectTpeNewDoc({info,docType,reloadFun}){
-
+    const {userConfig,appInfo,userInfo} = useAppInfo();
     const {popInAlert,popOutAlert} = useAlert();
     const [searchValue,setSearchVal] = useState('');
 
@@ -54,6 +55,7 @@ export function SelectTpeNewDoc({info,docType,reloadFun}){
         {title:'Orden de producción',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076216/Cuadricula3Documentos_3_q2hsc4.png',alert:<span>No disponible aún</span>},
         {title:'Transacciónes',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_6_fvpiav.png',alert:<span>No disponible aún</span>},
         {title:'Transacciónes',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_6_fvpiav.png',alert:<span>No disponible aún</span>},
+        {title:'Seleccionar Maquinaria',docType:'Machine use',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_6_fvpiav.png',alert:<FormSelectMachine instance_id={info?.instance_id} appInfo={appInfo} userConfig={userConfig} popOutAlert={popOutAlert} userInfo={userInfo}/>,icon:<i className="fa-solid fa-tractor"/>},
     ]
 
     const handleAutoSelectDocType = (type)=>{
