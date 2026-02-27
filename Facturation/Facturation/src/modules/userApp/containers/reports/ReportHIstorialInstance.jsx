@@ -23,8 +23,11 @@ export function ReportHistorialInstance() {
     const { appInfo } = useAppInfo();
     const [searchValue,setSearchValue] = useState("");
 
-    // Actions Page
+    // Control
     const [loading, setLoading] = useState(false);
+    const [disabled,setDisabled] = useState(false);
+    const [start_date,setStartDate] = useState();
+    const [end_date,setEndDate] = useState();
 
     // Settings Report
     const documentTypes = {
@@ -49,7 +52,9 @@ export function ReportHistorialInstance() {
 
     const settingsReport = {
         columns: columnsOp,
-        company_id: appInfo.company_id
+        company_id: appInfo.company_id,
+        start_date,
+        end_date
     };
 
 
@@ -68,8 +73,8 @@ export function ReportHistorialInstance() {
     }, []);
 
     useEffect(()=>{
-        console.log(info)
-    },[info])
+        getHistorial();
+    },[start_date,end_date])
 
     return (
         <div className="ReportDocument">
@@ -81,9 +86,9 @@ export function ReportHistorialInstance() {
         <div className="settingsReport">
             <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
             <div className="rangeInput">
-            <FormInput type={"date"} title={"Fecha Inicial"} />
+            <FormInput action={setStartDate} type={"datetime-local"} title={"Fecha Inicial"} />
             <span>-</span>
-            <FormInput type={"date"} title={"Fecha Final"} />
+            <FormInput action={setEndDate} type={"datetime-local"} title={"Fecha Final"} />
             </div>
             <SelectOptions
             options={[

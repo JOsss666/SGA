@@ -45,7 +45,7 @@ export function TableHistorialInstance({columns,info,searchValue,navigation}){
                             </div>
                         </div>
                         <span className="rowElement ">{element.description? element.description:'---'}</span>
-                        <span className="rowElement ">{formatDate(element.opening_time)}</span>
+                        <span className="rowElement ">{formatDate(element.created_at)}</span>
                         <span className="rowElement ">{element.status}</span>
                     </div>
                 ))}
