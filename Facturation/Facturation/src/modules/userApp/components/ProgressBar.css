@@ -25,4 +25,5 @@
     width: 25%;
     font-size: clamp(2px,2vh,20px);
     font-weight: 400;
+    color: var(--descriptionText);
 }

@@ -102,6 +102,7 @@ export function ric(datos){
 
 //varianza
 export function varianza(datos, poblacional = true) {
+    console.log('/// ',datos)
     if (!datos || datos.length === 0) return 0;
     
         //Si solo hay un elemento, no hay variación
@@ -143,3 +144,58 @@ export function zscore(valor, datos) {
     return (valor - mediaVal) / desviacion;
 }
 
+export function normalizeProcessData(data) {
+    // 1. Validaciones iniciales de seguridad
+    if (!data || (Array.isArray(data) && data.length === 0)) {
+        return { data: [], keys: [] };
+    }
+
+    const masterMap = {};
+    const keysSet = new Set();
+
+    // 2. Normalización de la fuente de entrada
+    const dataSources = Array.isArray(data[0]) ? data : [data];
+
+    // 3. Procesamiento y Agrupación
+    dataSources.forEach((source) => {
+        source.forEach((item,index) => {
+            // Detección flexible de fecha
+            if(index == 0){
+                console.log(item)
+            }
+            const rawDate = item.periodo || item.created_at || item.date || item.ejeX || item.label;
+            if (!rawDate) return;
+
+            // Limpieza de llave temporal (YYYY-MM-DD)
+            const dateKey = typeof rawDate === 'string' ? rawDate.split('T')[0].split(' ')[0] : rawDate;
+            
+            // Identificador de la serie (Usuario, Transición, etc.)
+            const seriesName = item.user_name || item.transicion || "total";
+            keysSet.add(seriesName);
+
+            // Inicialización del objeto por fecha si no existe
+            if (!masterMap[dateKey]) {
+                masterMap[dateKey] = { date: dateKey };
+            }
+
+            // Sumatoria de valores (Asegurando formato numérico)
+            const value = parseInt(item.total_acciones || item.value || item.total || 1, 10);
+            masterMap[dateKey][seriesName] = (masterMap[dateKey][seriesName] || 0) + value;
+        });
+    });
+
+    // 4. Formateo final y Relleno de ceros (Gap filling)
+    const seriesNames = Array.from(keysSet);
+    
+    const formattedData = Object.values(masterMap)
+        .map(entry => {
+            // Aseguramos que cada entrada tenga todas las llaves, incluso si es 0
+            seriesNames.forEach(name => {
+                if (entry[name] === undefined) entry[name] = 0;
+            });
+            return entry;
+        })
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    return formattedData
+}

@@ -1,0 +1,100 @@
+
+.ProcessInstanceAnalytics{
+    display: flex;
+    flex-direction: column;
+    padding: 0 2vh;
+}
+
+
+.ProcessInstanceAnalytics .headAnalytic{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 2vh;
+}
+
+.ProcessInstanceAnalytics .headAnalytic .BoldTitle{
+    margin-left: 1vh;
+}
+
+.ProcessInstanceAnalytics .bodyAnalytics{
+    display: flex;
+    flex-direction: column;
+    height: 75vh;
+    gap: 2vh;
+    width: 100%;
+    overflow-y: auto;
+    padding: .1vh;
+}
+
+.ProcessInstanceAnalytics .bodyAnalytics .mainChartSpaceContainer{
+    display: flex;
+    width: 100%;
+    height: 50vh;
+}
+
+.ProcessInstanceAnalytics .bodyAnalytics .mainChartSpaceContainer .mainChart{
+    height: 100%;
+    width: 65%;
+    margin: auto 0;
+    border-radius: 2vh;
+    padding: 1vh;
+    background-color: var(--menuAside);
+    outline: solid .1vh var(--inputsBorder);
+}
+
+.ProcessInstanceAnalytics .bodyAnalytics .auxChartCardsContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    width: 30%;
+    margin: auto;
+    height: 100%;
+    padding: 2vh;
+    background-color: var(--menuAside);
+    border-radius: 2vh;
+    outline: solid .1vh var(--inputsBorder);
+}
+
+.ProcessInstanceAnalytics .bodyAnalytics .auxChartCardsContainer .FormButton{
+    background-color: #155DFC;
+}
+
+.ProcessInstanceAnalytics .allProcessCardsIndicators{
+    display: flex;
+    width: 100%;
+    height: fit-content;
+    margin: auto 0;
+    flex-wrap: wrap;
+    gap: 2vw;
+    padding: 0 .5vh;
+}
+
+.ProcessInstanceAnalytics .mainChartSpaceContainer .secAuxCardsContainer{
+    display: flex;
+    padding: 0 1vh;
+    flex-wrap: wrap;
+    width: 42%;
+    gap: 2vh 2vw;
+}
+
+.ProcessInstanceAnalytics .mainChartSpaceContainer .secMainC{
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    width: 60%;
+}
+
+.ProcessInstanceAnalytics .mainChartSpaceContainer .secMainChart{
+    width: 100%;
+    height: 48%;
+    margin: auto;
+    padding: 1vh;
+    background-color: var(--menuAside);
+    border-radius: 2vh;
+    margin-right: 2vw;
+    outline: solid .1vh var(--inputsBorder);
+}
+
+.ProcessInstanceAnalytics .secMainChartContainer{
+    height: fit-content !important;
+}
