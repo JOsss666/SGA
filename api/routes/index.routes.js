@@ -12,6 +12,7 @@ import facturationController from '../controllers/facturationController.js';
 // Custom controllers import
     import zjController from '../controllers/custom-controllers/zjController.js';
 import assetsController from '../controllers/assetsController.js';
+import AnalyticController from '../controllers/AnalyticsController.js';
 
 const router = express.Router();
 
@@ -240,6 +241,12 @@ router.post('/facturation/getBriefcaseBills',facturationController.getBriefcaseB
 
 router.post('/assets/getAssets',assetsController.getAssets);
 
+// Analytics Controller
+
+router.post('/analytics/getProcessInstanceUsersAvtivity',AnalyticController.getProcessInstanceUsersAvtivity);
+
+router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessStepsCycleTime);
+
 // CUSTOM MODULES !!!
 
     // Z&J S.A.S 901167852
@@ -251,6 +258,8 @@ router.post('/assets/getAssets',assetsController.getAssets);
     router.post('/zj852/registerServiceMachine',zjController.registerServiceMachine);
 
     router.post('/zj852/getServiceMovements',zjController.getServiceMovements);
+
+    
 
 export default router;
 

@@ -91,12 +91,6 @@ export function ProcessesReport(){
         setTotalCredit(info.length);
     }
 
-    useEffect(()=>{
-        if(info.length >0){
-            calcTotals();
-        }
-    },[info])
-
     const getInstances = async () => {
         setLoading(true);
         let res = await postInfo('/process/getProcessInstances',settingsReport);
@@ -112,6 +106,12 @@ export function ProcessesReport(){
         }
         setLoading(false)
     };
+
+    useEffect(()=>{
+        if(info.length >0){
+            calcTotals();
+        }
+    },[info])
 
     useRealtime(appInfo.company_id, (payload) => {
         if (payload.table === 'process_instance') {

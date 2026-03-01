@@ -704,10 +704,30 @@ processController.getProcessInstances =(req,res)=>{
             values.push(info.allowedTypes);
         }
 
-        if(info.status != undefined){
+        if(info.status != undefined && info.status[0] != 'all' ){
             whereClauses.push(`"Process".process_instance.status = ANY($${values.length +1})`);
             values.push(info.status);
         }
+
+        if(info.thirdParty_id != undefined && info.status[0] != 'all' ){
+            whereClauses.push(`"Process".process_instance.status = ANY($${values.length +1})`);
+            values.push(info.status);
+        }
+
+        // Dates Filters
+            if (info.start_date) {
+                values.push(info.start_date);
+                whereClauses.push(
+                    `"Process".process_instance.created_at >= $${values.length}`
+                );
+            }
+
+            if (info.end_date) {
+                values.push(info.end_date);
+                whereClauses.push(
+                    `"Process".process_instance.created_at <= $${values.length}`
+                );
+            }
 
         const whereQuery = whereClauses.length > 0
             ? `WHERE ${whereClauses.join(" AND ")}`
@@ -900,6 +920,21 @@ processController.getInstanceHistorial = (req,res)=>{
         let info = JSON.parse(data);
         let values= [];
         let whereClauses = [];
+
+        // Dates Filters
+            if (info.start_date) {
+                values.push(info.start_date);
+                whereClauses.push(
+                    `"Process".process_historial.created_at >= $${values.length}`
+                );
+            }
+
+            if (info.end_date) {
+                values.push(info.end_date);
+                whereClauses.push(
+                    `"Process".process_historial.created_at <= $${values.length}`
+                );
+            }
 
         const whereQuery = whereClauses.length > 0
             ? `WHERE ${whereClauses.join(" AND ")}`

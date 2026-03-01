@@ -1,23 +1,24 @@
 import { useAlert } from '../../../context/context'
 import { ProgressBar } from '../components/ProgressBar';
 import { ProcessStatusAlert } from './Alerts/ProcessStatusAlert';
+import { formatDate } from '../../../utils/functions';
+import { useMemo } from 'react';
 import './TableReportProcesses.css'
 
 export function TableReportProcesses({settingsReport,info,searchValue}){
-
     const {popInAlert} = useAlert();
 
-    const formatDate = (date)=>{
-        if(date != undefined){
-            let x = date.split('T');
-            let newDate = `${x[0]}`;
-            if(settingsReport.showHour == undefined){
-                newDate += ` ${x[1].substring(0,5)}`
-            }
-            return newDate;
-        }
-        return `--/--/--`
-    }
+    const filteredInfo = useMemo(() => {
+            if (!searchValue?.trim()) return info;
+    
+            const lower = searchValue.toLowerCase();
+    
+            return info.filter(row =>
+                Object.values(row).some(val =>
+                    val?.toString().toLowerCase().includes(lower)
+                )
+            );
+        }, [info, searchValue]);
 
     const handleElementRow = (column,info)=>{
         let elementsRow = {
@@ -46,7 +47,7 @@ export function TableReportProcesses({settingsReport,info,searchValue}){
                 ))}
             </div>
             <div className="gridResultsTable">
-                {info != undefined && info.map((rowInfo,index)=>(
+                {filteredInfo.map((rowInfo,index)=>(
                     <div key={index} className={`RowResults rowStatus_${rowInfo.status}`} onClick={()=>{
                         popInAlert(<ProcessStatusAlert instance_id={rowInfo.id}/>)
                     }}>
