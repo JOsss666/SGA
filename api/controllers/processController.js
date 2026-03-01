@@ -704,7 +704,12 @@ processController.getProcessInstances =(req,res)=>{
             values.push(info.allowedTypes);
         }
 
-        if(info.status != undefined){
+        if(info.status != undefined && info.status[0] != 'all' ){
+            whereClauses.push(`"Process".process_instance.status = ANY($${values.length +1})`);
+            values.push(info.status);
+        }
+
+        if(info.thirdParty_id != undefined && info.status[0] != 'all' ){
             whereClauses.push(`"Process".process_instance.status = ANY($${values.length +1})`);
             values.push(info.status);
         }

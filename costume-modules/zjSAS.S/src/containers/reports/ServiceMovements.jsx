@@ -82,9 +82,10 @@ export function ServiceMovements({appInfo,userInfo,userConfig,popInAlert,popOutA
         info.forEach(element => {
             ttlValue += parseFloat(element.total)
         });
+        let defTTVal = ttlValue?.toFixed(2)
         setTotalClicks(ttlClicks);
         setTotalServices(ttlS);
-        setTotalValue(ttlValue);
+        setTotalValue(defTTVal);
      }
 
     useRealtime(appInfo.company_id, (payload) => {
