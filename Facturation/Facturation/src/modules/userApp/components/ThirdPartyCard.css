@@ -8,11 +8,12 @@
     box-shadow: 0 0.3dvh 0.6dvh rgba(0, 0, 0, 0.1);
     cursor: pointer;
     transition: all 0.3s ease;
-    min-height: 14dvh;
+    height: fit-content;
     display: flex;
     flex-direction: column;
     position: relative;
-    width: 20vw;
+    width: 17vw;
+    gap: 1vh;
 }
 
 .thirdparty-card:Hover {
@@ -175,23 +176,20 @@
 }
 
 .ThirdpartyCard .ImageSection {
-    background-color: var(--inputsBorder);
     height: 20dvh;
     border-radius: 0.4rem;
-    margin-top: 3dvh;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 0dvh dashed var(--descriptionText);
+    margin-bottom: 1vh;
 }
 
 .ThirdpartyCard .ImagePlaceholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.3dvh;
-    color: var(--descriptionText);
-    font-size: clamp(0.7rem, 1.2dvh, 0.9rem);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 1vh;
 }
 
 .ThirdpartyCard .ThirdpartyCard .ImagePlaceholder i {

@@ -1324,6 +1324,8 @@ controller.getPaymentMethods = (req,res)=>{
         whereClauses.push(`company_id = $1`);
         values.push(info.company_id)
 
+        whereClauses.push(`status = 'active'`);
+
         if(info.allowedPaymentMethods != undefined){
             whereClauses.push(`id = ANY($${values.length +1})`);
             values.push(info.allowedPaymentMethods);
@@ -1351,7 +1353,7 @@ controller.getPaymentMethods = (req,res)=>{
             FROM
                 "Ecosystem".payment_methods
             ${whereQuery}
-            ORDER BY name ASC;
+            ORDER BY order_index ASC, name ASC;
         `;
         let consulta = await useDataBase(sentence,values,1);;
         res.writeHead(200,{'Content-Type':'text/plain'})
