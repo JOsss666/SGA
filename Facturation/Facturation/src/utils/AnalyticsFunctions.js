@@ -196,6 +196,5 @@ export function normalizeProcessData(data) {
             return entry;
         })
         .sort((a, b) => new Date(a.date) - new Date(b.date));
-
     return formattedData
 }
