@@ -92,7 +92,7 @@
 
 .PreviewProcess .ProcesSteps .lineProgress .progressIndicador{
     width: 100%;
-    background-color: #05DF72;
+    background-color: #155DFC;
     border-radius: 1vh;
 }
 
@@ -120,16 +120,16 @@
 }
 
 .PreviewProcess .ProcesSteps .actualStep .bubbleStep{
-    background-color: #05DF72;
+    background-color: #155DFC;
     transform: scale(1.3);
 }
 
 .PreviewProcess .ProcesSteps .checkedStep .bubbleStep{
-    background-color: #B9F8CF;
+    background-color: #8EC5FF;
 }
 
 .PreviewProcess .ProcesSteps .checkedStep .bubbleStep i{
-    color: #034F3B;
+    color: #193CB8;
 }
 
 .PreviewProcess .ProcesSteps .actualStep .bubbleStep i{
@@ -241,8 +241,7 @@
     font-weight: 600;
     font-size: clamp(2px,2.2vh,22px);
     cursor: pointer;
-    background-color: #05DF72;
-    box-shadow: 0 0 1vh #2D9966;
+    background-color: #1447E6;
     color: #fff;
     margin-top: 1vh;
 }
