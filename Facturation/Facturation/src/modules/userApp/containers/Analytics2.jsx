@@ -96,19 +96,18 @@ export function Analytics2() {
         popInAlert(<FormNewAnalytics reloadFun={loadCounts} />);
     };
 
-    const filteredReports = useMemo(() => {
-        if (!searchValue && typeFilter == 'ninguno') return availableReports;
-
+ const filteredReports = useMemo(() => {
         const query = searchValue.toLowerCase();
 
-        return availableReports.filter(report => {
-            return (
-                report.title.toLowerCase().includes(query) || 
-                report.description.toLowerCase().includes(query) ||
-                typeFilter != 'ninguno'? report.type == typeFilter:true
-            );
+        return availableReports.filter(report => {            
+            const matchesText = report.title.toLowerCase().includes(query) || 
+                                report.description.toLowerCase().includes(query);
+
+            const matchesType = typeFilter === 'ninguno' || report.type === typeFilter;
+
+            return matchesText && matchesType;
         });
-    }, [searchValue,typeFilter]);
+    }, [searchValue, typeFilter]);
 
 
     // Functions

@@ -265,3 +265,19 @@
     font-size: 1.4vh;
     color: var(--descriptionText);
 }
+
+@media (max-width:500px) {
+    .Analytics2 .menuBar {
+        display: flex;
+        padding: 4vh 1vh !important;
+        width: 100dvw;
+        overflow-x: auto;
+        overflow-y: hidden;
+        margin: 1vh 0;
+    }
+
+    .Analytics2 .recent-cards .recent-card{
+        width: 100%;
+    }
+    
+}
