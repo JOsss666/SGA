@@ -152,7 +152,8 @@ function createWindow() {
     console.log("App is packaged:", app.isPackaged);
 
     //if (isDev) {
-        mainWindow.loadURL('https://facturation.sga360.co');
+        //mainWindow.loadURL('https://facturation.sga360.co');
+        mainWindow.loadURL('http://localhost:5173/');
         mainWindow.webContents.openDevTools();
 /*} else {
         const indexPath = path.join(app.getAppPath(), 'dist', 'index.html');

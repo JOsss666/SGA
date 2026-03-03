@@ -57,6 +57,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const [description,setDescription] = useState();
     const [attached,setAttached] = useState('-');
     const [instance_id,setInstance_id] = useState();
+    const [instanceOwnSerial,setInstanceOwnSerial] = useState();
     const [step_id,setStep_id] = useState();
     const [concept_id,setConcept_id] = useState();
     const [conceptAccount_id,setConcept_account_id] = useState();
@@ -74,6 +75,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         company_id:appInfo.company_id,
         created_by:userInfo.user_id,
         thirdParty_id,
+        thirdParty_name:thirdPartyInfo.names,
         bussines_id,
         doc_type:'Cash Recipt',
         status,
@@ -81,6 +83,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         total,
         attached,
         instance_id,
+        instanceOwnSerial,
         step_id,
         payedBills:briefCaseBills,
         cashBox_id
@@ -239,6 +242,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         console.log(element)
         setInstance_id(element.id)
         setStep_id(element.step_id)
+        setInstanceOwnSerial(element.ownSerial)
         setThirdParty_id(element.thirdParty_id)
         setInfo(prevInfo => ({
             ...prevInfo,            // Mantenemos todas las propiedades actuales (nombre, fecha, etc.)
@@ -559,7 +563,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             FormInfo['instance_id'] = instance_id;
             FormInfo["ownSerial"] = res.ownSerial;
             if(isElectron){
-                printCashRecipt(FormInfo,appInfo);
+                await printCashRecipt(FormInfo,appInfo,true);
+                await printCashRecipt(FormInfo,appInfo,false);
             }
             FormInfo["user_id"] = userInfo.user_id,
             FormInfo['transactionDetails'] = []
