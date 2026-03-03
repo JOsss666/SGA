@@ -51,6 +51,7 @@ import { Movements } from './Movements';
 import { MovementsRecord } from './MovementsRecord'; 
 import { CashHistory } from './CashHistory';
 import { Transactions } from './Transactions';
+import { Analytics2 } from './Analytics2';
 
 export function UserApp(){
 
@@ -218,7 +219,7 @@ export function UserApp(){
                             <Route path='/messages/*' element={<Messages/>} />
                             <Route path='/calendar' element={<Calendar/>} />
                             <Route path='/reports/*' element={<Reports/>} />
-                            <Route path='/analytics' element={<Analytics/>} />
+                            <Route path='/analytics' element={<Analytics2/>} />
                             <Route path='/analytics/*' element={<AnalyticDocDetail/>} />
 
                             <Route path='/settings/*' element={<Settings/>} />                            

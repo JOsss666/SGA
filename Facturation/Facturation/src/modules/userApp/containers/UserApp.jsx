@@ -48,6 +48,7 @@ import { CashBoxesDeetail } from './CashBoxesDetail';
 import { useRealtime } from '../../../utils/useRealTime';
 import { ProcessStatusAlert } from './Alerts/ProcessStatusAlert';
 import { ProcessInstanceAnalytics } from './Analytics/ProcessInstanceAnalycs';
+import { Analytics2 } from './Analytics2';
 
 export function UserApp(){
 
@@ -244,7 +245,7 @@ export function UserApp(){
                             )}
                             <Route path='/users/:user_id' element={<DetailsUser/>} />
                             <Route path='/reports/*' element={<Reports/>} />
-                            <Route path='/analytics/*' element={<ProcessInstanceAnalytics/>} />
+                            <Route path='/analytics/*' element={<Analytics2/>} />
                             <Route path='/calendar' element={<Calendar/>} />
                             <Route path='/concepts' element={<ConceptsPlan/>} />
                             <Route path='/accounts' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
