@@ -145,17 +145,22 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
+            devTools: true // 👈 Forzar devtools
         }
     });
 
-    if (isDev) {
-        // En desarrollo: usas tu servidor local
+    console.log("App is packaged:", app.isPackaged);
+
+    //if (isDev) {
         mainWindow.loadURL('https://facturation.sga360.co');
-    } else {
-        // En producción: cargamos el archivo generado por Vite en la carpeta dist
-        // Nota: Ajusta la ruta según necesites cargar la raíz o un módulo
-        mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
-    }
+        mainWindow.webContents.openDevTools();
+/*} else {
+        const indexPath = path.join(app.getAppPath(), 'dist', 'index.html');
+        console.log("Loading:", indexPath);
+
+        mainWindow.loadFile(indexPath);
+        mainWindow.webContents.openDevTools(); // 👈 Temporal para debug
+    }*/
 }
 
 app.whenReady().then(createWindow);
