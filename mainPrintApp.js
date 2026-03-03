@@ -5,7 +5,7 @@ import os from 'os';
 import path from 'path';
 import { exec } from 'child_process';
 import ptp from 'pdf-to-printer';
-import { autoUpdater } from 'electron-updater';
+
 
 let mainWindow;
 
@@ -169,7 +169,7 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
-            devTools: true // 👈 Forzar devtools
+            devTools: false // 👈 Forzar devtools
         }
     });
 
