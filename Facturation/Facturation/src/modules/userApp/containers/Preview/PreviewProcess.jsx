@@ -50,7 +50,7 @@ export function PreviewProcess({id}){
         setLoadingDocuments(true)
         let res = await postInfo('/getDocuments',{
             company_id:appInfo.company_id,
-            //allowedTypes:types,
+            allowedTypes:['Cash Recipt','Client Order'],
             instance_id:instance_id
         })
         console.log(res)
