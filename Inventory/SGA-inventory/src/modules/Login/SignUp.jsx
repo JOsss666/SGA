@@ -11,9 +11,9 @@ import { useAppInfo } from '../../context/context';
 export function SignUp() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [name, setName] = useState('');
     const [mail, setMail] = useState('');
     const [pass, setPass] = useState('');
+    const [visiblePassword,setVisblePassword] = useState(false);
     const navigate = useNavigate();
     const {appInfo} = useAppInfo();
 
@@ -47,12 +47,16 @@ export function SignUp() {
                     sendLogIn(e);
                 }}>
                 <div className="fields">
-                    <FormInput title={"Nombre"} placeholder={"Tu nombre"} type={"text"} value={mail} action={setName}/>
                     <FormInput title={"Email"} placeholder={"Correo@gmail.com"} type={"email"} value={mail} action={setMail}/>
-                    <FormInput title={"Contraseña"} placeholder={"****"} type={"password"} value={pass} action={setPass}/>
+                    <FormInput title={"Contraseña"} placeholder={"****"} type={visiblePassword? 'Text':"password"} value={pass} action={setPass} children={
+                        <i className={`fa-regular fa-eye${visiblePassword? '-slash':''} setVisPass`} onClick={()=>{
+                            setVisblePassword(!visiblePassword)
+                        }}/>
+                    }/>
                 </div>
                 <FormButton text={"Iniciar Sesión"} loading={loading}/>
                 {error && <div className="error" role="alert">{error}</div>}
+                <a href="#" className="forgot">Contraseña olvidada</a>
             </form>
 
             <div className="LoginAccounts">

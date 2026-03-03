@@ -89,6 +89,15 @@
     border: none;
 }
 
+.Login .Form .FormInput .setVisPass{
+    position: absolute;
+    top: 1.5vh;
+    right: 2vh;
+    font-size: clamp(3px,3vh,30px);
+    color: var(--descriptionText);
+    cursor: pointer;
+}
+
 .Login .LoginAccounts{
     padding: 2vh 0;
     margin: 1vh 0;
