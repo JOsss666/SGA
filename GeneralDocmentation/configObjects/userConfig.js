@@ -1,4 +1,4 @@
-let unserConfic = {
+let userconfig = {
   "meta": {
     "version": "1.0",
     "updatedAt": "2026-01-10"
@@ -12,7 +12,7 @@ let unserConfic = {
     },
     "cellars": {
       "enabled": [],
-      "overAll": true
+      "overAll": false
     },
     "modules": {
       "ctools": {
@@ -21,23 +21,23 @@ let unserConfic = {
         "instance": "alpha"
       },
       "process": {
-        "use": true,
+        "use": false,
         "expires": "10/01/2026",
         "instance": "full"
       },
       "sga-home": {
-        "use": true,
+        "use": false,
         "expires": "never",
         "instance": "full"
       },
       "treasury": {
-        "use": true,
+        "use": false,
         "expires": "10/01/2026",
         "instance": "full",
         "facturation": true
       },
       "inventory": {
-        "use": true,
+        "use": false,
         "expires": "10/01/2026",
         "instance": "full"
       },
@@ -47,12 +47,12 @@ let unserConfic = {
         "instance": "alpha"
       },
       "management": {
-        "use": true,
+        "use": false,
         "expires": "10/01/2026",
         "instance": "full"
       },
       "contability": {
-        "use": true,
+        "use": false,
         "expires": "10/01/2026",
         "instance": "full"
       },
@@ -77,7 +77,7 @@ let unserConfic = {
     },
     "sections": {
       "new": {
-        "overAll": true
+        "overAll": false
       },
       "help": {
         "overAll": true
@@ -122,38 +122,41 @@ let unserConfic = {
         }
       },
       "accounts": {
-        "overAll": true
+        "overAll": false
       },
       "concepts": {
-        "overAll": true,
-        "enabled": [35,36,37]
+        "overAll": false
       },
       "products": {
-        "overAll": true
+        "overAll": false
       },
       "services": {
-        "overAll": true
+        "overAll": false
       },
       "settings": {
         "overAll": true
       },
       "analytics": {
-        "overAll": true
+        "overAll": false
+      },
+      "cashBoxes": {
+        "enabled": [],
+        "overAll": false
       },
       "movements": {
-        "overAll": true
+        "overAll": false
       },
       "tutorials": {
         "overAll": true
       },
       "categories": {
-        "overAll": true
+        "overAll": false
       },
       "myBussines": {
-        "overAll": true
+        "overAll": false
       },
       "pricesList": {
-        "overAll": true
+        "overAll": false
       },
       "newDocument": {
         "overAll": true,
@@ -213,7 +216,13 @@ let unserConfic = {
           "instance": "full"
         }
       },
-      "personalized": {}
+      "personalized": {
+        "custom-modules": {
+          "z&j_clicksControl": {
+            "access": true
+          }
+        }
+      }
     },
     "suspended": false,
     "costCenters": {

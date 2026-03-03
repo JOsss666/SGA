@@ -1,6 +1,10 @@
 {
   "name": "sga360",
   "private": true,
+  "workspaces": [
+    "Facturation/Facturation",
+    "costume-modules/*"
+  ],
   "version": "0.0.0",
   "author": "KXA S.A.S",
   "description": "Sistema de gestion administrativa SGA360",

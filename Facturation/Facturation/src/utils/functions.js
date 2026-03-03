@@ -180,6 +180,18 @@ export function moneyFormat(value){
 
 }
 
+export const formatDate = (date,noHour)=>{
+        if(date != undefined){
+            let x = date.split('T');
+            let newDate = `${x[0]}`;
+            if(!noHour){
+                newDate += ` ${x[1].substring(0,5)}`
+            }
+            return newDate;
+        }
+        return `--/--/--`
+    }
+
 export async function uploadFileInChunks(file,setAdvancePercent){
     
     const chunkSize = 5 * 1024 * 1024; // 5MB

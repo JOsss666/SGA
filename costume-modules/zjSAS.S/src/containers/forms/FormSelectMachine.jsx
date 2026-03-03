@@ -5,9 +5,10 @@ import { SearchinList } from "../../components/SearchInList";
 import { LoadingSpace } from "../LoadingSpace";
 import {DescriptionSpan} from '../../components/DescriptionSpan'
 import {FormButton} from '../../components/FormButton'
+import {FormInput} from '../../components/FormInput'
 import './FormSelectMachine.css'
 
-export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert}){
+export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,instance_id}){
 
     // Requirements
     const [assets,setAssets] = useState([]);
@@ -18,14 +19,17 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert}){
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
     const [selectedAll,setSelectedAll] = useState(false);
+    const [description,setDescription] = useState('');
 
     //formInfo
     const [instanceInfo,setInstanceInfo] = useState({});
     const formInfo = {
+        instance_id:instance_id,
         document_type:"Machine use",
         company_id:appInfo.company_id,
         user_id:userInfo.user_id,
-        services:services
+        services:services,
+        description:description
     }
 
     // getters of info
@@ -34,17 +38,24 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert}){
         setDisabled(true);
         setLoading(true);
         let res = await postInfo('/process/getProcessInstances',{
-            company_id:appInfo.company_id
+            company_id:appInfo.company_id,
+            id:instance_id
         })
+        console.log(res)
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
                 C.push({
                     text:`${element.process_code}#${element.ownSerial}`,
-                    value:element
+                    value:element,
+                    id:element.id
                 })
             });
             setProcessInstances(C);
+            console.log(C)
+            if(C.length == 1){
+                setInstanceInfo(C[0]);
+            }
         }
         setLoading(false);
         setDisabled(false);
@@ -76,7 +87,7 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert}){
             res[1].forEach(element => {
                 C.push({
                     text:`${element.internal_code} - ${element.name}`,
-                    value:element.id
+                    value:element.id,
                 })
             });
             setAssets(C);
@@ -114,7 +125,7 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert}){
         if(!selectedAll) return;
         setDisabled(true);
         setLoading(true);
-        let res = await postInfo('/zj582/registerServiceMachine',formInfo);
+        let res = await postInfo('/zj852/registerServiceMachine',formInfo);
         console.log(res);
         setLoading(false);
         setDisabled(false);
@@ -134,6 +145,7 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert}){
     },[services])
 
     useEffect(()=>{
+        console.log(instanceInfo);
         if(instanceInfo.id != undefined){
             console.log(instanceInfo.id)
             getServicesMovements();
@@ -174,6 +186,7 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert}){
                                 Selecione una maquina en cada servicio para continuar
                             </span>
                         )}
+                        <FormInput textArea={true} title={'Descripcion'} placeholder={'Observaciones (Opcoinal)'} action={setDescription} disabled={disabled}/>
                         <FormButton text={'Guardar registro'} disabled={disabled? selectedAll:disabled}/>
                     </form>
                 </>

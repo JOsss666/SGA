@@ -59,9 +59,10 @@ export function CashBoxesDeetail(){
 
 
     const getLastRegisterShift= async()=>{
-        let res = await postInfo('/facturation/getLastRegisterShift',{
+        let res = await postInfo('/facturation/getRegisterShift',{
             company_id:appInfo.company_id,
-            cashBox_id:params.cashBox_id
+            cashBox_id:params.cashBox_id,
+            limit:1
         })
         console.log(res);
         setLastRegister(res[1][0]);

@@ -1,0 +1,283 @@
+.Analytics2 {
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    position: relative;
+    overflow-y: auto;
+}
+
+.Analytics2 .headSection {
+    margin-left: 2vh;
+    margin-bottom: 2vh;
+}
+
+.Analytics2 .headSection .BoldTitle {
+    font-size: 4vh;
+    margin-bottom: 0.5vh;
+}
+
+.Analytics2 .headSection .DescriptionSpan {
+    color: var(--descriptionText);
+}
+
+.Analytics2 .menuBar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 2vh 0;
+    margin-top: 1vh;
+}
+
+.Analytics2 .menuBar .optionsBar {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1.5vh;
+}
+
+.Analytics2 .menuBar .optionsBar .search-wrapper {
+    flex: 0 1 auto;
+}
+
+.Analytics2 .menuBar .optionsBar .actions-wrapper {
+    display: flex;
+    gap: 1.5vh;
+    align-items: center;
+}
+
+.Analytics2 .menuBar .optionsBar .IconList {
+    background-color: var(--inputsBg);
+    border-radius: 1vh;
+    height: fit-content;
+    box-shadow: 0 .2vh .8vh #0003;
+    font-size: 3vh;
+    align-content: center;
+    padding: 1vh;
+    color: var(--descriptionText);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.Analytics2 .menuBar .optionsBar .IconList.active {
+    background-color: var(--iconHover);
+    color: var(--mainText);
+}
+
+.Analytics2 .menuBar .optionsBar .IconList:hover {
+    background-color: var(--cardHover);
+}
+
+.Analytics2 .menuBar .optionsBar .SearchBar {
+    width: 34vh;
+}
+
+.Analytics2 .menuBar .optionsBar .SelectOptions .contentOptions {
+    width: 12vh;
+    box-shadow: 0 .2vh .8vh #0003;
+}
+
+.Analytics2 .menuBar .optionsBar .FormButton {
+    height: 5vh;
+    padding: 0 2vh;
+    font-size: 1.8vh;
+    border-radius: 1vh;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5vh;
+}
+
+.Analytics2 .menuBar .optionsBar .FormButton i {
+    font-size: 2vh;
+}
+
+.Analytics2 .menuBar .optionsBar .FormButton:hover {
+    background-color: #333;
+}
+
+.Analytics2 .menuBar .optionsBar .SelectOptions {
+    height: 5vh;
+}
+
+.Analytics2 .menuBar .optionsBar .SelectOptions .contentOptions {
+    width: 20vh;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 1vh;
+    border-radius: 1vh;
+    background-color: var(--inputsBg);
+    border: 0.1vh solid var(--inputsBorder);
+    font-size: 1.8vh;
+    color: var(--descriptionText);
+}
+
+.Analytics2 .galleryAnalytics {
+    margin-top: 2vh;
+    padding: 2vh 0;
+    transition: all 0.2s;
+}
+
+.Analytics2 .gallAn_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(28vh, 1fr));
+    gap: 3vh;
+}
+
+.Analytics2 .gallAn_list {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+/* Estilos para vista de lista (ajustes sobre las tarjetas) */
+.Analytics2 .gallAn_list  .CardAnalytics2 {
+    flex-direction: row;
+    align-items: center;
+    padding: 2vh;
+    gap: 2vw;
+    height: fit-content;
+    min-height: fit-content;
+}
+
+.Analytics2 .galleryAnalytics.list .CardAnalytics2 .card-title {
+    margin: 0;
+    min-width: 18vh;
+}
+
+.Analytics2 .galleryAnalytics.list .CardAnalytics2 .card-description {
+    margin: 0 2vh;
+    flex: 1;
+}
+
+.Analytics2 .galleryAnalytics.list .CardAnalytics2 .card-footer {
+    margin-top: 0;
+    min-width: 20vh;
+    justify-content: flex-end;
+}
+
+.Analytics2 .recent-section {
+    margin-top: 2vh;
+    padding: 2vh;
+    background-color: var(--bg);
+    border-radius: 2vh;
+    box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.05);
+    outline: solid .1vh var(--inputsBorder);
+}
+
+.Analytics2 .recent-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5vh;
+}
+
+.Analytics2 .recent-section .BoldTitle {
+    font-size: 2.5vh;
+    margin-bottom: 0;
+}
+
+.Analytics2 .recent-section .DescriptionSpan {
+    font-size: 1.8vh;
+    color: var(--descriptionText);
+    margin-bottom: 2vh;
+    display: block;
+}
+
+.Analytics2 .recent-history-button {
+    background: none;
+    border: 0.1vh solid var(--inputsBorder);
+    border-radius: 2vh;
+    padding: 1vh 2vh;
+    color: #61ADFF;
+    font-size: 1.8vh;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.8vh;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+.Analytics2 .recent-history-button:hover {
+    background-color: var(--iconHover);
+}
+
+.Analytics2 .recent-cards {
+    display: flex;
+    gap: 2vh;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.Analytics2 .recent-card {
+    background-color: var(--bg);
+    border: 0.1vh solid var(--inputsBorder);
+    border-radius: 2vh;
+    padding: 1.5vh;
+    display: flex;
+    align-items: center;
+    gap: 1.5vh;
+    min-width: 22vh;
+    box-shadow: 0 0.2vh 0.5vh rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.Analytics2 .recent-card:hover {
+    transform: translateY(-0.3vh);
+    box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.1);
+}
+
+.Analytics2 .recent-card-icon {
+    width: 4vh;
+    height: 4vh;
+    border-radius: 1.2vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2vh;
+    flex-shrink: 0;
+}
+
+.Analytics2 .recent-card-icon i {
+    font-size: 2vh;
+}
+
+.Analytics2 .recent-card-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.Analytics2 .recent-item-title {
+    font-weight: 500;
+    color: var(--mainText);
+    font-size: 1.8vh;
+    margin-bottom: 0.3vh;
+}
+
+.Analytics2 .recent-item-time {
+    font-size: 1.4vh;
+    color: var(--descriptionText);
+}
+
+@media (max-width:500px) {
+    .Analytics2 .menuBar {
+        display: flex;
+        padding: 4vh 1vh !important;
+        width: 100dvw;
+        overflow-x: auto;
+        overflow-y: hidden;
+        margin: 1vh 0;
+    }
+
+    .Analytics2 .recent-cards .recent-card{
+        width: 100%;
+    }
+    
+}

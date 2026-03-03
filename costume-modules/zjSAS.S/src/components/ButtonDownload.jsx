@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './ButtonDownload.css';
-import { componentToPdf, parseToCsv, parseToXlsx,ScreenShotElement } from '../../../utils/functions';
+//import { componentToPdf, parseToCsv, parseToXlsx,ScreenShotElement } from '../../../utils/functions';
 
 export function ButtonDownload({info,columns,formats,title,component}) {
     const [status, setStatus] = useState("default");
@@ -29,8 +29,10 @@ export function ButtonDownload({info,columns,formats,title,component}) {
 
     const current = states.find((s) => s.key === status);
 
+    
     const handleFormatClick = async(format) => {
         if(info != undefined){
+            /*
             setStatus("loading");
             setShowMenu(false);
             console.log(`Descargando archivo en formato: ${format}`);
@@ -44,6 +46,7 @@ export function ButtonDownload({info,columns,formats,title,component}) {
             setTimeout(() => {
                 setStatus("default");
             }, 2000);
+            */
         }
     };
 

@@ -22,7 +22,7 @@
     "dom-to-image-more": "^3.7.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.3",
-    "lightweight-charts": "^5.0.9",
+    "lightweight-charts": "^4.1.1",
     "papaparse": "^5.5.3",
     "qrcode": "^1.5.4",
     "qrcode.react": "^4.2.0",

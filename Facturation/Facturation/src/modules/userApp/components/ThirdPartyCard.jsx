@@ -13,6 +13,9 @@ export function ThirdPartyCard({ info, onCardClick }) {
 
     return (
         <div className="ThirdpartyCard" onClick={handleClick}>
+            <div className="ImageSection">
+                <img src={info.img} className='ImagePlaceholder' alt="" />
+            </div>
             <div className="CardContent">
                 <div className="CardHeader">
                     <div className="NameSection">
@@ -38,11 +41,6 @@ export function ThirdPartyCard({ info, onCardClick }) {
                         <i className="fa-solid fa-phone"></i>
                         <span className="ContactText">{info.phone}</span>
                     </div>
-                </div>
-            </div>
-            <div className="ImageSection">
-                <div className="ImagePlaceholder">
-                    <span></span>
                 </div>
             </div>
         </div>

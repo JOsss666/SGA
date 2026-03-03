@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAlert } from "../../../../context/context";
+import { useAlert, useAppInfo } from "../../../../context/context";
 import { BoldTitle } from "../../components/BoldTitle";
 import { FormNewDC } from "./FormNewDC";
 import { FormNewDocument } from "./FormNewDocument";
@@ -10,9 +10,10 @@ import { SearchBar } from "../../components/SearchBar";
 import { FormNewMovement } from "./FormNewMovement";
 import { FormNewClientOrder } from "./FormNewClientOrder";
 import { FormNewCashRecipt } from "./FormNewCashRecipt";
+import { FormSelectMachine } from "../../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormSelectMachine";
 
 export function SelectTpeNewDoc({info,docType,reloadFun}){
-
+    const {userConfig,appInfo,userInfo} = useAppInfo();
     const {popInAlert,popOutAlert} = useAlert();
     const [searchValue,setSearchVal] = useState('');
 
@@ -29,10 +30,10 @@ export function SelectTpeNewDoc({info,docType,reloadFun}){
     }
 
     const documents = [
-        {title:'Orden de Cliente',docType:'Client Order',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_5_she308.png',alert:<FormNewClientOrder params={info} reloadFun={endProcess}/>},
+        {title:'Orden de Cliente',docType:'Client Order',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_5_she308.png',alert:<FormNewClientOrder canRepeatServices={true} params={info} reloadFun={endProcess}/>},
         {title:'Factura de venta',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766014163/ChatGPT_Image_17_dic_2025_18_27_41_1_a3acbd.png',alert:<FormNewFV info={info} reloadFun={endProcess}/>},
         {title:'Documento de compra',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_3_nph10p.png',alert:<FormNewDC info={info} reloadFun={endProcess}/>},
-        {title:'Recibo de caja',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_4_ioz7jp.png',alert:<FormNewCashRecipt InfoParams={info} reloadFun={endProcess} />},
+        {title:'Recibo de caja',docType:'Cash Recipt',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_4_ioz7jp.png',alert:<FormNewCashRecipt InfoParams={info} reloadFun={endProcess} />},
         {title:'Recibo de salida',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_5_fvbrtz.png',alert:<span>No disponible aún</span>},
         {title:'Comprobante contable',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_6_uh2t9n.png',alert:<span>No disponible aún</span>},
         {title:'Nota débito',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072386/ChatGPT_Image_17_dic_2025_18_27_41_7_jpbmlq.png',alert:<span>No disponible aún</span>},
@@ -54,6 +55,7 @@ export function SelectTpeNewDoc({info,docType,reloadFun}){
         {title:'Orden de producción',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076216/Cuadricula3Documentos_3_q2hsc4.png',alert:<span>No disponible aún</span>},
         {title:'Transacciónes',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_6_fvpiav.png',alert:<span>No disponible aún</span>},
         {title:'Transacciónes',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_6_fvpiav.png',alert:<span>No disponible aún</span>},
+        {title:'Seleccionar Maquinaria',docType:'Machine use',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_6_fvpiav.png',alert:<FormSelectMachine instance_id={info?.instance_id} appInfo={appInfo} userConfig={userConfig} popOutAlert={popOutAlert} userInfo={userInfo}/>,icon:<i className="fa-solid fa-tractor"/>},
     ]
 
     const handleAutoSelectDocType = (type)=>{

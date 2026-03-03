@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import'./AiButton.css'
-import { useAiAssistant } from '../../../../context/context';
+//import { useAiAssistant } from '../../../../context/context';
 
-export function AiButton({sugerence,attached,text}){
+export function AiButton({sugerence,attached,text,useAiAssistant}){
     const [loading,setLoading] = useState(false);
     const {sendPrompt} = useAiAssistant();
     const [visibleSugerences,setVisibleSugerences] = useState(false);

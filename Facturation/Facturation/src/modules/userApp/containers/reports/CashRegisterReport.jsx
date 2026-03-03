@@ -108,9 +108,10 @@ export function CashRegisterReport({shift_id}){
      const getShiftInfo= async()=>{
         setDisabled(true);
         setLoading(true);
-        let res = await postInfo('/facturation/getLastRegisterShift',{
+        let res = await postInfo('/facturation/getRegisterShift',{
             company_id:appInfo.company_id,
-            cashBox_id:shift_id
+            cashBox_id:shift_id,
+            limit:1
         })
         if(res[0]){
             setShiftInfo(res[1][0]);

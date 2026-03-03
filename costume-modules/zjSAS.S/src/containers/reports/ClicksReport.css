@@ -1,0 +1,36 @@
+
+
+.ClicksReport .settingsReport{
+    margin-bottom: 2vh;
+}
+
+.ClicksReport .totalsIndicator{
+    position: absolute;
+    right: 4vw;
+    display: flex;
+    gap: 2vw;
+}
+
+.ClicksReport .totalsIndicator .ttlIndicator{
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    gap: .5vh;
+}
+
+.ClicksReport .totalsIndicator .ttlIndicator span{
+    color: var(--descriptionText);
+    font-size: clamp(2.2px,2.2vh,22px);
+}
+
+.ClicksReport .totalsIndicator .ttlIndicator strong{
+    color: var(--mainText);
+    font-size: clamp(2.5px,2.5vh,25px);
+    font-weight: 500;
+}
+
+
+.ClicksReport .contentReport{
+    overflow-y: auto;
+    overflow-x: auto;
+}

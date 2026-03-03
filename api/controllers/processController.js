@@ -704,10 +704,30 @@ processController.getProcessInstances =(req,res)=>{
             values.push(info.allowedTypes);
         }
 
-        if(info.status != undefined){
+        if(info.status != undefined && info.status[0] != 'all' ){
             whereClauses.push(`"Process".process_instance.status = ANY($${values.length +1})`);
             values.push(info.status);
         }
+
+        if(info.thirdParty_id != undefined && info.status[0] != 'all' ){
+            whereClauses.push(`"Process".process_instance.status = ANY($${values.length +1})`);
+            values.push(info.status);
+        }
+
+        // Dates Filters
+            if (info.start_date) {
+                values.push(info.start_date);
+                whereClauses.push(
+                    `"Process".process_instance.created_at >= $${values.length}`
+                );
+            }
+
+            if (info.end_date) {
+                values.push(info.end_date);
+                whereClauses.push(
+                    `"Process".process_instance.created_at <= $${values.length}`
+                );
+            }
 
         const whereQuery = whereClauses.length > 0
             ? `WHERE ${whereClauses.join(" AND ")}`
@@ -766,26 +786,45 @@ processController.updateProcessInstanceStatus = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `
-            UPDATE
-                "Process".process_instance
-            SET
-                start_date = $1,
-                delivery_date = $2,
-                status = $3,
-                "thirdParty_id" = $4,
-                responsable = $5
-            WHERE company_id = $6 AND id = $7;
-        `;
-        let consulta = await useDataBase(sentence,[
-            info.start_date,
-            info.delivery_date,
-            info.status,
-            (info.thirdParty_id === '' || info.thirdParty_id === undefined) ? null : info.thirdParty_id,
-            info.user_id,
-            info.company_id,
-            info.id
-        ],2);
+        let sentence;
+        let consulta;
+        if(info.status != 'cancelled'){
+            sentence = `
+                UPDATE
+                    "Process".process_instance
+                SET
+                    start_date = $1,
+                    delivery_date = $2,
+                    status = $3,
+                    "thirdParty_id" = $4,
+                    responsable = $5
+                WHERE company_id = $6 AND id = $7;
+            `;
+            consulta = await useDataBase(sentence,[
+                info.start_date,
+                info.delivery_date,
+                info.status,
+                (info.thirdParty_id === '' || info.thirdParty_id === undefined) ? null : info.thirdParty_id,
+                info.user_id,
+                info.company_id,
+                info.id
+            ],2);
+        }else{
+            sentence = `
+                UPDATE
+                    "Process".process_instance
+                SET
+                    status = $1,
+                    responsable = $2
+                WHERE company_id = $3 AND id = $4;
+            `;
+            consulta = await useDataBase(sentence,[
+                info.status,
+                info.user_id,
+                info.company_id,
+                info.id
+            ],2);
+        }
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     });
@@ -866,6 +905,83 @@ processController.getProcessState = (req,res)=>{
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err))
+    })
+}
+
+processController.getInstanceHistorial = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values= [];
+        let whereClauses = [];
+
+        // Dates Filters
+            if (info.start_date) {
+                values.push(info.start_date);
+                whereClauses.push(
+                    `"Process".process_historial.created_at >= $${values.length}`
+                );
+            }
+
+            if (info.end_date) {
+                values.push(info.end_date);
+                whereClauses.push(
+                    `"Process".process_historial.created_at <= $${values.length}`
+                );
+            }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
+        let sentence = `
+            SELECT
+                "Process".process_historial.*,
+                prevstep.name AS prevstep_name,
+                nextstep.name AS nextstep_name,
+                "Process".processes.name AS process_name,
+                "Process".processes.code AS process_code,
+                "Process".process_instance.process_id,
+                "Process".process_instance.status,
+                "Ecosystem".users.user_name,
+                "Ecosystem".users.img AS user_img
+            FROM
+                "Process".process_historial
+            LEFT JOIN
+                "Process".process_steps AS prevstep
+            ON
+                "Process".process_historial.previous_step = prevstep.id
+            LEFT JOIN
+                "Process".process_steps AS nextstep
+            ON
+                "Process".process_historial.next_step = nextstep.id
+            LEFT JOIN
+                "Process".process_instance
+            ON
+                "Process".process_historial.instance_id = "Process".process_instance.id
+            LEFT JOIN
+                "Process".processes
+            ON
+                "Process".process_instance.process_id = "Process".processes.id
+            LEFT JOIN
+                "Ecosystem".users
+            ON
+                "Process".process_historial.user_id = "Ecosystem".users.user_id
+            ${whereQuery}
+            ORDER BY "Process".process_historial.id DESC
+            ${info.limint != undefined ? `LIMIT ${info.limint}`:''}
+        `;
+
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    });
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err))

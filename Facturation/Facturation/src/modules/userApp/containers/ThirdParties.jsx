@@ -9,6 +9,9 @@ import { SelectOptions } from '../components/SelectOptions';
 import { FormButton } from '../components/FormButton';
 import { useAlert, useAppInfo } from '../../../context/context';
 import { FormNewThirdParties } from './forms/FormNewThirdParties';
+import { LoadingSpace } from './LoadingSpace';
+import { NoResults } from './NoResults';
+
 
 export function ThirdParties() {
     const navigate = useNavigate();
@@ -132,47 +135,23 @@ export function ThirdParties() {
                                 </div>
                             </div>
 
-                            {loading ? (
-                                <div className="thirdparties-loading">
-                                    <i className="fa-solid fa-spinner fa-spin"></i>
-                                    Cargando terceros...
-                                </div>
-                            ) : error ? (
-                                <div className="thirdparties-error">
-                                    <p>{error}</p>
-                                    <button onClick={handleRetry} className="retry-btn">
-                                        Reintentar
-                                    </button>
-                                </div>
-                            ) : thirdPartiesData.length === 0 ? (
-                                <div className="thirdparties-empty">
-                                    <p>No hay terceros registrados</p>
-                                    <button onClick={fetchThirdParties} className="retry-btn">
-                                        Actualizar
-                                    </button>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="thirdparties-grid">
-                                        {filteredThirdParties.map((thirdParty) => (
-                                            <ThirdPartyCard
-                                                key={thirdParty.id}
-                                                info={thirdParty}
-                                                onCardClick={handleCardClick}
-                                            />
-                                        ))}
-                                    </div>
-                                    
-                                    {/* Mensaje cuando no hay resultados de búsqueda */}
-                                    {filteredThirdParties.length === 0 && searchVal !== '' && (
-                                        <div className="thirdparties-no-results">
-                                            <p>No se encontraron terceros que coincidan con "{searchVal}"</p>
-                                            <button onClick={() => setSearchVal('')} className="retry-btn">
-                                                Limpiar búsqueda
-                                            </button>
-                                        </div>
+                            {loading && (
+                                <LoadingSpace title={'Cargando terceros'} description={'Esto no debe tardar mucho'}/>
+                            )}
+                                   
+                            {!loading && (
+                                 <div className="thirdparties-grid">
+                                    {filteredThirdParties.map((thirdParty) => (
+                                        <ThirdPartyCard
+                                            key={thirdParty.id}
+                                            info={thirdParty}
+                                            onCardClick={handleCardClick}
+                                        />
+                                    ))}
+                                    {filteredThirdParties.length == 0 && (
+                                        <NoResults title={'No hay terceros disponibles para mostrar'}/>
                                     )}
-                                </>
+                                </div>
                             )}
                         </div>
                     }
