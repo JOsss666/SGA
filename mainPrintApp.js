@@ -5,6 +5,7 @@ import os from 'os';
 import path from 'path';
 import { exec } from 'child_process';
 import ptp from 'pdf-to-printer';
+import { autoUpdater } from 'electron-updater';
 
 let mainWindow;
 
@@ -22,34 +23,6 @@ async function getTargetPrinter() {
     const defaultPrinter = printers.find(p => p.isDefault);
     return defaultPrinter ? defaultPrinter.name : null;
 }
-
-// 2. PRUEBA DE "HOLA MUNDO" (Texto Plano)
-
-ipcMain.on('print-test', async () => {
-    let tempWindow = new BrowserWindow({ show: false });
-
-    try {
-        console.log('Paso 1');
-
-        await tempWindow.loadURL('about:blank');
-        console.log('Paso 2');
-
-        await tempWindow.webContents.executeJavaScript(`
-            document.body.innerHTML = "<h1 style='font-size:40px'>HOLA MUNDO</h1>";
-        `);
-
-        console.log('Paso 3');
-
-        tempWindow.webContents.print({
-            silent: false,   // muestra diálogo para confirmar
-            printBackground: true
-        });
-
-    } catch (e) {
-        console.error('Error:', e);
-    }
-});
-
 
 // Usa este evento para probar si la impresora reacciona sin basura de código PDF
 ipcMain.on('print-test', async () => {
@@ -136,6 +109,57 @@ ipcMain.on('print-receipt', async (event, htmlContent) => {
     }
 });
 
+ipcMain.on('print-order', async (event, htmlContent) => {
+    let tempWindow = new BrowserWindow({ show: false });
+
+    try {
+        console.log('Paso 1');
+        const printerName = await getTargetPrinter();
+        console.log('Printer:', printerName);
+        console.log('Paso 2');
+
+        // Página limpia
+        await tempWindow.loadURL('about:blank');
+
+        // Reset total del body + inyección HTML
+        await tempWindow.webContents.executeJavaScript(`
+            document.body.style.margin = "0";
+            document.body.style.padding = "0";
+            document.body.style.width = "100%";
+            document.body.style.boxSizing = "border-box";
+            document.body.innerHTML = \`${htmlContent}\`;
+        `);
+
+        console.log('Paso 3');
+
+        if (process.platform === 'win32') {
+
+            tempWindow.webContents.print({
+                silent: true,
+                deviceName: printerName,
+                printBackground: true,
+                margins: { marginType: 'none' } // 👈 elimina margen físico
+            }, (success, errorType) => {
+                if (!success) {
+                    console.error('Falló impresión:', errorType);
+                } else {
+                    console.log('Job enviado sin diálogo');
+                }
+            });
+
+        } else {
+            // Mac/Linux igual que antes
+        }
+
+    } catch (e) {
+        console.error('Error:', e);
+    } finally {
+        setTimeout(() => {
+            if (!tempWindow.isDestroyed()) tempWindow.destroy();
+        }, 2000);
+    }
+});
+
 const isDev = !app.isPackaged;
 
 function createWindow() {
@@ -152,8 +176,8 @@ function createWindow() {
     console.log("App is packaged:", app.isPackaged);
 
     //if (isDev) {
-        //mainWindow.loadURL('https://facturation.sga360.co');
-        mainWindow.loadURL('http://localhost:5173/');
+        mainWindow.loadURL('https://facturation.sga360.co');
+        //mainWindow.loadURL('http://localhost:5173/');
         mainWindow.webContents.openDevTools();
 /*} else {
         const indexPath = path.join(app.getAppPath(), 'dist', 'index.html');
@@ -164,4 +188,30 @@ function createWindow() {
     }*/
 }
 
-app.whenReady().then(createWindow);
+
+
+ // APP Version and window control
+
+    app.whenReady().then(() => {
+        createWindow();
+
+        if (!isDev) {
+            autoUpdater.checkForUpdatesAndNotify();
+        }
+
+        autoUpdater.on('update-available', () => {
+            mainWindow.webContents.send('update_available');
+        });
+
+        autoUpdater.on('update-downloaded', () => {
+            mainWindow.webContents.send('update_downloaded');
+        });
+
+        autoUpdater.on('error', (err) => {
+            console.error('Error en autoUpdater:', err);
+        });
+    });
+
+    ipcMain.on('restart_app', () => {
+        autoUpdater.quitAndInstall();
+    });
