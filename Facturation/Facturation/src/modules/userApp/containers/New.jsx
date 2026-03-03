@@ -37,21 +37,12 @@ export function New(){
         {text:'Crear nueva orden de cliente',children:<FormNewClientOrder canRepeatServices={true}/>,icon:<i className="fa-regular fa-file"/>},
         ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Crear usuario',children:<FormNewUser/>,icon:<i className="fa-solid fa-person-circle-plus"/>}]:[]),
         {text:'Crear tercero',children:<FormNewThirdParties quickCreation={!userConfig.access.sections.thirdparties.can_create}/>,icon:<i className="fa-regular fa-user"/>},
-        ...(isElectron ? [{
-            text: 'Imprimir recibo',
-            children: (
-                <button onClick={() => printCashRecipt()}>
-                    Imprimir recibo
-                </button>
-            ),
-            icon: <i className="fa-regular fa-user"/>
-        }] : []),
         {text:'Crear reporte uso maquinaria',children:<FormSelectMachine appInfo={appInfo} userConfig={userConfig} popOutAlert={popOutAlert} userInfo={userInfo}/>,icon:<i className="fa-solid fa-tractor"/>},
         ...(userConfig.access != undefined && (userConfig.access.services.personalized['custom-modules'])["z&j_clicksControl"].access ? [{text:'Registro de clicks',children:<FormClicksControl appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} popOutAlert={popOutAlert}/>,icon:<i className="fa-solid fa-arrow-pointer"/>}]:[]),
         //{text:'Crear orden de trabajo',children:<SelectTpeNewDoc/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
-        //{text:'Ver recibo',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-bell-concierge"/>},
+        {text:'Ver recibos',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-print"/>},
         //{text:'Crear metodo de pago',children:<FormNewPaymentMethod/>,icon:<i className="fa-regular fa-credit-card"/>},
         //{text:'Crear Concepto',children:<FormNewConcept/>,icon:<i className="fa-solid fa-scale-balanced"/>},
         //{text:'Crear Producto',children:<FormNewProduct/>,icon:<i className="fa-solid fa-shirt"/>},

@@ -5,6 +5,7 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import QRCode from 'qrcode';
+import JsBarcode from 'jsbarcode';
 
 export async function postInfo(route,informacion){
     console.log('Funcion post');
@@ -351,16 +352,32 @@ export const arrayToTree = (flatArray, rootIdValue = null) => {
     return tree;
 };
 
-export async function printCashRecipt(info,appInfo){
+export async function printCashRecipt(info,appInfo,barCode){
     console.log(info);
+
+    function generateBarcodeSVG(value) {
+        const svgNode = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+        JsBarcode(svgNode, value, {
+            format: "CODE128",
+            width: 2,
+            height: 60,
+            displayValue: false,
+            margin: 0
+        });
+
+        return svgNode.outerHTML;
+    }
+
     if (!window.require) {
         alert("Esta función solo está disponible en la App de Escritorio.");
     }
-    const qrUrl = await QRCode.toDataURL(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${info.doc_id}`);
+    const qrUrl = await QRCode.toDataURL(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${info.doc_id}`)
     let procesqrUrl;
     if(info.instance_id != undefined){
         procesqrUrl= await QRCode.toDataURL(`https://facturation.sga360.co/preview/Process/${appInfo.company_key}/${info.instance_id}`)
     }
+    const internalProcessCodeBar = generateBarcodeSVG(`1026n${info.instance_id}`)
     const { ipcRenderer } = window.require('electron');
 
     const contenidoHTML = `
@@ -390,7 +407,7 @@ export async function printCashRecipt(info,appInfo){
                 text-align:center;
                 margin:0;
             ">
-                Z&J S.A.S
+                ${appInfo.legal_name}
             </h1>
             <h3 style="
                 font-size:14px;
@@ -405,7 +422,7 @@ export async function printCashRecipt(info,appInfo){
             </span>
 
             <span style="font-size:12px;">
-                Tercero: José Murillo
+                Tercero: ${info.thirdParty_name}
             </span>
 
             <span style="
@@ -471,7 +488,7 @@ export async function printCashRecipt(info,appInfo){
                 display:block;
             "></span>
 
-            ${info.instance_id != undefined && `
+            ${info.instance_id != undefined ? `
                 <div style="
                     display:flex;
                     flex-direction:column;
@@ -490,12 +507,305 @@ export async function printCashRecipt(info,appInfo){
                         text-align:center;
                         margin-top:2mm;
                     ">
-                        Orden de trabajo #${info.instance_id}
+                        Orden de trabajo #${info.instanceOwnSerial}
+                    </h3>
+                    <span style="font-size:12px;text-align:center;">
+                        Consulte el estado de su proceso en tiempo real.
+                    </span>
+                </div>
+            `:``}
+            ${barCode? `
+                <div style="
+                    margin:0 auto;
+                    display:flex;
+                    width:50mm;
+                ">
+                    <div style="
+                        width:20mm;
+                        height:10mm,
+                        margin:0 auto;
+                    ">
+                        ${internalProcessCodeBar}
+                    </div> 
+                </div>
+            `:`
+                <div style="
+                    width:100%;
+                    padding:4mm;
+                    box-sizing:border-box;
+                    display:flex;
+                    align-items:center;
+                    gap:4mm;
+                ">
+                    <div style="
+                            width:22mm;
+                            display:flex;
+                            borderRadius:4mm;
+                            border:solid 1mm #ddd;
+                            align-items:flex-end;
+                            justify-content:center;
+                            gap:4mm;
+                        ">
+                            <img 
+                                src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                                style="
+                                    width:100%;
+                                    height:25mm;
+                                    objectFit:cover;
+                                    display:block;"/>
+                        </div>
+                        <div style="
+                            flex:1;
+                            display:flex;
+                            flex-direction:column;
+                            justify-content:center;
+                        ">
+                            <span style="
+                                font-size:16px;
+                                font-weight:bold;
+                                line-height:1.1;
+                            ">SGA 360°</span>
+                            <span style="
+                                font-size:13px;
+                                margin-top:1mm;
+                            ">SGA Desarrollos.</span>
+                            <span style="
+                                font-size:12px;
+                                margin-top:2mm;
+                            ">Tel: 321 4221021</span>
+                            <span style="font-size:12px;">www.sga360.co</span>
+                        </div>
+                    </div>
+            `}
+        </div>
+    `;
+
+    ipcRenderer.send('print-receipt', contenidoHTML);
+}
+
+export async function printClientOrder(info,appInfo,barCode){
+    console.log(info);
+
+    function generateBarcodeSVG(value) {
+        const svgNode = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+        JsBarcode(svgNode, value, {
+            format: "CODE128",
+            width: 2,
+            height: 60,
+            displayValue: false,
+            margin: 0
+        });
+
+        return svgNode.outerHTML;
+    }
+
+    if (!window.require) {
+        alert("Esta función solo está disponible en la App de Escritorio.");
+    }
+    const qrUrl = await QRCode.toDataURL(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${info.doc_id}`)
+    let procesqrUrl;
+    if(info.instance_id != undefined){
+        procesqrUrl= await QRCode.toDataURL(`https://facturation.sga360.co/preview/Process/${appInfo.company_key}/${info.instance_id}`)
+    }
+    const internalProcessCodeBar = generateBarcodeSVG(`1026n${info.instance_id}`)
+    const { ipcRenderer } = window.require('electron');
+
+    const contenidoHTML = `
+        <div style="
+            margin:0;
+            width:72mm;
+            display:flex;
+            flex-direction:column;
+            box-sizing:border-box;
+            padding:2mm;
+            font-family:sans-serif;
+        ">
+            <div style="
+                display:flex;
+                justify-content:center;
+                margin-bottom:4mm;
+                padding:2mm;
+            ">
+                <img 
+                    src="${qrUrl}" 
+                    style="width:32mm;height:32mm;"
+                />
+            </div>
+
+            <h1 style="
+                font-size:16px;
+                text-align:center;
+                margin:0;
+            ">
+                ${appInfo.legal_name}
+            </h1>
+            <h3 style="
+                font-size:14px;
+                font-family:monospace;
+                margin:0;
+            ">
+                ${info.doc_type}#${info.ownSerial}
+            </h3>
+
+            <span style="font-size:12px;">
+                Concepto: Servicio de impresión digital
+            </span>
+
+            <span style="font-size:12px;">
+                Tercero: ${info.thirdParty_name}
+            </span>
+
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
+
+            <div style="
+                display:flex;
+                flex-direction:column;
+                padding:1mm;
+                gap:.5mm;
+            ">
+                ${info.paymentMethod.map((element)=>{
+                return(`
+                    <div style="display:flex;font-size:12px;">
+                        <span style="
+                            display:inline-block;
+                            max-width:50%;
+                            white-space:nowrap;
+                            overflow:hidden;
+                            text-overflow:ellipsis;
+                        ">
+                            ${element.name}:
+                        </span>
+                        <strong style="margin-left:auto;">
+                            ${Number(element.value).toLocaleString()}
+                        </strong>
+                    </div>
+                `)
+            }).join('')}
+            </div>
+
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
+
+            <div style="display:flex;font-size:12px;">
+                <span>TOTAL:</span>
+                <strong style="margin-left:auto;">${Number(info.total).toLocaleString()}</strong>
+            </div>
+
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
+
+            <span style="font-size:12px;">
+                Nota:  ${info.description}
+            </span>
+
+            <span style="
+                margin-top:8mm;
+                width:100%;
+                border-bottom:solid .2mm #000;
+                display:block;
+            "></span>
+
+            ${info.instance_id != undefined ? `
+                <div style="
+                    display:flex;
+                    flex-direction:column;
+                    justify-content:center;
+                    margin-bottom:4mm;
+                    padding:4mm 2mm;
+                ">
+                    <img 
+                        src="${procesqrUrl}" 
+                        style="width:32mm;height:32mm;margin:2mm auto;"
+                    />
+
+                    <h3 style="
+                        font-size:14px;
+                        font-family:monospace;
+                        text-align:center;
+                        margin-top:2mm;
+                    ">
+                        Orden de trabajo #${info.instanceOwnSerial}
                     </h3>
                 </div>
     
+            `:``}
+            ${barCode? `
+                <div style="
+                    margin:0 auto;
+                    display:flex;
+                    width:50mm;
+                ">
+                    <div style="
+                        width:20mm;
+                        height:10mm,
+                        margin:0 auto;
+                    ">
+                        ${internalProcessCodeBar}
+                    </div> 
+                </div>
+            `:`
+                <div style="
+                    width:100%;
+                    padding:4mm;
+                    box-sizing:border-box;
+                    display:flex;
+                    align-items:center;
+                    gap:4mm;
+                ">
+                    <div style="
+                            width:22mm;
+                            display:flex;
+                            borderRadius:4mm;
+                            border:solid 1mm #ddd;
+                            align-items:flex-end;
+                            justify-content:center;
+                            gap:4mm;
+                        ">
+                            <img 
+                                src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                                style="
+                                    width:100%;
+                                    height:25mm;
+                                    objectFit:cover;
+                                    display:block;"/>
+                        </div>
+                        <div style="
+                            flex:1;
+                            display:flex;
+                            flex-direction:column;
+                            justify-content:center;
+                        ">
+                            <span style="
+                                font-size:16px;
+                                font-weight:bold;
+                                line-height:1.1;
+                            ">SGA 360°</span>
+                            <span style="
+                                font-size:13px;
+                                margin-top:1mm;
+                            ">SGA Desarrollos.</span>
+                            <span style="
+                                font-size:12px;
+                                margin-top:2mm;
+                            ">Tel: 321 4221021</span>
+                            <span style="font-size:12px;">www.sga360.co</span>
+                        </div>
+                    </div>
             `}
-
         </div>
     `;
 

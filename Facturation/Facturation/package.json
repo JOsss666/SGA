@@ -21,6 +21,7 @@
     "date-fns": "^4.1.0",
     "dom-to-image-more": "^3.7.1",
     "html2canvas": "^1.4.1",
+    "jsbarcode": "^3.12.3",
     "jspdf": "^3.0.3",
     "lightweight-charts": "^4.1.1",
     "papaparse": "^5.5.3",

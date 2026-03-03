@@ -1833,7 +1833,7 @@ controller.getDocuments = (req,res)=>{
         values.push(info.company_id)
 
         if(info.allowedTypes != undefined){
-            whereClauses.push(`document_type = ANY($${values.length +1})`);
+            whereClauses.push(`document_type = ANY($${values.length + 1}::document_types[])`);
             values.push(info.allowedTypes);
         }
 
