@@ -270,7 +270,7 @@
     .Analytics2 .menuBar {
         display: flex;
         padding: 4vh 1vh !important;
-        width: 100dvw;
+        width: 90dvw;
         overflow-x: auto;
         overflow-y: hidden;
         margin: 1vh 0;
