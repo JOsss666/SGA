@@ -49,6 +49,7 @@ import { useRealtime } from '../../../utils/useRealTime';
 import { ProcessStatusAlert } from './Alerts/ProcessStatusAlert';
 import { ProcessInstanceAnalytics } from './Analytics/ProcessInstanceAnalycs';
 import { Analytics2 } from './Analytics2';
+import { QuickActions } from './QuickActions';
 
 export function UserApp(){
 
@@ -223,6 +224,7 @@ export function UserApp(){
                     <Routes>
                             <Route path='/' element={<HomeProcess/>} />
                             <Route path='/new' element={<New></New>} />
+                            <Route path='quickActions' element={<QuickActions/>} />
                             <Route path='/myBussines/' element={<MyBussines/>}/>
                             <Route path='/myBussines/costCenters' element={<CostCenters/>}/>
                             <Route path='/myBussines/Bussines' element={<Bussines/>}/>
