@@ -27,7 +27,7 @@
     font-size: clamp(3px,2.5vh,30px);
     border: hidden;
     outline: solid .1vh var(--inputsBorder);
-    border-radius: 3vh;
+    border-radius: 4vh;
     background-color: var(--inputsBg);
     color: var(--descriptionText);
 }
