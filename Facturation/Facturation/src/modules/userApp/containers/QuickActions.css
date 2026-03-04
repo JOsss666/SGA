@@ -32,6 +32,20 @@
     color: var(--descriptionText);
 }
 
+.QuickActions .searchContent form{
+    margin: 0 auto;
+    position: relative;
+}
+
+.QuickActions .searchContent form .searchIcon{
+    position: absolute;
+    top: 48%;
+    right: 3vh;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--descriptionText);
+    cursor: pointer;
+}
+
 .QuickActions .searchContent input:focus{
     outline: solid .3vh #155DFC;
     color: var(--mainText);
@@ -64,4 +78,32 @@
     object-fit: contain;
     height:60vh;
     width: auto;
+}
+
+@media (max-width:500px) {
+    .QuickActions .img2C img{
+        height: 35vh;
+    }
+
+    .QuickActions .searchContent .DescriptionSpan{
+        text-align: center;
+        max-width: 80%;
+    }
+
+    .QuickActions .img1C{
+        top: 2vh;
+        right: -6vh;
+    }
+
+    .QuickActions .img1C img{
+        object-fit: contain;
+        height:40vh;
+        width:auto;
+        transform: rotateZ(-45deg);
+    }
+
+    .QuickActions .searchContent input{
+        width: 80vw;
+    }
+
 }

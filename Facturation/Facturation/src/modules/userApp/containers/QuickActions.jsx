@@ -64,6 +64,9 @@ export function QuickActions(){
                     handleCodeInteraction();
                 }}>
                     <input ref={inRef} type="text" placeholder="Escanear o digitar codigo" autoFocus disabled={disabled}/>
+                    <i title='Buscar' className="fa-solid fa-magnifying-glass searchIcon" onClick={()=>{
+                        handleCodeInteraction();
+                    }}/>
                 </form>
             </div>
             <div className="img1C">
