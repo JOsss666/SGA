@@ -267,6 +267,11 @@
 }
 
 @media (max-width:500px) {
+
+    .Analytics2 .headSection .DescriptionSpan {
+        width: 25vw !important;
+    }
+
     .Analytics2 .menuBar {
         display: flex;
         padding: 4vh 1vh !important;
