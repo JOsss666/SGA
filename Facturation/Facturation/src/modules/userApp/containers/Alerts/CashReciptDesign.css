@@ -40,3 +40,11 @@
     flex-direction: column;
     gap: 2vh;
 }
+
+@media (max-width:500px) {
+    .CashReciptDesign{
+        padding: 2vh 10vw !important; 
+        width: 100vw !important;
+        border-radius: 2vh;
+    }
+}
