@@ -13,12 +13,13 @@ export function Login() {
     const [error, setError] = useState(null);
     const [mail, setMail] = useState('');
     const [pass, setPass] = useState('');
+    const [visiblePassword,setVisblePassword] = useState(false);
     const navigate = useNavigate();
 
     const handleRedirect = (info)=>{
         console.log(info)
-        console.log(`/SGA_management/${info.company_key}/${(info.user_key)}/`)
-        navigate(`/SGA_management/${info.company_key}/${(info.user_key)}/`)
+        console.log(`/SGA_treasury/${info.company_key}/${(info.user_key)}/`)
+        navigate(`/SGA_treasury/${info.company_key}/${(info.user_key)}/`)
     }
 
     const sendLogIn = async(event) => {
@@ -41,7 +42,7 @@ export function Login() {
         <div className="Card">
             <div className="CardTitle">
             <BoldTitle text={'Iniciar Sesión'} />
-            <h2>SGA - Administrativo</h2>
+            <h2>SGA - Treasury</h2>
             </div>
             <form className="Form" id="loginForm" autoComplete="off" onSubmit={(e) => {
                     e.preventDefault();
@@ -49,7 +50,11 @@ export function Login() {
                 }}>
                 <div className="fields">
                     <FormInput title={"Email"} placeholder={"Correo@gmail.com"} type={"email"} value={mail} action={setMail}/>
-                    <FormInput title={"Contraseña"} placeholder={"****"} type={"password"} value={pass} action={setPass}/>
+                    <FormInput title={"Contraseña"} placeholder={"****"} type={visiblePassword? 'Text':"password"} value={pass} action={setPass} children={
+                        <i className={`fa-regular fa-eye${visiblePassword? '-slash':''} setVisPass`} onClick={()=>{
+                            setVisblePassword(!visiblePassword)
+                        }}/>
+                    }/>
                 </div>
                 <FormButton text={"Iniciar Sesión"} loading={loading}/>
 
