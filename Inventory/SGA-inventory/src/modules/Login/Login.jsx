@@ -12,6 +12,7 @@ export function Login() {
     const [error, setError] = useState(null);
     const [mail, setMail] = useState('');
     const [pass, setPass] = useState('');
+    const [visiblePassword,setVisblePassword] = useState(false);
     const navigate = useNavigate();
 
     const handleRedirect = (info)=>{
@@ -48,7 +49,11 @@ export function Login() {
                 }}>
                 <div className="fields">
                     <FormInput title={"Email"} placeholder={"Correo@gmail.com"} type={"email"} value={mail} action={setMail}/>
-                    <FormInput title={"Contraseña"} placeholder={"****"} type={"password"} value={pass} action={setPass}/>
+                    <FormInput title={"Contraseña"} placeholder={"****"} type={visiblePassword? 'Text':"password"} value={pass} action={setPass} children={
+                        <i className={`fa-regular fa-eye${visiblePassword? '-slash':''} setVisPass`} onClick={()=>{
+                            setVisblePassword(!visiblePassword)
+                        }}/>
+                    }/>
                 </div>
                 <FormButton text={"Iniciar Sesión"} loading={loading}/>
 
