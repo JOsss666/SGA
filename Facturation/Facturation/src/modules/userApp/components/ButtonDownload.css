@@ -3,14 +3,18 @@
     width: fit-content;
 }
 
-.buttonDownloadDefault, .buttonDownloadLoading, .buttonDownloadSuccess {
+.ButtonDownload i{
+    margin-left: 1vh;
+}
+
+.ButtonDownload .buttonDownloadDefault, .buttonDownloadLoading, .buttonDownloadSuccess {
     width: 100%;
     color: #fff;
-    padding: 1.2vh 1.8vh;
+    padding: 1.5vh 2vh;
     border: none;
-    border-radius: .5vh;                 
+    border-radius: 1vh;                 
     font-size: clamp(2px, 2.2vh, 25px);  
-    font-weight: 500;
+    font-weight: 400;
     cursor: pointer;
     text-align: center;
     gap: 1vh;
@@ -18,15 +22,15 @@
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.buttonDownloadDefault {
+.ButtonDownload .buttonDownloadDefault {
     background-color: #000000;
 }
 
-.buttonDownloadLoading {
+.ButtonDownload .buttonDownloadLoading {
     background-color: #2563eb;
 }
 
-.buttonDownloadSuccess {
+.ButtonDownload .buttonDownloadSuccess {
     background-color: #22c55e;
 }
 
@@ -38,10 +42,10 @@
     width: 100%;
 }
 
-.downloadMenu {
+.ButtonDownload .downloadMenu {
     position: absolute;
     left: 10%;
-    top: 6vh;
+    bottom: -110%;
     margin-top: 0.5vh;
     z-index: 10;
     width: 80%;
@@ -53,7 +57,7 @@
     outline: solid .1vh var(--inputsBorder);
 }
 
-.downloadMenu .optionListFormat {
+.ButtonDownload .downloadMenu .optionListFormat {
     width: 100%;           
     border: none;
     padding: 1vh;
@@ -64,23 +68,25 @@
     background:var(--translucidMenu);
     backdrop-filter: blur(1vh);
     color: var(--mainText);
+    font-weight: 400;
+    transition: .3s;
 }
 
-.downloadMenu .optionListFormat:hover{
+.ButtonDownload .downloadMenu .optionListFormat:hover{
     background-color: var(--cardHover);
 }
 
-.downloadMenu .optionListFormat i{
-    margin-right: 1vh;
-    width: 2vh;
-}
 
-.downloadMenu .optionListFormat:nth-child(1){
+.ButtonDownload .downloadMenu .optionListFormat:nth-child(1){
     border-top-left-radius: 1vh;
     border-top-right-radius: 1vh;
 }
 
-.downloadMenu .optionListFormat:last-child{
+.ButtonDownload .downloadMenu .optionListFormat:last-child{
     border-bottom-left-radius: 1vh;
     border-bottom-right-radius: 1vh;
+}
+
+.ButtonDownload .downloadMenu .optionListFormat i{
+    margin-right: 1vh;
 }

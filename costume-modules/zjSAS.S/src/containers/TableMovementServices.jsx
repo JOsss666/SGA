@@ -8,7 +8,6 @@ import './TableMovementServices.css'
 export function TableMovmentServices({columns,info,disabled,searchValue}){
 
     const params = useParams();
-    console.log(info)
 
     const filteredInfo = useMemo(() => {
         if (!searchValue || searchValue.trim() === '') {
@@ -51,7 +50,7 @@ export function TableMovmentServices({columns,info,disabled,searchValue}){
                             window.open(`https://facturation.sga360.co/preview/Process/${params.company_key}/${element.instance_id}`,'_blank','noopener,noreferrer')
                         }}>{`${element.process_code}#${element.instance_serial}`}</span>
                         <span className='rowTable rightAl'>{element.thirdparty_name}</span>
-                        <span className='rowTable rightAl idHolder'>{0}</span>
+                        <span className='rowTable rightAl idHolder'>{(parseInt(element.units)*parseFloat(element.controlClicks))}</span>
                         <span className='rowTable rightAl idHolder'>{moneyFormat(parseInt(element.units))}</span>
                         <span className='rowTable rightAl'>{moneyFormat(parseFloat(element.unit_value))}</span>
                         <span className='rowTable rightAl'>{moneyFormat(parseFloat(element.total))}</span>
