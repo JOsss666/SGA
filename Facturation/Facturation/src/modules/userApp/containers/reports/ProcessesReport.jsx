@@ -72,6 +72,24 @@ export function ProcessesReport(){
         */
     }
 
+    const setInfoForReportDownload = ()=>{
+        let C = [];
+        info.forEach(element => {
+            C.push({
+                "Empresa":appInfo.legal_name,
+                //"Tienda":element.store_id,
+                "Proceso":element.process_name,
+                "Instancia":`${element.process_code}#${element.ownSerial}`,
+                "Tercero":element.thirdParty_name,
+                "Etapa actual":element.step_name,
+                "Avance":`${parseFloat((element.current_step_order/element.total_steps)*100)?.toFixed(2)}%`,
+                "Responsable actual":element.responsable_name,
+                "Estado":element.status
+            })
+        });
+        return(C);
+    } 
+
     const settingsReport = {
         columns: columsTr,
         company_id: appInfo.company_id,
@@ -165,7 +183,7 @@ export function ProcessesReport(){
                 {text:'Realiza un analisis de este informe',context:`Procesos - Balance - Cuentas contables - Saldo`},
                 {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Balance - Cuentas contables - Saldo`}
             ]}/>
-            <ButtonDownload />
+            <ButtonDownload info={setInfoForReportDownload(info)} title={'Informe instancias de procesos'}/>
             <FilterReports hidden={visibleSettings} columns={columsTr} filters={filters}/>
         </div>
         <div className="SpaceReport">

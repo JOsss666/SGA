@@ -6,6 +6,8 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import QRCode from 'qrcode';
 import JsBarcode from 'jsbarcode';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 export async function postInfo(route,informacion){
     console.log('Funcion post');
@@ -30,45 +32,153 @@ export async function postInfo(route,informacion){
     })
 }
 
-export function parseToXlsx(info, download, columns, name) {
-    // Crear hoja
-    let worksheet;
+export async function parseToXlsx(info, download, columns, name) {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(name || "Hoja1");
 
+    // 1. Añadir Título y Metadatos (Filas superiores)
+    worksheet.mergeCells('A1:D1');
+    const titleCell = worksheet.getCell('A1');
+    titleCell.value = (name || "Informe SGA").toUpperCase();
+    titleCell.font = { size: 16, bold: true };
+
+    worksheet.getCell('A2').value = `Fecha de generación: ${new Date().toLocaleString()}`;
+    worksheet.getCell('A3').value = `Total de registros: ${info.length}`;
+    
+    // Espacio antes de la tabla
+    const startRow = 5; 
+
+    // 2. Definir Columnas
     if (columns && Array.isArray(columns)) {
-        // Formato con columnas definidas
-        const rows = info.map(row => {
-            const obj = {};
-            columns.forEach(col => {
-                obj[col.header] = row[col.key];
-            });
-            return obj;
-        });
-        worksheet = XLSX.utils.json_to_sheet(rows);
+        worksheet.getRow(startRow).values = columns.map(col => col.header);
+        // Mapear las llaves para insertar los datos después
+        var columnKeys = columns.map(col => col.key);
     } else {
-        // Inferir columnas automáticamente
-        worksheet = XLSX.utils.json_to_sheet(info);
+        const keys = Object.keys(info[0] || {});
+        worksheet.getRow(startRow).values = keys;
+        var columnKeys = keys;
     }
 
-    // Crear libro
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, name || "Hoja1");
-
-    // Generar archivo excel
-    const wbout = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-
-    const blob = new Blob([wbout], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    // 3. Estilizar el Encabezado (Color de fondo y texto)
+    const headerRow = worksheet.getRow(startRow);
+    headerRow.eachCell((cell) => {
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '#262626' } // Azul corporativo
+        };
+        cell.font = { color: { argb: 'FFFFFF' }, bold: true };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
     });
 
+    // 4. Añadir los Datos
+    info.forEach((item) => {
+        const rowData = columnKeys.map(key => item[key]);
+        worksheet.addRow(rowData);
+    });
+
+    // 5. Ajustar ancho de columnas automáticamente
+    worksheet.columns.forEach(column => {
+        column.width = 20;
+    });
+
+    // 6. Generar el archivo
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
     if (download) {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = (name || "archivo") + ".xlsx";
-        link.click();
+        saveAs(blob, `${name || "archivo"}.xlsx`);
     } else {
         return blob;
     }
+}
+
+export async function parseCashBoxeToXlsx(data,title) {
+
+    console.log(data)
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Resumen de Cierre');
+
+    // 1. Encabezado General del Reporte
+    worksheet.mergeCells('A1:F1');
+    const mainTitle = worksheet.getCell('A1');
+    mainTitle.value = ` - ${title}`;
+    mainTitle.font = { size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
+    mainTitle.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '262626' } };
+    mainTitle.alignment = { horizontal: 'center' };
+
+    worksheet.getCell('A2').value = `Generado el: ${new Date().toLocaleString()}`;
+    
+    let currentRow = 4;
+
+    // 2. Iterar por cada Método de Pago
+    data.forEach((group) => {
+        // Título de la Sección (Método de Pago)
+        worksheet.mergeCells(`A${currentRow}:F${currentRow}`);
+        const methodCell = worksheet.getCell(`A${currentRow}`);
+        methodCell.value = group.paymentMethod_name.toUpperCase();
+        methodCell.font = { bold: true, size: 12 };
+        methodCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'E5E5E5' } };
+        
+        currentRow++;
+
+        // Encabezados de la tabla de transacciones
+        const headers = ['Instancia', 'Documento', 'Concepto', 'Tercero', 'Sub-total', 'Total','Fecha'];
+        const headerRow = worksheet.getRow(currentRow);
+        headerRow.values = headers;
+        headerRow.font = { bold: true };
+        headerRow.eachCell(cell => {
+            cell.border = { bottom: { style: 'thin' } };
+        });
+
+        currentRow++;
+
+        let subtotalMetodo = 0;
+
+        // 3. Insertar Transacciones del método
+        group.attached_trs?.forEach(trans => {
+            const row = worksheet.addRow([
+                trans.instance_serial? `${trans.process_code}#${trans.instance_serial}` : '---',
+                trans.doc_type || '---',
+                trans.concept_name || '---',
+                trans.thirdparty_name || '---',
+                trans.subTotal || '---',
+                trans.total || 0,
+                trans.created_at || '---'
+            ]);
+            
+            // Formato de moneda para la columna Total (F)
+            row.getCell(6).numFmt = '"$"#,##0';
+            subtotalMetodo += (trans.amount || 0);
+            currentRow++;
+        });
+
+        // 4. Fila de Subtotal por método
+        const totalRow = worksheet.getRow(currentRow);
+        totalRow.getCell(5).value = `Total ${group.paymentMethod_name}:`;
+        totalRow.getCell(5).font = { bold: true };
+        totalRow.getCell(6).value = group.net_balance;
+        totalRow.getCell(6).font = { bold: true };
+        totalRow.getCell(6).numFmt = '"$"#,##0';
+
+        currentRow += 2; // Espacio entre secciones
+    });
+
+    // Ajustar anchos de columna
+    worksheet.columns = [
+        { width: 15 }, // ID
+        { width: 15 }, // Tipo
+        { width: 35 }, // Descripción
+        { width: 25 }, // Cliente
+        { width: 20 }, // Fecha
+        { width: 15 }, // Total
+    ];
+
+    // 5. Descarga
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    saveAs(blob, `${name}_${new Date().getTime()}.xlsx`);
 }
 
 export  async function parseToCsv(info,download,name){

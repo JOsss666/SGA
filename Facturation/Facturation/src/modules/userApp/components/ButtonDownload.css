@@ -49,11 +49,11 @@
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
-    box-shadow: 0 0 2vh var(--inputsBorder);
     border-radius: 1vh;
+    outline: solid .1vh var(--inputsBorder);
 }
 
-.downloadMenu button {
+.downloadMenu .optionListFormat {
     width: 100%;           
     border: none;
     padding: 1vh;
@@ -61,42 +61,26 @@
     font-size: clamp(2px, 2.2vh, 25px);
     gap: 1vh;
     text-align: center;
-    background: #fff;
+    background:var(--translucidMenu);
+    backdrop-filter: blur(1vh);
+    color: var(--mainText);
 }
 
-.downloadMenu button i{
+.downloadMenu .optionListFormat:hover{
+    background-color: var(--cardHover);
+}
+
+.downloadMenu .optionListFormat i{
     margin-right: 1vh;
     width: 2vh;
 }
 
-.downloadMenu button:nth-child(1){
+.downloadMenu .optionListFormat:nth-child(1){
     border-top-left-radius: 1vh;
     border-top-right-radius: 1vh;
 }
 
-.downloadMenu button:last-child{
+.downloadMenu .optionListFormat:last-child{
     border-bottom-left-radius: 1vh;
     border-bottom-right-radius: 1vh;
 }
-
-
-.downloadMenu .xlsxFormat:hover{
-    background-color: #2D9966;
-    color: #fff;
-}
-
-.downloadMenu .csvFormat:hover{
-    background-color: #05DF72;
-    color: #fff;
-}
-
-.downloadMenu .pdfFormat:hover{
-    background-color: #E7180B;
-    color: #fff;
-}
-
-.downloadMenu .jpgFormat:hover{
-    background-color: #51A2FF;
-    color: #fff;
-}
-
