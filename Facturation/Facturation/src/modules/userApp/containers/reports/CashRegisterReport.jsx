@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { postInfo } from "../../../../utils/functions";
+import { parseToCsv, parseToXlsx, postInfo } from "../../../../utils/functions";
 import './CashRegisterReport.css'
 import { BoldTitle } from "../../components/BoldTitle";
 import { useAppInfo } from "../../../../context/context";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
 import { TagIndicator } from "../../components/TagIndicator";
+import { MoreOptions } from "../../components/MoreOptions";
 import { LoadingSpace } from "../LoadingSpace";
 import { FormInput } from "../../components/FormInput";
 import { ButtonMenu } from "../../components/ButtonMenu";
 import { useReactToPrint } from "react-to-print";
+import { parseCashBoxeToXlsx } from "../../../../utils/functions";
 
 export function CashRegisterReport({shift_id}){
 
@@ -48,7 +50,7 @@ export function CashRegisterReport({shift_id}){
     const handlePrint = useReactToPrint({
         // Aquí es donde la librería te pide el 'contentRef'
         contentRef: reportRef, 
-        documentTitle: `Informe cierre de ${cashBoxInfo.name} - ${formatDate(localISOTime)}`,
+        documentTitle: `SGA 360° Informe cierre de ${cashBoxInfo.name} - ${formatDate(localISOTime)}`,
     });
 
     useEffect(()=>{
@@ -170,13 +172,11 @@ export function CashRegisterReport({shift_id}){
                     </div>
                     {!hiddeToPrint && (
                         <div className="printButton">
-                            <ButtonMenu title={'Imprimir'} onClick={()=>{
-                                setHideToPrint(true);
-                                handlePrint();
-                                setHideToPrint(false);
-                            }}>
-                                <i className="fa-solid fa-print"/>
-                            </ButtonMenu>
+                            <MoreOptions children={<i className="fa-solid fa-print"/>} options={[
+                                {text:'.pdf',icon:<i className="fa-solid fa-file-pdf"/>,action:handlePrint},
+                                {text:'.xlsx',icon:<i className="fa-solid fa-file-excel"/>,action:()=>parseCashBoxeToXlsx(reportInfo,`SGA 360° Informe cierre de ${cashBoxInfo.name} - ${formatDate(localISOTime)}`)},
+                                {text:'.csv',icon:<i className="fa-solid fa-file-csv"/>,action:parseToCsv}
+                            ]}/>
                             <ButtonMenu title={'Descargar'}>
                                 <i className="fa-solid fa-file-arrow-down"/>
                             </ButtonMenu>

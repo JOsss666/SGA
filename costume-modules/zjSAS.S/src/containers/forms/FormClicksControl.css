@@ -21,3 +21,9 @@
 .FormClicksControl .LoadingSpace{
     height: 80dvh;
 }
+
+@media (max-width:500px) {
+    .FormClicksControl{
+        width: 100dvw;
+    }
+}

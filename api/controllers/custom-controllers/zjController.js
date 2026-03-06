@@ -193,7 +193,8 @@ zjController.getServiceMovements = (req,res)=>{
                 "AssetManagement".assets.img AS machine_img,
                 "Ecosystem".thirdparties.names AS thirdParty_name,
                 "Process".process_instance."ownSerial" AS instance_serial,
-                "Process".processes.code AS process_code
+                "Process".processes.code AS process_code,
+                "Custom"."z&j_clicksEquivalence".clicks AS "controlClicks"
             FROM
                 "Inventory".services_movement
             LEFT JOIN
@@ -220,6 +221,10 @@ zjController.getServiceMovements = (req,res)=>{
                 "Process".processes
             ON
                 "Process".process_instance.process_id = "Process".processes.id
+            LEFT JOIN
+                "Custom"."z&j_clicksEquivalence"
+            ON
+                "Inventory".services_movement.service_id = "Custom"."z&j_clicksEquivalence".service_id
             ${whereQuery}
             ORDER BY "Inventory".services_movement.created_at DESC ;
         `;
