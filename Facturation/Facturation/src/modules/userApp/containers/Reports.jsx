@@ -117,9 +117,11 @@ export function Reports(){
                             <CardReport type={'processes'} title={'Informe de procesos'} description={'Visualiza los procesos de tu empresa'} onClick={()=>{
                                 handleNavigate('Processes')
                             }}/>
-                            <CardReport type={'processes'} title={'Eficiencia usuarios'} description={'Visualiza la eficiencia de los usuarios de tu empresa'} onClick={()=>{
-                                handleNavigate('Eficiency')
-                            }}/>
+                            {false && (
+                                <CardReport type={'processes'} title={'Eficiencia usuarios'} description={'Visualiza la eficiencia de los usuarios de tu empresa'} onClick={()=>{
+                                    handleNavigate('Eficiency')
+                                }}/>
+                            )}
                             <CardReport type={'contable'} title={'Informe de cartera (Alpha)'} description={'Versión de prueba Alpha V 0.1'} onClick={()=>{
                                 handleNavigate('BriefCases')
                             }}/>

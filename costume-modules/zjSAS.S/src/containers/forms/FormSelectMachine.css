@@ -26,7 +26,6 @@
     flex-direction: column;
     gap: 2vh;
     margin-top: 2vh;
-    max-height: 70vh;
     min-height: 25vh;
     
 }
@@ -75,4 +74,10 @@
 
 .FormSelectMachine .alertComplete i{
     margin-right: 1vh;
+}
+
+@media (max-width:500px) {
+    .FormSelectMachine{
+        width: 100dvw;
+    }
 }
