@@ -1,0 +1,61 @@
+
+
+.HomePage{
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+    background-color: #fff;
+}
+
+.HomePage .mainSectionHomePage{
+    height: 90dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+.HomePage .mainSectionHomePage .saluteMessageContainer{
+    margin: auto;
+    margin-bottom: 2vh;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}
+
+.HomePage .mainSectionHomePage .saluteMessageContainer h4{
+    font-size: clamp(4px,4vh,40px);
+    font-weight: 500;
+    color: #1D1D1F;
+}
+
+.HomePage .mainSectionHomePage .saluteMessageContainer h2{
+    font-size: clamp(7px,10vh,100px);
+    font-weight: 600;
+    margin-top: .5vh;
+    color: #1D1D1F;
+}
+
+.HomePage .mainSectionHomePage .saluteMessageContainer span{
+    font-size: clamp(3px,2.5vh,25px);
+    font-weight: 400;
+    margin-top: 2vh;
+    color: #1D1D1F;
+}
+
+.HomePage .mainSectionHomePage #mainHomePage{
+    margin: auto;
+    margin-bottom: 0vh;
+    bottom: 0;
+    width: 55vw;
+    object-fit: contain;
+    height: 65vh;
+    z-index: 10;
+}
+
+
+.HomePage .mainSectionHomePage .BlueRoundButton{
+    position: absolute;
+    left: 44%;
+    bottom: 8%;
+    z-index: 10;
+}

@@ -1,0 +1,48 @@
+
+.LandingPage{
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    width: 100dvw;
+}
+
+.LandingPage .headLandingPage{
+    padding: .5vh 5vw;
+    display: flex;
+    width: 100dvw;
+    position: fixed;
+    background-color: #FFFFFF90;
+    backdrop-filter: blur(.3vh);
+    z-index: 1000;
+}
+
+.LandingPage .headLandingPage .optionsHeadMenu{
+    display: flex;
+    margin: auto 0;
+    margin-left: auto;
+    gap: 1vw;
+    height: 6vh;
+}
+
+.LandingPage .headLandingPage .HeadMenuSection{
+    margin: auto 1vw;
+}
+
+.LandingPage .headLandingPage .searchMainPage{
+    margin: auto 1vw;
+    cursor: pointer;
+    font-size: clamp(2px,2.5vh,25px);
+}
+
+.LandingPage .mainSpaceLandingPage {
+    padding: 0 5vw;
+    padding-top: 10vh; /* Espacio para que el header fixed no tape el contenido */
+    display: flex;
+    flex-direction: column;
+    width: 100dvw;
+    height: 100dvh;
+    overflow-y: auto;
+    /* Aseguramos que el contenido tenga un z-index menor si es necesario */
+    position: relative;
+    z-index: 1;
+}

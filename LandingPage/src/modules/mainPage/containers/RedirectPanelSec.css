@@ -1,0 +1,45 @@
+
+
+.RedirectPanelSec{
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+    padding: 2vh 0;
+    padding-bottom: 4vh;
+}
+
+.RedirectPanelSec h5{
+    font-size: clamp(2px,1.6vh,20px);
+    font-weight: 400;
+    color: #4B4B4B;
+}
+
+.RedirectPanelSec .redirectGrid{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.RedirectPanelSec .redirectElement .main{
+    font-size: clamp(4px,2.8vh,40px);
+    font-weight: 400;
+    cursor: pointer;
+    transition: .3s ease all;
+    width: fit-content;
+}
+
+.RedirectPanelSec .redirectElement .main:hover{
+    color: #0073EB;
+}
+
+.RedirectPanelSec .redirectElement .sub{
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 400;
+    transition: .3s ease all;
+    cursor: pointer;
+    width: fit-content;
+}
+
+.RedirectPanelSec .redirectElement .sub:hover{
+    color: #0073EB;
+}

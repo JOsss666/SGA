@@ -1,0 +1,22 @@
+
+.SgaCard{
+    display: flex;
+    padding: 1vh;
+    width: fit-content;
+    border-radius: 1vh;
+    cursor: pointer;
+}
+
+.SgaCard img{
+    width: 4vh;
+    height: 4vh;
+    object-fit: cover;
+}
+
+.SgaCard h1{
+    font-size: clamp(2.2px, 2.2vh, 22px);
+    margin: auto 0;
+    margin-left: 1vh;
+    color: #1D1D1D;
+    font-weight: 600;
+}
