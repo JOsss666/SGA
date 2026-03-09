@@ -86,8 +86,7 @@ zjController.getHistorialClicksControl = (req,res)=>{
                 "Ecosystem".users.user_name AS responsable,
                 "AssetManagement".assets.name AS asset_name,
                 "AssetManagement".assets.model AS asset_model,
-                "AssetManagement".assets.img AS asset_img,
-                "Custom"."z&j_required_asset_control".required AS "clickReuired"
+                "AssetManagement".assets.img AS asset_img
 	        FROM 
                 "Custom"."z&j_clickControl" 
             LEFT JOIN
@@ -98,10 +97,6 @@ zjController.getHistorialClicksControl = (req,res)=>{
                 "AssetManagement".assets
             ON
                 "Custom"."z&j_clickControl".asset_id = "AssetManagement".assets.id
-            LEFT JOIN 
-                "Custom"."z&j_required_asset_control"
-            ON
-                "AssetManagement".assets.id = "Custom"."z&j_required_asset_control".asset_id
             ${whereQuery}
             ORDER BY created_at DESC;
         `;

@@ -45,11 +45,15 @@ export function New(){
 
 
     let verifyClicksControlZ = async () => {
-        const hasCompletedClicks = await verifiClicksControl(); 
-        if (!hasCompletedClicks) {
-            setMessageDisabled('Completar cliks diarios para continuar');
+        const hasCompletedClicks = await verifiClicksControl();
+        console.log(hasCompletedClicks)
+        if (!hasCompletedClicks[0]) {
+            let m = hasCompletedClicks[1].join(', ');
+            m += '.'
+            setMessageDisabled(`Completar cliks diarios para ${hasCompletedClicks[1].length >= 1 ?  m:"continuar"}`);
+            
         }
-        setDisabled(!hasCompletedClicks);
+        setDisabled(!hasCompletedClicks[0]);
     }
 
     const options = [
@@ -115,7 +119,7 @@ export function New(){
                     <NoResults title={messgeDisabled} img={'https://uxwing.com/wp-content/themes/uxwing/download/signs-and-symbols/stop-blocked-icon.png'}/>
                     {userConfig.access != undefined && (userConfig.access.services.personalized['custom-modules'])["z&j_clicksControl"].access && (
                         <span className="createOption" onClick={()=>{
-                            popInAlert(<FormClicksControl appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} popOutAlert={popOutAlert} />)
+                            popInAlert(<FormClicksControl appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} popOutAlert={popOutAlert} reloadFun={verifyClicksControlZ} />)
                         }}>
                             <i className="fa-solid fa-arrow-pointer" />
                             Registrar clicks

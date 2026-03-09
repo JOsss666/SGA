@@ -132,15 +132,17 @@ export async function verifiClicksControl(){
     let res = await postInfo('/zj852/getlastClickControl',{});
     if(res[0]){
         let v = true;
+        let C = []
         res[1].forEach(element => {
             console.log(element)
             console.log(isToday(element.created_at))
             if(!isToday(element.created_at) && element.clickReuired){
                 v = false
+                C.push(element.asset_name)
             }
         });
-        return(v);
+        return([v,C]);
     }else{
-        return(false)
+        return([false,[]])
     }
 }
