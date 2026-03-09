@@ -46,11 +46,15 @@ function App() {
                     </>} />
                     <Route path='/preview/Document/:company_key/:doc_id' element={
                       <AppInfoProvider>
-                        <PreviewDocument/>
+                        <AlertProvider>
+                          <PreviewDocument/>
+                        </AlertProvider>
                     </AppInfoProvider>}/>
                     <Route path='/preview/Process/:company_key/:instance_id' element={
                       <AppInfoProvider>
-                        <PreviewProcess/>
+                        <AlertProvider>
+                          <PreviewProcess/>
+                        </AlertProvider>
                     </AppInfoProvider>}/>
                 </Routes>
             </Router>
