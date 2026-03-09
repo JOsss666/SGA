@@ -4,8 +4,6 @@ import { moneyFormat } from '../../utils/functions'
 
 export function TableClicks({columns,info,disabled}){
 
-    console.log(info)
-
     return(
         <div className="TableClicks">
             <div className="headTable">
@@ -22,7 +20,7 @@ export function TableClicks({columns,info,disabled}){
                         <span className='rowTable'>{moneyFormat(parseInt(element.initialClicks))}</span>
                         <span className='rowTable'>{element.responsable}</span>
                         <span className='rowTable'>{element.description}</span>
-                        <span className='rowTable'>{(element.created_at).substring(0,16)}</span>
+                        <span className='rowTable'>{element.created_at ? (element?.created_at)?.substring(0,16):'---'}</span>
                     </div>
                 ))}
             </div>

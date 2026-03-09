@@ -35,3 +35,52 @@
 .New .gridOptions span:hover{
     color: #007AFF;
 }
+
+.New .NoResults{
+    height: 65vh;
+    width: 100%;
+}
+
+.New .createOption{
+    display: flex;
+    width: fit-content;
+    margin: 0 auto;
+    color: #fff;
+    cursor: pointer;
+    font-size: clamp(2.2px,2.2vh,22px);
+    transition: .3s ease all;
+    background-color: #2B7FFF;
+    padding: 1.5vh 2vw;
+    border-radius: 4vh;
+}
+
+.New .createOption i{
+    margin: auto 0;
+    margin-right: 1vh;
+}
+
+.New .createOption:hover{
+    transform: scale(1.1);
+}
+
+
+@media (max-width:500px) {
+    .New .NoResults{
+        height: 40vh;
+        width: 80%;
+        margin: 1vh auto;
+    }
+
+    .New .NoResults{
+        text-align: center;
+    }
+
+    .New .createOption{
+        border-radius: 3vh;
+        padding: 1.5vh 3vh;
+    }
+
+    .New .createOption:hover{
+        transform: scale(.90);
+    }
+}

@@ -115,3 +115,32 @@ export const uploadFiles = async (files,info) => {
     }
 };
 
+export const isToday = (dateToCompare) => {
+    if (!dateToCompare) return false;
+
+    const date = new Date(dateToCompare);
+    const today = new Date();
+
+    return (
+        date.getDate() === today.getDate() &&
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear()
+    );
+};
+
+export async function verifiClicksControl(){
+    let res = await postInfo('/zj852/getlastClickControl',{});
+    if(res[0]){
+        let v = true;
+        res[1].forEach(element => {
+            console.log(element)
+            console.log(isToday(element.created_at))
+            if(!isToday(element.created_at) && element.clickReuired){
+                v = false
+            }
+        });
+        return(v);
+    }else{
+        return(false)
+    }
+}
