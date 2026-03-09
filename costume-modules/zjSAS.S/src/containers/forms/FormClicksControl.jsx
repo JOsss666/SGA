@@ -9,7 +9,7 @@ import {UserCard} from '../../components/UserCard'
 import {LoadingSpace} from '../LoadingSpace'
 import './FormClicksControl.css'
 
-export function FormClicksControl({appInfo,userInfo,userConfig,action,popOutAlert}){
+export function FormClicksControl({appInfo,userInfo,userConfig,action,popOutAlert,reloadFun}){
 
     // control
     const [disabled,setDisabled] = useState(false);
@@ -81,6 +81,7 @@ export function FormClicksControl({appInfo,userInfo,userConfig,action,popOutAler
         setLoading(false);
         setDisabled(false);   
         popOutAlert?.();
+        reloadFun?.();
     }
 
     useEffect(()=>{

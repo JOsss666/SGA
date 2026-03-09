@@ -51,7 +51,7 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
      const getClicksHistoric = async()=>{
         setDisabled(true);
         setLoading(true);
-        let res = await postInfo('/zj852/getlastClickControl',settingsReport);
+        let res = await postInfo('/zj852/getHistorialClicksControl',settingsReport);
         console.log(res);
         if(res[0]){
             setInfo(res[1])

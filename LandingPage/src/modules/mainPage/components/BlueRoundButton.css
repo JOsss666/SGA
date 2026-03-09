@@ -1,0 +1,13 @@
+
+
+.BlueRoundButton{
+    padding: 1.5vh 3vh;
+    border-radius: 3vh;
+    width: fit-content;
+    border: hidden;
+    cursor: pointer;
+    background-color: #0073EB;
+    color: #fff;
+    font-size: clamp(3px,2.5vh,25px);
+    font-weight: 400;
+}

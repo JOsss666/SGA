@@ -253,6 +253,8 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     
     router.post('/zj852/getlastClickControl',zjController.getlastClickControl);
 
+    router.post('/zj852/getHistorialClicksControl',zjController.getHistorialClicksControl);
+
     router.post('/zj852/openClickControl',zjController.openClickControl);
 
     router.post('/zj852/registerServiceMachine',zjController.registerServiceMachine);

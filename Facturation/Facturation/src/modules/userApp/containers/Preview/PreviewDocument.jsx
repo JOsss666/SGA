@@ -2,17 +2,20 @@ import { useEffect,useState } from "react";
 import { BoldTitle } from "../../components/BoldTitle";
 import './PreviewDocument.css'
 import { postInfo } from "../../../../utils/functions";
-import { useAppInfo } from "../../../../context/context";
+import { useAlert, useAppInfo } from "../../../../context/context";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
 import { UserCard } from "../../components/UserCard";
 import { MoreOptions } from "../../components/MoreOptions";
 import { useParams } from "react-router-dom";
 import { LoadingAppDataPage } from "../LoadingAppDataPage";
+import { AlertsHolder } from "../AlertsHolder";
+import { PreviewFile } from "./PreviewFile";
 
 export function PreviewDocument({doc_id}){
 
     // Requirements
     const {appInfo} = useAppInfo();
+    const {popInAlert} = useAlert();
     const [docInfo,setDocInfo] = useState({})
     const [attachedServices,setAttacedServices] = useState([]);
     const [attachedFiles,setAttachedFiles] = useState([]);
@@ -262,7 +265,9 @@ export function PreviewDocument({doc_id}){
                         <h6>Archivos adjuntos</h6>
                         <div className="attachedDocumentsGrid">
                             {attachedFiles.map((element,index)=>(
-                                <div className="attDocCard" key={index}>
+                                <div className="attDocCard" key={index} onClick={()=>{
+                                    popInAlert(<PreviewFile id={element.id}/>)
+                                }}>
                                     {iconDocsContainer[`${element.type}`]}
                                     <strong className="fileName">{element.name}</strong>
                                     <span>{element.type}</span>
@@ -291,6 +296,7 @@ export function PreviewDocument({doc_id}){
             {loading && (
                 <LoadingAppDataPage/>
             )}
+            <AlertsHolder/>
         </div>
     )
 }

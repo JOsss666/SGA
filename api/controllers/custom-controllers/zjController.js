@@ -23,6 +23,64 @@ zjController.getlastClickControl = (req,res)=>{
         : "";
 
         let sentence = `
+            SELECT DISTINCT ON ("AssetManagement".assets.id)
+                "Custom"."z&j_clickControl".*,
+                "Ecosystem".users.user_name AS responsable,
+                "AssetManagement".assets.name AS asset_name,
+                "AssetManagement".assets.model AS asset_model,
+                "AssetManagement".assets.img AS asset_img,
+                "Custom"."z&j_required_asset_control".required AS "clickReuired"
+            FROM 
+                "AssetManagement".assets -- Iniciamos desde assets para asegurar que barremos todos los activos
+            LEFT JOIN 
+                "Custom"."z&j_clickControl" 
+            ON
+                "AssetManagement".assets.id = "Custom"."z&j_clickControl".asset_id
+            LEFT JOIN
+                "Ecosystem".users
+            ON 
+                "Custom"."z&j_clickControl".updated_by = "Ecosystem".users.user_id
+            LEFT JOIN 
+                "Custom"."z&j_required_asset_control"
+            ON
+                "AssetManagement".assets.id = "Custom"."z&j_required_asset_control".asset_id
+            ${whereQuery}
+            ORDER BY 
+                "AssetManagement".assets.id, 
+                "Custom"."z&j_clickControl".created_at DESC; -- O la columna de fecha que utilices (updated_at)
+        `;
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+
+zjController.getHistorialClicksControl = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        console.log(data);
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        if(info.asset_id != undefined){
+            whereClauses.push(`"Custom"."z&j_clickControl".asset_id = $${values.length +1}`);
+            values.push(info.asset_id);
+        }
+
+        const whereQuery = whereClauses.length > 0
+        ? `WHERE ${whereClauses.join(" AND ")}`
+        : "";
+
+        let sentence = `
             SELECT 
                 "Custom"."z&j_clickControl" .*,
                 "Ecosystem".users.user_name AS responsable,

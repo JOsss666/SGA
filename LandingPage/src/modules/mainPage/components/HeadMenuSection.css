@@ -1,0 +1,7 @@
+
+.HeadMenuSection{
+    font-weight: 400;
+    font-size: clamp(2px,1.8vh,20px);
+    cursor: pointer;
+    color: #1D1D1D;
+}
