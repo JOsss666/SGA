@@ -18,19 +18,19 @@ function App() {
                           <Login/>
                       </AppInfoProvider>
                     }/>
-                    <Route path="/SGA_management/login" element={
+                    <Route path="/SGA_treasury/login" element={
                       <AppInfoProvider>
                         <Login/>
                       </AppInfoProvider>
                     }/>
-                    <Route path="/SGA_management/SignUp" element={
+                    <Route path="/SGA_treasury/SignUp" element={
                       <AppInfoProvider>
                         <SignUp/>
                       </AppInfoProvider>
                     }/>
-                    <Route path="/aboutUs" element={<><span>SGA_procesos - Sobre Nosotros</span></>}/>
+                    <Route path="/aboutUs" element={<><span>SGA_treasury - Sobre Nosotros</span></>}/>
                     <Route path='/404' element={<span>404 Not found</span>}/>
-                    <Route path='/SGA_management/:company_key/:user_key/*' element={<>
+                    <Route path='/SGA_treasury/:company_key/:user_key/*' element={<>
                       <AppInfoProvider>
                       <AlertProvider>
                             <PreviewProvider>
