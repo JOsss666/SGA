@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { parseToCsv, parseToXlsx, postInfo } from "../../../../utils/functions";
 import './CashRegisterReport.css'
 import { BoldTitle } from "../../components/BoldTitle";
-import { useAppInfo } from "../../../../context/context";
+import { useAlert, useAppInfo } from "../../../../context/context";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
 import { TagIndicator } from "../../components/TagIndicator";
 import { MoreOptions } from "../../components/MoreOptions";
@@ -11,12 +11,16 @@ import { FormInput } from "../../components/FormInput";
 import { ButtonMenu } from "../../components/ButtonMenu";
 import { useReactToPrint } from "react-to-print";
 import { parseCashBoxeToXlsx } from "../../../../utils/functions";
+import { useParams } from "react-router-dom";
+import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
 
 export function CashRegisterReport({shift_id}){
 
     const containerReport = useRef();
 
     // Requirements
+    const params = useParams();
+    const {popInAlert} = useAlert();
     const {appInfo,userInfo,userConfig} = useAppInfo();
     const [reportInfo,setReportInfo] = useState([]);
     const [cashBoxInfo,setCashBoxInfo] = useState({});
@@ -237,9 +241,15 @@ export function CashRegisterReport({shift_id}){
                                     {element.attached_trs != undefined && element.attached_trs.map((element,index)=>(
                                         <div  className={`transactionLine ${element.nature == 'CR'? 'negativeTrans':''}`} key={index}>
                                             {element.process_code != undefined && (
-                                                <strong>{`${element.process_code}#${element.instance_serial}`}</strong>
+                                                <strong className="idHolder" onClick={()=>{
+                                                    popInAlert(<ProcessStatusAlert instance_id={element.instance_id}/>)
+                                                }}>{`${element.process_code}#${element.instance_serial}`}</strong>
                                             )}
-                                            <strong>{element.doc_type}</strong>
+                                            <strong className="idHolder" onClick={()=>{
+                                                window.open(`https://facturation.sga360.co/preview/Document/${params.company_key}/${element.doc_id}`,'_blank','noopener,noreferrer')
+                                            }}>
+                                                {`${element.doc_type}#${element.ownSerial}`}
+                                            </strong>
                                             <span>{element.concept_name}</span>
                                             <strong>{element.thirdparty_name}</strong>
                                             <span>Sub-total: $ {element.nature == 'CR'? '-':''}{formatCurrency(element.subTotal)}</span>
