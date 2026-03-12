@@ -177,6 +177,15 @@
     font-weight: 500;
 }
 
+.CashRegisterReport .contentReport .cardTotalPaymentType .attachedTrsContainer .transactionLine .idHolder{
+    cursor: pointer;
+    transition: .3s;
+}
+
+.CashRegisterReport .contentReport .cardTotalPaymentType .attachedTrsContainer .transactionLine .idHolder:hover{
+    color: #155DFC;
+}
+
 .CashRegisterReport .LoadingSpace{
     height: 100dvh;
     width: 100%;
