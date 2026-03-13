@@ -80,6 +80,9 @@ export function ServiceMovements({appInfo,userInfo,userConfig,popInAlert,popOutA
         let ttlClicks = 0;
         let ttlValue = 0;
         info.forEach(element => {
+            if(element.controlClicks != undefined){
+                ttlClicks += parseFloat(element.controlClicks * element.units)
+            }
             ttlValue += parseFloat(element.total)
         });
         let defTTVal = ttlValue?.toFixed(2)
@@ -117,11 +120,11 @@ export function ServiceMovements({appInfo,userInfo,userConfig,popInAlert,popOutA
             <div className="totalsIndicator">
                 <div className="ttlIndicator">
                     <span>Servicios</span>
-                    <strong>{totalServices}</strong>
+                    <strong>{moneyFormat(totalServices)}</strong>
                 </div>
                 <div className="ttlIndicator">
                     <span>Clicks</span>
-                    <strong>{totalClicks}</strong>
+                    <strong>{moneyFormat(totalClicks)}</strong>
                 </div>
                 <div className="ttlIndicator">
                     <span>Valor total</span>
@@ -131,9 +134,9 @@ export function ServiceMovements({appInfo,userInfo,userConfig,popInAlert,popOutA
             <div className="settingsReport">
                 <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
                 <div className="rangeInput">
-                <FormInput type={"datetime-local"} title={"Fecha Inicial"} action={setStart_date} />
+                <FormInput type={"date"} title={"Fecha Inicial"} action={setStart_date} />
                 <span>-</span>
-                <FormInput type={"datetime-local"} title={"Fecha Final"} action={setEnd_date} />
+                <FormInput type={"date"} title={"Fecha Final"} action={setEnd_date} />
                 </div>
                 <SelectOptions
                 options={[

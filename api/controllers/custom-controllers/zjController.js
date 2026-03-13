@@ -231,7 +231,7 @@ zjController.getServiceMovements = (req,res)=>{
             if (info.end_date) {
                 values.push(info.end_date);
                 whereClauses.push(
-                    `"Inventory".services_movement.created_at <= $${values.length}`
+                    `"Inventory".services_movement.created_at < $${values.length}::date + INTERVAL '1 day'`
                 );
             }
 

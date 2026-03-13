@@ -13,6 +13,7 @@ import facturationController from '../controllers/facturationController.js';
     import zjController from '../controllers/custom-controllers/zjController.js';
 import assetsController from '../controllers/assetsController.js';
 import AnalyticController from '../controllers/AnalyticsController.js';
+import electronicFacturationController from '../controllers/electronicFacturationController.js';
 
 const router = express.Router();
 
@@ -261,7 +262,13 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
 
     router.post('/zj852/getServiceMovements',zjController.getServiceMovements);
 
+
+
+// EXTERNAL SERVICES
+
+    // ELECTRONIC FACTURATION
     
+    router.post('/electronicFacturation/createInvoice', electronicFacturationController.createInvoice)
 
 export default router;
 
