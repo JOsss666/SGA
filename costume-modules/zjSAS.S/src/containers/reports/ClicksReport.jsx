@@ -14,7 +14,7 @@ import { LoadingSpace } from "../LoadingSpace";
 import { TableClicks } from "../TableClicks";
 import './ClicksReport.css'
 
-export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert, useAiAssistant}){
+export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert,useAlert ,useAiAssistant}){
 
     // requirements
     const [info,setInfo] = useState([]);
@@ -60,11 +60,22 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
         setDisabled(false)
      }
 
+    const getAttachedDodcs = async(attArray)=>{
+        let res = await postInfo('/getAttachedFiles',{
+            company_id:appInfo.company_id,
+            allowedDocs:attArray
+        })
+        console.log(res);
+        if(res[0]){
+            setAttachedFiles(res[1]);
+        }
+    }
 
      // Effects listener
      useEffect(()=>{
         getClicksHistoric();
      },[])
+
 
     return(
         <div className="ClicksReport ReportDocument">
@@ -102,7 +113,7 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
                 <FilterReports hidden={visibleSettings} columns={columsReport} filters={filters}/>
             </div>
             {!loading && (
-                <TableClicks columns={columsReport} info={info} disabled={disabled}/>
+                <TableClicks columns={columsReport} info={info} disabled={disabled} useAlert={useAlert} appInfo={appInfo}/>
             )}
             {loading && (
                 <LoadingSpace title={'Cargando registro de clicks'} description={'Esto no debe tardar mucho'}/>
