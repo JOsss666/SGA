@@ -45,6 +45,12 @@
     padding: 1vh 2vh;
     border-bottom: dashed .1vh var(--inputsBorder);
     display: flex;
+    cursor: pointer;
+    transition: .3s ease all;
+}
+
+.TableClicks .bodyTable .rowClicks:hover{
+    background-color: var(--cardHover);
 }
 
 .TableClicks .bodyTable .rowClicks .rowTable{

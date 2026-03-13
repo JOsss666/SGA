@@ -462,6 +462,64 @@ export const arrayToTree = (flatArray, rootIdValue = null) => {
     return tree;
 };
 
+export async function newElectronicInvoide(info){
+    const invoiceToSubmit = {
+        // 1. Número de factura (debe ser un string)
+        invoiceNumber: "98001", 
+
+        // 2. Datos del Cliente (Customer)
+        customerData: {
+            id: "123456789", // Opcional si usas party_identification
+            party_identification: "900123123", 
+            party_identification_type: "NIT", // NIT, CEDULA_CIUDADANIA, CEDULA_EXTRANJERIA, etc.
+            party_type: "PERSONA_JURIDICA", // PERSONA_NATURAL o PERSONA_JURIDICA
+            company_name: "Nombre de la Empresa S.A.S", // Requerido si es JURIDICA
+            first_name: "Juan", // Requerido si es NATURAL
+            family_name: "Perez", // Requerido si es NATURAL
+            email: "cliente@correo.com",
+            phone: "3001234567",
+            address_line: "Calle 123 # 45-67",
+            country_code: "CO",
+            department: "ANTIOQUIA", // O código "05"
+            city: "MEDELLIN", // O código "05001"
+            tax_level_code: "SIMPLIFICADO", // REGIMEN_ORDINARIO_TARIF_COMUN, SIMPLIFICADO, etc.
+            regimen: "AUTORRETENEDOR" // Opcional según el caso
+        },
+
+        // 3. Array de Productos o Servicios (Items)
+        items: [
+            {
+                sku: "SERV-001", // Código interno
+                description: "Consultoría Técnica SGA",
+                quantity: 2,
+                price: 500000, // Precio UNITARIO antes de impuestos
+                original_price: 500000, 
+                measuring_unit: "94", // "94" para unidades/servicios, "CEN" para centenas, etc.
+                
+                // Impuestos por cada Item
+                taxes: [
+                    {
+                        "tax-category": "IVA",
+                        "tax-rate": 19, // Porcentaje (19%)
+                        "tax-base": 1000000, // Base imponible (precio * cantidad)
+                        "tax-amount": 190000 // Valor del impuesto
+                    }
+                ],
+                
+                // Retenciones por cada Item (Si aplica)
+                retentions: [
+                    {
+                        "tax-category": "RET_IVA",
+                        "tax-rate": 15,
+                        "base-amount": 190000,
+                        "amount": 28500
+                    }
+                ]
+            }
+        ]
+    };
+}
+
 export async function printCashRecipt(info,appInfo,barCode){
     console.log(info);
 

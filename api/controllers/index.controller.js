@@ -1213,6 +1213,10 @@ controller.getConcepts = (req,res)=>{
             values.push(info.allowedConcepts);
         }
 
+        if(info.status != null){
+            whereClauses.push(`"Ecosystem".concepts.status = ${info.status}`);
+        }
+
         const whereQuery = whereClauses.length > 0
                 ? `WHERE ${whereClauses.join(" AND ")}`
                 : "";

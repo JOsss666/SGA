@@ -18,7 +18,7 @@ import { ReportAccountTransactions } from './reports/ReportAccountTransactions';
 import { ProcessesReport } from './reports/ProcessesReport';
 import { EficiencyReport } from './reports/EficiencyReport';
 import { BriefCaseReport } from './reports/BriefCaseReport';
-import { useAppInfo,useAiAssistant } from '../../../context/context';
+import { useAppInfo,useAiAssistant, useAlert } from '../../../context/context';
 import { CashBoxesCloseReport } from './reports/CashBoxesCloseReport';
 import { ReportHistorialInstance } from './reports/ReportHIstorialInstance';
 
@@ -163,7 +163,7 @@ export function Reports(){
                 {userConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
                     <Route path='/zjClicksReport' element={
                     <Suspense fallback={<div>Cargando componente pesado...</div>}>
-                        <CustomZJClicksReport appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} useAiAssistant={useAiAssistant}/>
+                        <CustomZJClicksReport useAlert={useAlert} appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} useAiAssistant={useAiAssistant}/>
                     </Suspense>
                     }/>
                 )}

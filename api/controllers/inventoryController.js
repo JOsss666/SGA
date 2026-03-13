@@ -76,6 +76,8 @@ inventoryController.getProducts = (req, res) => {
             values.push(info.type)
         }
 
+        whereClauses.push(`ps.status = 'active'`);
+
         const whereQuery = whereClauses.length > 0
         ? `WHERE ${whereClauses.join(" AND ")}`
         : "";
