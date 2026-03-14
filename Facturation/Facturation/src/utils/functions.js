@@ -831,40 +831,27 @@ export async function printClientOrder(info,appInfo,barCode){
                 display:block;
             "></span>
 
-            <div style="
-                display:flex;
-                flex-direction:column;
-                padding:1mm;
-                gap:.5mm;
-            ">
-                ${info.paymentMethod.map((element)=>{
-                return(`
-                    <div style="display:flex;font-size:12px;">
-                        <span style="
-                            display:inline-block;
-                            max-width:50%;
-                            white-space:nowrap;
-                            overflow:hidden;
-                            text-overflow:ellipsis;
-                        ">
-                            ${element.name}:
-                        </span>
-                        <strong style="margin-left:auto;">
-                            ${Number(element.value).toLocaleString()}
-                        </strong>
-                    </div>
-                `)
-            }).join('')}
+            <div style="display: flex; border: solid 0.5mm #000; padding: 1mm; font-size: 10px; font-weight: bold; margin-bottom: 3mm;">
+                <span style="width: 50%;">Item</span>
+                <span style="width: 20%; text-align: center;">Unidades</span>
+                <span style="width: 30%; text-align: right;">Valor</span>
             </div>
 
-            <span style="
-                margin:2mm 0;
-                width:100%;
-                border-bottom:dashed .5mm #000;
-                display:block;
-            "></span>
+            <div style="display: flex; flex-direction: column; padding: 1mm;">
+                ${info.services.map((element) => {
+                    return `
+                        <div style="display: flex; font-size: 10px; border-bottom: dashed 0.3mm #000; padding-top: 1mm; padding-bottom: 2mm; margin-bottom: 1mm; align-items: center;">
+                            <span style="width: 50%; line-height: 1.2;">${element.name}</span>
+                            <span style="width: 20%; text-align: center;">${element.units}</span>
+                            <strong style="width: 30%; text-align: right;">
+                                ${moneyFormat(parseFloat(element.value))}
+                            </strong>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
 
-            <div style="display:flex;font-size:12px;">
+            <div style="display:flex;fontSize:10px;marginTop:2mm;">
                 <span>TOTAL:</span>
                 <strong style="margin-left:auto;">${Number(info.total).toLocaleString()}</strong>
             </div>
@@ -907,6 +894,14 @@ export async function printClientOrder(info,appInfo,barCode){
                         margin-top:2mm;
                     ">
                         Orden de trabajo #${info.instanceOwnSerial}
+                    </h3>
+                    <h3 style="
+                        font-size:10px;
+                        font-family:monospace;
+                        text-align:center;
+                        margin-top:2mm;
+                    ">
+                        Con este código QR consulta el estado en tiempo real de tu proceso.
                     </h3>
                 </div>
     

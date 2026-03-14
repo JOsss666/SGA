@@ -5,7 +5,7 @@ import os from 'os';
 import path from 'path';
 import { exec } from 'child_process';
 import ptp from 'pdf-to-printer';
-
+import { printer as ThermalPrinter, types as PrinterTypes } from 'node-thermal-printer';
 
 let mainWindow;
 
@@ -24,141 +24,94 @@ async function getTargetPrinter() {
     return defaultPrinter ? defaultPrinter.name : null;
 }
 
-// Usa este evento para probar si la impresora reacciona sin basura de código PDF
-ipcMain.on('print-test', async () => {
-    let tempWindow = new BrowserWindow({ show: false });
+async function executeSmartPrint(htmlContent, label = "Documento") {
+    let tempWindow = new BrowserWindow({ 
+        show: false, 
+        webPreferences: { offscreen: true } // Optimiza para capturas de pantalla
+    });
 
-    try {
-        console.log('Paso 1');
-
+    try{
+        console.log('--- Iniciando Proceso de Impresión ---');
+        
+        // 1. Preparar el contenido en la ventana oculta
         await tempWindow.loadURL('about:blank');
-        console.log('Paso 2');
-
-        await tempWindow.webContents.executeJavaScript(`
-            document.body.innerHTML = "<h1 style='font-size:40px'>SGA Factturation Test</h1>";
-        `);
-
-        console.log('Paso 3');
-
-        tempWindow.webContents.print({
-            silent: true,
-            deviceName: 'POS-80',
-            printBackground: true
-        }, (success, errorType) => {
-            if (!success) {
-                console.error('Falló impresión:', errorType);
-            } else {
-                console.log('Impresión enviada sin diálogo');
-            }
-        });
-
-    } catch (e) {
-        console.error('Error:', e);
-    }
-});
-
-
-ipcMain.on('print-receipt', async (event, htmlContent) => {
-    let tempWindow = new BrowserWindow({ show: false });
-
-    try {
-        console.log('Paso 1');
-        const printerName = await getTargetPrinter();
-        console.log('Printer:', printerName);
-        console.log('Paso 2');
-
-        // Página limpia
-        await tempWindow.loadURL('about:blank');
-
-        // Reset total del body + inyección HTML
         await tempWindow.webContents.executeJavaScript(`
             document.body.style.margin = "0";
             document.body.style.padding = "0";
-            document.body.style.width = "100%";
-            document.body.style.boxSizing = "border-box";
+            document.body.style.width = "300px"; // Ancho típico de POS 80mm
             document.body.innerHTML = \`${htmlContent}\`;
         `);
 
-        console.log('Paso 3');
+        // Esperar un momento a que el renderizado (imágenes/estilos) termine
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-        if (process.platform === 'win32') {
+        // 2. Intentar detectar impresora USB/Sistema
+        const printerName = await getTargetPrinter();
 
+        if (printerName) {
+            console.log('USB Detectado:', printerName);
+            
             tempWindow.webContents.print({
                 silent: true,
                 deviceName: printerName,
                 printBackground: true,
-                margins: { marginType: 'none' } // 👈 elimina margen físico
+                margins: { marginType: 'none' }
             }, (success, errorType) => {
-                if (!success) {
-                    console.error('Falló impresión:', errorType);
-                } else {
-                    console.log('Job enviado sin diálogo');
-                }
+                if (!success) console.error('Error USB:', errorType);
+                else console.log('Impresión USB enviada con éxito');
             });
 
         } else {
-            // Mac/Linux igual que antes
-        }
+            // 3. RESPALDO LAN (Si no hay USB)
+            console.log('No se detectó USB. Intentando vía LAN...');
+            
+            // Capturamos el HTML como imagen para que el diseño no se pierda
+            const image = await tempWindow.webContents.capturePage();
+            const imageBuffer = image.toPNG();
 
+            const LAN_IP = "192.168.1.50"; // 👈 AQUÍ PON LA IP DE TU IMPRESORA LAN
+
+            let printer = new ThermalPrinter({
+                type: PrinterTypes.EPSON, // O PrinterTypes.STAR según tu marca
+                interface: `tcp://${LAN_IP}`,
+            });
+
+            // Enviamos la imagen del ticket
+            await printer.printImageBuffer(imageBuffer);
+            printer.cut(); // El comando de corte que necesitabas
+
+            try {
+                await printer.execute();
+                console.log('Impresión LAN enviada con éxito');
+            } catch (lanError) {
+                console.error('Error: No se pudo conectar a la impresora LAN en', LAN_IP);
+            }
+        }
     } catch (e) {
-        console.error('Error:', e);
+        console.error('Error crítico en el flujo de impresión:', e);
     } finally {
+        // Cerramos la ventana después de un tiempo prudente
         setTimeout(() => {
             if (!tempWindow.isDestroyed()) tempWindow.destroy();
-        }, 2000);
+        }, 3000);
     }
+}
+
+
+// Usa este evento para probar si la impresora reacciona sin basura de código PDF
+
+ipcMain.on('print-receipt', async (event, htmlContent) => {
+    await executeSmartPrint(htmlContent, "Recibo/Factura");
+});
+
+ipcMain.on('print-test', async (event, htmlContent) => {
+    await executeSmartPrint(htmlContent, "Recibo/Factura");
 });
 
 ipcMain.on('print-order', async (event, htmlContent) => {
-    let tempWindow = new BrowserWindow({ show: false });
-
-    try {
-        console.log('Paso 1');
-        const printerName = await getTargetPrinter();
-        console.log('Printer:', printerName);
-        console.log('Paso 2');
-
-        // Página limpia
-        await tempWindow.loadURL('about:blank');
-
-        // Reset total del body + inyección HTML
-        await tempWindow.webContents.executeJavaScript(`
-            document.body.style.margin = "0";
-            document.body.style.padding = "0";
-            document.body.style.width = "100%";
-            document.body.style.boxSizing = "border-box";
-            document.body.innerHTML = \`${htmlContent}\`;
-        `);
-
-        console.log('Paso 3');
-
-        if (process.platform === 'win32') {
-
-            tempWindow.webContents.print({
-                silent: true,
-                deviceName: printerName,
-                printBackground: true,
-                margins: { marginType: 'none' } // 👈 elimina margen físico
-            }, (success, errorType) => {
-                if (!success) {
-                    console.error('Falló impresión:', errorType);
-                } else {
-                    console.log('Job enviado sin diálogo');
-                }
-            });
-
-        } else {
-            // Mac/Linux igual que antes
-        }
-
-    } catch (e) {
-        console.error('Error:', e);
-    } finally {
-        setTimeout(() => {
-            if (!tempWindow.isDestroyed()) tempWindow.destroy();
-        }, 2000);
-    }
+    await executeSmartPrint(htmlContent, "Recibo/Factura");
 });
+
 
 const isDev = !app.isPackaged;
 
@@ -176,8 +129,8 @@ function createWindow() {
     console.log("App is packaged:", app.isPackaged);
 
     //if (isDev) {
-        mainWindow.loadURL('https://facturation.sga360.co');
-        //mainWindow.loadURL('http://localhost:5173/');
+        //mainWindow.loadURL('https://facturation.sga360.co');
+        mainWindow.loadURL('http://localhost:5173/');
         mainWindow.webContents.openDevTools();
 /*} else {
         const indexPath = path.join(app.getAppPath(), 'dist', 'index.html');

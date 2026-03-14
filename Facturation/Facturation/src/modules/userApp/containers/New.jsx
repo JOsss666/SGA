@@ -27,6 +27,7 @@ import { isElectron } from "../../../App";
 import { useEffect, useState } from "react";
 import { verifiClicksControl } from "../../../../../../costume-modules/zjSAS.S/utils/functions";
 import { NoResults } from "./NoResults";
+import { ClientOrderPreview } from "./Alerts/ClientOrderPreview";
 
 export function New(){
     const {userConfig,appInfo,userInfo} = useAppInfo();
@@ -86,7 +87,8 @@ export function New(){
         //{text:'Crear orden de trabajo',children:<SelectTpeNewDoc/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
-        {text:'Ver recibos',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-print"/>},
+        {text:'Imprimir recibos',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-print"/>},
+        {text:'Imprimir documentos',children:<ClientOrderPreview/>,icon:<i className="fa-solid fa-print"/>},
         //{text:'Crear metodo de pago',children:<FormNewPaymentMethod/>,icon:<i className="fa-regular fa-credit-card"/>},
         //{text:'Crear Concepto',children:<FormNewConcept/>,icon:<i className="fa-solid fa-scale-balanced"/>},
         //{text:'Crear Producto',children:<FormNewProduct/>,icon:<i className="fa-solid fa-shirt"/>},
