@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAlert, useAppInfo } from "../../../../context/context";
-import { postInfo } from "../../../../utils/functions";
+import { formatDate, postInfo } from "../../../../utils/functions";
 import { BoldTitle } from "../../components/BoldTitle";
 import { ButtonDownload } from "../../components/ButtonDownload";
 import { ButtonMenu } from "../../components/ButtonMenu";
@@ -84,7 +84,10 @@ export function ProcessesReport(){
                 "Etapa actual":element.step_name,
                 "Avance":`${parseFloat((element.current_step_order/element.total_steps)*100)?.toFixed(2)}%`,
                 "Responsable actual":element.responsable_name,
-                "Estado":element.status
+                "Estado":element.status,
+                "Fecha de entrega":formatDate(element.delivery_date),
+                "Ultima modificación":formatDate(element.updated_at),
+                "Fecha de creación":formatDate(element.start_date),
             })
         });
         return(C);
