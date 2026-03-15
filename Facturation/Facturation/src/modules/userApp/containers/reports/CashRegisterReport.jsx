@@ -177,9 +177,30 @@ export function CashRegisterReport({shift_id}){
                     {!hiddeToPrint && (
                         <div className="printButton">
                             <MoreOptions children={<i className="fa-solid fa-print"/>} options={[
-                                {text:'.pdf',icon:<i className="fa-solid fa-file-pdf"/>,action:handlePrint},
-                                {text:'.xlsx',icon:<i className="fa-solid fa-file-excel"/>,action:()=>parseCashBoxeToXlsx(reportInfo,`SGA 360° Informe cierre de ${cashBoxInfo.name} - ${formatDate(localISOTime)}`)},
-                                {text:'.csv',icon:<i className="fa-solid fa-file-csv"/>,action:parseToCsv}
+                                {
+                                    text:'.pdf',
+                                    icon:<i className="fa-solid fa-file-pdf"/>,
+                                    action:handlePrint
+                                },
+                                {
+                                    text:'.xlsx',
+                                    icon:<i className="fa-solid fa-file-excel"/>,
+                                    action:()=>parseCashBoxeToXlsx(
+                                        reportInfo,
+                                        `SGA 360° Informe cierre de ${cashBoxInfo.name} - ${formatDate(localISOTime)}`
+                                    )
+                                },
+                                {
+                                    text:'.csv',
+                                    icon:<i className="fa-solid fa-file-csv"/>,
+
+                                    // [CAMBIO] ahora se pasan los datos y el nombre del archivo
+                                    action:()=>parseToCsv(
+                                        reportInfo,
+                                        true,
+                                        `SGA 360° Informe cierre de ${cashBoxInfo.name} - ${formatDate(localISOTime)}`
+                                    )
+                                }
                             ]}/>
                             <ButtonMenu title={'Descargar'}>
                                 <i className="fa-solid fa-file-arrow-down"/>

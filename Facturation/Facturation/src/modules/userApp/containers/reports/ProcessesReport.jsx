@@ -183,7 +183,7 @@ export function ProcessesReport(){
                 {text:'Realiza un analisis de este informe',context:`Procesos - Balance - Cuentas contables - Saldo`},
                 {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Balance - Cuentas contables - Saldo`}
             ]}/>
-            <ButtonDownload info={setInfoForReportDownload(info)} title={'Informe instancias de procesos'}/>
+            <ButtonDownload info={setInfoForReportDownload()} title={'Informe instancias de procesos'}/>
             <FilterReports hidden={visibleSettings} columns={columsTr} filters={filters}/>
         </div>
         <div className="SpaceReport">

@@ -16,14 +16,13 @@ import { postInfo } from "../../../../utils/functions";
 import { useAppInfo } from "../../../../context/context";
 import { LoadingSpace } from "../LoadingSpace";
 
-
 export function BriefCaseReport(){
 
     //Requirements
     const {appInfo,userConfig} = useAppInfo();
 
     // Control
-    const [info,setInfo] = useState({});
+    const [info,setInfo] = useState([]);
     const [loading,setLoading] = useState(true);
     const [disabled,setDisabled] = useState(false);
     const [searchValue,setSearchValue] = useState('');
@@ -32,7 +31,6 @@ export function BriefCaseReport(){
     const [visibleSettings,setVisibleSettings] = useState(false);
 
     // FormSettings
-
     const columsTr = [
         "Terceros",
         "Habilitado",
@@ -54,14 +52,18 @@ export function BriefCaseReport(){
     const getThirdParties = async(id,limit)=>{
         setDisabled(true);
         setLoading(true);
+
         let res = await postInfo('/getThirdParties',{
             company_id:appInfo.company_id,
             comercialInfo:true
         });
+
         console.log(res);
+
         if(res[0]){
             setInfo(res[1])
         }
+
         setLoading(false);
         setDisabled(false);
     }
@@ -70,49 +72,91 @@ export function BriefCaseReport(){
         getThirdParties();
     },[])
 
+    // [AGREGADO] Datos visibles en la tabla según el buscador
+    // Esto asegura que el Excel/CSV exporte exactamente lo mismo que ve el usuario
+    const tableData = Array.isArray(info)
+        ? info.filter((row)=>
+            Object.values(row)
+                .join(" ")
+                .toLowerCase()
+                .includes(searchValue.toLowerCase())
+        )
+        : [];
+
     return(
         <div className="BriefCaseReport ReportDocument">
+
             <div className="headReport">
                 <PathLocation/>
                 <BoldTitle text={'Informe de cartera'}/>
                 <DescriptionSpan text={'Consulte la cartera de los terceros de su aplicación'}/>
             </div>
+
             <div className="settingsReport">
+
                 <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
+
                 <div className="rangeInput">
-                <FormInput type={"date"} title={"Fecha Inicial"} action={setStart_date} />
-                <span>-</span>
-                <FormInput type={"date"} title={"Fecha Final"} action={setEnd_date} />
+                    <FormInput type={"date"} title={"Fecha Inicial"} action={setStart_date} />
+                    <span>-</span>
+                    <FormInput type={"date"} title={"Fecha Final"} action={setEnd_date} />
                 </div>
+
                 <SelectOptions
-                options={[
-                    "Ascendente (fecha)",
-                    "Descendente (fecha)",
-                    "Ascendente (Nombre)",
-                    "Descendente (Nombre)",
-                ]}
-                title={"Orden"}
+                    options={[
+                        "Ascendente (fecha)",
+                        "Descendente (fecha)",
+                        "Ascendente (Nombre)",
+                        "Descendente (Nombre)",
+                    ]}
+                    title={"Orden"}
                 />
-                <ButtonMenu title={"Mas Ajustes"} children={<i className="fa-solid fa-sliders" />} noRotate={true} onClick={()=>{
-                    setVisibleSettings(!visibleSettings)
-                }}/>
+
+                <ButtonMenu
+                    title={"Mas Ajustes"}
+                    children={<i className="fa-solid fa-sliders" />}
+                    noRotate={true}
+                    onClick={()=>{
+                        setVisibleSettings(!visibleSettings)
+                    }}
+                />
+
                 <ButtonMenu title={"Agregar a favoritos"} children={<i className="fa-regular fa-star" />} noRotate={true} />
-                <AiButton attached={info} sugerence={[
+
+                {/* [CAMBIO] ahora AI usa los datos filtrados */}
+                <AiButton attached={tableData} sugerence={[
                     {text:'¿Que proceso deberia priorizar?',context:`Procesos - Balance - Cuentas contables - Saldo`},
                     {text:'Realiza un analisis de este informe',context:`Procesos - Balance - Cuentas contables - Saldo`},
                     {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Balance - Cuentas contables - Saldo`}
                 ]}/>
-                <ButtonDownload />
+
+                {/* [CAMBIO] ButtonDownload ahora exporta la tabla visible */}
+                <ButtonDownload
+                    info={tableData}
+                    columns={columsTr}
+                    title={"Informe_Cartera"}
+                    component={"bodyreport"}
+                />
+
                 <FilterReports hidden={visibleSettings} columns={columsTr} filters={filters}/>
+
             </div>
+
             {!loading && (
-                <div className="bodyreport">
-                    <TableReport columns={columsTr} info={info} searchValue={searchValue}/>
+                // [AGREGADO] id para permitir exportación de screenshot/pdf
+                <div className="bodyreport" id="bodyreport">
+                    <TableReport
+                        columns={columsTr}
+                        info={tableData} // [CAMBIO] ahora usa datos filtrados
+                        searchValue={searchValue}
+                    />
                 </div>
             )}
+
             {loading && (
                 <LoadingSpace title={'Cargando cartera'} description={'Esto no debe tardar mucho'}/>
             )}
+
         </div>
     )
 }
