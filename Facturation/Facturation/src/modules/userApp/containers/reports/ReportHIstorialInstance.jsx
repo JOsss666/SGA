@@ -106,7 +106,12 @@ export function ReportHistorialInstance() {
                 {text:'Realiza un analisis de este informe',context:`Procesos - Informe - `},
                 {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Informe - `}
             ]}/>
-            <ButtonDownload />
+            <ButtonDownload
+                info={info}
+                columns={columnsOp}
+                title={"Historial_instancias_procesos"}
+                component={"bodyreport"}
+            />
         </div>
         <div className="SpaceReport">
             {!loading && (

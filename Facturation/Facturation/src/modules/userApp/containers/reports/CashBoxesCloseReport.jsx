@@ -53,6 +53,15 @@ export function CashBoxesCloseReport({type}) {
         company_id: appInfo.company_id
     };
 
+    // [AGREGADO] datos visibles
+    const tableData = Array.isArray(info)
+        ? info.filter((row)=>
+            Object.values(row)
+                .join(" ")
+                .toLowerCase()
+                .includes(searchValue.toLowerCase())
+        )
+        : [];
 
     const GetDocuments = async () => {
         setLoading(true);
@@ -102,9 +111,14 @@ export function CashBoxesCloseReport({type}) {
                 {text:'Realiza un analisis de este informe',context:`Procesos - Informe - `},
                 {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Informe - `}
             ]}/>
-            <ButtonDownload />
+            <ButtonDownload
+                info={tableData}
+                columns={columnsOp}
+                title={"Informe_Cierres_Caja"}
+                component={"SpaceReport"}
+            />
         </div>
-        <div className="SpaceReport">
+        <div className="SpaceReport" id="SpaceReport">
             {!loading && (
                 <TableCashBoxClose info={info} columns={columnsOp} searchValue={searchValue}/>
             )}
