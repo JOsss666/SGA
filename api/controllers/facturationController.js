@@ -23,7 +23,7 @@ facturationController.newClientOrder = (req,res)=>{
                 attached, 
                 instance_id,
                 step_instance)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id;
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id, "ownSerial";
     `;
         let consulta = await useDataBase(docCreation,[
             info.company_id,

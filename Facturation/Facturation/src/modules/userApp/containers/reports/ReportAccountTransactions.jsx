@@ -163,7 +163,12 @@ export function ReportAccountTransactions(){
                     {text:'Realiza un analisis de este informe',context:`Procesos - Balance - Cuentas contables - Saldo`},
                     {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Balance - Cuentas contables - Saldo`}
                 ]}/>
-                <ButtonDownload />
+                <ButtonDownload
+                    info={info}
+                    columns={columns}
+                    title={`Balance_${account_info.code}`}
+                    component={"bodyreport"}
+                />
                 <FilterReports hidden={visibleSettings} columns={columns} filters={filters}/>
             </div>
             <div className="SpaceReport">

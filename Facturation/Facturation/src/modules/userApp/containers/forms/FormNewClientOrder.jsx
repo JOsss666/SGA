@@ -6,7 +6,7 @@ import { SearchinList } from "../../components/SearchInList";
 import { FormButton } from "../../components/FormButton";
 import { LoadingSpace } from "../LoadingSpace";
 import './FormNewClientOrder.css'
-import { postInfo } from "../../../../utils/functions";
+import { postInfo, printClientOrder } from "../../../../utils/functions";
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
 import { FileInput } from "../../components/FileInput";
 import { NewElementSelect } from "../../components/NewElementSelect";
@@ -14,6 +14,7 @@ import { FormNewThirdParties } from "./FormNewThirdParties";
 import { LabelValue } from "../../components/LabelValue";
 import { SwitchOption } from "../../components/SwitchOption";
 import { TagIndicator } from "../../components/TagIndicator";
+import { isElectron } from "../../../../App";
 
 export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
 
@@ -38,11 +39,13 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
     // formInfo
 
     const [thirdParty_id,setThirdParty_id] = useState(params != undefined? params.thirdParty_id:undefined);
+    const [thirdParty_name,setThirdParty_name] = useState(params != undefined? params.thirdParty_name:undefined);
     const [status,setStatus] = useState('active');
     const [total,setTotal] = useState(0);
     const [description,setDescription] = useState('');
     const [attached,setAttached] = useState('');
     const [instance_id,setInstace_id] = useState();
+    const [instanceOwnSerial,setInstanceOwnSerial] = useState();
     const [store_id,setStore_id] = useState();
     const [productsServices,setProductsServices] = useState([]);
 
@@ -70,8 +73,10 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
     const handleInstnaceSelect = (element)=>{
         console.log(`Elemento seleccionado: ${element}`)
         setInstace_id(element.id);
+        setInstanceOwnSerial(element.ownSerial);
         setStep_id(element.step_id);
         setThirdParty_id(element.thirdParty_id);
+        setThirdParty_name(element.thirdParty_name);
         setInfo(prevInfo => ({
             ...prevInfo,            // Mantenemos todas las propiedades actuales (nombre, fecha, etc.)
             thirdParty_id: element.thirdParty_id // Sobrescribimos solo el ID del tercero
@@ -201,11 +206,16 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
             res[1].forEach(element => {
                 C.push({
                     text:`${element.names}  ${element.indentification_type}_${element.indentification_number}`,
-                    value:element.id
+                    value:element
                 })
             });
             setThirdParties(C);
         }
+    }
+
+    const handleThirdPartySelect = (element)=>{
+        setThirdParty_id(element.id);
+        setThirdParty_name(element.names);
     }
 
     // PreProcess functions
@@ -261,6 +271,12 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
         setDisabled(false);
     }
 
+    const printItem = async()=>{
+        console.log(formInfo)
+        await printClientOrder(formInfo,appInfo,true);
+        await printClientOrder(formInfo,appInfo,false);
+    }
+
     // Envents Hooks
 
     useEffect(()=>{
@@ -305,6 +321,22 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
         setLoading(false);
         popOutAlert();
         reloadFun?.();
+        if(isElectron){
+            let prevInfo = {
+                doc_type:'Client Order',
+                company_id:appInfo.company_id,
+                thirdParty_name,
+                description,
+                instance_id,
+                instanceOwnSerial,
+                doc_id:res.id,
+                services:productsServices,
+                ownSerial:res.ownSerial
+            }
+            await printClientOrder(prevInfo,appInfo,true);
+            await printClientOrder(prevInfo,appInfo,false);
+        }
+        
         if(instance_id != undefined){
             popInAlert(<ProcessStatusAlert instance_id={instance_id} reloadFun={reloadFun}/>)
         }
@@ -315,6 +347,9 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
             {!loading && (
                 <>
                     <BoldTitle text={'Nueva orden de cliente'}/>
+                    <span onClick={()=>{
+                        printItem();
+                    }}>Imprmimr</span>
                     <form action="" onSubmit={(e)=>{
                         e.preventDefault();
                         console.log(formInfo);
@@ -327,7 +362,7 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
                             <SearchinList title={'Proceso'} action={handleInstnaceSelect} list={processInstances} placeHolder={'Seleccione el proceso (opcional)'} disabled={disabled}/>
                         )}
                         {info.thirdParty_id == undefined && (
-                            <SearchinList title={'Cliente'} action={setThirdParty_id} list={thirdParties} placeHolder={'Seleccione el tercero'} disabled={disabled} specialOption={
+                            <SearchinList title={'Cliente'} action={handleThirdPartySelect} list={thirdParties} placeHolder={'Seleccione el tercero'} disabled={disabled} specialOption={
                                 <NewElementSelect title={'Crear nuevo tercero'} onClick={()=>{
                                     popInAlert(<FormNewThirdParties quickCreation={true} reloadFun={handleUserConfig}/>)
                                 }}/>

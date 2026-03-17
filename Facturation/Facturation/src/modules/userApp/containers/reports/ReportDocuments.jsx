@@ -117,26 +117,36 @@ export function ReportDocuments({ type }) {
         type,
     };
 
-
     const GetDocuments = async () => {
+
         setLoading(true);
 
         if(type === "TR_details"){
+
             let res = await postInfo('/getTransactionDetails',settingsReport);
+
             if(res[0]){
                 setInfo(res[1])
             }
+
         }else if (type === "TR"){
+
             let res = await postInfo('/getTransactions',settingsReport);
+
             if(res[0]){
                 setInfo(res[1])
             }
+
         }else{
+
             let res = await postInfo('/process/getDocuments',settingsReport);
+
             if(res[0]){
                 setInfo(res[1])
             }
+
         }
+
         setLoading(false)
     };
 
@@ -148,46 +158,95 @@ export function ReportDocuments({ type }) {
         console.log(info)
     },[info])
 
+    // [AGREGADO]
+    // Datos visibles en la tabla según el buscador
+    // Esto permite que el Excel/CSV exporte exactamente lo que ve el usuario
+    const tableData = Array.isArray(info)
+        ? info.filter((row)=>
+            Object.values(row)
+                .join(" ")
+                .toLowerCase()
+                .includes(searchValue.toLowerCase())
+        )
+        : [];
+
     return (
+
         <div className="ReportDocument">
-        <PathLocation />
-        <div className="headReport">
-            <BoldTitle text={`Informe de ${documentTypes[type]}`} />
-            <DescriptionSpan text={`Informe del estado de todos los documentos (${type}).`} />
-        </div>
-        <div className="settingsReport">
-            <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
-            <div className="rangeInput">
-            <FormInput type={"date"} title={"Fecha Inicial"} />
-            <span>-</span>
-            <FormInput type={"date"} title={"Fecha Final"} />
+
+            <PathLocation />
+
+            <div className="headReport">
+                <BoldTitle text={`Informe de ${documentTypes[type]}`} />
+                <DescriptionSpan text={`Informe del estado de todos los documentos (${type}).`} />
             </div>
-            <SelectOptions
-            options={[
-                "Ascendente (fecha)",
-                "Descendente (fecha)",
-                "Ascendente (Nombre)",
-                "Descendente (Nombre)",
-            ]}
-            title={"Orden"}
-            />
-            <ButtonMenu title={"Mas Ajustes"} children={<i className="fa-solid fa-sliders" />} noRotate={true} />
-            <ButtonMenu title={"Agregar a favoritos"} children={<i className="fa-regular fa-star" />} noRotate={true} />
-            <AiButton attached={info} sugerence={[
-                {text:'¿Que representa este informe?',context:`Procesos - Informe - ${documentTypes[type]}`},
-                {text:'Realiza un analisis de este informe',context:`Procesos - Informe - ${documentTypes[type]}`},
-                {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Informe - ${documentTypes[type]}`}
-            ]}/>
-            <ButtonDownload />
+
+            <div className="settingsReport">
+
+                <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
+
+                <div className="rangeInput">
+                    <FormInput type={"date"} title={"Fecha Inicial"} />
+                    <span>-</span>
+                    <FormInput type={"date"} title={"Fecha Final"} />
+                </div>
+
+                <SelectOptions
+                    options={[
+                        "Ascendente (fecha)",
+                        "Descendente (fecha)",
+                        "Ascendente (Nombre)",
+                        "Descendente (Nombre)",
+                    ]}
+                    title={"Orden"}
+                />
+
+                <ButtonMenu title={"Mas Ajustes"} children={<i className="fa-solid fa-sliders" />} noRotate={true} />
+
+                <ButtonMenu title={"Agregar a favoritos"} children={<i className="fa-regular fa-star" />} noRotate={true} />
+
+                {/* [CAMBIO] ahora AI usa los datos visibles */}
+                <AiButton attached={tableData} sugerence={[
+                    {text:'¿Que representa este informe?',context:`Procesos - Informe - ${documentTypes[type]}`},
+                    {text:'Realiza un analisis de este informe',context:`Procesos - Informe - ${documentTypes[type]}`},
+                    {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Informe - ${documentTypes[type]}`}
+                ]}/>
+
+                {/* [CAMBIO] ButtonDownload ahora exporta exactamente lo que ve el usuario */}
+                <ButtonDownload
+                    info={tableData}
+                    columns={settingsReport.columns}
+                    title={`Informe_${type}`}
+                    component={"SpaceReport"}
+                />
+
+            </div>
+
+            {/* [AGREGADO] id para permitir exportaciones visuales */}
+            <div className="SpaceReport" id="SpaceReport">
+
+                {!loading && (
+
+                    <TableReport
+                        columns={settingsReport.columns}
+                        info={tableData} // [CAMBIO] usa datos filtrados
+                        type={type}
+                        searchValue={searchValue}
+                        navigation={type == 'TR'}
+                    />
+
+                )}
+
+                {loading && (
+                    <LoadingSpace
+                        title={"Cargando información"}
+                        description={"Esto no debe tardar mucho..."}
+                    />
+                )}
+
+            </div>
+
         </div>
-        <div className="SpaceReport">
-            {!loading && (
-                <TableReport columns={settingsReport.columns} info={info} type={type} searchValue={searchValue} navigation={type == 'TR'}/>
-            )}
-            {loading && (
-                <LoadingSpace title={"Cargando información"} description={"Esto no debe tardar mucho..."} />
-            )}
-        </div>
-        </div>
+
     );
 }
