@@ -252,7 +252,7 @@ function createWindow() {
         webPreferences: { nodeIntegration: true, contextIsolation: false }
     });
     //mainWindow.loadURL('http://localhost:5173/SGA_management/123/f62e9cc238ebfeba80e67d22/new');
-    mainWindow.loadURL('https://sga-facturation.onrender.com');
+    mainWindow.loadURL('https://facturation.sga360.co/');
 }
 
 app.whenReady().then(async () => {
