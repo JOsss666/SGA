@@ -19,7 +19,7 @@ import { FormNewCashRecipt } from "./forms/FormNewCashRecipt";
 import { ProcessStatusAlert } from "./Alerts/ProcessStatusAlert";
 import { FormSelectNewProcess } from "./forms/FormSelectNewProcess";
 import { FormNewClientOrder } from "./forms/FormNewClientOrder";
-import { newElectronicInvoide, printCashRecipt } from "../../../utils/functions";
+import { newElectronicInvoide, printCashRecipt, scanDevices } from "../../../utils/functions";
 import { CashReciptDesign } from "./Alerts/CashReciptDesign";
 import {FormClicksControl} from '../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormClicksControl'
 import {FormSelectMachine} from '../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormSelectMachine'
@@ -88,10 +88,13 @@ export function New(){
         //{text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
         {text:'Imprimir recibos',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-print"/>},
-        {text:'Imprimir documentos',children:<ClientOrderPreview/>,icon:<i className="fa-solid fa-print"/>},
-        {text:'Factura electronica',children:<span onClick={()=>{
+        {text:'Imprimir Ordes de cliente',children:<ClientOrderPreview/>,icon:<i className="fa-solid fa-print"/>},
+        /*{text:'Factura electronica',children:<span onClick={()=>{
             newElectronicInvoide({})
         }}>Generar factura electronica</span>},
+        {text:'Ver dispositivos',children:<span onClick={()=>{
+            scanDevices();
+        }}>Ver impresoras</span>},*/
         //{text:'Crear metodo de pago',children:<FormNewPaymentMethod/>,icon:<i className="fa-regular fa-credit-card"/>},
         //{text:'Crear Concepto',children:<FormNewConcept/>,icon:<i className="fa-solid fa-scale-balanced"/>},
         //{text:'Crear Producto',children:<FormNewProduct/>,icon:<i className="fa-solid fa-shirt"/>},

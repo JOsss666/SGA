@@ -270,6 +270,8 @@ export function AppInfoProvider({children}){
             {text:'Informe Transacciónes',path:'reports/TRS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
         //{text:'Calendario',path:'calendar',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913184/LogoCalendario1_ig0avt.png'/>,action:handleNavigate},
         //{text:'Conceptos e impuestos',path:'concepts',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914608/LogoConceptosImpuestos_w0klzj.png'/>,action:handleNavigate},
+        {text:'Configuración',path:'settings',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579057/ChatGPT_Image_27_oct_2025_10_28_59_1_vfix8g.png'/>,action:handleNavigate},
+        {text:'Dispositivos',path:'settings/devices',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1773773820/Gemini_Generated_Image_nw3p98nw3p98nw3p_2_bxd2n2.png'/>,action:handleNavigate},
     ]
 
 

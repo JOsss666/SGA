@@ -545,7 +545,7 @@ export async function printCashRecipt(info,appInfo,barCode){
     const { ipcRenderer } = window.require('electron');
 
     const contenidoHTML = `
-        <div style="
+        <div id="clientOrderContainer" style="
             margin:0;
             width:72mm;
             display:flex;
@@ -782,6 +782,8 @@ export async function printClientOrder(info,appInfo,barCode){
             display:flex;
             flex-direction:column;
             box-sizing:border-box;
+            background:#fff;
+            height:fit-content;
             padding:2mm;
             font-family:sans-serif;
         ">
@@ -971,3 +973,17 @@ export async function printClientOrder(info,appInfo,barCode){
     ipcRenderer.send('print-receipt', contenidoHTML);
 }
 
+
+export async function scanDevices() {
+    const { ipcRenderer } = window.require('electron');
+    console.log("Escaneando impresoras de red...");
+    
+    try {
+        // Usamos invoke para llamar al handler asíncrono
+        let printers = await ipcRenderer.invoke('get-system-printers');
+        console.log("Impresoras encontradas:", printers);
+        return printers;
+    } catch (error) {
+        console.error("Error al escanear:", error);
+    }
+}

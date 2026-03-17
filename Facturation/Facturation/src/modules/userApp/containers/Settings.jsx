@@ -16,6 +16,7 @@ import { NoResults } from "./NoResults";
 import { SettingsGroup } from "../components/SettingsGroup";
 import { UserCard } from "../components/UserCard";
 import { useAppInfo } from "../../../context/context";
+import { DevicesSettings } from "./SettingsSections/DevicesSettings";
 
 export function Settings(){
     const {userInfo,userConfig} = useAppInfo();
@@ -66,7 +67,7 @@ export function Settings(){
                         <Route path="Styles" element={<StylesSettings/>} />
                         <Route path="Billing" element={<BillingSettings/>} />
                         <Route path="Security" element={<SecuritySettings/>} />
-                        <Route path="Devices" element={<NoResults title={'No es posible acceder a tus disposivos fisicos desde la nube'}/>} />
+                        <Route path="Devices" element={<DevicesSettings/>} />
                         <Route path="System" element={<SystemSettings/>} />
                     </Routes>
                 </div>
