@@ -1,104 +1,253 @@
-// 1. IMPORTANTE: Agregar ipcMain aquí
 import { app, BrowserWindow, ipcMain } from 'electron'; 
+import { autoUpdater } from 'electron';
 import fs from 'fs';
 import os from 'os';
+import net from 'net'; // 👈 Importante para el escaneo de red
 import path from 'path';
 import { exec } from 'child_process';
 import ptp from 'pdf-to-printer';
 import { printer as ThermalPrinter, types as PrinterTypes } from 'node-thermal-printer';
 
 let mainWindow;
+let lastDetectedPrinterIP = null; // Almacenará la IP detectada para no re-escanearen cada impresión
 
-console.log('V1.0')
+console.log('SGA POS - V1.1 (Dynamic Network Support)');
 
-// Función para detectar impresoras (la mantenemos igual)
-async function getTargetPrinter() {
-    const printers = await mainWindow.webContents.getPrintersAsync();
-    const target = printers.find(p => 
-        p.name.toUpperCase().includes('SGA') || 
-        p.name.toUpperCase().includes('POS') || 
-        p.name.toUpperCase().includes('THERMAL')
-    );
-    if (target) return target.name;
-    const defaultPrinter = printers.find(p => p.isDefault);
-    return defaultPrinter ? defaultPrinter.name : null;
-}
+// --- UTILIDAD DE ESCANEO DE RED ---
 
-async function executeSmartPrint(htmlContent, label = "Documento") {
-    let tempWindow = new BrowserWindow({ 
-        show: false, 
-        webPreferences: { offscreen: true } // Optimiza para capturas de pantalla
-    });
+async function scanNetworkForPrinters() {
+    const interfaces = os.networkInterfaces();
+    let networkPrefix = '192.168.1'; // Valor por defecto
 
-    try{
-        console.log('--- Iniciando Proceso de Impresión ---');
-        
-        // 1. Preparar el contenido en la ventana oculta
-        await tempWindow.loadURL('about:blank');
-        await tempWindow.webContents.executeJavaScript(`
-            document.body.style.margin = "0";
-            document.body.style.padding = "0";
-            document.body.style.width = "300px"; // Ancho típico de POS 80mm
-            document.body.innerHTML = \`${htmlContent}\`;
-        `);
-
-        // Esperar un momento a que el renderizado (imágenes/estilos) termine
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        // 2. Intentar detectar impresora USB/Sistema
-        const printerName = await getTargetPrinter();
-
-        if (printerName) {
-            console.log('USB Detectado:', printerName);
-            
-            tempWindow.webContents.print({
-                silent: true,
-                deviceName: printerName,
-                printBackground: true,
-                margins: { marginType: 'none' }
-            }, (success, errorType) => {
-                if (!success) console.error('Error USB:', errorType);
-                else console.log('Impresión USB enviada con éxito');
-            });
-
-        } else {
-            // 3. RESPALDO LAN (Si no hay USB)
-            console.log('No se detectó USB. Intentando vía LAN...');
-            
-            // Capturamos el HTML como imagen para que el diseño no se pierda
-            const image = await tempWindow.webContents.capturePage();
-            const imageBuffer = image.toPNG();
-
-            const LAN_IP = "192.168.1.50"; // 👈 AQUÍ PON LA IP DE TU IMPRESORA LAN
-
-            let printer = new ThermalPrinter({
-                type: PrinterTypes.EPSON, // O PrinterTypes.STAR según tu marca
-                interface: `tcp://${LAN_IP}`,
-            });
-
-            // Enviamos la imagen del ticket
-            await printer.printImageBuffer(imageBuffer);
-            printer.cut(); // El comando de corte que necesitabas
-
-            try {
-                await printer.execute();
-                console.log('Impresión LAN enviada con éxito');
-            } catch (lanError) {
-                console.error('Error: No se pudo conectar a la impresora LAN en', LAN_IP);
+    // Intentar detectar el prefijo de red local dinámicamente
+    for (const name in interfaces) {
+        for (const iface of interfaces[name]) {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                const parts = iface.address.split('.');
+                networkPrefix = `${parts[0]}.${parts[1]}.${parts[2]}`;
             }
         }
-    } catch (e) {
-        console.error('Error crítico en el flujo de impresión:', e);
-    } finally {
-        // Cerramos la ventana después de un tiempo prudente
-        setTimeout(() => {
-            if (!tempWindow.isDestroyed()) tempWindow.destroy();
-        }, 3000);
+    }
+
+    console.log(`Escaneando red: ${networkPrefix}.0/24...`);
+
+    const checkPort = (ip) => {
+        return new Promise((resolve) => {
+            const socket = new net.Socket();
+            socket.setTimeout(400); // Tiempo de espera para cada IP
+
+            socket.on('connect', () => {
+                socket.destroy();
+                resolve(ip);
+            });
+            socket.on('error', () => { socket.destroy(); resolve(null); });
+            socket.on('timeout', () => { socket.destroy(); resolve(null); });
+
+            socket.connect(9100, ip);
+        });
+    };
+
+    const scanPromises = [];
+    for (let i = 1; i <= 254; i++) {
+        scanPromises.push(checkPort(`${networkPrefix}.${i}`));
+    }
+
+    const results = await Promise.all(scanPromises);
+    const foundPrinters = results.filter(ip => ip !== null);
+    
+    if (foundPrinters.length > 0) {
+        lastDetectedPrinterIP = foundPrinters[0]; // Auto-asignar la primera encontrada
+    }
+    
+    return foundPrinters;
+}
+
+// --- LÓGICA DE IMPRESIÓN ---
+
+// ... (tus imports se mantienen igual)
+
+// --- LÓGICA DE SELECCIÓN DE IMPRESORA ---
+// Función para verificar si hay un dispositivo USB de impresión activo en el sistema
+// ... (tus imports se mantienen igual)
+
+// --- LÓGICA DE VALIDACIÓN DE HARDWARE REAL ---
+async function isUsbHardwareConnected(printerName) {
+    return new Promise((resolve) => {
+        // Consultamos específicamente a Windows si la impresora está 'Offline'
+        // Cuando quitas el cable USB, WorkOffline pasa a ser TRUE automáticamente
+        const command = `wmic path Win32_Printer where "Name='${printerName}'" get WorkOffline`;
+        
+        exec(command, (err, stdout) => {
+            if (err) {
+                // Fallback: Si falla el comando, buscamos en servicios de impresión USB activos
+                exec('wmic path Win32_PnPEntity where "Service=\'usbprint\'" get Caption', (err2, stdout2) => {
+                    resolve(stdout2.toUpperCase().includes(printerName.toUpperCase()));
+                });
+                return;
+            }
+            
+            const output = stdout.toUpperCase();
+            // Si dice 'FALSE', significa que NO está offline (está conectada)
+            const isConnected = output.includes("FALSE");
+            
+            console.log(`Hardware check para ${printerName}: ${isConnected ? 'CONECTADO' : 'DESCONECTADO'}`);
+            resolve(isConnected);
+        });
+    });
+}
+
+async function getTargetPrinter() {
+    const printers = await mainWindow.webContents.getPrintersAsync();
+    const candidates = printers.filter(p => {
+        const nameUpper = p.name.toUpperCase();
+        return nameUpper.includes('SGA') || nameUpper.includes('POS') || nameUpper.includes('THERMAL');
+    });
+
+    for (const printer of candidates) {
+        const hardwareOk = await isUsbHardwareConnected(printer.name);
+        if (hardwareOk) return printer.name;
+    }
+    return null;
+}
+
+// --- FUNCIÓN 1: LÓGICA USB ---
+async function printUSB(tempWindow, printerName, copies = 1) {
+    try {
+        console.log(`Enviando ${copies} copia(s) al Spooler USB: ${printerName}`);
+        for (let i = 0; i < copies; i++) {
+            await new Promise((resolve, reject) => {
+                tempWindow.webContents.print({
+                    silent: true,
+                    deviceName: printerName,
+                    printBackground: true,
+                    margins: { marginType: 'none' }
+                }, (success, failureReason) => {
+                    if (success) resolve();
+                    else reject(failureReason);
+                });
+            });
+            console.log(`✅ Copia USB ${i + 1} completada.`);
+        }
+        return true;
+    } catch (error) {
+        console.error('❌ Error en cola USB:', error);
+        return false;
     }
 }
 
+// --- FUNCIÓN 2: LÓGICA LAN ---
+async function printLAN(tempWindow, ip, copies = 1) {
+    try {
+        console.log(`Intentando imprimir ${copies} copia(s) por LAN: ${ip}`);
+        const image = await tempWindow.webContents.capturePage();
+        const imageBuffer = image.toPNG();
 
-// Usa este evento para probar si la impresora reacciona sin basura de código PDF
+        let printer = new ThermalPrinter({
+            type: PrinterTypes.EPSON,
+            interface: `tcp://${ip}`,
+            timeout: 5000,
+            width: 576
+        });
+
+        const isConnected = await printer.isPrinterConnected();
+        if (!isConnected) throw new Error("La impresora de red no responde.");
+
+        for (let i = 0; i < copies; i++) {
+            printer.alignCenter();
+            await printer.printImageBuffer(imageBuffer);
+            printer.cut();
+        }
+        
+        await printer.execute();
+        console.log('✅ Éxito LAN: Datos enviados.');
+        return true;
+    } catch (error) {
+        console.error('❌ Error LAN:', error.message);
+        return false;
+    }
+}
+
+// --- FUNCIÓN MAESTRA: CONTROLADOR DE FLUJO ---
+async function executeSmartPrint(htmlContent, label = "Documento", copies = 1) {
+    let tempWindow = new BrowserWindow({ 
+        show: false, 
+        webPreferences: { offscreen: true }
+    });
+
+    try {
+        console.log(`--- Iniciando Flujo: ${label} ---`);
+        
+        // 1. Preparar el Lienzo (Renderizado)
+        await tempWindow.loadURL('about:blank');
+        const formattedHtml = `
+            <style>
+                body { margin: 0; padding: 0; background: white; width: 550px; font-family: sans-serif; }
+                * { -webkit-print-color-adjust: exact; }
+            </style>
+            <div>${htmlContent}</div>
+        `;
+        
+        await tempWindow.webContents.executeJavaScript(`
+            document.body.innerHTML = ${JSON.stringify(formattedHtml)};
+        `);
+
+        // Esperar a que el motor de renderizado procese imágenes/estilos
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        // 2. INTENTO USB (Validación Estricta)
+        const printerName = await getTargetPrinter();
+        let success = false;
+
+        if (printerName) {
+            success = await printUSB(tempWindow, printerName, copies);
+        }
+
+        // 3. RESPALDO LAN (Si el USB no existe o el spooler falló)
+        if (!success) {
+            console.warn('⚠️ Saltando a respaldo por Red (LAN)...');
+            
+            if (!lastDetectedPrinterIP) {
+                const found = await scanNetworkForPrinters();
+                if (found.length > 0) lastDetectedPrinterIP = found[0];
+            }
+
+            if (lastDetectedPrinterIP) {
+                success = await printLAN(tempWindow, lastDetectedPrinterIP, copies);
+            }
+        }
+
+        if (!success) {
+            console.error('❌ Error Final: No se pudo imprimir por ningún medio.');
+        }
+
+    } catch (e) {
+        console.error('Error crítico en executeSmartPrint:', e.message);
+    } finally {
+        // Cerramos la ventana después de un tiempo prudente
+        setTimeout(() => { if (!tempWindow.isDestroyed()) tempWindow.destroy(); }, 5000);
+    }
+}
+
+// Función auxiliar para cargar el contenido
+async function prepareWindow(win, html) {
+    await win.loadURL('about:blank');
+    const styledHtml = `<body style="margin:0; width:576px;">${html}</body>`;
+    await win.webContents.executeJavaScript(`document.body.innerHTML = ${JSON.stringify(styledHtml)};`);
+    await new Promise(r => setTimeout(r, 500));
+}
+
+// --- COMUNICACIÓN IPC ---
+
+// Escáner manual desde el Frontend (para que el usuario elija la IP en Ajustes)
+ipcMain.handle('find-network-printers', async () => {
+    return await scanNetworkForPrinters();
+});
+
+// Guardar IP seleccionada manualmente por el usuario
+ipcMain.on('set-printer-ip', (event, ip) => {
+    lastDetectedPrinterIP = ip;
+    console.log('IP de impresora configurada manualmente:', ip);
+});
 
 ipcMain.on('print-receipt', async (event, htmlContent) => {
     await executeSmartPrint(htmlContent, "Recibo/Factura");

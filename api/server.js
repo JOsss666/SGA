@@ -18,6 +18,8 @@ export const allowedOrigins = [
         "https://www.process.sga360.co", // Procesos
     ]
 
+app.use(express.urlencoded({ extended: true }))
+
 app.use(cors({
     origin: allowedOrigins,
     methods: ["GET", "POST"],

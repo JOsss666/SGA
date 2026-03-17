@@ -2,82 +2,89 @@ import axios from "axios";
 
 const electronicFacturationController = {};
 
-electronicFacturationController.createInvoice = async (req, res) => {
-    try {
-        const { customerData, items, invoiceNumber } = req.body;
+electronicFacturationController.createInvoice = (req, res) => {
+    let data = '';
 
-        // 2. Construimos el objeto siguiendo el esquema de tu agente (Dataico)
-        const dataicoPayload = {
-            actions: {
-                send_dian: true,
-                send_email: false,
-                email: "murillojose.nvc@gmail.com",
-                pdf: "string", // Opcional
-                attachments: []
-            },
-            invoice: {
-                // IGNORAR POR AHORA DATOS ARL Y SECTOR SALUDA
-                health: {
-                    version: "API_SALUD_V1",
-                    coverage: "COBERTURA_ARL",
-                    person: {
-                        first_name: "Javier",
-                        last_name: "Mendoza",
-                        identification: "900373118",
-                        dian_identification_type: "TI"
+    // 1. Recibiendo los trozos de datos
+    req.on('data', chunk => {
+        data += chunk;
+    });
+
+    // 2. Procesamiento al terminar la recepción
+    req.on('end', async () => {
+        try {
+            // Parseo manual del cuerpo recibido
+            let info = JSON.parse(data);
+            const { customerData, items, invoiceNumber } = info;
+
+            // Construcción del objeto para Dataico
+            const dataicoPayload = {
+                actions: {
+                    send_dian: true,
+                    send_email: false,
+                    email: "murillojose.nvc@gmail.com",
+                },
+                invoice: {
+                    currency: "COP",
+                    invoice_type_code: "FACTURA_VENTA",
+                    items: items, // Ahora dinámico desde info
+                    number: invoiceNumber, // Ahora dinámico desde info
+                    numbering: {
+                        resolution_number: "18764100342086",
+                        prefix: "FEKX",
+                        flexible: true
                     },
-                    associated_users: []
+                    customer: customerData,
+                    dataico_account_id: process.env.DATAICO_ACCOUNT_ID,
+                    env: process.env.NODE_ENV === 'production' ? 'PRODUCCION' : 'PRUEBAS',
+                    operation: "ESTANDAR"
+                }
+            };
+
+            // Petición externa a Dataico
+            const response = await axios({
+                method: 'post',
+                url: 'https://api.dataico.com/dataico_api/v2/invoices',
+                timeout: 20000,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Auth-Token': process.env.DATAICO_TOKEN
                 },
-                currency: "COP",
-                invoice_type_code: "FACTURA_VENTA",
-                items: items, // Los items que vienen de tu base de datos
-                number: invoiceNumber,
-                numbering: {
-                    resolution_number: process.env.DATAICO_RESOLUTION,
-                    prefix: "SETP",
-                    flexible: true
-                },
-                customer: customerData, // El cliente que seleccionaste en el SGA
-                dataico_account_id: process.env.DATAICO_ACCOUNT_ID,
-                env: process.env.NODE_ENV === 'production' ? 'PRODUCCION' : 'PRUEBAS',
-                operation: "ESTANDAR"
-            }
-        };
+                data: dataicoPayload
+            });
 
-        // Envio y manejo respuesta
-        const response = await axios({
-            method: 'post',
-            url: 'https://api.dataico.com/dataico_api/v2/invoices',
-            timeout: 20000,
-            headers: {
-                'Content-Type': 'application/json',
-                'Auth-Token': process.env.DATAICO_TOKEN
-            },
-            data: dataicoPayload
-        });
+            // Respuesta exitosa al estilo de tu proyecto
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: true,
+                dian_status: response.data.status,
+                cufe: response.data.cufe,
+                invoice_url: response.data.pdf_url
+            }));
 
-        // 4. Respuesta al Frontend
-        return res.status(200).json({
-            success: true,
-            dian_status: response.data.status,
-            cufe: response.data.cufe,
-            invoice_url: response.data.pdf_url
-        });
+        } catch (error) {
+            // Manejo de errores detallado
+            console.error("Error DIAN Dataico:", error.response?.data || error.message);
+            
+            const errorDetails = {
+                success: false,
+                error: "Error en facturación electrónica",
+                details: error.response?.data?.errors || error.message
+            };
 
-    } catch (error) {
-        console.error("Error DIAN Dataico:", error.response?.data || error.message);
-        
-        return res.status(error.response?.status || 500).json({
-            success: false,
-            error: "Error en facturación electrónica",
-            details: error.response?.data?.errors || error.message
-        });
-    }
+            res.writeHead(error.response?.status || 500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(errorDetails));
+        }
+    });
+
+    // 3. Manejo de error en la transmisión del request
+    req.on('error', (err) => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+    });
 };
 
-
 export default electronicFacturationController;
-
 
 /*
    MODEL DATAICO FACTURA

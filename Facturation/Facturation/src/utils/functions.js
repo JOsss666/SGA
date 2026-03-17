@@ -465,19 +465,19 @@ export const arrayToTree = (flatArray, rootIdValue = null) => {
 export async function newElectronicInvoide(info){
     const invoiceToSubmit = {
         // 1. Número de factura (debe ser un string)
-        invoiceNumber: "98001", 
+        invoiceNumber: "93", 
 
         // 2. Datos del Cliente (Customer)
         customerData: {
-            id: "123456789", // Opcional si usas party_identification
-            party_identification: "900123123", 
-            party_identification_type: "NIT", // NIT, CEDULA_CIUDADANIA, CEDULA_EXTRANJERIA, etc.
+            id: 1, // Opcional si usas party_identification
+            party_identification: '1034517196', 
+            party_identification_type: 'NIT', // NIT, CEDULA_CIUDADANIA, CEDULA_EXTRANJERIA, etc.
             party_type: "PERSONA_JURIDICA", // PERSONA_NATURAL o PERSONA_JURIDICA
-            company_name: "Nombre de la Empresa S.A.S", // Requerido si es JURIDICA
-            first_name: "Juan", // Requerido si es NATURAL
-            family_name: "Perez", // Requerido si es NATURAL
-            email: "cliente@correo.com",
-            phone: "3001234567",
+            company_name: "EMPRESA 1", // Requerido si es JURIDICA
+            first_name: "José", // Requerido si es NATURAL
+            family_name: "Murillo", // Requerido si es NATURAL
+            email: "murillojose.nvc@gmail.com",
+            phone: "3026034563",
             address_line: "Calle 123 # 45-67",
             country_code: "CO",
             department: "ANTIOQUIA", // O código "05"
@@ -490,10 +490,10 @@ export async function newElectronicInvoide(info){
         items: [
             {
                 sku: "SERV-001", // Código interno
-                description: "Consultoría Técnica SGA",
+                description: "Impresión Digital",
                 quantity: 2,
-                price: 500000, // Precio UNITARIO antes de impuestos
-                original_price: 500000, 
+                price: 0, // Precio UNITARIO antes de impuestos
+                original_price: 0, 
                 measuring_unit: "94", // "94" para unidades/servicios, "CEN" para centenas, etc.
                 
                 // Impuestos por cada Item
@@ -501,23 +501,19 @@ export async function newElectronicInvoide(info){
                     {
                         "tax-category": "IVA",
                         "tax-rate": 19, // Porcentaje (19%)
-                        "tax-base": 1000000, // Base imponible (precio * cantidad)
-                        "tax-amount": 190000 // Valor del impuesto
+                        "tax-base": 0, // Base imponible (precio * cantidad)
+                        "tax-amount": 0 // Valor del impuesto
                     }
                 ],
                 
                 // Retenciones por cada Item (Si aplica)
-                retentions: [
-                    {
-                        "tax-category": "RET_IVA",
-                        "tax-rate": 15,
-                        "base-amount": 190000,
-                        "amount": 28500
-                    }
-                ]
+                retentions: []
             }
         ]
     };
+
+    let res = await postInfo('/electronicFacturation/createInvoice',invoiceToSubmit);
+    console.log(res);
 }
 
 export async function printCashRecipt(info,appInfo,barCode){
