@@ -1,4 +1,4 @@
-import { calcWeightedAverage, encrypt, isRelevanPrompt, useDataBase, actualDate } from "../app.js";
+import { encrypt, isRelevanPrompt, useDataBase, actualDate } from "../app.js";
 import fs from "fs";
 import path from "path";
 import { uploadToCloudinary } from "../uploadMiddleWare.js";
@@ -2322,5 +2322,93 @@ controller.getDocAnalyticDocNumberTable = async (req, res) => {
             res.end(JSON.stringify({ error: "Error en la recepción de datos", detail: err.message }));
         });
 };
+
+
+// Update Properties
+
+    // ThirdParties General Info
+
+    controller.updateThirdPartyGeneralInfo = (req,res)=>{
+        let data = '';
+        req.on('data', chunk => {
+            data += chunk;
+        });
+        req.on('end',async()=>{
+            let info = JSON.parse(data);
+            let sentence = `
+                UPDATE "Ecosystem".thirdparties
+                    SET
+                        names= $1,
+                        "lastNames"= $2,
+                        indentification_type=$3,
+                        indentification_number=$4,
+                        mail=$5,
+                        phone=$6,
+                        country=$7,
+                        city=$8, 
+                        address=$9,
+                        type=$10
+                WHERE id = $11;
+            `
+            let consulta = await useDataBase(sentence,[
+                info.names,
+                info.lastNames,
+                info.indentification_type,
+                info.indentification_number,
+                info.mail,
+                info.phone,
+                info.country,
+                info.city,
+                info.address,
+                info.type,
+                info.id
+            ],2);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(consulta));
+        })
+        req.on('error', (err) => {
+            console.error("⚠️ Error en la recepción de datos:", err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: "Error en la recepción de datos", detail: err.message }));
+        });
+    }
+
+
+    // ThirdPartties comercialInfo
+    
+    controller.updateThirdPartyComercialInfo = (req,res)=>{
+        let data = '';
+        req.on('data', chunk => {
+            data += chunk;
+        });
+        req.on('end',async()=>{
+            let info = JSON.parse(data);
+            let sentence = `
+                UPDATE "Ecosystem"."thirdPartyComercialInfo"
+	                SET 
+                        credit=$1,
+                        credit_term=$2,
+                        credit_value=$3,
+                        interest_rate=$4,
+                        comercial_state=$5
+	            WHERE "thirdParty_id" = $6 ;
+            `
+            let consulta = await useDataBase(sentence,[
+                info.credit,
+                info.credit_term,
+                info.credit_value,
+                info.interest_rate,
+                info.comercial_state,
+                info.id
+            ],2);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(consulta));
+        })
+        req.on('error', (err) => {
+            console.error("⚠️ Error en la recepción de datos:", err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: "Error en la recepción de datos", detail: err.message }));
+        });
+    }
 
 export default controller;

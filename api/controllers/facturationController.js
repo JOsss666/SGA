@@ -80,6 +80,13 @@ facturationController.newClientOrder = (req,res)=>{
     })
 }
 
+
+facturationController.updateThirdPartyPortfolio = async()=>{
+    let consulta = await useDataBase('REFRESH MATERIALIZED VIEW CONCURRENTLY "Ecosystem".mv_thirdparty_account_balances;',[],2);
+    console.log(consulta);
+}
+
+
 facturationController.newCashRecipt = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
@@ -155,7 +162,7 @@ facturationController.newCashRecipt = (req,res)=>{
 
             }
         }
-        facturationController,updateThirdPartyPortfolio();
+        facturationController.updateThirdPartyPortfolio();
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -164,12 +171,6 @@ facturationController.newCashRecipt = (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
-
-facturationController.updateThirdPartyPortfolio = async()=>{
-    let consulta = await useDataBase('REFRESH MATERIALIZED VIEW CONCURRENTLY "Ecosystem".mv_thirdparty_account_balances;',[],2);
-    console.log(consulta);
-}
-
 
 facturationController.getCashBoxes = (req,res)=>{
     let data = '';

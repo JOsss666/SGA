@@ -57,6 +57,10 @@ router.post('/getSuppliers',controller.getThirdParties);
 
 router.post('/getThirdParties',controller.getThirdParties);
 
+router.post('/updateThirdPartyGeneralInfo',controller.updateThirdPartyGeneralInfo);
+
+router.post('/updateThirdPartyComercialInfo',controller.updateThirdPartyComercialInfo);
+
 router.post('/createThirdParty',controller.createThirdParty);
 
 router.post('/getThirdPartyDetails',controller.getThirdPartyDetails);
