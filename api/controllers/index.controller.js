@@ -1533,6 +1533,7 @@ controller.createTransaction = (req,res)=>{
                         info.instance_id
                     ])
                 }
+                // Espacio para actualizar aviable credit
                 resultDetails.push([postConsulta.id != undefined,postConsulta.id]);
             }
             useDataBase(`REFRESH MATERIALIZED VIEW CONCURRENTLY "Facturation".mv_shift_payment_summaries`,[],1);
@@ -1911,23 +1912,26 @@ controller.getThirdParties = (req,res)=>{
         
         // Si se requiere información comercial, añadimos las columnas y el JOIN
         if (info.comercialInfo === true) {
+            // Ajustado a los nuevos campos de la MV de Cartera
             selectColumns += `,
-                "Ecosystem"."thirdPartyComercialInfo".credit,
-                "Ecosystem"."thirdPartyComercialInfo".credit_term,
-                "Ecosystem"."thirdPartyComercialInfo".comercial_state,
-                "Ecosystem"."thirdPartyComercialInfo".aviable_credit,
-                COALESCE("balances".total_db, 0) AS "thirdParty_balanceDb",
-                COALESCE("balances".total_cr, 0) AS "thirdParty_balanceCr",
-                COALESCE("balances".balance, 0) AS "thirdParty_balance"
+                ci.credit,
+                ci.credit_value,
+                ci.credit_term,
+                ci.comercial_state,
+                ci.aviable_credit,
+                COALESCE(b.total_debt, 0) AS "thirdParty_totalDebt",
+                COALESCE(b.total_paid, 0) AS "thirdParty_totalPaid",
+                COALESCE(b.balance, 0) AS "thirdParty_balance",
+                COALESCE(b.current_balance, 0) AS "thirdParty_currentBalance",
+                COALESCE(b.overdue_balance, 0) AS "thirdParty_overdueBalance"
             `;
             
             joinClause = `
-                LEFT JOIN "Ecosystem"."thirdPartyComercialInfo"
-                    ON "Ecosystem".thirdParties.id = "Ecosystem"."thirdPartyComercialInfo"."thirdParty_id"
-                LEFT JOIN "Ecosystem".mv_thirdparty_account_balances AS "balances"
-                    ON "Ecosystem".thirdParties.id = "balances"."thirdParty_id"
-                    AND "Ecosystem".thirdParties.company_id = "balances".company_id
-
+                LEFT JOIN "Ecosystem"."thirdPartyComercialInfo" ci
+                    ON "Ecosystem".thirdparties.id = ci."thirdParty_id"
+                LEFT JOIN "Ecosystem".mv_thirdparty_account_balances b
+                    ON "Ecosystem".thirdparties.id = b."thirdParty_id"
+                    AND "Ecosystem".thirdparties.company_id = b.company_id
             `;
         }
 

@@ -50,7 +50,8 @@ export function ThirdPartyDetail(){
         setLoading(true)
         let res = await postInfo('/getThirdPartyDetails',{
             id:params.thirdparty_id,
-            company_id:appInfo.company_id
+            company_id:appInfo.company_id,
+            comercialInfo:true
         })
         console.log(res);
         if(res[0]){

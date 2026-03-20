@@ -152,8 +152,10 @@ facturationController.newCashRecipt = (req,res)=>{
                     element.paid_value,
                     consulta.id
                 ],2)
+
             }
         }
+        facturationController,updateThirdPartyPortfolio();
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
@@ -161,6 +163,11 @@ facturationController.newCashRecipt = (req,res)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
+}
+
+facturationController.updateThirdPartyPortfolio = async()=>{
+    let consulta = await useDataBase('REFRESH MATERIALIZED VIEW CONCURRENTLY "Ecosystem".mv_thirdparty_account_balances;',[],2);
+    console.log(consulta);
 }
 
 
