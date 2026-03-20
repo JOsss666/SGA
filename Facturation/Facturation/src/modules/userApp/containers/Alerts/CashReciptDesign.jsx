@@ -127,6 +127,8 @@ export function CashReciptDesign(){
         console.log(element)
         if(element.id == undefined) return;
         setDocInfo(element);
+        setInstaceId(element.instance_id)
+        setInstanceOwnSerial(element.instanceOwnSerial)
         setStage(1);
     }
 
@@ -143,6 +145,7 @@ export function CashReciptDesign(){
 
 
     useEffect(()=>{
+        console.log(docInfo)
         if(docInfo.id == undefined) return;
         getAttachedTransactions();
         getThirdParties()
@@ -201,6 +204,7 @@ export function CashReciptDesign(){
                         doc_id:docInfo.id,
                         doc_type:docInfo.document_type,
                         instance_id,
+                        instanceOwnSerial,
                         thirdParty_name:thirdPartyInfo.names,
                         description:docInfo.description,
                         ownSerial:docInfo.ownSerial,

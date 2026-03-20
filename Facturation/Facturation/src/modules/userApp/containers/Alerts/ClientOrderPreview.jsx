@@ -134,6 +134,8 @@ export function ClientOrderPreview(){
         console.log(element)
         if(element.id == undefined) return;
         setDocInfo(element);
+        setInstaceId(element.instance_id)
+        setInstanceOwnSerial(element.instanceOwnSerial)
         setStage(1);
     }
 
@@ -212,6 +214,7 @@ export function ClientOrderPreview(){
                         doc_id:docInfo.id,
                         doc_type:docInfo.document_type,
                         instance_id,
+                        instanceOwnSerial,
                         thirdParty_name:thirdPartyInfo.names,
                         description:docInfo.description,
                         ownSerial:docInfo.ownSerial,
