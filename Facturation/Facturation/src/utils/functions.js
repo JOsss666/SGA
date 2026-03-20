@@ -767,6 +767,7 @@ export async function printClientOrder(info,appInfo,barCode){
     if (!window.require) {
         alert("Esta función solo está disponible en la App de Escritorio.");
     }
+    const expeditionDate = new Date().toLocaleString();
     const qrUrl = await QRCode.toDataURL(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${info.doc_id}`)
     let procesqrUrl;
     if(info.instance_id != undefined){
@@ -820,6 +821,10 @@ export async function printClientOrder(info,appInfo,barCode){
 
             <span style="font-size:12px;">
                 Tercero: ${info.thirdParty_name}
+            </span>
+
+            <span style="font-size:12px;">
+                Fecha de generación: ${expeditionDate}
             </span>
 
             <span style="
