@@ -1834,21 +1834,21 @@ controller.getDocuments = (req,res)=>{
 
         console.log(info)
 
-        whereClauses.push(`company_id = $1`);
+        whereClauses.push(`"Ecosystem".documents.company_id = $1`);
         values.push(info.company_id)
 
         if(info.allowedTypes != undefined){
-            whereClauses.push(`document_type = ANY($${values.length + 1}::document_types[])`);
+            whereClauses.push(`"Ecosystem".documents.document_type = ANY($${values.length + 1}::document_types[])`);
             values.push(info.allowedTypes);
         }
 
         if(info.instance_id != undefined){
-            whereClauses.push(`instance_id = $${values.length +1}`);
+            whereClauses.push(`"Ecosystem".documents.instance_id = $${values.length +1}`);
             values.push(info.instance_id);
         }
 
         if(info.id != undefined){
-            whereClauses.push(`id = $${values.length + 1}`);
+            whereClauses.push(`"Ecosystem".documents.id = $${values.length + 1}`);
             values.push(info.id)
         }
 
@@ -1857,10 +1857,17 @@ controller.getDocuments = (req,res)=>{
             : "";
 
         let sentence = `
-            SELECT * FROM
+            SELECT 
+                "Ecosystem".documents.*,
+                "Process".process_instance."ownSerial" as "instanceOwnSerial"
+            FROM
                 "Ecosystem".documents
+            LEFT JOIN
+                "Process".process_instance
+            ON
+                "Ecosystem".documents.instance_id = "Process".process_instance.id
             ${whereQuery}
-            ORDER BY document_type ASC
+            ORDER BY id DESC, document_type ASC
         ;`;
 
         let consulta = await useDataBase(sentence,values,1);
