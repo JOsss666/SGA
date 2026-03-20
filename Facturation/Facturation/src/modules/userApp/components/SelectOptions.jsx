@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react"
 import './SelectOptions.css'
 
-export function SelectOptions({title,options,action,value,defaultValue,objectC}){
+export function SelectOptions({title,options,action,value,defaultValue,objectC,disabled}){
 
     // 
-    const [selectedOption,setSelectedOption] = useState(defaultValue? value!=undefined? value:options[0]:undefined);
+    const [selectedOption,setSelectedOption] = useState(defaultValue? defaultValue.value!=undefined? defaultValue.value:options[0]:undefined);
     const [openOptions,setOpenOptions] = useState(false);
     const optionsContainer = useRef();
     useEffect(()=>{
@@ -28,14 +28,14 @@ export function SelectOptions({title,options,action,value,defaultValue,objectC})
                 <span>{title? (title + ': '):''}{selectedOption}</span>
                 <i onClick={()=>{setOpenOptions(!openOptions)}} title={openOptions? 'Ocultar opciones':'Ver opciones'} className={`despleOptions fa-solid fa-chevron-${openOptions? 'up':'down'}`}/>
             </div>
-            {!objectC && openOptions && (
+            {!disabled && !objectC && openOptions && (
                 <ul className={`listOptions`}>
                     {options.map((element,index)=>(
                         <li title={element} key={index} onClick={()=>{setSelectedOption(element);setOpenOptions(false)}}>{element}</li>
                     ))}
                 </ul>
             )}
-            {objectC && openOptions && (
+            {!disabled && objectC && openOptions && (
                 <ul className={`listOptions`}>
                     {options.map((element,index)=>(
                         <li title={element.text} key={index} onClick={()=>{
