@@ -45,18 +45,18 @@ export function GeneralInfo({info}){
                 <FormInput action={setLastNames} value={lastNames} title={'Apellidos o Extensiones'} placeholder={'Apellidos o complementos'} disabled={disabled}/>
                 <div className="SelOp">
                     <h6>Relación comercial</h6>
-                    <SelectOptions action={setType} options={['client','supplier','employee','contractor','partner','other']} value={type}/>
+                    <SelectOptions defaultValue={info.type} action={setType} options={['client','supplier','employee','contractor','partner','other']} value={type}/>
                 </div>
                 <div className="SelOp">
                     <h6>Tipo de documento</h6>
-                    <SelectOptions action={setIndentification_type} options={['CC','NIT','CE','PAS']} value={indentification_type}/>
+                    <SelectOptions defaultValue={info.indentification_type} action={setIndentification_type} options={['CC','NIT','CE','PAS']} value={indentification_type}/>
                 </div>
                 <FormInput action={setIndentification_number} title={'Número de documento'} placeholder={'132...'} disabled={disabled} type={'number'} value={indentification_number}/>
                 <FormInput action={setmail} title={'Correo electronico'} placeholder={'...@gmail.com'} disabled={disabled} type={'mail'} value={mail}/>
-                <FormInput action={setPhone} title={'Número telefonico'} placeholder={'numero telefonico'} disabled={disabled} value={phone}/>
-                <FormInput action={setCountry} title={'País'} placeholder={'Pais de origen o de registro'} disabled={disabled} value={country}/>
-                <FormInput action={setCity} title={'Ciudad'} placeholder={'Ciudad o departamento'} disabled={disabled} value={city}/>
-                <FormInput action={setAddress} title={'Dirección'} placeholder={'Cll - Cra... '} disabled={disabled} value={address}/>
+                <FormInput action={setPhone} title={'Número telefonico'} placeholder={'numero telefonico'} disabled={disabled} value={info.phone}/>
+                <FormInput action={setCountry} title={'País'} placeholder={'Pais de origen o de registro'} disabled={disabled} value={info.country}/>
+                <FormInput action={setCity} title={'Ciudad'} placeholder={'Ciudad o departamento'} disabled={disabled} value={info.city}/>
+                <FormInput action={setAddress} title={'Dirección'} placeholder={'Cll - Cra... '} disabled={disabled} value={info.address}/>
                 {formInfo != info && (
                     <FormButton text={'Guardar Cambios'} disabled={disabled} />
                 )}

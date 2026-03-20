@@ -1,4 +1,4 @@
-import { calcWeightedAverage, encrypt, isRelevanPrompt, useDataBase, actualDate } from "../app.js";
+import { encrypt, isRelevanPrompt, useDataBase, actualDate } from "../app.js";
 import fs from "fs";
 import path from "path";
 import { uploadToCloudinary } from "../uploadMiddleWare.js";
