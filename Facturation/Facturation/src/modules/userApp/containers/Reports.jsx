@@ -141,6 +141,9 @@ export function Reports(){
                             <CardReport type={'processes'} title={'Historial de procesos'} description={'Consulte el historial de acciones en los procesos'} onClick={()=>{
                                 handleNavigate('ProcessInstanceHistorial')
                             }}/>
+                            <CardReport type={'contable'} title={'Balance de prueba'} description={'Consulte la contabilización de su empresa'} onClick={()=>{
+                                handleNavigate('Balance')
+                            }}/>
                         </div>
                     </>
                 }/>

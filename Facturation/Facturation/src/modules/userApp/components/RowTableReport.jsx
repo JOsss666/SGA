@@ -4,12 +4,14 @@ import { UserCard } from "./UserCard"
 import './RowTableReport.css'
 import { useAlert, usePreview } from "../../../context/context"
 import { DocumentPreview } from "../containers/Alerts/DocumentPreview"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
+import { PreviewDocument } from "../containers/Preview/PreviewDocument"
 
 export function RowTableReport({columns,info,hidden,navigation}){
 
     const navigate = useNavigate();
     const location = useLocation();
+    const params = useParams();
 
     const handleNavigate = (path)=>{
         navigate(`${location.pathname}/${path}`);
@@ -67,8 +69,10 @@ export function RowTableReport({columns,info,hidden,navigation}){
         'Fecha de entrega':<span className="rowSpan">{info.created_at != undefined? (info.created_at).substring(0,10):''}</span>,
         'Fecha creación':<span className="rowSpan">{info.created_at != undefined? (info.created_at).substring(0,10):''}</span>,
         'Tipo Doc':<span className="rowSpan">{info.doc_type}</span>,
-        'Documento':<span className="rowSpan idHolder Redirect">#{info.doc_id}</span>,
-        'Naturaleza':<span className="rowSpan centerAl">{info.nature}</span>,
+        'Documento':<span className="rowSpan Redirect" onClick={()=>{
+            window.open(`https://facturation.sga360.co/preview/Document/${params.company_key}/${info.doc_id}`,'_blank','noopener,noreferrer')
+        }}>{`${info.doc_type}#${info.ownSerial}`}</span>,
+        'Naturaleza':<span className="rowSpan idHolder centerAl">{info.nature}</span>,
         'Debito':<span className="rowSpan">{info.total_debit != undefined? moneyFormat(info.total_debit):0}</span>,
         'Crédito':<span className="rowSpan">{info.total_credit != undefined? moneyFormat(info.total_credit):0}</span>,
         'Saldo inicial':<span className="rowSpan">{info.opening_balance != undefined? moneyFormat(info.opening_balance):0}</span>,

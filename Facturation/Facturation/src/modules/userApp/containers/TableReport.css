@@ -44,7 +44,7 @@
 .TableReport .headTable .headColum_Estado,
 .TableReport .headTable .headColum_Serial,
 .TableReport .headTable .headColum_Habilitado,
-.TableReport .headTable .headColum_Documento,
+.TableReport .headTable .headColum_Naturaleza,
 .TableReport .headTable .headColum_Plazo
 {
     width: 5vw;
@@ -55,7 +55,6 @@
     width: 7vw;
 }
 
-.TableReport .headTable .headColum_Naturaleza,
 .TableReport .headTable .headColum_Valor,
 .TableReport .headTable .headColum_Subtotal,
 .TableReport .headTable .headColum_Costo,

@@ -11,6 +11,14 @@ contabiltyController.getBalance = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = []
+
+        whereClauses.push(`p.company_id = $1`)
+        values.push(info.company_id)
+
+        const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
+
         let tableAcc = info.typePlanAccount == 'PUC'? 'account_templates_PUC':'contable_accounts';
         let sentence;
         if(tableAcc == 'account_templates_PUC'){
@@ -87,7 +95,7 @@ contabiltyController.getBalance = (req,res)=>{
                 LEFT JOIN movements_by_account m
                     ON m.account_id = h.child_id
 
-                WHERE p.company_id = $1
+                ${whereQuery}
 
                 GROUP BY p.id, p.code, p.name, p.level
 
@@ -132,7 +140,7 @@ contabiltyController.getBalance = (req,res)=>{
                 ON ca.code LIKE CONCAT(a.code, '%')
             LEFT JOIN sga_ecosystem.transaction_detail t
                 ON t.account_id = ca.id
-            WHERE a.company_id = $1
+            ${whereQuery}
             GROUP BY a.id, a.code, a.name
             ORDER BY a.code;
             `;
@@ -161,6 +169,19 @@ contabiltyController.getBalance = (req,res)=>{
     });
 }
 
+
+contabiltyController.refreshAccountBalanceMaterializedView = (req,res)=>{
+    req.on('end',async()=>{
+        let consulta = await useDataBase(`REFRESH MATERIALIZED VIEW CONCURRENTLY "Facturation".mv_shift_payment_summaries`,[],2);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error', (err) => {
+            console.error("⚠️ Error en la recepción de datos:", err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: "Error en la recepción de datos", detail: err.message }));
+    });
+}
 
 
 export default contabiltyController;

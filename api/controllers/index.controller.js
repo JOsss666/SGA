@@ -1691,7 +1691,7 @@ controller.getTransactionDetails = (req,res)=>{
         let whereClauses = [];
         const start = info.start_date || null;
         const end = info.end_date || null;
-        const columnDate = '"Inventory"."transaction_detail".created_at';
+        const columnDate = '"Ecosystem"."transaction_detail".created_at';
 
         whereClauses.push(`"Ecosystem".transaction_detail.company_id = $1`)
         values.push(info.company_id)
@@ -1745,6 +1745,7 @@ controller.getTransactionDetails = (req,res)=>{
                 "Ecosystem".contable_accounts.code AS account_code,
                 "Ecosystem".transactions.doc_type,
                 "Ecosystem".transactions.doc_id,
+                "Ecosystem".documents."ownSerial",
                 "Ecosystem".payment_methods.name AS payment_name,
                 "Ecosystem".thirdparties.names AS thirdParty_name,
                 "Ecosystem".thirdparties.img AS thirdParty_img
@@ -1766,6 +1767,10 @@ controller.getTransactionDetails = (req,res)=>{
                 "Ecosystem".transactions
             ON
                 "Ecosystem".transaction_detail.transaction_id = "Ecosystem".transactions.id
+            LEFT JOIN
+                "Ecosystem".documents
+            ON
+                "Ecosystem".transactions.doc_id = "Ecosystem".documents.id
             ${whereQuery}
             ORDER BY "Ecosystem".transaction_detail.created_at DESC;
         `;
