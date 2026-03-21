@@ -61,6 +61,7 @@ export function BriefCaseReport(){
         console.log(res);
 
         if(res[0]){
+            console.log("BACKEND DATA:", res[1]);
             setInfo(res[1])
         }
 
@@ -82,6 +83,51 @@ export function BriefCaseReport(){
                 .includes(searchValue.toLowerCase())
         )
         : [];
+
+    const columnMap = {
+        "Terceros": "names",
+        "Habilitado": "credit",
+        "Plazo": "credit_term",
+        "Cupo_max": "credit_value",
+        "Cupo_disponible": "aviable_credit",
+        "Cartera": "thirdParty_totalDebt",
+        "Corriente": "thirdParty_currentBalance",
+        "Vencido": "thirdParty_overdueBalance"
+    };
+
+    const setInfoForReportDownload = () => {
+        return tableData.map(element => {
+
+            let row = {};
+
+            columsTr.forEach(col => {
+
+                const key = columnMap[col];
+                let value = element[key] ?? "";
+
+                // Formatear boolean
+                if(key === "credit"){
+                    value = value ? "SI" : "NO";
+                }
+
+                // Formatear números
+                if(
+                    key === "credit_value" ||
+                    key === "aviable_credit" ||
+                    key === "thirdParty_totalDebt" ||
+                    key === "thirdParty_currentBalance" ||
+                    key === "thirdParty_overdueBalance"
+                ){
+                    value = Number(value);
+                }
+
+                row[col] = value;
+
+            });
+
+            return row;
+        });
+    };
 
     return(
         <div className="BriefCaseReport ReportDocument">
@@ -132,10 +178,9 @@ export function BriefCaseReport(){
 
                 {/* [CAMBIO] ButtonDownload ahora exporta la tabla visible */}
                 <ButtonDownload
-                    info={tableData}
+                    info={setInfoForReportDownload()}
                     columns={columsTr}
                     title={"Informe_Cartera"}
-                    component={"bodyreport"}
                 />
 
                 <FilterReports hidden={visibleSettings} columns={columsTr} filters={filters}/>
