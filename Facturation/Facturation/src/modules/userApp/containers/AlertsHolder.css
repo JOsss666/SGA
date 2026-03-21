@@ -17,6 +17,10 @@
     overflow: hidden;
 }
 
+:root.dark .AlertsHolder{
+    background-color: var(--menuAside);
+}
+
 .AlertsHolder .AlertContainer{
     grid-area: 1 / 1;
 }
