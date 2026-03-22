@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAppInfo, useNotifications } from '../../../context/context'
 import { copyToClipBoard } from '../../../utils/functions';
-import './ChatMessage.css'
 import { MainTitleAi } from './ChatAiComponents/MainTitleAi';
 import { TextPlainAi } from './ChatAiComponents/TextPlainAi';
 import { SubTitleAi } from './ChatAiComponents/SubTitleAi';
+import './ChatMessage.css'
 
 export function ChatMessage({info}){
 

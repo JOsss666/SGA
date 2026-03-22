@@ -215,7 +215,7 @@ export function UserApp(){
                             }}>
                             <i className="fa-solid fa-xmark"/>
                         </div>
-                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1761514001/ChatGPT_Image_26_oct_2025_16_24_57_hgpkmn.png'} visbleInfo={visibleMenu} title={'Ventas'} desc={'SGA - Desarrollos'} />
+                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1772826198/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.png'} visbleInfo={visibleMenu} title={'Ventas'} desc={'SGA - Desarrollos'} />
                         <MenuApp setVisibleMenu={setVisibleMenu} visibleMenu={visibleMenu} title={'General'} options={optionsMenu}/>
                         <MenuApp setVisibleMenu={setVisibleMenu} visibleMenu={visibleMenu} title={'Ajustes'} options={secondOptionsMenu}/>
                     </div>

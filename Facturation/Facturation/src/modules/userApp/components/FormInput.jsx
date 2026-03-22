@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import './FormInput.css'
 import { moneyFormat } from '../../../utils/functions';
 
-export function FormInput({action,title,placeholder,children,type,disabled,textArea,value,moneyF,min,max,required,step}){
+export function FormInput({action,title,placeholder,children,type,disabled,textArea,value,moneyF,min,max,required,step,onSubmit}){
 
     const inRef = useRef();
     const moneyFspan = useRef();
@@ -18,6 +18,14 @@ export function FormInput({action,title,placeholder,children,type,disabled,textA
         }
     },[inRef])
 
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            if (required && !inRef.current.value) return;
+            onSubmit?.(inRef.current.value);
+            inRef.current.value = ""
+        }
+    };
+
     return(
         <div className="FormInput">
             <label htmlFor="">{title}</label>
@@ -32,7 +40,7 @@ export function FormInput({action,title,placeholder,children,type,disabled,textA
                         if(action != null){
                             action(inRef.current.value)
                         }
-                    }} disabled={disabled} type={type} placeholder={placeholder}/>
+                    }} disabled={disabled} onKeyDown={handleKeyDown} type={type} placeholder={placeholder}/>
                 )}
                 {textArea && (
                     <textarea onChange={()=>{
