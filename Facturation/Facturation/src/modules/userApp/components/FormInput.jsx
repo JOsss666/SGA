@@ -19,7 +19,7 @@ export function FormInput({action,title,placeholder,children,type,disabled,textA
     },[inRef])
 
     const handleKeyDown = (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && onSubmit != undefined) {
             if (required && !inRef.current.value) return;
             onSubmit?.(inRef.current.value);
             inRef.current.value = ""

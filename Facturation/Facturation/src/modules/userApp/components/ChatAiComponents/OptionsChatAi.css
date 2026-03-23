@@ -70,6 +70,7 @@
     transition: .3s ease all;
 }
 
+
 .OptionsChatAi .listOptions li:hover{
     background-color: var(--cardHover);
     color: var(--mainText);
