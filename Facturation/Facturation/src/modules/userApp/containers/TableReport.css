@@ -41,6 +41,7 @@
 }
 
 .TableReport .headTable .headColum_ID,
+.TableReport .headTable .headColum_Instancia,
 .TableReport .headTable .headColum_Estado,
 .TableReport .headTable .headColum_Serial,
 .TableReport .headTable .headColum_Habilitado,
@@ -57,6 +58,8 @@
 
 .TableReport .headTable .headColum_Valor,
 .TableReport .headTable .headColum_Subtotal,
+.TableReport .headTable .headColum_Pagado,
+.TableReport .headTable .headColum_Pendiente,
 .TableReport .headTable .headColum_Costo,
 .TableReport .headTable .headColum_Unidades,
 .TableReport .headTable .headColum_Cupo_disponible,

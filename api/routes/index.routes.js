@@ -14,6 +14,7 @@ import facturationController from '../controllers/facturationController.js';
 import assetsController from '../controllers/assetsController.js';
 import AnalyticController from '../controllers/AnalyticsController.js';
 import electronicFacturationController from '../controllers/electronicFacturationController.js';
+import treasuryController from '../controllers/TreasuryController.js';
 
 const router = express.Router();
 
@@ -221,6 +222,8 @@ router.post('/contability/contabiltyController', contabiltyController.getBalance
 // SGA treasury
 
 router.post('/treasury/getTreasury',controller.getAccounts); //PENDIENTE IMPLEMENTAR 
+
+router.post('/treasury/getThirdPartyPortfolio',treasuryController.getThirdPartyPortfolio); //PENDIENTE IMPLEMENTAR 
 
 // SGA Facturation
 
