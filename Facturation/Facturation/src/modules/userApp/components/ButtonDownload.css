@@ -23,7 +23,11 @@
 }
 
 .ButtonDownload .buttonDownloadDefault {
-    background-color: #000000;
+    background-color: #000;
+}
+
+:root.dark .ButtonDownload .buttonDownloadDefault{
+    background-color: #2563eb;
 }
 
 .ButtonDownload .buttonDownloadLoading {

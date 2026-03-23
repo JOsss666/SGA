@@ -4,12 +4,15 @@ import { UserCard } from "./UserCard"
 import './RowTableReport.css'
 import { useAlert, usePreview } from "../../../context/context"
 import { DocumentPreview } from "../containers/Alerts/DocumentPreview"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
+import { PreviewDocument } from "../containers/Preview/PreviewDocument"
+import { ProcessStatusAlert } from "../containers/Alerts/ProcessStatusAlert"
 
 export function RowTableReport({columns,info,hidden,navigation}){
 
     const navigate = useNavigate();
     const location = useLocation();
+    const params = useParams();
 
     const handleNavigate = (path)=>{
         navigate(`${location.pathname}/${path}`);
@@ -58,17 +61,22 @@ export function RowTableReport({columns,info,hidden,navigation}){
         'Valor Facturado':<span className="rowSpan">$ {parseFloat(info.invoicedValue) != undefined? moneyFormat(parseFloat(info.invoicedValue)):0}</span>,
         'Valor':<span className="rowSpan rightAl">$ {info.total != undefined? moneyFormat(parseFloat(info.total)):0}</span>,
         'Costo':<span className="rowSpan rightAl">$ {info.value != undefined? moneyFormat(parseFloat(info.value)):0}</span>,
-        'Fecha de entrega':<span className="rowSpan">{info.doc_date != undefined? (info.doc_date).substring(0,10):''}</span>,
-        'Fecha Documento':<span className="rowSpan">{info.created_at != undefined? (info.created_at).substring(0,10):''}</span>,
+        'Fecha de entrega':<span className="rowSpan ">{info.doc_date != undefined? (info.doc_date).substring(0,10):''}</span>,
+        'Fecha vencimiento':<span className="rowSpan">{info.due_date != undefined? (info.due_date).substring(0,10):''}</span>,
+        'Fecha Documento':<span className="rowSpan ">{info.created_at != undefined? (info.created_at).substring(0,10):''}</span>,
         'Concepto':<span className="rowSpan" onClick={()=>{console.log(info)}}>{info.type =='payment'? 'Pago '+info.payment_name:info.concept_name}</span>,
         'Subtotal':<span className="rowSpan rightAl">{`$ ${moneyFormat(parseFloat(info.subTotal))}`}</span>,
         'Base':<span className="rowSpan">{`$ ${moneyFormat(parseFloat(info.subTotal))}`}</span>,
         'Valor ':<span className="rowSpan rightAl">{`$ ${moneyFormat(parseFloat(info.total))}`}</span>,
+        'Pagado':<span className="rowSpan rightAl">{`$ ${moneyFormat(parseFloat(info.paid_amount))}`}</span>,
+        'Pendiente':<span className="rowSpan rightAl">{`$ ${moneyFormat(parseFloat(info.pending_amount))}`}</span>,
         'Fecha de entrega':<span className="rowSpan">{info.created_at != undefined? (info.created_at).substring(0,10):''}</span>,
-        'Fecha creación':<span className="rowSpan">{info.created_at != undefined? (info.created_at).substring(0,10):''}</span>,
+        'Fecha creación':<span className="rowSpan ">{info.created_at != undefined? (info.created_at).substring(0,10):''}</span>,
         'Tipo Doc':<span className="rowSpan">{info.doc_type}</span>,
-        'Documento':<span className="rowSpan idHolder Redirect">#{info.doc_id}</span>,
-        'Naturaleza':<span className="rowSpan centerAl">{info.nature}</span>,
+        'Documento':<span className="rowSpan Redirect" onClick={()=>{
+            window.open(`https://facturation.sga360.co/preview/Document/${params.company_key}/${info.doc_id}`,'_blank','noopener,noreferrer')
+        }}>{`${info.doc_type}#${info.ownSerial}`}</span>,
+        'Naturaleza':<span className="rowSpan idHolder centerAl">{info.nature}</span>,
         'Debito':<span className="rowSpan">{info.total_debit != undefined? moneyFormat(info.total_debit):0}</span>,
         'Crédito':<span className="rowSpan">{info.total_credit != undefined? moneyFormat(info.total_credit):0}</span>,
         'Saldo inicial':<span className="rowSpan">{info.opening_balance != undefined? moneyFormat(info.opening_balance):0}</span>,
@@ -82,11 +90,14 @@ export function RowTableReport({columns,info,hidden,navigation}){
         "Vencido":<span className="rowSpan rightAl">{moneyFormat(parseFloat(info.thirdParty_overdueBalance? info.thirdParty_overdueBalance:0).toFixed(2))}</span>,
         "Cupo_max":<span className="rowSpan rightAl">{moneyFormat(parseFloat(info.credit_value? info.credit_value:0).toFixed(2))}</span>,
         "Cupo_disponible":<span className="rowSpan rightAl">{moneyFormat(parseFloat(info.credit_value != undefined && info.thirdParty_totalDebt? info.credit_value - info.thirdParty_totalDebt:0).toFixed(2))}</span>,
+        "Instancia":<span className="rowSpan idHolder Redirect" onClick={()=>{
+            popInAlert(<ProcessStatusAlert instance_id={info.instance_id}/>)
+        }}>{`${info.process_code? info.process_code:'---'}#${info.instance_serial? info.instance_serial:'---'}`}</span>,
     }
 
     if(!hidden){
         return(
-            <div className="RowTableReport" onClick={()=>{
+            <div className={`RowTableReport ${navigation? 'RowTableReport_redirectRow':''}`} onClick={()=>{
                 if(info.id != undefined && navigation){
                     handleNavigate(info.id)
                 }

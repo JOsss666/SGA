@@ -10,6 +10,10 @@
     padding-left: 1vh;
 }
 
+.RowTableReport_redirectRow{
+    cursor: pointer;
+}
+
 .RowTableReport:hover{
     background-color: var(--cardHover);
 }

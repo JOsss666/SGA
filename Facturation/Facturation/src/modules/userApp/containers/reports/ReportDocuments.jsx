@@ -4,7 +4,6 @@ import { postInfo } from "../../../../utils/functions";
 import { BoldTitle } from "../../components/BoldTitle";
 import { ButtonMenu } from "../../components/ButtonMenu";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
-import { FormButton } from "../../components/FormButton";
 import { FormInput } from "../../components/FormInput";
 import { PathLocation } from "../../components/PathLocation";
 import { SearchBar } from "../../components/SearchBar";
@@ -17,15 +16,13 @@ import { AiButton } from "../../components/ChatAiComponents/AiButton";
 
 export function ReportDocuments({ type }) {
 
-    // Prev Info
+    // Estados
     const [info, setInfo] = useState([]);
     const { appInfo } = useAppInfo();
-    const [searchValue,setSearchValue] = useState("");
-
-    // Actions Page
+    const [searchValue, setSearchValue] = useState("");
     const [loading, setLoading] = useState(false);
 
-    // Settings Report
+    // Tipos de documento
     const documentTypes = {
         'Client Order': "Ordenes de Cliente",
         'Production Order': "Ordenes de Producción",
@@ -36,69 +33,35 @@ export function ReportDocuments({ type }) {
         TR_details: "Detalles de la Transacción",
     };
 
+    // Columnas
     const columnsOp = [
-        "ID",
-        "Tienda",
-        "Creada por",
-        "Cliente",
-        "Ingreso Presupuestado",
-        "Costo Presupuestado",
-        "Costo Ejecutado",
-        "Valor Facturado",
-        "Fecha de entrega",
-        "Estado",
+        "ID","Tienda","Creada por","Cliente",
+        "Ingreso Presupuestado","Costo Presupuestado",
+        "Costo Ejecutado","Valor Facturado",
+        "Fecha de entrega","Estado",
     ];
 
     const columnsOc = [
-        "ID",
-        "OP",
-        "Tienda",
-        "Creada por",
-        "Cliente",
-        "Descripción",
-        "Ingreso Presupuestado",
-        "Costo Presupuestado",
-        "Fecha creación",
-        "Estado",
+        "ID","OP","Tienda","Creada por","Cliente",
+        "Descripción","Ingreso Presupuestado",
+        "Costo Presupuestado","Fecha creación","Estado",
     ];
 
     const columnsDc = [
-        "ID",
-        "OP",
-        "Tienda",
-        "Creada por",
-        "Cliente",
-        "Descripción",
-        "Valor",
-        "Fecha creación",
-        "Estado",
+        "ID","OP","Tienda","Creada por","Cliente",
+        "Descripción","Valor","Fecha creación","Estado",
     ];
 
     const columsTr = [
-        "ID",
-        "Fecha Documento",
-        "Tipo Doc",
-        "Concepto",
-        "Subtotal",
-        "Valor ",
-        "Tienda",
-        "Tercero",
-        "Negocio",
-        "Centro de costo",
-        "Estado",
-        "Creada por",
-        "Fecha creación",
-        "Ver Detalles"
+        "ID","Fecha Documento","Tipo Doc","Concepto",
+        "Subtotal","Valor","Tienda","Tercero",
+        "Negocio","Centro de costo","Estado",
+        "Creada por","Fecha creación","Ver Detalles"
     ];
 
     const columsTr_details = [
-        "ID",
-        "Concepto",
-        "Creada por",
-        "Fecha Documento",
-        "Subtotal",
-        "Valor ",
-        "Fecha creación",
+        "ID","Concepto","Creada por",
+        "Fecha Documento","Subtotal","Valor ","Fecha creación",
     ];
 
     const columsDictionary = {
@@ -111,56 +74,41 @@ export function ReportDocuments({ type }) {
         TR_details: columsTr_details,
     };
 
+    // Configuración
     const settingsReport = {
-        columns: columsDictionary[type],
+        columns: columsDictionary[type] || [],
         company_id: appInfo.company_id,
         type,
     };
 
+    // Obtener datos
     const GetDocuments = async () => {
 
         setLoading(true);
 
+        let res;
+
         if(type === "TR_details"){
-
-            let res = await postInfo('/getTransactionDetails',settingsReport);
-
-            if(res[0]){
-                setInfo(res[1])
-            }
-
-        }else if (type === "TR"){
-
-            let res = await postInfo('/getTransactions',settingsReport);
-
-            if(res[0]){
-                setInfo(res[1])
-            }
-
-        }else{
-
-            let res = await postInfo('/process/getDocuments',settingsReport);
-
-            if(res[0]){
-                setInfo(res[1])
-            }
-
+            res = await postInfo('/getTransactionDetails', settingsReport);
+        } 
+        else if (type === "TR"){
+            res = await postInfo('/getTransactions', settingsReport);
+        } 
+        else {
+            res = await postInfo('/process/getDocuments', settingsReport);
+        }
+        
+        if(res && res[0]){
+            setInfo(res[1]);
         }
 
-        setLoading(false)
+        setLoading(false);
     };
 
     useEffect(() => {
         GetDocuments();
-    }, []);
+    }, [type]);
 
-    useEffect(()=>{
-        console.log(info)
-    },[info])
-
-    // [AGREGADO]
-    // Datos visibles en la tabla según el buscador
-    // Esto permite que el Excel/CSV exporte exactamente lo que ve el usuario
     const tableData = Array.isArray(info)
         ? info.filter((row)=>
             Object.values(row)
@@ -170,8 +118,44 @@ export function ReportDocuments({ type }) {
         )
         : [];
 
-    return (
+    const columnMap = {
+        "ID": "ownSerial",
+        "Fecha Documento": "doc_date",
+        "Tipo Doc": "doc_type",
+        "Concepto": "concept_name",
+        "Subtotal": "subTotal",
+        "Valor": "total",
+        "Tienda": "store_name",
+        "Tercero": "thirdparty_name",
+        "Negocio": "bussines_name",
+        "Centro de costo": "costcenter_name",
+        "Estado": "status",
+        "Creada por": "user_name",
+        "Fecha creación": "created_at",
+        "Ver Detalles": "id"
+    };
 
+    const setInfoForReportDownload = () => {
+
+        return tableData.map(element => {
+
+            let row = {};
+
+            settingsReport.columns.forEach(col => {
+
+            const key = columnMap[col];
+
+            row[col] = key ? (element[key] ?? "") : "";
+
+            });
+
+            return row;
+
+        });
+
+    };
+
+    return (
         <div className="ReportDocument">
 
             <PathLocation />
@@ -201,40 +185,36 @@ export function ReportDocuments({ type }) {
                     title={"Orden"}
                 />
 
-                <ButtonMenu title={"Mas Ajustes"} children={<i className="fa-solid fa-sliders" />} noRotate={true} />
+                <ButtonMenu title={"Mas Ajustes"} children={<i className="fa-solid fa-sliders" />} noRotate />
+                <ButtonMenu title={"Agregar a favoritos"} children={<i className="fa-regular fa-star" />} noRotate />
 
-                <ButtonMenu title={"Agregar a favoritos"} children={<i className="fa-regular fa-star" />} noRotate={true} />
+                <AiButton 
+                    attached={tableData}
+                    sugerence={[
+                        {text:'¿Que representa este informe?',context:`Procesos - Informe - ${documentTypes[type]}`},
+                        {text:'Realiza un analisis de este informe',context:`Procesos - Informe - ${documentTypes[type]}`},
+                        {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Informe - ${documentTypes[type]}`}
+                    ]}
+                />
 
-                {/* [CAMBIO] ahora AI usa los datos visibles */}
-                <AiButton attached={tableData} sugerence={[
-                    {text:'¿Que representa este informe?',context:`Procesos - Informe - ${documentTypes[type]}`},
-                    {text:'Realiza un analisis de este informe',context:`Procesos - Informe - ${documentTypes[type]}`},
-                    {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Informe - ${documentTypes[type]}`}
-                ]}/>
-
-                {/* [CAMBIO] ButtonDownload ahora exporta exactamente lo que ve el usuario */}
                 <ButtonDownload
-                    info={tableData}
+                    info={setInfoForReportDownload()}
                     columns={settingsReport.columns}
                     title={`Informe_${type}`}
-                    component={"SpaceReport"}
                 />
 
             </div>
 
-            {/* [AGREGADO] id para permitir exportaciones visuales */}
             <div className="SpaceReport" id="SpaceReport">
 
                 {!loading && (
-
                     <TableReport
                         columns={settingsReport.columns}
-                        info={tableData} // [CAMBIO] usa datos filtrados
+                        info={tableData}
                         type={type}
                         searchValue={searchValue}
-                        navigation={type == 'TR'}
+                        navigation={type === 'TR'}
                     />
-
                 )}
 
                 {loading && (
@@ -247,6 +227,5 @@ export function ReportDocuments({ type }) {
             </div>
 
         </div>
-
     );
 }

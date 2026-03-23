@@ -38,7 +38,6 @@ export function ReportAccountTransactions(){
         "ID",
         "Transacción",
         "Fecha Documento",
-        "Tipo Doc",
         "Documento",
         "Cuenta",
         "Concepto",

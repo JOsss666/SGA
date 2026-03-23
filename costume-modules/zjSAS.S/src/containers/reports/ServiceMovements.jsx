@@ -59,37 +59,38 @@ export function ServiceMovements({appInfo,userInfo,userConfig,popInAlert,popOutA
 
      // Gettrers of info
 
-     const getServiceMovements = async()=>{
-        setDisabled(true);
-        setLoading(true)
-        let res = await postInfo('/zj852/getServiceMovements',settingsReport);
-        console.log(res);
-        if(res[0]){
-            setInfo(res[1]);
-        }else{
-            setInfo([])
-        }
-        setLoading(false);
-        setDisabled(false);
-     }
+    const getServiceMovements = async()=>{
+    setDisabled(true);
+    setLoading(true)
+    let res = await postInfo('/zj852/getServiceMovements',settingsReport);
+    console.log(res);
+    if(res[0]){
+        console.log("DATA BACKEND:", res[1]);
+        setInfo(res[1]);
+    }else{
+        setInfo([])
+    }
+    setLoading(false);
+    setDisabled(false);
+    }
 
      // functions
 
-     const calcTotals = ()=>{
-        let ttlS = info.length;
-        let ttlClicks = 0;
-        let ttlValue = 0;
-        info.forEach(element => {
-            if(element.controlClicks != undefined){
-                ttlClicks += parseFloat(element.controlClicks * element.units)
-            }
-            ttlValue += parseFloat(element.total)
-        });
-        let defTTVal = ttlValue?.toFixed(2)
-        setTotalClicks(ttlClicks);
-        setTotalServices(ttlS);
-        setTotalValue(defTTVal);
-     }
+    const calcTotals = ()=>{
+    let ttlS = info.length;
+    let ttlClicks = 0;
+    let ttlValue = 0;
+    info.forEach(element => {
+        if(element.controlClicks != undefined){
+            ttlClicks += parseFloat(element.controlClicks * element.units)
+        }
+        ttlValue += parseFloat(element.total)
+    });
+    let defTTVal = ttlValue?.toFixed(2)
+    setTotalClicks(ttlClicks);
+    setTotalServices(ttlS);
+    setTotalValue(defTTVal);
+    }
 
     useRealtime(appInfo.company_id, (payload) => {
         if (payload.table === 'process_instance') {
@@ -98,17 +99,68 @@ export function ServiceMovements({appInfo,userInfo,userConfig,popInAlert,popOutA
     });
 
      // Effects listener
-     useEffect(()=>{
-        getServiceMovements();
-     },[])
+    useEffect(()=>{
+    getServiceMovements();
+    },[])
 
-     useEffect(()=>{
-        getServiceMovements();
-     },[start_date,end_date])
+    useEffect(()=>{
+    getServiceMovements();
+    },[start_date,end_date])
 
-     useEffect(()=>{
-        calcTotals();
-     },[info])
+    useEffect(()=>{
+    calcTotals();
+    },[info])
+
+
+    const columnMap = {
+        "Servicio": "service_name",
+        "Instancia": "instance_serial",
+        "Tercero": "thirdparty_name",
+        "Clicks": "controlClicks",
+        "Unidades": "units",
+        "Valor unitario": "unit_value",
+        "Total": "total",
+        "Descripción": "description",
+        "Maquina": "machine_name",
+        "Fecha": "created_at"
+    };
+
+
+    const setInfoForReportDownload = () => {
+
+        return info.map(element => {
+
+            let row = {};
+
+            columsReport.forEach(col => {
+
+                const backendKey = columnMap[col];
+
+                let value = element[backendKey] ?? "";
+
+                // formateo de números
+                if(backendKey === "controlClicks" || backendKey === "units"){
+                    value = Number(value);
+                }
+
+                if(backendKey === "unit_value" || backendKey === "total"){
+                    value = Number(value);
+                }
+
+                // formateo de fecha
+                if(backendKey === "created_at"){
+                    value = new Date(value).toLocaleString();
+                }
+
+                row[col] = value;
+
+            });
+
+            return row;
+
+        });
+
+    };
 
     return(
         <div className="ClicksReport ReportDocument">
@@ -156,7 +208,11 @@ export function ServiceMovements({appInfo,userInfo,userConfig,popInAlert,popOutA
                     {text:'Realiza un analisis de este informe',context:`Procesos - Balance - Cuentas contables - Saldo`},
                     {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Balance - Cuentas contables - Saldo`}
                 ]}/>
-                <ButtonDownload />
+                <ButtonDownload
+                    info={setInfoForReportDownload()}
+                    columns={columsReport}
+                    title="Informe_Servicios"
+                />
                 <FilterReports hidden={visibleSettings} columns={columsReport} filters={filters}/>
             </div>
             <div className="contentReport">

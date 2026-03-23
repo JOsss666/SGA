@@ -12,68 +12,102 @@ import './BriefCaseReport.css'
 import './ReportDocuments.css'
 import { FilterReports } from "./FilterReports";
 import { TableReport } from "../TableReport";
-import { postInfo } from "../../../../utils/functions";
+import { moneyFormat, postInfo } from "../../../../utils/functions";
 import { useAppInfo } from "../../../../context/context";
 import { LoadingSpace } from "../LoadingSpace";
+import { useParams } from "react-router-dom";
+import { LabelValue } from "../../components/LabelValue";
 
-export function BriefCaseReport(){
+export function PortfolioReportDetail(){
 
     //Requirements
+    const params = useParams();
+    console.log(params)
     const {appInfo,userConfig} = useAppInfo();
 
     // Control
     const [info,setInfo] = useState([]);
+    const [thirdPartyInfo,setThirdPartyInfo] = useState({});
     const [loading,setLoading] = useState(true);
+    const [searchValue,setSearchValue] = useState('')
     const [disabled,setDisabled] = useState(false);
-    const [searchValue,setSearchValue] = useState('');
-    const [startDate, setStart_date] = useState();
-    const [endDate,setEnd_date] = useState();
+    const [start_date,setStart_date] = useState(undefined);
+    const [end_date,setEnd_date] = useState(undefined);
     const [visibleSettings,setVisibleSettings] = useState(false);
+    const [totalUsed,setTotalUsed] = useState(0)
+    const [totalPayed,setTotalPayed] = useState(0)
+    const [totalPendig,setTotalPending] = useState(0)
 
     // FormSettings
     const columsTr = [
-        "Terceros",
-        "Habilitado",
-        "Plazo",
-        "Cupo_max",
-        "Cupo_disponible",
-        "Cartera",
-        "Corriente",
-        "Vencido",
+        "Tienda",
+        "Instancia",
+        "Documento",
+        "Valor",
+        "Pagado",
+        "Pendiente",
+        "Fecha vencimiento",
+        "Fecha creación",
+        //"Ultima actualización"
     ]
 
     const filters = [];
 
-    const FormSettings = {
-        columsTr
-    }
+     const settingsReport = {
+        columns: columsTr,
+        company_id: appInfo.company_id,
+        start_date,
+        end_date,
+        thirdParty_id:params.thirdParty_id
+    };
 
     // Getters of info
-    const getThirdParties = async(id,limit)=>{
+    const getThirdPartyPortfolio = async(id,limit)=>{
         setDisabled(true);
         setLoading(true);
-
-        let res = await postInfo('/getThirdParties',{
-            company_id:appInfo.company_id,
-            comercialInfo:true
-        });
-
-        console.log(res);
-
-        if(res[0]){
-            console.log("BACKEND DATA:", res[1]);
-            setInfo(res[1])
-        }
-
+        let res = await postInfo('/treasury/getThirdPartyPortfolio',settingsReport);
+        setInfo(res[1])
         setLoading(false);
         setDisabled(false);
     }
+    const getThirdPartyInfo = async()=>{
+        let res = await postInfo('/getThirdParties',{
+            company_id:appInfo.company_id,
+            id:params.thirdParty_id
+        });
+        console.log(res)
+        if(res[0]){
+            setThirdPartyInfo(res[1][0])
+        }
+    }
 
     useEffect(()=>{
-        getThirdParties();
-    },[])
+        getThirdPartyPortfolio();
+        getThirdPartyInfo();
+    },[]);
 
-    // [AGREGADO] Datos visibles en la tabla según el buscador
+    useEffect(()=>{
+        let newTtlused = 0;
+        let newTtlpayed = 0;
+        let newTtlpending = 0;
+
+        info.forEach(element => {
+            newTtlused += parseFloat(element.total);
+            newTtlpending += parseFloat(element.pending_amount);
+            newTtlpayed += parseFloat(element.paid_amount);
+        });
+
+        setTotalPayed(newTtlpayed);
+        setTotalPending(newTtlpending);
+        setTotalUsed(newTtlused);
+
+    },[info])
+
+    useEffect(()=>{
+        setVisibleSettings(false);
+        getThirdPartyPortfolio();
+    },[start_date,end_date]);
+
     // Esto asegura que el Excel/CSV exporte exactamente lo mismo que ve el usuario
     const tableData = Array.isArray(info)
         ? info.filter((row)=>
@@ -134,13 +168,27 @@ export function BriefCaseReport(){
 
             <div className="headReport">
                 <PathLocation/>
-                <BoldTitle text={'Informe de cartera'}/>
+                <BoldTitle text={`Informe de cartera de "${thirdPartyInfo.names? thirdPartyInfo.names:'---'}"`}/>
                 <DescriptionSpan text={'Consulte la cartera de los terceros de su aplicación'}/>
+            </div>
+
+            <div className="totalsBalanceC">
+
+                <LabelValue title={"Usado"} value={<b>{moneyFormat(totalUsed)}</b>} />
+                <LabelValue title={"Pendiente de pago"} value={<b>{moneyFormat(totalPendig)}</b>} />
+                <LabelValue title={"Pagado"} value={<b>{moneyFormat(totalPayed)}</b>} />
+
             </div>
 
             <div className="settingsReport">
 
                 <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
+
+                <div className="rangeInput">
+                    <FormInput type={"date"} title={"Fecha Inicial"} action={setStart_date} />
+                    <span>-</span>
+                    <FormInput type={"date"} title={"Fecha Final"} action={setEnd_date} />
+                </div>
 
                 <SelectOptions
                     options={[
@@ -185,7 +233,6 @@ export function BriefCaseReport(){
                 // [AGREGADO] id para permitir exportación de screenshot/pdf
                 <div className="bodyreport" id="bodyreport">
                     <TableReport
-                        navigation={true}
                         columns={columsTr}
                         info={tableData} // [CAMBIO] ahora usa datos filtrados
                         searchValue={searchValue}

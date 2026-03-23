@@ -4,7 +4,7 @@
     height: inherit;
     padding: 1vh;
     width: fit-content;
-    background-color: var(--bg);
+    background-color: var(--asideMenu);
     position: relative;
     box-shadow: 0 -.2vh 1vh #0002;
     overflow: auto;
@@ -14,6 +14,10 @@
     animation-timing-function: ease;
     width: 100%;
     z-index: 30;
+}
+
+:root.dark .AlertContainer{
+    background-color: var(--menuAside);
 }
 
 .AlertContainer .optionsAlert{
