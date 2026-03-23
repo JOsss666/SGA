@@ -112,4 +112,5 @@
 .ReportDocument .totalsBalanceC .LabelValue .val{
     font-weight: 400 !important;
     margin-top: 1vh;
+    text-align: right;
 }
