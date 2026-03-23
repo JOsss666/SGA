@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SelectOptions } from "../../components/SelectOptions";
 import { FormInput } from "../../components/FormInput";
 import './ComercialInfo.css'
@@ -43,6 +43,11 @@ export function ComercialInfo({info,reloadFun}){
         }
         setDisabled(false);
     }
+
+    useEffect(()=>{
+        console.log(info)
+        console.log(comercial_state)
+    },[info])
 
     return(
         <div className="ComercialInfo">
