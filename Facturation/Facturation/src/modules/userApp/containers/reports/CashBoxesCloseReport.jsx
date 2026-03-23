@@ -81,6 +81,35 @@ export function CashBoxesCloseReport({type}) {
         console.log(info)
     },[info])
 
+    const columnMap = {
+        "Responsable": "responsable",
+        "Caja": "cashBox_name",
+        "Saldo inicial": "initialBalance",
+        "Saldo actual": "actual_balance",
+        "Saldo final": "expectedBalance",
+        "Fecha de inicio": "opening_time",
+        "Fecha de cierre": "closing_time",
+        "Estado": "status"
+    };
+
+    const setInfoForReportDownload = () => {
+        return tableData.map(element => {
+            let row = {};
+
+            columnsOp.forEach(col => {
+                const key = columnMap[col];
+
+                // ✔ trae el dato tal cual
+                // ✔ si no existe → vacío
+                row[col] = (key && element[key] !== undefined)
+                    ? element[key]
+                    : "";
+            });
+
+            return row;
+        });
+    };
+
     return (
         <div className="ReportDocument">
         <PathLocation />
@@ -112,10 +141,8 @@ export function CashBoxesCloseReport({type}) {
                 {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Informe - `}
             ]}/>
             <ButtonDownload
-                info={tableData}
-                columns={columnsOp}
+                info={setInfoForReportDownload()}
                 title={"Informe_Cierres_Caja"}
-                component={"SpaceReport"}
             />
         </div>
         <div className="SpaceReport" id="SpaceReport">
