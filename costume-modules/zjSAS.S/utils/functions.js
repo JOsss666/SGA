@@ -1,4 +1,18 @@
+
+import Papa from 'papaparse';
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import QRCode from 'qrcode';
+import JsBarcode from 'jsbarcode';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+
+
+
 //export const urlSer = 'http://localhost:3000';
+
+
 export const urlSer = 'https://sga-2zgp.onrender.com';
 
 export async function postInfo(route,informacion){
@@ -23,6 +37,136 @@ export async function postInfo(route,informacion){
             resolve(data)
         })
     })
+}
+
+export function parseToXlsx(info, download, columns, name) {
+    // Crear hoja
+    let worksheet;
+
+    if (columns && Array.isArray(columns)) {
+        // Formato con columnas definidas
+        const rows = info.map(row => {
+            const obj = {};
+            columns.forEach(col => {
+                obj[col.header] = row[col.key];
+            });
+            return obj;
+        });
+        worksheet = XLSX.utils.json_to_sheet(rows);
+    } else {
+        // Inferir columnas automáticamente
+        worksheet = XLSX.utils.json_to_sheet(info);
+    }
+
+    // Crear libro
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, name || "Hoja1");
+
+    // Generar archivo excel
+    const wbout = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+
+    const blob = new Blob([wbout], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+
+    if (download) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = (name || "archivo") + ".xlsx";
+        link.click();
+    } else {
+        return blob;
+    }
+}
+
+export  async function parseToCsv(info,download,name){
+    const newCsv = Papa.unparse(info);
+    const blob = new Blob([newCsv],{type:"text/csv;charset=utf-8;"})
+    let blobUrl = URL.createObjectURL(blob)
+    let newLinkDownload = document.createElement("a");
+    newLinkDownload.href = blobUrl;
+    newLinkDownload.setAttribute("download",name? name:"SGA - descarga.csv");
+    if(download){
+        newLinkDownload.click();
+    }else{
+        return newLinkDownload;
+    }
+}
+
+export async function componentToPdf(component,download = true,options = {},name = "SGA-descarga.pdf") {
+    const { title = "", scale = 2 } = options;
+
+    // Asegurar que todas las imágenes dentro del componente estén cargadas
+    await Promise.all(
+        Array.from(component.getElementsByTagName("img")).map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+        });
+        })
+    );
+
+    // Guardar estilos originales
+    const originalOverflow = component.style.overflow;
+    const originalHeight = component.style.height;
+
+    // Expandir el componente para capturar todo (en caso de scroll)
+    component.style.overflow = "visible";
+    component.style.height = "auto";
+
+    // Capturar el contenido
+    const canvas = await html2canvas(component, {
+        scale,
+        useCORS: true,
+        scrollY: 0,
+        logging: false,
+        backgroundColor: "#ffffff",
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // Si hay título, lo añadimos al inicio
+    if (title) {
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(16);
+        const textWidth = pdf.getTextWidth(title);
+        pdf.text(title, (pageWidth - textWidth) / 2, 15); // centrado
+        position = 25; // espacio para el título
+    }
+
+    // Añadir imagen (primera página)
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // Agregar páginas adicionales si es necesario
+    while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+    }
+
+    // Restaurar estilos originales
+    component.style.overflow = originalOverflow;
+    component.style.height = originalHeight;
+
+    // Descargar o retornar el PDF
+    if (download) {
+        pdf.save(name);
+    } else {
+        return pdf;
+    }
 }
 
 export function copyToClipBoard(text){
@@ -80,6 +224,19 @@ export async function uploadFileInChunks(file,setAdvancePercent){
     });
 
     return await finalizeRes.json();
+}
+
+export async function ScreenShotElement(elemet,name){
+    domtoimage.toPng(elemet)
+    .then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = name != undefined? name:'captura.png';
+        link.href = dataUrl;
+        link.click();
+    })
+    .catch((error) => {
+        console.error('Error al generar la imagen:', error);
+    });
 }
 
 export const uploadFiles = async (files,info) => {

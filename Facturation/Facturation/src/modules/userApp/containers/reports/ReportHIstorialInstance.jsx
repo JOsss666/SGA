@@ -63,6 +63,7 @@ export function ReportHistorialInstance() {
         let res = await postInfo('/process/getInstanceHistorial',settingsReport);
         console.log(res);
         if(res[0]){
+            console.log("BACKEND DATA:", res[1]);
             setInfo(res[1])
         }
         setLoading(false)
@@ -75,6 +76,44 @@ export function ReportHistorialInstance() {
     useEffect(()=>{
         getHistorial();
     },[start_date,end_date])
+
+    const columnMap = {
+        "Proceso": "process_name",
+        "Instancia": "instance_id",
+        "Responsable": "user_name",
+        "Accion": "nextstep_name",
+        "Descripción": "description",
+        "Fecha": "created_at",
+        "Estado": "status"
+    };
+
+    const setInfoForReportDownload = () => {
+
+        return info.map(element => {
+
+            let row = {};
+
+            columnsOp.forEach(col => {
+
+                const backendKey = columnMap[col];
+
+                let value = element[backendKey] ?? "";
+
+                // formatear fecha
+                if (backendKey === "created_at") {
+                    value = new Date(value).toLocaleString();
+                }
+
+                row[col] = value;
+
+            });
+
+            return row;
+
+        });
+
+    };
+
 
     return (
         <div className="ReportDocument">
@@ -107,10 +146,9 @@ export function ReportHistorialInstance() {
                 {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Informe - `}
             ]}/>
             <ButtonDownload
-                info={info}
+                info={setInfoForReportDownload()}
                 columns={columnsOp}
                 title={"Historial_instancias_procesos"}
-                component={"bodyreport"}
             />
         </div>
         <div className="SpaceReport">

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './ButtonDownload.css';
-import { componentToPdf, parseToCsv, parseToXlsx,ScreenShotElement } from '../../../utils/functions';
+import { componentToPdf, parseToCsv, parseToXlsx,ScreenShotElement } from '../../utils/functions';
 
 export function ButtonDownload({info,columns,formats,title,component}) {
     const [status, setStatus] = useState("default");
@@ -36,7 +36,7 @@ export function ButtonDownload({info,columns,formats,title,component}) {
             console.log(`Descargando archivo en formato: ${format}`);
             switch (format){
                 case "csv": await parseToCsv(info,true,title); break;
-                case "xlsx": await parseToXlsx(info,true,null,title);break;
+                case "xlsx": await parseToXlsx(info,true,null,title);break; 
                 case "pdf": await componentToPdf(component,true,{},title);break;
                 case "jpg": await ScreenShotElement(component,title);
             }
@@ -53,10 +53,8 @@ export function ButtonDownload({info,columns,formats,title,component}) {
 
             {showMenu && status === "default" && (
                 <div className="downloadMenu">
-                    <button className='xlsxFormat' onClick={() => handleFormatClick("xlsx")}><i className="fa-regular fa-file-excel"/> XLSX</button>
-                    <button className="csvFormat" onClick={() => handleFormatClick("csv")}><i className="fa-solid fa-file-csv"/> CSV</button>
-                    <button className="pdfFormat" onClick={() => handleFormatClick("pdf")}><i className="fa-regular fa-file-pdf"/> PDF</button>
-                    <button className="jpgFormat" onClick={() => handleFormatClick("jpg")}><i className="fa-solid fa-image"/>JPG</button>
+                    <button className='optionListFormat' onClick={()=>handleFormatClick('xlsx')}><i className="fa-regular fa-file-excel"/> XLSX</button>
+                    <button className="optionListFormat" onClick={() => handleFormatClick("csv")}><i className="fa-solid fa-file-csv"/> CSV</button>
                 </div>
             )}
         </div>
