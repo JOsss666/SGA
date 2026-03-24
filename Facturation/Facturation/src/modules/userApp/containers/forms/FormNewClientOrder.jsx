@@ -347,9 +347,6 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
             {!loading && (
                 <>
                     <BoldTitle text={'Nueva orden de cliente'}/>
-                    <span onClick={()=>{
-                        printItem();
-                    }}>Imprmimr</span>
                     <form action="" onSubmit={(e)=>{
                         e.preventDefault();
                         console.log(formInfo);
