@@ -19,6 +19,11 @@ export function GeneralInfo({info,reloadFun}){
     // ParamsForm
     const [names,setNames] = useState(info.names != undefined? info.names:'');
     const [lastNames,setLastNames] = useState(info.lastNames != undefined? info.lastNames:'');
+    //
+    const [first_name,setFirst_name] = useState(info.names != undefined? info.first_name:'');
+    const [second_name,setSecond_name] = useState(info.names != undefined? info.second_name:'');
+    const [first_surname,setFirst_surname] = useState(info.names != undefined? info.first_surname:'');
+    const [second_surname,setSecond_surname] = useState(info.names != undefined? info.second_surname:'');
     const [indentification_type,setIndentification_type] = useState(info.indentification_type != undefined? info.indentification_type:'');
     const [indentification_number,setIndentification_number] = useState(info.indentification_number != undefined? info.indentification_number:'');
     const [mail,setmail] = useState(info.mail != undefined? info.mail:'');
@@ -31,8 +36,10 @@ export function GeneralInfo({info,reloadFun}){
     const formInfo = {
         company_id:info.company_id,
         id:info.id,
-        names,
-        lastNames,
+        first_name,
+        second_name,
+        first_surname,
+        second_surname,
         indentification_type,
         indentification_number,
         mail,
@@ -60,8 +67,10 @@ export function GeneralInfo({info,reloadFun}){
                 e.preventDefault();
                 updateInfo();
             }}>
-                <FormInput action={setNames} value={names} title={'Nombre(s) o Razon Social'} placeholder={'Nombres del tercero'} disabled={disabled}/>
-                <FormInput action={setLastNames} required={false} value={lastNames} title={'Apellidos o Extensiones'} placeholder={'Apellidos o complementos'} disabled={disabled}/>
+                <FormInput action={setFirst_name} value={first_name} title={'Primer Nombre'} placeholder={'Primer nombre'} disabled={disabled}/>
+                <FormInput action={setSecond_name} value={second_name} title={'Segundo Nombre'} placeholder={'Segundo nombre'} disabled={disabled}/>
+                <FormInput action={setFirst_surname} value={first_surname} title={'Primer Apellido'} placeholder={'Primer Apellido'} disabled={disabled}/>
+                <FormInput action={setSecond_surname} value={second_surname} title={'Segundo Apellido'} placeholder={'Segundo Apellido'} disabled={disabled}/>
                 <div className="SelOp">
                     <h6>Relación comercial</h6>
                     <SelectOptions disabled={disabled} defaultValue={type} action={setType} options={['client','supplier','employee','contractor','partner','other']} value={type}/>
