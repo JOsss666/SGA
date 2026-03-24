@@ -2014,14 +2014,32 @@ controller.createThirdParty = (req, res) => {
             console.log(info);
             const sentence = `
                 INSERT INTO "Ecosystem".thirdparties(
-                    company_id, names, "lastNames", indentification_type, indentification_number, mail, phone, country, city, address, type)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id;
+                    company_id, 
+                    names,
+                    "lastNames",
+                    first_name,
+                    second_name,
+                    first_surname,
+                    second_surname,
+                    indentification_type,
+                    indentification_number,
+                    mail,
+                    phone,
+                    country,
+                    city,
+                    address,
+                    type)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING id;
             `;
 
             const values = [
                 info.company_id,
-                info.name,
-                info.lastNames,
+                `${info.first_name}${info.second_name? ` ${info.second_name}`:''}`,
+                `${info.first_surname}${info.second_surname? ` ${info.second_surname}`:''}`,
+                info.first_name,
+                info.second_name,
+                info.first_surname,
+                info.second_surname,
                 info.indentification_type,
                 info.indentification_number,
                 info.mail,
@@ -2352,19 +2370,27 @@ controller.getDocAnalyticDocNumberTable = async (req, res) => {
                     SET
                         names= $1,
                         "lastNames"= $2,
-                        indentification_type=$3,
-                        indentification_number=$4,
-                        mail=$5,
-                        phone=$6,
-                        country=$7,
-                        city=$8, 
-                        address=$9,
-                        type=$10
-                WHERE id = $11;
+                        first_name = $3,
+                        second_name = $4,
+                        first_surname = $5,
+                        second_surname = $6,
+                        indentification_type=$7,
+                        indentification_number=$8,
+                        mail=$9,
+                        phone=$10,
+                        country=$11,
+                        city=$12, 
+                        address=$13,
+                        type=$14
+                WHERE id = $15;
             `
             let consulta = await useDataBase(sentence,[
-                info.names,
-                info.lastNames,
+                `${info.first_name}${info.second_name? ` ${info.second_name}`:''}`,
+                `${info.first_surname}${info.second_surname? ` ${info.second_surname}`:''}`,
+                info.first_name,
+                info.second_name,
+                info.first_surname,
+                info.second_surname,
                 info.indentification_type,
                 info.indentification_number,
                 info.mail,

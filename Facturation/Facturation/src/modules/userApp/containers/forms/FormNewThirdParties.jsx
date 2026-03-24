@@ -27,6 +27,11 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
     const [name,setName] = useState('');
     const [userPhoto,setUserPhoto] = useState('https://i.pinimg.com/1200x/ba/8d/7a/ba8d7a6364bf8ce99756686cba83c695.jpg');
     const [lastNames,setLastName] = useState('');
+    //
+    const [first_name,setFirst_name] = useState('');
+    const [second_name,setSecond_name] = useState('');
+    const [first_surname,setFirst_surname] = useState('');
+    const [second_surname,setSecond_surname] = useState('');
     const [indentification_type,setindentification_type] = useState('');
     const [indentification_number,setindentification_number] = useState('');
     const [mail,setMail] = useState('');
@@ -50,9 +55,11 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
 
     const formInfo = {
         company_id:appInfo.company_id,
-        name,
         userPhoto,
-        lastNames,
+        first_name,
+        second_name,
+        first_surname,
+        second_surname,
         indentification_type,
         indentification_number,
         mail,
@@ -87,8 +94,8 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
         if(res){
             addNotification({
                 type:'aproved',
-                title:`Proveedor ${name} creado correctamente`,
-                description:`El proveedor ${name} fue creado correctamente.`
+                title:`Tercero ${first_name} creado correctamente`,
+                description:`El tercero ${first_name} fue creado correctamente.`
             })
             popOutAlert();
             if(reloadFun != undefined){
@@ -98,8 +105,8 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
         else{
             addNotification({
                 type:'error',
-                title:`Error al crear proveedor "${name}"`,
-                description:`Hubo un problema al crear el proveedor "${name}", intentelo de nuevo.`
+                title:`Error al crear tercerp "${first_name}"`,
+                description:`Hubo un problema al crear el tercero "${first_name}", intentelo de nuevo.`
             })
         }
         setLoading(false);
@@ -130,15 +137,17 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                             <i className="fa-solid fa-camera"/>
                         </FileInput>
                     </div>
-                    <FormInput action={setName} title={'Nombre o razón social'} placeholder={'Nombre del proveedor'} disabled={disabled} value={name}/>
-                    <FormInput action={setLastName} title={'Apellido o complemento'} placeholder={'Apellido del proveedor'} disabled={disabled} value={lastNames}/>
+                    <FormInput action={setFirst_name} value={first_name} title={'Primer Nombre o Razon Social'} placeholder={'Primer nombre'} disabled={disabled}/>
+                <FormInput action={setSecond_name} value={second_name} title={'Segundo Nombre'} placeholder={'Segundo nombre'} disabled={disabled}/>
+                <FormInput action={setFirst_surname} value={first_surname} title={'Primer Apellido o Diminutivo'} placeholder={'Primer Apellido'} disabled={disabled}/>
+                <FormInput action={setSecond_surname} value={second_surname} title={'Segundo Apellido'} placeholder={'Segundo Apellido'} disabled={disabled}/>
                     <SearchinList action={setindentification_type} title={'Tipo de Identificación'} placeHolder={'Tipo de identificación'} list={[
                         {text:'NIT',value:'NIT'},
                         {text:'Cédula de Ciudadanía',value:'CC'},
                         {text:'Cédula de Extranjería',value:'CE'},
                         {text:'Pasaporte',value:'PAS'}
                     ]}/>
-                    <FormInput action={setindentification_number} title={'Número de Identificación'} placeholder={'Número de identificación'} disabled={disabled}/>
+                    <FormInput action={setindentification_number} value={indentification_number} title={'Número de Identificación'} placeholder={'Número de identificación'} disabled={disabled}/>
                 </form>
             )}
             {stage === 1 &&(
