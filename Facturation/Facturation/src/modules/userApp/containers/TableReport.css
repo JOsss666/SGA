@@ -1,6 +1,5 @@
 @import './UserApp.css';
 
-
 .TableReport{
     max-height: 100%;
     height: fit-content;
@@ -18,9 +17,11 @@
     border-radius: .5vh;
     box-shadow: 0 .4vh .5vh var(--translucidMenu);
     outline: solid .1vh var(--inputsBorder);
-    z-index: 1;
+    z-index: 2;
     transition: .3s;
     width: 100%;
+    position: sticky;
+    top: 0;
 }
 
 .TableReport .headTable .headColumn{
@@ -29,15 +30,16 @@
     width: 10vw;
     padding: 1vh;
     overflow: hidden;
-    white-space: none;
-    text-wrap: nowrap;
+    white-space: nowrap;
     text-overflow: ellipsis;
     font-weight: 400;
     color: var(--mainText);
 }
 
 .TableReport .bodyTable{
+    height: 50vh;
     overflow-y: auto;
+    position: relative;
 }
 
 .TableReport .headTable .headColum_ID,
