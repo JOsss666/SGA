@@ -5,6 +5,7 @@
     max-height: 80dvh;
     overflow-y: auto;
 }
+
 .CashReciptDesign_goBackBtn{
     position: absolute;
     top: 3vh;
@@ -35,10 +36,12 @@
 
 .SelectCashRecipt{
     padding: 2vh;
-    margin-top: 6vh;
+    padding-top: 6vh;
     display: flex;
     flex-direction: column;
     gap: 2vh;
+    height: 100%;
+    background-color: var(--menuAside);
 }
 
 @media (max-width:500px) {
