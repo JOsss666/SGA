@@ -41,7 +41,7 @@
     flex-direction: column;
     gap: 2vh;
     height: 100%;
-    background-color: var(--menuAside);
+    background-color: var(--menuAsidecle);
 }
 
 @media (max-width:500px) {

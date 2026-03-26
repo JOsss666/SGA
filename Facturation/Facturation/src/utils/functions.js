@@ -32,6 +32,37 @@ export async function postInfo(route,informacion){
     })
 }
 
+export async function getInfo(route) {
+    console.log('Funcion get');
+    return new Promise((resolve, reject) => {
+        console.log(urlSer + route);
+        
+        fetch(urlSer + route, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok === false) {
+                // Manejo de errores (404, 500, etc)
+                return response.json().then(err => {
+                    reject(err);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            resolve(data);
+        })
+        .catch(error => {
+            // Manejo de errores de red o conexión
+            reject(error);
+        });
+    });
+}
+
 export async function parseToXlsx(info, download, columns, name) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(name || "Hoja1");
@@ -463,58 +494,32 @@ export const arrayToTree = (flatArray, rootIdValue = null) => {
 };
 
 export async function newElectronicInvoide(info){
-    const invoiceToSubmit = {
-        // 1. Número de factura (debe ser un string)
-        invoiceNumber: "93", 
-
-        // 2. Datos del Cliente (Customer)
-        customerData: {
-            id: 1, // Opcional si usas party_identification
-            party_identification: '1034517196', 
-            party_identification_type: 'NIT', // NIT, CEDULA_CIUDADANIA, CEDULA_EXTRANJERIA, etc.
-            party_type: "PERSONA_JURIDICA", // PERSONA_NATURAL o PERSONA_JURIDICA
-            company_name: "EMPRESA 1", // Requerido si es JURIDICA
-            first_name: "José", // Requerido si es NATURAL
-            family_name: "Murillo", // Requerido si es NATURAL
-            email: "murillojose.nvc@gmail.com",
-            phone: "3026034563",
-            address_line: "Calle 123 # 45-67",
-            country_code: "CO",
-            department: "ANTIOQUIA", // O código "05"
-            city: "MEDELLIN", // O código "05001"
-            tax_level_code: "SIMPLIFICADO", // REGIMEN_ORDINARIO_TARIF_COMUN, SIMPLIFICADO, etc.
-            regimen: "AUTORRETENEDOR" // Opcional según el caso
-        },
-
-        // 3. Array de Productos o Servicios (Items)
-        items: [
-            {
-                sku: "SERV-001", // Código interno
-                description: "Impresión Digital",
-                quantity: 2,
-                price: 0, // Precio UNITARIO antes de impuestos
-                original_price: 0, 
-                measuring_unit: "94", // "94" para unidades/servicios, "CEN" para centenas, etc.
-                
-                // Impuestos por cada Item
-                taxes: [
-                    {
-                        "tax-category": "IVA",
-                        "tax-rate": 19, // Porcentaje (19%)
-                        "tax-base": 0, // Base imponible (precio * cantidad)
-                        "tax-amount": 0 // Valor del impuesto
-                    }
-                ],
-                
-                // Retenciones por cada Item (Si aplica)
-                retentions: []
-            }
-        ]
-    };
-
-    let res = await postInfo('/electronicFacturation/createInvoice',invoiceToSubmit);
+    let res = await postInfo('/electronicFacturation/invoice',info);
     console.log(res);
 }
+
+export async function getNumberingRangesElectronicInvoices() {
+    let res = await getInfo('/electronicFacturation/getNumberingRanges');
+    console.log(res);
+}
+
+export async function showActualToken() {
+    let res = await getInfo('/electronicFacturation/showActualToken');
+    console.log(res);
+}
+
+export async function showAPITaxes() {
+    let res = await getInfo('/electronicFacturation/taxes');
+    console.log(res);
+}
+
+
+
+
+
+
+
+// funciones para impresion
 
 export async function printCashRecipt(info,appInfo,barCode){
     console.log(info);

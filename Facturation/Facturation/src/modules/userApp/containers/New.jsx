@@ -19,7 +19,7 @@ import { FormNewCashRecipt } from "./forms/FormNewCashRecipt";
 import { ProcessStatusAlert } from "./Alerts/ProcessStatusAlert";
 import { FormSelectNewProcess } from "./forms/FormSelectNewProcess";
 import { FormNewClientOrder } from "./forms/FormNewClientOrder";
-import { newElectronicInvoide, printCashRecipt, scanDevices } from "../../../utils/functions";
+import { getNumberingRangesElectronicInvoices, newElectronicInvoide, printCashRecipt, scanDevices, showActualToken, showAPITaxes } from "../../../utils/functions";
 import { CashReciptDesign } from "./Alerts/CashReciptDesign";
 import {FormClicksControl} from '../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormClicksControl'
 import {FormSelectMachine} from '../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormSelectMachine'
@@ -28,6 +28,7 @@ import { useEffect, useState } from "react";
 import { verifiClicksControl } from "../../../../../../costume-modules/zjSAS.S/utils/functions";
 import { NoResults } from "./NoResults";
 import { ClientOrderPreview } from "./Alerts/ClientOrderPreview";
+import { FormButton } from "../components/FormButton";
 
 export function New(){
     const {userConfig,appInfo,userInfo} = useAppInfo();
@@ -89,10 +90,28 @@ export function New(){
         //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
         {text:'Imprimir recibos',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-print"/>},
         {text:'Imprimir Ordes de cliente',children:<ClientOrderPreview/>,icon:<i className="fa-solid fa-print"/>},
-        /*{text:'Factura electronica',children:<span onClick={()=>{
-            newElectronicInvoide({})
-        }}>Generar factura electronica</span>},
-        {text:'Ver dispositivos',children:<span onClick={()=>{
+        {text:'Factura electronica',children:<div style={{
+            paddingTop:'8vh',
+            display:'flex',
+            gap:'1vh',
+            flexDirection:'column'
+        }}>
+            <FormButton text={'Obtener rangos Númericos'} onClick={()=>{
+                getNumberingRangesElectronicInvoices({})
+            }}></FormButton>
+            <FormButton text={'Mostrar token actual'} onClick={()=>{
+                showActualToken({})
+            }}></FormButton>
+            <FormButton text={'Obtener Impuestos'} onClick={()=>{
+                showAPITaxes({})
+            }}></FormButton>
+            <FormButton text={'Generar factura'} onClick={()=>{
+                newElectronicInvoide({
+                    type:'invoice'
+                })
+            }}></FormButton>
+        </div>},
+        /*{text:'Ver dispositivos',children:<span onClick={()=>{
             scanDevices();
         }}>Ver impresoras</span>},*/
         //{text:'Crear metodo de pago',children:<FormNewPaymentMethod/>,icon:<i className="fa-regular fa-credit-card"/>},
