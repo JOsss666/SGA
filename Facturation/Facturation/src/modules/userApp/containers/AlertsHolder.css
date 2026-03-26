@@ -3,7 +3,6 @@
 .AlertsHolder{
     position: absolute;
     height: 100dvh;
-    background-color: var(--bg);
     box-shadow: -.5vh 0 2vh #0002;
     z-index: 31;
     top: 0;
