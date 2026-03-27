@@ -128,7 +128,7 @@
     color: var(--descriptionText);
 }
 
-.FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .PaymentMethodCard input{
+.FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .PaymentMethodCard .inputPaymentValue{
     border: hidden;
     outline: solid .1vh var(--inputsBorder);
     font-size: clamp(2.2px,2.2vh,22px);
@@ -141,7 +141,7 @@
     background-color: var(--inputsBg);
 }
 
-.FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .PaymentMethodCard input:focus{
+.FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .PaymentMethodCard .inputPaymentValue:focus{
     
     color: var(--mainText);
     outline: solid .3vh #007AFF;
