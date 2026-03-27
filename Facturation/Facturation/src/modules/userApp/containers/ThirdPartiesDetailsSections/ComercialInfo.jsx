@@ -65,7 +65,7 @@ export function ComercialInfo({info,reloadFun}){
                     {credit == true || credit == 'true' && (
                         <>
                             <FormInput title={'Plazo de págo en días'} action={setCredit_term} placeholder={'0 días'} type={'number'} value={credit_term} disabled={disabled}/>
-                            <FormInput disabled={disabled} action={setCredit_value} title={'Monto del credito'} value={credit_value} moneyF={true} placeholder={'$ 0'} />
+                            <FormInput disabled={disabled} action={setCredit_value} title={'Monto del credito'} value={credit_value}  placeholder={'$ 0'} />
                             <FormInput title={'Tasa de interes diaria por mora'} action={setInterestRate} placeholder={'0 %'} value={interest_rate} type={'number'} disabled={disabled}/>
                             <SelectOptions disabled={disabled} title={'Estado comercial'} defaultValue={{text:comercial_state,value:comercial_state}} action={setComercial_state} objectC={true} options={[
                                 {text:'Activo',value:'active'},

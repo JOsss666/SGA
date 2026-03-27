@@ -4,7 +4,6 @@
     height: inherit;
     padding: 1vh;
     width: fit-content;
-    background-color: var(--asideMenu);
     position: relative;
     box-shadow: 0 -.2vh 1vh #0002;
     overflow: auto;
@@ -13,6 +12,7 @@
     animation-fill-mode: both;
     animation-timing-function: ease;
     width: 100%;
+    background-color: var(--bg);
     z-index: 30;
 }
 

@@ -3,6 +3,7 @@
     flex-direction: column;
     padding: 2vh;
     width: 30vw;
+    background-color: var(--bg);
 }
 
 .ProcessStatusAlert .headProcess{

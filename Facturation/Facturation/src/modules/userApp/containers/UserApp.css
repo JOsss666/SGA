@@ -227,6 +227,18 @@
     display: none;
 }
 
+/* Para Chrome, Safari, Edge y Opera (Webkit) */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+/* Para Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 /*  Responsive Design -> Mobile  */
 
 @media (max-width:500px) {
