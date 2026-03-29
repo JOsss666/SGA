@@ -111,8 +111,6 @@ export function PreviewDocument({doc_id}){
 
 
     // Functions
-
-
     const getDocumentInfo = async()=>{
         setLoading(true)
         let res = await postInfo('/getDocuments',{
