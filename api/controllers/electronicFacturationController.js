@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
-import { type } from 'os';
 import path from 'path';
+import { useDataBase } from '../app.js';
 
 const electronicFacturationController = {};
 const TOKEN_PATH = path.resolve('./factus_token.json');
@@ -209,14 +209,15 @@ electronicFacturationController.newInvoice = (req,res)=>{
         "observation": "",
         "payment_method_code": "10",
         "customer": {
-            "identification": "123456789",
+            "identification": info.customer.indentification_number,
             "dv": "3",
-            "company": "",
-            "trade_name": "",
-            "names": "Alan Turing",
-            "address": "calle 1 # 2-68",
-            "email": "alanturing@enigmasas.com",
-            "phone": "1234567890",
+            "company": `${info.customer.names} ${info.customer.lastNames}`,
+            "trade_name": info.customer.names,
+            "names": info.customer.names,
+            "address": info.customer.address,
+            //"email": info.customer.mail,
+            "email": 'murillojose.nvc@gmail.com',
+            "phone": info.customer.phone,
             "legal_organization_id": "2",
             "tribute_id": "21",
             "identification_document_id": "3",
@@ -273,8 +274,60 @@ electronicFacturationController.newInvoice = (req,res)=>{
         body: JSON.stringify(params)
     });
     const data = await response.json();
-    console.log('XXXXX ',data)
+    /*await electronicFacturationController.registerElectronicInvoice({
+        user_id:info.user_id,
+        customer:info.customer,
+        company_id:info.company_info.company_id,
+        store_id:6,
+        doc_id:info.doc_id,
+        invoice_id:data.bill.id,
+        reference:data.bill.reference_code,
+        number:data.bill.number,
+        code:data.bill.cufe,
+        url:data.bill.url,
+        qr:data.bill.qr,
+        qr_image:data.bill.qr_image
+    })*/
+    res.writeHead(200,{'Content-Type':'text/plain'})
+    res.end(JSON.stringify(data));
   })
+  req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+
+electronicFacturationController.registerElectronicInvoice = async(info)=>{
+    let sentence = `
+        INSERT INTO "ElectronicFacturation".invoices(
+            generated_by,
+            company_id,
+            store_id,
+            doc_id,
+            invoice_id,
+            reference,
+            "number",
+            code,
+            url,
+            qr,
+            qr_image
+            )
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11);
+    `;
+    let consulta = await useDataBase(sentence,[
+        info.user_id,
+        info.company_id,
+        info.store_id,
+        info.doc_id,
+        info.invoice_id,
+        info.reference,
+        info.number,
+        info.code,
+        info.url,
+        info.qr,
+        info.qr_image
+    ],2);
 }
 
 

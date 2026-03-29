@@ -681,6 +681,8 @@ processController.getProcessInstances =(req,res)=>{
         let values = [];
         let whereClauses = [];
 
+        console.log('------zzz ',info)
+
         whereClauses.push(`"Process".process_instance.company_id = $1`);
         values.push(info.company_id)
 
@@ -710,8 +712,8 @@ processController.getProcessInstances =(req,res)=>{
         }
 
         if(info.thirdParty_id != undefined && info.status[0] != 'all' ){
-            whereClauses.push(`"Process".process_instance.status = ANY($${values.length +1})`);
-            values.push(info.status);
+            whereClauses.push(`"Process".process_instance."thirdParty_id" = $${values.length +1}`);
+            values.push(info.thirdParty_id);
         }
 
         // Dates Filters

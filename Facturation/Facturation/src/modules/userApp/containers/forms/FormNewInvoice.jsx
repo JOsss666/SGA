@@ -6,17 +6,19 @@ import { FormInput } from "../../components/FormInput";
 import { InputFiles } from "../../components/InputFiles";
 import { FormButton } from "../../components/FormButton";
 import './FormNewCashRecipt.css'
+import './FormNewInvoice.css'
 import { FileInput } from "../../components/FileInput";
 import { LoadingSpace } from "../LoadingSpace";
-import { newElectronicInvoide, postInfo, printCashRecipt } from "../../../../utils/functions";
+import { moneyFormat, newElectronicInvoide, postInfo, printCashRecipt } from "../../../../utils/functions";
 import { NewElementSelect } from "../../components/NewElementSelect";
 import { FormNewThirdParties } from "./FormNewThirdParties";
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
 import { isElectron } from "../../../../App";
 import { LabelValue } from "../../components/LabelValue";
 import { SwitchOption } from "../../components/SwitchOption";
+import { UserCard } from "../../components/UserCard";
 
-export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
+export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     // Requieremnets
     const [info,setInfo] = useState(InfoParams != undefined? InfoParams:{})
@@ -47,6 +49,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         const [documentNature,setDocumentNature] = useState('DB');
         // Control of electronic facturation
         const [e_invoice,setE_invoice] = useState(false);
+        // Control of ITEMS Blocks
+        const [itemBlocks,setItemBlocks] = useState([{items:[]}]);
     
     // form info
     const [thirdParty_id,setThirdParty_id] = useState();
@@ -219,10 +223,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         }
     }
 
-    useEffect(()=>{
-        console.log(documentNature);
-    },[documentNature])
-
     const handleThirdPartyChange = (element)=>{
         setThirdParty_id(element.id);
         setThirdPartyInfo(element);
@@ -240,6 +240,13 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     useEffect(()=>{
         handleUserConfig();
     },[])
+
+    useEffect(()=>{
+        if(thirdParty_id != undefined){
+            getDocuments();
+            getInstances();
+        }
+    },[thirdParty_id])
 
     // Getters of info
 
@@ -262,7 +269,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const getInstances = async(allowedInstances,allowedTypes)=>{
         let res = await postInfo('/process/getProcessInstances',{
             company_id:appInfo.company_id,
-            status:['active']
+            status:['active'],
+            thirdParty_id
         })
         console.log(res);
         if(res[0]){
@@ -393,18 +401,52 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             setPaymentMethods(C);
         }
     }
-    
+
+    const getAttachedServices = async(doc_id)=>{
+        let res = await postInfo('/getServiceMovements',{
+            company_id:appInfo.company_id,
+            doc_id
+        })
+        if(res[0]){
+            return(res[1])
+        }
+    }
 
     const getDocuments = async(instance_id)=>{
         let res = await postInfo('/getDocuments',{
             company_id:appInfo.company_id,
             instance_id,
+            thirdParty_id,
             status:'active',
             // Arreglo temporal de tipo de documentos
             allowedTypes:['Client Order']
         })
+        console.log(res)
         if(res[0]){
-            setDocuments(res[1]);
+            if(instance_id == undefined){
+                let C = []
+                res[1].forEach(element => {
+                    C.push({
+                        text:`${element.document_type}#${element.ownSerial}`,
+                        value:element
+                    })
+                });
+                setDocuments(C);
+            }else{
+                let C = [{
+                    items:[]
+                }];
+                for (const element of res[1]) {
+                console.log('Procesando elemento:', element.id);
+                    let attachedItems = await getAttachedServices(element.id);
+                    C.push({
+                        docInfo: element,
+                        items: attachedItems
+                    });
+                }
+                console.log('===> ',C);
+                setItemBlocks(C);
+            }
         }
     }
 
@@ -537,8 +579,13 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         console.log(documents)
         if(documents.length > 0){
             let newTotalToPay = 0;
-            documents.forEach(element => {
-                newTotalToPay += parseInt(element.total);
+            itemBlocks.forEach(element => {
+                console.log(element)
+                let tempTtl = 0;
+                element.items.forEach(element => {
+                    tempTtl += (parseFloat(element.unit_value)*parseFloat(element.units))
+                });
+                newTotalToPay += tempTtl;
             });
             setTotalToPay(newTotalToPay);
         }
@@ -550,7 +597,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             setTotalToPay(newTotalToPay)
         }
         calcTotalFromPayments();
-    },[documents,briefCaseBills])
+    },[documents,briefCaseBills,itemBlocks])
 
     // Creation Function
 
@@ -674,11 +721,16 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     },[instance_id])
 
     return(
-        <div className="FormNewCashRecipt">
+        <div className="FormNewCashRecipt FormNewInvoice">
             <div className="headForm">
-                <BoldTitle text={documentNature == 'DB'? 'Recibo de caja':'Nuevo Egreso'}>
-                    <i className="fa-solid fa-receipt"/>
+                <BoldTitle text={'Factura de venta'}>
+                    <i className="fa-solid fa-file-invoice"/>
                 </BoldTitle>
+                {appConfig?.access?.services?.e_facturation?.use == true && (
+                    <LabelValue title={"Generar factura electronica"}>
+                        <SwitchOption action={setE_invoice}/>    
+                    </LabelValue> 
+                )}
                 <div className="valuesCashRecipt">
                     {(instance_id != undefined || mode == 'briefcase_payment')&& (
                         <h6 className="valueCashRecipt">Valor a cobrar: $ {formatCurrency(totalToPay)}</h6>
@@ -709,15 +761,16 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                     {info.costCenter_id == undefined && (
                         <SearchinList action={setCostCenter_id} title={'Centro de costo'} placeHolder={'Seleccione el centro de costo'} list={costCenters} disabled={disabled}/>
                     )}
+                    <SearchinList action={handleThirdPartyChange} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdparties} disabled={disabled} specialOption={
+                        <NewElementSelect title={'Crear nuevo'} onClick={()=>{
+                            popInAlert(<FormNewThirdParties reloadFun={getThirdParties} quickCreation={true}/>)
+                        }}/>
+                    }/>
                     {info.instance_id == undefined && (
-                        <SearchinList action={handleSelectInstance} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={disabled}/>
+                        <SearchinList action={handleSelectInstance} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={thirdParty_id != undefined? disabled:true}/>
                     )}
                     {info.thirdParty_id == undefined && (
-                        <SearchinList action={handleThirdPartyChange} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdparties} disabled={disabled} specialOption={
-                            <NewElementSelect title={'Crear nuevo'} onClick={()=>{
-                                popInAlert(<FormNewThirdParties reloadFun={getThirdParties} quickCreation={true}/>)
-                            }}/>
-                        }/>
+                        <SearchinList action={handleThirdPartyChange} title={'Documentos'} placeHolder={'Seleccione el documento'} list={documents} disabled={thirdParty_id != undefined? disabled:true}/>
                     )}
                     {info.concept_id == undefined && (
                         <SearchinList action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
@@ -725,27 +778,36 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                     {info.cashBox_id == undefined && (
                         <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja'} list={cashBoxes} disabled={disabled}/>
                     )}
-                    {mode == 'briefcase_payment' && (
-                        <div className="aviableBriefCaseContainer">
-                            <h6>Cuentas por cobrar</h6>
-                            <div className="gridBirefCaseBills">
-                                {briefCaseBills.map((element,index)=>(
-                                    <div key={index} className="briefCaseCard">
-                                        <strong>{`${element.process_code != undefined? element.process_code:'--'}#${element.instance_id != undefined? element.instance_id:'---'}`}</strong>
-                                        <span>Valor: {formatCurrency(element.pending_amount)}</span>
-                                        <span>Vence: {formatDate(element.due_date)}</span>
-                                        <input type="number" min={0} max={element.pending_amount} step={0.1} disabled={disabled} placeHolder={'$ 0'} onChange={(e)=>{
-                                            if(e.target.value != '' && e.target.value != undefined){
-                                                updateBriefCasePayedValue(e.target.value,element.id)
-                                            }else{
-                                                updateBriefCasePayedValue(0,element.id);
-                                            }
-                                        }} />
+                    <div className="gridItemsContainer">
+                        {itemBlocks?.map((element,index)=>(
+                            <div key={index} className="itemBlock">
+                                {element.docInfo != undefined && (
+                                    <div className="headBlock">
+                                        <strong>{`${element.docInfo.document_type}#${element.docInfo.ownSerial}`}</strong>
+                                        <span>Total: ${moneyFormat(element.docInfo.pending_value)}</span>
+                                        <span className="quitContainer">
+                                            <i className="fa-solid fa-trash"/>
+                                        </span>
                                     </div>
-                                ))}
+                                )}
+                                <div className="gridItems">
+                                    {element.items.map((element,index)=>(
+                                        <div className="itemRow">
+                                            <UserCard imgSrc={element.service_img} name={element.service_name}/>
+                                            <strong className="valueItemRow">Unidades: {element.units}</strong>
+                                            <strong className="valueItemRow">Val unidad: {moneyFormat(element.unit_value)}</strong>
+                                            <strong className="valueItemRow">Total: {moneyFormat(parseFloat(element.units)*parseFloat(element.unit_value))}</strong>
+                                        </div>
+                                    ))}
+                                </div>
+                                {element.docInfo == undefined && (
+                                    <div className="personalizaedView">
+                                        <SearchinList list={[]} placeHolder={'+ Agregar producto o servicio'}/>
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                    )}
+                        ))}
+                    </div>
                     {info.paymentMethod == undefined && (
                         <div className="paymentMehtodsContainer">
                             <SearchinList title={'Metodos de pago'} action={addPaymentMethod} noActVal={true} placeHolder={'Selecione metodos de pago'} list={paymentMehtods}/>
@@ -801,11 +863,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                         </div>
                     )}
                     <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
-                    {appConfig?.access?.services?.e_facturation?.use == true && (
-                        <LabelValue title={"Factura electronica"}>
-                            <SwitchOption action={setE_invoice}/>    
-                        </LabelValue> 
-                    )}
                     <FileInput action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
                     <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor excede el monto max':'Crear recibo de caja'} disabled={disabled} loading={loading}/>
                 </form>

@@ -29,6 +29,7 @@ import { verifiClicksControl } from "../../../../../../costume-modules/zjSAS.S/u
 import { NoResults } from "./NoResults";
 import { ClientOrderPreview } from "./Alerts/ClientOrderPreview";
 import { FormButton } from "../components/FormButton";
+import { FormNewInvoice } from "./forms/FormNewInvoice";
 
 export function New(){
     const {userConfig,appInfo,userInfo} = useAppInfo();
@@ -65,6 +66,9 @@ export function New(){
         ...(userConfig?.access?.sections?.cashBoxes?.overAll ? 
             [{ text: 'Crear recibo de caja', children: <FormNewCashRecipt />, icon: <i className="fa-solid fa-receipt" /> }] : []),
         
+        {text:'Factura de venta',children:<FormNewInvoice/>,icon:<i className="fa-solid fa-file-invoice"/>},
+        
+
         { text: 'Crear nueva orden de cliente', children: <FormNewClientOrder canRepeatServices={true} />, icon: <i className="fa-regular fa-file" /> },
         
         ...(userConfig?.access?.sections?.users?.overAll ? 
@@ -90,7 +94,7 @@ export function New(){
         //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
         {text:'Imprimir recibos',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-print"/>},
         {text:'Imprimir Ordes de cliente',children:<ClientOrderPreview/>,icon:<i className="fa-solid fa-print"/>},
-        /*{text:'Factura electronica',children:<div style={{
+        {text:'Factura electronica',children:<div style={{
             paddingTop:'8vh',
             display:'flex',
             gap:'1vh',
@@ -110,7 +114,7 @@ export function New(){
                     type:'invoice'
                 })
             }}></FormButton>
-        </div>},/*
+        </div>},
         /*{text:'Ver dispositivos',children:<span onClick={()=>{
             scanDevices();
         }}>Ver impresoras</span>},*/
