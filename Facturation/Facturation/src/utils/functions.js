@@ -495,7 +495,7 @@ export const arrayToTree = (flatArray, rootIdValue = null) => {
 
 export async function newElectronicInvoide(info){
     let res = await postInfo('/electronicFacturation/invoice',info);
-    console.log(res);
+    console.log(res)
 }
 
 export async function getNumberingRangesElectronicInvoices() {

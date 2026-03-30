@@ -1533,6 +1533,9 @@ controller.createTransaction = (req,res)=>{
                         info.instance_id
                     ])
                 }
+                if(element.for_balance){
+
+                }
                 // Espacio para actualizar aviable credit
                 resultDetails.push([postConsulta.id != undefined,postConsulta.id]);
             }
@@ -1855,6 +1858,11 @@ controller.getDocuments = (req,res)=>{
         if(info.id != undefined){
             whereClauses.push(`"Ecosystem".documents.id = $${values.length + 1}`);
             values.push(info.id)
+        }
+
+        if(info.thirdParty_id != undefined){
+            whereClauses.push(`"Ecosystem".documents."thirdParty_id" = $${values.length + 1}`);
+            values.push(info.thirdParty_id)
         }
 
         const whereQuery = whereClauses.length > 0

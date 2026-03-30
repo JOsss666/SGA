@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
-import { type } from 'os';
 import path from 'path';
+import { useDataBase } from '../app.js';
 
 const electronicFacturationController = {};
 const TOKEN_PATH = path.resolve('./factus_token.json');
@@ -60,27 +60,21 @@ async function getNumercRangeData(type) {
 }
 
 electronicFacturationController.getAuthToken = async (grantType = 'password', refreshToken = null) => {
-    // 1. VALIDACIÓN DE SEGURIDAD: 
-    // Si grantType no es una de las dos opciones válidas, forzamos 'password'.
-    // Esto evita el error "unsupported_grant_type" si se cuela un parámetro basura.
     const validGrants = ['password', 'refresh_token'];
     let finalGrantType = validGrants.includes(grantType) ? grantType : 'password';
 
-    // 2. Intentar cargar token desde el archivo si es un flujo normal de password
     let stored = await readFile(TOKEN_PATH);
 
+    // Si pedimos password pero hay un token válido en caché, lo usamos
     if (stored && finalGrantType === 'password') {
         const now = Date.now();
         const fiveMinutes = 5 * 60 * 1000;
         
-        // ¿Sigue siendo válido?
         if (now < (stored.expires_at - fiveMinutes)) {
             console.log('✅ Utilizando token guardado en caché');
-            electronicFacturationController.authToken = stored;
             return stored;
         }
         
-        // Si expiró pero tenemos el refresh_token guardado, lo usamos automáticamente
         if (stored.refresh_token) {
             console.log('🔄 El access_token expiró, intentando refrescar...');
             finalGrantType = 'refresh_token';
@@ -89,7 +83,6 @@ electronicFacturationController.getAuthToken = async (grantType = 'password', re
     }
 
     try {
-        // 3. Construcción del Payload con los nombres exactos que pide Factus
         const payload = {
             grant_type: finalGrantType,
             client_id: process.env.FACTUS_CLIENT_ID,
@@ -100,35 +93,33 @@ electronicFacturationController.getAuthToken = async (grantType = 'password', re
             payload.username = process.env.FACTUS_USERNAME;
             payload.password = process.env.FACTUS_PASSWORD;
         } else {
-            // Si el refreshToken llegó nulo por alguna razón, abortamos antes de pedirlo
-            if (!refreshToken) throw new Error("Se requiere refresh_token para este grant_type");
+            if (!refreshToken) throw new Error("Falta refresh_token");
             payload.refresh_token = refreshToken;
         }
 
-        console.log(`🚀 Solicitando token a Factus con grant_type: [${finalGrantType}]`);
+        console.log(`🚀 Solicitando token a Factus: [${finalGrantType}]`);
 
         const response = await fetch('https://api-sandbox.factus.com.co/oauth/token', {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json', 
-                'Accept': 'application/json' 
-            },
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify(payload)
         });
 
         const data = await response.json();
 
-        // 4. Si la API de Factus responde con error (aquí verías el unsupported_grant_type si algo falló)
         if (!response.ok) {
+            // SOLUCIÓN AL ERROR DE REFRESH: Si falla el refresh_token, reintentamos con password
+            if (finalGrantType === 'refresh_token') {
+                console.warn('⚠️ Refresh token inválido o revocado. Reintentando login completo...');
+                return await electronicFacturationController.getAuthToken('password');
+            }
+            
             console.error('❌ Error detallado de Factus:', data);
             throw new Error(data.message || data.error || 'Error en la autenticación');
         }
 
-        // 5. Guardar en el archivo para el futuro
         const savedToken = await saveToken(data);
-        electronicFacturationController.authToken = savedToken;
-        
-        console.log('✨ Nuevo token obtenido y guardado exitosamente');
+        console.log('✨ Token actualizado correctamente');
         return savedToken;
 
     } catch (error) {
@@ -136,6 +127,8 @@ electronicFacturationController.getAuthToken = async (grantType = 'password', re
         throw error;
     }   
 };
+
+
 electronicFacturationController.getNumberingRanges = async () => {
     try {
         let stored = await readFile(RANGES_PATH);
@@ -209,14 +202,15 @@ electronicFacturationController.newInvoice = (req,res)=>{
         "observation": "",
         "payment_method_code": "10",
         "customer": {
-            "identification": "123456789",
+            "identification": info.customer.indentification_number,
             "dv": "3",
-            "company": "",
-            "trade_name": "",
-            "names": "Alan Turing",
-            "address": "calle 1 # 2-68",
-            "email": "alanturing@enigmasas.com",
-            "phone": "1234567890",
+            "company": `${info.customer.names} ${info.customer.lastNames}`,
+            "trade_name": info.customer.names,
+            "names": info.customer.names,
+            "address": info.customer.address,
+            //"email": info.customer.mail,
+            "email": 'murillojose.nvc@gmail.com',
+            "phone": info.customer.phone,
             "legal_organization_id": "2",
             "tribute_id": "21",
             "identification_document_id": "3",
@@ -273,8 +267,60 @@ electronicFacturationController.newInvoice = (req,res)=>{
         body: JSON.stringify(params)
     });
     const data = await response.json();
-    console.log('XXXXX ',data)
+    /*await electronicFacturationController.registerElectronicInvoice({
+        user_id:info.user_id,
+        customer:info.customer,
+        company_id:info.company_info.company_id,
+        store_id:6,
+        doc_id:info.doc_id,
+        invoice_id:data.bill.id,
+        reference:data.bill.reference_code,
+        number:data.bill.number,
+        code:data.bill.cufe,
+        url:data.bill.url,
+        qr:data.bill.qr,
+        qr_image:data.bill.qr_image
+    })*/
+    res.writeHead(200,{'Content-Type':'text/plain'})
+    res.end(JSON.stringify(data));
   })
+  req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+
+electronicFacturationController.registerElectronicInvoice = async(info)=>{
+    let sentence = `
+        INSERT INTO "ElectronicFacturation".invoices(
+            generated_by,
+            company_id,
+            store_id,
+            doc_id,
+            invoice_id,
+            reference,
+            "number",
+            code,
+            url,
+            qr,
+            qr_image
+            )
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11);
+    `;
+    let consulta = await useDataBase(sentence,[
+        info.user_id,
+        info.company_id,
+        info.store_id,
+        info.doc_id,
+        info.invoice_id,
+        info.reference,
+        info.number,
+        info.code,
+        info.url,
+        info.qr,
+        info.qr_image
+    ],2);
 }
 
 

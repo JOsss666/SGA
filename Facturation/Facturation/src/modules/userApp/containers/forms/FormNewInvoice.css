@@ -1,0 +1,126 @@
+.FormNewInvoice{
+    width: 70dvw;
+    position: relative;
+}
+
+.FormNewInvoice .headForm{
+    width: 70%;
+    padding: 2vh 2vw;
+}
+
+.FormNewInvoice .headForm .LabelValue{
+    padding:1vh 0;
+}
+
+.FormNewInvoice .headForm .valuesCashRecipt{
+    flex-direction: row;
+    display: flex;
+    gap: 2vw;
+}
+
+.FormNewInvoice form{
+    padding-top: 4vh;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 2vh 4vw;
+}
+
+.FormNewInvoice form .paymentMehtodsContainer{
+    padding: 2vh;
+    border-radius: 2vh;
+    width: 100%;
+}
+
+.FormNewInvoice form .gridItemsContainer{
+    width: 100%;
+    display: flex;
+    flex-direction: column-reverse;
+    padding: 1vh 2vh;
+    border-radius: 1vh;
+    outline: solid .1vh var(--inputsBorder);
+}
+
+.FormNewInvoice .itemBlock{
+    padding: 1vh 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+
+.FormNewInvoice .itemBlock .headBlock{
+    display: flex;
+    gap: 2vw;
+}
+
+.FormNewInvoice .itemBlock .headBlock strong{
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--mainText);
+    font-weight: 500;
+    margin: auto 0;
+}
+
+.FormNewInvoice .itemBlock .headBlock span{
+    margin: auto;
+    margin-right: 1vh;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--descriptionText);
+}
+
+.FormNewInvoice .itemBlock .headBlock .quitContainer{
+    margin: auto 1vh;
+}
+
+.FormNewInvoice .itemBlock .headBlock .quitContainer i{
+    cursor: pointer;
+    transition: .3s ease all;
+}
+
+.FormNewInvoice .itemBlock .headBlock .quitContainer i:hover{
+    color: #FB2C36;
+    transform: rotateZ(15deg);
+}
+
+.FormNewInvoice .itemBlock .gridItems{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding-left: 1vw;
+}
+
+.FormNewInvoice .itemBlock .gridItems .itemRow{
+    display: flex;
+    width: 100%;
+    gap: 2vw;
+    padding: 1vh;
+    border-radius: 1vh;
+    border-bottom: .2vh dashed var(--inputsBorder);
+}
+
+.FormNewInvoice .itemBlock .gridItems .UserCard{
+    width: 40%;
+}
+
+.FormNewInvoice .itemBlock .gridItems .valueItemRow{
+    margin: auto 0;
+    text-align: right;
+    width: 15%;
+    font-weight: 400;
+    color: var(--descriptionText);
+}
+
+.FormNewInvoice .itemBlock .gridItems .rowInputItem .FormInput{
+    width: 10vw;
+    min-width: 0;
+}
+
+.FormNewInvoice .itemBlock .gridItems .rowInputItem .FormInput label{
+    font-weight: 400;
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
+}
+
+.FormNewInvoice .itemBlock .gridItems .itemRow:hover{
+    background-color: var(--cardHover);
+}
