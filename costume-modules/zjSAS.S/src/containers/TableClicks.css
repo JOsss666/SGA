@@ -31,11 +31,11 @@
     width: 15vw;
 }
 
+
 .TableClicks .bodyTable{
-    display: flex;
-    flex-direction: column;
-    width: fit-content;
-    max-height: 55vh;
+    position: relative;
+    height: 60vh;
+    width: 100%;
     overflow-y: auto;
 }
 
