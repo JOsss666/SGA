@@ -109,9 +109,14 @@ let companyConfig = {
                     "use":true,
                     "instance":"full",
                     "expires":"---"
-                },
+                }
             },
-            "personalized":{}
+            "personalized":{},
+            "e_facturation":{
+                "use":true,
+                "instance":"full",
+                "expires":"---"
+            }
         }
     },
     "features":{

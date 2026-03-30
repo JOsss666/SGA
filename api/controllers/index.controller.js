@@ -1857,6 +1857,11 @@ controller.getDocuments = (req,res)=>{
             values.push(info.id)
         }
 
+        if(info.thirdParty_id != undefined){
+            whereClauses.push(`"Ecosystem".documents."thirdParty_id" = $${values.length + 1}`);
+            values.push(info.thirdParty_id)
+        }
+
         const whereQuery = whereClauses.length > 0
             ? `WHERE ${whereClauses.join(" AND ")}`
             : "";
