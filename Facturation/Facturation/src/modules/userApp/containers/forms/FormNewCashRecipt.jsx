@@ -692,13 +692,13 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             {!loading && (
                 <form action="" disabled={disabled} onSubmit={(e)=>{
                     e.preventDefault();
-                    //createCashRecipt();
-                    newElectronicInvoide({
+                    createCashRecipt();
+                    /*newElectronicInvoide({
                         company_info:appInfo,
                         customer:thirdPartyInfo,
                         user_id:userInfo.user_id,
                         document:FormInfo
-                    });
+                    });*/
                 }}>
                     {info.store_id == undefined && (
                         <SearchinList action={setStore_id} title={'Tienda'} placeHolder={'Seleccione la tienda'} list={stores} disabled={disabled}/>
@@ -760,7 +760,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                                     <div key={index} className={`PaymentMethodCard ${disabledByValue? 'disabledPaymentMethodCard':''}`}>
                                         <div className="payMC">
                                             <strong>{element.name}</strong>
-                                            {!element.for_balance && (
+                                            {!element.for_wallet && (
                                                 <input className="inputPaymentValue" step={0.001} type="number"  placeholder="$0" onChange={(e)=>{
                                                     updatePaymentValue(element.id,"value",e.target.value)
                                                 }}/>
