@@ -113,7 +113,7 @@ export function New(){
                     type:'invoice'
                 })
             }}></FormButton>
-        </div>},/*
+        </div>},*/
         /*{text:'Ver dispositivos',children:<span onClick={()=>{
             scanDevices();
         }}>Ver impresoras</span>},*/

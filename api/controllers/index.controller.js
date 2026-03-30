@@ -1533,6 +1533,9 @@ controller.createTransaction = (req,res)=>{
                         info.instance_id
                     ])
                 }
+                if(element.for_balance){
+
+                }
                 // Espacio para actualizar aviable credit
                 resultDetails.push([postConsulta.id != undefined,postConsulta.id]);
             }

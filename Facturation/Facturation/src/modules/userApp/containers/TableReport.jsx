@@ -1,11 +1,13 @@
 import { CheckSquare } from "../components/CheckSquare";
 import { RowTableReport } from "../components/RowTableReport";
 import { NoResults } from "./NoResults";
-import { useMemo } from "react";
-import './TableReport.css'
+import { useMemo, useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import "./TableReport.css";
 
-export function TableReport({columns,info,type,searchValue,navigation}){
+export function TableReport({ columns, info, type, searchValue, navigation }) {
 
+    // Filtrado optimizado
     const filteredInfo = useMemo(() => {
         if (!searchValue?.trim()) return info;
 
@@ -17,23 +19,86 @@ export function TableReport({columns,info,type,searchValue,navigation}){
             )
         );
     }, [info, searchValue]);
-    
-    return(
+
+    // referencia del contenedor scroll
+    const parentRef = useRef(null);
+
+    // virtualizador
+    const rowVirtualizer = useVirtualizer({
+        count: filteredInfo.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 50, // altura aproximada de cada fila
+        overscan: 5
+    });
+
+    return (
         <div className="TableReport">
+
+            {/* HEADER */}
             <div className="headTable">
-                <span><CheckSquare/></span>
-                {columns.map((element,index)=>(
-                    <span className={`headColumn headColum_${element}`} key={index}>{element}</span>
+                <span>
+                    <CheckSquare />
+                </span>
+
+                {columns.map((element, index) => (
+                    <span
+                        className={`headColumn headColum_${element}`}
+                        key={index}
+                    >
+                        {element}
+                    </span>
                 ))}
             </div>
-            <div className="bodyTable">
-                {info.length >0 && filteredInfo.map((element,index)=>(
-                    <RowTableReport type={type} columns={columns} info={element} key={index} navigation={navigation}/>
-                ))}
-                {info.length == 0 && (
-                    <NoResults title={'No hay resultados disponibles'}/>
-                )}
-            </div>
+
+            {/* BODY */}
+            {filteredInfo.length > 0 ? (
+                <div
+                    ref={parentRef}
+                    className="bodyTable"
+                    style={{
+                        height: "500px",
+                        overflowY: "auto"
+                    }}
+                >
+                    <div
+                        style={{
+                            height: `${rowVirtualizer.getTotalSize()}px`,
+                            width: "100%",
+                            position: "relative"
+                        }}
+                    >
+                        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+
+                            const element = filteredInfo[virtualRow.index];
+
+                            return (
+                                <div
+                                    key={virtualRow.key}
+                                    style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        width: "100%",
+                                        transform: `translateY(${virtualRow.start}px)`
+                                    }}
+                                >
+                                    <RowTableReport
+                                        type={type}
+                                        columns={columns}
+                                        info={element}
+                                        navigation={navigation}
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            ) : (
+                <div className="bodyTable">
+                    <NoResults title={"No hay resultados disponibles"} />
+                </div>
+            )}
+
         </div>
-    )
+    );
 }

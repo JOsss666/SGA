@@ -1,10 +1,10 @@
 .FormNewInvoice{
-    width: 60dvw;
+    width: 70dvw;
     position: relative;
 }
 
 .FormNewInvoice .headForm{
-    width: 60%;
+    width: 70%;
     padding: 2vh 2vw;
 }
 
@@ -108,6 +108,17 @@
     width: 15%;
     font-weight: 400;
     color: var(--descriptionText);
+}
+
+.FormNewInvoice .itemBlock .gridItems .rowInputItem .FormInput{
+    width: 10vw;
+    min-width: 0;
+}
+
+.FormNewInvoice .itemBlock .gridItems .rowInputItem .FormInput label{
+    font-weight: 400;
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
 }
 
 .FormNewInvoice .itemBlock .gridItems .itemRow:hover{

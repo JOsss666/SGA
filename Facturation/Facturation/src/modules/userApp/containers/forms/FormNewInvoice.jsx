@@ -33,6 +33,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const [costCenters,setCostCenters] = useState([]);
     const [concepts,setConcepts] = useState([]);
     const [documents,setDocuments] = useState([]);
+    const [productsAndServices,setProductsAndServices] = useState([]);
     const [cashBoxes,setCashBoxes] = useState([]);
         // BirefCase Bills requirements
         const [briefCaseBills,setBriefCaseBills] = useState([]);
@@ -41,6 +42,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const [mode,setMode] = useState('process_instance');
     const [loading,setLoading] = useState();
     const [disabled,setDisabled] = useState();
+    const [disabledToSubmit,setDisabledToSubmit] = useState(false);
     const [disabledByValue,setDisabledByValue] = useState(false);
         // control of credit conditions of thirdParty
         const [ableCredit,setAbleCredit] = useState(false);
@@ -85,7 +87,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         thirdParty_id,
         thirdParty_name:thirdPartyInfo.names,
         bussines_id,
-        doc_type:'Cash Recipt',
+        doc_type:'Sell Invoice',
         status,
         subTotal:total,
         total,
@@ -237,17 +239,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
     }
 
-    useEffect(()=>{
-        handleUserConfig();
-    },[])
-
-    useEffect(()=>{
-        if(thirdParty_id != undefined){
-            getDocuments();
-            getInstances();
-        }
-    },[thirdParty_id])
-
     // Getters of info
 
     const handleSelectInstance = (element)=>{
@@ -265,6 +256,82 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
         calcTotalFromPayments();
     }
+
+    // Control of Products and services in ITEM blocks
+
+        const handleAddProductAndService = async (element) => {
+            if(element.name == undefined)return;
+            setItemBlocks(prev =>
+                prev.map((block, index) =>
+                    index === 0
+                        ? { 
+                            ...block, 
+                            items: [...block.items, element] // Copia los items actuales y añade el nuevo
+                        }
+                        : block // Mantiene los demás bloques sin cambios
+                )
+            );
+        };
+
+        const handleDeleteBlock = (blockIndex) => {
+            setItemBlocks(prev => {
+                // 1. Buscamos el bloque que el usuario quiere "eliminar"
+                const blockToProcess = prev[blockIndex];
+
+                // Si por alguna razón el índice no existe, retornamos el estado actual
+                if (!blockToProcess) return prev;
+
+                // 2. Aplicamos tu lógica condicional:
+                // Si docInfo es undefined (Bloque manual/vacío), solo limpiamos los items
+                if (blockToProcess.docInfo === undefined) {
+                    return prev.map((block, index) => 
+                        index === blockIndex 
+                            ? { ...block, items: [] } // Vaciamos el arreglo de ítems
+                            : block
+                    );
+                } 
+
+                // 3. Si docInfo tiene contenido (Viene de una Orden/Documento), eliminamos el bloque
+                return prev.filter((_, index) => index !== blockIndex);
+            });
+        };
+
+        const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
+            setItemBlocks(prev =>
+                prev.map((block, bIdx) => {
+                    // 1. Buscamos el bloque correcto
+                    if (bIdx !== blockIndex) return block;
+
+                    // 2. Si es el bloque, mapeamos sus ítems para encontrar el que queremos editar
+                    const updatedItems = block.items.map((item, iIdx) => {
+                        if (iIdx !== itemIndex) return item;
+
+                        // 3. Retornamos una copia del ítem con el valor actualizado
+                        return { ...item, [key]: value };
+                    });
+
+                    // 4. Retornamos el bloque con su nueva lista de ítems
+                    return { ...block, items: updatedItems };
+                })
+            );
+        };
+
+    const handleDeleteItem = (blockIndex, itemIndex) => {
+        setItemBlocks(prev =>
+            prev.map((block, bIdx) => {
+                // 1. Si no es el bloque que buscamos, lo dejamos tal cual
+                if (bIdx !== blockIndex) return block;
+
+                // 2. Si es el bloque, filtramos su lista de ítems
+                const filteredItems = block.items.filter((_, iIdx) => iIdx !== itemIndex);
+
+                // 3. Retornamos el bloque actualizado con la nueva lista de ítems
+                return { ...block, items: filteredItems };
+            })
+        );
+    };
+
+    // Getters of info
 
     const getInstances = async(allowedInstances,allowedTypes)=>{
         let res = await postInfo('/process/getProcessInstances',{
@@ -513,11 +580,11 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             }
         });
         if(instance_id != undefined){
-            if(newTTl > totalToPay){
-                setDisabled(true);
+            if(newTTl < totalToPay){
+                setDisabledToSubmit(true);
                 setDisabledByValue(true);
             }else{
-                setDisabled(false);
+                setDisabledToSubmit(false);
                 setDisabledByValue(false);
             }
         }
@@ -534,6 +601,36 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             )
         );
     };
+
+    const getProductsAndServices = async()=>{
+        let allowedStores = undefined;
+        let allowedCellars = undefined;
+        if(userConfig.access.stores.enabled.length > 1){
+            allowedStores = userConfig.access.stores.enabled;
+        }
+        if(userConfig.access.cellars.enabled.length > 1){
+            allowedCellars = userConfig.access.cellars.enabled.length;
+        }
+        let res = await postInfo('/inventory/getProducts',{
+            company_id:appInfo.company_id,
+            allowedStores,
+            allowedCellars,
+            type:'service'
+        })
+        console.log('=======> ',res);
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:`${element.code} ${element.name}`,
+                    value:element
+                })
+            });
+            setProductsAndServices(C)
+        }else{
+            setProductsAndServices([]);
+        }
+    }
 
     useEffect(()=>{
         calcTotalFromPayments();
@@ -559,18 +656,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         )
     }
 
-
-    // Function for control payments of BirefCaseBills
-    const updateBriefCasePayedValue = (newValue,id)=>{
-        setBriefCaseBills(prev => 
-            prev.map(item => 
-                item.id === id 
-                    ? { ...item, ["paid_value"]: newValue } 
-                    : item
-            )
-        );
-    }
-
     useEffect(()=>{
         console.log(briefCaseBills)
     },[briefCaseBills])
@@ -583,7 +668,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 console.log(element)
                 let tempTtl = 0;
                 element.items.forEach(element => {
-                    tempTtl += (parseFloat(element.unit_value)*parseFloat(element.units))
+                    tempTtl += (parseFloat(element.unit_value? element.unit_value:0)*parseFloat(element.units? element.units:0))
                 });
                 newTotalToPay += tempTtl;
             });
@@ -598,6 +683,18 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
         calcTotalFromPayments();
     },[documents,briefCaseBills,itemBlocks])
+
+    useEffect(()=>{
+        handleUserConfig();
+        getProductsAndServices();
+    },[])
+
+    useEffect(()=>{
+        if(thirdParty_id != undefined){
+            getDocuments();
+            getInstances();
+        }
+    },[thirdParty_id])
 
     // Creation Function
 
@@ -742,7 +839,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 }}/>
             </div>
             {!loading && (
-                <form action="" disabled={disabled} onSubmit={(e)=>{
+                <form action="" disabled={disabledToSubmit? true:disabled} onSubmit={(e)=>{
                     e.preventDefault();
                     //createCashRecipt();
                     newElectronicInvoide({
@@ -779,30 +876,63 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                         <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja'} list={cashBoxes} disabled={disabled}/>
                     )}
                     <div className="gridItemsContainer">
-                        {itemBlocks?.map((element,index)=>(
-                            <div key={index} className="itemBlock">
-                                {element.docInfo != undefined && (
-                                    <div className="headBlock">
-                                        <strong>{`${element.docInfo.document_type}#${element.docInfo.ownSerial}`}</strong>
-                                        <span>Total: ${moneyFormat(element.docInfo.pending_value)}</span>
-                                        <span className="quitContainer">
-                                            <i className="fa-solid fa-trash"/>
-                                        </span>
-                                    </div>
-                                )}
+                        {itemBlocks?.map((element,index_block)=>(
+                            <div key={index_block} className="itemBlock">
+                                <div className="headBlock">
+                                    <strong>
+                                        {element.docInfo != undefined ? `${element.docInfo.document_type}#${element.docInfo.ownSerial}`:'Adicionar producto o servicio'}
+                                    </strong>
+                                    <span>Total: ${element.docInfo != undefined ? moneyFormat(element.docInfo.pending_value):0}</span>
+                                    <span className="quitContainer" onClick={()=>{
+                                        handleDeleteBlock(index_block)
+                                    }}>
+                                        <i className="fa-solid fa-trash"/>
+                                    </span>
+                                </div>
                                 <div className="gridItems">
-                                    {element.items.map((element,index)=>(
-                                        <div className="itemRow">
+                                    {element.docInfo != undefined && element.items.map((element,index)=>(
+                                        <div className="itemRow" key={index}>
                                             <UserCard imgSrc={element.service_img} name={element.service_name}/>
                                             <strong className="valueItemRow">Unidades: {element.units}</strong>
                                             <strong className="valueItemRow">Val unidad: {moneyFormat(element.unit_value)}</strong>
                                             <strong className="valueItemRow">Total: {moneyFormat(parseFloat(element.units)*parseFloat(element.unit_value))}</strong>
                                         </div>
                                     ))}
+                                     {element.docInfo == undefined && element.items.map((element,index)=>(
+                                        <div className="itemRow" key={index}>
+                                            <UserCard imgSrc={element.img} name={element.name}/>
+                                            <strong className="valueItemRow rowInputItem">
+                                                <FormInput 
+                                                    title={'unidades'}
+                                                    type={'number'}
+                                                    min={0}
+                                                    placeholder={0}
+                                                    action={(value)=>{
+                                                        handleEditItemDetail(index_block,index,'units',value);
+                                                    }}
+                                                    max={element.type == 'service'? undefined:element.stock}
+                                                />
+                                            </strong>
+                                            <strong className="valueItemRow rowInputItem">
+                                                <FormInput 
+                                                    title={'Val unidad'}
+                                                    type={'number'}
+                                                    min={0}
+                                                    placeholder={0}
+                                                    value={element.unit_cost> 0 ? element.unit_cost:undefined}
+                                                    disabled={element.unit_cost> 0 ? true:disabled}
+                                                    action={(value)=>{
+                                                        handleEditItemDetail(index_block,index,'unit_value',value);
+                                                    }}
+                                                />
+                                            </strong>
+                                            <strong className="valueItemRow">Total: {moneyFormat(parseFloat(element.units)*parseFloat(element.unit_value))}</strong>
+                                        </div>
+                                    ))}
                                 </div>
                                 {element.docInfo == undefined && (
                                     <div className="personalizaedView">
-                                        <SearchinList list={[]} placeHolder={'+ Agregar producto o servicio'}/>
+                                        <SearchinList noActVal={true} list={productsAndServices} action={handleAddProductAndService} placeHolder={'+ Agregar producto o servicio'}/>
                                     </div>
                                 )}
                             </div>
@@ -814,8 +944,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                             <div className="gridPaymentMethods">
                                 {disabledByValue && (
                                     <span className="warnByValue">
-                                        El valor ingresado supera el monto maximo del documento,
-                                        modifique el valor o agrege un metodo de pago para saldo a favor.
+                                        El valor ingresado es menor a el monto del documento,
+                                        modifique el valor o agrege un metodo valido.
                                     </span>
                                 )}
                                 {paymentMethod.map((element,index)=>(
@@ -864,7 +994,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     )}
                     <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
                     <FileInput action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
-                    <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor excede el monto max':'Crear recibo de caja'} disabled={disabled} loading={loading}/>
+                    <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor excede el monto max':'Crear recibo de caja'} disabled={disabledToSubmit? true:disabled} loading={loading}/>
                 </form>
             )}
             {loading && (
