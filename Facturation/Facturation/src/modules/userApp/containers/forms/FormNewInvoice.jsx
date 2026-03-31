@@ -689,56 +689,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         )
     }
 
-    // Events Listeners
-
-    useEffect(()=>{
-        console.log('INSTANCE IDS: ',instance_id);
-    },[instance_id])
-
-    useEffect(()=>{
-        calcTotalFromPayments();
-    },[paymentMethod])
-
-    useEffect(()=>{
-        console.log(documents)
-        if(documents.length > 0){
-            let newTotalToPay = 0;
-            itemBlocks.forEach(element => {
-                console.log(element)
-                let tempTtl = 0;
-                element.items.forEach(element => {
-                    tempTtl += (parseFloat(element.unit_value? element.unit_value:0)*parseFloat(element.units? element.units:0))
-                });
-                newTotalToPay += tempTtl;
-            });
-            setTotalToPay(newTotalToPay);
-        }
-        if(briefCaseBills.length >0 && documents.length == 0){
-            let newTotalToPay = 0;
-            briefCaseBills.forEach(element => {
-                newTotalToPay += (element.paid_value != undefined && element.paid_value != "" ? element.paid_value:0);
-            });
-            setTotalToPay(newTotalToPay)
-        }
-        calcTotalFromPayments();
-    },[documents,briefCaseBills,itemBlocks])
-
-    useEffect(()=>{
-        handleUserConfig();
-        getProductsAndServices();
-    },[])
-
-    useEffect(()=>{
-        if(thirdParty_id != undefined){
-            getDocuments();
-            getInstances();
-        }
-    },[thirdParty_id])
-
-    useEffect(()=>{
-        console.log('---> ',itemBlocks);
-    },[itemBlocks])
-
     // Creation Function
 
     const createSellInvoice = async()=>{
@@ -752,6 +702,9 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 title:`Recibo de caja #${res.id} creado correctamente`,
                 description:`El recibo de caja #${res.id} fue creado correctamente`
             })
+            if(e_invoice){
+                handleCreationOfEinvoice(res.id);
+            }
             FormInfo["doc_id"] = res.id
             FormInfo['instance_id'] = instance_id;
             FormInfo["ownSerial"] = res.ownSerial;
@@ -809,7 +762,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         setDisabled(false);
         reloadFun?.();
         if(instance_id != undefined && instance_id.length == 1){
-            popInAlert(<ProcessStatusAlert instance_id={instance_id[0]} reloadFun={reloadFun}/>)
+            //popInAlert(<ProcessStatusAlert instance_id={instance_id[0]} reloadFun={reloadFun}/>)
         }
     }
 
@@ -847,8 +800,58 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             })
         }
     }
-    
 
+
+    const handleCreationOfEinvoice = async(doc_id)=>{
+        let itemsToFac = [];
+        itemBlocks.forEach(element => {
+            element.items.forEach(item => {
+                console.log('??? ',item)
+                itemsToFac.push(
+                    {
+                        "code_reference": item.code? item.code:item.service_id,
+                        "name": item.name? item.name:item.service_name,
+                        "quantity": parseFloat(item.units),
+                        "discount": 0,
+                        "discount_rate": 0,
+                        "price": parseFloat(item.unit_value),
+                        "tax_rate": "19.00",
+                        "unit_measure_id": 70,
+                        "standard_code_id": 1,
+                        "is_excluded": 0,
+                        "tribute_id": 1,
+                        "withholding_taxes": []
+                    }
+                )
+            });
+        });
+        let res = await newElectronicInvoide({
+            company_info:appInfo,
+            customer:thirdPartyInfo,
+            user_id:userInfo.user_id,
+            document:FormInfo,
+            items:itemsToFac,
+            doc_id
+        });
+        console.log(res)
+        if(res.status == 'Created'){
+            addNotification({
+                type:'aproved',
+                title:`Factura Electronica #${res.data.bill.number} creada exitosamente`,
+                description:'Para consultar y previsualizar la factura haga click en esta notificación.',
+                onClick:()=>{
+                    //window.open(`${res.data.bill.public_url}`,'_blank','noopener,noreferrer')
+                    window.open(`http://localhost:5173/preview/ElectronicInvoice/${appInfo.company_key}/${res.sga_id}`,'_blank','noopener,noreferrer')
+                }
+            })
+            // Open in a new tab
+            window.open(`${res.data.bill.public_url}`,'_blank','noopener,noreferrer')
+        }
+    }
+
+
+    // Event listeners
+    
     useEffect(()=>{
         console.log(thirdPartyInfo)
         if(thirdPartyInfo.id != undefined){
@@ -872,6 +875,46 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             getThirdParties(thirdParty_id,1)
         }
     },[instance_id])
+
+    useEffect(()=>{
+        calcTotalFromPayments();
+    },[paymentMethod])
+
+    useEffect(()=>{
+        console.log(documents)
+        if(documents.length > 0){
+            let newTotalToPay = 0;
+            itemBlocks.forEach(element => {
+                console.log(element)
+                let tempTtl = 0;
+                element.items.forEach(element => {
+                    tempTtl += (parseFloat(element.unit_value? element.unit_value:0)*parseFloat(element.units? element.units:0))
+                });
+                newTotalToPay += tempTtl;
+            });
+            setTotalToPay(newTotalToPay);
+        }
+        if(briefCaseBills.length >0 && documents.length == 0){
+            let newTotalToPay = 0;
+            briefCaseBills.forEach(element => {
+                newTotalToPay += (element.paid_value != undefined && element.paid_value != "" ? element.paid_value:0);
+            });
+            setTotalToPay(newTotalToPay)
+        }
+        calcTotalFromPayments();
+    },[documents,briefCaseBills,itemBlocks])
+
+    useEffect(()=>{
+        handleUserConfig();
+        getProductsAndServices();
+    },[])
+
+    useEffect(()=>{
+        if(thirdParty_id != undefined){
+            getDocuments();
+            getInstances();
+        }
+    },[thirdParty_id])
 
     return(
         <div className="FormNewCashRecipt FormNewInvoice">
@@ -898,12 +941,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 <form action="" disabled={disabledToSubmit? true:disabled} onSubmit={(e)=>{
                     e.preventDefault();
                     createSellInvoice();
-                    /*newElectronicInvoide({
-                        company_info:appInfo,
-                        customer:thirdPartyInfo,
-                        user_id:userInfo.user_id,
-                        document:FormInfo
-                    });*/
                 }}>
                     {info.store_id == undefined && (
                         <SearchinList action={setStore_id} title={'Tienda'} placeHolder={'Seleccione la tienda'} list={stores} disabled={disabled}/>
@@ -1048,7 +1085,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     )}
                     <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
                     <FileInput action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
-                    <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor excede el monto max':'Crear recibo de caja'} disabled={disabledToSubmit? true:disabled} loading={loading}/>
+                    <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor ingresado no es valido':'Crear factura de venta'} disabled={disabledToSubmit? true:disabled} loading={loading}/>
                 </form>
             )}
             {loading && (
