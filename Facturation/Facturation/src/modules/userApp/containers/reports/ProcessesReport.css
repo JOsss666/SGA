@@ -12,6 +12,13 @@
     cursor: pointer;
 }
 
+.ProcessesReport .SpaceReport{
+    width: 100%;
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+}
+
 @media (max-width:500px) {
     .ProcessesReport .SpaceReport{
         padding-left: 0;
@@ -45,3 +52,4 @@
         left: 1.5vh;
     }
 }
+

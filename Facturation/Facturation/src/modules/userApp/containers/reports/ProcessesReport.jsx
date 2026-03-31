@@ -141,35 +141,21 @@ export function ProcessesReport(){
         setLoading(true);
 
         try{
-
             let res = await postInfo("/process/getProcessInstances",settingsReport);
-
-            console.log("Respuesta backend:",res);
-
             if(!res || !Array.isArray(res) || !res[0]){
                 console.warn("Respuesta inválida");
                 setInfo([]);
                 setLoading(false);
                 return;
             }
-
             let data = res[1];
-
             if(!Array.isArray(data)){
-                console.warn("Datos inválidos:",data);
                 setInfo([]);
                 setLoading(false);
                 return;
             }
-
-            console.table(data);
-
             const validData = data.filter(validateInstance);
-
-            console.log("Procesos válidos:",validData.length);
-
             setInfo(validData);
-
         }catch(error){
 
             console.error("Error cargando procesos:",error);
