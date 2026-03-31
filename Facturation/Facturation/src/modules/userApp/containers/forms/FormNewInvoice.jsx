@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { BoldTitle } from "../../components/BoldTitle";
 import { SearchinList } from "../../components/SearchInList";
@@ -68,7 +68,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         const [totalToPay,setTotalToPay] = useState(0);
     const [description,setDescription] = useState();
     const [attached,setAttached] = useState('-');
-    const [instance_id,setInstance_id] = useState();
+    const [instance_id,setInstance_id] = useState([]);
     const [instanceOwnSerial,setInstanceOwnSerial] = useState();
     const [step_id,setStep_id] = useState();
     const [concept_id,setConcept_id] = useState();
@@ -94,7 +94,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         subTotal:total,
         total,
         attached,
-        instance_id,
+        instances:instance_id,
         instanceOwnSerial,
         step_id,
         payedBills:briefCaseBills,
@@ -209,6 +209,18 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         setDisabled(false);
     }
 
+    // Processes Instances Control
+        const handleAddInstanceID = (id) => {
+            if (instance_id.includes(id)) return;
+            setInstance_id(prev => [...prev, id]);
+        }
+        
+        const handleDeleteInstanceID = (id) => {
+            setInstance_id(prev => 
+                prev.filter(item => item !== id)
+            );
+        }
+
     let handleConceptChange = (element)=>{
         if(element.id != undefined){
             setConcept_id(element.id);
@@ -245,7 +257,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     const handleSelectInstance = (element)=>{
         console.log(element)
-        setInstance_id(element.id)
+        handleAddInstanceID(element.id)
         setStep_id(element.step_id)
         setInstanceOwnSerial(element.ownSerial)
         setThirdParty_id(element.thirdParty_id)
@@ -288,6 +300,11 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         };
 
         const handleDeleteBlock = (blockIndex) => {
+            if(itemBlocks[blockIndex].docInfo != undefined){
+                handleDeleteInstanceID(
+                    itemBlocks[blockIndex].docInfo.instance_id
+                )
+            }
             setItemBlocks(prev => {
                 // 1. Buscamos el bloque que el usuario quiere "eliminar"
                 const blockToProcess = prev[blockIndex];
@@ -344,6 +361,17 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             })
         );
     };
+
+    const handleAddDocument = async(element)=>{
+        let attachedItems = await getAttachedServices(element.id);
+        if(element.instance_id != undefined){
+            handleAddInstanceID(element.instance_id);
+        }
+        handleAddBlock({
+            docInfo: element,
+            items: attachedItems
+        });
+    }
 
     // Getters of info
 
@@ -526,14 +554,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
     }
 
-    const handleAddDocument = async(element)=>{
-        let attachedItems = await getAttachedServices(element.id);
-        handleAddBlock({
-            docInfo: element,
-            items: attachedItems
-        });
-    }
-
     const getThirdParties = async(id,limit)=>{
         let res = await postInfo('/getThirdParties',{
             company_id:appInfo.company_id,
@@ -649,10 +669,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
     }
 
-    useEffect(()=>{
-        calcTotalFromPayments();
-    },[paymentMethod])
-
     const setAplyVoucher = (id,value)=>{
         setPaymentMethod(prev=>
             prev.map(item =>
@@ -673,9 +689,15 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         )
     }
 
+    // Events Listeners
+
     useEffect(()=>{
-        console.log(briefCaseBills)
-    },[briefCaseBills])
+        console.log('INSTANCE IDS: ',instance_id);
+    },[instance_id])
+
+    useEffect(()=>{
+        calcTotalFromPayments();
+    },[paymentMethod])
 
     useEffect(()=>{
         console.log(documents)
@@ -722,7 +744,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const createSellInvoice = async()=>{
         setDisabled(true)
         setLoading(true)
-        let res = await postInfo('/facturation/newCashRecipt',FormInfo);
+        let res = await postInfo('/facturation/newSellInvoice',FormInfo);
         console.log(res);
         if(typeof(parseInt(res.id)) == 'number'){
             addNotification({
@@ -786,8 +808,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         setLoading(false);
         setDisabled(false);
         reloadFun?.();
-        if(instance_id != undefined){
-            popInAlert(<ProcessStatusAlert instance_id={instance_id} reloadFun={reloadFun}/>)
+        if(instance_id != undefined && instance_id.length == 1){
+            popInAlert(<ProcessStatusAlert instance_id={instance_id[0]} reloadFun={reloadFun}/>)
         }
     }
 

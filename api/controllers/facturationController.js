@@ -172,6 +172,117 @@ facturationController.newCashRecipt = (req,res)=>{
     })
 }
 
+facturationController.newSellInvoice = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data)
+        console.log(info)
+        let docCreation = `
+            INSERT INTO "Ecosystem".documents(
+	            company_id,
+                store_id, 
+                "thirdParty_id", 
+                document_type, 
+                status, 
+                "subTotal", 
+                total, 
+                created_by,  
+                description, 
+                attached, 
+                instance_id,
+                step_instance)
+	    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id, "ownSerial";
+    `;
+        let consulta = await useDataBase(docCreation,[
+            info.company_id,
+            info.store_id,
+            info.thirdParty_id,
+            info.doc_type,
+            info.status,
+            info.subTotal,
+            info.total,
+            info.created_by,
+            info.description,
+            JSON.stringify(info.attached),
+            info.instance_id != "" && info.instance_id != undefined? info.instance_id:undefined,
+            info.instance_id != "" && info.instance_id != undefined? info.step_id:undefined
+        ],3);
+        if((info.payedBills != undefined || info.payedBills.length > 0) && consulta.id != undefined){
+            for(const element of info.payedBills){
+                let senUPB = `
+                    UPDATE
+                        "Treasury".accounts_receivable
+                    SET
+                        paid_amount = paid_amount + $2
+                    WHERE id = $1 ;
+                `;
+                let updatePaymentBills = await useDataBase(senUPB,[
+                    element.id,
+                    element.paid_value
+                ],2)
+
+
+                // FUNCTION FOR PORTFOLIO MOVMENTS
+                let senIPP = `
+                    INSERT INTO "Treasury".portfolio_payments(
+                       company_id,
+                       store_id,
+                       "thirdParty_id",
+                       document_id,
+                       instance_id,
+                       paid_value, 
+                       "creationDocument_id")
+                    VALUES ($1, $2, $3, $4, $5, $6, $7);
+                `;
+
+                let insertPortfolioPayment = await useDataBase(senIPP,[
+                    info.company_id,
+                    info.store_id,
+                    info.thirdParty_id,
+                    element.document_id,
+                    element.instance_id,
+                    element.paid_value,
+                    consulta.id
+                ],2)
+            }
+        }
+        console.log('ZZZZZZZZZZZZZZ ',consulta)
+        if(consulta.id != undefined){
+            console.log('============================ ')
+            // FUNCTION FOR MULTIPE INSTACES INSERT IN DB
+            let regDocInstancesValues = [];
+            let valuePlaceholders = [];
+            let counter = 1;
+
+            info.instances.forEach(instanceId => {
+                regDocInstancesValues.push(consulta.id, instanceId);
+                valuePlaceholders.push(`($${counter++}, $${counter++})`);
+            });
+
+            const regDocInstanceSentence = `
+                INSERT INTO "Ecosystem".docs_instances (doc_id, instance_id)
+                VALUES ${valuePlaceholders.join(', ')}
+                ON CONFLICT (doc_id, instance_id) DO NOTHING; 
+            `;
+
+            let registerDocInstancesrelation = await useDataBase(
+                regDocInstanceSentence, 
+                regDocInstancesValues, 
+                2
+            );
+        }
+        facturationController.updateThirdPartyPortfolio();
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 facturationController.getCashBoxes = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{

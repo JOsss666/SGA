@@ -229,6 +229,8 @@ router.post('/treasury/getThirdPartyPortfolio',treasuryController.getThirdPartyP
 
 router.post('/facturation/newCashRecipt',facturationController.newCashRecipt);
 
+router.post('/facturation/newSellInvoice',facturationController.newSellInvoice);
+
 router.post('/facturation/newClientOrder',facturationController.newClientOrder);
 
 router.post('/facturation/getCashBoxes',facturationController.getCashBoxes);
