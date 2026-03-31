@@ -77,86 +77,70 @@ export function TableReportProcesses({settingsReport,info,searchValue}){
     console.log("info length", info.length)
     console.log("filtered length", filteredInfo.length)
 
-    return(
-
+   return (
         <div className="TableReportProcesses">
+            {/* Este es el único contenedor con SCROLL. 
+                Maneja tanto el vertical (Virtualizer) como el horizontal (CSS).
+            */}
+            <div ref={parentRef} className="gridResultsTable">
+                
+                {/* Contenedor de ancho real. 
+                   'min-width: 100%' asegura que el fondo cubra todo, 
+                   y 'width: fit-content' permite que crezca según las columnas.
+                */}
+                <div style={{ width: 'fit-content', minWidth: '100%' }}>
+                    
+                    {/* Encabezado dentro del scroll para que se mueva en X */}
+                    <div className="headTable">
+                        {settingsReport.columns?.map((element) => (
+                            <span className={`TH_${element}`} key={element}>
+                                {element}
+                            </span>
+                        ))}
+                    </div>
 
-            <div className="headTable">
-
-                {settingsReport.columns?.map((element)=>(
-                    <span
-                        className={`TH_${element}`}
-                        key={element}
+                    {/* Contenedor del virtualizador */}
+                    <div
+                        className="virtualContainer"
+                        style={{
+                            height: `${rowVirtualizer.getTotalSize()}px`,
+                            width: '100%',
+                            position: "relative"
+                        }}
                     >
-                        {element}
-                    </span>
-                ))}
+                        {virtualItems.map((virtualRow) => {
+                            const rowInfo = filteredInfo[virtualRow.index];
+                            if (!rowInfo) return null;
 
-            </div>
-
-            <div
-                ref={parentRef}
-                className="gridResultsTable"
-            >
-
-                <div
-                    className="virtualContainer"
-                    style={{
-                        height: `${rowVirtualizer.getTotalSize()}px`,
-                        position: "relative"
-                    }}
-                >
-
-                    {virtualItems.map((virtualRow)=>{
-
-                        const rowInfo = filteredInfo[virtualRow.index]
-
-                        return(
-
-                            <div
-                                key={virtualRow.key}
-                                className="virtualRow"
-                                style={{
-                                    position: "absolute",
-                                    top: 0,
-                                    left: 0,
-                                    width: "100%",
-                                    height: `${virtualRow.size}px`,
-                                    transform: `translateY(${virtualRow.start}px)`
-                                }}
-                            >
-
+                            return (
                                 <div
-                                    className={`RowResults rowStatus_${rowInfo.status}`}
-                                    onClick={()=>{
-                                        popInAlert(
-                                            <ProcessStatusAlert instance_id={rowInfo.id}/>
-                                        )
+                                    key={virtualRow.key}
+                                    className="virtualRow"
+                                    style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%', // Ocupa el ancho del 'fit-content' de arriba
+                                        height: `${virtualRow.size}px`,
+                                        transform: `translateY(${virtualRow.start}px)`
                                     }}
                                 >
-
-                                    {settingsReport.columns?.map((element)=>(
-                                        <div
-                                            key={element}
-                                            className={`elementRow TH_${element}`}
-                                        >
-                                            {handleElementRow(element,rowInfo)}
-                                        </div>
-                                    ))}
-
+                                    <div
+                                        className={`RowResults rowStatus_${rowInfo.status}`}
+                                        onClick={() => popInAlert(<ProcessStatusAlert instance_id={rowInfo.id} />)}
+                                    >
+                                        {settingsReport.columns?.map((element) => (
+                                            <div key={element} className={`elementRow TH_${element}`}>
+                                                {handleElementRow(element, rowInfo)}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-
-                            </div>
-
-                        )
-
-                    })}
-
+                            );
+                        })}
+                    </div>
                 </div>
-
             </div>
-
         </div>
-
-    )
+    );
 }

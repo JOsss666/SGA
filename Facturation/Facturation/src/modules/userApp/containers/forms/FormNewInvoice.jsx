@@ -13,7 +13,7 @@ import { moneyFormat, newElectronicInvoide, postInfo, printCashRecipt } from "..
 import { NewElementSelect } from "../../components/NewElementSelect";
 import { FormNewThirdParties } from "./FormNewThirdParties";
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
-import { isElectron } from "../../../../App";
+import { isElectron, urlSer } from "../../../../App";
 import { LabelValue } from "../../components/LabelValue";
 import { SwitchOption } from "../../components/SwitchOption";
 import { UserCard } from "../../components/UserCard";
@@ -841,7 +841,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 description:'Para consultar y previsualizar la factura haga click en esta notificación.',
                 onClick:()=>{
                     //window.open(`${res.data.bill.public_url}`,'_blank','noopener,noreferrer')
-                    window.open(`http://localhost:5173/preview/ElectronicInvoice/${appInfo.company_key}/${res.sga_id}`,'_blank','noopener,noreferrer')
+                    window.open(`${urlSer}/preview/ElectronicInvoice/${appInfo.company_key}/${res.sga_id}`,'_blank','noopener,noreferrer')
                 }
             })
             // Open in a new tab
