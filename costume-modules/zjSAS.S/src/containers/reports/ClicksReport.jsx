@@ -7,7 +7,7 @@ import { SelectOptions } from '../../components/SelectOptions';
 import { ButtonMenu } from '../../components/ButtonMenu';
 import { ButtonDownload } from '../../components/ButtonDownload';
 import { AiButton } from '../../components/ChatAiComponents/AiButton';
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { FilterReports } from './FilterReports'
 import { postInfo } from "../../../utils/functions";
 import { LoadingSpace } from "../LoadingSpace";
@@ -62,14 +62,18 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
         getClicksHistoric();
     },[]);
 
-    const tableData = Array.isArray(info)
-        ? info.filter((row)=>
+    const tableData = useMemo(() => {
+        if(!Array.isArray(info)) return []
+        const search = searchValue.toLowerCase()
+
+        return info.filter((row)=>
             Object.values(row)
                 .join(" ")
                 .toLowerCase()
-                .includes(searchValue.toLowerCase())
+                .includes(search)
         )
-        : [];
+
+    }, [info, searchValue])
 
     const columnMap = {
         "Maquina": "asset_name",

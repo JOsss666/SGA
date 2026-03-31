@@ -29,10 +29,9 @@
 }
 
 .TableReportProcesses .gridResultsTable{
-    display: flex;
-    flex-direction: column;
-    max-height: 55vh;
-    width: fit-content;
+    position: relative;
+    height: 55vh;
+    width: 100%;
     overflow-y: auto;
 }
 
@@ -90,6 +89,18 @@
     background-color: #82181A90;
 }
 
+.TableReportProcesses .virtualContainer{
+    width: 100%;
+    position: relative;
+}
+
+.TableReportProcesses .virtualRow{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
 @media (max-width:500px) {
 
     .TableReportProcesses .headTable span{
@@ -113,3 +124,4 @@
         width: 30vw;
     }
 }
+
