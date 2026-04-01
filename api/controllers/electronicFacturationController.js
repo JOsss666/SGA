@@ -108,14 +108,15 @@ electronicFacturationController.getAuthToken = async (grantType = 'password', re
         const data = await response.json();
 
         if (!response.ok) {
-            // SOLUCIÓN AL ERROR DE REFRESH: Si falla el refresh_token, reintentamos con password
             if (finalGrantType === 'refresh_token') {
-                console.warn('⚠️ Refresh token inválido o revocado. Reintentando login completo...');
+                console.warn('⚠️ Refresh token inválido. Reintentando login único...');
+                // Solo reintenta si no estábamos ya intentando con password
                 return await electronicFacturationController.getAuthToken('password');
             }
             
-            console.error('❌ Error detallado de Factus:', data);
-            throw new Error(data.message || data.error || 'Error en la autenticación');
+            // Si ya falló con password, NO REINTENTES, arroja el error.
+            console.error('❌ Error crítico de Factus:', data);
+            throw new Error(data.message || 'Error de autenticación');
         }
 
         const savedToken = await saveToken(data);
@@ -340,13 +341,13 @@ electronicFacturationController.getInvoice = (req,res)=>{
         let whereClauses = [];
 
         if(info.company_id != undefined){
-            whereClauses.push(`company_id = $${info.company_id}`);
             values.push(info.company_id);
+            whereClauses.push(`company_id = $${values.length}`);
         }
 
         if(info.id != undefined){
-            whereClauses.push(`id = $${values.length+1}`);
-            values.push(info.id)
+            values.push(info.id);
+            whereClauses.push(`id = $${values.length}`);
         }
 
         const whereQuery = whereClauses.length > 0
@@ -369,7 +370,22 @@ electronicFacturationController.getInvoice = (req,res)=>{
     })
 }
 
+// Función para inicializar servicios al arrancar el servidor
+electronicFacturationController.init = async () => {
+    try {
+        console.log('--- 🔐 Iniciando Autenticación Factus ---');
+        const auth = await electronicFacturationController.getAuthToken('password');
+        
+        if (auth) {
+            console.log('✅ Conexión inicial con Factus establecida.');
+            // Opcional: También puedes precargar los rangos de numeración
+            await electronicFacturationController.getNumberingRanges();
+        }
+    } catch (error) {
+        console.error('⚠️ No se pudo obtener el token inicial de Factus:', error.message);
+        console.log('ℹ️ El sistema reintentará la conexión en la primera solicitud de factura.');
+    }
+};
 
-electronicFacturationController.getAuthToken('password',null);
 
 export default electronicFacturationController;
