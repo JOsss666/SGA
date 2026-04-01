@@ -769,6 +769,11 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                                                     updatePaymentValue(element.id,"value",e.target.value)
                                                 }}/>
                                             )}
+                                            {!element.for_balance && (
+                                                <input className="inputPaymentValue" step={0.001} type="number"  placeholder="$0" onChange={(e)=>{
+                                                    updatePaymentValue(element.id,"value",e.target.value)
+                                                }}/>
+                                            )}
                                             {element.for_balance && (
                                                 <input className="inputPaymentValue" step={0.001} max={thirdPartyInfo.thirdParty_balance} type="number" placeholder={`Max $ ${formatCurrency(thirdPartyInfo.thirdParty_balance)}`} onChange={(e)=>{
                                                     updatePaymentValue(element.id,"value",e.target.value)
