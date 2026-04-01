@@ -840,12 +840,10 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 title:`Factura Electronica #${res.data.bill.number} creada exitosamente`,
                 description:'Para consultar y previsualizar la factura haga click en esta notificación.',
                 onClick:()=>{
+                    window.open(`${res.data.bill.public_url}`,'_blank','noopener,noreferrer')
                     //window.open(`${res.data.bill.public_url}`,'_blank','noopener,noreferrer')
-                    window.open(`${urlSer}/preview/ElectronicInvoice/${appInfo.company_key}/${res.sga_id}`,'_blank','noopener,noreferrer')
                 }
             })
-            // Open in a new tab
-            window.open(`${res.data.bill.public_url}`,'_blank','noopener,noreferrer')
         }
     }
 

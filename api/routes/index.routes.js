@@ -277,13 +277,15 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
 
     // ELECTRONIC FACTURATION
     
-    router.get('/electronicFacturation/getNumberingRanges', electronicFacturationController.getNumberingRanges)
+    router.get('/electronicFacturation/getNumberingRanges', electronicFacturationController.getNumberingRanges);
 
-    router.get('/electronicFacturation/showActualToken', electronicFacturationController.showActualToken)
+    router.get('/electronicFacturation/showActualToken', electronicFacturationController.showActualToken);
 
-    router.post('/electronicFacturation/invoice', electronicFacturationController.newInvoice)
+    router.post('/electronicFacturation/invoice', electronicFacturationController.newInvoice);
 
-    router.get('/electronicFacturation/taxes', electronicFacturationController.getTaxes)
+    router.get('/electronicFacturation/taxes', electronicFacturationController.getTaxes);
+
+    router.post('/electronicFacturation/getInvoice',electronicFacturationController.getInvoice);
 
 export default router;
 

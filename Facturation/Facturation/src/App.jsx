@@ -6,7 +6,6 @@ import { Login } from './modules/Login/Login';
 import { SignUp } from './modules/Login/SignUp';
 import { PreviewDocument } from './modules/userApp/containers/Preview/PreviewDocument';
 import { PreviewProcess } from './modules/userApp/containers/Preview/PreviewProcess';
-import { PreviewFile } from './modules/userApp/containers/Preview/PreviewFile';
 export const urlSer = 'http://localhost:3000';
 //export const urlSer = 'https://sga-2zgp.onrender.com';
 export const isElectron = navigator.userAgent.toLowerCase().includes('electron');
@@ -55,12 +54,6 @@ function App() {
                       <AppInfoProvider>
                         <AlertProvider>
                           <PreviewProcess/>
-                        </AlertProvider>
-                    </AppInfoProvider>}/>
-                     <Route path='/preview/ElectronicInvoice/:company_key/:invoice_id' element={
-                      <AppInfoProvider>
-                        <AlertProvider>
-                          <PreviewFile/>
                         </AlertProvider>
                     </AppInfoProvider>}/>
                 </Routes>
