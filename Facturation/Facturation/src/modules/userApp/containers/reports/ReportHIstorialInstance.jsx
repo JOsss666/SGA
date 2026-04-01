@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo} from "react";
 import { useAppInfo } from "../../../../context/context";
 import { postInfo } from "../../../../utils/functions";
 import { BoldTitle } from "../../components/BoldTitle";
@@ -50,31 +50,39 @@ export function ReportHistorialInstance() {
         "Estado"
     ];
 
-    const settingsReport = {
+    const settingsReport = useMemo(() => ({
         columns: columnsOp,
         company_id: appInfo.company_id,
         start_date,
         end_date
-    };
+    }), [appInfo.company_id, start_date, end_date]);
 
 
     const getHistorial = async () => {
         setLoading(true);
-        let res = await postInfo('/process/getInstanceHistorial',settingsReport);
-        console.log(res);
-        if(res[0]){
-            console.log("BACKEND DATA:", res[1]);
-            setInfo(res[1])
-        }
-        setLoading(false)
-    };
 
-    useEffect(() => {
-        getHistorial();
-    }, []);
+        let res = await postInfo('/process/getInstanceHistorial',settingsReport);
+
+        console.log("BACKEND DATA:", res);
+
+        if(res && res[0] && Array.isArray(res[1])){
+            setInfo(res[1]);
+        }else{
+            setInfo([]);
+        }
+
+        setLoading(false);
+        
+    };
 
     useEffect(()=>{
         getHistorial();
+    },[])
+
+    useEffect(()=>{
+        if(start_date && end_date){
+            getHistorial();
+        }
     },[start_date,end_date])
 
     const columnMap = {
@@ -115,50 +123,53 @@ export function ReportHistorialInstance() {
     };
 
 
+    console.log("REQUEST:", settingsReport);
+    
+
     return (
         <div className="ReportDocument">
-        <PathLocation />
-        <div className="headReport">
-            <BoldTitle text={`Historial de acciones en procesos`} />
-            <DescriptionSpan text={`Consulte el historial de acciones en los procesos.  `} />
-        </div>
-        <div className="settingsReport">
-            <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
-            <div className="rangeInput">
-            <FormInput action={setStartDate} type={"datetime-local"} title={"Fecha Inicial"} />
-            <span>-</span>
-            <FormInput action={setEndDate} type={"datetime-local"} title={"Fecha Final"} />
+            <PathLocation />
+            <div className="headReport">
+                <BoldTitle text={`Historial de acciones en procesos`} />
+                <DescriptionSpan text={`Consulte el historial de acciones en los procesos.  `} />
             </div>
-            <SelectOptions
-            options={[
-                "Ascendente (fecha)",
-                "Descendente (fecha)",
-                "Ascendente (Nombre)",
-                "Descendente (Nombre)",
-            ]}
-            title={"Orden"}
-            />
-            <ButtonMenu title={"Mas Ajustes"} children={<i className="fa-solid fa-sliders" />} noRotate={true} />
-            <ButtonMenu title={"Agregar a favoritos"} children={<i className="fa-regular fa-star" />} noRotate={true} />
-            <AiButton attached={info} sugerence={[
-                {text:'¿Que representa este informe?',context:`Procesos - Informe `},
-                {text:'Realiza un analisis de este informe',context:`Procesos - Informe - `},
-                {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Informe - `}
-            ]}/>
-            <ButtonDownload
-                info={setInfoForReportDownload()}
-                columns={columnsOp}
-                title={"Historial_instancias_procesos"}
-            />
-        </div>
-        <div className="SpaceReport">
-            {!loading && (
-                <TableHistorialInstance info={info} columns={columnsOp} searchValue={searchValue}/>
-            )}
-            {loading && (
-                <LoadingSpace title={"Cargando información"} description={"Esto no debe tardar mucho..."} />
-            )}
-        </div>
+            <div className="settingsReport">
+                <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
+                <div className="rangeInput">
+                <FormInput action={setStartDate} type={"datetime-local"} title={"Fecha Inicial"} />
+                <span>-</span>
+                <FormInput action={setEndDate} type={"datetime-local"} title={"Fecha Final"} />
+                </div>
+                <SelectOptions
+                options={[
+                    "Ascendente (fecha)",
+                    "Descendente (fecha)",
+                    "Ascendente (Nombre)",
+                    "Descendente (Nombre)",
+                ]}
+                title={"Orden"}
+                />
+                <ButtonMenu title={"Mas Ajustes"} children={<i className="fa-solid fa-sliders" />} noRotate={true} />
+                <ButtonMenu title={"Agregar a favoritos"} children={<i className="fa-regular fa-star" />} noRotate={true} />
+                <AiButton attached={info} sugerence={[
+                    {text:'¿Que representa este informe?',context:`Procesos - Informe `},
+                    {text:'Realiza un analisis de este informe',context:`Procesos - Informe - `},
+                    {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Informe - `}
+                ]}/>
+                <ButtonDownload
+                    info={setInfoForReportDownload()}
+                    columns={columnsOp}
+                    title={"Historial_instancias_procesos"}
+                />
+            </div>
+            <div className="SpaceReport">
+                {!loading && (
+                    <TableHistorialInstance info={info} columns={columnsOp} searchValue={searchValue}/>
+                )}
+                {loading && (
+                    <LoadingSpace title={"Cargando información"} description={"Esto no debe tardar mucho..."} />
+                )}
+            </div>
         </div>
     );
 }

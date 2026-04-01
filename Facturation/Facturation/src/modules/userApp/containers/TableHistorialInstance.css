@@ -3,8 +3,6 @@
     display: flex;
     flex-direction: column;
     position: relative;
-    height: fit-content;
-    width: fit-content;
     width: 100%;
     padding: .1vh;
 }
@@ -13,7 +11,7 @@
     display: flex;
     gap: .5vw;
     padding: 2vh;
-    width: fit-content;
+    width: 100%;
     background-color: var(--menuAside);
     border-radius: 1vh;
     box-shadow: 0 .1vh 1vh var(--translucidMenu);
@@ -41,19 +39,22 @@
 .TableHistorialInstance .bodyTable{
     display: flex;
     flex-direction: column;
-    width: fit-content;
+    width: 100%;
     max-height: 55vh;
     overflow-y: auto;
+    position:relative;
 }
 
 .TableHistorialInstance .bodyTable .rowTable{
+    display: flex;
     gap: .5vw;
     width: 100%;
     padding: 1vh 2vh;
     border-bottom: dashed .1vh var(--inputsBorder);
-    display: flex;
     cursor: pointer;
     transition: .3s;
+    min-height: 60px; 
+    align-items:center;
 }
 
 .TableHistorialInstance .bodyTable .rowTable:hover{
@@ -61,10 +62,11 @@
 }
 
 .TableHistorialInstance .bodyTable .rowTable .rowElement{
-    margin: auto.5vw;
+    margin: auto .5vw;
     padding: 0 1vh;
     width: 10vw;
     color: var(--descriptionText);
+    flex-shrink: 0;
 }
 
 .TableHistorialInstance .bodyTable .rowTable .UserCard{
@@ -155,4 +157,16 @@
 
 .TableHistorialInstance .bodyTable .rowTable .redirect:hover{
     color: #155DFC;
+}
+
+.TableHistorialInstance .virtualContainer{
+    width:100%;
+    position:relative;
+}
+
+.TableHistorialInstance .virtualRow{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
 }
