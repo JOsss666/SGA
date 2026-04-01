@@ -764,7 +764,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                                     <div key={index} className={`PaymentMethodCard ${disabledByValue? 'disabledPaymentMethodCard':''}`}>
                                         <div className="payMC">
                                             <strong>{element.name}</strong>
-                                            {element.for_wallet && (
+                                            {!element.for_balance && (
                                                 <input className="inputPaymentValue" step={0.001} type="number"  placeholder="$0" onChange={(e)=>{
                                                     updatePaymentValue(element.id,"value",e.target.value)
                                                 }}/>

@@ -39,6 +39,7 @@
     padding: 1vh 2vh;
     border-radius: 1vh;
     outline: solid .1vh var(--inputsBorder);
+    gap: 2vh;
 }
 
 .FormNewInvoice .itemBlock{
@@ -119,6 +120,10 @@
     font-weight: 400;
     color: var(--descriptionText);
     font-size: clamp(2px,2vh,20px);
+}
+
+.FormNewInvoice form .FileInput{
+    height: fit-content;
 }
 
 .FormNewInvoice .itemBlock .gridItems .itemRow:hover{

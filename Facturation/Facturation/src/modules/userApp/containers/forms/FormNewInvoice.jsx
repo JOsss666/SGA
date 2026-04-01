@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { BoldTitle } from "../../components/BoldTitle";
 import { SearchinList } from "../../components/SearchInList";
@@ -13,7 +13,7 @@ import { moneyFormat, newElectronicInvoide, postInfo, printCashRecipt } from "..
 import { NewElementSelect } from "../../components/NewElementSelect";
 import { FormNewThirdParties } from "./FormNewThirdParties";
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
-import { isElectron } from "../../../../App";
+import { isElectron, urlSer } from "../../../../App";
 import { LabelValue } from "../../components/LabelValue";
 import { SwitchOption } from "../../components/SwitchOption";
 import { UserCard } from "../../components/UserCard";
@@ -32,7 +32,9 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const [bussines,setBussines] = useState([]);
     const [costCenters,setCostCenters] = useState([]);
     const [concepts,setConcepts] = useState([]);
-    const [documents,setDocuments] = useState([]);
+    const [documents,setDocuments] = useState([{
+        items:[]
+    }]);
     const [productsAndServices,setProductsAndServices] = useState([]);
     const [cashBoxes,setCashBoxes] = useState([]);
         // BirefCase Bills requirements
@@ -66,7 +68,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         const [totalToPay,setTotalToPay] = useState(0);
     const [description,setDescription] = useState();
     const [attached,setAttached] = useState('-');
-    const [instance_id,setInstance_id] = useState();
+    const [instance_id,setInstance_id] = useState([]);
     const [instanceOwnSerial,setInstanceOwnSerial] = useState();
     const [step_id,setStep_id] = useState();
     const [concept_id,setConcept_id] = useState();
@@ -92,7 +94,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         subTotal:total,
         total,
         attached,
-        instance_id,
+        instances:instance_id,
         instanceOwnSerial,
         step_id,
         payedBills:briefCaseBills,
@@ -207,6 +209,18 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         setDisabled(false);
     }
 
+    // Processes Instances Control
+        const handleAddInstanceID = (id) => {
+            if (instance_id.includes(id)) return;
+            setInstance_id(prev => [...prev, id]);
+        }
+        
+        const handleDeleteInstanceID = (id) => {
+            setInstance_id(prev => 
+                prev.filter(item => item !== id)
+            );
+        }
+
     let handleConceptChange = (element)=>{
         if(element.id != undefined){
             setConcept_id(element.id);
@@ -243,7 +257,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     const handleSelectInstance = (element)=>{
         console.log(element)
-        setInstance_id(element.id)
+        handleAddInstanceID(element.id)
         setStep_id(element.step_id)
         setInstanceOwnSerial(element.ownSerial)
         setThirdParty_id(element.thirdParty_id)
@@ -258,6 +272,18 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     }
 
     // Control of Products and services in ITEM blocks
+
+        const handleAddBlock = (newDocInfo = undefined) => {
+            // 1. Definimos la estructura base de un bloque nuevo
+            const newBlock = {
+                docInfo: newDocInfo.docInfo, // Si no se pasa nada, será undefined (bloque manual)
+                items: newDocInfo? newDocInfo.items:[],           // Siempre inicia con la lista de productos vacía
+                aplyVoucher: false    // O cualquier otra propiedad por defecto que uses
+            };
+
+            // 2. Actualizamos el estado añadiendo el nuevo bloque al arreglo anterior
+            setItemBlocks(prev => [...prev, newBlock]);
+        };
 
         const handleAddProductAndService = async (element) => {
             if(element.name == undefined)return;
@@ -274,6 +300,11 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         };
 
         const handleDeleteBlock = (blockIndex) => {
+            if(itemBlocks[blockIndex].docInfo != undefined){
+                handleDeleteInstanceID(
+                    itemBlocks[blockIndex].docInfo.instance_id
+                )
+            }
             setItemBlocks(prev => {
                 // 1. Buscamos el bloque que el usuario quiere "eliminar"
                 const blockToProcess = prev[blockIndex];
@@ -330,6 +361,17 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             })
         );
     };
+
+    const handleAddDocument = async(element)=>{
+        let attachedItems = await getAttachedServices(element.id);
+        if(element.instance_id != undefined){
+            handleAddInstanceID(element.instance_id);
+        }
+        handleAddBlock({
+            docInfo: element,
+            items: attachedItems
+        });
+    }
 
     // Getters of info
 
@@ -500,24 +542,19 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 });
                 setDocuments(C);
             }else{
-                let C = [{
-                    items:[]
-                }];
                 for (const element of res[1]) {
                 console.log('Procesando elemento:', element.id);
                     let attachedItems = await getAttachedServices(element.id);
-                    C.push({
+                    handleAddBlock({
                         docInfo: element,
                         items: attachedItems
                     });
                 }
-                console.log('===> ',C);
-                setItemBlocks(C);
             }
         }
     }
 
-     const getThirdParties = async(id,limit)=>{
+    const getThirdParties = async(id,limit)=>{
         let res = await postInfo('/getThirdParties',{
             company_id:appInfo.company_id,
             comercialInfo:true,
@@ -580,7 +617,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             }
         });
         if(instance_id != undefined){
-            if(newTTl < totalToPay){
+            if(newTTl != totalToPay){
                 setDisabledToSubmit(true);
                 setDisabledByValue(true);
             }else{
@@ -632,10 +669,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
     }
 
-    useEffect(()=>{
-        calcTotalFromPayments();
-    },[paymentMethod])
-
     const setAplyVoucher = (id,value)=>{
         setPaymentMethod(prev=>
             prev.map(item =>
@@ -656,52 +689,12 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         )
     }
 
-    useEffect(()=>{
-        console.log(briefCaseBills)
-    },[briefCaseBills])
-
-    useEffect(()=>{
-        console.log(documents)
-        if(documents.length > 0){
-            let newTotalToPay = 0;
-            itemBlocks.forEach(element => {
-                console.log(element)
-                let tempTtl = 0;
-                element.items.forEach(element => {
-                    tempTtl += (parseFloat(element.unit_value? element.unit_value:0)*parseFloat(element.units? element.units:0))
-                });
-                newTotalToPay += tempTtl;
-            });
-            setTotalToPay(newTotalToPay);
-        }
-        if(briefCaseBills.length >0 && documents.length == 0){
-            let newTotalToPay = 0;
-            briefCaseBills.forEach(element => {
-                newTotalToPay += (element.paid_value != undefined && element.paid_value != "" ? element.paid_value:0);
-            });
-            setTotalToPay(newTotalToPay)
-        }
-        calcTotalFromPayments();
-    },[documents,briefCaseBills,itemBlocks])
-
-    useEffect(()=>{
-        handleUserConfig();
-        getProductsAndServices();
-    },[])
-
-    useEffect(()=>{
-        if(thirdParty_id != undefined){
-            getDocuments();
-            getInstances();
-        }
-    },[thirdParty_id])
-
     // Creation Function
 
-    const createCashRecipt = async()=>{
+    const createSellInvoice = async()=>{
         setDisabled(true)
         setLoading(true)
-        let res = await postInfo('/facturation/newCashRecipt',FormInfo);
+        let res = await postInfo('/facturation/newSellInvoice',FormInfo);
         console.log(res);
         if(typeof(parseInt(res.id)) == 'number'){
             addNotification({
@@ -709,6 +702,9 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 title:`Recibo de caja #${res.id} creado correctamente`,
                 description:`El recibo de caja #${res.id} fue creado correctamente`
             })
+            if(e_invoice){
+                handleCreationOfEinvoice(res.id);
+            }
             FormInfo["doc_id"] = res.id
             FormInfo['instance_id'] = instance_id;
             FormInfo["ownSerial"] = res.ownSerial;
@@ -718,6 +714,19 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             }
             FormInfo["user_id"] = userInfo.user_id,
             FormInfo['transactionDetails'] = []
+            itemBlocks.forEach(element => {
+                console.log(element)
+                element.items.forEach(item => {
+                    console.log('EL> ',item)
+                    FormInfo.transactionDetails.push({
+                        account_id:item.exit_account,
+                        subtotal:parseFloat(item.units)*parseFloat(item.unit_value),
+                        total:parseFloat(item.units)*parseFloat(item.unit_value),
+                        type:item.type == 'service'? 'serviceMovement':'inventoryMovement',
+                        nature: documentNature == 'DB'? 'CR':'DB'
+                    })
+                });
+            });
             paymentMethod.forEach(element => {
                 FormInfo.transactionDetails.push({
                     account_id:element.account_id,
@@ -733,13 +742,13 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     shift_id,
                 })
             });
-            FormInfo.transactionDetails.push({
+            /*FormInfo.transactionDetails.push({
                 account_id:conceptAccount_id,
                 subtotal:total,
                 total:total,
                 type:'operation',
                 nature: documentNature == 'DB'? 'CR':'DB'
-            })
+            })*/
             await toAccount();
         }else{
             addNotification({
@@ -752,8 +761,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         setLoading(false);
         setDisabled(false);
         reloadFun?.();
-        if(instance_id != undefined){
-            popInAlert(<ProcessStatusAlert instance_id={instance_id} reloadFun={reloadFun}/>)
+        if(instance_id != undefined && instance_id.length == 1){
+            //popInAlert(<ProcessStatusAlert instance_id={instance_id[0]} reloadFun={reloadFun}/>)
         }
     }
 
@@ -791,8 +800,56 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             })
         }
     }
-    
 
+
+    const handleCreationOfEinvoice = async(doc_id)=>{
+        let itemsToFac = [];
+        itemBlocks.forEach(element => {
+            element.items.forEach(item => {
+                console.log('??? ',item)
+                itemsToFac.push(
+                    {
+                        "code_reference": item.code? item.code:item.service_id,
+                        "name": item.name? item.name:item.service_name,
+                        "quantity": parseFloat(item.units),
+                        "discount": 0,
+                        "discount_rate": 0,
+                        "price": parseFloat(item.unit_value),
+                        "tax_rate": "19.00",
+                        "unit_measure_id": 70,
+                        "standard_code_id": 1,
+                        "is_excluded": 0,
+                        "tribute_id": 1,
+                        "withholding_taxes": []
+                    }
+                )
+            });
+        });
+        let res = await newElectronicInvoide({
+            company_info:appInfo,
+            customer:thirdPartyInfo,
+            user_id:userInfo.user_id,
+            document:FormInfo,
+            items:itemsToFac,
+            doc_id
+        });
+        console.log(res)
+        if(res.status == 'Created'){
+            addNotification({
+                type:'aproved',
+                title:`Factura Electronica #${res.data.bill.number} creada exitosamente`,
+                description:'Para consultar y previsualizar la factura haga click en esta notificación.',
+                onClick:()=>{
+                    window.open(`${res.data.bill.public_url}`,'_blank','noopener,noreferrer')
+                    //window.open(`${res.data.bill.public_url}`,'_blank','noopener,noreferrer')
+                }
+            })
+        }
+    }
+
+
+    // Event listeners
+    
     useEffect(()=>{
         console.log(thirdPartyInfo)
         if(thirdPartyInfo.id != undefined){
@@ -816,6 +873,46 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             getThirdParties(thirdParty_id,1)
         }
     },[instance_id])
+
+    useEffect(()=>{
+        calcTotalFromPayments();
+    },[paymentMethod])
+
+    useEffect(()=>{
+        console.log(documents)
+        if(documents.length > 0){
+            let newTotalToPay = 0;
+            itemBlocks.forEach(element => {
+                console.log(element)
+                let tempTtl = 0;
+                element.items.forEach(element => {
+                    tempTtl += (parseFloat(element.unit_value? element.unit_value:0)*parseFloat(element.units? element.units:0))
+                });
+                newTotalToPay += tempTtl;
+            });
+            setTotalToPay(newTotalToPay);
+        }
+        if(briefCaseBills.length >0 && documents.length == 0){
+            let newTotalToPay = 0;
+            briefCaseBills.forEach(element => {
+                newTotalToPay += (element.paid_value != undefined && element.paid_value != "" ? element.paid_value:0);
+            });
+            setTotalToPay(newTotalToPay)
+        }
+        calcTotalFromPayments();
+    },[documents,briefCaseBills,itemBlocks])
+
+    useEffect(()=>{
+        handleUserConfig();
+        getProductsAndServices();
+    },[])
+
+    useEffect(()=>{
+        if(thirdParty_id != undefined){
+            getDocuments();
+            getInstances();
+        }
+    },[thirdParty_id])
 
     return(
         <div className="FormNewCashRecipt FormNewInvoice">
@@ -841,13 +938,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             {!loading && (
                 <form action="" disabled={disabledToSubmit? true:disabled} onSubmit={(e)=>{
                     e.preventDefault();
-                    //createCashRecipt();
-                    newElectronicInvoide({
-                        company_info:appInfo,
-                        customer:thirdPartyInfo,
-                        user_id:userInfo.user_id,
-                        document:FormInfo
-                    });
+                    createSellInvoice();
                 }}>
                     {info.store_id == undefined && (
                         <SearchinList action={setStore_id} title={'Tienda'} placeHolder={'Seleccione la tienda'} list={stores} disabled={disabled}/>
@@ -864,11 +955,9 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                         }}/>
                     }/>
                     {info.instance_id == undefined && (
-                        <SearchinList action={handleSelectInstance} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={thirdParty_id != undefined? disabled:true}/>
+                        <SearchinList action={handleSelectInstance} noActVal={true} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={thirdParty_id != undefined? disabled:true}/>
                     )}
-                    {info.thirdParty_id == undefined && (
-                        <SearchinList action={handleThirdPartyChange} title={'Documentos'} placeHolder={'Seleccione el documento'} list={documents} disabled={thirdParty_id != undefined? disabled:true}/>
-                    )}
+                    <SearchinList action={handleAddDocument} noActVal={true} title={'Documentos'} placeHolder={'Seleccione el documento'} list={documents} disabled={thirdParty_id != undefined? disabled:true}/>
                     {info.concept_id == undefined && (
                         <SearchinList action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
                     )}
@@ -994,7 +1083,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     )}
                     <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
                     <FileInput action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
-                    <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor excede el monto max':'Crear recibo de caja'} disabled={disabledToSubmit? true:disabled} loading={loading}/>
+                    <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor ingresado no es valido':'Crear factura de venta'} disabled={disabledToSubmit? true:disabled} loading={loading}/>
                 </form>
             )}
             {loading && (

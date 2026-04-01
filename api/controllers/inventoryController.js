@@ -1144,16 +1144,16 @@ inventoryController.getServicesMovements = (req,res)=>{
         const values = [];
         let whereClauses = [];
 
-        whereClauses.push(`"Inventory".services_movement.company_id = $1`);
+        whereClauses.push(`sm.company_id = $1`);
         values.push(info.company_id);
 
         if(info.doc_id != undefined){
-            whereClauses.push(`"Inventory".services_movement.doc_id = $${values.length + 1}`);
+            whereClauses.push(`sm.doc_id = $${values.length + 1}`);
             values.push(info.doc_id)
         }
 
         if(info.instance_id != undefined){
-            whereClauses.push(`"Inventory".services_movement.instance_id = $${values.length + 1}`);
+            whereClauses.push(`sm.instance_id = $${values.length + 1}`);
             values.push(info.instance_id);
         }
 
@@ -1161,22 +1161,30 @@ inventoryController.getServicesMovements = (req,res)=>{
         ? `WHERE ${whereClauses.join(" AND ")}`
         : "";
         let sentence = `
-            SELECT
-                "Inventory".services_movement.*,
-                "Inventory"."products&services".name AS service_name,
-                "Inventory"."products&services".img AS service_img,
-                "Inventory"."products&services".type
-                 AS service_type
+           SELECT
+                sm.*, -- Solo el alias
+                ps.name AS service_name,
+                ps.img AS service_img,
+                ps.type,
+                c_exit.account_id AS exit_account,
+                c_entry.account_id AS entry_account
             FROM
-                "Inventory".services_movement
+                "Inventory".services_movement AS sm -- Aquí nace el alias 'sm'
             LEFT JOIN
-                "Inventory"."products&services"
+                "Inventory"."products&services" AS ps -- Aquí nace el alias 'ps'
             ON
-                "Inventory".services_movement.service_id = "Inventory"."products&services".id
+                sm.service_id = ps.id
+            LEFT JOIN
+                "Ecosystem".concepts AS c_exit
+            ON
+                ps.exit_concept = c_exit.id
+            LEFT JOIN
+                "Ecosystem".concepts AS c_entry
+            ON
+                ps.entry_concept = c_entry.id
             ${whereQuery}
             ORDER BY
-                "Inventory"."products&services".order_index ASC, "Inventory"."products&services".name ASC
-            ;
+                ps.order_index ASC, ps.name ASC; -- Usamos los alias
         `;
         let consulta = await useDataBase(sentence,values,1);
         res.writeHead(200,{'Content-Type':'text/plain'})

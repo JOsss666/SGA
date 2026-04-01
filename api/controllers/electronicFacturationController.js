@@ -216,10 +216,10 @@ electronicFacturationController.newInvoice = (req,res)=>{
             "identification_document_id": "3",
             "municipality_id": "980"
         },
-        "items": [
+        /*"items": [
             {
                 "code_reference": "12345",
-                "name": "producto de prueba",
+                "name": "SGA 1",
                 "quantity": 1,
                 "discount": 8403.36,
                 "discount_rate": 20,
@@ -242,11 +242,11 @@ electronicFacturationController.newInvoice = (req,res)=>{
             },
             {
                 "code_reference": "54321",
-                "name": "producto de prueba 2",
+                "name": "SGA 2 ",
                 "quantity": 1,
                 "discount": 0,
                 "discount_rate": 0,
-                "price": 50000,
+                "price": 250000,
                 "tax_rate": "5.00",
                 "unit_measure_id": 70,
                 "standard_code_id": 1,
@@ -254,7 +254,8 @@ electronicFacturationController.newInvoice = (req,res)=>{
                 "tribute_id": 1,
                 "withholding_taxes": []
             }
-        ]
+        ]*/
+       "items":info.items
     }
     console.log(params)
     const response = await fetch('https://api-sandbox.factus.com.co/v1/bills/validate', {
@@ -266,23 +267,27 @@ electronicFacturationController.newInvoice = (req,res)=>{
         },
         body: JSON.stringify(params)
     });
-    const data = await response.json();
-    /*await electronicFacturationController.registerElectronicInvoice({
-        user_id:info.user_id,
-        customer:info.customer,
-        company_id:info.company_info.company_id,
-        store_id:6,
-        doc_id:info.doc_id,
-        invoice_id:data.bill.id,
-        reference:data.bill.reference_code,
-        number:data.bill.number,
-        code:data.bill.cufe,
-        url:data.bill.url,
-        qr:data.bill.qr,
-        qr_image:data.bill.qr_image
-    })*/
+    const resInvoice = await response.json();
+    if(resInvoice.status == 'Created'){
+        let data = resInvoice.data
+        let insertRes = await electronicFacturationController.registerElectronicInvoice({
+            user_id:info.user_id,
+            customer:info.customer,
+            company_id:info.company_info.company_id,
+            store_id:6,
+            doc_id:info.doc_id,
+            invoice_id:data.bill.id,
+            reference:data.bill.reference_code,
+            number:data.bill.number,
+            code:data.bill.cufe,
+            url:data.bill.public_url,
+            qr:data.bill.qr,
+            qr_image:data.bill.qr_image
+        });
+    resInvoice.sga_id = insertRes;
+    }
     res.writeHead(200,{'Content-Type':'text/plain'})
-    res.end(JSON.stringify(data));
+    res.end(JSON.stringify(resInvoice));
   })
   req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
@@ -306,7 +311,7 @@ electronicFacturationController.registerElectronicInvoice = async(info)=>{
             qr,
             qr_image
             )
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11);
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id;
     `;
     let consulta = await useDataBase(sentence,[
         info.user_id,
@@ -320,7 +325,48 @@ electronicFacturationController.registerElectronicInvoice = async(info)=>{
         info.url,
         info.qr,
         info.qr_image
-    ],2);
+    ],3);
+    return consulta;
+}
+
+electronicFacturationController.getInvoice = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        if(info.company_id != undefined){
+            whereClauses.push(`company_id = $${info.company_id}`);
+            values.push(info.company_id);
+        }
+
+        if(info.id != undefined){
+            whereClauses.push(`id = $${values.length+1}`);
+            values.push(info.id)
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
+        let sentence = `
+            SELECT * FROM
+                "ElectronicFacturation".invoices
+            ${whereQuery}
+            ORDER BY id DESC ;
+        `;
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
 }
 
 
