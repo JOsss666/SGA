@@ -3,6 +3,7 @@ import cors from 'cors';
 import routes from './routes/index.routes.js'
 import http from 'http';
 import { setupRealtime } from './realTimeConnection.js';
+import electronicFacturationController from './controllers/electronicFacturationController.js';
 
 const app = express();
 const asignedPort  = process.env.PORT || 3000;
@@ -30,8 +31,9 @@ app.use(routes);
 setupRealtime(server)
 
 
-server.listen(asignedPort , () => {
+server.listen(asignedPort , async() => {
     console.log('Servidor SGA_inventory v1.2 Escuchando en el puerto', asignedPort);
+    await electronicFacturationController.init();
 });
 
 //server.listen(asignedPort , () => {

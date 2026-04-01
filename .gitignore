@@ -20,6 +20,9 @@ logs
 *.log
 *.log.*
 
+#Token files
+factus_token.json
+
 # Editor / sistema
 .DS_Store
 Thumbs.db
