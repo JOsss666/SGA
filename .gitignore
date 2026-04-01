@@ -22,6 +22,7 @@ logs
 
 #Token files
 factus_token.json
+numbering_ranges.json
 
 # Editor / sistema
 .DS_Store

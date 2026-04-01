@@ -285,7 +285,7 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
 
     router.get('/electronicFacturation/taxes', electronicFacturationController.getTaxes);
 
-    router.post('/electronicFacturation/getInvoice',electronicFacturationController.getInvoice);
+    router.post('/electronicFacturation/getDocuments',electronicFacturationController.getDocuments);
 
 export default router;
 

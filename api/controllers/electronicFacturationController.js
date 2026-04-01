@@ -40,19 +40,25 @@ async function saveNumberingRanges(ranges) {
     return dataToSave;
 }
 
-async function getNumercRangeData(type) {
+export async function getNumercRangeData(type) {
     const cache = await readFile(RANGES_PATH);
-    if (!cache || !cache.numbering_ranges) return null;
-    const rangesArray = Object.values(cache.numbering_ranges);
+    if (!cache) return null;
+    const rawData = cache.numbering_ranges ? cache.numbering_ranges : cache;
+    const rangesArray = Object.values(rawData);
+    if (rangesArray.length === 0) return null;
+
     switch (type) {
         case 'invoice':
-
             const invoiceRange = rangesArray.find(item => item.document === 'Factura de Venta');
             return invoiceRange ? invoiceRange.id : null;
 
-        case 'note':
-            const noteRange = rangesArray.find(item => item.document === 'Nota Crédito');
-            return noteRange ? noteRange.id : null;
+        case 'cr_note':
+            const crNoteRange = rangesArray.find(item => item.document === 'Nota Crédito');
+            return crNoteRange ? crNoteRange.id : null;
+
+        case 'db_note':
+            const dbNoteRange = rangesArray.find(item => item.document === 'Nota Débito');
+            return dbNoteRange ? dbNoteRange.id : null;
 
         default:
             return null;
@@ -71,12 +77,10 @@ electronicFacturationController.getAuthToken = async (grantType = 'password', re
         const fiveMinutes = 5 * 60 * 1000;
         
         if (now < (stored.expires_at - fiveMinutes)) {
-            console.log('✅ Utilizando token guardado en caché');
             return stored;
         }
         
         if (stored.refresh_token) {
-            console.log('🔄 El access_token expiró, intentando refrescar...');
             finalGrantType = 'refresh_token';
             refreshToken = stored.refresh_token;
         }
@@ -198,7 +202,7 @@ electronicFacturationController.newInvoice = (req,res)=>{
     console.log(auth)
     let params = {
         "document": "01",
-        "numbering_range_id": 8,
+        "numbering_range_id": await getNumercRangeData('invoice'),
         "reference_code": "fact0022025",
         "observation": "",
         "payment_method_code": "10",
@@ -240,22 +244,7 @@ electronicFacturationController.newInvoice = (req,res)=>{
                         "withholding_tax_rate": "15.00"
                     }
                 ]
-            },
-            {
-                "code_reference": "54321",
-                "name": "SGA 2 ",
-                "quantity": 1,
-                "discount": 0,
-                "discount_rate": 0,
-                "price": 250000,
-                "tax_rate": "5.00",
-                "unit_measure_id": 70,
-                "standard_code_id": 1,
-                "is_excluded": 0,
-                "tribute_id": 1,
-                "withholding_taxes": []
-            }
-        ]*/
+            },*/
        "items":info.items
     }
     console.log(params)
@@ -271,7 +260,7 @@ electronicFacturationController.newInvoice = (req,res)=>{
     const resInvoice = await response.json();
     if(resInvoice.status == 'Created'){
         let data = resInvoice.data
-        let insertRes = await electronicFacturationController.registerElectronicInvoice({
+        let insertRes = await electronicFacturationController.registerEFactDocument({
             user_id:info.user_id,
             customer:info.customer,
             company_id:info.company_info.company_id,
@@ -283,7 +272,8 @@ electronicFacturationController.newInvoice = (req,res)=>{
             code:data.bill.cufe,
             url:data.bill.public_url,
             qr:data.bill.qr,
-            qr_image:data.bill.qr_image
+            qr_image:data.bill.qr_image,
+            type:'electronic invoice'
         });
     resInvoice.sga_id = insertRes;
     }
@@ -297,9 +287,9 @@ electronicFacturationController.newInvoice = (req,res)=>{
 }
 
 
-electronicFacturationController.registerElectronicInvoice = async(info)=>{
+electronicFacturationController.registerEFactDocument = async(info)=>{
     let sentence = `
-        INSERT INTO "ElectronicFacturation".invoices(
+        INSERT INTO "ElectronicFacturation".documents(
             generated_by,
             company_id,
             store_id,
@@ -310,9 +300,10 @@ electronicFacturationController.registerElectronicInvoice = async(info)=>{
             code,
             url,
             qr,
-            qr_image
+            qr_image,
+            type
             )
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id;
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id;
     `;
     let consulta = await useDataBase(sentence,[
         info.user_id,
@@ -325,12 +316,85 @@ electronicFacturationController.registerElectronicInvoice = async(info)=>{
         info.code,
         info.url,
         info.qr,
-        info.qr_image
+        info.qr_image,
+        info.type
     ],3);
     return consulta;
 }
 
-electronicFacturationController.getInvoice = (req,res)=>{
+electronicFacturationController.newNote = (req,res)=>{
+  let bodyData = '';
+  req.on('data',chunk=>{
+      bodyData += chunk;
+  })
+  req.on('end',async()=>{
+    let info = JSON.parse(bodyData);
+    const auth = await electronicFacturationController.getAuthToken();
+    let params = {
+        "numbering_range_id": await getNumercRangeData(info.type == 'credit_note'? 'cr_note':'db_note'),
+        "correction_concept_code": 2,
+        "customization_id": 20,
+        "bill_id": info.bill_id,
+        "reference_code": "5",
+        "observation": "",
+        "payment_method_code": "10",
+        "customer": {
+            "identification": info.customer.indentification_number,
+            "dv": "3",
+            "company": `${info.customer.names} ${info.customer.lastNames}`,
+            "trade_name": info.customer.names,
+            "names": info.customer.names,
+            "address": info.customer.address,
+            //"email": info.customer.mail,
+            "email": 'murillojose.nvc@gmail.com',
+            "phone": info.customer.phone,
+            "legal_organization_id": "2",
+            "tribute_id": "21",
+            "identification_document_id": "3",
+            "municipality_id": "980"
+        },
+        "items":info.items
+    }
+    console.log(params)
+    const response = await fetch('https://api-sandbox.factus.com.co/v1/credit-notes/validate', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${auth.access_token}`,
+            'Content-Type': 'application/json', // ¡Faltaba este!
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify(params)
+    });
+    const resInvoice = await response.json();
+    if(resInvoice.status == 'Created'){
+        let data = resInvoice.data
+        let insertRes = await electronicFacturationController.registerEFactDocument({
+            user_id:info.user_id,
+            customer:info.customer,
+            company_id:info.company_info.company_id,
+            store_id:6,
+            doc_id:info.doc_id,
+            invoice_id:data.bill.id,
+            reference:data.bill.reference_code,
+            number:data.bill.number,
+            code:data.bill.cufe,
+            url:data.bill.public_url,
+            qr:data.bill.qr,
+            qr_image:data.bill.qr_image,
+            type:info.type == 'credit_note'? 'credit note':'debit note'
+        });
+    resInvoice.sga_id = insertRes;
+    }
+    res.writeHead(200,{'Content-Type':'text/plain'})
+    res.end(JSON.stringify(resInvoice));
+  })
+  req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+electronicFacturationController.getDocuments = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
         data += chunk;
@@ -356,7 +420,7 @@ electronicFacturationController.getInvoice = (req,res)=>{
 
         let sentence = `
             SELECT * FROM
-                "ElectronicFacturation".invoices
+                "ElectronicFacturation".documents
             ${whereQuery}
             ORDER BY id DESC ;
         `;
@@ -369,6 +433,8 @@ electronicFacturationController.getInvoice = (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
+
+
 
 // Función para inicializar servicios al arrancar el servidor
 electronicFacturationController.init = async () => {
@@ -386,6 +452,5 @@ electronicFacturationController.init = async () => {
         console.log('ℹ️ El sistema reintentará la conexión en la primera solicitud de factura.');
     }
 };
-
 
 export default electronicFacturationController;
