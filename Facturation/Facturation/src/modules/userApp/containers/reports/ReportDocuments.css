@@ -85,9 +85,8 @@
 .ReportDocument .SpaceReport{
     margin-top: 2vh;
     max-width: 100%;
-    overflow-x: auto;
+    overflow: hidden;
     height: 60vh;
-    padding: .1vh;
 }
 
 .ReportDocument .totalsBalanceC{
