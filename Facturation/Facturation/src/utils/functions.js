@@ -498,6 +498,11 @@ export async function newElectronicInvoide(info){
     return(res)
 }
 
+export async function newElectronicNote(info){
+    let res = await postInfo('/electronicFacturation/note',info);
+    return(res)
+}
+
 export async function getNumberingRangesElectronicInvoices() {
     let res = await getInfo('/electronicFacturation/getNumberingRanges');
     console.log(res);

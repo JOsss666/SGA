@@ -331,9 +331,10 @@ electronicFacturationController.newNote = (req,res)=>{
     let info = JSON.parse(bodyData);
     const auth = await electronicFacturationController.getAuthToken();
     let params = {
-        "numbering_range_id": await getNumercRangeData(info.type == 'credit_note'? 'cr_note':'db_note'),
+        "numbering_range_id": await getNumercRangeData(info.type == 'Credit Note'? 'cr_note':'db_note'),
         "correction_concept_code": 2,
-        "customization_id": 20,
+        // System use 22 when the note dont have an asociated bill. --> bill_id becomes optional
+        "customization_id": info.bill_id != undefined? 20:22,
         "bill_id": info.bill_id,
         "reference_code": "5",
         "observation": "",
@@ -381,14 +382,14 @@ electronicFacturationController.newNote = (req,res)=>{
             url:data.bill.public_url,
             qr:data.bill.qr,
             qr_image:data.bill.qr_image,
-            type:info.type == 'credit_note'? 'credit note':'debit note'
+            type:info.type
         });
     resInvoice.sga_id = insertRes;
     }
     res.writeHead(200,{'Content-Type':'text/plain'})
     res.end(JSON.stringify(resInvoice));
   })
-  req.on('error',(err)=>{
+    req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
@@ -407,6 +408,11 @@ electronicFacturationController.getDocuments = (req,res)=>{
         if(info.company_id != undefined){
             values.push(info.company_id);
             whereClauses.push(`company_id = $${values.length}`);
+        }
+
+        if(info.type != undefined){
+            values.push(info.type);
+            whereClauses.push(`type = $${values.length}`);
         }
 
         if(info.id != undefined){
@@ -432,6 +438,37 @@ electronicFacturationController.getDocuments = (req,res)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
+}
+
+electronicFacturationController.getDocumentFullInfo = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        const auth = await electronicFacturationController.getAuthToken();
+        let info = JSON.parse(data);
+        console.log('bill_number: ',info.bill_numer);
+        console.log(`Ruta: https://api-sandbox.factus.com.co/v1/bills/show-bill/`);
+        //https://api-sandbox.factus.com.co/v1/bills/show/SETP990028932
+        //https://api-sandbox.factus.com.co/v1/bills/show/${info.bill_number}
+        const response = await fetch(`https://api-sandbox.factus.com.co/v1/bills/show/SETP990008144`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${auth.access_token}`,
+                'Accept': 'application/json'
+            }
+        });
+        const resInvoice = await response.json();
+        console.log(resInvoice)
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(resInvoice));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+
 }
 
 

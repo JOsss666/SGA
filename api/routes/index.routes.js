@@ -231,6 +231,8 @@ router.post('/facturation/newCashRecipt',facturationController.newCashRecipt);
 
 router.post('/facturation/newSellInvoice',facturationController.newSellInvoice);
 
+router.post('/facturation/newNote',facturationController.newNote);
+
 router.post('/facturation/newClientOrder',facturationController.newClientOrder);
 
 router.post('/facturation/getCashBoxes',facturationController.getCashBoxes);
@@ -286,6 +288,10 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     router.get('/electronicFacturation/taxes', electronicFacturationController.getTaxes);
 
     router.post('/electronicFacturation/getDocuments',electronicFacturationController.getDocuments);
+
+    router.post('/electronicFacturation/note',electronicFacturationController.newNote);
+
+    router.post('/electronicFacturationController.getDocumentFullInfo',electronicFacturationController.getDocumentFullInfo);
 
 export default router;
 
