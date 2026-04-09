@@ -320,7 +320,7 @@ facturationController.newNote = (req,res)=>{
             info.instance_id != "" && info.instance_id != undefined? info.instance_id:undefined,
             info.instance_id != "" && info.instance_id != undefined? info.step_id:undefined
         ],3);
-        if((info.payedBills != undefined || info.payedBills.length > 0) && consulta.id != undefined){
+        if((info.payedBills != undefined && info.payedBills.length > 0) && consulta.id != undefined){
             for(const element of info.payedBills){
                 let senUPB = `
                     UPDATE
