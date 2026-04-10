@@ -91,3 +91,31 @@
     font-weight: 500;
     font-size: clamp(2.4px,2.4vh,24px);
 }
+
+.FormNewENote .step2Form .sumaryContainer{
+    width: 100%;
+    display: flex;
+    padding: 2vh 1vh;
+}
+
+.FormNewENote .step2Form .sumaryContainer .sumary{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    width: fit-content;
+    margin: auto;
+    margin-right: 2vw;
+}
+
+.FormNewENote .step2Form .sumaryContainer .sumary span{
+    font-size: clamp(2px,2.2vh,22px);
+    text-align: right;
+    font-weight: 500;
+    color: var(--descriptionText);
+}
+
+.FormNewENote .step2Form .sumaryContainer .sumary span b{
+    font-size: clamp(2.4px,2.4vh,24px);
+    color: var(--mainText);
+    margin-left: 2vw;
+}

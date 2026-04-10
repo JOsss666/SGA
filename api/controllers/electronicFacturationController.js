@@ -138,7 +138,7 @@ electronicFacturationController.getNumberingRanges = async () => {
     try {
         let stored = await readFile(RANGES_PATH);
         if(stored){
-          console.log('Res ran num Cache: ',stored);
+            console.log('Rangos Numericos (cache): ',stored);
           return (stored);
         }
         const response = await fetch('https://api-sandbox.factus.com.co/v1/numbering-ranges', {
@@ -148,9 +148,7 @@ electronicFacturationController.getNumberingRanges = async () => {
                 'Authorization': `Bearer ${auth.access_token}` // ¡ESTO ES VITAL!
             },
         });
-
         const data = await response.json();
-        console.log('Res ran num: ',data);
         console.log('Rangos Numericos: ',data.data.data);
         saveNumberingRanges(data.data.data)
         if (!response.ok) throw new Error(data.message || 'Error al obtener rangos');
@@ -247,7 +245,6 @@ electronicFacturationController.newInvoice = (req,res)=>{
             },*/
        "items":info.items
     }
-    console.log(params)
     const response = await fetch('https://api-sandbox.factus.com.co/v1/bills/validate', {
         method: 'POST',
         headers: {
@@ -367,6 +364,7 @@ electronicFacturationController.newNote = (req,res)=>{
         body: JSON.stringify(params)
     });
     const resInvoice = await response.json();
+    console.log(resInvoice)
     if(resInvoice.status == 'Created'){
         let data = resInvoice.data
         let insertRes = await electronicFacturationController.registerEFactDocument({
@@ -375,13 +373,13 @@ electronicFacturationController.newNote = (req,res)=>{
             company_id:info.company_info.company_id,
             store_id:6,
             doc_id:info.doc_id,
-            invoice_id:data.bill.id,
-            reference:data.bill.reference_code,
-            number:data.bill.number,
-            code:data.bill.cufe,
-            url:data.bill.public_url,
-            qr:data.bill.qr,
-            qr_image:data.bill.qr_image,
+            invoice_id:data.credit_note.id,
+            reference:data.credit_note.reference_code,
+            number:data.credit_note.number,
+            code:data.credit_note.cufe,
+            url:data.credit_note.public_url,
+            qr:data.credit_note.qr,
+            qr_image:data.credit_note.qr_image,
             type:info.type
         });
     resInvoice.sga_id = insertRes;
@@ -407,17 +405,17 @@ electronicFacturationController.getDocuments = (req,res)=>{
 
         if(info.company_id != undefined){
             values.push(info.company_id);
-            whereClauses.push(`company_id = $${values.length}`);
+            whereClauses.push(`"ElectronicFacturation".documents.company_id = $${values.length}`);
         }
 
         if(info.type != undefined){
             values.push(info.type);
-            whereClauses.push(`type = $${values.length}`);
+            whereClauses.push(`"ElectronicFacturation".documents.type = $${values.length}`);
         }
 
         if(info.id != undefined){
             values.push(info.id);
-            whereClauses.push(`id = $${values.length}`);
+            whereClauses.push(`"ElectronicFacturation".documents.id = $${values.length}`);
         }
 
         const whereQuery = whereClauses.length > 0
@@ -425,8 +423,16 @@ electronicFacturationController.getDocuments = (req,res)=>{
             : "";
 
         let sentence = `
-            SELECT * FROM
+            SELECT 
+                "ElectronicFacturation".documents.*,
+                "Ecosystem".documents.id AS doc_id,
+                "Ecosystem".documents."thirdParty_id"
+            FROM
                 "ElectronicFacturation".documents
+            LEFT JOIN
+                "Ecosystem".documents
+            ON
+                "ElectronicFacturation".documents.doc_id = "Ecosystem".documents.id
             ${whereQuery}
             ORDER BY id DESC ;
         `;

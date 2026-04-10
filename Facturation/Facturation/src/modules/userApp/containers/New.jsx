@@ -135,7 +135,7 @@ export function New(){
         <div className="New">
             <BoldTitle text={'Crear nuevo'}/>
             <DescriptionSpan text={'Crea todo lo que necesites en un solo click'}/>
-            {disabled && (
+            {!disabled && (
                 <div className="gridOptions">
                     {options.map((element,index)=>(
                         <span key={index} onClick={()=>{
@@ -147,7 +147,7 @@ export function New(){
                     ))}
                 </div>
             )}
-            {!disabled && (
+            {disabled && (
                 <>
                     <NoResults title={messgeDisabled} img={'https://uxwing.com/wp-content/themes/uxwing/download/signs-and-symbols/stop-blocked-icon.png'}/>
                     {userConfig.access != undefined && (userConfig.access.services.personalized['custom-modules'])["z&j_clicksControl"].access && (

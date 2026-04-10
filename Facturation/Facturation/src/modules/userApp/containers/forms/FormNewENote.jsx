@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAlert, useAppInfo } from "../../../../context/context";
+import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { BoldTitle } from "../../components/BoldTitle";
 import './FormNewENote.css'
 import { SearchinList } from "../../components/SearchInList";
@@ -8,27 +8,36 @@ import { FormButton } from "../../components/FormButton";
 import { FormInput } from "../../components/FormInput";
 import { isElectron } from "../../../../App";
 
-export function FormNewENote(){
+export function FormNewENote({InfoParams,reloadFun}){
 
     // Requirtements
+    const {addNotification} = useNotifications();
     const {appInfo,userConfig,userInfo,appConfig} = useAppInfo();
     const {popInAlert,popOutAlert} = useAlert();
 
     // Control
+    const [info,setInfo] = useState(InfoParams != undefined? InfoParams:{})
     const [step,setStep] = useState(0);
     const [disabled,setDisabled] = useState(false);
     const [loading,setLoading] = useState(false);
     const [thirdparties,setThirdParties] = useState([]);
     const [invoices,setInvoices] = useState([]);
+    const [bussines,setBussines] = useState([]);
+    const [costCenters,setCostCenters] = useState([]);
+    const [stores,setStores] = useState([]);
+
     
     // FormInfo
     const [mode,setMode] = useState();
     const [type,setType] = useState('Credit Note');
+    const [bussines_id,setBussines_id] = useState();
     const [thirdParyInfo,setThirdPartyInfo] = useState({});
     const [invoiceInfo,setInvoiceInfo] = useState({});
     const [correction_code,setCorrection_code] = useState();
-    const [description,setDescription] = useState('')
+    const [description,setDescription] = useState('');
+    const [costCenter_id,setCostCenter_id] = useState();
     const [items,setItems] = useState([]);
+    const [store_id,setStore_id] = useState();
     const [total,setTotal] = useState();
 
     const FormInfo = {
@@ -36,8 +45,17 @@ export function FormNewENote(){
         customer:thirdParyInfo,
         user_id:userInfo.user_id,
         document:{
-            correction_code,
-            description,    
+            company_id:appInfo.company_id,
+            store_id:6,
+            type:'Sell Invoice',
+            thirdParty_id:thirdParyInfo.id,
+            status:'active',
+            subTotal:total,
+            total:total,
+            created_by:userInfo.user_id,
+            description:description,
+            attached:[],
+            instances:[],
         },
         items,
         bill_id:invoiceInfo.bill_id,
@@ -86,15 +104,75 @@ export function FormNewENote(){
         }
     }
 
-    const getInvoiceInfo = async(bill_number)=>{
+    const getInvoiceInfo = async(bill_number,thirdParty_id)=>{
         let res = await postInfo('/electronicFacturationController.getDocumentFullInfo',{
             bill_numer:bill_number
         });
         console.log(res);
         if(res.status == 'OK'){
             setInvoiceInfo(res.data)
+            setThirdPartyInfo({
+                id:thirdParty_id,
+                indentification_number:res.data.customer.identification,
+                names:res.data.customer.names,
+                address:res.data.customer.address,
+                phone:res.data.customer.phone,
+                mail:res.data.customer.email
+            })
             setItems(res.data.items);
         };
+    }
+
+    const getStores = async(allowedStores)=>{
+        let res = await postInfo('/getStores',{
+            company_id:appInfo.company_id,
+            allowedStores
+        })
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:element.name,
+                    value:element.id
+                })
+            });
+            setStores(C)
+        }
+    }
+
+    const getBussines = async(allowedBussines)=>{
+            let res = await postInfo('/getBussines',{
+                company_id:appInfo.company_id,
+                allowedBussines
+            })
+            if(res[0]){
+                let C = []
+                res[1].forEach(element => {
+                    C.push({
+                        text:element.name,
+                        value:element.id
+                    })
+                    setBussines(C);
+                });
+            }
+        }
+    
+    const getCostCenters = async(allowedCostCenters)=>{
+        let res = await postInfo('/getCostCenters',{
+            company_id:appInfo.company_id,
+            allowedCostCenters
+        })
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:element.name,
+                    value:element.id
+                })
+                setCostCenters(C);
+            });
+            
+        }
     }
 
     // Creation Functions
@@ -104,7 +182,6 @@ export function FormNewENote(){
         setDisabled(true)
         setLoading(true)
         await getThirdParties();
-        await getConcepts();
         let temInfo = {}
         if(userConfig.access != undefined){
             console.log(userConfig.access)
@@ -136,19 +213,6 @@ export function FormNewENote(){
                 await getBussines();
             }
 
-            if(userConfig.access.sections.cashBoxes.overAll){
-                if(userConfig.access.bussines.enabled.length > 1){
-                    //getCashBoxes con filtro
-                    await getCashBoxes(userConfig.access.sections.cashBoxes.enabled)
-                }else{
-                    temInfo.cashBox_id = userConfig.access.sections.cashBoxes.enabled[0]
-                    setBussines_id(userConfig.access.sections.cashBoxes.enabled[0])
-                    getCashBoxes(userConfig.access.sections.cashBoxes.enabled)
-                }
-            }else{
-                await getCashBoxes();
-            }
-
             // Filtro para busqueda de Centros de costo
             if(!userConfig.access.costCenters.overAll){
                 if(userConfig.access.costCenters.enabled.length > 1){
@@ -162,19 +226,6 @@ export function FormNewENote(){
                 // GetCostCenterSinFiltro
                 await getCostCenters();
             }
-
-            // Filtro para busqueda de Instancias de Procesos
-            if(!userConfig.access.process_instances.overAll){
-                if(userConfig.access.process_instances.enabled.length > 1){
-                    await getInstances(userConfig.access.process_instances.enabled,undefined);
-                }else{
-                    temInfo.instance_id = userConfig.access.process_instances.enabled[0]
-                    setInstance_id(userConfig.access.process_instances.enabled[0])
-                }
-            }else{
-                await getInstances()
-            }
-
         }
         
         if(temInfo != {}){
@@ -187,34 +238,34 @@ export function FormNewENote(){
 
     const handleCreationOfNote = async(doc_id)=>{
         let itemsToFac = [];
-        itemBlocks.forEach(element => {
-            element.items.forEach(item => {
-                console.log('??? ',item)
-                itemsToFac.push(
-                    {
-                        "code_reference": item.code? item.code:item.service_id,
-                        "name": item.name? item.name:item.service_name,
-                        "quantity": parseFloat(item.units),
-                        "discount": 0,
-                        "discount_rate": 0,
-                        "price": parseFloat(item.unit_value),
-                        "tax_rate": "19.00",
-                        "unit_measure_id": 70,
-                        "standard_code_id": 1,
-                        "is_excluded": 0,
-                        "tribute_id": 1,
-                        "withholding_taxes": []
-                    }
-                )
-            });
+        items.forEach(item => {
+            console.log('??? ',item)
+            itemsToFac.push(
+                {
+                    "code_reference": item.code_reference? item.code_reference:'-',
+                    "name": item.name? item.name:item.service_name,
+                    "quantity": parseFloat(item.quantity),
+                    "discount": 0,
+                    "discount_rate": 0,
+                    "price": parseFloat(item.price),
+                    "tax_rate": "19.00",
+                    "unit_measure_id": 70,
+                    "standard_code_id": 1,
+                    "is_excluded": 0,
+                    "tribute_id": 1,
+                    "withholding_taxes": []
+                }
+            )
         });
         let res = await newElectronicNote({
             company_info:appInfo,
             customer:thirdParyInfo,
             user_id:userInfo.user_id,
             document:FormInfo,
-            items:items,
-            doc_id
+            items:itemsToFac,
+            bill_id:invoiceInfo.bill.id,
+            doc_id,
+            type
         });
         console.log(res)
         if(res.status == 'Created'){
@@ -224,7 +275,6 @@ export function FormNewENote(){
                 description:'Para consultar y previsualizar la factura haga click en esta notificación.',
                 onClick:()=>{
                     window.open(`${res.data.bill.public_url}`,'_blank','noopener,noreferrer')
-                    //window.open(`${res.data.bill.public_url}`,'_blank','noopener,noreferrer')
                 }
             })
         }
@@ -233,25 +283,20 @@ export function FormNewENote(){
     const createNote = async()=>{
         setDisabled(true)
         setLoading(true)
-        let res = await postInfo('/facturation/newNote',{
-            company_id:appInfo.company_id,
-            store_id:6,
-
-        });
+        let res = await postInfo('/facturation/newNote',FormInfo.document);
         console.log(res);
         if(typeof(parseInt(res.id)) == 'number'){
             addNotification({
                 type:'aproved',
-                title:`Recibo de caja #${res.id} creado correctamente`,
+                title:`Nota ${type == 'Credit Note'? 'crédito':'débito'} #${res.ownSerial} creada correctamente`,
                 description:`El recibo de caja #${res.id} fue creado correctamente`
             })
             handleCreationOfNote(res.id);
             FormInfo["doc_id"] = res.id
-            FormInfo['instance_id'] = instance_id;
             FormInfo["ownSerial"] = res.ownSerial;
             if(isElectron){
-                await printCashRecipt(FormInfo,appInfo,true);
-                await printCashRecipt(FormInfo,appInfo,false);
+                //await printCashRecipt(FormInfo,appInfo,true);
+                //await printCashRecipt(FormInfo,appInfo,false);
             }
             FormInfo["user_id"] = userInfo.user_id,
             FormInfo['transactionDetails'] = []
@@ -284,22 +329,20 @@ export function FormNewENote(){
                     shift_id,
                 })
             }); */
+
             // Pendiente definir como se contabiliza la nota debito o credito
             //await toAccount();
         }else{
             addNotification({
                 type:'error',
-                title:`Error al crear recibo de caja #`,
-                description:`Hubo un problema al crear el recibo de caja #.`
+                title:`Error al crear nota ${type == 'Credit Note'? 'crédito':'débito'}`,
+                description:`Hubo un problema al crear la nota ${type == 'Credit Note'? 'crédito':'débito'}.`
             })
         }
         popOutAlert();
         setLoading(false);
         setDisabled(false);
         reloadFun?.();
-        if(instance_id != undefined && instance_id.length == 1){
-            //popInAlert(<ProcessStatusAlert instance_id={instance_id[0]} reloadFun={reloadFun}/>)
-        }
     }
 
     // utils functions
@@ -329,11 +372,13 @@ export function FormNewENote(){
 
     useEffect(()=>{
         if(mode == undefined || mode == null)return;
-        getThirdParties();
         getInvoices(); 
         handleUserConfig();
     },[mode]);
 
+    useEffect(()=>{
+        console.log(thirdParyInfo)
+    },[thirdParyInfo])
 
     useEffect(() => {
         console.log('Mod Items')
@@ -458,6 +503,25 @@ export function FormNewENote(){
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    )}
+                    {invoiceInfo.bill != undefined && (
+                        <div className="sumaryContainer">
+                            <div className="sumary">
+                                <span>Total factura original: 
+                                    <b>{moneyFormat(invoiceInfo.bill != undefined? invoiceInfo.bill.total:0)}</b></span>
+                                <hr />
+                                <span>Total Nota: 
+                                    <b>{moneyFormat(total)}</b>
+                                </span>
+                                <span>Tipo nota: 
+                                    <b>{type == 'Credit Note'? 'Crédito':'Débito'}</b>
+                                </span>
+                                <hr />
+                                <span>Diferencia: 
+                                    <b>{moneyFormat(invoiceInfo.bill != undefined? invoiceInfo.bill.total - total:0)}</b>
+                                </span>
+                            </div>
                         </div>
                     )}
                     <div className="submitContainer">
