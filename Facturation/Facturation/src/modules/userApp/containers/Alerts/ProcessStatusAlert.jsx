@@ -69,7 +69,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
     const getAttachedDocuments = async()=>{
         setDisabled(true)
         setLoadingDocuments(true)
-        let res = await postInfo('/getDocuments',{
+        let res = await postInfo('/process/getAttachedDocuments',{
             company_id:appInfo.company_id,
             //allowedTypes:types,
             instance_id:info.id

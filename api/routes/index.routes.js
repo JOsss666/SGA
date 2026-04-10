@@ -199,6 +199,8 @@ router.post('/process/getOp', processController.getOp);
 
 router.post('/process/getDocuments', processController.getDocuments);
 
+router.post('/process/getAttachedDocuments', processController.getAttachedDocuments);
+
 router.post('/process/getOpAttached',processController.getOpAttached);
 
 router.post('/process/createOC',processController.createOc);
