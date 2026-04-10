@@ -96,6 +96,7 @@ export function New(){
         //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
         {text:'Imprimir recibos',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-print"/>},
         {text:'Imprimir Ordes de cliente',children:<ClientOrderPreview/>,icon:<i className="fa-solid fa-print"/>},
+        /*
         {text:'Opciones de factura electronica',children:<div style={{
             paddingTop:'8vh',
             display:'flex',
@@ -117,6 +118,8 @@ export function New(){
                 })
             }}></FormButton>
         </div>},
+        /*
+
         /*{text:'Ver dispositivos',children:<span onClick={()=>{
             scanDevices();
         }}>Ver impresoras</span>},*/

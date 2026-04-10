@@ -14,6 +14,7 @@ export function FormNewENote({InfoParams,reloadFun}){
     const {addNotification} = useNotifications();
     const {appInfo,userConfig,userInfo,appConfig} = useAppInfo();
     const {popInAlert,popOutAlert} = useAlert();
+    const [docParams,setDocParams] = useState({});
 
     // Control
     const [info,setInfo] = useState(InfoParams != undefined? InfoParams:{})
@@ -299,21 +300,7 @@ export function FormNewENote({InfoParams,reloadFun}){
                 //await printCashRecipt(FormInfo,appInfo,false);
             }
             FormInfo["user_id"] = userInfo.user_id,
-            FormInfo['transactionDetails'] = []
-            /*
-            itemBlocks.forEach(element => {
-                console.log(element)
-                element.items.forEach(item => {
-                    console.log('EL> ',item)
-                    FormInfo.transactionDetails.push({
-                        account_id:item.exit_account,
-                        subtotal:parseFloat(item.units)*parseFloat(item.unit_value),
-                        total:parseFloat(item.units)*parseFloat(item.unit_value),
-                        type:item.type == 'service'? 'serviceMovement':'inventoryMovement',
-                        nature: type == 'Credit Note'? 'CR':'DB'
-                    })
-                });
-            });
+            FormInfo['transactionDetails'] = []     
             items.forEach(element => {
                 FormInfo.transactionDetails.push({
                     account_id:element.account_id,
@@ -321,17 +308,16 @@ export function FormNewENote({InfoParams,reloadFun}){
                     total:element.value,
                     type:'payment',
                     paymentMethod_id:element.id,
-                    nature: documentNature,
-                    due_date:addDaysToCurrentDate(thirdPartyInfo.credit_term != undefined? thirdPartyInfo.credit_term:0),
+                    nature: type == 'Credit Note'? 'CR':'DB',
+                    due_date:0,
                     for_wallet:element.for_wallet,
                     voucher:element.voucher,
                     cashBox_id,
                     shift_id,
                 })
-            }); */
-
+            });
             // Pendiente definir como se contabiliza la nota debito o credito
-            //await toAccount();
+            await toAccount();
         }else{
             addNotification({
                 type:'error',
@@ -343,6 +329,27 @@ export function FormNewENote({InfoParams,reloadFun}){
         setLoading(false);
         setDisabled(false);
         reloadFun?.();
+    }
+
+     const toAccount = async()=>{
+        console.log(FormInfo)
+        let res = await postInfo('/createTransaction',FormInfo);
+        const insertId = parseInt(res[0]);
+        if(typeof(insertId) == 'number' && insertId != NaN && insertId != undefined){
+            addNotification({
+                type:'aproved',
+                title:`Movimiento contabilizado correctamente`,
+                description:`La transacción ${insertId} fue contabilizada correctamente.`
+            })
+            updateTransactions(insertId);
+        }else{
+            addNotification({
+                type:'error',
+                title:`Error al contabilizar movimiento`,
+                description:`Hubo un problema al intentar contabilizar el movimiento ${FormInfo.doc_id} de inventario`
+            })
+        }
+        popOutAlert();
     }
 
     // utils functions
