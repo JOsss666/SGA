@@ -1,4 +1,5 @@
 import { useDataBase } from "../../app.js";
+import processController from "../processController.js";
 
 const zjController = {};
 
@@ -178,9 +179,12 @@ zjController.registerServiceMachine = (req,res)=>{
                 description,
                 instance_id,
                 step_instance)
-            VALUES ${valuesPre};
+            VALUES ${valuesPre} RETURNING id;
         `;
-        let preConsulta = await useDataBase(preSentence,[],2);
+        let preConsulta = await useDataBase(preSentence,[],3);
+        if(info.instance_id != undefined && preConsulta.id != undefined){
+            await processController.relatedoc_instances(preConsulta.id, [info.instance_id])
+        }
         const values = info.services
             .filter(element => element.asset_id !== undefined)
             .map(element => {
