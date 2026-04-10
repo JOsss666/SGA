@@ -1281,4 +1281,22 @@ processController.getEficincyUsers = (req,res)=>{
     })
 }
 
+
+// Process utils
+
+processController.relatedoc_instances = async (doc_id,instances) => {
+    for(const instance of instances){
+        let sentence = `
+            INSERT INTO "Ecosystem".docs_instances(
+                doc_id,
+                instance_id
+            ) VALUES ($1, $2);
+        `
+        await useDataBase(sentence,[
+            doc_id,
+            instance
+        ],2);
+    }
+}
+
 export default processController;

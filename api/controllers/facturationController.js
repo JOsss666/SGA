@@ -1,4 +1,5 @@
 import { useDataBase } from "../app.js";
+import processController from "./processController.js";
 const facturationController = {};
 
 
@@ -39,7 +40,9 @@ facturationController.newClientOrder = (req,res)=>{
             info.instance_id != "" && info.instance_id != undefined? info.instance_id:undefined,
             info.instance_id != "" && info.instance_id != undefined? info.step_id:undefined
         ],3);
-
+        if(info.instance_id != undefined && consulta.id != undefined){
+            await processController.relatedoc_instances(consulta.id, [info.instance_id])
+        }
         if(info.productsServices != undefined && consulta.id != undefined){
             for(const element of info.productsServices){
                 let insertMovSen = `
