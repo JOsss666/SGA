@@ -14,7 +14,7 @@ facturationController.newClientOrder = (req,res)=>{
                 company_id,
                 store_id, 
                 "thirdParty_id", 
-                document_type, newSellInvoices
+                document_type,
                 status, 
                 "subTotal", 
                 total, 
