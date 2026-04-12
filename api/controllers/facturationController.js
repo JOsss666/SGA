@@ -127,6 +127,9 @@ facturationController.newCashRecipt = (req,res)=>{
             info.instance_id != "" && info.instance_id != undefined? info.instance_id:undefined,
             info.instance_id != "" && info.instance_id != undefined? info.step_id:undefined
         ],3);
+        if(info.instance_id != undefined && consulta.id != undefined){
+            await processController.relatedoc_instances(consulta.id, [info.instance_id])
+        }
         if((info.payedBills != undefined || info.payedBills.length > 0) && consulta.id != undefined){
             for(const element of info.payedBills){
                 let senUPB = `

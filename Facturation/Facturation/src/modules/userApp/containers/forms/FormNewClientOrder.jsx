@@ -350,7 +350,7 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
                     <form action="" onSubmit={(e)=>{
                         e.preventDefault();
                         console.log(formInfo);
-                        //createClientOrder();
+                        createClientOrder();
                     }}>
                         {info.store_id == undefined && (
                             <SearchinList title={'Tienda'} action={setStore_id} list={stores} placeHolder={'Seleccione la tienda'} disabled={disabled}/>
