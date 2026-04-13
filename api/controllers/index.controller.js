@@ -1455,7 +1455,7 @@ controller.createTransaction = (req,res)=>{
         
         const transId = parseInt(consulta.id)
         console.log('- ',transId)
-        const cashBoxTypes = ['Cash Recipt'];
+        const cashBoxTypes = ['Cash Recipt','Sell Invoice'];
         if(typeof(transId) == 'number'){
             let resultDetails = [];
             for(const element of info.transactionDetails){

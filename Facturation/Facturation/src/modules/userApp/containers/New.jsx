@@ -30,6 +30,7 @@ import { NoResults } from "./NoResults";
 import { ClientOrderPreview } from "./Alerts/ClientOrderPreview";
 import { FormButton } from "../components/FormButton";
 import { FormNewInvoice } from "./forms/FormNewInvoice";
+import { FormNewENote } from "./forms/FormNewENote";
 
 export function New(){
     const {userConfig,appInfo,userInfo} = useAppInfo();
@@ -61,6 +62,7 @@ export function New(){
 
     const options = [
         { text: 'Crear orden de trabajo', children: <FormSelectNewProcess />, icon: <i className="fa-solid fa-bell-concierge" /> },
+        { text: 'Crear nueva orden de cliente', children: <FormNewClientOrder canRepeatServices={true} />, icon: <i className="fa-regular fa-file" /> },
         
         // Simplificado con optional chaining
         ...(userConfig?.access?.sections?.cashBoxes?.overAll ? 
@@ -68,7 +70,7 @@ export function New(){
         
         {text:'Factura de venta',children:<FormNewInvoice/>,icon:<i className="fa-solid fa-file-invoice"/>},
 
-        { text: 'Crear nueva orden de cliente', children: <FormNewClientOrder canRepeatServices={true} />, icon: <i className="fa-regular fa-file" /> },
+        {text:'Nota débito o crédito',children:<FormNewENote/>,icon:<i className="fa-solid fa-note-sticky"/>},
         
         ...(userConfig?.access?.sections?.users?.overAll ? 
             [{ text: 'Crear usuario', children: <FormNewUser />, icon: <i className="fa-solid fa-person-circle-plus" /> }] : []),
@@ -93,7 +95,8 @@ export function New(){
         //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
         {text:'Imprimir recibos',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-print"/>},
         {text:'Imprimir Ordes de cliente',children:<ClientOrderPreview/>,icon:<i className="fa-solid fa-print"/>},
-        {text:'Factura electronica',children:<div style={{
+        /*
+        {text:'Opciones de factura electronica',children:<div style={{
             paddingTop:'8vh',
             display:'flex',
             gap:'1vh',
@@ -108,12 +111,14 @@ export function New(){
             <FormButton text={'Obtener Impuestos'} onClick={()=>{
                 showAPITaxes({})
             }}></FormButton>
-            <FormButton text={'Generar factura'} onClick={()=>{
+            <FormButton text={'Generar factura de prueba'} onClick={()=>{
                 newElectronicInvoide({
                     type:'invoice'
                 })
             }}></FormButton>
         </div>},
+        /*
+
         /*{text:'Ver dispositivos',children:<span onClick={()=>{
             scanDevices();
         }}>Ver impresoras</span>},*/

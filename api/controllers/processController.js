@@ -24,6 +24,73 @@ processController.createDocument = async(info,ownSerial)=>{
         return(consulta);
 }
 
+
+processController.getAttachedDocuments = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+        whereClauses.push(`"Ecosystem".documents.company_id = $1`);
+        values.push(info.company_id);
+
+        if(info.instance_id != undefined && info.instance_id != ''){
+            whereClauses.push(`"Ecosystem".docs_instances.instance_id = $${values.length +1}`);
+            values.push(info.instance_id);
+        }
+
+        if(info.allowedTypes != undefined){
+            whereClauses.push(`"Ecosystem".documents.document_type = ANY($${values.length + 1}::document_types[])`);
+            values.push(info.allowedTypes);
+        }
+
+        if(info.id != undefined){
+            whereClauses.push(`"Ecosystem".documents.id = $${values.length + 1}`);
+            values.push(info.id)
+        }
+
+        if(info.thirdParty_id != undefined){
+            whereClauses.push(`"Ecosystem".documents."thirdParty_id" = $${values.length + 1}`);
+            values.push(info.thirdParty_id)
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+            
+        let sentece = `
+            SELECT
+                "Ecosystem".docs_instances.*,
+                "Ecosystem".documents.*,
+                "Process".process_instance."ownSerial" as "instanceOwnSerial"
+            FROM
+                "Ecosystem".docs_instances
+            LEFT JOIN
+                "Ecosystem".documents
+            ON
+                "Ecosystem".docs_instances.doc_id = "Ecosystem".documents.id
+            LEFT JOIN
+                "Process".process_instance
+            ON
+                "Ecosystem".docs_instances.instance_id = "Process".process_instance.id
+            ${whereQuery}
+            ORDER
+                BY "Ecosystem".docs_instances.id DESC
+            ;
+        `;
+        let consulta = await useDataBase(sentece,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 processController.createOp = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
@@ -1212,6 +1279,24 @@ processController.getEficincyUsers = (req,res)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err))
     })
+}
+
+
+// Process utils
+
+processController.relatedoc_instances = async (doc_id,instances) => {
+    for(const instance of instances){
+        let sentence = `
+            INSERT INTO "Ecosystem".docs_instances(
+                doc_id,
+                instance_id
+            ) VALUES ($1, $2);
+        `
+        await useDataBase(sentence,[
+            doc_id,
+            instance
+        ],2);
+    }
 }
 
 export default processController;

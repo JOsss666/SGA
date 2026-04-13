@@ -1,4 +1,5 @@
 import { useDataBase } from "../app.js";
+import processController from "./processController.js";
 const facturationController = {};
 
 
@@ -14,7 +15,7 @@ facturationController.newClientOrder = (req,res)=>{
                 company_id,
                 store_id, 
                 "thirdParty_id", 
-                document_type, 
+                document_type,
                 status, 
                 "subTotal", 
                 total, 
@@ -39,7 +40,9 @@ facturationController.newClientOrder = (req,res)=>{
             info.instance_id != "" && info.instance_id != undefined? info.instance_id:undefined,
             info.instance_id != "" && info.instance_id != undefined? info.step_id:undefined
         ],3);
-
+        if(info.instance_id != undefined && consulta.id != undefined){
+            await processController.relatedoc_instances(consulta.id, [info.instance_id])
+        }
         if(info.productsServices != undefined && consulta.id != undefined){
             for(const element of info.productsServices){
                 let insertMovSen = `
@@ -124,6 +127,9 @@ facturationController.newCashRecipt = (req,res)=>{
             info.instance_id != "" && info.instance_id != undefined? info.instance_id:undefined,
             info.instance_id != "" && info.instance_id != undefined? info.step_id:undefined
         ],3);
+        if(info.instance_id != undefined && consulta.id != undefined){
+            await processController.relatedoc_instances(consulta.id, [info.instance_id])
+        }
         if((info.payedBills != undefined || info.payedBills.length > 0) && consulta.id != undefined){
             for(const element of info.payedBills){
                 let senUPB = `
@@ -282,6 +288,54 @@ facturationController.newSellInvoice = (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
+
+facturationController.newNote = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data)
+        console.log(info)
+        let docCreation = `
+            INSERT INTO "Ecosystem".documents(
+	            company_id,
+                store_id, 
+                "thirdParty_id", 
+                document_type, 
+                status, 
+                "subTotal", 
+                total, 
+                created_by,  
+                description, 
+                attached, 
+                instance_id,
+                step_instance)
+	    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id, "ownSerial";
+    `;
+        let consulta = await useDataBase(docCreation,[
+            info.company_id,
+            info.store_id,
+            info.thirdParty_id,
+            info.type,
+            info.status,
+            info.subTotal,
+            info.total,
+            info.created_by,
+            info.description,
+            JSON.stringify(info.attached),
+            info.instance_id != "" && info.instance_id != undefined? info.instance_id:undefined,
+            info.instance_id != "" && info.instance_id != undefined? info.step_id:undefined
+        ],3);
+        //facturationController.updateThirdPartyPortfolio();
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 
 facturationController.getCashBoxes = (req,res)=>{
     let data = '';

@@ -40,43 +40,47 @@ async function saveNumberingRanges(ranges) {
     return dataToSave;
 }
 
-async function getNumercRangeData(type) {
+export async function getNumercRangeData(type) {
     const cache = await readFile(RANGES_PATH);
-    if (!cache || !cache.numbering_ranges) return null;
-    const rangesArray = Object.values(cache.numbering_ranges);
+    if (!cache) return null;
+    const rawData = cache.numbering_ranges ? cache.numbering_ranges : cache;
+    const rangesArray = Object.values(rawData);
+    if (rangesArray.length === 0) return null;
+
     switch (type) {
         case 'invoice':
-
             const invoiceRange = rangesArray.find(item => item.document === 'Factura de Venta');
             return invoiceRange ? invoiceRange.id : null;
 
-        case 'note':
-            const noteRange = rangesArray.find(item => item.document === 'Nota Crédito');
-            return noteRange ? noteRange.id : null;
+        case 'cr_note':
+            const crNoteRange = rangesArray.find(item => item.document === 'Nota Crédito');
+            return crNoteRange ? crNoteRange.id : null;
+
+        case 'db_note':
+            const dbNoteRange = rangesArray.find(item => item.document === 'Nota Débito');
+            return dbNoteRange ? dbNoteRange.id : null;
 
         default:
             return null;
     }
 }
 
-electronicFacturationController.getAuthToken = async (grantType = 'password', refreshToken = null) => {
+electronicFacturationController.getAuthToken = async (grantType = 'password', refreshToken = null, bypassCache = false) => {
     const validGrants = ['password', 'refresh_token'];
     let finalGrantType = validGrants.includes(grantType) ? grantType : 'password';
 
-    let stored = await readFile(TOKEN_PATH);
+    // Si bypassCache es true, ignoramos el archivo (esto rompe el bucle)
+    let stored = bypassCache ? null : await readFile(TOKEN_PATH);
 
-    // Si pedimos password pero hay un token válido en caché, lo usamos
     if (stored && finalGrantType === 'password') {
         const now = Date.now();
         const fiveMinutes = 5 * 60 * 1000;
         
         if (now < (stored.expires_at - fiveMinutes)) {
-            console.log('✅ Utilizando token guardado en caché');
             return stored;
         }
         
         if (stored.refresh_token) {
-            console.log('🔄 El access_token expiró, intentando refrescar...');
             finalGrantType = 'refresh_token';
             refreshToken = stored.refresh_token;
         }
@@ -106,15 +110,15 @@ electronicFacturationController.getAuthToken = async (grantType = 'password', re
         });
 
         const data = await response.json();
-
+        
         if (!response.ok) {
+            // SI FALLA EL REFRESH, reintentamos pasando bypassCache = true
             if (finalGrantType === 'refresh_token') {
-                console.warn('⚠️ Refresh token inválido. Reintentando login único...');
-                // Solo reintenta si no estábamos ya intentando con password
-                return await electronicFacturationController.getAuthToken('password');
+                console.warn('⚠️ Refresh token inválido. Reintentando login con credenciales directas...');
+                // Aquí pasamos TRUE en el tercer parámetro
+                return await electronicFacturationController.getAuthToken('password', null, true);
             }
             
-            // Si ya falló con password, NO REINTENTES, arroja el error.
             console.error('❌ Error crítico de Factus:', data);
             throw new Error(data.message || 'Error de autenticación');
         }
@@ -129,28 +133,32 @@ electronicFacturationController.getAuthToken = async (grantType = 'password', re
     }   
 };
 
-
 electronicFacturationController.getNumberingRanges = async () => {
     try {
         let stored = await readFile(RANGES_PATH);
-        if(stored){
-          console.log('Res ran num Cache: ',stored);
-          return (stored);
+        // Validamos si la caché existe y no ha pasado más de 30 mins
+        if(stored && (Date.now() < stored.expires_at)){
+            console.log('📦 Usando rangos de numeración desde caché');
+            return (stored.numbering_ranges);
         }
+
+        // CORRECCIÓN: Obtener el auth ANTES de usarlo
+        const auth = await electronicFacturationController.getAuthToken();
+        
         const response = await fetch('https://api-sandbox.factus.com.co/v1/numbering-ranges', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
-                'Authorization': `Bearer ${auth.access_token}` // ¡ESTO ES VITAL!
+                'Authorization': `Bearer ${auth.access_token}`
             },
         });
-
         const data = await response.json();
-        console.log('Res ran num: ',data);
-        console.log('Rangos Numericos: ',data.data.data);
-        saveNumberingRanges(data.data.data)
+        
         if (!response.ok) throw new Error(data.message || 'Error al obtener rangos');
-        return data;
+
+        // Guardamos en caché
+        await saveNumberingRanges(data.data.data);
+        return data.data.data;
     } catch (error) {
         console.error('Error en Rangos:', error.message);
         throw error;
@@ -198,7 +206,7 @@ electronicFacturationController.newInvoice = (req,res)=>{
     console.log(auth)
     let params = {
         "document": "01",
-        "numbering_range_id": 8,
+        "numbering_range_id": await getNumercRangeData('invoice'),
         "reference_code": "fact0022025",
         "observation": "",
         "payment_method_code": "10",
@@ -240,25 +248,9 @@ electronicFacturationController.newInvoice = (req,res)=>{
                         "withholding_tax_rate": "15.00"
                     }
                 ]
-            },
-            {
-                "code_reference": "54321",
-                "name": "SGA 2 ",
-                "quantity": 1,
-                "discount": 0,
-                "discount_rate": 0,
-                "price": 250000,
-                "tax_rate": "5.00",
-                "unit_measure_id": 70,
-                "standard_code_id": 1,
-                "is_excluded": 0,
-                "tribute_id": 1,
-                "withholding_taxes": []
-            }
-        ]*/
+            },*/
        "items":info.items
     }
-    console.log(params)
     const response = await fetch('https://api-sandbox.factus.com.co/v1/bills/validate', {
         method: 'POST',
         headers: {
@@ -271,7 +263,7 @@ electronicFacturationController.newInvoice = (req,res)=>{
     const resInvoice = await response.json();
     if(resInvoice.status == 'Created'){
         let data = resInvoice.data
-        let insertRes = await electronicFacturationController.registerElectronicInvoice({
+        let insertRes = await electronicFacturationController.registerEFactDocument({
             user_id:info.user_id,
             customer:info.customer,
             company_id:info.company_info.company_id,
@@ -283,7 +275,8 @@ electronicFacturationController.newInvoice = (req,res)=>{
             code:data.bill.cufe,
             url:data.bill.public_url,
             qr:data.bill.qr,
-            qr_image:data.bill.qr_image
+            qr_image:data.bill.qr_image,
+            type:'electronic invoice'
         });
     resInvoice.sga_id = insertRes;
     }
@@ -297,9 +290,9 @@ electronicFacturationController.newInvoice = (req,res)=>{
 }
 
 
-electronicFacturationController.registerElectronicInvoice = async(info)=>{
+electronicFacturationController.registerEFactDocument = async(info)=>{
     let sentence = `
-        INSERT INTO "ElectronicFacturation".invoices(
+        INSERT INTO "ElectronicFacturation".documents(
             generated_by,
             company_id,
             store_id,
@@ -310,9 +303,10 @@ electronicFacturationController.registerElectronicInvoice = async(info)=>{
             code,
             url,
             qr,
-            qr_image
+            qr_image,
+            type
             )
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id;
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id;
     `;
     let consulta = await useDataBase(sentence,[
         info.user_id,
@@ -325,12 +319,87 @@ electronicFacturationController.registerElectronicInvoice = async(info)=>{
         info.code,
         info.url,
         info.qr,
-        info.qr_image
+        info.qr_image,
+        info.type
     ],3);
     return consulta;
 }
 
-electronicFacturationController.getInvoice = (req,res)=>{
+electronicFacturationController.newNote = (req,res)=>{
+  let bodyData = '';
+  req.on('data',chunk=>{
+      bodyData += chunk;
+  })
+  req.on('end',async()=>{
+    let info = JSON.parse(bodyData);
+    const auth = await electronicFacturationController.getAuthToken();
+    let params = {
+        "numbering_range_id": await getNumercRangeData(info.type == 'Credit Note'? 'cr_note':'db_note'),
+        "correction_concept_code": 2,
+        // System use 22 when the note dont have an asociated bill. --> bill_id becomes optional
+        "customization_id": info.bill_id != undefined? 20:22,
+        "bill_id": info.bill_id,
+        "reference_code": "5",
+        "observation": "",
+        "payment_method_code": "10",
+        "customer": {
+            "identification": info.customer.indentification_number,
+            "dv": "3",
+            "company": `${info.customer.names} ${info.customer.lastNames}`,
+            "trade_name": info.customer.names,
+            "names": info.customer.names,
+            "address": info.customer.address,
+            //"email": info.customer.mail,
+            "email": 'murillojose.nvc@gmail.com',
+            "phone": info.customer.phone,
+            "legal_organization_id": "2",
+            "tribute_id": "21",
+            "identification_document_id": "3",
+            "municipality_id": "980"
+        },
+        "items":info.items
+    }
+    console.log(params)
+    const response = await fetch('https://api-sandbox.factus.com.co/v1/credit-notes/validate', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${auth.access_token}`,
+            'Content-Type': 'application/json', // ¡Faltaba este!
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify(params)
+    });
+    const resInvoice = await response.json();
+    console.log(resInvoice)
+    if(resInvoice.status == 'Created'){
+        let data = resInvoice.data
+        let insertRes = await electronicFacturationController.registerEFactDocument({
+            user_id:info.user_id,
+            customer:info.customer,
+            company_id:info.company_info.company_id,
+            store_id:6,
+            doc_id:info.doc_id,
+            invoice_id:data.credit_note.id,
+            reference:data.credit_note.reference_code,
+            number:data.credit_note.number,
+            code:data.credit_note.cufe,
+            url:data.credit_note.public_url,
+            qr:data.credit_note.qr,
+            qr_image:data.credit_note.qr_image,
+            type:info.type
+        });
+    resInvoice.sga_id = insertRes;
+    }
+    res.writeHead(200,{'Content-Type':'text/plain'})
+    res.end(JSON.stringify(resInvoice));
+  })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+electronicFacturationController.getDocuments = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
         data += chunk;
@@ -342,12 +411,17 @@ electronicFacturationController.getInvoice = (req,res)=>{
 
         if(info.company_id != undefined){
             values.push(info.company_id);
-            whereClauses.push(`company_id = $${values.length}`);
+            whereClauses.push(`"ElectronicFacturation".documents.company_id = $${values.length}`);
+        }
+
+        if(info.type != undefined){
+            values.push(info.type);
+            whereClauses.push(`"ElectronicFacturation".documents.type = $${values.length}`);
         }
 
         if(info.id != undefined){
             values.push(info.id);
-            whereClauses.push(`id = $${values.length}`);
+            whereClauses.push(`"ElectronicFacturation".documents.id = $${values.length}`);
         }
 
         const whereQuery = whereClauses.length > 0
@@ -355,8 +429,16 @@ electronicFacturationController.getInvoice = (req,res)=>{
             : "";
 
         let sentence = `
-            SELECT * FROM
-                "ElectronicFacturation".invoices
+            SELECT 
+                "ElectronicFacturation".documents.*,
+                "Ecosystem".documents.id AS doc_id,
+                "Ecosystem".documents."thirdParty_id"
+            FROM
+                "ElectronicFacturation".documents
+            LEFT JOIN
+                "Ecosystem".documents
+            ON
+                "ElectronicFacturation".documents.doc_id = "Ecosystem".documents.id
             ${whereQuery}
             ORDER BY id DESC ;
         `;
@@ -369,6 +451,39 @@ electronicFacturationController.getInvoice = (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
+
+electronicFacturationController.getDocumentFullInfo = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        const auth = await electronicFacturationController.getAuthToken();
+        let info = JSON.parse(data);
+        console.log('bill_number: ',info.bill_numer);
+        console.log(`Ruta: https://api-sandbox.factus.com.co/v1/bills/show-bill/`);
+        //https://api-sandbox.factus.com.co/v1/bills/show/SETP990028932
+        //https://api-sandbox.factus.com.co/v1/bills/show/${info.bill_number}
+        const response = await fetch(`https://api-sandbox.factus.com.co/v1/bills/show/SETP990008144`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${auth.access_token}`,
+                'Accept': 'application/json'
+            }
+        });
+        const resInvoice = await response.json();
+        console.log(resInvoice)
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(resInvoice));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+
+}
+
+
 
 // Función para inicializar servicios al arrancar el servidor
 electronicFacturationController.init = async () => {
@@ -386,6 +501,5 @@ electronicFacturationController.init = async () => {
         console.log('ℹ️ El sistema reintentará la conexión en la primera solicitud de factura.');
     }
 };
-
 
 export default electronicFacturationController;

@@ -199,6 +199,8 @@ router.post('/process/getOp', processController.getOp);
 
 router.post('/process/getDocuments', processController.getDocuments);
 
+router.post('/process/getAttachedDocuments', processController.getAttachedDocuments);
+
 router.post('/process/getOpAttached',processController.getOpAttached);
 
 router.post('/process/createOC',processController.createOc);
@@ -230,6 +232,8 @@ router.post('/treasury/getThirdPartyPortfolio',treasuryController.getThirdPartyP
 router.post('/facturation/newCashRecipt',facturationController.newCashRecipt);
 
 router.post('/facturation/newSellInvoice',facturationController.newSellInvoice);
+
+router.post('/facturation/newNote',facturationController.newNote);
 
 router.post('/facturation/newClientOrder',facturationController.newClientOrder);
 
@@ -285,7 +289,11 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
 
     router.get('/electronicFacturation/taxes', electronicFacturationController.getTaxes);
 
-    router.post('/electronicFacturation/getInvoice',electronicFacturationController.getInvoice);
+    router.post('/electronicFacturation/getDocuments',electronicFacturationController.getDocuments);
+
+    router.post('/electronicFacturation/note',electronicFacturationController.newNote);
+
+    router.post('/electronicFacturationController.getDocumentFullInfo',electronicFacturationController.getDocumentFullInfo);
 
 export default router;
 

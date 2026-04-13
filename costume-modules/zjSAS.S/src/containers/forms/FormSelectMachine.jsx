@@ -24,7 +24,7 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
     //formInfo
     const [instanceInfo,setInstanceInfo] = useState({});
     const formInfo = {
-        instance_id:instance_id,
+        instance_id:instanceInfo.id,
         document_type:"Machine use",
         company_id:appInfo.company_id,
         user_id:userInfo.user_id,
@@ -41,7 +41,6 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
             company_id:appInfo.company_id,
             id:instance_id
         })
-        console.log(res)
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
@@ -52,7 +51,6 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
                 })
             });
             setProcessInstances(C);
-            console.log(C)
             if(C.length == 1){
                 setInstanceInfo(C[0]);
             }
@@ -68,7 +66,6 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
             company_id:appInfo.company_id,
             instance_id:instanceInfo.id
         })
-        console.log(res)
         if(res[0]){
             setServices(res[1])
         }
@@ -105,7 +102,6 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
                 s = false;
             }
         });
-        console.log(s);
         setSelectedAll(s);
     }
 
@@ -126,7 +122,6 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
         setDisabled(true);
         setLoading(true);
         let res = await postInfo('/zj852/registerServiceMachine',formInfo);
-        console.log(res);
         setLoading(false);
         setDisabled(false);
         popOutAlert?.();
@@ -140,14 +135,11 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
     },[])
 
     useEffect(()=>{
-        console.log(services);
         verifySelection();
     },[services])
 
     useEffect(()=>{
-        console.log(instanceInfo);
         if(instanceInfo.id != undefined){
-            console.log(instanceInfo.id)
             getServicesMovements();
         }
     },[instanceInfo])
@@ -163,6 +155,7 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
                     )}
                     <form action="" disabled={disabled? !selectedAll:disabled} onSubmit={(e)=>{
                         e.preventDefault();
+                        console.log(formInfo)
                         registerServiceActions();
                     }}>
                         {instanceInfo.id != undefined && (
