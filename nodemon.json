@@ -1,0 +1,6 @@
+{
+  "ignore": [
+    "factus_token.json",
+    "numbering_ranges.json"
+  ]
+}

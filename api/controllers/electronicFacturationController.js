@@ -65,13 +65,13 @@ export async function getNumercRangeData(type) {
     }
 }
 
-electronicFacturationController.getAuthToken = async (grantType = 'password', refreshToken = null) => {
+electronicFacturationController.getAuthToken = async (grantType = 'password', refreshToken = null, bypassCache = false) => {
     const validGrants = ['password', 'refresh_token'];
     let finalGrantType = validGrants.includes(grantType) ? grantType : 'password';
 
-    let stored = await readFile(TOKEN_PATH);
+    // Si bypassCache es true, ignoramos el archivo (esto rompe el bucle)
+    let stored = bypassCache ? null : await readFile(TOKEN_PATH);
 
-    // Si pedimos password pero hay un token válido en caché, lo usamos
     if (stored && finalGrantType === 'password') {
         const now = Date.now();
         const fiveMinutes = 5 * 60 * 1000;
@@ -110,15 +110,15 @@ electronicFacturationController.getAuthToken = async (grantType = 'password', re
         });
 
         const data = await response.json();
-
+        
         if (!response.ok) {
+            // SI FALLA EL REFRESH, reintentamos pasando bypassCache = true
             if (finalGrantType === 'refresh_token') {
-                console.warn('⚠️ Refresh token inválido. Reintentando login único...');
-                // Solo reintenta si no estábamos ya intentando con password
-                return await electronicFacturationController.getAuthToken('password');
+                console.warn('⚠️ Refresh token inválido. Reintentando login con credenciales directas...');
+                // Aquí pasamos TRUE en el tercer parámetro
+                return await electronicFacturationController.getAuthToken('password', null, true);
             }
             
-            // Si ya falló con password, NO REINTENTES, arroja el error.
             console.error('❌ Error crítico de Factus:', data);
             throw new Error(data.message || 'Error de autenticación');
         }
@@ -133,26 +133,32 @@ electronicFacturationController.getAuthToken = async (grantType = 'password', re
     }   
 };
 
-
 electronicFacturationController.getNumberingRanges = async () => {
     try {
         let stored = await readFile(RANGES_PATH);
-        if(stored){
-            console.log('Rangos Numericos (cache): ',stored);
-          return (stored);
+        // Validamos si la caché existe y no ha pasado más de 30 mins
+        if(stored && (Date.now() < stored.expires_at)){
+            console.log('📦 Usando rangos de numeración desde caché');
+            return (stored.numbering_ranges);
         }
+
+        // CORRECCIÓN: Obtener el auth ANTES de usarlo
+        const auth = await electronicFacturationController.getAuthToken();
+        
         const response = await fetch('https://api-sandbox.factus.com.co/v1/numbering-ranges', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
-                'Authorization': `Bearer ${auth.access_token}` // ¡ESTO ES VITAL!
+                'Authorization': `Bearer ${auth.access_token}`
             },
         });
         const data = await response.json();
-        console.log('Rangos Numericos: ',data.data.data);
-        saveNumberingRanges(data.data.data)
+        
         if (!response.ok) throw new Error(data.message || 'Error al obtener rangos');
-        return data;
+
+        // Guardamos en caché
+        await saveNumberingRanges(data.data.data);
+        return data.data.data;
     } catch (error) {
         console.error('Error en Rangos:', error.message);
         throw error;
