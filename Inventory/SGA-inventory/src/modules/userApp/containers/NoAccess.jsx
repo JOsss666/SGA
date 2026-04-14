@@ -15,7 +15,7 @@ export function NoAccess(){
     }
     return(
         <div className="NoAccess">
-            <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png"/>
+            <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1772826198/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.png"/>
             <div className="descriptionMessage">
                 <BoldTitle text={'No tiene acceso a este modulo'}/>
                 <DescriptionSpan text={`${appInfo.legal_name} ha limitado su acceso al modulo de Facturación`}/>
