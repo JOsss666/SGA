@@ -4,6 +4,10 @@ import Papa from 'papaparse';
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import QRCode from 'qrcode';
+import JsBarcode from 'jsbarcode';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 export async function postInfo(route,informacion){
     console.log('Funcion post');
@@ -28,45 +32,184 @@ export async function postInfo(route,informacion){
     })
 }
 
-export function parseToXlsx(info, download, columns, name) {
-    // Crear hoja
-    let worksheet;
-
-    if (columns && Array.isArray(columns)) {
-        // Formato con columnas definidas
-        const rows = info.map(row => {
-            const obj = {};
-            columns.forEach(col => {
-                obj[col.header] = row[col.key];
-            });
-            return obj;
+export async function getInfo(route) {
+    console.log('Funcion get');
+    return new Promise((resolve, reject) => {
+        console.log(urlSer + route);
+        
+        fetch(urlSer + route, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok === false) {
+                // Manejo de errores (404, 500, etc)
+                return response.json().then(err => {
+                    reject(err);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            resolve(data);
+        })
+        .catch(error => {
+            // Manejo de errores de red o conexión
+            reject(error);
         });
-        worksheet = XLSX.utils.json_to_sheet(rows);
+    });
+}
+
+export async function parseToXlsx(info, download, columns, name) {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(name || "Hoja1");
+
+    // 1. Añadir Título y Metadatos (Filas superiores)
+    worksheet.mergeCells('A1:D1');
+    const titleCell = worksheet.getCell('A1');
+    titleCell.value = (name || "Informe SGA").toUpperCase();
+    titleCell.font = { size: 16, bold: true };
+
+    worksheet.getCell('A2').value = `Fecha de generación: ${new Date().toLocaleString()}`;
+    worksheet.getCell('A3').value = `Total de registros: ${info.length}`;
+    
+    // Espacio antes de la tabla
+    const startRow = 5; 
+
+    // 2. Definir Columnas
+    if (columns && Array.isArray(columns)) {
+        worksheet.getRow(startRow).values = columns.map(col => col.header);
+        // Mapear las llaves para insertar los datos después
+        var columnKeys = columns.map(col => col.key);
     } else {
-        // Inferir columnas automáticamente
-        worksheet = XLSX.utils.json_to_sheet(info);
+        const keys = Object.keys(info[0] || {});
+        worksheet.getRow(startRow).values = keys;
+        var columnKeys = keys;
     }
 
-    // Crear libro
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, name || "Hoja1");
-
-    // Generar archivo excel
-    const wbout = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-
-    const blob = new Blob([wbout], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    // 3. Estilizar el Encabezado (Color de fondo y texto)
+    const headerRow = worksheet.getRow(startRow);
+    headerRow.eachCell((cell) => {
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '#262626' } // Azul corporativo
+        };
+        cell.font = { color: { argb: 'FFFFFF' }, bold: true };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
     });
 
+    // 4. Añadir los Datos
+    info.forEach((item) => {
+        const rowData = columnKeys.map(key => item[key]);
+        worksheet.addRow(rowData);
+    });
+
+    // 5. Ajustar ancho de columnas automáticamente
+    worksheet.columns.forEach(column => {
+        column.width = 20;
+    });
+
+    // 6. Generar el archivo
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
     if (download) {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = (name || "archivo") + ".xlsx";
-        link.click();
+        saveAs(blob, `${name || "archivo"}.xlsx`);
     } else {
         return blob;
     }
+}
+
+export async function parseCashBoxeToXlsx(data,title) {
+
+    console.log(data)
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Resumen de Cierre');
+
+    // 1. Encabezado General del Reporte
+    worksheet.mergeCells('A1:F1');
+    const mainTitle = worksheet.getCell('A1');
+    mainTitle.value = ` - ${title}`;
+    mainTitle.font = { size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
+    mainTitle.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '262626' } };
+    mainTitle.alignment = { horizontal: 'center' };
+
+    worksheet.getCell('A2').value = `Generado el: ${new Date().toLocaleString()}`;
+    
+    let currentRow = 4;
+
+    // 2. Iterar por cada Método de Pago
+    data.forEach((group) => {
+        // Título de la Sección (Método de Pago)
+        worksheet.mergeCells(`A${currentRow}:F${currentRow}`);
+        const methodCell = worksheet.getCell(`A${currentRow}`);
+        methodCell.value = group.paymentMethod_name.toUpperCase();
+        methodCell.font = { bold: true, size: 12 };
+        methodCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'E5E5E5' } };
+        
+        currentRow++;
+
+        // Encabezados de la tabla de transacciones
+        const headers = ['Instancia', 'Documento', 'Concepto', 'Tercero', 'Sub-total', 'Total','Fecha'];
+        const headerRow = worksheet.getRow(currentRow);
+        headerRow.values = headers;
+        headerRow.font = { bold: true };
+        headerRow.eachCell(cell => {
+            cell.border = { bottom: { style: 'thin' } };
+        });
+
+        currentRow++;
+
+        let subtotalMetodo = 0;
+
+        // 3. Insertar Transacciones del método
+        group.attached_trs?.forEach(trans => {
+            const row = worksheet.addRow([
+                trans.instance_serial? `${trans.process_code}#${trans.instance_serial}` : '---',
+                trans.doc_type || '---',
+                trans.concept_name || '---',
+                trans.thirdparty_name || '---',
+                trans.subTotal || '---',
+                trans.total || 0,
+                trans.created_at || '---'
+            ]);
+            
+            // Formato de moneda para la columna Total (F)
+            row.getCell(6).numFmt = '"$"#,##0';
+            subtotalMetodo += (trans.amount || 0);
+            currentRow++;
+        });
+
+        // 4. Fila de Subtotal por método
+        const totalRow = worksheet.getRow(currentRow);
+        totalRow.getCell(5).value = `Total ${group.paymentMethod_name}:`;
+        totalRow.getCell(5).font = { bold: true };
+        totalRow.getCell(6).value = group.net_balance;
+        totalRow.getCell(6).font = { bold: true };
+        totalRow.getCell(6).numFmt = '"$"#,##0';
+
+        currentRow += 2; // Espacio entre secciones
+    });
+
+    // Ajustar anchos de columna
+    worksheet.columns = [
+        { width: 15 }, // ID
+        { width: 15 }, // Tipo
+        { width: 35 }, // Descripción
+        { width: 25 }, // Cliente
+        { width: 20 }, // Fecha
+        { width: 15 }, // Total
+    ];
+
+    // 5. Descarga
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    saveAs(blob, `${name}_${new Date().getTime()}.xlsx`);
 }
 
 export  async function parseToCsv(info,download,name){
@@ -167,37 +310,29 @@ export function copyToClipBoard(text){
 }
 
 
-export function moneyFormat(number){
-    if(number != undefined){
-        let testN = number>0 ? number:number * -1
-        let n = JSON.stringify(testN);
-        let data = ''
-        let counter = 1;
-        for(let i = n.length -1;i >= 0;i--){
-            if(n[i] != '.'){
-                data += n[i];
-                if(counter%3 == 0 && i != 0){
-                    data += '.'
-                }
-                counter ++;
-            }
-            if(n[i] == '.'){
-                data += ','
-                counter = 1;
-            }
-        }
-        let x = '';
-        if(number < 0){
-            x += '- '
-        }
-        for(let i = data.length -1;i >= 0;i--){
-            x += data[i];
-        }
-        return(x)
-    }else{
-        return('0')
+export function moneyFormat(value){
+  // Manejo de undefined, null o valores no numéricos
+    if (value === undefined || value === null || isNaN(value) || value === '') {
+        return '0'; // O puedes retornar 'N/A' según tu preferencia
     }
+
+    // Usamos Intl.NumberFormat para máxima eficiencia
+    // 'de-DE' usa el punto como separador de miles
+    return new Intl.NumberFormat('de-DE').format(value);
+
 }
+
+export const formatDate = (date,noHour)=>{
+        if(date != undefined){
+            let x = date.split('T');
+            let newDate = `${x[0]}`;
+            if(!noHour){
+                newDate += ` ${x[1].substring(0,5)}`
+            }
+            return newDate;
+        }
+        return `--/--/--`
+    }
 
 export async function uploadFileInChunks(file,setAdvancePercent){
     
@@ -284,16 +419,16 @@ export async function ScreenShotElement(elemet,name){
 }
 
 
-export const uploadFiles = async (files) => {
+export const uploadFiles = async (files,info) => {
+    console.log(info)
     if (!files || files.length === 0) {
         throw new Error("Debe proporcionar al menos un archivo.");
     }
 
     const formData = new FormData();
-
+    formData.append('info', JSON.stringify(info));
     // Append de varios archivos
     for (let i = 0; i < files.length; i++) {
-        console.log("Agregando:", files[i].name);
         formData.append("files", files[i]); // CORRECTO
     }
 
@@ -307,6 +442,7 @@ export const uploadFiles = async (files) => {
             const errorData = await respuesta.json().catch(() => ({}));
             throw new Error(errorData.mensaje || `Error HTTP: ${respuesta.status}`);
         }
+        // Espacio para insertar el adunto en la base de datos
 
         return await respuesta.json();
 
@@ -357,22 +493,517 @@ export const arrayToTree = (flatArray, rootIdValue = null) => {
     return tree;
 };
 
-export function printCashRecipt(info){
-    if (window.require) {
-        alert('Imprimiendo recibo');
-        const { ipcRenderer } = window.require('electron');
-        
-        const contenidoHTML = `
-            <div style="text-align: center; font-family: sans-serif;">
-                <h1>SGA - RECIBO</h1>
-                <p>Impresión desde Escritorio</p>
-                <hr>
-                <p>Prueba de conexión exitosa</p>
-            </div>
-        `;
-        ipcRenderer.send('print-receipt', contenidoHTML);
-    } else {
-        alert("Esta función solo está disponible en la App de Escritorio.");
-    }
+export async function newElectronicInvoide(info){
+    let res = await postInfo('/electronicFacturation/invoice',info);
+    return(res)
 }
 
+export async function newElectronicNote(info){
+    let res = await postInfo('/electronicFacturation/note',info);
+    return(res)
+}
+
+export async function getNumberingRangesElectronicInvoices() {
+    let res = await getInfo('/electronicFacturation/getNumberingRanges');
+    console.log(res);
+}
+
+export async function showActualToken() {
+    let res = await getInfo('/electronicFacturation/showActualToken');
+    console.log(res);
+}
+
+export async function showAPITaxes() {
+    let res = await getInfo('/electronicFacturation/taxes');
+    console.log(res);
+}
+
+
+
+
+
+
+
+// funciones para impresion
+
+export async function printCashRecipt(info,appInfo,barCode){
+    console.log(info);
+
+    function generateBarcodeSVG(value) {
+        const svgNode = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+        JsBarcode(svgNode, value, {
+            format: "CODE128",
+            width: 2,
+            height: 60,
+            displayValue: false,
+            margin: 0
+        });
+
+        return svgNode.outerHTML;
+    }
+
+    if (!window.require) {
+        alert("Esta función solo está disponible en la App de Escritorio.");
+    }
+    const qrUrl = await QRCode.toDataURL(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${info.doc_id}`)
+    const expeditionDate = new Date().toLocaleString();
+    let procesqrUrl;
+    if(info.instance_id != undefined){
+        procesqrUrl= await QRCode.toDataURL(`https://facturation.sga360.co/preview/Process/${appInfo.company_key}/${info.instance_id}`)
+    }
+    const internalProcessCodeBar = generateBarcodeSVG(`1026n${info.instance_id}`)
+    const { ipcRenderer } = window.require('electron');
+
+    const contenidoHTML = `
+        <div id="clientOrderContainer" style="
+            margin:0;
+            width:72mm;
+            display:flex;
+            flex-direction:column;
+            box-sizing:border-box;
+            padding:2mm;
+            font-family:sans-serif;
+        ">
+            <div style="
+                display:flex;
+                justify-content:center;
+                margin-bottom:4mm;
+                padding:2mm;
+            ">
+                <img 
+                    src="${qrUrl}" 
+                    style="width:32mm;height:32mm;"
+                />
+            </div>
+
+            <h1 style="
+                font-size:16px;
+                text-align:center;
+                margin:0;
+            ">
+                ${appInfo.legal_name}
+            </h1>
+            <h3 style="
+                font-size:14px;
+                font-family:monospace;
+                margin:0;
+            ">
+                ${info.doc_type}#${info.ownSerial}
+            </h3>
+
+            <span style="font-size:12px;">
+                Concepto: Servicio de impresión digital
+            </span>
+
+            <span style="font-size:12px;">
+                Tercero: ${info.thirdParty_name}
+            </span>
+
+            <span style="font-size:12px;">
+                Fecha de generación: ${expeditionDate}
+            </span>
+
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
+
+            <div style="
+                display:flex;
+                flex-direction:column;
+                padding:1mm;
+                gap:.5mm;
+            ">
+                ${info.paymentMethod.map((element)=>{
+                return(`
+                    <div style="display:flex;font-size:12px;">
+                        <span style="
+                            display:inline-block;
+                            max-width:50%;
+                            white-space:nowrap;
+                            overflow:hidden;
+                            text-overflow:ellipsis;
+                        ">
+                            ${element.name}:
+                        </span>
+                        <strong style="margin-left:auto;">
+                            ${Number(element.value).toLocaleString()}
+                        </strong>
+                    </div>
+                `)
+            }).join('')}
+            </div>
+
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
+
+            <div style="display:flex;font-size:12px;">
+                <span>TOTAL:</span>
+                <strong style="margin-left:auto;">${Number(info.total).toLocaleString()}</strong>
+            </div>
+
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
+
+            <span style="font-size:12px;">
+                Nota:  ${info.description}
+            </span>
+
+            <span style="
+                margin-top:8mm;
+                width:100%;
+                border-bottom:solid .2mm #000;
+                display:block;
+            "></span>
+
+            ${info.instance_id != undefined ? `
+                <div style="
+                    display:flex;
+                    flex-direction:column;
+                    justify-content:center;
+                    margin-bottom:4mm;
+                    padding:4mm 2mm;
+                ">
+                    <img 
+                        src="${procesqrUrl}" 
+                        style="width:32mm;height:32mm;margin:2mm auto;"
+                    />
+
+                    <h3 style="
+                        font-size:14px;
+                        font-family:monospace;
+                        text-align:center;
+                        margin-top:2mm;
+                    ">
+                        Orden de trabajo #${info.instanceOwnSerial}
+                    </h3>
+                    <span style="font-size:12px;text-align:center;">
+                        Consulte el estado de su proceso en tiempo real.
+                    </span>
+                </div>
+            `:``}
+            ${barCode? `
+                <div style="
+                    margin:0 auto;
+                    display:flex;
+                    width:50mm;
+                ">
+                    <div style="
+                        width:20mm;
+                        height:10mm,
+                        margin:0 auto;
+                    ">
+                        ${internalProcessCodeBar}
+                    </div> 
+                </div>
+            `:`
+                <div style="
+                    width:100%;
+                    padding:4mm;
+                    box-sizing:border-box;
+                    display:flex;
+                    align-items:center;
+                    gap:4mm;
+                ">
+                    <div style="
+                            width:22mm;
+                            display:flex;
+                            borderRadius:4mm;
+                            border:solid 1mm #ddd;
+                            align-items:flex-end;
+                            justify-content:center;
+                            gap:4mm;
+                        ">
+                            <img 
+                                src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                                style="
+                                    width:100%;
+                                    height:25mm;
+                                    objectFit:cover;
+                                    display:block;"/>
+                        </div>
+                        <div style="
+                            flex:1;
+                            display:flex;
+                            flex-direction:column;
+                            justify-content:center;
+                        ">
+                            <span style="
+                                font-size:16px;
+                                font-weight:bold;
+                                line-height:1.1;
+                            ">SGA 360°</span>
+                            <span style="
+                                font-size:13px;
+                                margin-top:1mm;
+                            ">SGA Desarrollos.</span>
+                            <span style="
+                                font-size:12px;
+                                margin-top:2mm;
+                            ">Tel: 321 4221021</span>
+                            <span style="font-size:12px;">www.sga360.co</span>
+                        </div>
+                    </div>
+            `}
+        </div>
+    `;
+
+    ipcRenderer.send('print-receipt', contenidoHTML);
+}
+
+export async function printClientOrder(info,appInfo,barCode){
+    console.log(info);
+
+    function generateBarcodeSVG(value) {
+        const svgNode = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+        JsBarcode(svgNode, value, {
+            format: "CODE128",
+            width: 2,
+            height: 60,
+            displayValue: false,
+            margin: 0
+        });
+
+        return svgNode.outerHTML;
+    }
+
+    if (!window.require) {
+        alert("Esta función solo está disponible en la App de Escritorio.");
+    }
+    const expeditionDate = new Date().toLocaleString();
+    const qrUrl = await QRCode.toDataURL(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${info.doc_id}`)
+    let procesqrUrl;
+    if(info.instance_id != undefined){
+        procesqrUrl= await QRCode.toDataURL(`https://facturation.sga360.co/preview/Process/${appInfo.company_key}/${info.instance_id}`)
+    }
+    const internalProcessCodeBar = generateBarcodeSVG(`1026n${info.instance_id}`)
+    const { ipcRenderer } = window.require('electron');
+
+    const contenidoHTML = `
+        <div style="
+            margin:0;
+            width:72mm;
+            display:flex;
+            flex-direction:column;
+            box-sizing:border-box;
+            background:#fff;
+            height:fit-content;
+            padding:2mm;
+            font-family:sans-serif;
+        ">
+            <div style="
+                display:flex;
+                justify-content:center;
+                margin-bottom:4mm;
+                padding:2mm;
+            ">
+                <img 
+                    src="${qrUrl}" 
+                    style="width:32mm;height:32mm;"
+                />
+            </div>
+
+            <h1 style="
+                font-size:16px;
+                text-align:center;
+                margin:0;
+            ">
+                ${appInfo.legal_name}
+            </h1>
+            <h3 style="
+                font-size:14px;
+                font-family:monospace;
+                margin:0;
+            ">
+                ${info.doc_type}#${info.ownSerial}
+            </h3>
+
+            <span style="font-size:12px;">
+                Concepto: Servicio de impresión digital
+            </span>
+
+            <span style="font-size:12px;">
+                Tercero: ${info.thirdParty_name}
+            </span>
+
+            <span style="font-size:12px;">
+                Fecha de generación: ${expeditionDate}
+            </span>
+
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
+
+            <div style="display: flex; border: solid 0.5mm #000; padding: 1mm; font-size: 10px; font-weight: bold; margin-bottom: 3mm;">
+                <span style="width: 50%;">Item</span>
+                <span style="width: 20%; text-align: center;">Unidades</span>
+                <span style="width: 30%; text-align: right;">Valor</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; padding: 1mm;">
+                ${info.services.map((element) => {
+                    return `
+                        <div style="display: flex; font-size: 10px; border-bottom: dashed 0.3mm #000; padding-top: 1mm; padding-bottom: 2mm; margin-bottom: 1mm; align-items: center;">
+                            <span style="width: 50%; line-height: 1.2;">${element.name}</span>
+                            <span style="width: 20%; text-align: center;">${element.units}</span>
+                            <strong style="width: 30%; text-align: right;">
+                                ${moneyFormat(parseFloat(element.value))}
+                            </strong>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+
+            <div style="display:flex;fontSize:10px;marginTop:2mm;">
+                <span>TOTAL:</span>
+                <strong style="margin-left:auto;">${Number(info.total).toLocaleString()}</strong>
+            </div>
+
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
+
+            <span style="font-size:12px;">
+                Nota:  ${info.description}
+            </span>
+
+            <span style="
+                margin-top:8mm;
+                width:100%;
+                border-bottom:solid .2mm #000;
+                display:block;
+            "></span>
+
+            ${info.instance_id != undefined ? `
+                <div style="
+                    display:flex;
+                    flex-direction:column;
+                    justify-content:center;
+                    margin-bottom:4mm;
+                    padding:4mm 2mm;
+                ">
+                    <img 
+                        src="${procesqrUrl}" 
+                        style="width:32mm;height:32mm;margin:2mm auto;"
+                    />
+
+                    <h3 style="
+                        font-size:14px;
+                        font-family:monospace;
+                        text-align:center;
+                        margin-top:2mm;
+                    ">
+                        Orden de trabajo #${info.instanceOwnSerial}
+                    </h3>
+                    <h3 style="
+                        font-size:10px;
+                        font-family:monospace;
+                        text-align:center;
+                        margin-top:2mm;
+                    ">
+                        Con este código QR consulta el estado en tiempo real de tu proceso.
+                    </h3>
+                </div>
+    
+            `:``}
+            ${barCode? `
+                <div style="
+                    margin:0 auto;
+                    display:flex;
+                    width:50mm;
+                ">
+                    <div style="
+                        width:20mm;
+                        height:10mm,
+                        margin:0 auto;
+                    ">
+                        ${internalProcessCodeBar}
+                    </div> 
+                </div>
+            `:`
+                <div style="
+                    width:100%;
+                    padding:4mm;
+                    box-sizing:border-box;
+                    display:flex;
+                    align-items:center;
+                    gap:4mm;
+                ">
+                    <div style="
+                            width:22mm;
+                            display:flex;
+                            borderRadius:4mm;
+                            border:solid 1mm #ddd;
+                            align-items:flex-end;
+                            justify-content:center;
+                            gap:4mm;
+                        ">
+                            <img 
+                                src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                                style="
+                                    width:100%;
+                                    height:25mm;
+                                    objectFit:cover;
+                                    display:block;"/>
+                        </div>
+                        <div style="
+                            flex:1;
+                            display:flex;
+                            flex-direction:column;
+                            justify-content:center;
+                        ">
+                            <span style="
+                                font-size:16px;
+                                font-weight:bold;
+                                line-height:1.1;
+                            ">SGA 360°</span>
+                            <span style="
+                                font-size:13px;
+                                margin-top:1mm;
+                            ">SGA Desarrollos.</span>
+                            <span style="
+                                font-size:12px;
+                                margin-top:2mm;
+                            ">Tel: 321 4221021</span>
+                            <span style="font-size:12px;">www.sga360.co</span>
+                        </div>
+                    </div>
+            `}
+        </div>
+    `;
+
+    ipcRenderer.send('print-receipt', contenidoHTML);
+}
+
+
+export async function scanDevices() {
+    const { ipcRenderer } = window.require('electron');
+    console.log("Escaneando impresoras de red...");
+    
+    try {
+        // Usamos invoke para llamar al handler asíncrono
+        let printers = await ipcRenderer.invoke('get-system-printers');
+        console.log("Impresoras encontradas:", printers);
+        return printers;
+    } catch (error) {
+        console.error("Error al escanear:", error);
+    }
+}

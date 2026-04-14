@@ -1,67 +1,18 @@
 
 .AccountSettings{
-    width: 100%;
-    height: 78vh;
-    overflow-y: auto;
-    padding: .1vh;
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.AccountSettings section{
     display: flex;
     flex-direction: column;
-    width: 35%;
-    height: fit-content;
-    margin-top: 2vh;
+    gap: 3vh;
+    padding-top: 2vh;
 }
 
-.AccountSettings section .sectionSettingsTitle{
-    font-size: clamp(3.2px,3.2vh,32px);
-    font-weight: 500;
-    color:var(--mainText);
-    margin-bottom: 2vh;
-}
-
-.AccountSettings section .gridOptions{
-    display: flex;
-    flex-direction: column;
-    gap: 3vh 0;
-}
-
-.AccountSettings section .LabelValue{
-    flex-direction: column;
-    margin: auto 0;
-    margin-right: 4vh;
-    width: fit-content;
-    padding: 0;
+.AccountSettings .UserContainer{
     width: 100%;
+    background-color: var(--menuAside);
+    padding: 1vh;
+    border-radius: 2vh;
 }
 
-.AccountSettings section .LabelValue .lab, .AccountSettings section .LabelValue .val{
-    width:  100%;
-}
-
-.AccountSettings section .LabelValue .val{
-    font-size: 3vh;
-    margin-top: 2vh;
-    color:var(--sectionTitle);
-    width: 100%;
-}
-
-.AccountSettings section .LabelValue .val h6{
-    font-weight: 500;
-    display: flex;
-    position: relative;
-} 
-
-.AccountSettings section .LabelValue .val h6 .ButtonMenu{
-    position: absolute;
-    top: -2.5vh;
-    right: 2vh;
-    margin-right: 1vh;
-}
-
-.AccountSettings section .FormButton{
-    background-color: #007AFF;
+.AccountSettings .UserContainer .UserCard img{
+    margin-right: 2vh;
 }

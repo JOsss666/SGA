@@ -1,32 +1,39 @@
-import { useState } from "react";
+
 import { useAppInfo } from "../../../../context/context"
-import { FormInput } from "../../components/FormInput";
+import { SettingsGroup } from "../../components/SettingsGroup";
+import { UserCard } from "../../components/UserCard";
+
 import './AccountSettings.css'
-import { LabelValue } from "../../components/LabelValue";
-import { ButtonMenu } from "../../components/ButtonMenu";
-import { FormButton } from "../../components/FormButton";
 
 export function AccountSettings(){
 
-    const {userInfo,appInfo} = useAppInfo();
-    const [disabled,setDisabled] = useState(false);
+    const {userInfo,userConfig} = useAppInfo();
 
-    console.log(userInfo,appInfo)
+    const sec1 = [
+        {text:'Información personal',path:'personalInfo',value:userInfo.user_name,type:'functionality',icon:<i className="fa-solid fa-circle-info"/>},
+        {text:'Inicion de sesión y seguridad',path:'logIn',value:'',type:'functionality',icon:<i className="fa-solid fa-key"/>},
+        {text:'Actividad',path:'activity',value:'',type:'general',icon:<i className="fa-solid fa-user-clock"/>},
+        {text:'Grabar sesiónes',path:'recodSession',value:
+            `${userConfig.account.recordSesion}`
+            ,type:'functionality',icon:<i className="fa-solid fa-video"/>}
+    ]
+
+    const sec3 = [
+        {text:'Dispostivo principal',path:'deviceId',value:'',type:'device',icon:<img src="https://www.aiho.es/img/cms/home/macbook-reacondicionado.png"/>},
+        {text:'Dispostivo secundario',path:'deviceId',value:'',type:'device',icon:<img src="https://exitocol.vtexassets.com/arquivos/ids/24795805/image-e6de4bf97b544cb1a6d0d779ed0331dd.jpg?v=638622661899270000"/>}
+    ]
 
     return(
         <div className="AccountSettings">
-            <section>
-                <h3 className="sectionSettingsTitle">Información Personal</h3>
-                <div className="gridOptions">
-                    <LabelValue title={'Compañia'} value={<h6>{appInfo.legal_name}</h6>}/>
-                    <FormInput title={'Nombre'} value={userInfo.user_name} placeholder={'tu nombre de usuario'} />
-                    <FormInput title={'Correo electrónico'} value={userInfo.user_mail} placeholder={'tu correo asociado'} />
-                    <LabelValue title={'Contraseña'} value={<h6>************** <ButtonMenu title={'Editar contraseña'} noRotate={true} children={
-                        <i className="fa-solid fa-pencil"/>
-                    }/></h6>}/>
-                    <FormButton text={'Guardar cambios'}/>
-                </div>
-            </section>
+            <div className="UserContainer">
+                <UserCard
+                    imgSrc={userInfo.img != undefined? userInfo.img:'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png'}
+                    name={userInfo.user_name}
+                    desc={userInfo.user_mail}
+                />
+            </div>
+            <SettingsGroup options={sec1}/>
+            <SettingsGroup options={sec3}/>
         </div>
     )
 }
