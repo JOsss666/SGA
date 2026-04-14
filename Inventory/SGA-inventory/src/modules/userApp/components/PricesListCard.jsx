@@ -2,15 +2,24 @@ import { TagIndicator } from "./TagIndicator";
 import './PricesListCard.css';
 import { formatDate } from "../../../utils/functions";
 import { MoreOptions } from "./MoreOptions";
+import { useRef } from "react";
 
 export function PricesListCard({info, onClick}){
+
+    const optionsContainer = useRef();
+
     return(
-        <div className="PricesListCard" onClick={onClick}>
+        <div className="PricesListCard" onClick={(e)=>{
+            if(optionsContainer.current && optionsContainer.current.contains(e.target)){
+                return;
+            }
+            onClick();
+        }}>
             <div className="headCard">
                 <div className="tagContainer">
                     <TagIndicator children={<i className="fa-solid fa-tag"/>}/>
                 </div>
-                <div className="optionsCard">
+                <div className="optionsCard" ref={optionsContainer}>
                     <MoreOptions options={[
                         {text:'Editar',icon:<i className="fa-solid fa-pen"/>},
                         {text:'Comentar',icon:<i className="fa-solid fa-pen"/>},
