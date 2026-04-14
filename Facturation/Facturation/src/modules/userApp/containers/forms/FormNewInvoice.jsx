@@ -859,7 +859,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                         "discount": 0,
                         "discount_rate": 0,
                         "price": parseFloat(item.unit_value),
-                        "tax_rate": "19.00",
+                        "tax_rate": `${item.tax_rate || "0"}`,
                         "unit_measure_id": 70,
                         "standard_code_id": 1,
                         "is_excluded": 0,
@@ -991,8 +991,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             {!loading && (
                 <form action="" disabled={disabledToSubmit? true:disabled} onSubmit={(e)=>{
                     e.preventDefault();
-                    //createSellInvoice();
-                    updatePaidAmount();
+                    createSellInvoice();
                 }}>
                     {info.store_id == undefined && (
                         <SearchinList action={setStore_id} title={'Tienda'} placeHolder={'Seleccione la tienda'} list={stores} disabled={disabled}/>
