@@ -140,8 +140,7 @@ export function UserApp(){
             {!loadingAppData && statusPage=='page' &&(
                 <>
                     <header className='headApp'>
-                    <BigTitle title={appInfo.legal_name}/>
-                    <SearchBar placeholder={"Buscar en SGA - Inventarios"} action={setQuickSearch}/>
+                    <SearchBar placeholder={`Buscar en ${appInfo.legal_name} - Inventarios`} action={setQuickSearch}/>
                     {visibleResultsSearch && (
                         <div className="resultsQuickSerch">
                             {quickSearch != "" && routesApp.map((element,index)=>(
@@ -175,12 +174,12 @@ export function UserApp(){
                         <ServicesGrid/>
                     )}
                     <NotificationsMenuSpace visible={visibleNotifications}/>
-                    <UserCard name={userInfo.user_name} imgSrc={'https://i.pinimg.com/736x/fc/55/78/fc557891f4587e03e4eaaea18a4bc9c3.jpg'} desc={userInfo.user_roll} />
+                    <UserCard name={userInfo.user_name} imgSrc={userInfo.img} desc={userInfo.user_roll} />
                     <SwitchColorMode/>
                 </header>
                 <aside ref={asideMenuC}  className='asideMenuApp'>
                     <div className={`menusHolder ${visibleMenu? 'activeMenusHolder':''}`}>
-                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1761582991/ChatGPT_Image_29_sept_2025_16_39_52_dozlku.png'} visbleInfo={visibleMenu} title={'Inventarios'} desc={'SGA - Desarrollos'} />
+                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1772826198/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.png'} visbleInfo={visibleMenu} title={'Inventarios'} desc={'SGA - Desarrollos'} />
                         <MenuApp visibleMenu={visibleMenu} title={'General'} options={optionsMenu}/>
                         <MenuApp visibleMenu={visibleMenu} title={'Ajustes'} options={secondOptionsMenu}/>
                     </div>

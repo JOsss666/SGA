@@ -91,7 +91,7 @@
     color: var(--descriptionText);
     font-size: clamp(2px,2vh,20px);
     left: 2.5vh;
-    top: 2.5vh !important;
+    top: 3vh !important;
 }
 
 .UserApp .headApp .SearchBar input{
@@ -99,6 +99,7 @@
     background-color: var(--menuAside);
     outline: none;
     padding-left: 7vh;
+    outline: solid .1vh var(--inputsBorder);
 }
 
 .UserApp .headApp .resultsQuickSerch{
