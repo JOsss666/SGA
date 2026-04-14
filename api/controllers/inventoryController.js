@@ -317,30 +317,68 @@ inventoryController.createPriceList = (req,res)=>{
 }
 
 
-inventoryController.getPricesList = (req,res)=>{
+inventoryController.getPricesList = (req, res) => {
     let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `SELECT pricesList.*, sga_ecosystem.stores.id,sga_ecosystem.stores.name FROM sga_process.pricesList LEFT JOIN sga_ecosystem.stores ON sga_ecosystem.pricesList.store_id = sga_ecosystem.stores.id WHERE sga_process.pricesList.company_id = ? `
-        if(info.store_id != undefined){
-            sentence += `AND store_id = ? `
+    req.on('data', chunk => { data += chunk; });
+
+    req.on('end', async () => {
+        try {
+            const info = JSON.parse(data);
+            
+            // 1. Iniciamos los arrays de construcción
+            const values = [info.company_id];
+            const whereClauses = [`pl.company_id = $1`];
+            let limitQuery = "";
+
+            // 2. Agregamos filtros dinámicos a los arrays
+            if (info.store_id !== undefined && info.store_id !== null) {
+                whereClauses.push(`spl.store_id = $${values.length + 1}`);
+                values.push(info.store_id);
+            }
+
+            // 3. El LIMIT se maneja aparte porque no va en el WHERE
+            if (info.limit && !isNaN(info.limit)) {
+                limitQuery = `LIMIT ?`;
+                values.push(parseInt(info.limit));
+            }
+
+            const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
+
+            // 4. CONSTRUCCIÓN FINAL (Aquí es donde se une todo)
+            const sentence = `
+                SELECT 
+                    pl.*,
+                    s.id as store_id_ref,
+                    spl.store_id,
+                    spl.priority,
+                    s.name as store_name
+                FROM
+                    "Inventory"."store_pricesLists" spl
+                LEFT JOIN
+                    "Inventory".prices_lists pl
+                ON
+                    spl."priceList_id" = pl.id
+                LEFT JOIN 
+                    "Ecosystem".stores s 
+                ON 
+                    spl.store_id = s.id
+                ${whereQuery}
+                ORDER BY spl.priority,pl.created_at DESC
+                ${limitQuery}
+            `;
+
+            const consulta = await useDataBase(sentence, values, 1);
+            
+            res.writeHead(200, {'Content-Type': 'application/json'});
+            res.end(JSON.stringify(consulta));
+
+        } catch (error) {
+            console.error("Error en getPricesList:", error);
+            res.writeHead(500, {'Content-Type': 'application/json'});
+            res.end(JSON.stringify({ error: "Internal Server Error", details: error.message }));
         }
-        sentence += `ORDER BY pricesList.created_at DESC `
-        if(info.limit != undefined){
-            sentence += `LIMIT ${info.limit} ;`
-        }
-        let consulta = await useDataBase(sentence,[info.company_id,info.store_id],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-        req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
+    });
+};
 
 /* ELEMINAR LISTA DE PRECIOS */
 inventoryController.deletePriceList = (req,res)=>{
