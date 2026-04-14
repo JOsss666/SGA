@@ -33,6 +33,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const [costCenters,setCostCenters] = useState([]);
     const [concepts,setConcepts] = useState([]);
     const [documents,setDocuments] = useState([{
+        docInfo:{},
         items:[]
     }]);
     const [productsAndServices,setProductsAndServices] = useState([]);
@@ -586,6 +587,36 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         setBriefCaseBills(res[1]);
     }
 
+    const getProductsAndServices = async()=>{
+        let allowedStores = undefined;
+        let allowedCellars = undefined;
+        if(userConfig.access.stores.enabled.length > 1){
+            allowedStores = userConfig.access.stores.enabled;
+        }
+        if(userConfig.access.cellars.enabled.length > 1){
+            allowedCellars = userConfig.access.cellars.enabled.length;
+        }
+        let res = await postInfo('/inventory/getProducts',{
+            company_id:appInfo.company_id,
+            allowedStores,
+            allowedCellars,
+            type:'service'
+        })
+        console.log('=======> ',res);
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:`${element.code} ${element.name}`,
+                    value:element
+                })
+            });
+            setProductsAndServices(C)
+        }else{
+            setProductsAndServices([]);
+        }
+    }
+
 
     // Control functions
 
@@ -639,35 +670,47 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         );
     };
 
-    const getProductsAndServices = async()=>{
-        let allowedStores = undefined;
-        let allowedCellars = undefined;
-        if(userConfig.access.stores.enabled.length > 1){
-            allowedStores = userConfig.access.stores.enabled;
-        }
-        if(userConfig.access.cellars.enabled.length > 1){
-            allowedCellars = userConfig.access.cellars.enabled.length;
-        }
-        let res = await postInfo('/inventory/getProducts',{
-            company_id:appInfo.company_id,
-            allowedStores,
-            allowedCellars,
-            type:'service'
-        })
-        console.log('=======> ',res);
-        if(res[0]){
-            let C = []
-            res[1].forEach(element => {
-                C.push({
-                    text:`${element.code} ${element.name}`,
-                    value:element
-                })
-            });
-            setProductsAndServices(C)
-        }else{
-            setProductsAndServices([]);
+    // function for update paid ammount
+    const updatePaidAmount = async()=>{
+        for(let doc of itemBlocks){
+            console.log(itemBlocks)
+            if(doc.docInfo != undefined){
+                console.log(doc.docInfo)
+                let res = await postInfo('/facturation/updatePaymentDocument',doc.docInfo);
+                console.log(res);
+            }
         }
     }
+
+    // function for calculte the paidAmmoount for each document
+    const calcPaidAmountDocuments = () => {
+        let remainingTotal = total;
+        // 1. Creamos un nuevo arreglo para no mutar el estado original directamente
+        const updatedDocuments = itemBlocks.map((doc) => {
+            // Si ya no queda saldo, el valor pagado es 0
+            if (remainingTotal <= 0 || doc.docInfo == undefined) {
+                return { ...doc};
+            }
+            let paymentForThisDoc;
+            if(parseFloat(doc.docInfo.pending_value) <= remainingTotal){
+                paymentForThisDoc = parseFloat(doc.docInfo.pending_value);
+                remainingTotal -= paymentForThisDoc;
+            }else{
+                paymentForThisDoc = remainingTotal;
+                remainingTotal = 0
+            }
+            return {
+                ...doc,
+                docInfo: {
+                    ...doc.docInfo,
+                    paid_amount: paymentForThisDoc
+                }
+            };
+        }); 
+        console.log(updatedDocuments)
+        // 5. Actualizamos el estado de React
+        setItemBlocks(updatedDocuments);
+    };
 
     const setAplyVoucher = (id,value)=>{
         setPaymentMethod(prev=>
@@ -750,6 +793,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 nature: documentNature == 'DB'? 'CR':'DB'
             })*/
             await toAccount();
+            await updatePaidAmount();
         }else{
             addNotification({
                 type:'error',
@@ -883,12 +927,15 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         if(documents.length > 0){
             let newTotalToPay = 0;
             itemBlocks.forEach(element => {
-                console.log(element)
-                let tempTtl = 0;
-                element.items.forEach(element => {
-                    tempTtl += (parseFloat(element.unit_value? element.unit_value:0)*parseFloat(element.units? element.units:0))
-                });
-                newTotalToPay += tempTtl;
+                if(element.docInfo == undefined){
+                    let tempTtl = 0;
+                    element.items.forEach(element => {
+                        tempTtl += (parseFloat(element.unit_value? element.unit_value:0)*parseFloat(element.units? element.units:0))
+                    });
+                    newTotalToPay += tempTtl;
+                }else{
+                    newTotalToPay += (element.docInfo.pending_value != undefined && element.docInfo.pending_value != "" ? element.docInfo.pending_value:0);
+                }
             });
             setTotalToPay(newTotalToPay);
         }
@@ -914,6 +961,12 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
     },[thirdParty_id])
 
+     useEffect(()=>{
+        if(documents.length > 0){
+            calcPaidAmountDocuments();
+        }
+    },[total])
+
     return(
         <div className="FormNewCashRecipt FormNewInvoice">
             <div className="headForm">
@@ -938,7 +991,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             {!loading && (
                 <form action="" disabled={disabledToSubmit? true:disabled} onSubmit={(e)=>{
                     e.preventDefault();
-                    createSellInvoice();
+                    //createSellInvoice();
+                    updatePaidAmount();
                 }}>
                     {info.store_id == undefined && (
                         <SearchinList action={setStore_id} title={'Tienda'} placeHolder={'Seleccione la tienda'} list={stores} disabled={disabled}/>

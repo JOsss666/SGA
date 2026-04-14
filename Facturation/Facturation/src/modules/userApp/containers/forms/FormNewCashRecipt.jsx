@@ -526,7 +526,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     }
 
     // function for update paid ammount
-
     const updatePaidAmount = async()=>{
         for(let doc of documents){
             let res = await postInfo('/facturation/updatePaymentDocument',doc);
@@ -736,8 +735,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             {!loading && (
                 <form action="" disabled={disabled} onSubmit={(e)=>{
                     e.preventDefault();
-                    //createCashRecipt();
-                    updatePaidAmount();
+                    createCashRecipt();
                     /*newElectronicInvoide({
                         company_info:appInfo,
                         customer:thirdPartyInfo,

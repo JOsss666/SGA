@@ -764,6 +764,7 @@ facturationController.updatePaymentDocument = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        console.log(info)
         let sentence = `
             UPDATE "Ecosystem".documents
             SET paid_amount = paid_amount + $2
