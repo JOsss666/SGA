@@ -6,15 +6,18 @@ import './ChatAi.css'
 import { DespleList } from '../components/DespleList';
 import { CardTitleLogo } from '../components/CardTitleLogo';
 import {getAttached, postInfo} from '../../../utils/functions'
-import { useAiAssistant, useAppInfo } from '../../../context/context';
+import { useAiAssistant, useAppInfo, useNotifications } from '../../../context/context';
 import { ChatMessage } from '../components/ChatMessage';
 import { BoldTitle } from '../components/BoldTitle';
 import { AttachedCard } from '../components/AttachedCard';
 import { MainTitleAi } from '../components/ChatAiComponents/MainTitleAi';
+import { FormInput } from '../components/FormInput';
+import { OptionsChatAi } from '../components/ChatAiComponents/OptionsChatAi';
 
 
 export function ChatAi({visible}){
     const {chat,addMessage} = useAiAssistant();
+    const {addNotification} = useNotifications();
     const {userInfo,appInfo} = useAppInfo();
     const fileInput = useRef();
     const [visibleAddOptions,setVisibleAddOptions] = useState(false);
@@ -43,10 +46,7 @@ export function ChatAi({visible}){
             text:searchVal,
             user_id:userInfo.user_id,
         })
-/*       await addMessage({
-            text:`Procesando...`,
-            user_id:0
-        })*/
+
         let res = await postInfo('/processAiRequest',{
             text:searchVal,
             userInfo,
@@ -133,22 +133,51 @@ export function ChatAi({visible}){
                 <ButtonMenu title={'Como usar Asistente AI'}><i className="fa-solid fa-question"/></ButtonMenu>
             </div>
             {chat.length >0 && (
-                <div className={`spaceChatAi`}>
+                <div className={`spaceChatAi ${attached.length >0? 'activeAttachedSpace':''}`}>
                     {chat.map((element,index)=>(
                         <ChatMessage info={element} key={index}/>
                     ))}
                 </div>
             )}
             {chat.length == 0 && (
-                <div className="noChatIMg">
+                <div className={`noChatIMg`}>
                     <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1759180939/ChatGPT_Image_29_sept_2025_16_21_31_shjyfv.png" alt="" />
-                    <MainTitleAi text={`Hola ${userInfo.user_name}, ¿Listo para empezar?`}/>
+                    <div className="mainChatWelcome">
+                        <span>😎 Hola {userInfo.user_name}</span>
+                        <MainTitleAi text={`¿ Listo para empezar ?`}/>
+                    </div>
                 </div>
             )}
             
-            <div className={`chatAiInput ${attached.length >0? 'activeAttachedSpace':''}`}>
-                <ButtonMenu onClick={()=>{setVisibleAddOptions(!visibleAddOptions)}} noRotate={true} title={'Agregar'}><i className="fa-solid fa-plus"/></ButtonMenu>
-                <InputBarChat sendAction={sendAiPrompt} loading={loading} disabled={disabled} value={searchVal} searchAction={setSearchVal} placeholder={'Pregunta lo que necesites'}/>
+            <div className={`chatAiInput ${chat.length >0 ? 'fullWidthChat':''}`}>
+                {attached.length >0 && (
+                    <div className="attachedHolder">
+                        {attached.map((element,index)=>(
+                            <AttachedCard info={element} key={index} deleteAct={deleteAttached}/>
+                        ))}
+                    </div>
+                )}
+                <FormInput action={setSearchVal} placeholder={'Pregunta lo que necesites'} type={'search'} onSubmit={()=>{
+                    sendAiPrompt()
+                }}/>
+                <div className="toolsOptions">
+                    <ButtonMenu onClick={()=>{setVisibleAddOptions(!visibleAddOptions)}} noRotate={true} title={'Agregar'}><i className="fa-solid fa-plus"/></ButtonMenu>
+                    <OptionsChatAi options={[
+                        {text:'Creación',value:'creation',children:<i className="fa-solid fa-palette"/>},
+                        {text:'Analisis',value:'analysis',children:<i className="fa-solid fa-brain"/>},
+                        {text:'Busqueda',value:'search',children:<i className="fa-solid fa-magnifying-glass"/>},
+                        {text:'Acciones',value:'action',children:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1772826198/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.png'/>}
+                    ]} children={<i className="fa-solid fa-sliders"/>}/>
+                    <div className="rightAlOptions">
+                        <OptionsChatAi options={[
+                            {text:'Bajo consumo',value:'low-consume',children:<i className="fa-solid fa-leaf"/>},
+                            {text:'Rápido',value:'fast',children:<i className="fa-solid fa-bolt"/>},
+                            {text:'Razonamiento',value:'think',children:<i className="fa-regular fa-lightbulb"/>},
+                            {text:'Pro',value:'pro',children:<i className="fa-solid fa-graduation-cap"/>}
+                        ]}/>
+                        <ButtonMenu onClick={()=>{sendAiPrompt()}} noRotate={true} title={'Enviar'}><i className="fa-regular fa-paper-plane"/></ButtonMenu>
+                    </div>
+                </div>
             </div>
             {visibleAddOptions && (
                 <div className="addOptions">
@@ -179,13 +208,6 @@ export function ChatAi({visible}){
                         ]}/>
                     </ul>
                     <input type="file" hidden ref={fileInput}/>
-                </div>
-            )}
-            {attached.length >0 && (
-                <div className="attachedHolder">
-                    {attached.map((element,index)=>(
-                        <AttachedCard info={element} key={index} deleteAct={deleteAttached}/>
-                    ))}
                 </div>
             )}
         </div>
