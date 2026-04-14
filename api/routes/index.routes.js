@@ -251,6 +251,8 @@ router.post('/facturation/getTransactionsOfCashRecord',facturationController.get
 
 router.post('/facturation/getBriefcaseBills',facturationController.getBriefcaseBills);
 
+router.post('/facturation/updatePaymentDocument',facturationController.updatePaymentDocument);
+
 // Assets Controller
 
 router.post('/assets/getAssets',assetsController.getAssets);

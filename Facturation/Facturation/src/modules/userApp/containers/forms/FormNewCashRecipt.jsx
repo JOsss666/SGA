@@ -493,10 +493,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         );
     };
 
-    useEffect(()=>{
-        calcTotalFromPayments();
-    },[paymentMethod])
-
     const setAplyVoucher = (id,value)=>{
         setPaymentMethod(prev=>
             prev.map(item =>
@@ -529,28 +525,41 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         );
     }
 
-    useEffect(()=>{
-        console.log(briefCaseBills)
-    },[briefCaseBills])
+    // function for update paid ammount
 
-    useEffect(()=>{
-        console.log(documents)
-        if(documents.length > 0){
-            let newTotalToPay = 0;
-            documents.forEach(element => {
-                newTotalToPay += parseInt(element.total);
-            });
-            setTotalToPay(newTotalToPay);
+    const updatePaidAmount = async()=>{
+        for(let doc of documents){
+            let res = await postInfo('/facturation/updatePaymentDocument',doc);
+            console.log(res);
         }
-        if(briefCaseBills.length >0 && documents.length == 0){
-            let newTotalToPay = 0;
-            briefCaseBills.forEach(element => {
-                newTotalToPay += (element.paid_value != undefined && element.paid_value != "" ? element.paid_value:0);
-            });
-            setTotalToPay(newTotalToPay)
-        }
-        calcTotalFromPayments();
-    },[documents,briefCaseBills])
+    }
+
+    // function for calculte the paidAmmoount for each document
+    const calcPaidAmountDocuments = () => {
+        let remainingTotal = total;
+        // 1. Creamos un nuevo arreglo para no mutar el estado original directamente
+        const updatedDocuments = documents.map((doc) => {
+            // Si ya no queda saldo, el valor pagado es 0
+            if (remainingTotal <= 0) {
+                return { ...doc};
+            }
+            let paymentForThisDoc;
+            if(parseFloat(doc.pending_value) <= remainingTotal){
+                paymentForThisDoc = parseFloat(doc.pending_value);
+                remainingTotal -= paymentForThisDoc;
+            }else{
+                paymentForThisDoc = remainingTotal;
+                remainingTotal = 0
+            }
+            return {
+                ...doc,
+                paid_amount: paymentForThisDoc
+            };
+        });
+        console.log(updatedDocuments)
+        // 5. Actualizamos el estado de React
+        setDocuments(updatedDocuments);
+    };
 
     // Creation Function
 
@@ -597,6 +606,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 nature: documentNature == 'DB'? 'CR':'DB'
             })
             await toAccount();
+            await updatePaidAmount();
         }else{
             addNotification({
                 type:'error',
@@ -647,7 +657,35 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             })
         }
     }
-    
+
+    // --  Events Listeners
+
+    useEffect(()=>{
+        calcTotalFromPayments();
+    },[paymentMethod])
+
+    useEffect(()=>{
+        console.log(briefCaseBills)
+    },[briefCaseBills])
+
+    useEffect(()=>{
+        console.log(documents)
+        if(documents.length > 0){
+            let newTotalToPay = 0;
+            documents.forEach(element => {
+                newTotalToPay += parseFloat(element.pending_value);
+            });
+            setTotalToPay(newTotalToPay);
+        }
+        if(briefCaseBills.length >0 && documents.length == 0){
+            let newTotalToPay = 0;
+            briefCaseBills.forEach(element => {
+                newTotalToPay += (element.paid_value != undefined && element.paid_value != "" ? element.paid_value:0);
+            });
+            setTotalToPay(newTotalToPay)
+        }
+        calcTotalFromPayments();
+    },[documents,briefCaseBills])
 
     useEffect(()=>{
         console.log(thirdPartyInfo)
@@ -659,7 +697,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         }
     },[thirdPartyInfo])
 
-
     useEffect(()=>{
         if(thirdPartyInfo.id != undefined){
             console.log('Obteniedo metodos de pago')
@@ -667,15 +704,18 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         }
     },[aviableCredit,ableCredit])
 
-    useEffect(()=>{
-        console.log('XXX ',paymentMethod)
-    },[paymentMethod])
 
     useEffect(()=>{
         if(instance_id != undefined && instance_id != ''){
             getThirdParties(thirdParty_id,1)
         }
     },[instance_id])
+
+    useEffect(()=>{
+        if(documents.length > 0){
+            calcPaidAmountDocuments();
+        }
+    },[total])
 
     return(
         <div className="FormNewCashRecipt">
@@ -696,7 +736,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             {!loading && (
                 <form action="" disabled={disabled} onSubmit={(e)=>{
                     e.preventDefault();
-                    createCashRecipt();
+                    //createCashRecipt();
+                    updatePaidAmount();
                     /*newElectronicInvoide({
                         company_info:appInfo,
                         customer:thirdPartyInfo,
