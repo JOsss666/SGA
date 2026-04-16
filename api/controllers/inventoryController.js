@@ -330,16 +330,19 @@ inventoryController.getPricesList = (req, res) => {
             const whereClauses = [`pl.company_id = $1`];
             let limitQuery = "";
 
-            // 2. Agregamos filtros dinámicos a los arrays
             if (info.store_id !== undefined && info.store_id !== null) {
                 whereClauses.push(`spl.store_id = $${values.length + 1}`);
                 values.push(info.store_id);
             }
 
-            // 3. El LIMIT se maneja aparte porque no va en el WHERE
             if (info.limit && !isNaN(info.limit)) {
-                limitQuery = `LIMIT ?`;
+                limitQuery = `LIMIT $${values.length + 1}`;
                 values.push(parseInt(info.limit));
+            }
+
+            if(info.id != undefined){
+                whereClauses.push(`pl.id = $${values.length + 1}`);
+                values.push(info.id);
             }
 
             const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;

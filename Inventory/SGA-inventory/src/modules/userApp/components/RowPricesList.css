@@ -4,18 +4,19 @@
     background-color: var(--bg);
     backdrop-filter: blur(.5vh);
     border: solid .1vh #E3E3E3;
-    border-top: 0;
     margin-top: .1vh;
-    border-radius: 1vh;
     transition: .3s;
-    gap: 1vh;
+    gap: 1vw;
     padding:0 1vh;
+    border-bottom: 0;
 }
 
 .RowPricesList .ElementRow{
     width: fit-content;
     margin: auto 0;
     padding: .1vh;
+    width: 10vw;
+    padding: 1vh 0;
 }
 
 .RowPricesList .ElementRow .rowSpan{
@@ -28,7 +29,6 @@
 .RowPricesList .ElementRow .idHolder{
     width: 5vw;
 }
-
 
 .RowPricesList .ElementRow .valueUpdateIn{
     width: 10vw;

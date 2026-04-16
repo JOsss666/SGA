@@ -39,6 +39,13 @@
     margin-right: 1.5vh;
 }
 
+.MoreOptions .options img{
+    width: 2.5vh;
+    height: 2.5vh;
+    margin: auto 0;
+    margin-right: 1.5vh;
+}
+
 .MoreOptions .options li:hover{
     padding-left: 4vh;
     background-color: #fff7;

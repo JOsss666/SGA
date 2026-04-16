@@ -7,17 +7,17 @@
 }
 
 .AiButton button{
-    padding: .5vh;
+    padding: .1vh;
     width: fit-content;
     border-radius:4vh;
     display: flex;
     border: hidden;
-    background-image: linear-gradient(45deg,#B8E6FE,#F4A8FF);
+    background-image: linear-gradient(45deg,#B8E6FE,#05DF72);
     cursor: pointer;
-    box-shadow: 0 0 3vh #F6CFFF;
+    box-shadow: 0 0 3vh #B8E6FE;
 }
 
-.AiButton button svg{
+.AiButton button img{
     height: 5vh;
     width: 5vh;
     margin: auto;

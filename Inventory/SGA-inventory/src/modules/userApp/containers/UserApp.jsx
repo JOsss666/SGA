@@ -190,7 +190,7 @@ export function UserApp(){
                             <Route path="Analytics" element={<Analytics/>}/>
                             <Route path="Analytics/:product_id" element={<ReferenceAnalitics/>}/>
                             <Route path="PricesList" element={<PricesList setActualist={{}}/>}/>
-                            <Route path="PricesList/:priceListName" element={<PricesListDetails info={{}}/>}/>
+                            <Route path="PricesList/:priceListId" element={<PricesListDetails info={{}}/>}/>
                             <Route path='/thirdparties/*' element={<ThirdParties/>} />
                             <Route path='/thirdparties/:thirdparty_id' element={<ThirdPartyDetail/>} />
                             <Route path='/Products/' element={<Products/>} />

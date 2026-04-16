@@ -19,13 +19,15 @@ export function RowPricesList({disabled,columns,info}){
     const dictionaryElementsColum = {
         "SKU":<span className="rowSpan Redirect idHolder">{info.code}</span>,
         "Producto":<span className="rowSpan Redirect">{info.product_name}</span>,
-        "Categoría":<span className="rowSpan Redirect">{info.category_name}</span>,
-        "Unidades":<span className='rowSpan'>{info.units}</span>,
-        "Costo":<span className='rowSpan'>$ {formatCurrency(info.unit_cost)}</span>,
-        "Gravado":<span className='rowSpan'>{info.taxed}</span>,
-        "MOQ":<input min={1} className='valueUpdateIn' type='number' disabled={disabled} placeholder='1'/>,
-        "Precio Venta":<input className='valueUpdateIn' type='number' disabled={disabled} placeholder='$ 0'/>,
-        "Margen":<span className='rowSpan'>0%</span>
+        "Descripción":<span className="rowSpan Redirect">{info.product_name}</span>,
+        "Costo":<span className="rowSpan Redirect">{info.category_name}</span>,
+        "Valor venta":<span className='rowSpan'>{(formatCurrency(info.cost))}</span>,
+        "Unidades min":<span className='rowSpan'>$ {info.units}</span>,
+        "Unidades max":<span className='rowSpan'>{info.units}</span>,
+        "Descuento %":<input min={1} className='valueUpdateIn' type='number' disabled={disabled} placeholder='1'/>,
+        "Margen":<input min={1} className='valueUpdateIn' type='number' disabled={disabled} placeholder='1'/>,
+        "Disponible desde":<input min={1} className='valueUpdateIn' type='date' disabled={disabled} placeholder='1'/>,
+        "Disponible hasta":<input min={1} className='valueUpdateIn' type='date' disabled={disabled} placeholder='1'/>,
     }
 
     const ReloadInfo = async(info)=>{
