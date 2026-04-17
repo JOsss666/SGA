@@ -15,19 +15,26 @@
     width: fit-content;
     margin: auto 0;
     padding: .1vh;
-    width: 10vw;
     padding: 1vh 0;
 }
 
 .RowPricesList .ElementRow .rowSpan{
-    padding: .9vh 1vh;
-    width: 10vw;
     font-size: clamp(2px,2vh,20px);
     color: var(--descriptionText);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 10vw;
+    display: block;
 }
 
 .RowPricesList .ElementRow .idHolder{
     width: 5vw;
+}
+
+
+.RowPricesList .ElementRow .wideElement{
+    width: 15vw;
 }
 
 .RowPricesList .ElementRow .valueUpdateIn{

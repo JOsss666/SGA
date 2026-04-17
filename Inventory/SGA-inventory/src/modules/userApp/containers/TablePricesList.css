@@ -3,6 +3,7 @@
     flex-direction: column;
     width: max-content;
     position: relative;
+    height: 60vh;
 }
 
 .TablePricesList .headTable{
@@ -22,11 +23,18 @@
     font-weight: 500;
 }
 
-.TablePricesList .addNewProduct{
-    margin-top: 6.6vh;
+.TablePricesList .headColumn:nth-child(2){
+    width: 5vw;
 }
 
+.TablePricesList .headColumn:nth-child(3),
+.TablePricesList .headColumn:nth-child(4){
+    width: 15vw;
+}
+
+
 .TablePricesList .bodyTable{
+    margin-top: 6.8vh;
     width: inherit;
     padding: .1vh;
     max-height: 45vh;

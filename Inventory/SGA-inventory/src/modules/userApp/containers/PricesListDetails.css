@@ -49,6 +49,11 @@
     width: fit-content;
 }
 
+.PricesListDetails .searchContainer .SearchinList{
+    margin: auto;
+    margin-right: 1vh;
+}
+
 .PricesListDetails .contentDetailsList{
     margin-top: 2vh;
     overflow-x: auto;

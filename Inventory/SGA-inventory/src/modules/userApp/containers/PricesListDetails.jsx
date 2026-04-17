@@ -17,6 +17,7 @@ import { ButtonMenu } from '../components/ButtonMenu';
 import { MoreOptions } from '../components/MoreOptions';
 import { SelectOptions } from '../components/SelectOptions';
 import { TablePricesList } from './TablePricesList';
+import { SearchinList } from '../components/SearchInList';
 import { AiButton } from '../components/ChatAiComponents/AiButton';
 
 export function PricesListDetails(){
@@ -30,6 +31,7 @@ export function PricesListDetails(){
     const [searchVal,setSearchVal] = useState('');
     const [disabled,setDisabled] = useState(false);
     const [loading,setLoading] = useState(false);
+    const [listItems,setListItems] = useState([]);
     
     // info
     const [products,setProducts] = useState([]);
@@ -49,129 +51,37 @@ export function PricesListDetails(){
         'Disponible hasta',
     ]
 
-     const testinfo = [
-        {
-            list_id:1,
-            code:1223,
-            product_name:"producto de prueba",
-            category_name:"Category",
-            unit_cost:120000,
-            units:2,
-            cost:120000,
-            taxed:true,
-        },
-        {
-            list_id:1,
-            code:1223,
-            product_name:"producto de prueba",
-            category_name:"Category",
-            unit_cost:120000,
-            units:2,
-            cost:120000,
-            taxed:true,
-        },
-        {
-            list_id:1,
-            code:1223,
-            product_name:"producto de prueba",
-            category_name:"Category",
-            unit_cost:120000,
-            units:2,
-            cost:120000,
-            taxed:true,
-        },
-        {
-            list_id:1,
-            code:1223,
-            product_name:"producto de prueba",
-            category_name:"Category",
-            unit_cost:120000,
-            units:2,
-            cost:120000,
-            taxed:true,
-        },
-        {
-            list_id:1,
-            code:1223,
-            product_name:"producto de prueba",
-            category_name:"Category",
-            unit_cost:120000,
-            units:2,
-            cost:120000,
-            taxed:true,
-        },
-        {
-            list_id:1,
-            code:1223,
-            product_name:"producto de prueba",
-            category_name:"Category",
-            unit_cost:120000,
-            units:2,
-            cost:120000,
-            taxed:true,
-        },
-        {
-            list_id:1,
-            code:1223,
-            product_name:"producto de prueba",
-            category_name:"Category",
-            unit_cost:120000,
-            units:2,
-            cost:120000,
-            taxed:true,
-        },
-        {
-            list_id:1,
-            code:1223,
-            product_name:"producto de prueba",
-            category_name:"Category",
-            unit_cost:120000,
-            units:2,
-            cost:120000,
-            taxed:true,
-        },
-        {
-            list_id:1,
-            code:1223,
-            product_name:"producto de prueba",
-            category_name:"Category",
-            unit_cost:120000,
-            units:2,
-            cost:120000,
-            taxed:true,
-        },
-        {
-            list_id:1,
-            code:1223,
-            product_name:"producto de prueba",
-            category_name:"Category",
-            unit_cost:120000,
-            units:2,
-            cost:120000,
-            taxed:true,
-        },
-        {
-            list_id:1,
-            code:1223,
-            product_name:"producto de prueba",
-            category_name:"Category",
-            unit_cost:120000,
-            units:2,
-            cost:120000,
-            taxed:true,
-        },
-        {
-            list_id:1,
-            code:1223,
-            product_name:"producto de prueba",
-            category_name:"Category",
-            unit_cost:120000,
-            units:2,
-            cost:120000,
-            taxed:true,
-        },
-        
-    ]
+        // Handlers of listItems
+        const addListItem = (newElement)=>{
+            if(newElement.id == undefined) return;
+            setListItems([
+                ...listItems,
+                newElement
+            ])
+        };
+
+       const deleteListItem = (indexToDelete) => {
+            setListItems(prevItems => 
+                prevItems.filter((_, index) => index !== indexToDelete)
+            );
+        };
+
+        const updateListItem = (elIndex, property, value) => {
+            setListItems((prevItems) => 
+                prevItems.map((item,index) => {
+                    // 1. Buscamos el elemento que queremos editar
+                    if (elIndex) {
+                        // 2. Retornamos una copia del objeto con la propiedad cambiada
+                        return { 
+                            ...item, 
+                            [property]: value 
+                        };
+                    }
+                    // 3. Si no es el que buscamos, lo devolvemos tal cual
+                    return item;
+                })
+            );
+        };
 
     // Getters of info
     const getListPriceInfo = async ()=>{
@@ -248,7 +158,6 @@ export function PricesListDetails(){
             </div>
             <div className="searchContainer">
                 <SearchBar placeholder={'Buscar'} action={setSearchVal} />
-                <SelectOptions title={'Filtro'} options={['ninguno']}/>
                 <SelectOptions title={'Orden'} options={['Alfabetico','Fecha de Creación','Categoría']}/>
                 <ButtonDownload title={'Descargar listas de precios'}/>
                 <MoreOptions children={<i className="fa-solid fa-ellipsis-vertical"/>} options={[
@@ -265,9 +174,16 @@ export function PricesListDetails(){
                     {text:'Realiza un analisis de este informe',context:``},
                     {text:'¿Que acciones me recomiendas basado en este informe?',context:``}
                 ]}/>
+                <SearchinList noActVal={true} action={addListItem} placeHolder={'+ Agregar nuevo producto'} list={products}/>
             </div>
             <div className="contentDetailsList">
-                <TablePricesList columns={columns} info={testinfo} products={products}/>
+                <TablePricesList columns={columns} info={listItems} products={products}
+                    functions={{
+                        addListItem,
+                        deleteListItem,
+                        updateListItem
+                    }}
+                />
             </div>
         </div>
     )

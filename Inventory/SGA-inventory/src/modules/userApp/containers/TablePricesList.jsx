@@ -3,7 +3,7 @@ import { RowPricesList } from "../components/RowPricesList";
 import { SearchinList } from "../components/SearchInList";
 import './TablePricesList.css'
 
-export function TablePricesList({columns,info,type,searchValue,products}){
+export function TablePricesList({columns,info,type,searchValue,products,functions}){
 
     const filterOptions = (value) => {
         if (!searchValue) return true; 
@@ -18,12 +18,9 @@ export function TablePricesList({columns,info,type,searchValue,products}){
                     <span className="headColumn" key={index}>{element}</span>
                 ))}
             </div>
-            <div className="addNewProduct">
-                <SearchinList noActVal={true} placeHolder={'+ Agregar nuevo producto'} list={products}/>
-            </div>
             <div className="bodyTable">
                 {info.length >0 && info.map((element,index)=>(
-                    <RowPricesList hidden={!filterOptions(JSON.stringify(element))} type={type} columns={columns} info={element} key={index}/>
+                    <RowPricesList index={index} hidden={!filterOptions(JSON.stringify(element))} type={type} columns={columns} functions={functions} info={element} key={index}/>
                 ))}
             </div>
         </div>
