@@ -205,30 +205,70 @@ inventoryController.createProduct = (req,res)=>{
     })
 }
 
-
-inventoryController.getPricesNameList = (req,res)=>{
+inventoryController.getPricesListItems = (req, res) => {
     let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        console.log(data);
-        let info = JSON.parse(data);
-        let sentence = ``;
-        if(info.limit != undefined){
-            sentence = `SELECT * FROM "Inventory".pricesList WHERE company_id = ? LIMIT 3;`
-        }else{
-            sentence = `SELECT * FROM "Inventory".pricesList WHERE company_id = ? ; `
+    req.on('data', chunk => { data += chunk; });
+    
+    req.on('end', async () => {
+        try {
+            const info = JSON.parse(data);
+            let values = [info.company_id];
+            let whereClauses = [`pi.company_id = $1`];
+
+            if (info.id !== undefined) {
+                values.push(info.id);
+                whereClauses.push(`pi.id = $${values.length}`);
+            }
+
+            if (info.list_id !== undefined) {
+                values.push(info.list_id);
+                whereClauses.push(`pi."priceList_id" = $${values.length}`);
+            }
+
+            if (info.product_id !== undefined) {
+                values.push(info.product_id);
+                whereClauses.push(`pi."product&service_id" = $${values.length}`);
+            }
+
+            const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
+            let sentence = `
+                SELECT 
+                    pi."priceList_id",
+                    pi."product&service_id" AS product_id,
+                    pi.id,
+                    pi.cost,
+                    pi."tier_min_quantity" as min_units,
+                    pi.unit_price AS value,
+                    pi."discount_percent" AS discount, 
+                    pi."valid_from" AS start_date,
+                    pi."valid_to" AS end_date,
+                    ps.name,
+                    ps.code,
+                    ps.description,
+                    ps.img
+                FROM
+                    "Inventory"."priceList_items" pi
+                LEFT JOIN
+                    "Inventory"."products&services" ps
+                ON
+                    pi."product&service_id" = ps.id
+                ${whereQuery}
+                ORDER BY ps.name ASC
+            `;
+
+            // 3. ¡CORRECCIÓN CLAVE!: Pasar el arreglo 'values' completo, no solo info.company_id
+            let consulta = await useDataBase(sentence, values, 1);
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(consulta));
+
+        } catch (error) {
+            console.error("Error en getPricesListItems:", error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
         }
-        let consulta = await useDataBase(sentence,[info.company_id],1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
+    });
+};
 
 
 inventoryController.createCellar = (req,res)=>{
@@ -1231,6 +1271,118 @@ inventoryController.getServicesMovements = (req,res)=>{
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+inventoryController.updatePricesList = (req, res) => {
+    let data = '';
+    req.on('data', chunk => { data += chunk; });
+
+    req.on('end', async () => {
+        console.log('Recibido')
+        try {
+            const info = JSON.parse(data);
+            const editedItems = info.items.filter(item => item.edited === true);
+
+            // No editedItems case
+            if (editedItems.length === 0) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ message: "No hay cambios para guardar" }));
+            }
+
+            const allValues = [];
+            const valuePlaceholders = [];
+            let counter = 1;
+
+            editedItems.forEach((item) => {
+                const row = [
+                    info.company_id,
+                    info.list_id,
+                    item.product_id,
+                    item.cost || 0,
+                    item.min_units || 1,
+                    item.value || 0,
+                    item.discount || 0,
+                    item.start_date || null,
+                    item.end_date || null
+                ];
+                
+                const placeholders = row.map(() => `$${counter++}`);
+                valuePlaceholders.push(`(${placeholders.join(', ')})`);
+                allValues.push(...row);
+            });
+
+            const sentence = `
+                INSERT INTO "Inventory"."priceList_items" (
+                    company_id, 
+                    "priceList_id", 
+                    "product&service_id", 
+                    cost, 
+                    "tier_min_quantity", 
+                    unit_price, 
+                    "discount_percent", 
+                    "valid_from", 
+                    "valid_to"
+                ) 
+                VALUES ${valuePlaceholders.join(', ')}
+                ON CONFLICT ("priceList_id", "product&service_id", "tier_min_quantity")
+                DO UPDATE SET 
+                    cost = EXCLUDED.cost,
+                    unit_price = EXCLUDED.unit_price,
+                    "tier_min_quantity" = EXCLUDED."tier_min_quantity",
+                    "discount_percent" = EXCLUDED."discount_percent",
+                    "valid_from" = EXCLUDED."valid_from",
+                    "valid_to" = EXCLUDED."valid_to"
+                RETURNING id;
+            `;
+
+            const consulta = await useDataBase(sentence, allValues, 3);
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(consulta));
+
+        } catch (error) {
+            console.error(error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: "Error procesando la solicitud" }));
+        }
+    });
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+};
+
+inventoryController.deleteItemPricesList = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        try{
+            let info = JSON.parse(data);
+            let sentence = `
+                DELETE FROM
+                    "Inventory"."priceList_items"
+                WHERE
+                    id = ANY($1)
+                    AND company_id = $2 ;
+            `;
+            let consulta = await useDataBase(sentence,[
+                info.items,
+                info.company_id
+            ],2);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(consulta));
+        } catch (error) {
+            console.error(error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: "Error procesando la solicitud" }));
+        }
+    });
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));

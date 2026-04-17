@@ -3,6 +3,7 @@
     display: flex;
     flex-direction: column;
     padding: 0 4vh;
+    position: relative;
 }
 
 .PricesListDetails .headList{
@@ -25,6 +26,16 @@
     display: flex;
     gap: 1vh;
     margin-top: 1vh;
+}
+
+.PricesListDetails .actionsPricesList{
+    position: absolute;
+    top: 4vh;
+    right: 2vw;
+}
+
+.PricesListDetails .saveChanges .FormButton{
+    background-color: #2A9689;
 }
 
 .PricesListDetails .searchContainer{

@@ -4,7 +4,7 @@ import { SectionTitle } from '../components/SectionTitle'
 import './PricesListDetails.css'
 import { PathLocation } from '../components/PathLocation';
 import { ListPriceProducts } from './ListPriceProducts';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { BoldTitle } from '../components/BoldTitle';
 import { postInfo } from '../../../utils/functions';
 import { useAppInfo } from '../../../context/context';
@@ -19,6 +19,7 @@ import { SelectOptions } from '../components/SelectOptions';
 import { TablePricesList } from './TablePricesList';
 import { SearchinList } from '../components/SearchInList';
 import { AiButton } from '../components/ChatAiComponents/AiButton';
+import { FormButton } from '../components/FormButton';
 
 export function PricesListDetails(){
 
@@ -31,7 +32,24 @@ export function PricesListDetails(){
     const [searchVal,setSearchVal] = useState('');
     const [disabled,setDisabled] = useState(false);
     const [loading,setLoading] = useState(false);
+    const [loadingItems,setLoadingItems] = useState(false);
     const [listItems,setListItems] = useState([]);
+    const [modifiedList,setModifiedList] = useState(false);
+
+    const filteredListItems = useMemo(() => {
+        if (!searchVal.trim()) return listItems;
+        const query = searchVal.toLowerCase();
+        return listItems.filter((item) => {
+            // Buscamos coincidencia en SKU (code), Nombre o Descripción
+            const codeMatch = item.code?.toLowerCase().includes(query);
+            const nameMatch = item.name?.toLowerCase().includes(query);
+            const costMatch = item.cost?.toLowerCase().includes(query);
+            const valueMatch = item.value?.toLowerCase().includes(query);
+            const descMatch = item.description?.toLowerCase().includes(query);
+
+            return codeMatch || nameMatch || descMatch || costMatch || valueMatch;
+        });
+    }, [searchVal, listItems]);
     
     // info
     const [products,setProducts] = useState([]);
@@ -44,11 +62,11 @@ export function PricesListDetails(){
         'Costo',
         'Valor venta',
         'Unidades min',
-        "Unidades max",
         'Descuento %',
         'Margen',
         'Disponible desde',
         'Disponible hasta',
+        'Eliminar'
     ]
 
         // Handlers of listItems
@@ -56,11 +74,35 @@ export function PricesListDetails(){
             if(newElement.id == undefined) return;
             setListItems([
                 ...listItems,
-                newElement
+                {
+                    id:null,
+                    code:newElement.code,
+                    product_id:newElement.id,
+                    name:newElement.name,
+                    description:newElement.description,
+                    cost:0,
+                    value:0,
+                    min_units:0,
+                    discount:0,
+                    start_date:undefined,
+                    end_date:undefined,
+                    edited:true
+                }
             ])
         };
 
-       const deleteListItem = (indexToDelete) => {
+       const deleteListItem = async(indexToDelete,id) => {
+            if(id != null){
+                let res = await postInfo('/inventory/deleteItemPricesList',{
+                    items:[id],
+                    company_id:appInfo.company_id
+                });
+                console.log(res);
+                if(!res || res[0] == false){
+                    console.log('Error al eliminar elemento')
+                    return;
+                }
+            }
             setListItems(prevItems => 
                 prevItems.filter((_, index) => index !== indexToDelete)
             );
@@ -70,11 +112,12 @@ export function PricesListDetails(){
             setListItems((prevItems) => 
                 prevItems.map((item,index) => {
                     // 1. Buscamos el elemento que queremos editar
-                    if (elIndex) {
+                    if (elIndex == index) {
                         // 2. Retornamos una copia del objeto con la propiedad cambiada
                         return { 
                             ...item, 
-                            [property]: value 
+                            [property]: value,
+                            edited:true
                         };
                     }
                     // 3. Si no es el que buscamos, lo devolvemos tal cual
@@ -82,6 +125,21 @@ export function PricesListDetails(){
                 })
             );
         };
+
+        const saveListChanges = async()=>{
+            setDisabled(true);
+            setLoadingItems(true);
+            let res = await postInfo('/inventory/updatePricesList',{
+                items:listItems,
+                company_id:appInfo.company_id,
+                list_id:listPriceInfo.id,
+            });
+            console.log(res);
+            setModifiedList(false);
+            setLoadingItems(false)
+            setDisabled(true);
+            getPriceListItems();
+        }
 
     // Getters of info
     const getListPriceInfo = async ()=>{
@@ -99,6 +157,23 @@ export function PricesListDetails(){
             setListPriceInfo({});
         }
         setLoading(false);
+        setDisabled(false);
+    }
+
+    const getPriceListItems = async()=>{
+        setDisabled(true);
+        setLoadingItems(true);
+        let res = await postInfo('/inventory/getPricesListItems',{
+            company_id:appInfo.company_id,
+            list_id:params.priceListId
+        })
+        console.log(res);
+        if(res[0]){
+            setListItems(res[1]);
+        }else{
+            setListItems([]);
+        }
+        setLoadingItems(false);
         setDisabled(false);
     }
 
@@ -138,6 +213,18 @@ export function PricesListDetails(){
         getProductsAndServices();
     },[])
 
+    useEffect(()=>{
+        if(listPriceInfo.id == undefined) return;
+        getPriceListItems();
+    },[listPriceInfo])
+
+    useEffect(() => {
+        if(listItems.length == 0) return;
+        const hasEditedItems = listItems.some(element => element.edited);
+        if (hasEditedItems) {
+            setModifiedList(true);
+        }
+    }, [listItems]);
 
     if(!loading)return(
         <div className="PricesListDetails appSection">
@@ -150,11 +237,33 @@ export function PricesListDetails(){
                         <i className="fa-regular fa-clock"/>
                         Ultima actualización: {formatDate(listPriceInfo.updated_at)}
                     </span>
-                        <span className="lastUpdated">
+                    <span className="lastUpdated">
                         <i className="fa-regular fa-calendar"/>
                         Fecha de creación: {formatDate(listPriceInfo.created_at)}
                     </span>
+                    <span className="lastUpdated">
+                        <i className="fa-regular fa-calendar"/>
+                        Valido hasta: {formatDate(listPriceInfo.valid_from)}
+                    </span>
+                    <span className="lastUpdated">
+                        <i className="fa-regular fa-calendar"/>
+                        Valido hasta: {formatDate(listPriceInfo.valid_until)}
+                    </span>
                 </div>
+            </div>
+            <div className="actionsPricesList">
+                {modifiedList && (
+                    <div className="saveChanges">
+                        <FormButton text={'Guardar cambios'} 
+                            disabled={disabled}
+                            onClick={()=>{
+                                saveListChanges();
+                            }}
+                            >
+                            <i className="fa-regular fa-floppy-disk"/>
+                        </FormButton>
+                    </div>
+                )}
             </div>
             <div className="searchContainer">
                 <SearchBar placeholder={'Buscar'} action={setSearchVal} />
@@ -177,13 +286,18 @@ export function PricesListDetails(){
                 <SearchinList noActVal={true} action={addListItem} placeHolder={'+ Agregar nuevo producto'} list={products}/>
             </div>
             <div className="contentDetailsList">
-                <TablePricesList columns={columns} info={listItems} products={products}
-                    functions={{
-                        addListItem,
-                        deleteListItem,
-                        updateListItem
-                    }}
-                />
+                {!loadingItems && (
+                    <TablePricesList columns={columns} info={filteredListItems} products={products}
+                        functions={{
+                            addListItem,
+                            deleteListItem,
+                            updateListItem
+                        }}
+                    />
+                )}
+                {loadingItems && (
+                    <LoadingSpace title={'Cargando lista de precios'} description={'Esto no debe tardar mucho...'}/>
+                )}
             </div>
         </div>
     )

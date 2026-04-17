@@ -5,12 +5,18 @@ import './RowPricesList.css';
 
 export function RowPricesList({ disabled, columns, info, functions, index }) {
     // 1. Estado local: 'data' es nuestra fuente de verdad para el renderizado inmediato
-    const [edited, setEdited] = useState(false);
     const [data, setNewInfo] = useState(info);
 
     // Utils
+    const cleanData = (item) => ({
+        ...item,
+        cost: item.cost ? item.edited? item.cost : parseFloat(item.cost).toFixed(2) : "0",
+        value: item.value ? item.edited? item.value : parseFloat(item.value).toFixed(2) : "0",
+        start_date: item.start_date ? item.start_date.split('T')[0] : "",
+        end_date: item.end_date ? item.end_date.split('T')[0] : ""
+    });
+
     const handleInputChange = (property, value) => {
-        setEdited(true);
         setNewInfo(prev => ({
             ...prev,
             [property]: value
@@ -27,9 +33,8 @@ export function RowPricesList({ disabled, columns, info, functions, index }) {
     }, [data.value, data.cost]);
 
     // Events listeners
-
     useEffect(() => {
-        setNewInfo(info);
+        setNewInfo(cleanData(info));
     }, [info]);
 
     const dictionaryElementsColum = {
@@ -45,7 +50,7 @@ export function RowPricesList({ disabled, columns, info, functions, index }) {
                 className='valueUpdateIn'
                 type='number' 
                 step={0.001}
-                value={data.cost ?? 0}
+                value={data.cost || 0}
                 disabled={disabled}
                 onChange={(e) => handleInputChange("cost", e.target.value)}
                 placeholder='0'
@@ -56,7 +61,7 @@ export function RowPricesList({ disabled, columns, info, functions, index }) {
                 className='valueUpdateIn'
                 type='number' 
                 step={0.001} 
-                value={data.value ?? 0} 
+                value={data.value || 0} 
                 disabled={disabled} 
                 onChange={(e) => handleInputChange("value", e.target.value)}
                 placeholder='0'
@@ -66,31 +71,22 @@ export function RowPricesList({ disabled, columns, info, functions, index }) {
             <input 
                 className='valueUpdateIn' 
                 type='number' 
-                value={data.min_units ?? 0} 
+                value={data.min_units || 0} 
                 disabled={disabled} 
                 onChange={(e) => handleInputChange("min_units", e.target.value)}
-            />
-        ),
-        "Unidades max": (
-            <input 
-                className='valueUpdateIn' 
-                type='number' 
-                value={data.max_units ?? 0} 
-                disabled={disabled}
-                onChange={(e) => handleInputChange("max_units", e.target.value)}
             />
         ),
         "Descuento %": (
             <input 
                 className='valueUpdateIn' 
                 type='number' 
-                value={data.discount ?? 0} 
+                value={data.discount || 0} 
                 disabled={disabled}
                 onChange={(e) => handleInputChange("discount", e.target.value)}
                 placeholder='0%'
             />
         ),
-        "Margen": <span className="rowSpan Redirect">{marginValue}%</span>,
+        "Margen": <span className="rowSpan">{marginValue}%</span>,
         "Disponible desde": (
             <input 
                 className='valueUpdateIn' 
@@ -109,13 +105,20 @@ export function RowPricesList({ disabled, columns, info, functions, index }) {
                 onChange={(e) => handleInputChange("end_date", e.target.value)}
             />
         ),
+        "Eliminar":(
+            <span className="rowSpan Redirect idHolder">
+                <i className="fa-solid fa-trash deleteItem" onClick={()=>{
+                    functions.deleteListItem(index,info.id);
+                }}/>
+            </span>
+        )
     };
 
     return (
         <div className={`
             RowPricesList
             ${disabled ? 'DisabledPricesListRow' : ''}
-            ${edited ? 'EditedPricesListRow' : ''}
+            ${info.edited ? 'EditedPricesListRow' : ''}
         `}>
             <CheckSquare />
             {columns.map((colName, colIdx) => (

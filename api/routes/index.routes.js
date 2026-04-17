@@ -142,7 +142,7 @@ router.post('/inventory/getProducts',inventoryController.getProducts);
 
 router.post('/inventory/createProduct',inventoryController.createProduct);
 
-router.post('/inventory/getPricesNameList',inventoryController.getPricesNameList);
+router.post('/inventory/getPricesListItems',inventoryController.getPricesListItems);
 
 router.post('/inventory/createCellar',inventoryController.createCellar);
 
@@ -177,6 +177,10 @@ router.post('/inventory/getRotation',inventoryController.getRotation);
 router.post('/inventory/getKardex',inventoryController.getKardex);
 
 router.post('/getServiceMovements',inventoryController.getServicesMovements);
+
+router.post('/inventory/updatePricesList',inventoryController.updatePricesList);
+
+router.post('/inventory/deleteItemPricesList',inventoryController.deleteItemPricesList)
 
 
 // SGA - PROCESS

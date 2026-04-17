@@ -3,7 +3,8 @@
     display: flex;
     background-color: var(--bg);
     backdrop-filter: blur(.5vh);
-    border: solid .1vh #E3E3E3;
+    border: solid .1vh var(--inputsBorder);
+    border-top: dashed .1vh var(--inputsBorder);
     margin-top: .1vh;
     transition: .3s;
     gap: 1vw;
@@ -26,6 +27,7 @@
     overflow: hidden;
     width: 10vw;
     display: block;
+    display: flex;
 }
 
 .RowPricesList .ElementRow .idHolder{
@@ -60,3 +62,24 @@
     color: var(--mainText);
     outline: solid .2vh #007AFF;
 }
+
+.RowPricesList .ElementRow .deleteItem{
+    margin: auto;
+    font-size: clamp(2.5px,2.5vh,25px);
+    cursor: pointer;
+    transition: .3s;
+}
+
+.RowPricesList .ElementRow .deleteItem:hover{
+    color: #FB2C36;
+    transform: rotateZ(15deg);
+}
+
+:root .EditedPricesListRow{
+    background-color: #FEFCE8;
+}
+
+:root.dark .EditedPricesListRow{
+    background-color: #D0872E60;
+}
+
