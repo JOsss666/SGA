@@ -28,6 +28,10 @@
     margin-top: 1vh;
 }
 
+.PricesListDetails .headList .updatesInfo .lastUpdated i{
+    margin: auto 0;
+}
+
 .PricesListDetails .actionsPricesList{
     position: absolute;
     top: 4vh;
