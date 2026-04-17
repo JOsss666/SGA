@@ -129,8 +129,107 @@ inventoryController.getProducts = (req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(consulta));
     });
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
 };
 
+
+inventoryController.getComercialProducts = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        console.log('Recibido')
+        let info = JSON.parse(data);
+        let values = [info.company_id];
+        let whereClauses = [`ps.company_id = $1`];
+
+        if(info.list_id != undefined){
+            values.push(info.list_id)
+            whereClauses.push(`pi."priceList_id" = ${values.length}`)
+        }
+
+        if(info.id != undefined){
+            values.push(info.id);
+            whereClauses.push(`ps.id = ${values.length}`);
+        }
+
+        // Filter by control valid date in pricesListitems
+        whereClauses.push(`(pi."valid_from" <= CURRENT_DATE OR pi."valid_from" IS NULL)`);
+        whereClauses.push(`(pi."valid_to" >= CURRENT_DATE OR pi."valid_to" IS NULL)`);
+
+        const whereQuery = whereClauses.length > 0
+        ? `WHERE ${whereClauses.join(" AND ")}`
+        : "";
+
+        let sentence = `
+            SELECT 
+                ps.id AS product_id,
+                ps.img,
+                ps.name,
+                ps.code,
+                ac.name AS tax_name,
+                t.base AS tax_base,
+                t.rate AS tax_rate,
+                c_exit.account_id AS exit_account,
+                c_entry.account_id AS entry_account,
+                array_remove(array_agg(DISTINCT c.name), NULL) AS categories,
+                jsonb_agg(DISTINCT jsonb_build_object(
+                    'min_qty', pi."tier_min_quantity",
+                    'price', pi.unit_price,
+                    'discount', pi."discount_percent"
+                )) AS price_tiers
+            FROM 
+                "Inventory"."products&services" ps
+            INNER JOIN 
+                "Inventory"."priceList_items" pi 
+            ON 
+                ps.id = pi."product&service_id"
+            LEFT JOIN 
+                "Ecosystem".taxes AS t
+                ON ps.tax_id = t.id
+            LEFT JOIN 
+                "Ecosystem".contable_accounts AS ac
+                ON t.account_id = ac.id
+            LEFT JOIN
+                "Inventory".product_categories AS pc
+                ON pc.product_id = ps.id
+            LEFT JOIN
+                "Inventory".categories AS c
+                ON pc.category_id = c.id
+            LEFT JOIN 
+                "Ecosystem".concepts AS c_exit
+            ON 
+                ps.exit_concept = c_exit.id
+            LEFT JOIN 
+                "Ecosystem".concepts AS c_entry
+            ON 
+                ps.entry_concept = c_entry.id
+            ${whereQuery}
+            GROUP BY 
+                ps.id, 
+                ps.name, 
+                ps.code, 
+                ac.name, 
+                t.base, 
+                t.rate, 
+                c_exit.account_id, 
+                c_entry.account_id
+            ORDER BY ps.name ASC, ps.code ASC
+            ;
+        `
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
 
 inventoryController.createProduct = (req,res)=>{
     let data = '';

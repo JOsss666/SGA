@@ -140,6 +140,8 @@ router.post('/inventory/createSubCategory',inventoryController.createCatetory);
 
 router.post('/inventory/getProducts',inventoryController.getProducts);
 
+router.post(`/inventory/getComercialProducts`,inventoryController.getComercialProducts);
+
 router.post('/inventory/createProduct',inventoryController.createProduct);
 
 router.post('/inventory/getPricesListItems',inventoryController.getPricesListItems);

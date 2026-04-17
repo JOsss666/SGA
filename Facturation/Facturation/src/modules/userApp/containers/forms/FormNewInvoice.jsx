@@ -331,18 +331,19 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             setItemBlocks(prev =>
                 prev.map((block, bIdx) => {
-                    // 1. Buscamos el bloque correcto
                     if (bIdx !== blockIndex) return block;
 
-                    // 2. Si es el bloque, mapeamos sus ítems para encontrar el que queremos editar
                     const updatedItems = block.items.map((item, iIdx) => {
                         if (iIdx !== itemIndex) return item;
-
-                        // 3. Retornamos una copia del ítem con el valor actualizado
-                        return { ...item, [key]: value };
+                        let updatedItem = { ...item, [key]: value };
+                        if (key === 'units') {
+                            const newPrice = getEffectivePrice(item, value);
+                            updatedItem.unit_value = newPrice;
+                        }
+                        console.log(updatedItem)
+                        return updatedItem;
                     });
 
-                    // 4. Retornamos el bloque con su nueva lista de ítems
                     return { ...block, items: updatedItems };
                 })
             );
@@ -596,7 +597,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         if(userConfig.access.cellars.enabled.length > 1){
             allowedCellars = userConfig.access.cellars.enabled.length;
         }
-        let res = await postInfo('/inventory/getProducts',{
+        let res = await postInfo('/inventory/getComercialProducts',{
             company_id:appInfo.company_id,
             allowedStores,
             allowedCellars,
@@ -891,6 +892,19 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
     }
 
+    const getEffectivePrice = (product, quantity) => {
+    const qty = parseInt(quantity) || 0;
+        if (!product.price_tiers || product.price_tiers.length === 0) {
+            return product.unit_price || 0;
+        }
+        const applicableTier = [...product.price_tiers]
+            .sort((a, b) => b.min_qty - a.min_qty) 
+            .find(tier => qty >= tier.min_qty);
+        return applicableTier 
+            ? applicableTier.price 
+            : [...product.price_tiers].sort((a, b) => a.min_qty - b.min_qty)[0].price;
+    };
+
 
     // Event listeners
     
@@ -1048,23 +1062,23 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                                                     title={'unidades'}
                                                     type={'number'}
                                                     min={0}
-                                                    placeholder={0}
-                                                    action={(value)=>{
-                                                        handleEditItemDetail(index_block,index,'units',value);
+                                                    value={element.units || ''}
+                                                    action={(value) => {
+                                                        handleEditItemDetail(index_block, index, 'units', value);
                                                     }}
-                                                    max={element.type == 'service'? undefined:element.stock}
                                                 />
                                             </strong>
+
                                             <strong className="valueItemRow rowInputItem">
                                                 <FormInput 
                                                     title={'Val unidad'}
                                                     type={'number'}
                                                     min={0}
-                                                    placeholder={0}
-                                                    value={element.unit_cost> 0 ? element.unit_cost:undefined}
-                                                    disabled={element.unit_cost> 0 ? true:disabled}
-                                                    action={(value)=>{
-                                                        handleEditItemDetail(index_block,index,'unit_value',value);
+                                                    defaultValue={element.unit_value}
+                                                    placeholder={element.unit_value} 
+                                                    disabled={disabled}
+                                                    action={(value) => {
+                                                        handleEditItemDetail(index_block, index, 'unit_value', value);
                                                     }}
                                                 />
                                             </strong>
