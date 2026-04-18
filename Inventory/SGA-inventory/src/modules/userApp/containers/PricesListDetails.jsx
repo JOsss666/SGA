@@ -190,7 +190,7 @@ export function PricesListDetails(){
             company_id:appInfo.company_id,
             allowedStores,
             allowedCellars,
-            type:'service'
+            //type:'service'
         })
         console.log('=======> ',res);
         if(res[0]){
