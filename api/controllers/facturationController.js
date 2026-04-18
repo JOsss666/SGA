@@ -63,7 +63,7 @@ facturationController.newClientOrder = (req,res)=>{
                     info.company_id,
                     info.store_id,
                     info.thirdParty_id,
-                    element.id,
+                    element.id || element.product_id,
                     element.units,
                     element.unit_value,
                     element.total,
