@@ -400,7 +400,7 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
                                                     handleEditItemDetail(element.lineId,"unit_value",e.target.value)
                                                 }}/>
                                                 <input step={0.001} type="text" placeholder="Descripción" onChange={(e)=>{
-                                                    handleEditItemDetail(element.lineId,e.target.value)
+                                                    handleEditItemDetail(element.lineId,"description",e.target.value)
                                                 }}/>
                                                 <span className="ttlValUnitIndicator">{formatCurrency(element.total || 0)}</span>
                                                 <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
