@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BoldTitle } from "../../components/BoldTitle";
 import { ButtonDownload } from "../../components/ButtonDownload";
 import { ButtonMenu } from "../../components/ButtonMenu";
@@ -12,7 +12,7 @@ import './BriefCaseReport.css'
 import './ReportDocuments.css'
 import { FilterReports } from "./FilterReports";
 import { TableReport } from "../TableReport";
-import { postInfo } from "../../../../utils/functions";
+import { moneyFormat, postInfo } from "../../../../utils/functions";
 import { useAppInfo } from "../../../../context/context";
 import { LoadingSpace } from "../LoadingSpace";
 
@@ -75,14 +75,47 @@ export function BriefCaseReport(){
 
     // [AGREGADO] Datos visibles en la tabla según el buscador
     // Esto asegura que el Excel/CSV exporte exactamente lo mismo que ve el usuario
-    const tableData = Array.isArray(info)
-        ? info.filter((row)=>
-            Object.values(row)
-                .join(" ")
-                .toLowerCase()
-                .includes(searchValue.toLowerCase())
-        )
-        : [];
+    const tableData = useMemo(() => (
+        Array.isArray(info)
+            ? info.filter((row)=>
+                Object.values(row)
+                    .join(" ")
+                    .toLowerCase()
+                    .includes(searchValue.toLowerCase())
+            )
+            : []
+    ), [info, searchValue]);
+
+    const tableSummary = useMemo(() => {
+        const parseMoneyValue = (value) => {
+            const number = Number(value);
+            return Number.isFinite(number) ? number : 0;
+        };
+
+        const totals = tableData.reduce((acc, row) => {
+            const creditValue = parseMoneyValue(row.credit_value);
+            const totalDebt = parseMoneyValue(row.thirdParty_totalDebt);
+
+            acc["Cupo_disponible"] += creditValue - totalDebt;
+            acc["Cartera"] += parseMoneyValue(row.thirdParty_balance ?? row.thirdParty_totalDebt);
+            acc["Corriente"] += parseMoneyValue(row.thirdParty_currentBalance);
+            acc["Vencido"] += parseMoneyValue(row.thirdParty_overdueBalance);
+
+            return acc;
+        }, {
+            "Cupo_disponible": 0,
+            "Cartera": 0,
+            "Corriente": 0,
+            "Vencido": 0
+        });
+
+        return Object.fromEntries(
+            Object.entries(totals).map(([key, value]) => [
+                key,
+                `$ ${moneyFormat(Number(value.toFixed(2)))}`
+            ])
+        );
+    }, [tableData]);
 
     const columnMap = {
         "Terceros": "names",
@@ -189,6 +222,7 @@ export function BriefCaseReport(){
                         columns={columsTr}
                         info={tableData} // [CAMBIO] ahora usa datos filtrados
                         searchValue={searchValue}
+                        summaryValues={tableSummary}
                     />
                 </div>
             )}
