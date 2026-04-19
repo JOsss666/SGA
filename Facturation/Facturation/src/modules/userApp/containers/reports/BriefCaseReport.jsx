@@ -96,6 +96,7 @@ export function BriefCaseReport(){
             const creditValue = parseMoneyValue(row.credit_value);
             const totalDebt = parseMoneyValue(row.thirdParty_totalDebt);
 
+            acc["Cupo_max"] += creditValue;
             acc["Cupo_disponible"] += creditValue - totalDebt;
             acc["Cartera"] += parseMoneyValue(row.thirdParty_balance ?? row.thirdParty_totalDebt);
             acc["Corriente"] += parseMoneyValue(row.thirdParty_currentBalance);
@@ -103,6 +104,7 @@ export function BriefCaseReport(){
 
             return acc;
         }, {
+            "Cupo_max":0,
             "Cupo_disponible": 0,
             "Cartera": 0,
             "Corriente": 0,
@@ -215,12 +217,11 @@ export function BriefCaseReport(){
             </div>
 
             {!loading && (
-                // [AGREGADO] id para permitir exportación de screenshot/pdf
                 <div className="bodyreport" id="bodyreport">
                     <TableReport
                         navigation={true}
                         columns={columsTr}
-                        info={tableData} // [CAMBIO] ahora usa datos filtrados
+                        info={tableData} 
                         searchValue={searchValue}
                         summaryValues={tableSummary}
                     />

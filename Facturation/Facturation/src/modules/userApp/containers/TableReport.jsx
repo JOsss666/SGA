@@ -40,13 +40,17 @@ export function TableReport({ columns, info, type, searchValue, navigation, summ
                     </span>
 
                     {columns.map((element, index) => (
-                        <span
-                            className={`summaryColumn summaryColum_${element} headColum_${element}`}
-                            key={index}
-                            title={summaryValues[element] || ""}
-                        >
-                            {summaryValues[element] || ""}
-                        </span>
+                        <>
+                            {summaryValues[element] != undefined && (
+                                <span
+                                    className={`summaryColumn summaryColum_${element} headColum_${element}`}
+                                    key={index}
+                                    title={summaryValues[element] || ""}
+                                >
+                                    {summaryValues[element] || ""}
+                                </span>
+                            )}
+                        </>
                     ))}
                 </div>
             )}
