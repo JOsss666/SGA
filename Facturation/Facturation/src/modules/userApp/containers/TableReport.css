@@ -27,18 +27,20 @@
 .TableReport .summaryTable{
     display: flex;
     padding: .8vh 1vh;
-    background-color: var(--bg);
+    background-color: var(--menuAside);
     border: solid .1vh var(--inputsBorder);
     border-bottom: none;
     border-radius: .5vh .5vh 0 0;
-    width: 100%;
+    width: fit-content;
+    transition: .3s;
     position: sticky;
     top: 0;
+    left: 100%;
     z-index: 3;
 }
 
 .TableReport .summaryTable .summaryCheckSpace{
-    visibility: hidden;
+    display: none;
 }
 
 .TableReport_withSummary .headTable{
@@ -58,14 +60,14 @@
 }
 
 .TableReport .summaryTable .summaryColumn{
-    font-size: clamp(2px,1.75vh,18px);
+    font-size: clamp(2.2px,2.2vh,22px);
     margin: auto 1vh;
     width: 10vw;
     padding: .6vh 1vh;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--mainText);
 }
 
