@@ -820,7 +820,7 @@ controller.getAccountsPlan = (req,res)=>{
             let sentence = `
                 SELECT * FROM
                     "Ecosystem".contable_accounts
-                WHERE company_id = $1
+                WHERE company_id = 0 OR company_id = $1
                     AND account_plan = $2
                     AND type_account = $3
                 ORDER BY code ASC;  
