@@ -14,7 +14,6 @@ import { NoResults } from './NoResults';
 
 
 export function ThirdParties() {
-    const {appInfo} = useAppInfo();
     const navigate = useNavigate();
     const params = useParams();
     const {appInfo,userConfig} = useAppInfo();
