@@ -14,6 +14,7 @@ import { NoResults } from './NoResults';
 
 
 export function ThirdParties() {
+    const {appInfo} = useAppInfo();
     const navigate = useNavigate();
     const params = useParams();
     const {appInfo,userConfig} = useAppInfo();
@@ -31,7 +32,7 @@ export function ThirdParties() {
         try {
             setLoading(true);
             setError(null);
-            const response = await postInfo('/getThirdParties', { company_id: 1 });
+            const response = await postInfo('/getThirdParties', { company_id: appInfo.company_id});
             
             if (response[0]){
                 setThirdPartiesData(response[1])
