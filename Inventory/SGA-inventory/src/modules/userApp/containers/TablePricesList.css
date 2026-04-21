@@ -1,0 +1,55 @@
+.TablePricesList{
+    display: flex;
+    flex-direction: column;
+    width: max-content;
+    position: relative;
+    height: 60vh;
+}
+
+.TablePricesList .headTable{
+    position: absolute;
+    display: flex;
+    gap: 1vw;
+    padding: 1vh;
+    border-radius: 1vh;
+    background-color: var(--cardHover);
+    outline: solid .1vh var(--inputsBorder);
+}
+
+.TablePricesList .headColumn{
+    margin: auto 0;
+    color: var(--mainText);
+    width: 10vw;
+    font-weight: 500;
+}
+
+.TablePricesList .headColumn:nth-child(2),
+.TablePricesList .headColumn:last-child{
+    width: 5vw;
+}
+
+.TablePricesList .headColumn:nth-child(3),
+.TablePricesList .headColumn:nth-child(4){
+    width: 15vw;
+}
+
+
+.TablePricesList .bodyTable{
+    margin-top: 6.8vh;
+    width: inherit;
+    padding: .1vh;
+    max-height: 52vh;
+    overflow-y: auto;
+}
+
+.TablePricesList .bodyTable .RowPricesList:first-child{
+    border-top-left-radius: 1vh;
+    border-top-right-radius: 1vh;
+    border-top: solid .1vh var(--inputsBorder);
+}
+
+.TablePricesList .bodyTable .RowPricesList:last-child{
+    border-bottom-left-radius: 1vh;
+    border-bottom-right-radius: 1vh;
+    border-bottom: solid .1vh var(--inputsBorder);
+}

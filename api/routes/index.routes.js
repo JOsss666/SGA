@@ -140,9 +140,11 @@ router.post('/inventory/createSubCategory',inventoryController.createCatetory);
 
 router.post('/inventory/getProducts',inventoryController.getProducts);
 
+router.post(`/inventory/getComercialProducts`,inventoryController.getComercialProducts);
+
 router.post('/inventory/createProduct',inventoryController.createProduct);
 
-router.post('/inventory/getPricesNameList',inventoryController.getPricesNameList);
+router.post('/inventory/getPricesListItems',inventoryController.getPricesListItems);
 
 router.post('/inventory/createCellar',inventoryController.createCellar);
 
@@ -177,6 +179,10 @@ router.post('/inventory/getRotation',inventoryController.getRotation);
 router.post('/inventory/getKardex',inventoryController.getKardex);
 
 router.post('/getServiceMovements',inventoryController.getServicesMovements);
+
+router.post('/inventory/updatePricesList',inventoryController.updatePricesList);
+
+router.post('/inventory/deleteItemPricesList',inventoryController.deleteItemPricesList)
 
 
 // SGA - PROCESS
@@ -250,6 +256,8 @@ router.post('/facturation/getCashRegisterReport',facturationController.getCashRe
 router.post('/facturation/getTransactionsOfCashRecord',facturationController.getTransactionsOfCashRecord);
 
 router.post('/facturation/getBriefcaseBills',facturationController.getBriefcaseBills);
+
+router.post('/facturation/updatePaymentDocument',facturationController.updatePaymentDocument);
 
 // Assets Controller
 

@@ -1,9 +1,9 @@
 import { CheckSquare } from "../components/CheckSquare";
 import { RowPricesList } from "../components/RowPricesList";
-import { RowTableReport } from "../components/RowTableReport";
-import './TableReport.css'
+import { SearchinList } from "../components/SearchInList";
+import './TablePricesList.css'
 
-export function TablePricesList({columns,info,type,searchValue}){
+export function TablePricesList({columns,info,type,searchValue,products,functions}){
 
     const filterOptions = (value) => {
         if (!searchValue) return true; 
@@ -11,7 +11,7 @@ export function TablePricesList({columns,info,type,searchValue}){
     }
     
     return(
-        <div className="TablePricesList TableReport">
+        <div className="TablePricesList">
             <div className="headTable">
                 <span><CheckSquare/></span>
                 {columns.map((element,index)=>(
@@ -20,7 +20,7 @@ export function TablePricesList({columns,info,type,searchValue}){
             </div>
             <div className="bodyTable">
                 {info.length >0 && info.map((element,index)=>(
-                    <RowPricesList hidden={!filterOptions(JSON.stringify(element))} type={type} columns={columns} info={element} key={index}/>
+                    <RowPricesList index={index} hidden={!filterOptions(JSON.stringify(element))} type={type} columns={columns} functions={functions} info={element} key={index}/>
                 ))}
             </div>
         </div>

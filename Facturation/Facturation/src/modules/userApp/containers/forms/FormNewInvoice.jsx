@@ -33,6 +33,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const [costCenters,setCostCenters] = useState([]);
     const [concepts,setConcepts] = useState([]);
     const [documents,setDocuments] = useState([{
+        docInfo:{},
         items:[]
     }]);
     const [productsAndServices,setProductsAndServices] = useState([]);
@@ -330,18 +331,19 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             setItemBlocks(prev =>
                 prev.map((block, bIdx) => {
-                    // 1. Buscamos el bloque correcto
                     if (bIdx !== blockIndex) return block;
 
-                    // 2. Si es el bloque, mapeamos sus ítems para encontrar el que queremos editar
                     const updatedItems = block.items.map((item, iIdx) => {
                         if (iIdx !== itemIndex) return item;
-
-                        // 3. Retornamos una copia del ítem con el valor actualizado
-                        return { ...item, [key]: value };
+                        let updatedItem = { ...item, [key]: value };
+                        if (key === 'units') {
+                            const newPrice = getEffectivePrice(item, value);
+                            updatedItem.unit_value = newPrice;
+                        }
+                        console.log(updatedItem)
+                        return updatedItem;
                     });
 
-                    // 4. Retornamos el bloque con su nueva lista de ítems
                     return { ...block, items: updatedItems };
                 })
             );
@@ -586,6 +588,36 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         setBriefCaseBills(res[1]);
     }
 
+    const getProductsAndServices = async()=>{
+        let allowedStores = undefined;
+        let allowedCellars = undefined;
+        if(userConfig.access.stores.enabled.length > 1){
+            allowedStores = userConfig.access.stores.enabled;
+        }
+        if(userConfig.access.cellars.enabled.length > 1){
+            allowedCellars = userConfig.access.cellars.enabled.length;
+        }
+        let res = await postInfo('/inventory/getComercialProducts',{
+            company_id:appInfo.company_id,
+            allowedStores,
+            allowedCellars,
+            type:'service'
+        })
+        console.log('=======> ',res);
+        if(res[0]){
+            let C = []
+            res[1].forEach(element => {
+                C.push({
+                    text:`${element.code} ${element.name}`,
+                    value:element
+                })
+            });
+            setProductsAndServices(C)
+        }else{
+            setProductsAndServices([]);
+        }
+    }
+
 
     // Control functions
 
@@ -639,35 +671,47 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         );
     };
 
-    const getProductsAndServices = async()=>{
-        let allowedStores = undefined;
-        let allowedCellars = undefined;
-        if(userConfig.access.stores.enabled.length > 1){
-            allowedStores = userConfig.access.stores.enabled;
-        }
-        if(userConfig.access.cellars.enabled.length > 1){
-            allowedCellars = userConfig.access.cellars.enabled.length;
-        }
-        let res = await postInfo('/inventory/getProducts',{
-            company_id:appInfo.company_id,
-            allowedStores,
-            allowedCellars,
-            type:'service'
-        })
-        console.log('=======> ',res);
-        if(res[0]){
-            let C = []
-            res[1].forEach(element => {
-                C.push({
-                    text:`${element.code} ${element.name}`,
-                    value:element
-                })
-            });
-            setProductsAndServices(C)
-        }else{
-            setProductsAndServices([]);
+    // function for update paid ammount
+    const updatePaidAmount = async()=>{
+        for(let doc of itemBlocks){
+            console.log(itemBlocks)
+            if(doc.docInfo != undefined){
+                console.log(doc.docInfo)
+                let res = await postInfo('/facturation/updatePaymentDocument',doc.docInfo);
+                console.log(res);
+            }
         }
     }
+
+    // function for calculte the paidAmmoount for each document
+    const calcPaidAmountDocuments = () => {
+        let remainingTotal = total;
+        // 1. Creamos un nuevo arreglo para no mutar el estado original directamente
+        const updatedDocuments = itemBlocks.map((doc) => {
+            // Si ya no queda saldo, el valor pagado es 0
+            if (remainingTotal <= 0 || doc.docInfo == undefined) {
+                return { ...doc};
+            }
+            let paymentForThisDoc;
+            if(parseFloat(doc.docInfo.pending_value) <= remainingTotal){
+                paymentForThisDoc = parseFloat(doc.docInfo.pending_value);
+                remainingTotal -= paymentForThisDoc;
+            }else{
+                paymentForThisDoc = remainingTotal;
+                remainingTotal = 0
+            }
+            return {
+                ...doc,
+                docInfo: {
+                    ...doc.docInfo,
+                    paid_amount: paymentForThisDoc
+                }
+            };
+        }); 
+        console.log(updatedDocuments)
+        // 5. Actualizamos el estado de React
+        setItemBlocks(updatedDocuments);
+    };
 
     const setAplyVoucher = (id,value)=>{
         setPaymentMethod(prev=>
@@ -750,6 +794,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 nature: documentNature == 'DB'? 'CR':'DB'
             })*/
             await toAccount();
+            await updatePaidAmount();
         }else{
             addNotification({
                 type:'error',
@@ -815,7 +860,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                         "discount": 0,
                         "discount_rate": 0,
                         "price": parseFloat(item.unit_value),
-                        "tax_rate": "19.00",
+                        "tax_rate": `${item.tax_rate || "0"}`,
                         "unit_measure_id": 70,
                         "standard_code_id": 1,
                         "is_excluded": 0,
@@ -846,6 +891,19 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             })
         }
     }
+
+    const getEffectivePrice = (product, quantity) => {
+    const qty = parseInt(quantity) || 0;
+        if (!product.price_tiers || product.price_tiers.length === 0) {
+            return product.unit_price || 0;
+        }
+        const applicableTier = [...product.price_tiers]
+            .sort((a, b) => b.min_qty - a.min_qty) 
+            .find(tier => qty >= tier.min_qty);
+        return applicableTier 
+            ? applicableTier.price 
+            : [...product.price_tiers].sort((a, b) => a.min_qty - b.min_qty)[0].price;
+    };
 
 
     // Event listeners
@@ -883,12 +941,15 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         if(documents.length > 0){
             let newTotalToPay = 0;
             itemBlocks.forEach(element => {
-                console.log(element)
-                let tempTtl = 0;
-                element.items.forEach(element => {
-                    tempTtl += (parseFloat(element.unit_value? element.unit_value:0)*parseFloat(element.units? element.units:0))
-                });
-                newTotalToPay += tempTtl;
+                if(element.docInfo == undefined){
+                    let tempTtl = 0;
+                    element.items.forEach(element => {
+                        tempTtl += (parseFloat(element.unit_value? element.unit_value:0)*parseFloat(element.units? element.units:0))
+                    });
+                    newTotalToPay += tempTtl;
+                }else{
+                    newTotalToPay += (element.docInfo.pending_value != undefined && element.docInfo.pending_value != "" ? element.docInfo.pending_value:0);
+                }
             });
             setTotalToPay(newTotalToPay);
         }
@@ -913,6 +974,12 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             getInstances();
         }
     },[thirdParty_id])
+
+     useEffect(()=>{
+        if(documents.length > 0){
+            calcPaidAmountDocuments();
+        }
+    },[total])
 
     return(
         <div className="FormNewCashRecipt FormNewInvoice">
@@ -995,23 +1062,23 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                                                     title={'unidades'}
                                                     type={'number'}
                                                     min={0}
-                                                    placeholder={0}
-                                                    action={(value)=>{
-                                                        handleEditItemDetail(index_block,index,'units',value);
+                                                    value={element.units || ''}
+                                                    action={(value) => {
+                                                        handleEditItemDetail(index_block, index, 'units', value);
                                                     }}
-                                                    max={element.type == 'service'? undefined:element.stock}
                                                 />
                                             </strong>
+
                                             <strong className="valueItemRow rowInputItem">
                                                 <FormInput 
                                                     title={'Val unidad'}
                                                     type={'number'}
                                                     min={0}
-                                                    placeholder={0}
-                                                    value={element.unit_cost> 0 ? element.unit_cost:undefined}
-                                                    disabled={element.unit_cost> 0 ? true:disabled}
-                                                    action={(value)=>{
-                                                        handleEditItemDetail(index_block,index,'unit_value',value);
+                                                    defaultValue={element.unit_value}
+                                                    placeholder={element.unit_value} 
+                                                    disabled={disabled}
+                                                    action={(value) => {
+                                                        handleEditItemDetail(index_block, index, 'unit_value', value);
                                                     }}
                                                 />
                                             </strong>

@@ -7,10 +7,11 @@ import { useState, useEffect } from 'react';
 import { SearchBar } from '../components/SearchBar';
 import { SelectOptions } from '../components/SelectOptions';
 import { FormButton } from '../components/FormButton';
-import { useAlert } from '../../../context/context';
+import { useAlert, useAppInfo } from '../../../context/context';
 import { FormNewThirdParties } from './forms/FormNewThirdParties';
 
 export function ThirdParties() {
+    const {appInfo} = useAppInfo();
     const navigate = useNavigate();
     const params = useParams();
     const [thirdPartiesData, setThirdPartiesData] = useState([]);
@@ -27,7 +28,7 @@ export function ThirdParties() {
         try {
             setLoading(true);
             setError(null);
-            const response = await postInfo('/getThirdParties', { company_id: 1 });
+            const response = await postInfo('/getThirdParties', { company_id: appInfo.company_id});
             
             if (response[0]){
                 setThirdPartiesData(response[1])
@@ -133,7 +134,7 @@ export function ThirdParties() {
                                         />
                                         <FormButton onClick={()=>{
                                             popInAlert(<FormNewThirdParties reloadFun={fetchThirdParties}/>)
-                                            }}text={'Crear Proveedor'} children={<i className="fa-solid fa-plus"/>}/>
+                                            }}text={'Crear Tercero'} children={<i className="fa-solid fa-plus"/>}/>
                                     </div>
                                 </div>
                             </div>

@@ -1,215 +1,100 @@
 import './PricesList.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { NormalCard } from '../components/NormalCard';
-import { SectionTitle } from '../components/SectionTitle';
-import { SubSectionTitle } from '../components/SubSectionTitle';
-import { ListCard } from './ListCard';
-import { ListPriceProducts } from './ListPriceProducts';
 import { useEffect, useState } from 'react';
 import { postInfo } from '../../../utils/functions';
 import { useAlert, useAppInfo } from '../../../context/context';
 import { CreatePricesList } from './forms/CreatePricesList';
 import { SearchBar } from '../components/SearchBar';
 import { SelectOptions } from '../components/SelectOptions';
-import { FormButton } from '../components/FormButton';
+import { PathLocation } from '../components/PathLocation';
+import { BoldTitle } from '../components/BoldTitle';
+import { DescriptionSpan } from '../components/DescriptionSpan';
+import { ButtonMenu } from '../components/ButtonMenu';
 import { MoreOptions } from '../components/MoreOptions';
+import { ButtonDownload } from '../components/ButtonDownload';
+import { LoadingSpace } from './LoadingSpace';
+import { PricesListCard } from '../components/PricesListCard';
+
 
 export function PricesList({ setActualist }) {
+
+    // Requierements
+    const { appInfo, userConfig} = useAppInfo();
+    const { popInAlert, setOpenAlert } = useAlert();
     const location = useLocation();
     const navigate = useNavigate();
-    const { popInAlert, setOpenAlert } = useAlert();
+
+    // Control
+    const [disabled,setDisabled] = useState(false);
+    const [displayGird, setDisplayGrid] = useState('grid');
+    const [searchVal, setSearchVal] = useState('');
     const [listPrices, setListPrices] = useState([]);
-    const [filteredLists, setFilteredLists] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedFilter, setSelectedFilter] = useState('');
     const [loading, setLoading] = useState(false);
-    const { appInfo } = useAppInfo();
 
-    const priceListCards = [
-        {
-            id: 1,
-            title: 'Lista 1',
-            image: 'https://i.pinimg.com/736x/00/2c/13/002c13c1b24794d3fd202c2a184c46d3.jpg',
-            onlyTitle: true,
-            listNumber: '1'
-        },
-        {
-            id: 2,
-            title: 'Lista 2',
-            image: 'https://i.pinimg.com/736x/00/2c/13/002c13c1b24794d3fd202c2a184c46d3.jpg',
-            onlyTitle: true,
-            listNumber: '2'
-        },
-        {
-            id: 3,
-            title: 'Lista 3',
-            image: 'https://i.pinimg.com/736x/00/2c/13/002c13c1b24794d3fd202c2a184c46d3.jpg',
-            onlyTitle: true,
-            listNumber: '3'
-        },
-        {
-            id: 4,
-            title: 'Lista 4',
-            image: 'https://i.pinimg.com/736x/00/2c/13/002c13c1b24794d3fd202c2a184c46d3.jpg',
-            onlyTitle: true,
-            listNumber: '4'
-        },
-    ];
 
+    // Getters of info
     const getPricesLists = async () => {
+        setDisabled(true)
         setLoading(true);
-        let res = await postInfo('/getPricesNameList', {
-            company_id: appInfo.company_id,
-            limit: 10
+        let res = await postInfo('/inventory/getPricesList',{
+            company_id:appInfo.company_id,
+            allowedStores: userConfig.access.stores.enabled.length > 0 ? userConfig.access.stores.enabled:undefined
         });
-        if (res[0]) {
+        if(res[0]){
             setListPrices(res[1]);
-            setFilteredLists(res[1]);
+        }else{
+            setListPrices([]);
         }
         setLoading(false);
-        console.log(res);
+        setDisabled(false);
     }
 
-    useEffect(() => {
+    // functions
+    const handleNavigate = (id)=>{
+        navigate(`${location.pathname}/${id}`);
+    }
+
+    // Events listeners
+    useEffect(()=>{
         getPricesLists();
-    }, []);
-
-    useEffect(() => {
-        let filtered = listPrices;
-        
-        if (searchTerm) {
-            filtered = filtered.filter(list =>
-                list.list_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                list.description?.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
-        
-        if (selectedFilter) {
-            switch (selectedFilter) {
-                case 'active':
-                    filtered = filtered.filter(list => list.is_active);
-                    break;
-                case 'inactive':
-                    filtered = filtered.filter(list => !list.is_active);
-                    break;
-                case 'with_categories':
-                    filtered = filtered.filter(list => list.has_categories);
-                    break;
-            }
-        }
-        
-        setFilteredLists(filtered);
-    }, [searchTerm, selectedFilter, listPrices]);
-
-    const handleSearch = (term) => {
-        setSearchTerm(term);
-    };
-
-    const handleFilterChange = (filter) => {
-        setSelectedFilter(filter);
-    };
-
-    const handleNavigate = (listName) => {
-        navigate(location.pathname + `/${listName}`);
-        if (setActualist != undefined) {
-            const actualList = listPrices.find(list => list.list_name === listName);
-            setActualist(actualList);
-        }
-    };
-
-    const handleCreateNew = () => {
-        popInAlert(<CreatePricesList reloadFun={getPricesLists} />);
-        setOpenAlert(true);
-    };
-
-    const handleEditList = (list) => {
-        popInAlert(<CreatePricesList editData={list} reloadFun={getPricesLists} />);
-    };
-
-    const handleDeleteList = async (list) => {
-        if (window.confirm(`¿Estás seguro de eliminar la lista "${list.list_name}"?`)) {
-            let res = await postInfo('/deletePriceList', {
-                company_id: appInfo.company_id,
-                price_list_id: list.id
-            });
-            if (res[0]) {
-                getPricesLists();
-            }
-        }
-    };
-
-    const handleViewDetails = (list) => {
-        navigate(location.pathname + `/${list.list_name}`);
-        if (setActualist) {
-            setActualist(list);
-        }
-    };
+    },[])
 
     return (
         <div className="PricesList appSection">
-            <div className="asideOptions">
-               <div className="sectionTitleContainer">
-                    <SectionTitle text={'Listas de precios'}/>
+            <div className="headPricesListC">
+                <PathLocation/>
+                <BoldTitle text={'Listas de precios'}/>
+                <DescriptionSpan text={'Consulta, modifica y mas tus listas de precios'}/>
+            </div>
+            <div className="searchOptions">
+                <SearchBar placeholder={'Buscar'} action={setSearchVal} />
+                <SelectOptions title={'Filtro'} options={['ninguno']}/>
+                <SelectOptions title={'Orden'} options={['Alfabetico','Fecha de Creación','Categoría']}/>
+                <div className="organizerView">
+                    <ButtonMenu noRotate={true} onClick={()=>{
+                            displayGird == 'grid'? setDisplayGrid('tree'):setDisplayGrid('grid')
+                        }} title={'Cambiar distribución'}><i className={displayGird == 'grid'? 'fa-solid fa-border-all':'fa-solid fa-folder-tree'}/>
+                    </ButtonMenu>
                 </div>
-                <div className="ListContainer">
-                    {listPrices.length>0 && listPrices.map((element,index)=>(
-                        <ListCard info={element} key={index} onClick={()=>{navigate(location.pathname + `/${element.list_name}`);if(setActualist!=undefined){setActualist(element)}}}/>
+                <ButtonDownload title={'Descargar listas de precios'}/>
+                <MoreOptions children={<i className="fa-solid fa-ellipsis-vertical"/>} options={[
+                    {text:'Crear nueva lista', action: undefined,icon:<i className="fa-solid fa-plus"/>},
+                    {text:'Refrescar', action: getPricesLists,icon:<i className="fa-solid fa-sync"/>},
+                    {text:'Ver Historial', action: undefined,icon:<i className="fa-solid fa-eye"/>},
+                ]}/>
+            </div>
+            {!loading && (
+                <div className="gridPricesList">
+                    {listPrices.map((element,index)=>(
+                        <PricesListCard onClick={()=>{
+                            handleNavigate(element.id)
+                        }} info={element} key={index}/>
                     ))}
                 </div>
-                <div className="filterSection">
-                    <SearchBar placeholder={'Buscar'} onChange={handleSearch} />
-                    <SelectOptions
-                        title={'Filtro'}
-                        options={[]}
-                        onChange={handleFilterChange}
-                    />
-                    <FormButton text={'+ Crear Nuevo'} onClick={handleCreateNew} />
-                    <FormButton text={'Historial de listas'} onClick={[]} />
-                </div>
-
-                {/* Listas numeradas con menú desplegable */}
-                <div className="numberedListsSection">
-                    <SubSectionTitle text={'Listas'}/>
-                    <div className="numberedLists">
-                        {priceListCards.map((list) => (
-                            <div className="numberedListCard" key={list.id}>
-                                <NormalCard
-                                    title={list.title}
-                                    onlyTitle={list.onlyTitle}
-                                    img={'https://i.pinimg.com/736x/00/2c/13/002c13c1b24794d3fd202c2a184c46d3.jpg'}
-                                    onClick={() => handleNavigate(list.title)}
-                                />
-                                {/* Menú desplegable */}
-                                <MoreOptions options={[
-                                    { text: 'Editar', icon: <i className="fa-solid fa-pencil" />, action: () => console.log('Editar', list.title) },
-                                    { text: 'Eliminar', icon: <i className="fa-solid fa-trash" />, action: () => console.log('Eliminar', list.title) },
-                                    { text: 'Compartir', icon: <i className="fa-solid fa-share-nodes" /> },
-                                ]} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-            
-            <div className="activeList">
-                <SubSectionTitle text={'Nombre de la lista de precios'}/>
-                <div className="containerMainList">
-                    {listPrices.length > 0 ? (
-                        <ListPriceProducts info={listPrices[0]}/>
-                    ) : listPrices.length === 0 && !loading ? (
-                        <div className="noListsMessage">
-                            <span>No hay listas de precios disponibles</span>
-                            <FormButton 
-                                text={'Crear primera lista'} 
-                                onClick={handleCreateNew}
-                                style={{ marginTop: '2vh' }}
-                            />
-                        </div>
-                    ) : (
-                        <span>Cargando...</span>
-                    )}
-                </div>
-            </div>
+            )}
+            {loading && (
+                <LoadingSpace title={'Cargando lista de precios'}/>
+            )}
         </div>
     );
 }

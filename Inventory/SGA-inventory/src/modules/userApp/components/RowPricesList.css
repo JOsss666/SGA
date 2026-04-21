@@ -3,32 +3,41 @@
     display: flex;
     background-color: var(--bg);
     backdrop-filter: blur(.5vh);
-    border: solid .1vh #E3E3E3;
-    border-top: 0;
+    border: solid .1vh var(--inputsBorder);
+    border-top: dashed .1vh var(--inputsBorder);
     margin-top: .1vh;
-    border-radius: 1vh;
     transition: .3s;
-    gap: 1vh;
+    gap: 1vw;
     padding:0 1vh;
+    border-bottom: 0;
 }
 
 .RowPricesList .ElementRow{
     width: fit-content;
     margin: auto 0;
     padding: .1vh;
+    padding: 1vh 0;
 }
 
 .RowPricesList .ElementRow .rowSpan{
-    padding: .9vh 1vh;
-    width: 10vw;
     font-size: clamp(2px,2vh,20px);
     color: var(--descriptionText);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 10vw;
+    display: block;
+    display: flex;
 }
 
 .RowPricesList .ElementRow .idHolder{
     width: 5vw;
 }
 
+
+.RowPricesList .ElementRow .wideElement{
+    width: 15vw;
+}
 
 .RowPricesList .ElementRow .valueUpdateIn{
     width: 10vw;
@@ -53,3 +62,24 @@
     color: var(--mainText);
     outline: solid .2vh #007AFF;
 }
+
+.RowPricesList .ElementRow .deleteItem{
+    margin: auto;
+    font-size: clamp(2.5px,2.5vh,25px);
+    cursor: pointer;
+    transition: .3s;
+}
+
+.RowPricesList .ElementRow .deleteItem:hover{
+    color: #FB2C36;
+    transform: rotateZ(15deg);
+}
+
+:root .EditedPricesListRow{
+    background-color: #FEFCE8;
+}
+
+:root.dark .EditedPricesListRow{
+    background-color: #D0872E60;
+}
+

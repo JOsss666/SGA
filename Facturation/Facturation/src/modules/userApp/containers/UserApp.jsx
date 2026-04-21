@@ -164,7 +164,7 @@ export function UserApp(){
             {!loadingAppData && statusPage=='page' &&(
                 <>
                     <header className='headApp'>
-                    <SearchBar placeholder={"Buscar en SGA - Ventas"} action={setQuickSearch}/>
+                    <SearchBar placeholder={`Buscar en ${appInfo.legal_name} - Ventas`} action={setQuickSearch}/>
                     {visibleResultsSearch && (
                         <div className="resultsQuickSerch">
                             {quickSearch != "" && routesApp.map((element,index)=>(

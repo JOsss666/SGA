@@ -9,11 +9,11 @@
 .UserCard img{
     height: 6.5vh;
     width: 6.5vh;
-    border-radius: .5vh;
-    background-color: #eee;
+    border-radius: 1vh;
+    background-color: var(--cardHover);
     margin-right: 1vh;
     object-fit: cover;
-    border: solid .1vh #ddd;
+    border: solid .1vh var(--inputsBorder);
 }
 
 .UserCard .infoUser{

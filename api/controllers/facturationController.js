@@ -63,7 +63,7 @@ facturationController.newClientOrder = (req,res)=>{
                     info.company_id,
                     info.store_id,
                     info.thirdParty_id,
-                    element.id,
+                    element.id || element.product_id,
                     element.units,
                     element.unit_value,
                     element.total,
@@ -747,6 +747,33 @@ facturationController.getBriefcaseBills = (req,res)=>{
             info.company_id,
             info.thirdParty_id
         ],1)
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
+
+facturationController.updatePaymentDocument = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        console.log(info)
+        let sentence = `
+            UPDATE "Ecosystem".documents
+            SET paid_amount = paid_amount + $2
+            WHERE id = $1;
+        `;
+        let consulta = await useDataBase(sentence,[
+            info.id,
+            info.paid_amount,
+        ],2)
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })

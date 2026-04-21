@@ -83,18 +83,33 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
         }));
     }
 
-    const addPService = (newService) => {
-        if (newService.id !== undefined) {
-            const uniqueLineId = `${newService.id}-${Date.now()}-${Math.random()}`;
+    const getEffectivePrice = (product, quantity) => {
+    const qty = parseInt(quantity) || 0;
+        if (!product.price_tiers || product.price_tiers.length === 0) {
+            return product.unit_price || 0;
+        }
+        const applicableTier = [...product.price_tiers]
+            .sort((a, b) => b.min_qty - a.min_qty) 
+            .find(tier => qty >= tier.min_qty);
+        return applicableTier 
+            ? applicableTier.price 
+            : [...product.price_tiers].sort((a, b) => a.min_qty - b.min_qty)[0].price;
+    };
+
+    const handleAddProduct = (newService) => {
+        console.log(newService)
+        if (newService.product_id !== undefined) {
+            const uniqueLineId = `${newService.product_id}-${Date.now()}-${Math.random()}`;
 
             const serviceWithLineId = {
                 ...newService,
+                id:newService.product_id,
                 lineId: uniqueLineId,
-                units: 1,
-                unit_value: 0,
+                units: 0,
+                unit_value: getEffectivePrice(0),
                 total: 0
             };
-
+            console.log(serviceWithLineId);
             setProductsServices(prev => [...prev, serviceWithLineId]);
         }
     };
@@ -103,54 +118,31 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
         setProductsServices(prev => prev.filter(item => item.lineId !== lineId));
     };
 
-    const updatePServiceValue = (lineId, key, newValue) => {
-        setProductsServices(prev => 
+    const handleEditItemDetail = (lineId, key, value) => {
+        setProductsServices(prev =>
             prev.map(item => {
-                if (item.lineId === lineId) {
-                    const updatedItem = { ...item, [key]: Number(newValue) };
-                    return {
-                        ...updatedItem,
-                        total: (updatedItem.units || 0) * (updatedItem.unit_value || 0)
-                    };
+                if (item.lineId !== lineId) return item;
+                let updatedValue = (key === 'description') ? value : Number(value);
+                let updatedItem = { ...item, [key]: updatedValue };
+                if (key === 'units') {
+                    const newPrice = getEffectivePrice(item, updatedValue);
+                    updatedItem.unit_value = newPrice;
                 }
-                return item;
+                updatedItem.total = (updatedItem.units || 0) * (updatedItem.unit_value || 0);
+
+                return updatedItem;
             })
         );
     };
-
-    const updatePServiceUnits = (lineId, newValue) => {
-        setProductsServices(prev => 
-            prev.map(item => {
-                if (item.lineId === lineId) {
-                    const updatedItem = { ...item, units: Number(newValue) };
-                    return {
-                        ...updatedItem,
-                        total: (updatedItem.units || 0) * (updatedItem.unit_value || 0)
-                    };
-                }
-                return item;
-            })
-        );
-    };
-
-        const updatePServiceDescription = (lineId, newValue) => {
-            setProductsServices(prev =>
-                prev.map(item =>
-                item.lineId === lineId
-                ? { ...item, ['description']: newValue }
-                : item
-                )
-            );
-        };
             
 
     // getters of info
 
     const getProducts = async()=>{
         console.log('Cargando productos')
-        let res = await postInfo('/inventory/getProducts',{
+        let res = await postInfo('/inventory/getComercialProducts',{
             company_id:appInfo.company_id,
-            type:'service',
+            //type:'service',
         })
         console.log(res);
         if(res[0]){
@@ -213,12 +205,12 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
         }
     }
 
-    const handleThirdPartySelect = (element)=>{
+    // PreProcess functions
+
+     const handleThirdPartySelect = (element)=>{
         setThirdParty_id(element.id);
         setThirdParty_name(element.names);
     }
-
-    // PreProcess functions
 
     const handleUserConfig = async()=>{
         setDisabled(true)
@@ -378,11 +370,8 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
                         )}
                         {cotizationView && (
                             <div className="gridServicesProductsContainer">
-                                <LabelValue title={"Factura electronica"}>
-                                    <SwitchOption action={setTaxedTransactions}/>    
-                                </LabelValue> 
                                 <SearchinList title={'Productos - Servicios'}
-                                    action={addPService}
+                                    action={handleAddProduct}
                                     list={productsServicesArray}
                                     placeHolder={'Agregar producto o servicio'}
                                     disabled={disabled}
@@ -405,13 +394,13 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
                                             <div className="PaymentMethodCard">
                                                 <strong>{element.name}</strong>
                                                 <input className="unitsInp" step={1} required type="number" min={1} placeholder="unidades" onChange={(e)=>{
-                                                    updatePServiceUnits(element.lineId,e.target.value)
+                                                    handleEditItemDetail(element.lineId,"units",e.target.value)
                                                 }}/>
-                                                <input step={0.001} type="number" required placeholder="Valor unitatio: $0" onChange={(e)=>{
-                                                    updatePServiceValue(element.lineId,"unit_value",e.target.value)
+                                                <input step={0.001} type="number" placeholder={element.unit_value} onChange={(e)=>{
+                                                    handleEditItemDetail(element.lineId,"unit_value",e.target.value)
                                                 }}/>
                                                 <input step={0.001} type="text" placeholder="Descripción" onChange={(e)=>{
-                                                    updatePServiceDescription(element.lineId,e.target.value)
+                                                    handleEditItemDetail(element.lineId,"description",e.target.value)
                                                 }}/>
                                                 <span className="ttlValUnitIndicator">{formatCurrency(element.total || 0)}</span>
                                                 <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
