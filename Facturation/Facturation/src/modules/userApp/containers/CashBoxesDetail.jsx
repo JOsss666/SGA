@@ -64,8 +64,9 @@ export function CashBoxesDeetail(){
             cashBox_id:params.cashBox_id,
             limit:1
         })
-        console.log(res);
-        setLastRegister(res[1][0]);
+        if(res[0]){
+            setLastRegister(res[1][0]);
+        }
     };
 
         // Functions for controll the status od the cash register
