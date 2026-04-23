@@ -466,7 +466,7 @@ electronicFacturationController.getDocumentFullInfo = (req,res)=>{
         let info = JSON.parse(data);
         console.log('bill_number: ',info.bill_numer);
         console.log(`Ruta: ${urlSer}/v1/bills/show-bill/`);
-        const response = await fetch(urlSer + `/v1/bills/show/SETP990008144`, {
+        const response = await fetch(urlSer + `/v1/bills/show/${info.bill_numer}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${auth.access_token}`,

@@ -369,7 +369,7 @@ export function FormNewENote({InfoParams,reloadFun}){
             setItems(prev => 
                 prev.map((item,index) => 
                     itemIndex === index
-                        ? { ...item, ['total']: (parseFloat(value) * parseFloat(units)) * (1 + (parseFloat(item.tax_rate)/100)) } 
+                        ? { ...item, ['total']: (parseFloat(value) * parseFloat(units))} 
                         : item
                     )
                 );
