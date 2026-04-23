@@ -81,7 +81,7 @@ export function New(){
         { text: 'Crear tercero', children: <FormNewThirdParties quickCreation={!userConfig?.access?.sections?.thirdparties?.can_create} />, icon: <i className="fa-regular fa-user" /> },
 
         // CORRECCIÓN: Acceso seguro a módulos personalizados
-        ...(userConfig?.access?.services?.personalized?.['custom-modules']?.['z&j_clicksControl']?.access ? [
+        ...(appConfig?.access?.services?.personalized?.['custom-modules']?.['z&j_clicksControl']?.access ? [
             { 
                 text: 'Crear reporte uso maquinaria', 
                 children: <FormSelectMachine appInfo={appInfo} userConfig={userConfig} popOutAlert={popOutAlert} userInfo={userInfo} />, 
