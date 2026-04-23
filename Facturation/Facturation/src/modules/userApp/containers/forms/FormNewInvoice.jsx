@@ -1062,6 +1062,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                                                     title={'unidades'}
                                                     type={'number'}
                                                     min={0}
+                                                    required={true}
                                                     value={element.units || ''}
                                                     action={(value) => {
                                                         handleEditItemDetail(index_block, index, 'units', value);
@@ -1074,6 +1075,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                                                     title={'Val unidad'}
                                                     type={'number'}
                                                     min={0}
+                                                    required={false}
                                                     defaultValue={element.unit_value}
                                                     placeholder={element.unit_value} 
                                                     disabled={disabled}

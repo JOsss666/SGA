@@ -1,6 +1,10 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { useDataBase } from '../app.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
+const urlSer = process.env.FACTUS_API_LINK;
 
 const electronicFacturationController = {};
 const TOKEN_PATH = path.resolve('./factus_token.json');
@@ -103,7 +107,7 @@ electronicFacturationController.getAuthToken = async (grantType = 'password', re
 
         console.log(`🚀 Solicitando token a Factus: [${finalGrantType}]`);
 
-        const response = await fetch('https://api-sandbox.factus.com.co/oauth/token', {
+        const response = await fetch(urlSer + '/oauth/token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify(payload)
@@ -145,7 +149,7 @@ electronicFacturationController.getNumberingRanges = async () => {
         // CORRECCIÓN: Obtener el auth ANTES de usarlo
         const auth = await electronicFacturationController.getAuthToken();
         
-        const response = await fetch('https://api-sandbox.factus.com.co/v1/numbering-ranges', {
+        const response = await fetch(urlSer + '/v1/numbering-ranges', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -168,7 +172,7 @@ electronicFacturationController.getNumberingRanges = async () => {
 electronicFacturationController.getTaxes = async () => {
     const auth = await electronicFacturationController.getAuthToken();
     try {
-        const response = await fetch('https://api-sandbox.factus.com.co/v1/tributes/products', {
+        const response = await fetch(urlSer + '/v1/tributes/products', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -251,7 +255,7 @@ electronicFacturationController.newInvoice = (req,res)=>{
             },*/
        "items":info.items
     }
-    const response = await fetch('https://api-sandbox.factus.com.co/v1/bills/validate', {
+    const response = await fetch(urlSer + '/v1/bills/validate', {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${auth.access_token}`,
@@ -360,7 +364,7 @@ electronicFacturationController.newNote = (req,res)=>{
         "items":info.items
     }
     console.log(params)
-    const response = await fetch('https://api-sandbox.factus.com.co/v1/credit-notes/validate', {
+    const response = await fetch(urlSer + '/v1/credit-notes/validate', {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${auth.access_token}`,
@@ -461,10 +465,8 @@ electronicFacturationController.getDocumentFullInfo = (req,res)=>{
         const auth = await electronicFacturationController.getAuthToken();
         let info = JSON.parse(data);
         console.log('bill_number: ',info.bill_numer);
-        console.log(`Ruta: https://api-sandbox.factus.com.co/v1/bills/show-bill/`);
-        //https://api-sandbox.factus.com.co/v1/bills/show/SETP990028932
-        //https://api-sandbox.factus.com.co/v1/bills/show/${info.bill_number}
-        const response = await fetch(`https://api-sandbox.factus.com.co/v1/bills/show/SETP990008144`, {
+        console.log(`Ruta: ${urlSer}/v1/bills/show-bill/`);
+        const response = await fetch(urlSer + `/v1/bills/show/${info.bill_numer}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${auth.access_token}`,
