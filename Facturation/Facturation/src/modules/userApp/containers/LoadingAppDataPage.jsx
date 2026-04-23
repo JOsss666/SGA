@@ -19,7 +19,7 @@ export function LoadingAppDataPage({title}){
 
     return(
         <div className="LoadingAppDataPage">
-            <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1759181339/ChatGPT_Image_7_sept_2025_13_29_09_v2xl9a.png" />
+            <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1772826198/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.png" />
             <div className="loadingDotsA">
                 <div className="loadingDot"></div>
                 <div className="loadingDot"></div>

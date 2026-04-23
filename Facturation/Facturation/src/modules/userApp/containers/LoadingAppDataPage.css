@@ -46,8 +46,8 @@
 }
 
 .LoadingAppDataPage .loadingDotsA .loadingDot{
-    height: 1.5vh;
-    width: 1.5vh;
+    height: 1vh;
+    width: 1vh;
     border-radius: 100%;
     background-color: #FDA5D5;
     margin: auto 1vh;
@@ -104,8 +104,11 @@
 
 @media (max-width:500px) {
     .LoadingAppDataPage{
-        width: 100dvw;
+        width: 100%;
         margin: auto;
-        margin-left: -8dvw;
+    }
+
+    .LoadingAppDataPage img{
+        height: 20vh;
     }
 }
