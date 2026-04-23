@@ -113,7 +113,6 @@
     width: 80%;
     overflow-y: auto;
     scroll-behavior: smooth;
-
 }
 
 .ChatAi .activeAttachedSpace{
@@ -412,5 +411,36 @@
     }
     100%{
         bottom: 0%;
+    }
+}
+
+@media (max-width:500px) {
+    .ChatAi{
+        width: 100%;
+        border-radius: 2vh;
+    }
+
+    .ChatAi .headChat .BoldTitle{
+        display: none;
+    }
+
+    .ChatAi .chatAiInput{
+        width: 100%;
+        padding-bottom: 4vh;
+    }
+
+    .ChatAi .noChatIMg{
+        margin-bottom: 25vh;
+    }
+
+    .ChatAi .chatAiInput .OptionsChatAi .selectedOption span{
+        display: none;
+    }
+
+    .ChatAi .spaceChatAi{
+        padding: 3vh 2vh;
+        margin-top: 1vh;
+        height: 65vh;
+        width: 100%;
     }
 }
