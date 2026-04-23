@@ -33,19 +33,21 @@ import { FormNewInvoice } from "./forms/FormNewInvoice";
 import { FormNewENote } from "./forms/FormNewENote";
 
 export function New(){
-    const {userConfig,appInfo,userInfo} = useAppInfo();
+    const {userConfig,appInfo,userInfo, appConfig} = useAppInfo();
     const {popInAlert,popOutAlert} = useAlert();
     const [disabled,setDisabled] = useState(false);
     const [messgeDisabled,setMessageDisabled] = useState('')
 
-    useEffect(()=>{
-        if(userConfig.access == undefined) return;
-        if((userConfig.access.services.personalized['custom-modules'])["z&j_clicksControl"].access){
+    useEffect(() => {
+        if (!appConfig?.access) return;
+        const hasAccess = appConfig.access?.services?.personalized?.['custom-modules']?.['z&j_clicksControl']?.access;
+
+        if (hasAccess) {
             setMessageDisabled('Cargando Reporte de clicks...');
             setDisabled(true);
             verifyClicksControlZ();
         }
-    },[userConfig])
+    }, [appConfig]);
 
 
     let verifyClicksControlZ = async () => {
