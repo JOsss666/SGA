@@ -1,24 +1,37 @@
 
-.ButtonAccounts .btnAccounts{
-    background-color: #fff;
+.ButtonAccounts{
+    background-color: var(--inputsBg);
     display: flex;
     flex-direction: row;
     gap: 1.5vh;
     margin: auto;
-    align-items: center;
-    justify-content: space-around;
     padding: 1vh 2vh;
     width: auto;
-    border-radius: 1.5vh;
-    box-shadow: 0 0 .2vh #757575;
+    border-radius: 3vh;
     border: none;
+    cursor: pointer;
+    border: solid .1vh var(--inputsBorder);
 }
 
-.ButtonAccounts .btnAccounts .btnIcon{
-    font-size: 2.5vh;
+.ButtonAccounts .buttonContent{
+    display: flex;
+    width: fit-content;
+    gap: 2vh;
+    margin: auto;
+    color: var(--mainText);
 }
 
-.ButtonAccounts .btnAccounts .btnText{
+.ButtonAccounts img{
+    height: 2.5vh;
+    width: 2.5vh;
+}
+
+.ButtonAccounts .buttonContent .btnIcon{
+    font-size: 3vh;
+}
+
+.ButtonAccounts .buttonContent .btnText{
     font-size: 2vh;
     font-weight: 400;
+    margin: auto 0;
 }

@@ -4,7 +4,7 @@ import { BoldTitle } from "../components/BoldTitle"
 import { DescriptionSpan } from "../components/DescriptionSpan"
 import './NoAccess.css'
 
-export function NoAccess({title,description,img,noExit}){
+export function NoAccess({title,description,img,noExit,noRedirect}){
 
     const {appInfo} = useAppInfo()
     const navigate = useNavigate();
@@ -25,7 +25,7 @@ export function NoAccess({title,description,img,noExit}){
                 <BoldTitle text={title? title:'No tiene acceso a este modulo'}/>
                 <DescriptionSpan text={description? description:`${appInfo.legal_name} ha limitado su acceso al modulo de Facturación`}/>
             </div>
-            {!noExit && (
+            {!noRedirect && !noExit && (
                 <span className="redirect" onClick={()=>{
                     handleRedirect();
                 }}>
@@ -33,12 +33,17 @@ export function NoAccess({title,description,img,noExit}){
                     Salir de este modulo
                 </span>
             )}
-            <span className="redirect" onClick={()=>{
-                handleGoHome();
-            }}>
-                <i className="fa-solid fa-arrow-right-from-bracket"/>
-                Salir de esta sección
-            </span>
+            {!noRedirect && noExit && (
+                <span className="redirect" onClick={()=>{
+                    handleGoHome();
+                }}>
+                    <i className="fa-solid fa-arrow-right-from-bracket"/>
+                    Salir de esta sección
+                </span>
+            )}
+            {noRedirect && (
+                <span className="redirect"/>
+            )}
         </div>
     )
 }

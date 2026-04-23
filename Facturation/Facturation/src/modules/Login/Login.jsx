@@ -41,7 +41,7 @@ export function Login() {
         <div className="Login">
         <div className="Card">
             <div className="CardTitle">
-            <BoldTitle text={'Iniciar Sesión'} />
+            <BoldTitle text={'Iniciar Sesión'}/>
             <h2>SGA - Facturación</h2>
             </div>
             <form className="Form" id="loginForm" autoComplete="off" onSubmit={(e) => {
@@ -64,7 +64,9 @@ export function Login() {
             </form>
 
             <div className="LoginAccounts">
-                <ButtonAccounts icon={"fa-brands fa-google"} text={"Continuar con Google"}/>
+                <ButtonAccounts 
+                    children={<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Google_Favicon_2025.svg/960px-Google_Favicon_2025.svg.png'/>}
+                    text={"Continuar con Google"}/>
                 <ButtonAccounts icon={"fa-brands fa-apple"} text={"Continuar con Apple"}/>
             </div>
         </div>

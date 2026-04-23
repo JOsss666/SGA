@@ -31,21 +31,24 @@ import { ClientOrderPreview } from "./Alerts/ClientOrderPreview";
 import { FormButton } from "../components/FormButton";
 import { FormNewInvoice } from "./forms/FormNewInvoice";
 import { FormNewENote } from "./forms/FormNewENote";
+import { NoAccess } from "./NoAccess";
 
 export function New(){
-    const {userConfig,appInfo,userInfo} = useAppInfo();
+    const {userConfig,appInfo,userInfo, appConfig} = useAppInfo();
     const {popInAlert,popOutAlert} = useAlert();
     const [disabled,setDisabled] = useState(false);
     const [messgeDisabled,setMessageDisabled] = useState('')
 
-    useEffect(()=>{
-        if(userConfig.access == undefined) return;
-        if((userConfig.access.services.personalized['custom-modules'])["z&j_clicksControl"].access){
+    useEffect(() => {
+        if (!appConfig?.access) return;
+        const hasAccess = appConfig.access?.services?.personalized?.['custom-modules']?.['z&j_clicksControl']?.access;
+
+        if (hasAccess) {
             setMessageDisabled('Cargando Reporte de clicks...');
             setDisabled(true);
             verifyClicksControlZ();
         }
-    },[userConfig])
+    }, [appConfig]);
 
 
     let verifyClicksControlZ = async () => {
@@ -78,7 +81,7 @@ export function New(){
         { text: 'Crear tercero', children: <FormNewThirdParties quickCreation={!userConfig?.access?.sections?.thirdparties?.can_create} />, icon: <i className="fa-regular fa-user" /> },
 
         // CORRECCIÓN: Acceso seguro a módulos personalizados
-        ...(userConfig?.access?.services?.personalized?.['custom-modules']?.['z&j_clicksControl']?.access ? [
+        ...(appConfig?.access?.services?.personalized?.['custom-modules']?.['z&j_clicksControl']?.access ? [
             { 
                 text: 'Crear reporte uso maquinaria', 
                 children: <FormSelectMachine appInfo={appInfo} userConfig={userConfig} popOutAlert={popOutAlert} userInfo={userInfo} />, 
@@ -94,6 +97,13 @@ export function New(){
         //{text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
         {text:'Imprimir recibos',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-print"/>},
+        {text:'Imprimir Facturas',children:
+            <NoAccess 
+                noRedirect={true} 
+                title={'Formulario no disponible'} 
+                description={'Formulario en mantenimiento, pronto estara disponible.'}
+            />,
+            icon:<i className="fa-solid fa-print"/>},
         {text:'Imprimir Ordes de cliente',children:<ClientOrderPreview/>,icon:<i className="fa-solid fa-print"/>},
         /*
         {text:'Opciones de factura electronica',children:<div style={{
