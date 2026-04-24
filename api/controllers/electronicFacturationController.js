@@ -198,6 +198,32 @@ electronicFacturationController.showActualToken = async()=>{
     console.log('Token Refresh: ',refreshToken);
 }
 
+electronicFacturationController.getMunicipalities = async (auth) => {
+    try {
+        const response = await fetch(urlSer + '/v1/municipalities?name=Bogota', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${auth.access_token}`
+            },
+        });
+
+        // 1. Verificamos si la respuesta fue exitosa antes de procesar
+        if (!response.ok) {
+            throw new Error(`Error en la petición: ${response.status}`);
+        }
+
+        // 2. IMPORTANTE: Extraer los datos del cuerpo (body)
+        const data = await response.json();
+
+        // 3. Ahora sí verás los datos reales
+        console.log('Resultados de Municipios:', data);
+        
+        return data;
+    } catch (error) {
+        console.error('Error al obtener municipios:', error.message);
+    }
+}
 
 electronicFacturationController.newInvoice = (req,res)=>{
   let bodyData = '';
@@ -211,7 +237,7 @@ electronicFacturationController.newInvoice = (req,res)=>{
     let params = {
         "document": "01",
         "numbering_range_id": await getNumercRangeData('invoice'),
-        "reference_code": "fact0022025",
+        "reference_code": `FVE_${info.document.ownSerial}`,
         "observation": "",
         "payment_method_code": "10",
         "customer": {
@@ -222,12 +248,12 @@ electronicFacturationController.newInvoice = (req,res)=>{
             "names": info.customer.names,
             "address": info.customer.address,
             //"email": info.customer.mail,
-            "email": 'murillojose.nvc@gmail.com',
+            "email": info.customer.mail,
             "phone": info.customer.phone,
             "legal_organization_id": "2",
             "tribute_id": "21",
             "identification_document_id": "3",
-            "municipality_id": "980"
+            "municipality_id": 169
         },
         /*"items": [
             {
@@ -265,6 +291,7 @@ electronicFacturationController.newInvoice = (req,res)=>{
         body: JSON.stringify(params)
     });
     const resInvoice = await response.json();
+    console.log('ZZZZZZZZZ ',resInvoice)
     if(resInvoice.status == 'Created'){
         let data = resInvoice.data
         let insertRes = await electronicFacturationController.registerEFactDocument({
@@ -492,13 +519,14 @@ electronicFacturationController.init = async () => {
     try {
         console.log('--- 🔐 Iniciando Autenticación Factus ---');
         const auth = await electronicFacturationController.getAuthToken('password');
-        
+        console.log('---> ',auth)
         if (auth) {
             console.log('✅ Conexión inicial con Factus establecida.');
             // Opcional: También puedes precargar los rangos de numeración
             await electronicFacturationController.getNumberingRanges();
         }
     } catch (error) {
+        console.log(error)
         console.error('⚠️ No se pudo obtener el token inicial de Factus:', error.message);
         console.log('ℹ️ El sistema reintentará la conexión en la primera solicitud de factura.');
     }

@@ -746,12 +746,12 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 title:`Recibo de caja #${res.id} creado correctamente`,
                 description:`El recibo de caja #${res.id} fue creado correctamente`
             })
-            if(e_invoice){
-                handleCreationOfEinvoice(res.id);
-            }
             FormInfo["doc_id"] = res.id
             FormInfo['instance_id'] = instance_id;
             FormInfo["ownSerial"] = res.ownSerial;
+            if(e_invoice){
+                handleCreationOfEinvoice(res.id);
+            }
             if(isElectron){
                 await printCashRecipt(FormInfo,appInfo,true);
                 await printCashRecipt(FormInfo,appInfo,false);
