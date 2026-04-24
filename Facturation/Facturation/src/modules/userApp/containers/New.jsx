@@ -105,7 +105,7 @@ export function New(){
             />,
             icon:<i className="fa-solid fa-print"/>},
         {text:'Imprimir Ordes de cliente',children:<ClientOrderPreview/>,icon:<i className="fa-solid fa-print"/>},
-        /*
+        
         {text:'Opciones de factura electronica',children:<div style={{
             paddingTop:'8vh',
             display:'flex',
@@ -127,7 +127,7 @@ export function New(){
                 })
             }}></FormButton>
         </div>},
-        /*
+        
 
         /*{text:'Ver dispositivos',children:<span onClick={()=>{
             scanDevices();
