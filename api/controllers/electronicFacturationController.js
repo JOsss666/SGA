@@ -291,7 +291,6 @@ electronicFacturationController.newInvoice = (req,res)=>{
         body: JSON.stringify(params)
     });
     const resInvoice = await response.json();
-    console.log('ZZZZZZZZZ ',resInvoice)
     if(resInvoice.status == 'Created'){
         let data = resInvoice.data
         let insertRes = await electronicFacturationController.registerEFactDocument({
@@ -380,13 +379,12 @@ electronicFacturationController.newNote = (req,res)=>{
             "trade_name": info.customer.names,
             "names": info.customer.names,
             "address": info.customer.address,
-            //"email": info.customer.mail,
-            "email": 'murillojose.nvc@gmail.com',
+            "email": info.customer.mail,
             "phone": info.customer.phone,
             "legal_organization_id": "2",
             "tribute_id": "21",
             "identification_document_id": "3",
-            "municipality_id": "980"
+            "municipality_id": 169
         },
         "items":info.items
     }
@@ -519,7 +517,6 @@ electronicFacturationController.init = async () => {
     try {
         console.log('--- 🔐 Iniciando Autenticación Factus ---');
         const auth = await electronicFacturationController.getAuthToken('password');
-        console.log('---> ',auth)
         if (auth) {
             console.log('✅ Conexión inicial con Factus establecida.');
             // Opcional: También puedes precargar los rangos de numeración
