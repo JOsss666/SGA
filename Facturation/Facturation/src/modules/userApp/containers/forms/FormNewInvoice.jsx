@@ -975,6 +975,10 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
     },[thirdParty_id])
 
+    useEffect(()=>{
+        console.log('---> ',disabled)
+    },[disabled])
+
      useEffect(()=>{
         if(documents.length > 0){
             calcPaidAmountDocuments();
@@ -1022,7 +1026,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                         }}/>
                     }/>
                     {info.instance_id == undefined && (
-                        <SearchinList action={handleSelectInstance} noActVal={true} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={thirdParty_id != undefined? disabled:true}/>
+                        <SearchinList action={handleSelectInstance} noActVal={true} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={thirdPartyInfo.id != undefined? disabled:true}/>
                     )}
                     <SearchinList action={handleAddDocument} noActVal={true} title={'Documentos'} placeHolder={'Seleccione el documento'} list={documents} disabled={thirdParty_id != undefined? disabled:true}/>
                     {info.concept_id == undefined && (
