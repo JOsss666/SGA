@@ -1,10 +1,10 @@
 
 import './FormNewThirdParties.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BoldTitle } from '../../components/BoldTitle';
 import { FormButton } from '../../components/FormButton';
 import { FormInput } from '../../components/FormInput';
-import { postInfo } from '../../../../utils/functions';
+import { getInfo, postInfo } from '../../../../utils/functions';
 import { useAlert, useAppInfo, useNotifications } from '../../../../context/context';  
 import { SelectOptions } from '../../components/SelectOptions';
 import { SearchinList } from '../../components/SearchInList';
@@ -18,10 +18,12 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
     const {addNotification} = useNotifications();
     const {popOutAlert} = useAlert();
     const {appInfo} = useAppInfo();
+    // control
     const [stage,setStage] = useState(0);
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
     const [autoTaxInfo,setAutoTaxInfo] = useState(false);
+    const [municipalities,setMunicipalities] = useState([]);
 
     // info básica
     const [name,setName] = useState('');
@@ -37,6 +39,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
     const [mail,setMail] = useState('');
     const [phone,setPhone] = useState('');
     const [country,setCountry] = useState('');
+    const [mucipality_id,setMunicipality_id] = useState();
     const [city,setCity] = useState('');
     const [address,setAddress] = useState('');
     const [type,setType] = useState('');
@@ -47,6 +50,8 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
     const [interest_rate,setInterest_rate] = useState(0);
     const [comercial_state,setComercial_state] = useState('active');
     // info tributaria
+    const [typePerson,setTypePerson] = useState();
+    const [identidicationType_id,setIdentidicationType_id] = useState();
     const [attachedRut,setAttachedRut] = useState();
     const [regime,seRregime] = useState('-');
     const [IVA_responsability,setIVA_responsability] = useState('-');
@@ -62,11 +67,14 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
         second_surname,
         indentification_type,
         indentification_number,
+        identidicationType_id,
         mail,
         phone,
         country,
         city,
         address,
+        mucipality_id,
+        typePerson,
         type,
         credit,
         credit_term,
@@ -80,13 +88,45 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
         attachedRut
     }
 
+    const dictionaryDocumentTypes = {
+        "NIT":6,
+        "CC":3,
+        "CE":5,
+        "TE":4,
+        "PAS":7,
+        "RC":11,
+        "TI":12
+    }
+
+    // Utils
     const handleUserPhotoChange = (elements)=>{  
         if(elements.length >0 &&  elements[0].id != undefined){
             setUserPhoto(elements[0].url)
         }
     }
 
+    const handleSetDocumentType = (value)=>{
+        setIdentidicationType_id(dictionaryDocumentTypes[value]);
+        setindentification_type(value);
+    }
 
+    // Getters of info
+    const getMunicipalities = async()=>{
+        let res = await getInfo('/electronicFacturation/getMunicipalities');
+        if(res.status == 'OK'){
+            let C = [];
+            res.data.forEach(element => {
+                C.push({
+                    text:`${element.name} - ${element.department} (${element.code})`,
+                    value:element.id
+                })
+            });
+            setMunicipalities(C);
+        }
+    };
+
+
+    // Creation function
     const createThirdParty = async()=>{
         setDisabled(true)
         setLoading(true)
@@ -114,6 +154,12 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
     }
 
 
+    // Events listeners
+    
+    useEffect(()=>{
+        getMunicipalities();
+    },[])
+
 
 /** PENDIENTE REVISAR **/
     return(
@@ -138,14 +184,17 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                         </FileInput>
                     </div>
                     <FormInput action={setFirst_name} value={first_name} title={'Primer Nombre o Razon Social'} placeholder={'Primer nombre'} disabled={disabled}/>
-                <FormInput action={setSecond_name} value={second_name} title={'Segundo Nombre'} placeholder={'Segundo nombre'} disabled={disabled}/>
-                <FormInput action={setFirst_surname} value={first_surname} title={'Primer Apellido o Diminutivo'} placeholder={'Primer Apellido'} disabled={disabled}/>
-                <FormInput action={setSecond_surname} value={second_surname} title={'Segundo Apellido'} placeholder={'Segundo Apellido'} disabled={disabled}/>
-                    <SearchinList action={setindentification_type} title={'Tipo de Identificación'} placeHolder={'Tipo de identificación'} list={[
+                    <FormInput action={setSecond_name} value={second_name} title={'Segundo Nombre'} placeholder={'Segundo nombre'} disabled={disabled}/>
+                    <FormInput action={setFirst_surname} value={first_surname} title={'Primer Apellido o Diminutivo'} placeholder={'Primer Apellido'} disabled={disabled}/>
+                    <FormInput action={setSecond_surname} value={second_surname} title={'Segundo Apellido'} placeholder={'Segundo Apellido'} disabled={disabled}/>
+                    <SearchinList action={handleSetDocumentType} title={'Tipo de Identificación'} placeHolder={'Tipo de identificación'} list={[
                         {text:'NIT',value:'NIT'},
                         {text:'Cédula de Ciudadanía',value:'CC'},
                         {text:'Cédula de Extranjería',value:'CE'},
-                        {text:'Pasaporte',value:'PAS'}
+                        {text:'Tarjeta de extranjería',value:'TE'},
+                        {text:'Pasaporte',value:'PAS'},
+                        {text:'Registro civil',value:'RC'},
+                        {text:'Tarjeta de identidad',value:'TI'}
                     ]}/>
                     <FormInput action={setindentification_number} value={indentification_number} title={'Número de Identificación'} placeholder={'Número de identificación'} disabled={disabled}/>
                 </form>
@@ -156,6 +205,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                     <FormInput action={setMail} title={'Correo Electrónico'} placeholder={'Correo electrónico del proveedor'} disabled={disabled}/>
                     <FormInput action={setPhone} title={'Teléfono'} placeholder={'Número de teléfono'} disabled={disabled}/>
                     <FormInput action={setCountry} title={'País'} placeholder={'País'} disabled={disabled}/>
+                    <SearchinList action={setMunicipality_id} title={'Municio o region'} placeHolder={'Seleccione munipio o region (Obligatorio)'} list={municipalities} disabled={disabled}/>
                     <FormInput action={setCity} title={'Ciudad'} placeholder={'Ciudad'} disabled={disabled}/>
                     <FormInput action={setAddress} title={'Dirección'} placeholder={'Dirección del proveedor'} disabled={disabled}/>
                 </form>
@@ -203,9 +253,17 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                         <div className="modeTaxInfoIndicator" style={{left:`${autoTaxInfo? '50':'0'}%`}}/>
                     </div>
                     {!autoTaxInfo && (
-                        <>
+                        <>  
+                            <SearchinList placeHolder={'Seleccione una opción'} action={setTypePerson} title={'Naturaleza'} disabled={disabled} list={[
+                                {text:'Persona juridica',value:1},
+                                {text:'Persona Natural',value:2}
+                            ]}/>
+                            <SearchinList placeHolder={'Seleccione una opción'} action={setIVA_responsability} title={'Responsabilidad de IVA'} disabled={disabled} list={[
+                                {text:'No aplica / No responsable de IVA',value:21},
+                                {text:'IVA',value:18},
+                                {text:'No responsable de consumo',value:22},
+                            ]}/>
                             <FormInput title={'Regimen del tercero'} action={seRregime} disabled={disabled} value={regime}/>
-                            <FormInput title={'Responsabilidad de IVA'} action={setIVA_responsability} disabled={disabled} value={IVA_responsability}/>
                             <FormInput title={'Tipo de Retención'} action={setRetention_type} disabled={disabled} value={retention_type}/>
                             <FormInput title={'Actividad Economica'} action={setEconomic_activity} disabled={disabled} value={economic_activity}/>
                         </>

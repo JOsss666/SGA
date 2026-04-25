@@ -198,9 +198,13 @@ electronicFacturationController.showActualToken = async()=>{
     console.log('Token Refresh: ',refreshToken);
 }
 
-electronicFacturationController.getMunicipalities = async (auth) => {
+electronicFacturationController.getMunicipalities = async (req, res) => {
     try {
-        const response = await fetch(urlSer + '/v1/municipalities?name=Bogota', {
+        // 1. Obtenemos el token
+        const auth = await electronicFacturationController.getAuthToken();
+
+        // 2. Hacemos la petición a Factus (Sin el req.on('end'))
+        const response = await fetch(urlSer + '/v1/municipalities', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -208,22 +212,22 @@ electronicFacturationController.getMunicipalities = async (auth) => {
             },
         });
 
-        // 1. Verificamos si la respuesta fue exitosa antes de procesar
         if (!response.ok) {
-            throw new Error(`Error en la petición: ${response.status}`);
+            throw new Error(`Error en Factus: ${response.status}`);
         }
 
-        // 2. IMPORTANTE: Extraer los datos del cuerpo (body)
         const data = await response.json();
 
-        // 3. Ahora sí verás los datos reales
-        console.log('Resultados de Municipios:', data);
-        
-        return data;
+        // 3. ¡VITAL! Enviamos la respuesta al cliente
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(data));
+
     } catch (error) {
         console.error('Error al obtener municipios:', error.message);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: error.message }));
     }
-}
+};
 
 electronicFacturationController.newInvoice = (req,res)=>{
   let bodyData = '';
