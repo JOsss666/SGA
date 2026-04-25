@@ -63,37 +63,32 @@ export async function getInfo(route) {
     });
 }
 
-export async function parseToXlsx(info = [], download, columns, name, options = {}) {
+export async function parseToXlsx(info, download, columns, name) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(name || "Hoja1");
 
-    const normalizedColumns = columns && Array.isArray(columns)
-        ? columns.map(col => typeof col === "string" ? { header: col, key: col } : col)
-        : Object.keys(info[0] || {}).map(key => ({ header: key, key }));
-
-    const columnKeys = normalizedColumns.map(col => col.key);
-    const tableStartRow = options.startRow || 5;
-    const reportColumnCount = Math.max(normalizedColumns.length, 4);
-
     // 1. Añadir Título y Metadatos (Filas superiores)
-    worksheet.mergeCells(1, 1, 1, reportColumnCount);
+    worksheet.mergeCells('A1:D1');
     const titleCell = worksheet.getCell('A1');
-    titleCell.value = options.companyName || (name || "Informe SGA").toUpperCase();
+    titleCell.value = (name || "Informe SGA").toUpperCase();
     titleCell.font = { size: 16, bold: true };
 
     worksheet.getCell('A2').value = `Fecha de generación: ${new Date().toLocaleString()}`;
     worksheet.getCell('A3').value = `Total de registros: ${info.length}`;
     
     // Espacio antes de la tabla
-    const startRow = tableStartRow;
-
-    if (options.companyName || options.reportName || options.period) {
-        worksheet.getCell('A2').value = options.reportName || name || "Informe SGA";
-        worksheet.getCell('A3').value = options.period ? `Periodo: ${options.period}` : "";
-    }
+    const startRow = 5; 
 
     // 2. Definir Columnas
-    worksheet.getRow(startRow).values = normalizedColumns.map(col => col.header);
+    if (columns && Array.isArray(columns)) {
+        worksheet.getRow(startRow).values = columns.map(col => col.header);
+        // Mapear las llaves para insertar los datos después
+        var columnKeys = columns.map(col => col.key);
+    } else {
+        const keys = Object.keys(info[0] || {});
+        worksheet.getRow(startRow).values = keys;
+        var columnKeys = keys;
+    }
 
     // 3. Estilizar el Encabezado (Color de fondo y texto)
     const headerRow = worksheet.getRow(startRow);
@@ -101,7 +96,7 @@ export async function parseToXlsx(info = [], download, columns, name, options = 
         cell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: '262626' }
+            fgColor: { argb: '#262626' } // Azul corporativo
         };
         cell.font = { color: { argb: 'FFFFFF' }, bold: true };
         cell.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -109,27 +104,13 @@ export async function parseToXlsx(info = [], download, columns, name, options = 
 
     // 4. Añadir los Datos
     info.forEach((item) => {
-        const rowData = columnKeys.map((key, index) => {
-            const value = item[key];
-            if (normalizedColumns[index]?.type === "number" && value !== null && value !== undefined && value !== "") {
-                const numericValue = Number(value);
-                return Number.isNaN(numericValue) ? value : numericValue;
-            }
-            return value;
-        });
-        const row = worksheet.addRow(rowData);
-        row.eachCell((cell, colNumber) => {
-            const columnConfig = normalizedColumns[colNumber - 1];
-            if (columnConfig?.numFmt) {
-                cell.numFmt = columnConfig.numFmt;
-                cell.alignment = { horizontal: 'right' };
-            }
-        });
+        const rowData = columnKeys.map(key => item[key]);
+        worksheet.addRow(rowData);
     });
 
     // 5. Ajustar ancho de columnas automáticamente
-    worksheet.columns.forEach((column, index) => {
-        column.width = normalizedColumns[index]?.width || 20;
+    worksheet.columns.forEach(column => {
+        column.width = 20;
     });
 
     // 6. Generar el archivo

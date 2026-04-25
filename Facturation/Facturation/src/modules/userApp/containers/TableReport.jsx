@@ -5,7 +5,7 @@ import { useMemo, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import "./TableReport.css";
 
-export function TableReport({ columns, info, type, searchValue, navigation, summaryValues }) {
+export function TableReport({ columns, info, type, searchValue, navigation }) {
 
     // Filtrado optimizado
     const filteredInfo = useMemo(() => {
@@ -32,28 +32,7 @@ export function TableReport({ columns, info, type, searchValue, navigation, summ
     });
 
     return (
-        <div className={`TableReport ${summaryValues ? "TableReport_withSummary" : ""}`}>
-            {summaryValues && (
-                <div className="summaryTable">
-                    <span className="summaryCheckSpace">
-                        <CheckSquare />
-                    </span>
-
-                    {columns.map((element, index) => (
-                        <>
-                            {summaryValues[element] != undefined && (
-                                <span
-                                    className={`summaryColumn summaryColum_${element} headColum_${element}`}
-                                    key={index}
-                                    title={summaryValues[element] || ""}
-                                >
-                                    {summaryValues[element] || ""}
-                                </span>
-                            )}
-                        </>
-                    ))}
-                </div>
-            )}
+        <div className="TableReport">
 
             {/* HEADER */}
             <div className="headTable">

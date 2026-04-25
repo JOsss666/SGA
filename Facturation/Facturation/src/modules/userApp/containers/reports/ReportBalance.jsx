@@ -43,46 +43,6 @@ export function ReportBalance({}) {
         "Saldo"
     ];
 
-    const balanceXlsxColumns = [
-        { header: "Cuenta", key: "account_code", width: 18 },
-        { header: "Concepto", key: "concept_name", width: 36 },
-        { header: "Saldo Inicial", key: "opening_balance", type: "number", numFmt: "#,##0.00", width: 18 },
-        { header: "D\u00e9bito", key: "total_debit", type: "number", numFmt: "#,##0.00", width: 18 },
-        { header: "Cr\u00e9dito", key: "total_credit", type: "number", numFmt: "#,##0.00", width: 18 },
-        { header: "Saldo Final", key: "final_balance", type: "number", numFmt: "#,##0.00", width: 18 }
-    ];
-
-    const formatReportDate = (value) => {
-        if (!value) return "";
-
-        if (typeof value === "string") {
-            const dateMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
-            if (dateMatch) {
-                return `${dateMatch[1]}${dateMatch[2]}${dateMatch[3]}`;
-            }
-        }
-
-        const date = new Date(value);
-        if (Number.isNaN(date.getTime())) return "";
-
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return `${year}${month}${day}`;
-    };
-
-    const getBalanceXlsxOptions = () => {
-        const periodStart = formatReportDate(start_date || appInfo.created_at || "1900-01-01");
-        const periodEnd = formatReportDate(end_date || new Date());
-
-        return {
-            companyName: appInfo.legal_name || appInfo.trade_name || appInfo.company_name || "Compa\u00f1\u00eda",
-            reportName: "Balance de prueba",
-            period: `${periodStart} a ${periodEnd}`,
-            startRow: 4
-        };
-    };
-
     const filters = {
         "Saldo":[
             {title:'Valor',
@@ -187,10 +147,9 @@ export function ReportBalance({}) {
             ]}/>
             <ButtonDownload
                 info={info}
-                columns={balanceXlsxColumns}
+                columns={columsTr}
                 title={"Balance_de_prueba"}
                 component={"bodyreport"}
-                xlsxOptions={getBalanceXlsxOptions}
             />
             <FilterReports hidden={visibleSettings} columns={columsTr} filters={filters}/>
         </div>
