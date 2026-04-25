@@ -1939,6 +1939,10 @@ controller.getThirdParties = (req,res)=>{
                 ci.credit_term,
                 ci.comercial_state,
                 ci.aviable_credit,
+                tti."IVA_responsability",
+                tti.municipality_id,
+                tti.nature AS "thirdParty_nature",
+                tti."identidicationType_id",
                 COALESCE(b.total_debt, 0) AS "thirdParty_totalDebt",
                 COALESCE(b.total_paid, 0) AS "thirdParty_totalPaid",
                 COALESCE(b.balance, 0) AS "thirdParty_balance",
@@ -1952,6 +1956,8 @@ controller.getThirdParties = (req,res)=>{
                 LEFT JOIN "Ecosystem".mv_thirdparty_account_balances b
                     ON "Ecosystem".thirdparties.id = b."thirdParty_id"
                     AND "Ecosystem".thirdparties.company_id = b.company_id
+                LEFT JOIN "Ecosystem"."thirdPartyTaxInfo" tti
+                    ON "Ecosystem".thirdparties.id = tti."thirdParty_id"
             `;
         }
 

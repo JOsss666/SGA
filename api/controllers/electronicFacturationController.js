@@ -254,10 +254,10 @@ electronicFacturationController.newInvoice = (req,res)=>{
             //"email": info.customer.mail,
             "email": info.customer.mail,
             "phone": info.customer.phone,
-            "legal_organization_id": "2",
-            "tribute_id": "21",
+            "legal_organization_id": info.customer.thirdParty_nature,
+            "tribute_id": info.customer.IVA_responsability,
             "identification_document_id": "3",
-            "municipality_id": 169
+            "municipality_id": info.customer.municipality_id?? 149
         },
         /*"items": [
             {
@@ -519,6 +519,7 @@ electronicFacturationController.getDocumentFullInfo = (req,res)=>{
 // Función para inicializar servicios al arrancar el servidor
 electronicFacturationController.init = async () => {
     try {
+        console.log('Ambiente funcionamiento: ',urlSer)
         console.log('--- 🔐 Iniciando Autenticación Factus ---');
         const auth = await electronicFacturationController.getAuthToken('password');
         if (auth) {
