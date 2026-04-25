@@ -301,6 +301,8 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
 
     router.post('/electronicFacturation/note',electronicFacturationController.newNote);
 
+    router.get('/electronicFacturation/getMunicipalities',electronicFacturationController.getMunicipalities);
+
     router.post('/electronicFacturationController.getDocumentFullInfo',electronicFacturationController.getDocumentFullInfo);
 
 export default router;
