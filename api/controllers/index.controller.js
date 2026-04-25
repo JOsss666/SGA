@@ -2077,8 +2077,8 @@ controller.createThirdParty = (req, res) => {
                 ],2);
                 let taxInfo = `
                     INSERT INTO "Ecosystem"."thirdPartyTaxInfo"(
-                        "thirdParty_id", company_id, regime, "IVA_responsability", retention_type, economic_activity, "attachedRut")
-                    VALUES ($1, $2, $3, $4, $5, $6, $7);
+	                    "thirdParty_id", company_id, regime, "IVA_responsability", retention_type, economic_activity, "attachedRut", municipality_id, nature, "identidicationType_id")
+	                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
                 `;
                 let taxInfoCons = await useDataBase(taxInfo,[
                     idNewThirdParty,
@@ -2087,7 +2087,10 @@ controller.createThirdParty = (req, res) => {
                     info.IVA_responsability,
                     info.retention_type,
                     info.economic_activity,
-                    info.attachedRut != undefined? info.attachedRut:''
+                    info.attachedRut != undefined? info.attachedRut:'',
+                    info.mucipality_id,
+                    info.typePerson,
+                    info.identidicationType_id
                 ],2);
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify(comercialInfoCons && taxInfoCons));
