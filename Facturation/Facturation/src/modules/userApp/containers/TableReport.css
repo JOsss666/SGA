@@ -24,6 +24,29 @@
     top: 0;
 }
 
+.TableReport .summaryTable{
+    display: flex;
+    padding: .8vh 1vh;
+    background-color: var(--menuAside);
+    border: solid .1vh var(--inputsBorder);
+    border-bottom: none;
+    border-radius: .5vh .5vh 0 0;
+    width: fit-content;
+    transition: .3s;
+    position: sticky;
+    top: 0;
+    left: 100%;
+    z-index: 3;
+}
+
+.TableReport .summaryTable .summaryCheckSpace{
+    display: none;
+}
+
+.TableReport_withSummary .headTable{
+    border-radius: 0 0 .5vh .5vh;
+}
+
 .TableReport .headTable .headColumn{
     font-size: clamp(2px,2vh,20px);
     margin: auto 1vh;
@@ -33,6 +56,18 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     font-weight: 400;
+    color: var(--mainText);
+}
+
+.TableReport .summaryTable .summaryColumn{
+    font-size: clamp(2.2px,2.2vh,22px);
+    margin: auto 1vh;
+    width: 10vw;
+    padding: .6vh 1vh;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 500;
     color: var(--mainText);
 }
 
@@ -54,7 +89,23 @@
     text-align: center;
 }
 
+.TableReport .summaryTable .headColum_ID,
+.TableReport .summaryTable .headColum_Instancia,
+.TableReport .summaryTable .headColum_Estado,
+.TableReport .summaryTable .headColum_Serial,
+.TableReport .summaryTable .headColum_Habilitado,
+.TableReport .summaryTable .headColum_Naturaleza,
+.TableReport .summaryTable .headColum_Plazo
+{
+    width: 5vw;
+    text-align: center;
+}
+
 .TableReport .headTable .headColum_Unidades{
+    width: 7vw;
+}
+
+.TableReport .summaryTable .headColum_Unidades{
     width: 7vw;
 }
 
@@ -69,6 +120,22 @@
 .TableReport .headTable .headColum_Cartera,
 .TableReport .headTable .headColum_Corriente,
 .TableReport .headTable .headColum_Vencido
+{
+    text-align: right;
+    padding-right: 3vh;
+}
+
+.TableReport .summaryTable .headColum_Valor,
+.TableReport .summaryTable .headColum_Subtotal,
+.TableReport .summaryTable .headColum_Pagado,
+.TableReport .summaryTable .headColum_Pendiente,
+.TableReport .summaryTable .headColum_Costo,
+.TableReport .summaryTable .headColum_Unidades,
+.TableReport .summaryTable .headColum_Cupo_disponible,
+.TableReport .summaryTable .headColum_Cupo_max,
+.TableReport .summaryTable .headColum_Cartera,
+.TableReport .summaryTable .headColum_Corriente,
+.TableReport .summaryTable .headColum_Vencido
 {
     text-align: right;
     padding-right: 3vh;

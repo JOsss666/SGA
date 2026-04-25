@@ -2,7 +2,7 @@ import { useState } from 'react';
 import './ButtonDownload.css';
 import { componentToPdf, parseToCsv, parseToXlsx,ScreenShotElement } from '../../../utils/functions';
 
-export function ButtonDownload({info,columns,formats,title,component}) {
+export function ButtonDownload({info,columns,formats,title,component,xlsxOptions}) {
     const [status, setStatus] = useState("default");
     const [showMenu, setShowMenu] = useState(false);
 
@@ -36,7 +36,7 @@ export function ButtonDownload({info,columns,formats,title,component}) {
             console.log(`Descargando archivo en formato: ${format}`);
             switch (format){
                 case "csv": await parseToCsv(info,true,title); break;
-                case "xlsx": await parseToXlsx(info,true,null,title);break; 
+                case "xlsx": await parseToXlsx(info,true,columns,title, typeof xlsxOptions === "function" ? xlsxOptions() : xlsxOptions);break;
                 case "pdf": await componentToPdf(component,true,{},title);break;
                 case "jpg": await ScreenShotElement(component,title);
             }
