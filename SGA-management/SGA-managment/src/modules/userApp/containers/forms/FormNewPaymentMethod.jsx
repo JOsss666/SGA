@@ -26,7 +26,10 @@ export function FormNewPaymentMethod({reloadFun}){
     const [code,setCode] = useState('');
     const [currency,setCurrency] = useState('COP');
     const [type,setType] = useState('');
+    const [facturation_code,setFacturation_code] = useState('');
     const [status,setStatus] = useState('active');
+
+    // utils
 
     const formInfo = {
         company_id:appInfo.company_id,
@@ -35,10 +38,74 @@ export function FormNewPaymentMethod({reloadFun}){
         code,
         currency,
         type,
-        status
+        status,
+        facturation_code
     }
 
-    // functions
+    const paymentMethods = [
+        {
+            text: "Efectivo",
+            value: { value: "10", text: "Efectivo", type: "cash" }
+        },
+        {
+            text: "Consignación bancaria",
+            value: { value: "42", text: "Consignación bancaria", type: "bank_transfer" }
+        },
+        {
+            text: "Transferencia Débito Bancaria",
+            value: { value: "47", text: "Transferencia Débito Bancaria", type: "bank_transfer" }
+        },
+        {
+            text: "Transferencia Débito Bancaria (ACH)",
+            value: { value: "31", text: "Transferencia Débito Bancaria (ACH)", type: "bank_transfer" }
+        },
+        {
+            text: "Tarjeta de Crédito",
+            value: { value: "48", text: "Tarjeta de Crédito", type: "credit_card" }
+        },
+        {
+            text: "Tarjeta de Débito",
+            value: { value: "49", text: "Tarjeta de Débito", type: "debit_card" }
+        },
+        {
+            text: "Cheque",
+            value: { value: "20", text: "Cheque", type: "check" }
+        },
+        {
+            text: "Cheque certificado",
+            value: { value: "25", text: "Cheque certificado", type: "check" }
+        },
+        {
+            text: "Nota promisoria",
+            value: { value: "61", text: "Nota promisoria", type: "cash_onDelivery" }
+        },
+        {
+            text: "Bonos",
+            value: { value: "71", text: "Bonos", type: "balances favor" }
+        },
+        {
+            text: "Vales",
+            value: { value: "72", text: "Vales", type: "balances favor" }
+        },
+        {
+            text: "Instrumento no definido",
+            value: { value: "1", text: "Instrumento no definido", type: "cash" }
+        },
+        {
+            text: "Otro",
+            value: { value: "ZZ", text: "Otro", type: "cash" }
+        }
+    ];
+
+
+    // Utils functions
+
+    const handleSelectPaymentMethod = (element)=>{
+        setType(element.type)
+        setFacturation_code(element.value)
+    }
+
+    // getters of info
     const getAccounts = async()=>{
         let res = await postInfo('/getAccountsPlan',{
             company_id:appInfo.company_id,
@@ -57,6 +124,8 @@ export function FormNewPaymentMethod({reloadFun}){
         }
     }
 
+
+    // Creation function
     const createPaymentMehtod = async()=>{
         setsDisabled(true);
         setLoading(true);
@@ -99,16 +168,7 @@ export function FormNewPaymentMethod({reloadFun}){
                 <SearchinList disabled={disabled} action={setAccount_id} title={'Cuenta'} list={accounts} placeHolder={'Seleccionar Cuenta'} specialOption={
                     <NewElementSelect title={'Crear nueva cuenta'} onClick={()=>{popInAlert(<span>Formulario nueva cuenta</span>)}}/>
                 }/>
-                <SearchinList title={'Tipo de metodo de pago'} placeHolder={'Seleccionar opción'} disabled={disabled} action={setType} list={[
-                    {text:'cash'},
-                    {text:'bank_transfer'},
-                    {text:'debit_card'},
-                    {text:'credit_card'},
-                    {text:'digital_wallet'},
-                    {text:'check'},
-                    {text:'cash_onDelivery'},
-                    {text:'crypto_currency'}
-                ]}/>
+                <SearchinList title={'Tipo de metodo de pago'} placeHolder={'Seleccionar opción'} disabled={disabled} action={handleSelectPaymentMethod} list={paymentMethods}/>
                 <SearchinList title={'Moneda'} placeHolder={'Seleccionar opción'} disabled={disabled} action={setCurrency} list={[
                     {text:'COP'},
                     {text:'USD'},
