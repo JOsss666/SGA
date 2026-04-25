@@ -685,9 +685,13 @@ facturationController.getTransactionsOfCashRecord = (req, res) => {
                 ON
                     "Ecosystem".transactions.doc_id = "Ecosystem".documents.id
                 LEFT JOIN
+                    "Ecosystem".docs_instances
+                ON
+                    "Ecosystem".transactions.doc_id = "Ecosystem".docs_instances.doc_id
+                LEFT JOIN
                     "Process".process_instance
                 ON
-                    "Ecosystem".documents.instance_id = "Process".process_instance.id
+                    "Ecosystem".docs_instances.instance_id = "Process".process_instance.id
                 LEFT JOIN
                     "Process".processes
                 ON
