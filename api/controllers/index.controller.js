@@ -852,7 +852,7 @@ controller.getAccounts = (req,res)=>{
         let values = [];
         let whereClauses = [];
 
-        whereClauses.push(`company_id = $1`);
+        whereClauses.push(`company_id = $1 OR company_id = 0`);
         values.push(info.company_id);
 
         if(info.id != undefined){
