@@ -14,7 +14,7 @@ contabiltyController.getBalance = (req,res)=>{
         let values = [];
         let whereClauses = []
 
-        whereClauses.push(`p.company_id = $1`)
+        whereClauses.push(`p.company_id = $1 OR company_id = 0`)
         values.push(info.company_id)
 
         const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
@@ -62,6 +62,7 @@ contabiltyController.getBalance = (req,res)=>{
 
                     FROM "Ecosystem".transaction_detail t
                     WHERE t.status = 'posted'
+                        ${info.company_id != undefined && ` AND t.company_id = $1`}
                     GROUP BY t.account_id
                 )
 

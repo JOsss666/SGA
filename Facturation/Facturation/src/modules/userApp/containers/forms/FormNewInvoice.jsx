@@ -940,6 +940,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         console.log(documents)
         if(documents.length > 0){
             let newTotalToPay = 0;
+            console.log('XXX',itemBlocks)
             itemBlocks.forEach(element => {
                 if(element.docInfo == undefined){
                     let tempTtl = 0;
@@ -948,7 +949,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     });
                     newTotalToPay += tempTtl;
                 }else{
-                    newTotalToPay += (element.docInfo.pending_value != undefined && element.docInfo.pending_value != "" ? element.docInfo.pending_value:0);
+                    newTotalToPay += (element.docInfo.pending_value != undefined && element.docInfo.pending_value != "" ? parseFloat(element.docInfo.pending_value):0);
                 }
             });
             setTotalToPay(newTotalToPay);
@@ -974,6 +975,10 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             getInstances();
         }
     },[thirdParty_id])
+
+    useEffect(()=>{
+        console.log('---> ',disabled)
+    },[disabled])
 
      useEffect(()=>{
         if(documents.length > 0){
@@ -1022,7 +1027,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                         }}/>
                     }/>
                     {info.instance_id == undefined && (
-                        <SearchinList action={handleSelectInstance} noActVal={true} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={thirdParty_id != undefined? disabled:true}/>
+                        <SearchinList action={handleSelectInstance} noActVal={true} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={thirdPartyInfo.id != undefined? disabled:true}/>
                     )}
                     <SearchinList action={handleAddDocument} noActVal={true} title={'Documentos'} placeHolder={'Seleccione el documento'} list={documents} disabled={thirdParty_id != undefined? disabled:true}/>
                     {info.concept_id == undefined && (

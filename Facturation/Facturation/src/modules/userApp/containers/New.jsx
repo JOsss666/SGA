@@ -96,6 +96,8 @@ export function New(){
         //{text:'Crear orden de trabajo',children:<SelectTpeNewDoc/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
+
+        /*
         {text:'Imprimir recibos',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-print"/>},
         {text:'Imprimir Facturas',children:
             <NoAccess 
@@ -127,7 +129,7 @@ export function New(){
                 })
             }}></FormButton>
         </div>},
-        
+        */
 
         /*{text:'Ver dispositivos',children:<span onClick={()=>{
             scanDevices();
