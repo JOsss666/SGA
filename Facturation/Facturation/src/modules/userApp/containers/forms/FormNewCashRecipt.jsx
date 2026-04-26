@@ -87,6 +87,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         total,
         attached,
         instance_id,
+        instances: [{id:instance_id,step_id:step_id}],
         instanceOwnSerial,
         step_id,
         payedBills:briefCaseBills,
