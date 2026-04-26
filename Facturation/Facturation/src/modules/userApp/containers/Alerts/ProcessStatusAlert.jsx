@@ -110,7 +110,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
         if (allRequirementsMet) {
             console.log('Docs validados')
             return true;
-        } else {
+        } else { 
             console.log('No cumple')
             return false;
         }
