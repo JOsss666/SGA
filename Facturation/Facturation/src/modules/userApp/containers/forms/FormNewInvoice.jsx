@@ -70,9 +70,11 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         const [totalToPay,setTotalToPay] = useState(0);
     const [description,setDescription] = useState();
     const [attached,setAttached] = useState('-');
-    const [instance_id,setInstance_id] = useState([]);
-    const [instanceOwnSerial,setInstanceOwnSerial] = useState();
-    const [step_id,setStep_id] = useState();
+        // Instances control
+        const [instance_id,setInstance_id] = useState([]);
+        const [selectedInstances, setSelectedInstances] = useState([]);
+        const [instanceOwnSerial,setInstanceOwnSerial] = useState();
+        const [step_id,setStep_id] = useState();
     const [concept_id,setConcept_id] = useState();
     const [conceptAccount_id,setConcept_account_id] = useState();
     const [cashBox_id,setCashBox_id] = useState();
@@ -96,11 +98,12 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         subTotal:total,
         total,
         attached,
-        instances:instance_id,
+        instance_id:instance_id,
         instanceOwnSerial,
         step_id,
         payedBills:briefCaseBills,
         cashBox_id,
+        instances: selectedInstances,
         paymentMethod_code
     }
 
@@ -213,16 +216,18 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     }
 
     // Processes Instances Control
-        const handleAddInstanceID = (id) => {
-            if (instance_id.includes(id)) return;
-            setInstance_id(prev => [...prev, id]);
-        }
+        const handleAddInstanceID = (element) => {
+            if (!element.id) return;
+            if (selectedInstances.some(item => item.id === element.id)) return;
+            setSelectedInstances(prev => [...prev, { 
+                id: element.id, 
+                step_id: element.step_id 
+            }]);
+        };
         
         const handleDeleteInstanceID = (id) => {
-            setInstance_id(prev => 
-                prev.filter(item => item !== id)
-            );
-        }
+            setSelectedInstances(prev => prev.filter(item => item.id !== id));
+        };
 
     let handleConceptChange = (element)=>{
         if(element.id != undefined){
@@ -259,21 +264,21 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     // Getters of info
 
-    const handleSelectInstance = (element)=>{
-        console.log(element)
-        handleAddInstanceID(element.id)
-        setStep_id(element.step_id)
-        setInstanceOwnSerial(element.ownSerial)
-        setThirdParty_id(element.thirdParty_id)
-        setInfo(prevInfo => ({
-            ...prevInfo,            // Mantenemos todas las propiedades actuales (nombre, fecha, etc.)
-            thirdParty_id: element.thirdParty_id // Sobrescribimos solo el ID del tercero
-        }));
-        if(element.id != undefined){
+    const handleSelectInstance = (element) => {
+        if (!element.id) return;
+        
+        handleAddInstanceID(element);
+        
+        // Sincronización de otros estados dependientes
+        setStep_id(element.step_id);
+        setInstanceOwnSerial(element.ownSerial);
+        setThirdParty_id(element.thirdParty_id);
+        
+        if (element.id) {
             getDocuments(element.id);
         }
         calcTotalFromPayments();
-    }
+    };
 
     // Control of Products and services in ITEM blocks
 
@@ -304,15 +309,13 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         };
 
         const handleDeleteBlock = (blockIndex) => {
-            if(itemBlocks[blockIndex].docInfo != undefined){
-                handleDeleteInstanceID(
-                    itemBlocks[blockIndex].docInfo.instance_id
-                )
+            const block = itemBlocks[blockIndex];
+            if (block && block.docInfo && block.docInfo.instance_id) {
+                handleDeleteInstanceID(block.docInfo.instance_id);
             }
             setItemBlocks(prev => {
                 // 1. Buscamos el bloque que el usuario quiere "eliminar"
                 const blockToProcess = prev[blockIndex];
-
                 // Si por alguna razón el índice no existe, retornamos el estado actual
                 if (!blockToProcess) return prev;
 

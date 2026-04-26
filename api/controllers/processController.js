@@ -64,7 +64,20 @@ processController.getAttachedDocuments = (req,res)=>{
         let sentece = `
             SELECT
                 "Ecosystem".docs_instances.*,
-                "Ecosystem".documents.*,
+                "Ecosystem".documents.company_id,
+                "Ecosystem".documents.store_id,
+                "Ecosystem".documents."thirdParty_id",
+                "Ecosystem".documents.document_type,
+                "Ecosystem".documents."ownSerial",
+                "Ecosystem".documents.status,
+                "Ecosystem".documents."subTotal",
+                "Ecosystem".documents.total,
+                "Ecosystem".documents.created_by,
+                "Ecosystem".documents.created_at,
+                "Ecosystem".documents.updated_at,
+                "Ecosystem".documents.description,
+                "Ecosystem".documents.paid_amount,
+                "Ecosystem".documents.pending_value,
                 "Process".process_instance."ownSerial" as "instanceOwnSerial"
             FROM
                 "Ecosystem".docs_instances
@@ -1284,19 +1297,31 @@ processController.getEficincyUsers = (req,res)=>{
 
 // Process utils
 
-processController.relatedoc_instances = async (doc_id,instances) => {
-    for(const instance of instances){
-        let sentence = `
-            INSERT INTO "Ecosystem".docs_instances(
-                doc_id,
-                instance_id
-            ) VALUES ($1, $2);
-        `
-        await useDataBase(sentence,[
-            doc_id,
-            instance
-        ],2);
+processController.relatedoc_instances = async (doc_id, instances) => {
+    if (!instances || instances.length === 0) return;
+    const values = [];
+    const placeholders = [];
+    let counter = 1;
+    instances.forEach(instance => {
+        const instId = instance.instance_id || instance.id;
+        const stepId = instance.step_id;
+        values.push(doc_id, instId, stepId);
+        placeholders.push(`($${counter++}, $${counter++}, $${counter++})`);
+    });
+    const regDocInstanceSentence = `
+        INSERT INTO "Ecosystem".docs_instances (doc_id, instance_id, step_instance)
+        VALUES ${placeholders.join(', ')}
+        ON CONFLICT (doc_id, instance_id) 
+        DO UPDATE SET step_instance = EXCLUDED.step_instance; 
+    `;
+
+    // 4. Ejecución única en la base de datos
+    try {
+        return await useDataBase(regDocInstanceSentence, values, 2);
+    } catch (error) {
+        console.error("🚨 Error al relacionar documento con instancias:", error.message);
+        throw error;
     }
-}
+};
 
 export default processController;
