@@ -110,6 +110,8 @@ export function FormSelectNewProcess (){
     }
 
     const updateProcessInstance = async()=>{
+        setDisabled(true);
+        setLoading(true);
         let res = await postInfo('/process/updateProcessInstanceStatus',{
             company_id:appInfo.company_id,
             start_date,
@@ -135,6 +137,8 @@ export function FormSelectNewProcess (){
                 }/>)
             }
         }
+        setLoading(false);
+        setDisabled(false);
     }
 
     const cancellProcess = async()=>{
