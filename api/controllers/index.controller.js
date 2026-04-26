@@ -1286,6 +1286,7 @@ controller.createPaymentMethod = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        console.log(info)
         let sentence = `
             INSERT INTO "Ecosystem".payment_methods(
                 company_id,
@@ -1294,8 +1295,9 @@ controller.createPaymentMethod = (req,res)=>{
                 code,
                 currency,
                 type,
-                status)
-            VALUES ($1, $2, $3, $4, $5, $6, $7);
+                status,
+                facturation_code)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -1304,7 +1306,8 @@ controller.createPaymentMethod = (req,res)=>{
             info.code,
             info.currency,
             info.type,
-            info.status
+            info.status,
+            info.facturation_code
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -1353,7 +1356,8 @@ controller.getPaymentMethods = (req,res)=>{
                 status,
                 account_id,
                 for_wallet,
-                for_balance
+                for_balance,
+                facturation_code
             FROM
                 "Ecosystem".payment_methods
             ${whereQuery}

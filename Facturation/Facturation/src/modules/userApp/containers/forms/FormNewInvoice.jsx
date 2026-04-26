@@ -64,6 +64,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const [bussines_id,setBussines_id] = useState();
     const [store_id,setStore_id] = useState();
     const [costCenter_id,setCostCenter_id] = useState();
+    const [paymentMethod_code, setPaymentMethod_code] = useState();
     const [total,setTotal] = useState(0);
         // Valor indicativo d a pagar
         const [totalToPay,setTotalToPay] = useState(0);
@@ -99,7 +100,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         instanceOwnSerial,
         step_id,
         payedBills:briefCaseBills,
-        cashBox_id
+        cashBox_id,
+        paymentMethod_code
     }
 
     // PreProcess functions
@@ -625,7 +627,9 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const addPaymentMethod = (newPayment) => {
         if(newPayment.id != undefined){
             setPaymentMethod(prev => {
-                // Verificamos si ya existe un objeto con ese ID
+                
+                // Permitir seleccionar varias veces el mismo metodo de pago
+                /*
                 const exists = prev.some(item => item.id === newPayment.id);
                 if (exists) {
                     // Opcional: Podrías lanzar una alerta o simplemente no hacer nada
@@ -633,6 +637,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     alert(`El metodo de pago ${newPayment.name} ya fue agregado`)
                     return prev; 
                 }
+                    */
                 // Si no existe, lo agregamos al array
                 return [...prev, newPayment];
             });
@@ -644,6 +649,9 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     const calcTotalFromPayments = ()=>{
         let newTTl = 0;
+        if(paymentMethod.length == 0)return;
+        console.log(paymentMethod)
+        setPaymentMethod_code(paymentMethod[0].facturation_code);
         paymentMethod.forEach(element => {
             if(element.value != "" && element.value != undefined){
                 newTTl += parseFloat(element.value)
@@ -1005,13 +1013,13 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     <h6 className="valueCashRecipt">Valor: $ {formatCurrency(total)}</h6>
                 </div>
                 <i className="fa-solid fa-xmark closeFormBtn" onClick={()=>{
-                    //popOutAlert();
-                    getThirdParties()
+                    popOutAlert();
                 }}/>
             </div>
             {!loading && (
                 <form action="" disabled={disabledToSubmit? true:disabled} onSubmit={(e)=>{
                     e.preventDefault();
+                    console.log(FormInfo)
                     createSellInvoice();
                 }}>
                     {info.store_id == undefined && (

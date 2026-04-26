@@ -161,6 +161,7 @@ export function FormNewPaymentMethod({reloadFun}){
             <BoldTitle text={'Nuevo Metodo de págo'}/>
             <form action="" onSubmit={(e)=>{
                 e.preventDefault();
+                console.log(formInfo)
                 createPaymentMehtod();
             }}>
                 <FormInput title={'Nombre'} action={setName} placeholder={'Nombra tu metodo de pago'} disabled={disabled}/>

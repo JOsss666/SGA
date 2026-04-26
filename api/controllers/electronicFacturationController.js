@@ -236,14 +236,14 @@ electronicFacturationController.newInvoice = (req,res)=>{
   })
   req.on('end',async()=>{
     let info = JSON.parse(bodyData);
+    console.log('--X ',info);
     const auth = await electronicFacturationController.getAuthToken();
-    console.log(auth)
     let params = {
         "document": "01",
         "numbering_range_id": await getNumercRangeData('invoice'),
         "reference_code": `FVE_${info.document.ownSerial}`,
         "observation": "",
-        "payment_method_code": "10",
+        "payment_method_code": info.document.paymentMethod_code,
         "customer": {
             "identification": info.customer.indentification_number,
             "dv": "3",
