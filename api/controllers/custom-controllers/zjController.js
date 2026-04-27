@@ -183,7 +183,7 @@ zjController.registerServiceMachine = (req,res)=>{
         `;
         let preConsulta = await useDataBase(preSentence,[],3);
         if(info.instance_id != undefined && preConsulta.id != undefined){
-            await processController.relatedoc_instances(preConsulta.id, [info.instance_id])
+            await processController.relatedoc_instances(preConsulta.id, info.instances)
         }
         const values = info.services
             .filter(element => element.asset_id !== undefined)
