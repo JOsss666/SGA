@@ -255,7 +255,7 @@ electronicFacturationController.newInvoice = (req,res)=>{
             "email": info.customer.mail,
             "phone": info.customer.phone,
             "legal_organization_id": info.customer.thirdParty_nature,
-            "tribute_id": info.customer.IVA_responsability,
+            "tribute_id": info.customer.IVA_responsability ?? '18',
             "identification_document_id": "3",
             "municipality_id": info.customer.municipality_id?? 149
         },

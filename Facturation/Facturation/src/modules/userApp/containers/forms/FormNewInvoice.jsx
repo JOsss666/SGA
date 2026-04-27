@@ -1022,7 +1022,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             {!loading && (
                 <form action="" disabled={disabledToSubmit? true:disabled} onSubmit={(e)=>{
                     e.preventDefault();
-                    console.log(FormInfo)
                     createSellInvoice();
                 }}>
                     {info.store_id == undefined && (
