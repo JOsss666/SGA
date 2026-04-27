@@ -2378,7 +2378,6 @@ controller.getDocAnalyticDocNumberTable = async (req, res) => {
 // Update Properties
 
     // ThirdParties General Info
-
     controller.updateThirdPartyGeneralInfo = (req,res)=>{
         let data = '';
         req.on('data', chunk => {
@@ -2434,7 +2433,6 @@ controller.getDocAnalyticDocNumberTable = async (req, res) => {
 
 
     // ThirdPartties comercialInfo
-    
     controller.updateThirdPartyComercialInfo = (req,res)=>{
         let data = '';
         req.on('data', chunk => {
@@ -2469,5 +2467,56 @@ controller.getDocAnalyticDocNumberTable = async (req, res) => {
             res.end(JSON.stringify({ error: "Error en la recepción de datos", detail: err.message }));
         });
     }
+
+    // Thirdparties taxparty
+    controller.updateThirdPartyTaxInfo = (req, res) => {
+        let data = '';
+        req.on('data', chunk => {
+            data += chunk;
+        });
+        req.on('end', async () => {
+            try {
+                let info = JSON.parse(data);
+                let sentence = `
+                    UPDATE "Ecosystem"."thirdPartyTaxInfo"
+                    SET 
+                        regime = $1, 
+                        "IVA_responsability" = $2, 
+                        retention_type = $3, 
+                        economic_activity = $4, 
+                        "attachedRut" = $5, 
+                        nature = $6,
+                        "identidicationType_id" = $7
+                    WHERE "thirdParty_id" = $8 AND company_id = $9;
+                `;
+
+                let consulta = await useDataBase(sentence, [
+                    info.regime,                    
+                    info.IVA_responsability,        
+                    info.retention_type,            
+                    info.economic_activity,         
+                    info.attachedRut ?? '-',               
+                    info.nature,              
+                    info.identidicationType_id,      
+                    info.thirdParty_id,             
+                    info.company_id                 
+                ], 2);
+
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(consulta));
+
+            } catch (err) {
+                console.error("🚨 Error al actualizar información fiscal:", err);
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: "Error al procesar los datos", detail: err.message }));
+            }
+        });
+
+        req.on('error', (err) => {
+            console.error("⚠️ Error en la recepción de datos:", err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: "Error en la recepción de datos", detail: err.message }));
+        });
+    };
 
 export default controller;

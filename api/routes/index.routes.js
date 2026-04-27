@@ -62,6 +62,8 @@ router.post('/updateThirdPartyGeneralInfo',controller.updateThirdPartyGeneralInf
 
 router.post('/updateThirdPartyComercialInfo',controller.updateThirdPartyComercialInfo);
 
+router.post('/updateThirdPartyTaxInfo',controller.updateThirdPartyTaxInfo);
+
 router.post('/createThirdParty',controller.createThirdParty);
 
 router.post('/getThirdPartyDetails',controller.getThirdPartyDetails);
