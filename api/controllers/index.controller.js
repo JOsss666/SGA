@@ -1933,7 +1933,6 @@ controller.getThirdParties = (req,res)=>{
 
         // 2. Joins dinámicos
         let joinClause = "";
-        
         // Si se requiere información comercial, añadimos las columnas y el JOIN
         if (info.comercialInfo === true) {
             // Ajustado a los nuevos campos de la MV de Cartera
