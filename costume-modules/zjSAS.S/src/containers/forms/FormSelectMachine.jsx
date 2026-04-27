@@ -29,7 +29,8 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
         company_id:appInfo.company_id,
         user_id:userInfo.user_id,
         services:services,
-        description:description
+        description:description,
+        instances:[{id:instanceInfo.id,step_id:instanceInfo.step_id}]
     }
 
     // getters of info
