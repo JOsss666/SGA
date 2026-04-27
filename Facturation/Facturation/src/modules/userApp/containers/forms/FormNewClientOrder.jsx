@@ -61,6 +61,7 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
         attached,
         instance_id,
         step_id,
+        instances: [{id:instance_id,step_id:step_id}],
         store_id,
         productsServices
     }

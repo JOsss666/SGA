@@ -62,6 +62,8 @@ router.post('/updateThirdPartyGeneralInfo',controller.updateThirdPartyGeneralInf
 
 router.post('/updateThirdPartyComercialInfo',controller.updateThirdPartyComercialInfo);
 
+router.post('/updateThirdPartyTaxInfo',controller.updateThirdPartyTaxInfo);
+
 router.post('/createThirdParty',controller.createThirdParty);
 
 router.post('/getThirdPartyDetails',controller.getThirdPartyDetails);
@@ -300,6 +302,8 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     router.post('/electronicFacturation/getDocuments',electronicFacturationController.getDocuments);
 
     router.post('/electronicFacturation/note',electronicFacturationController.newNote);
+
+    router.get('/electronicFacturation/getMunicipalities',electronicFacturationController.getMunicipalities);
 
     router.post('/electronicFacturationController.getDocumentFullInfo',electronicFacturationController.getDocumentFullInfo);
 

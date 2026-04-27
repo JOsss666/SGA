@@ -41,7 +41,7 @@ facturationController.newClientOrder = (req,res)=>{
             info.instance_id != "" && info.instance_id != undefined? info.step_id:undefined
         ],3);
         if(info.instance_id != undefined && consulta.id != undefined){
-            await processController.relatedoc_instances(consulta.id, [info.instance_id])
+            await processController.relatedoc_instances(consulta.id,info.instances)
         }
         if(info.productsServices != undefined && consulta.id != undefined){
             for(const element of info.productsServices){
@@ -128,7 +128,7 @@ facturationController.newCashRecipt = (req,res)=>{
             info.instance_id != "" && info.instance_id != undefined? info.step_id:undefined
         ],3);
         if(info.instance_id != undefined && consulta.id != undefined){
-            await processController.relatedoc_instances(consulta.id, [info.instance_id])
+            await processController.relatedoc_instances(consulta.id, info.instances)
         }
         if((info.payedBills != undefined || info.payedBills.length > 0) && consulta.id != undefined){
             for(const element of info.payedBills){
@@ -212,8 +212,8 @@ facturationController.newSellInvoice = (req,res)=>{
             info.created_by,
             info.description,
             JSON.stringify(info.attached),
-            info.instance_id != "" && info.instance_id != undefined? info.instance_id:undefined,
-            info.instance_id != "" && info.instance_id != undefined? info.step_id:undefined
+            undefined,
+            undefined
         ],3);
         if((info.payedBills != undefined || info.payedBills.length > 0) && consulta.id != undefined){
             for(const element of info.payedBills){
@@ -228,9 +228,6 @@ facturationController.newSellInvoice = (req,res)=>{
                     element.id,
                     element.paid_value
                 ],2)
-
-
-                // FUNCTION FOR PORTFOLIO MOVMENTS
                 let senIPP = `
                     INSERT INTO "Treasury".portfolio_payments(
                        company_id,
@@ -255,29 +252,8 @@ facturationController.newSellInvoice = (req,res)=>{
             }
         }
         console.log('ZZZZZZZZZZZZZZ ',consulta)
-        if(consulta.id != undefined){
-            console.log('============================ ')
-            // FUNCTION FOR MULTIPE INSTACES INSERT IN DB
-            let regDocInstancesValues = [];
-            let valuePlaceholders = [];
-            let counter = 1;
-
-            info.instances.forEach(instanceId => {
-                regDocInstancesValues.push(consulta.id, instanceId);
-                valuePlaceholders.push(`($${counter++}, $${counter++})`);
-            });
-
-            const regDocInstanceSentence = `
-                INSERT INTO "Ecosystem".docs_instances (doc_id, instance_id)
-                VALUES ${valuePlaceholders.join(', ')}
-                ON CONFLICT (doc_id, instance_id) DO NOTHING; 
-            `;
-
-            let registerDocInstancesrelation = await useDataBase(
-                regDocInstanceSentence, 
-                regDocInstancesValues, 
-                2
-            );
+        if (consulta.id !== undefined && info.instances != undefined) {
+            await processController.relatedoc_instances(consulta.id,info.instances);
         }
         facturationController.updateThirdPartyPortfolio();
         res.writeHead(200,{'Content-Type':'text/plain'})

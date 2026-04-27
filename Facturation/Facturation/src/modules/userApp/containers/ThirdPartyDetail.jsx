@@ -49,10 +49,10 @@ export function ThirdPartyDetail(){
         setDisabled(true);
         setLoading(true)
         let res = await postInfo('/getThirdParties',{
-            id:params.thirdparty_id,
             company_id:appInfo.company_id,
-            comercialInfo:true
-        })
+            comercialInfo:true,
+            id:params.thirdparty_id,
+        });
         console.log(res);
         if(res[0]){
             setThirdPartyInfo(res[1][0])

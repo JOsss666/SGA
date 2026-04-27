@@ -198,9 +198,13 @@ electronicFacturationController.showActualToken = async()=>{
     console.log('Token Refresh: ',refreshToken);
 }
 
-electronicFacturationController.getMunicipalities = async (auth) => {
+electronicFacturationController.getMunicipalities = async (req, res) => {
     try {
-        const response = await fetch(urlSer + '/v1/municipalities?name=Bogota', {
+        // 1. Obtenemos el token
+        const auth = await electronicFacturationController.getAuthToken();
+
+        // 2. Hacemos la petición a Factus (Sin el req.on('end'))
+        const response = await fetch(urlSer + '/v1/municipalities', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -208,22 +212,22 @@ electronicFacturationController.getMunicipalities = async (auth) => {
             },
         });
 
-        // 1. Verificamos si la respuesta fue exitosa antes de procesar
         if (!response.ok) {
-            throw new Error(`Error en la petición: ${response.status}`);
+            throw new Error(`Error en Factus: ${response.status}`);
         }
 
-        // 2. IMPORTANTE: Extraer los datos del cuerpo (body)
         const data = await response.json();
 
-        // 3. Ahora sí verás los datos reales
-        console.log('Resultados de Municipios:', data);
-        
-        return data;
+        // 3. ¡VITAL! Enviamos la respuesta al cliente
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(data));
+
     } catch (error) {
         console.error('Error al obtener municipios:', error.message);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: error.message }));
     }
-}
+};
 
 electronicFacturationController.newInvoice = (req,res)=>{
   let bodyData = '';
@@ -232,14 +236,14 @@ electronicFacturationController.newInvoice = (req,res)=>{
   })
   req.on('end',async()=>{
     let info = JSON.parse(bodyData);
+    console.log('--X ',info);
     const auth = await electronicFacturationController.getAuthToken();
-    console.log(auth)
     let params = {
         "document": "01",
         "numbering_range_id": await getNumercRangeData('invoice'),
         "reference_code": `FVE_${info.document.ownSerial}`,
         "observation": "",
-        "payment_method_code": "10",
+        "payment_method_code": info.document.paymentMethod_code,
         "customer": {
             "identification": info.customer.indentification_number,
             "dv": "3",
@@ -250,10 +254,10 @@ electronicFacturationController.newInvoice = (req,res)=>{
             //"email": info.customer.mail,
             "email": info.customer.mail,
             "phone": info.customer.phone,
-            "legal_organization_id": "2",
-            "tribute_id": "21",
+            "legal_organization_id": info.customer.thirdParty_nature,
+            "tribute_id": info.customer.IVA_responsability ?? '18',
             "identification_document_id": "3",
-            "municipality_id": 169
+            "municipality_id": info.customer.municipality_id?? 149
         },
         /*"items": [
             {
@@ -515,6 +519,7 @@ electronicFacturationController.getDocumentFullInfo = (req,res)=>{
 // Función para inicializar servicios al arrancar el servidor
 electronicFacturationController.init = async () => {
     try {
+        console.log('Ambiente funcionamiento: ',urlSer)
         console.log('--- 🔐 Iniciando Autenticación Factus ---');
         const auth = await electronicFacturationController.getAuthToken('password');
         if (auth) {

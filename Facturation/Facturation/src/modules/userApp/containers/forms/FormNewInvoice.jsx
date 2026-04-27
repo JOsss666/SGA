@@ -64,14 +64,17 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const [bussines_id,setBussines_id] = useState();
     const [store_id,setStore_id] = useState();
     const [costCenter_id,setCostCenter_id] = useState();
+    const [paymentMethod_code, setPaymentMethod_code] = useState();
     const [total,setTotal] = useState(0);
         // Valor indicativo d a pagar
         const [totalToPay,setTotalToPay] = useState(0);
     const [description,setDescription] = useState();
     const [attached,setAttached] = useState('-');
-    const [instance_id,setInstance_id] = useState([]);
-    const [instanceOwnSerial,setInstanceOwnSerial] = useState();
-    const [step_id,setStep_id] = useState();
+        // Instances control
+        const [instance_id,setInstance_id] = useState([]);
+        const [selectedInstances, setSelectedInstances] = useState([]);
+        const [instanceOwnSerial,setInstanceOwnSerial] = useState();
+        const [step_id,setStep_id] = useState();
     const [concept_id,setConcept_id] = useState();
     const [conceptAccount_id,setConcept_account_id] = useState();
     const [cashBox_id,setCashBox_id] = useState();
@@ -95,11 +98,13 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         subTotal:total,
         total,
         attached,
-        instances:instance_id,
+        instance_id:instance_id,
         instanceOwnSerial,
         step_id,
         payedBills:briefCaseBills,
-        cashBox_id
+        cashBox_id,
+        instances: selectedInstances,
+        paymentMethod_code
     }
 
     // PreProcess functions
@@ -211,16 +216,18 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     }
 
     // Processes Instances Control
-        const handleAddInstanceID = (id) => {
-            if (instance_id.includes(id)) return;
-            setInstance_id(prev => [...prev, id]);
-        }
+        const handleAddInstanceID = (element) => {
+            if (!element.id) return;
+            if (selectedInstances.some(item => item.id === element.id)) return;
+            setSelectedInstances(prev => [...prev, { 
+                id: element.id, 
+                step_id: element.step_id 
+            }]);
+        };
         
         const handleDeleteInstanceID = (id) => {
-            setInstance_id(prev => 
-                prev.filter(item => item !== id)
-            );
-        }
+            setSelectedInstances(prev => prev.filter(item => item.id !== id));
+        };
 
     let handleConceptChange = (element)=>{
         if(element.id != undefined){
@@ -241,6 +248,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     }
 
     const handleThirdPartyChange = (element)=>{
+        console.log(element);
         setThirdParty_id(element.id);
         setThirdPartyInfo(element);
     }
@@ -256,21 +264,21 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     // Getters of info
 
-    const handleSelectInstance = (element)=>{
-        console.log(element)
-        handleAddInstanceID(element.id)
-        setStep_id(element.step_id)
-        setInstanceOwnSerial(element.ownSerial)
-        setThirdParty_id(element.thirdParty_id)
-        setInfo(prevInfo => ({
-            ...prevInfo,            // Mantenemos todas las propiedades actuales (nombre, fecha, etc.)
-            thirdParty_id: element.thirdParty_id // Sobrescribimos solo el ID del tercero
-        }));
-        if(element.id != undefined){
+    const handleSelectInstance = (element) => {
+        if (!element.id) return;
+        
+        handleAddInstanceID(element);
+        
+        // Sincronización de otros estados dependientes
+        setStep_id(element.step_id);
+        setInstanceOwnSerial(element.ownSerial);
+        setThirdParty_id(element.thirdParty_id);
+        
+        if (element.id) {
             getDocuments(element.id);
         }
         calcTotalFromPayments();
-    }
+    };
 
     // Control of Products and services in ITEM blocks
 
@@ -301,15 +309,13 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         };
 
         const handleDeleteBlock = (blockIndex) => {
-            if(itemBlocks[blockIndex].docInfo != undefined){
-                handleDeleteInstanceID(
-                    itemBlocks[blockIndex].docInfo.instance_id
-                )
+            const block = itemBlocks[blockIndex];
+            if (block && block.docInfo && block.docInfo.instance_id) {
+                handleDeleteInstanceID(block.docInfo.instance_id);
             }
             setItemBlocks(prev => {
                 // 1. Buscamos el bloque que el usuario quiere "eliminar"
                 const blockToProcess = prev[blockIndex];
-
                 // Si por alguna razón el índice no existe, retornamos el estado actual
                 if (!blockToProcess) return prev;
 
@@ -624,7 +630,9 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const addPaymentMethod = (newPayment) => {
         if(newPayment.id != undefined){
             setPaymentMethod(prev => {
-                // Verificamos si ya existe un objeto con ese ID
+                
+                // Permitir seleccionar varias veces el mismo metodo de pago
+                /*
                 const exists = prev.some(item => item.id === newPayment.id);
                 if (exists) {
                     // Opcional: Podrías lanzar una alerta o simplemente no hacer nada
@@ -632,6 +640,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     alert(`El metodo de pago ${newPayment.name} ya fue agregado`)
                     return prev; 
                 }
+                    */
                 // Si no existe, lo agregamos al array
                 return [...prev, newPayment];
             });
@@ -643,6 +652,9 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     const calcTotalFromPayments = ()=>{
         let newTTl = 0;
+        if(paymentMethod.length == 0)return;
+        console.log(paymentMethod)
+        setPaymentMethod_code(paymentMethod[0].facturation_code);
         paymentMethod.forEach(element => {
             if(element.value != "" && element.value != undefined){
                 newTTl += parseFloat(element.value)

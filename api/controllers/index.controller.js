@@ -1286,6 +1286,7 @@ controller.createPaymentMethod = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        console.log(info)
         let sentence = `
             INSERT INTO "Ecosystem".payment_methods(
                 company_id,
@@ -1294,8 +1295,9 @@ controller.createPaymentMethod = (req,res)=>{
                 code,
                 currency,
                 type,
-                status)
-            VALUES ($1, $2, $3, $4, $5, $6, $7);
+                status,
+                facturation_code)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -1304,7 +1306,8 @@ controller.createPaymentMethod = (req,res)=>{
             info.code,
             info.currency,
             info.type,
-            info.status
+            info.status,
+            info.facturation_code
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -1353,7 +1356,8 @@ controller.getPaymentMethods = (req,res)=>{
                 status,
                 account_id,
                 for_wallet,
-                for_balance
+                for_balance,
+                facturation_code
             FROM
                 "Ecosystem".payment_methods
             ${whereQuery}
@@ -1939,6 +1943,10 @@ controller.getThirdParties = (req,res)=>{
                 ci.credit_term,
                 ci.comercial_state,
                 ci.aviable_credit,
+                tti."IVA_responsability",
+                tti.municipality_id,
+                tti.nature AS "thirdParty_nature",
+                tti."identidicationType_id",
                 COALESCE(b.total_debt, 0) AS "thirdParty_totalDebt",
                 COALESCE(b.total_paid, 0) AS "thirdParty_totalPaid",
                 COALESCE(b.balance, 0) AS "thirdParty_balance",
@@ -1952,6 +1960,8 @@ controller.getThirdParties = (req,res)=>{
                 LEFT JOIN "Ecosystem".mv_thirdparty_account_balances b
                     ON "Ecosystem".thirdparties.id = b."thirdParty_id"
                     AND "Ecosystem".thirdparties.company_id = b.company_id
+                LEFT JOIN "Ecosystem"."thirdPartyTaxInfo" tti
+                    ON "Ecosystem".thirdparties.id = tti."thirdParty_id"
             `;
         }
 
@@ -2077,8 +2087,8 @@ controller.createThirdParty = (req, res) => {
                 ],2);
                 let taxInfo = `
                     INSERT INTO "Ecosystem"."thirdPartyTaxInfo"(
-                        "thirdParty_id", company_id, regime, "IVA_responsability", retention_type, economic_activity, "attachedRut")
-                    VALUES ($1, $2, $3, $4, $5, $6, $7);
+	                    "thirdParty_id", company_id, regime, "IVA_responsability", retention_type, economic_activity, "attachedRut", municipality_id, nature, "identidicationType_id")
+	                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
                 `;
                 let taxInfoCons = await useDataBase(taxInfo,[
                     idNewThirdParty,
@@ -2087,7 +2097,10 @@ controller.createThirdParty = (req, res) => {
                     info.IVA_responsability,
                     info.retention_type,
                     info.economic_activity,
-                    info.attachedRut != undefined? info.attachedRut:''
+                    info.attachedRut != undefined? info.attachedRut:'',
+                    info.mucipality_id,
+                    info.typePerson,
+                    info.identidicationType_id
                 ],2);
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify(comercialInfoCons && taxInfoCons));
@@ -2365,7 +2378,6 @@ controller.getDocAnalyticDocNumberTable = async (req, res) => {
 // Update Properties
 
     // ThirdParties General Info
-
     controller.updateThirdPartyGeneralInfo = (req,res)=>{
         let data = '';
         req.on('data', chunk => {
@@ -2421,7 +2433,6 @@ controller.getDocAnalyticDocNumberTable = async (req, res) => {
 
 
     // ThirdPartties comercialInfo
-    
     controller.updateThirdPartyComercialInfo = (req,res)=>{
         let data = '';
         req.on('data', chunk => {
@@ -2456,5 +2467,56 @@ controller.getDocAnalyticDocNumberTable = async (req, res) => {
             res.end(JSON.stringify({ error: "Error en la recepción de datos", detail: err.message }));
         });
     }
+
+    // Thirdparties taxparty
+    controller.updateThirdPartyTaxInfo = (req, res) => {
+        let data = '';
+        req.on('data', chunk => {
+            data += chunk;
+        });
+        req.on('end', async () => {
+            try {
+                let info = JSON.parse(data);
+                let sentence = `
+                    UPDATE "Ecosystem"."thirdPartyTaxInfo"
+                    SET 
+                        regime = $1, 
+                        "IVA_responsability" = $2, 
+                        retention_type = $3, 
+                        economic_activity = $4, 
+                        "attachedRut" = $5, 
+                        nature = $6,
+                        "identidicationType_id" = $7
+                    WHERE "thirdParty_id" = $8 AND company_id = $9;
+                `;
+
+                let consulta = await useDataBase(sentence, [
+                    info.regime,                    
+                    info.IVA_responsability,        
+                    info.retention_type,            
+                    info.economic_activity,         
+                    info.attachedRut ?? '-',               
+                    info.nature,              
+                    info.identidicationType_id,      
+                    info.thirdParty_id,             
+                    info.company_id                 
+                ], 2);
+
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(consulta));
+
+            } catch (err) {
+                console.error("🚨 Error al actualizar información fiscal:", err);
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: "Error al procesar los datos", detail: err.message }));
+            }
+        });
+
+        req.on('error', (err) => {
+            console.error("⚠️ Error en la recepción de datos:", err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: "Error en la recepción de datos", detail: err.message }));
+        });
+    };
 
 export default controller;
