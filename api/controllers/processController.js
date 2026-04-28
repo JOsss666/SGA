@@ -1080,8 +1080,6 @@ async function validateStepRequirements(instance_id, step_id) {
 
         const requirements = stepRes[1][0].required_docs; // Ejemplo: [{docType: 'Sell Invoice', min: 1}]
 
-        // 2. Contamos cuántos documentos de esos tipos existen para ESTA instancia en la tabla puente
-        // Cruzamos "docs_instances" con "documents" para saber el tipo (document_type)
         const countQuery = `
             SELECT d.document_type, COUNT(di.doc_id) as total
             FROM "Ecosystem".docs_instances di

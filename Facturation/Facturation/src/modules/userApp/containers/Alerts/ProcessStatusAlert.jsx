@@ -281,7 +281,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                                 ))}
                                             {element.attached_Docs.map((doc, i) => (
                                                 <span key={i} className="attachedDoc" onClick={()=>{
-                                                    window.open(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${doc.id}`,'_blank','noopener,noreferrer')
+                                                    window.open(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${doc.doc_id}`,'_blank','noopener,noreferrer')
                                                 }}>
                                                     <i className="fa-solid fa-file-circle-check"/>
                                                     {`${doc.document_type} #${doc.ownSerial}`}
