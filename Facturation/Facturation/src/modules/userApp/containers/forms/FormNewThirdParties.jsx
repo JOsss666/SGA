@@ -113,6 +113,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
     // Getters of info
     const getMunicipalities = async()=>{
         let res = await getInfo('/electronicFacturation/getMunicipalities');
+        
         if(res.status == 'OK'){
             let C = [];
             res.data.forEach(element => {
