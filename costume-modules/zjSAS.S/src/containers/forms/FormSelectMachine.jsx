@@ -8,7 +8,7 @@ import {FormButton} from '../../components/FormButton'
 import {FormInput} from '../../components/FormInput'
 import './FormSelectMachine.css'
 
-export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,instance_id}){
+export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,instance_id,reloadFun}){
 
     // Requirements
     const [assets,setAssets] = useState([]);
@@ -30,7 +30,7 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
         user_id:userInfo.user_id,
         services:services,
         description:description,
-        instances:[{id:instanceInfo.id,step_id:instanceInfo.step_id}]
+        instances:[{id:instanceInfo.value != undefined ? instanceInfo.value.id:undefined,step_id:instanceInfo.value != undefined ? instanceInfo.value.step_id:undefined}]
     }
 
     // getters of info
@@ -126,6 +126,7 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
         setLoading(false);
         setDisabled(false);
         popOutAlert?.();
+        reloadFun?.();
     }
 
     // Event listeners
@@ -140,6 +141,7 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
     },[services])
 
     useEffect(()=>{
+        console.log(instanceInfo)
         if(instanceInfo.id != undefined){
             getServicesMovements();
         }
@@ -157,6 +159,7 @@ export function FormSelectMachine({appInfo,userInfo,userConfig,popOutAlert,insta
                     <form action="" disabled={disabled? !selectedAll:disabled} onSubmit={(e)=>{
                         e.preventDefault();
                         console.log(formInfo)
+                        console.log(instanceInfo)
                         registerServiceActions();
                     }}>
                         {instanceInfo.id != undefined && (

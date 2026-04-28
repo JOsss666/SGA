@@ -1070,61 +1070,48 @@ processController.getInstanceHistorial = (req,res)=>{
     })
 }
 
-const validateStepRequirements = async (instanceId, nextStepId, companyId) => {
-    // 1. Buscamos qué documentos son obligatorios para el paso al que se intenta avanzar
-    // OJO: Validamos los requerimientos del paso actual y anteriores que sean obligatorios
-    const requirementsQuery = `
-        SELECT 
-            r."docType", 
-            r.min_number, 
-            r.step_id,
-            ps.name as step_name
-        FROM "Process".step_doc_realtion r
-        JOIN "Process".process_steps ps ON r.step_id = ps.id
-        WHERE r.company_id = $1 
-          AND r.required = true
-          AND ps."order" <= (SELECT "order" FROM "Process".process_steps WHERE id = $2);
-    `;
+async function validateStepRequirements(instance_id, step_id) {
+    try {
+        // 1. Obtenemos qué documentos se requieren para el paso al que se intenta entrar/salir
+        const stepQuery = `SELECT required_docs FROM "Process".process_steps WHERE id = $1`;
+        const stepRes = await useDataBase(stepQuery, [step_id], 1);
 
-    const requirementsQ = await useDataBase(requirementsQuery, [companyId, nextStepId], 1);
-    
-    if (!requirementsQ[0] || requirementsQ[1].length === 0) return { success: true };
+        if (!stepRes[0] || !stepRes[1][0]?.required_docs) return { success: true };
 
-    const requirements = requirementsQ[1];
+        const requirements = stepRes[1][0].required_docs; // Ejemplo: [{docType: 'Sell Invoice', min: 1}]
 
-    // 2. Consultamos qué documentos ya han sido cargados para esta instancia
-    // Basado en tu tabla de transacciones o donde guardes la relación doc <-> instancia
-    const attachedQuery = `
-        SELECT "document_type", COUNT(*) as total
-        FROM "Ecosystem".documents 
-        WHERE instance_id = $1 AND company_id = $2
-        GROUP BY "document_type"
-    `;
-    
-    const attachedQ = await useDataBase(attachedQuery, [instanceId, companyId], 1);
-    const attachedDocs = attachedQ[0] ? attachedQ[1] : [];
+        // 2. Contamos cuántos documentos de esos tipos existen para ESTA instancia en la tabla puente
+        // Cruzamos "docs_instances" con "documents" para saber el tipo (document_type)
+        const countQuery = `
+            SELECT d.document_type, COUNT(di.doc_id) as total
+            FROM "Ecosystem".docs_instances di
+            JOIN "Documents".documents d ON di.doc_id = d.id
+            WHERE di.instance_id = $1
+            GROUP BY d.document_type
+        `;
+        const countRes = await useDataBase(countQuery, [instance_id], 1);
+        const attachedDocs = countRes[1] || [];
 
-    // 3. Comparar requerimientos vs realidad
-    let missingDocs = [];
-    requirements.forEach(req => {
-        // Cambiamos d.docType por d.document_type
-        const found = attachedDocs.find(d => d.document_type === req.docType);
-        const count = found ? parseInt(found.total) : 0;
-        
-        if (count < req.min_number) {
-            missingDocs.push(`${req.min_number} ${req.docType} (requerido en: ${req.step_name})`);
+        // 3. Verificamos si se cumple cada requisito
+        for (const req of requirements) {
+            const docData = attachedDocs.find(d => d.document_type === req.docType);
+            const currentTotal = docData ? parseInt(docData.total) : 0;
+
+            if (currentTotal < req.min) {
+                return {
+                    success: false,
+                    error: `No se puede avanzar. Faltan los siguientes documentos: ${req.min - currentTotal} ${req.docType}`
+                };
+            }
         }
-    });
 
-    if (missingDocs.length > 0) {
-        return { 
-            success: false, 
-            error: `No se puede avanzar. Faltan los siguientes documentos: ${missingDocs.join(', ')}` 
-        };
+        return { success: true };
+    } catch (error) {
+        console.error("Error validando docs:", error);
+        return { success: false, error: "Error en el servidor al validar documentos." };
     }
+}
 
-    return { success: true };
-};
 
 processController.nextProcessStep = async (req, res) => {
     let data = '';
