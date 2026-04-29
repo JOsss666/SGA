@@ -32,6 +32,7 @@ import { FormButton } from "../components/FormButton";
 import { FormNewInvoice } from "./forms/FormNewInvoice";
 import { FormNewENote } from "./forms/FormNewENote";
 import { NoAccess } from "./NoAccess";
+import { SellInvoiceDesign } from "./Alerts/SellInvoiceDesing";
 
 export function New(){
     const {userConfig,appInfo,userInfo, appConfig} = useAppInfo();
@@ -108,6 +109,7 @@ export function New(){
             icon:<i className="fa-solid fa-print"/>},
         */
         {text:'Imprimir Ordes de cliente',children:<ClientOrderPreview/>,icon:<i className="fa-solid fa-print"/>},
+        //{text:'Imprimir Factura de venta',children:<SellInvoiceDesign/>,icon:<i className="fa-solid fa-print"/>},
         /*
         {text:'Opciones de factura electronica',children:<div style={{
             paddingTop:'8vh',
