@@ -863,7 +863,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         let itemsToFac = [];
         itemBlocks.forEach(element => {
             element.items.forEach(item => {
-                console.log('??? ',item)
                 itemsToFac.push(
                     {
                         "code_reference": item.code? item.code:item.service_id,
@@ -872,8 +871,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                         "discount": 0,
                         "discount_rate": 0,
                         "price": parseFloat(item.unit_value),
-                        //"tax_rate": `${item.tax_rate || "0"}`,
-                        "tax_rate": `19.00`,
+                        "tax_rate": `${(item.tax_rate).toFixed(2) || "19.00"}`,
+                        //"tax_rate": "19.00",
                         "unit_measure_id": 70,
                         "standard_code_id": 1,
                         "is_excluded": 0,
@@ -1017,7 +1016,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     <h6 className="valueCashRecipt">Valor: $ {formatCurrency(total)}</h6>
                 </div>
                 <i className="fa-solid fa-xmark closeFormBtn" onClick={()=>{
-                    popOutAlert();
+                    //popOutAlert();
+                    handleCreationOfEinvoice();
                 }}/>
             </div>
             {!loading && (
