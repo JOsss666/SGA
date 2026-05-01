@@ -174,7 +174,7 @@ export async function parseCashBoxeToXlsx(data,title) {
         currentRow++;
 
         // Encabezados de la tabla de transacciones
-        const headers = ['Instancia', 'Documento', 'Concepto', 'Tercero', 'Sub-total', 'Total','Fecha'];
+        const headers = ['Instancia', 'Documento', 'Concepto', 'Tercero', 'Sub-total', 'Total','Fecha','Documento electronico'];
         const headerRow = worksheet.getRow(currentRow);
         headerRow.values = headers;
         headerRow.font = { bold: true };
@@ -195,7 +195,8 @@ export async function parseCashBoxeToXlsx(data,title) {
                 trans.thirdparty_name || '---',
                 trans.subTotal || '---',
                 trans.total || 0,
-                trans.created_at || '---'
+                trans.created_at || '---',
+                trans.e_doc_number || '---'
             ]);
             
             // Formato de moneda para la columna Total (F)

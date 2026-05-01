@@ -279,6 +279,11 @@ export function CashRegisterReport({shift_id}){
                                             {element.voucher != undefined && (
                                                 <span>Voucher/ref: {element.voucher}</span>
                                             )}
+                                            {element.e_doc_number != null && element.e_doc_number != undefined && (
+                                                <strong className="redirectEdoc" onClick={()=>{
+                                                    window.open(element.e_doc_url,'_blank','noopener,noreferrer')
+                                                }}><i className="fa-solid fa-file-invoice"/> {element.e_doc_number}</strong>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

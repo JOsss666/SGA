@@ -755,8 +755,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         if(typeof(parseInt(res.id)) == 'number'){
             addNotification({
                 type:'aproved',
-                title:`Recibo de caja #${res.id} creado correctamente`,
-                description:`El recibo de caja #${res.id} fue creado correctamente`
+                title:`Factura de venta #${res.id} creada correctamente`,
+                description:`La factura de venta #${res.id} fue creada correctamente`
             })
             FormInfo["doc_id"] = res.id
             FormInfo['instance_id'] = instance_id;
@@ -1016,8 +1016,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     <h6 className="valueCashRecipt">Valor: $ {formatCurrency(total)}</h6>
                 </div>
                 <i className="fa-solid fa-xmark closeFormBtn" onClick={()=>{
-                    //popOutAlert();
-                    handleCreationOfEinvoice();
+                    popOutAlert();
+                    //handleCreationOfEinvoice();
                 }}/>
             </div>
             {!loading && (
@@ -1092,6 +1092,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                                                 <FormInput 
                                                     title={'Val unidad'}
                                                     type={'number'}
+                                                    step={0.01}
                                                     min={0}
                                                     required={false}
                                                     defaultValue={element.unit_value}
