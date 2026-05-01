@@ -629,6 +629,8 @@ facturationController.getTransactionsOfCashRecord = (req, res) => {
                     "Process".processes.code AS process_code,
                     "Ecosystem".payment_methods.name AS payment_name,
                     "Ecosystem".thirdparties.names AS thirdParty_name,
+                    "ElectronicFacturation".documents.number AS e_doc_number,
+                    "ElectronicFacturation".documents.url AS e_doc_url,
                     "Ecosystem".thirdparties.img AS thirdParty_img
                 FROM
                     "Facturation".shift_settlement_details
@@ -660,6 +662,10 @@ facturationController.getTransactionsOfCashRecord = (req, res) => {
                     "Ecosystem".documents
                 ON
                     "Ecosystem".transactions.doc_id = "Ecosystem".documents.id
+                LEFT JOIN
+                    "ElectronicFacturation".documents
+                ON
+                    "Ecosystem".transactions.doc_id = "ElectronicFacturation".documents.doc_id
                 LEFT JOIN
                     "Ecosystem".docs_instances
                 ON

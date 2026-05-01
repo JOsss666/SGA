@@ -267,3 +267,13 @@
 .CashRegisterReport .contentReport .cardTotalPaymentType .attachedTrsContainer .negativeTrans span{
     color: #FB2C36;
 }
+
+.CashRegisterReport .contentReport .cardTotalPaymentType .attachedTrsContainer .transactionLine .redirectEdoc{
+    font-weight: 500;
+    color: #155DFC;
+    cursor: pointer;
+}
+
+.CashRegisterReport .contentReport .cardTotalPaymentType .attachedTrsContainer .transactionLine .redirectEdoc i{
+    margin-right: .5vh;
+}
