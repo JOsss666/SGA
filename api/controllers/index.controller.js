@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { uploadToCloudinary } from "../uploadMiddleWare.js";
 import { send_API_AI } from "../ApiFunctions.js";
+import treasuryController from "./TreasuryController.js";
 const controller = {};
 
 controller.uploadChunk = (req, res) => {
@@ -1516,26 +1517,8 @@ controller.createTransaction = (req,res)=>{
                 }
                 console.log('---> ',element);
                 if(element.for_wallet == true){
-                    let senInsBreafcase = `
-                        INSERT INTO "Treasury".accounts_receivable(
-                           company_id,
-                           "thirdParty_id",
-                           document_id,
-                           total,
-                           paid_amount,
-                           due_date,
-                           instance_id)
-                        VALUES ($1, $2, $3, $4, $5, $6, $7);
-                    `;
-                    let insertBreafCaseBill = await useDataBase(senInsBreafcase,[
-                        info.company_id,
-                        info.thirdParty_id,
-                        info.doc_id,
-                        element.total,
-                        0,
-                        element.due_date,
-                        info.instance_id
-                    ])
+                    let insertForWallet = await treasuryController.newAccountReceivable(info,element)
+                    console.log('Estado creacion cartera: ',insertForWallet);
                 }
                 if(element.for_balance){
 

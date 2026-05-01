@@ -89,7 +89,7 @@ export function RowTableReport({columns,info,hidden,navigation}){
         "Plazo":<span className="rowSpan idHolder">{`${info.credit_term ? info.credit_term:0} días`}</span>,
         "Vencido":<span className="rowSpan rightAl">{moneyFormat(parseFloat(info.thirdParty_overdueBalance? info.thirdParty_overdueBalance:0).toFixed(2))}</span>,
         "Cupo_max":<span className="rowSpan rightAl">{moneyFormat(parseFloat(info.credit_value? info.credit_value:0).toFixed(2))}</span>,
-        "Cupo_disponible":<span className="rowSpan rightAl">{moneyFormat(parseFloat(info.credit_value != undefined && info.thirdParty_totalDebt? info.credit_value - info.thirdParty_totalDebt:0).toFixed(2))}</span>,
+        "Cupo_disponible":<span className="rowSpan rightAl">{moneyFormat(parseFloat(info.aviable_credit)-(parseFloat(info.thirdParty_currentBalance ?? 0)).toFixed(2))}</span>,
         "Instancia":<span className="rowSpan idHolder Redirect" onClick={()=>{
             popInAlert(<ProcessStatusAlert instance_id={info.instance_id}/>)
         }}>{`${info.process_code? info.process_code:'---'}#${info.instance_serial? info.instance_serial:'---'}`}</span>,

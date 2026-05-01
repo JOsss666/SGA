@@ -1,5 +1,6 @@
 import { useDataBase } from "../app.js";
 import processController from "./processController.js";
+import treasuryController from "./TreasuryController.js";
 const facturationController = {};
 
 
@@ -131,41 +132,11 @@ facturationController.newCashRecipt = (req,res)=>{
             await processController.relatedoc_instances(consulta.id, info.instances)
         }
         if((info.payedBills != undefined || info.payedBills.length > 0) && consulta.id != undefined){
+            console.log('-------------------------------------')
+            console.log('ACTUALIZANDO CARTERA')
+            console.log('-------------------------------------')
             for(const element of info.payedBills){
-                let senUPB = `
-                    UPDATE
-                        "Treasury".accounts_receivable
-                    SET
-                        paid_amount = paid_amount + $2
-                    WHERE id = $1 ;
-                `;
-                let updatePaymentBills = await useDataBase(senUPB,[
-                    element.id,
-                    element.paid_value
-                ],2)
-
-                let senIPP = `
-                    INSERT INTO "Treasury".portfolio_payments(
-                       company_id,
-                       store_id,
-                       "thirdParty_id",
-                       document_id,
-                       instance_id,
-                       paid_value, 
-                       "creationDocument_id")
-                    VALUES ($1, $2, $3, $4, $5, $6, $7);
-                `;
-
-                let insertPortfolioPayment = await useDataBase(senIPP,[
-                    info.company_id,
-                    info.store_id,
-                    info.thirdParty_id,
-                    element.document_id,
-                    element.instance_id,
-                    element.paid_value,
-                    consulta.id
-                ],2)
-
+                await treasuryController.newPaymentOfBriefCase(info,element,consulta.id)
             }
         }
         facturationController.updateThirdPartyPortfolio();
@@ -710,14 +681,20 @@ facturationController.getBriefcaseBills = (req,res)=>{
         let sentence = `
             SELECT
                 "Treasury".accounts_receivable.*,
+                "Ecosystem".docs_instances.instance_id,
+                "Ecosystem".docs_instances.doc_id,
                 "Process".process_instance.process_id, 
                 "Process".processes.code AS process_code
             FROM
                 "Treasury".accounts_receivable
             LEFT JOIN
+                "Ecosystem".docs_instances
+            ON
+                "Treasury".accounts_receivable.document_id = "Ecosystem".docs_instances.doc_id
+            LEFT JOIN
                 "Process".process_instance
             ON
-                "Treasury".accounts_receivable.instance_id = "Process".process_instance.id
+                "Ecosystem".docs_instances.instance_id = "Process".process_instance.id
             LEFT JOIN
                 "Process".processes
             ON
