@@ -1070,43 +1070,57 @@ processController.getInstanceHistorial = (req,res)=>{
     })
 }
 
-async function validateStepRequirements(instance_id, step_id) {
+async function validateFullProcessRequirements(instance_id, process_id) {
     try {
-        // 1. Obtenemos qué documentos se requieren para el paso al que se intenta entrar/salir
-        const stepQuery = `SELECT required_docs FROM "Process".process_steps WHERE id = $1`;
-        const stepRes = await useDataBase(stepQuery, [step_id], 1);
+        // 1. Obtenemos TODOS los documentos requeridos para este proceso según la tabla de relaciones
+        const requirementsQuery = `
+            SELECT "docType", SUM(min_number) as total_min
+            FROM "Process".step_doc_realtion
+            WHERE company_id = (SELECT company_id FROM "Process".process_instance WHERE id = $1)
+            AND step_id IN (SELECT id FROM "Process".process_steps WHERE process_id = $2)
+            AND required = true
+            GROUP BY "docType"
+        `;
+        const reqRes = await useDataBase(requirementsQuery, [instance_id, process_id], 1);
+        
+        if (!reqRes[0] || reqRes[1].length === 0) return { success: true };
 
-        if (!stepRes[0] || !stepRes[1][0]?.required_docs) return { success: true };
+        const requirements = reqRes[1];
 
-        const requirements = stepRes[1][0].required_docs; // Ejemplo: [{docType: 'Sell Invoice', min: 1}]
-
+        // 2. Contamos qué documentos tiene la instancia actualmente
         const countQuery = `
             SELECT d.document_type, COUNT(di.doc_id) as total
             FROM "Ecosystem".docs_instances di
-            JOIN "Documents".documents d ON di.doc_id = d.id
+            JOIN "Ecosystem".documents d ON di.doc_id = d.id
             WHERE di.instance_id = $1
             GROUP BY d.document_type
         `;
         const countRes = await useDataBase(countQuery, [instance_id], 1);
         const attachedDocs = countRes[1] || [];
 
-        // 3. Verificamos si se cumple cada requisito
+        // 3. Validamos faltantes
+        let missingDocs = [];
         for (const req of requirements) {
             const docData = attachedDocs.find(d => d.document_type === req.docType);
             const currentTotal = docData ? parseInt(docData.total) : 0;
 
-            if (currentTotal < req.min) {
-                return {
-                    success: false,
-                    error: `No se puede avanzar. Faltan los siguientes documentos: ${req.min - currentTotal} ${req.docType}`
-                };
+            if (currentTotal < req.total_min) {
+                missingDocs.push(`${req.docType} (Mínimo: ${req.total_min}, Actual: ${currentTotal})`);
             }
+        }
+
+        if (missingDocs.length > 0) {
+            return {
+                success: false,
+                error: `No se puede finalizar el proceso. Faltan los siguientes documentos: ${missingDocs.join(', ')}`
+            };
         }
 
         return { success: true };
     } catch (error) {
-        console.error("Error validando docs:", error);
-        return { success: false, error: "Error en el servidor al validar documentos." };
+        console.log(error)
+        console.error("Error validando cierre de proceso:", error);
+        return { success: false, error: "Error técnico al validar integridad de documentos." };
     }
 }
 
@@ -1118,7 +1132,7 @@ processController.nextProcessStep = async (req, res) => {
         try {
             let info = JSON.parse(data);
 
-            // 1. Obtener información de la instancia actual y su proceso
+            // 1. Obtener información de la instancia y el proceso
             const instanceQuery = `
                 SELECT pi.id, pi.step_id, pi.process_id, ps.order as current_order
                 FROM "Process".process_instance pi
@@ -1126,12 +1140,11 @@ processController.nextProcessStep = async (req, res) => {
                 WHERE pi.id = $1
             `;
             const instanceQ = await useDataBase(instanceQuery, [info.instance_id], 1);
-
             if (!instanceQ[0]) throw new Error("Instancia no encontrada");
 
-            const instance = instanceQ[1][0]
+            const instance = instanceQ[1][0];
 
-            // 2. Buscar el paso que sigue en el orden
+            // 2. Buscar el siguiente paso
             const nextStepQuery = `
                 SELECT id, name, required_roll, "order", end_process
                 FROM "Process".process_steps
@@ -1139,30 +1152,25 @@ processController.nextProcessStep = async (req, res) => {
                 ORDER BY "order" ASC
                 LIMIT 1
             `;
-
             const nextStepQ = await useDataBase(nextStepQuery, [instance.process_id, instance.current_order], 1);
 
             if (!nextStepQ[0]) {
                 res.writeHead(200);
-                return res.end(JSON.stringify({ success:false,message: "El proceso ya ha finalizado." }));
+                return res.end(JSON.stringify({ success: false, message: "El proceso ya ha finalizado." }));
             }
             const nextStep = nextStepQ[1][0];
 
-            // 3. Validar Permisos (required_roll es un array en la DB)
-            // Usamos .some para ver si el rol del usuario está en el array permitido
-            console.log('Roles habilitados: ',nextStep.required_roll)
-            console.log('Rol usuario: ',info.user_roll)
-            // Para verificar si el siguiente paso es el ultimo y disparar la validación de documentos
-            console.log(nextStep.end_process)
+            // 3. Validar Permisos
             const hasPermission = nextStep.required_roll.includes(info.user_roll);
-                        
             if (!hasPermission) {
                 res.writeHead(200);
-                return res.end(JSON.stringify({success:false,error: "No tienes el rol necesario para autorizar este paso." }));
+                return res.end(JSON.stringify({ success: false, error: "No tienes el rol necesario para autorizar este paso." }));
             }
 
-            if(nextStep.end_process){
-                const validation = await validateStepRequirements(info.instance_id, nextStep.id, info.company_id);
+            // --- CAMBIO CLAVE: Validación de Cierre ---
+            // Si el siguiente paso es el de cierre (end_process), validamos TODO el historial de documentos
+            if (nextStep.end_process) {
+                const validation = await validateFullProcessRequirements(info.instance_id, instance.process_id);
                 if (!validation.success) {
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     return res.end(JSON.stringify({ 
@@ -1172,39 +1180,30 @@ processController.nextProcessStep = async (req, res) => {
                 }
             }
 
-            // 4. Actualizar la instancia al nuevo paso
+            // 4. Actualizar la instancia
             const updateQuery = `
                 UPDATE "Process".process_instance 
-                SET step_id = $1,
-                updated_at = CURRENT_TIMESTAMP,
-                responsable = $3
+                SET step_id = $1, updated_at = CURRENT_TIMESTAMP, responsable = $3
                 WHERE id = $2
             `;
-
             await useDataBase(updateQuery, [nextStep.id, info.instance_id, info.user_id], 2);
 
-            // 5. (Opcional) Registrar en el historial para auditoría
+            // 5. Historial
             await useDataBase(`
                 INSERT INTO "Process".process_historial(
                     company_id, instance_id, previous_step, next_step, user_id, description)
                 VALUES ($1, $2, $3, $4, $5, $6);
-            `, [
-                info.company_id,
-                info.instance_id,
-                info.previous_step,
-                info.next_step,
-                info.user_id,
-                info.description
-            ], 2);
+            `, [info.company_id, info.instance_id, instance.step_id, nextStep.id, info.user_id, info.description || 'Avance de etapa'], 2);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ 
                 success: true, 
-                message: `el proceso a avanzado a: ${nextStep.name}`,
+                message: `El proceso ha avanzado a: ${nextStep.name}`,
                 nextStepId: nextStep.id 
             }));
 
         } catch (error) {
+            console.error(error);
             res.writeHead(500);
             res.end(JSON.stringify({ error: error.message }));
         }
