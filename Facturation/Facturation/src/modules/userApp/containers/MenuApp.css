@@ -59,7 +59,7 @@
 }
 
 .MenuApp .listOptions li:hover{
-    background-color: var(--iconHover);
+    background-color: var(--cardHover);
 }
 
 .MenuApp .listOptions li .despleSiubMe{
