@@ -129,3 +129,48 @@
 .FormNewInvoice .itemBlock .gridItems .itemRow:hover{
     background-color: var(--cardHover);
 }
+
+
+
+@media (max-width:500px) {
+    .FormNewInvoice{
+        width: 100dvw;
+    }
+
+    .FormNewInvoice .headForm{
+        padding: 2vh;
+        padding-top: 10vh;
+        width: 100dvw;
+    }
+
+    .FormNewInvoice .LoadingSpace{
+        width: 100dvw;
+    }
+
+    .FormNewInvoice form{
+        margin-top: 28vh;
+    }
+
+    .FormNewInvoice form .SearchinList{
+        width: 100%;
+    }
+
+    .FormNewInvoice .itemBlock .gridItems .UserCard{
+        width: 100%;
+    }
+
+    .FormNewInvoice .itemBlock .gridItems .itemRow{
+        flex-direction: column;
+    }
+
+    .FormNewInvoice .itemBlock .gridItems .rowInputItem .FormInput{
+        width: 72dvw;
+    }
+
+    .FormNewInvoice .itemBlock .gridItems .valueItemRow{
+        width: 100%;
+        margin-top: .5vh;
+    }
+
+
+}
