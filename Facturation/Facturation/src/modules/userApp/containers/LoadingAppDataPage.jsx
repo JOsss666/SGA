@@ -8,7 +8,7 @@ export function LoadingAppDataPage({title}){
     const {appInfo,darkMode,setDarkMode} = useAppInfo();
 
     useEffect(()=>{
-        setDarkMode(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        //setDarkMode(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     },[])
 
     useEffect(() => {

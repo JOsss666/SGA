@@ -845,6 +845,11 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                         </div>
                     )}
                     <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
+                    {appConfig?.access?.services?.e_facturation?.use == true && (
+                        <LabelValue title={"Factura electronica"}>
+                            <SwitchOption action={setE_invoice}/>    
+                        </LabelValue> 
+                    )}
                     <FileInput action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
                     <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor excede el monto max':'Crear recibo de caja'} disabled={disabled} loading={loading}/>
                 </form>
