@@ -1388,7 +1388,7 @@ controller.getDocParams = (req,res)=>{
         values.push(info.company_id)
 
         if(info.docType != undefined){
-            whereClauses.push(`docType = $${values.length +1}`)
+            whereClauses.push(`document_type = $${values.length +1}`)
             values.push(info.docType)
         }
         
@@ -1396,13 +1396,23 @@ controller.getDocParams = (req,res)=>{
 
         let sentence = `
             SELECT * FROM
-                "Ecosystem".docs_params
+                "Ecosystem".documents_rules
             ${whereQuery}
         `
 
         let consulta = await useDataBase(sentence,values,1);
+        let response = {};
+        if(consulta[0]){
+            response.status = 'OK';
+            response.data = consulta[1];
+            response.message = 'Reglas obtenidas correctamente'
+        }else{
+            response.sttus = 'Error',
+            response.data = [],
+            response.message = consulta[1]
+        }
         res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
+        res.end(JSON.stringify(response));
     })
         req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
