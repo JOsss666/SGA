@@ -30,7 +30,7 @@ const requiredHeaderFields = [
   'created_by',
   'thirdParty_id',
   'thirdParty_name',
-  'bussines_id',
+  //'bussines_id',
   'doc_type',
   'subTotal',
   'total'
