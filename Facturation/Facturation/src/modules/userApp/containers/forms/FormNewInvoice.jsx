@@ -17,10 +17,12 @@ import { isElectron, urlSer } from "../../../../App";
 import { LabelValue } from "../../components/LabelValue";
 import { SwitchOption } from "../../components/SwitchOption";
 import { UserCard } from "../../components/UserCard";
+import { executeDocumentAction } from "../../../../utils/DocumentsControl";
 
 export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     // Requieremnets
+    const [docRules,setDocRules] = useState([]);
     const [info,setInfo] = useState(InfoParams != undefined? InfoParams:{})
     const {appInfo,userInfo,userConfig, appConfig} = useAppInfo();
     const {popOutAlert,popInAlert} = useAlert();
@@ -42,6 +44,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         const [briefCaseBills,setBriefCaseBills] = useState([]);
 
     // control
+    const [error,setError] = useState(``);
+    const [visibleError,setVisibleError] = useState(false);
     const [mode,setMode] = useState('process_instance');
     const [loading,setLoading] = useState();
     const [disabled,setDisabled] = useState();
@@ -53,7 +57,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         // Control of the conditions of the document
         const [documentNature,setDocumentNature] = useState('DB');
         // Control of electronic facturation
-        const [e_invoice,setE_invoice] = useState(false);
+        const [e_invoice,setE_invoice] = useState(true);
         // Control of ITEMS Blocks
         const [itemBlocks,setItemBlocks] = useState([{items:[]}]);
     
@@ -383,6 +387,17 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     // Getters of info
 
+        // Get Document Rules
+        const getDocumentRules = async()=>{
+            let res = await postInfo('/getDocParams',{
+                company_id:appInfo.company_id,
+                docType:'Sell Invoice'
+            })
+            if(res.status == 'OK'){
+                setDocRules(res.data);
+            }
+        }
+
     const getInstances = async(allowedInstances,allowedTypes)=>{
         let res = await postInfo('/process/getProcessInstances',{
             company_id:appInfo.company_id,
@@ -652,7 +667,12 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     const calcTotalFromPayments = ()=>{
         let newTTl = 0;
-        if(paymentMethod.length == 0)return;
+        if(paymentMethod.length == 0){
+            if(totalToPay == 0) return;
+            setDisabledToSubmit(true);
+            setDisabledByValue(true)
+            return;
+        }
         console.log(paymentMethod)
         setPaymentMethod_code(paymentMethod[0].facturation_code);
         paymentMethod.forEach(element => {
@@ -660,14 +680,12 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 newTTl += parseFloat(element.value)
             }
         });
-        if(instance_id != undefined){
-            if(newTTl != totalToPay){
-                setDisabledToSubmit(true);
-                setDisabledByValue(true);
-            }else{
-                setDisabledToSubmit(false);
-                setDisabledByValue(false);
-            }
+        if(newTTl != totalToPay){
+            setDisabledToSubmit(true);
+            setDisabledByValue(true);
+        }else{
+            setDisabledToSubmit(false);
+            setDisabledByValue(false);
         }
         setTotal(newTTl)
         return(newTTl)
@@ -755,8 +773,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         if(typeof(parseInt(res.id)) == 'number'){
             addNotification({
                 type:'aproved',
-                title:`Factura de venta #${res.id} creada correctamente`,
-                description:`La factura de venta #${res.id} fue creada correctamente`
+                title:`Factura de venta #${res.ownSerial} creada correctamente`,
+                description:`La factura de venta #${res.ownSerial} fue creada correctamente`
             })
             FormInfo["doc_id"] = res.id
             FormInfo['instance_id'] = instance_id;
@@ -917,6 +935,26 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             : [...product.price_tiers].sort((a, b) => a.min_qty - b.min_qty)[0].price;
     };
 
+    const validateDocument = async () => {
+        if (docRules.length === 0) {
+            setDisabled(true);
+            console.warn('Documento sin parametrizar');
+            return;
+        }
+        setVisibleError(false);
+        for (const rule of docRules) {
+            const res = await executeDocumentAction(rule.action, FormInfo);
+            console.log(res);
+
+            if (res.isValid === false) {
+            setError(`Error de validación: ${res.message}`);
+            setVisibleError(true);
+            return; 
+            }
+        }
+        // Execution after all filters temporal, first implementation of doc_rules
+        createSellInvoice();
+    };
 
     // Event listeners
     
@@ -977,6 +1015,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     },[documents,briefCaseBills,itemBlocks])
 
     useEffect(()=>{
+        getDocumentRules();
         handleUserConfig();
         getProductsAndServices();
     },[])
@@ -1000,14 +1039,26 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     return(
         <div className="FormNewCashRecipt FormNewInvoice">
+            {visibleError && (
+                <div className="errorContainer">
+                    <span>{error}</span>
+                    <i title="Ocultar advertencia" className="fa-solid fa-xmark closeErrorBtn" onClick={()=>{
+                        setVisibleError(false);
+                    }}/>
+                </div>
+            )}
             <div className="headForm">
                 <BoldTitle text={'Factura de venta'}>
                     <i className="fa-solid fa-file-invoice"/>
                 </BoldTitle>
-                {appConfig?.access?.services?.e_facturation?.use == true && (
-                    <LabelValue title={"Generar factura electronica"}>
-                        <SwitchOption action={setE_invoice}/>    
-                    </LabelValue> 
+                {false && (
+                    <>
+                        {appConfig?.access?.services?.e_facturation?.use == true && (
+                            <LabelValue title={"Generar factura electronica"}>
+                                <SwitchOption action={setE_invoice}/>    
+                            </LabelValue> 
+                        )}
+                    </>
                 )}
                 <div className="valuesCashRecipt">
                     {(instance_id != undefined || mode == 'briefcase_payment')&& (
@@ -1017,13 +1068,13 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 </div>
                 <i className="fa-solid fa-xmark closeFormBtn" onClick={()=>{
                     popOutAlert();
-                    //handleCreationOfEinvoice();
                 }}/>
             </div>
             {!loading && (
                 <form action="" disabled={disabledToSubmit? true:disabled} onSubmit={(e)=>{
                     e.preventDefault();
-                    createSellInvoice();
+                    //createSellInvoice();
+                    validateDocument();
                 }}>
                     {info.store_id == undefined && (
                         <SearchinList action={setStore_id} title={'Tienda'} placeHolder={'Seleccione la tienda'} list={stores} disabled={disabled}/>
