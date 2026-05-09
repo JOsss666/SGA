@@ -1071,6 +1071,31 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     },[documents,briefCaseBills,itemBlocks])
 
     useEffect(()=>{
+        if(itemBlocks.length == 0) return;
+        let C = [];
+        itemBlocks.forEach(element => {
+            if(element.items != undefined){
+                element.items.forEach(item => {
+                    C.push(item);
+                });
+            }
+        });
+        setAttachedItems(C);
+    },[itemBlocks])
+
+    useEffect(()=>{
+        handleTaxes(attachedItems);
+    },[attachedItems])
+
+    useEffect(()=>{
+        let totalTax = 0;
+        taxes.forEach(element => {
+            totalTax += element.total;
+        });
+        setTotalTaxes(totalTax);
+    },[taxes])
+
+    useEffect(()=>{
         getDocumentRules();
         handleUserConfig();
         getProductsAndServices();
@@ -1123,10 +1148,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     <h6 className="valueCashRecipt">Valor: $ {formatCurrency(total)}</h6>
                 </div>
                 <i className="fa-solid fa-xmark closeFormBtn" onClick={()=>{
-                    //popOutAlert();
-                    console.log(attachedItems)
-                    console.log(taxes)
-                    console.log(totalTaxes)
+                    popOutAlert();
                 }}/>
             </div>
             {!loading && (

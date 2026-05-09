@@ -112,7 +112,7 @@ export function New(){
         {text:'Imprimir Ordes de cliente',children:<ClientOrderPreview/>,icon:<i className="fa-solid fa-print"/>},
         //{text:'Factura de prueba',children:<FormInvoice/>,icon:<i className="fa-solid fa-print"/>},
         
-        //{text:'Imprimir Factura de venta',children:<SellInvoiceDesign/>,icon:<i className="fa-solid fa-print"/>},
+        {text:'Imprimir Factura de venta',children:<SellInvoiceDesign/>,icon:<i className="fa-solid fa-print"/>},
         /*
         {text:'Opciones de factura electronica',children:<div style={{
             paddingTop:'8vh',
@@ -135,10 +135,7 @@ export function New(){
                 })
             }}></FormButton>
         </div>},
-        /*
-        /*{text:'Ver dispositivos',children:<span onClick={()=>{
-            scanDevices();
-        }}>Ver impresoras</span>},*/
+        /**/
         //{text:'Crear metodo de pago',children:<FormNewPaymentMethod/>,icon:<i className="fa-regular fa-credit-card"/>},
         //{text:'Crear Concepto',children:<FormNewConcept/>,icon:<i className="fa-solid fa-scale-balanced"/>},
         //{text:'Crear Producto',children:<FormNewProduct/>,icon:<i className="fa-solid fa-shirt"/>},
