@@ -1848,7 +1848,7 @@ controller.getDocuments = (req,res)=>{
         }
 
         if(info.instance_id != undefined){
-            whereClauses.push(`"Ecosystem".documents.instance_id = $${values.length +1}`);
+            whereClauses.push(`"Ecosystem".docs_instances.instance_id = $${values.length +1}`);
             values.push(info.instance_id);
         }
 
@@ -1869,13 +1869,18 @@ controller.getDocuments = (req,res)=>{
         let sentence = `
             SELECT 
                 "Ecosystem".documents.*,
+                "Ecosystem".docs_instances.instance_id,
                 "Process".process_instance."ownSerial" as "instanceOwnSerial"
             FROM
                 "Ecosystem".documents
             LEFT JOIN
+                "Ecosystem".docs_instances
+            ON
+                "Ecosystem".documents.id = "Ecosystem".docs_instances.doc_id
+            LEFT JOIN
                 "Process".process_instance
             ON
-                "Ecosystem".documents.instance_id = "Process".process_instance.id
+                "Ecosystem".docs_instances.instance_id = "Process".process_instance.id
             ${whereQuery}
             ORDER BY id DESC, document_type ASC
         ;`;
