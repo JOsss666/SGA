@@ -680,7 +680,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         if(briefCaseBills.length >0 && documents.length == 0){
             let newTotalToPay = 0;
             briefCaseBills.forEach(element => {
-                newTotalToPay += (element.paid_value != undefined && element.paid_value != "" ? element.paid_value:0);
+                newTotalToPay += parseFloat(element.paid_value != undefined && element.paid_value != "" ? element.paid_value:0);
             });
             setTotalToPay(newTotalToPay)
         }
