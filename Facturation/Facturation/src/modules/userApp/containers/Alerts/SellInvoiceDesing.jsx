@@ -23,6 +23,8 @@ export function SellInvoiceDesign(){
     const [paymentMethods,setPaymentMethods] = useState([]);
     const [electronInfo,setElectronInfo] = useState({});
     const total = useMemo(() => {
+        console.log('///////// ',paymentMethods);
+        if(paymentMethods.length == 0) return docInfo.total;
         return paymentMethods.reduce((acc, el) => acc + parseFloat(el.value || 0), 0);
     }, [paymentMethods]);
     const [thirdPartyInfo,setThirdPartyInfo] = useState({});
@@ -84,11 +86,6 @@ export function SellInvoiceDesign(){
     const getAttachedDocuments = async()=>{
         setDisabled(true)
         setLoading(true)
-        console.log({
-            company_id:appInfo.company_id,
-            allowedTypes:['Cash recipt'],
-            instance_id
-        })
         let res = await postInfo('/getDocuments',{
             company_id:appInfo.company_id,
             allowedTypes:['Sell Invoice'],
@@ -120,6 +117,7 @@ export function SellInvoiceDesign(){
             company_id:appInfo.company_id,
             doc_id:docInfo.id
         })
+        console.log(res);
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
@@ -128,7 +126,10 @@ export function SellInvoiceDesign(){
                     value:element.total
                 })
             });
+            console.log('------> ', C);
             setPaymentMethods(C);
+        }else{
+            setAttachedItems([])
         }
         setLoading(false);
     }
@@ -206,6 +207,10 @@ export function SellInvoiceDesign(){
     }
 
     useEffect(()=>{
+        console.log(paymentMethods);
+    },[paymentMethods])
+
+    useEffect(()=>{
         console.log(instance_id)
         if(instance_id == undefined && instance_id != '') return;
         getAttachedDocuments();
@@ -224,11 +229,13 @@ export function SellInvoiceDesign(){
     useEffect(()=>{
         console.log(docInfo)
         if(docInfo.id == undefined) return;
-        getAttachedTransactions();
+        if(stage == 1){
+            getAttachedTransactions();
+        };
         getThirdParties()
         getDocuments(docInfo.instance_id);
         getElectronInfo();
-    },[docInfo])
+    },[docInfo,stage])
 
     useEffect(()=>{
         let totalTax = 0;
@@ -270,6 +277,7 @@ export function SellInvoiceDesign(){
         <>
         <span className='CashReciptDesign_goBackBtn' onClick={()=>{
             setStage(0);
+            setInstaceId();
         }}><i className="fa-solid fa-arrow-left"/>Volver</span>
         <div className="CashReciptDesign_suitElectronOptions">
             {isElectron && (
@@ -422,7 +430,7 @@ export function SellInvoiceDesign(){
                 {attachedItems.map((item, index) => {
                     const quantity = Number(item.units || 1);
                     const price = Number(item.unit_value || 0).toFixed(2);
-                    const total = Number(item.total || 0);
+                    const total = Number(parseFloat(item.units) * parseFloat(item.unit_value) || 0).toFixed(2);
                     return (
                         <tr
                             key={index}

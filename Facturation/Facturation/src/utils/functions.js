@@ -1172,7 +1172,7 @@ export async function printSellInvoice(info,appInfo,barCode){
 
                             const quantity = Number(item.units || 1);
                             const price = Number(item.unit_value || 0).toFixed(2);
-                            const total = Number(item.total || 0);
+                            const total = Number(parseFloat(item.units) * parseFloat(item.unit_value) || 0).toFixed(2);
 
                             return `
                                 <tr style="
@@ -1185,7 +1185,7 @@ export async function printSellInvoice(info,appInfo,barCode){
                                         word-break:break-word;
                                         padding-right:1mm;
                                     ">
-                                        ${item.service_name}
+                                        ${item.service_name ?? item.name ?? '--'}
                                     </td>
 
                                     <td style="
