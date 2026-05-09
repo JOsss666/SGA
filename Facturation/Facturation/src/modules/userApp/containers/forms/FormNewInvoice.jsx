@@ -1071,31 +1071,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     },[documents,briefCaseBills,itemBlocks])
 
     useEffect(()=>{
-        if(itemBlocks.length == 0) return;
-        let C = [];
-        itemBlocks.forEach(element => {
-            if(element.items != undefined){
-                element.items.forEach(item => {
-                    C.push(item);
-                });
-            }
-        });
-        setAttachedItems(C);
-    },[itemBlocks])
-
-    useEffect(()=>{
-        handleTaxes(attachedItems);
-    },[attachedItems])
-
-    useEffect(()=>{
-        let totalTax = 0;
-        taxes.forEach(element => {
-            totalTax += element.total;
-        });
-        setTotalTaxes(totalTax);
-    },[taxes])
-
-    useEffect(()=>{
         getDocumentRules();
         handleUserConfig();
         getProductsAndServices();
