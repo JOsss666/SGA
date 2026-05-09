@@ -112,7 +112,7 @@ export function New(){
         {text:'Imprimir Ordes de cliente',children:<ClientOrderPreview/>,icon:<i className="fa-solid fa-print"/>},
         //{text:'Factura de prueba',children:<FormInvoice/>,icon:<i className="fa-solid fa-print"/>},
         
-        {text:'Imprimir Factura de venta',children:<SellInvoiceDesign/>,icon:<i className="fa-solid fa-print"/>},
+        //{text:'Imprimir Factura de venta',children:<SellInvoiceDesign/>,icon:<i className="fa-solid fa-print"/>},
         /*
         {text:'Opciones de factura electronica',children:<div style={{
             paddingTop:'8vh',
