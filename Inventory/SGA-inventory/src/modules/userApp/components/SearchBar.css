@@ -34,8 +34,8 @@
 
 .SearchBar i{
     position: absolute;
-    left: 2vh;
-    top: 2vh;
+    left: 1.8vh;
+    top: 2.7vh;
     transform: translateY(-50%);
     color: #777;
     font-size: 2.2vh;

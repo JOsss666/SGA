@@ -1,0 +1,61 @@
+
+.ProcessesReport .gridResults{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    padding-left: 2vh;
+}
+
+.ProcessesReport .gridResults span{
+    display: flex;
+    color: var(--descriptionText);
+    cursor: pointer;
+}
+
+.ProcessesReport .SpaceReport{
+    width: 100%;
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width:500px) {
+    .ProcessesReport .SpaceReport{
+        padding-left: 0;
+        margin-top: 6vh;
+        height: 65vh;
+    }
+
+    .ProcessesReport .totalsBalanceC{
+        display: none;
+    }
+
+    .ProcessesReport .settingsReport{
+        top: 1vh;
+        padding-top: 1vh;
+        max-width: 90dvw;
+        overflow-y: auto;
+        position: absolute;
+        top: 16vh;
+        overflow-y: hidden;
+    }
+
+    .ProcessesReport .settingsReport .ButtonDownload{
+        max-width:max-content;
+        flex-wrap: nowrap;
+        text-wrap: nowrap;
+    }
+
+    .ProcessesReport .settingsReport .SearchBar{
+        width: 30vh;
+        top: .25vh;
+        left: 1.5vh;
+        
+    }
+
+    .ProcessesReport .settingsReport .SearchBar i.fa-search {
+    position: relative;
+    top: -8px;   /* ajusta según necesites */
+}
+}
+
