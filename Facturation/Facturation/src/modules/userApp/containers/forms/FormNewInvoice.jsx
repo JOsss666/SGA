@@ -1148,10 +1148,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     <h6 className="valueCashRecipt">Valor: $ {formatCurrency(total)}</h6>
                 </div>
                 <i className="fa-solid fa-xmark closeFormBtn" onClick={()=>{
-                    //popOutAlert();
-                    console.log(attachedItems)
-                    console.log(taxes)
-                    console.log(totalTaxes)
+                    popOutAlert();
                 }}/>
             </div>
             {!loading && (
