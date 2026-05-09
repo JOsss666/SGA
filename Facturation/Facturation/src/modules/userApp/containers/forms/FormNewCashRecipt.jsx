@@ -680,7 +680,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         if(briefCaseBills.length >0 && documents.length == 0){
             let newTotalToPay = 0;
             briefCaseBills.forEach(element => {
-                newTotalToPay += (element.paid_value != undefined && element.paid_value != "" ? element.paid_value:0);
+                newTotalToPay += parseFloat(element.paid_value != undefined && element.paid_value != "" ? element.paid_value:0);
             });
             setTotalToPay(newTotalToPay)
         }
@@ -845,11 +845,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                         </div>
                     )}
                     <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
-                    {appConfig?.access?.services?.e_facturation?.use == true && (
-                        <LabelValue title={"Factura electronica"}>
-                            <SwitchOption action={setE_invoice}/>    
-                        </LabelValue> 
-                    )}
                     <FileInput action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
                     <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor excede el monto max':'Crear recibo de caja'} disabled={disabled} loading={loading}/>
                 </form>

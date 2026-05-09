@@ -1,11 +1,38 @@
 .FormNewInvoice{
-    width: 70dvw;
+    width: 93dvw;
     position: relative;
 }
 
 .FormNewInvoice .headForm{
-    width: 70%;
+    width: 92%;
     padding: 2vh 2vw;
+}
+
+.FormNewInvoice .errorContainer{
+    position: fixed;
+    width: 90%;
+    top: 12vh;
+    left: 8vw;
+    background-color: #FEF2F2;
+    border-radius: 1vh;
+    padding: 2vh;
+    border: solid .2vh #FF6467;
+    z-index: 40;
+}
+
+.FormNewInvoice .errorContainer .closeErrorBtn{
+    cursor: pointer;
+    position: absolute;
+    top: 1.5vh;
+    right: 2vh;
+    font-size: clamp(3px,3vh,30px);
+    color: #FF6467;   
+}
+
+.FormNewInvoice .errorContainer span{
+    color: #FF6467;   
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
 }
 
 .FormNewInvoice .headForm .LabelValue{
