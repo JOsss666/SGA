@@ -87,6 +87,7 @@ inventoryController.getProducts = (req, res) => {
                 ps.*,
                 ac.name AS tax_name,
                 t.base AS tax_base,
+                t.id AS tax_id,
                 t.rate AS tax_rate,
                 c_exit.account_id AS exit_account,
                 c_entry.account_id AS entry_account,
@@ -174,6 +175,7 @@ inventoryController.getComercialProducts = (req,res)=>{
                 ac.name AS tax_name,
                 t.base AS tax_base,
                 t.rate AS tax_rate,
+                t.id AS tax_id,
                 c_exit.account_id AS exit_account,
                 c_entry.account_id AS entry_account,
                 array_remove(array_agg(DISTINCT c.name), NULL) AS categories,
@@ -215,6 +217,7 @@ inventoryController.getComercialProducts = (req,res)=>{
                 ps.code, 
                 ac.name, 
                 t.base, 
+                t.id,
                 t.rate, 
                 c_exit.account_id, 
                 c_entry.account_id
@@ -1316,11 +1319,15 @@ inventoryController.getKardex = (req,res)=>{
 
 inventoryController.getServicesMovements = (req,res)=>{
     let data = '';
+
     req.on('data',chunk=>{
         data += chunk;
-    })
+    });
+
     req.on('end',async()=>{
+
         let info = JSON.parse(data);
+
         const values = [];
         let whereClauses = [];
 
@@ -1329,7 +1336,7 @@ inventoryController.getServicesMovements = (req,res)=>{
 
         if(info.doc_id != undefined){
             whereClauses.push(`sm.doc_id = $${values.length + 1}`);
-            values.push(info.doc_id)
+            values.push(info.doc_id);
         }
 
         if(info.instance_id != undefined){
@@ -1340,40 +1347,75 @@ inventoryController.getServicesMovements = (req,res)=>{
         const whereQuery = whereClauses.length > 0
         ? `WHERE ${whereClauses.join(" AND ")}`
         : "";
+
         let sentence = `
-           SELECT
-                sm.*, -- Solo el alias
+            SELECT
+                sm.*,
+
                 ps.name AS service_name,
                 ps.img AS service_img,
                 ps.type,
+
+                ps.tax_id,
+                t.rate AS tax_rate,
+                t.base AS tax_base,
+                ac.name AS tax_name,
+
                 c_exit.account_id AS exit_account,
                 c_entry.account_id AS entry_account
+
             FROM
-                "Inventory".services_movement AS sm -- Aquí nace el alias 'sm'
+                "Inventory".services_movement AS sm
+
             LEFT JOIN
-                "Inventory"."products&services" AS ps -- Aquí nace el alias 'ps'
+                "Inventory"."products&services" AS ps
             ON
                 sm.service_id = ps.id
+
+            LEFT JOIN
+                "Ecosystem".taxes AS t
+            ON
+                ps.tax_id = t.id
+
+            LEFT JOIN
+                "Ecosystem".contable_accounts AS ac
+            ON
+                t.account_id = ac.id
+
             LEFT JOIN
                 "Ecosystem".concepts AS c_exit
             ON
                 ps.exit_concept = c_exit.id
+
             LEFT JOIN
                 "Ecosystem".concepts AS c_entry
             ON
                 ps.entry_concept = c_entry.id
+
             ${whereQuery}
+
             ORDER BY
-                ps.order_index ASC, ps.name ASC; -- Usamos los alias
+                ps.order_index ASC,
+                ps.name ASC;
         `;
+
         let consulta = await useDataBase(sentence,values,1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
+
+        res.writeHead(200,{
+            'Content-Type':'application/json'
+        });
+
         res.end(JSON.stringify(consulta));
-    })
+
+    });
+
     req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.writeHead(500,{
+            'Content-Type':'text/plain'
+        });
+
         res.end(JSON.stringify(err));
-    })
+    });
 }
 
 inventoryController.updatePricesList = (req, res) => {

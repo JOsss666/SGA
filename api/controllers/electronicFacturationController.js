@@ -447,6 +447,11 @@ electronicFacturationController.getDocuments = (req,res)=>{
             whereClauses.push(`"ElectronicFacturation".documents.company_id = $${values.length}`);
         }
 
+        if(info.doc_id != undefined){
+            values.push(info.doc_id);
+            whereClauses.push(`"ElectronicFacturation".documents.doc_id = $${values.length}`);
+        }
+
         if(info.type != undefined){
             values.push(info.type);
             whereClauses.push(`"ElectronicFacturation".documents.type = $${values.length}`);

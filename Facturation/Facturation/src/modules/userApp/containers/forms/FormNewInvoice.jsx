@@ -9,7 +9,7 @@ import './FormNewCashRecipt.css'
 import './FormNewInvoice.css'
 import { FileInput } from "../../components/FileInput";
 import { LoadingSpace } from "../LoadingSpace";
-import { moneyFormat, newElectronicInvoide, postInfo, printCashRecipt } from "../../../../utils/functions";
+import { moneyFormat, newElectronicInvoide, postInfo, printCashRecipt, printSellInvoice } from "../../../../utils/functions";
 import { NewElementSelect } from "../../components/NewElementSelect";
 import { FormNewThirdParties } from "./FormNewThirdParties";
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
@@ -85,6 +85,13 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const [shift_id,setShift_id] = useState();
     const [status,setStatus] = useState('active');
 
+
+    // Control to print
+    const [totalTaxes,setTotalTaxes] = useState(0);
+    const [attachedItems,setAttachedItems] = useState([]);
+    const [taxes,setTaxes] = useState([]);
+    const [electronicInfo,setElectronicInfo] = useState({});
+
     // Object FormInfo
     let FormInfo = {
         paymentMethod,
@@ -102,7 +109,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         subTotal:total,
         total,
         attached,
-        instance_id:instance_id,
+        instance_id,
         instanceOwnSerial,
         step_id,
         payedBills:briefCaseBills,
@@ -642,6 +649,28 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     // Control functions
 
+    const handleTaxes = (items) => {
+        const groupedTaxes = items.reduce((acc, item) => {
+            if (!item.tax_id) return acc;
+            let itemTotal = parseFloat(item.unit_value) * parseInt(item.units);
+            console.log('OOOOOOOOOOOOOOOO ',itemTotal)
+            console.log('IIIIIIIIIIIIIIII ',item)
+            const taxTotal = (itemTotal * item.tax_rate) / 100;
+            if (!acc[item.tax_id]) {
+                acc[item.tax_id] = {
+                    id: item.tax_id,
+                    rate: item.tax_rate,
+                    name: item.tax_name,
+                    total: taxTotal
+                };
+            } else {
+                acc[item.tax_id].total += taxTotal;
+            }
+            return acc;
+        }, {});
+        setTaxes(Object.values(groupedTaxes));
+    };
+
     const addPaymentMethod = (newPayment) => {
         if(newPayment.id != undefined){
             setPaymentMethod(prev => {
@@ -777,14 +806,36 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 description:`La factura de venta #${res.ownSerial} fue creada correctamente`
             })
             FormInfo["doc_id"] = res.id
-            FormInfo['instance_id'] = instance_id;
+            FormInfo['instance_id'] = instance_id[0] ?? undefined ;
             FormInfo["ownSerial"] = res.ownSerial;
+            let e_info = electronicInfo;
             if(e_invoice){
-                handleCreationOfEinvoice(res.id);
+                e_info = await handleCreationOfEinvoice(res.id);
             }
             if(isElectron){
-                await printCashRecipt(FormInfo,appInfo,true);
-                await printCashRecipt(FormInfo,appInfo,false);
+                let infoToPrtint = {
+                    docInfo:{
+                        doc_id:res.id,
+                        doc_type:FormInfo.doc_type,
+                        instance_id:instance_id[0] ?? undefined,
+                        description:FormInfo.description,
+                        ownSerial: res.ownSerial,
+                        total,
+                        paymentMethod,
+                        instanceOwnSerial:instance_id[0]?.ownSerial ?? undefined 
+                    },
+                    thirdPartyInfo:{
+                        thirdParty_name:thirdPartyInfo.names
+                    },
+                    total,
+                    paymentMethods:paymentMethod,
+                    electronInfo:e_info,
+                    totalTaxes,
+                    taxes,
+                    attachedItems
+                }
+                await printSellInvoice(infoToPrtint,appInfo,true);
+                await printSellInvoice(infoToPrtint,appInfo,false);
             }
             FormInfo["user_id"] = userInfo.user_id,
             FormInfo['transactionDetails'] = []
@@ -920,6 +971,11 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 }
             })
         }
+        return({
+            id: res.sga_id,
+            code:res.data.bill.cufe,
+            url: res.data.bill.public_url
+        })
     }
 
     const getEffectivePrice = (product, quantity) => {
@@ -1067,7 +1123,10 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     <h6 className="valueCashRecipt">Valor: $ {formatCurrency(total)}</h6>
                 </div>
                 <i className="fa-solid fa-xmark closeFormBtn" onClick={()=>{
-                    popOutAlert();
+                    //popOutAlert();
+                    console.log(attachedItems)
+                    console.log(taxes)
+                    console.log(totalTaxes)
                 }}/>
             </div>
             {!loading && (
