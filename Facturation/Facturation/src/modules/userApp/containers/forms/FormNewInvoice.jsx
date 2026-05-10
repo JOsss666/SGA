@@ -57,7 +57,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         // Control of the conditions of the document
         const [documentNature,setDocumentNature] = useState('DB');
         // Control of electronic facturation
-        const [e_invoice,setE_invoice] = useState(false);
+        const [e_invoice,setE_invoice] = useState(true);
         // Control of ITEMS Blocks
         const [itemBlocks,setItemBlocks] = useState([{items:[]}]);
     
@@ -1132,7 +1132,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 <BoldTitle text={'Factura de venta'}>
                     <i className="fa-solid fa-file-invoice"/>
                 </BoldTitle>
-                {true && (
+                {false && (
                     <>
                         {appConfig?.access?.services?.e_facturation?.use == true && (
                             <LabelValue title={"Generar factura electronica"}>
