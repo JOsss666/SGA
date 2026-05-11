@@ -874,8 +874,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 type:'operation',
                 nature: documentNature == 'DB'? 'CR':'DB'
             })*/
-            //await toAccount();
-            //await updatePaidAmount();
+            await toAccount();
+            await updatePaidAmount();
         }else{
             addNotification({
                 type:'error',
