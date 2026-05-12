@@ -291,7 +291,7 @@ export function SellInvoiceDesign(){
                             thirdParty_name:thirdPartyInfo.names,
                             description:docInfo.description,
                             ownSerial:docInfo.ownSerial,
-                            total,
+                            total:docInfo.total,
                             paymentMethod:paymentMethods,
                             instanceOwnSerial
                         },
@@ -312,7 +312,7 @@ export function SellInvoiceDesign(){
                             thirdParty_name:thirdPartyInfo.names,
                             description:docInfo.description,
                             ownSerial:docInfo.ownSerial,
-                            total,
+                            total:docInfo.total,
                             paymentMethod:paymentMethods,
                             instanceOwnSerial
                         },
@@ -484,19 +484,19 @@ export function SellInvoiceDesign(){
         <span style={{margin:"2mm 0",width:"100%",borderBottom:"dashed .5mm #000"}}></span>
             <div style={{display:"flex",fontSize:"12px"}}>
                 <div style={{display:'flex',flexDirection:'column',gap:'10px 0',width:'100%'}}>
-                {taxes.map((element,index)=>(
-                    <div key={index} style={{display:"flex",fontSize:"12px"}}>
-                            <span style={{margin:'auto 0'}}>{element.name} ({element.rate}%):</span>
-                            <strong style={{margin:"auto",marginRight:"0"}}>{moneyFormat(element.total)}</strong>
-                    </div>
-                    ))}
                     <div style={{display:"flex",fontSize:"12px", width:'100%'}}>
                         <span style={{margin:'auto 0',fontSize:"12px"}}>Base impuestos: </span>
-                        <strong style={{margin:"auto",marginRight:"0",textAlign:'right'}}>{moneyFormat(total-totalTaxes)}</strong>
+                        <strong style={{margin:"auto",marginRight:"0",textAlign:'right'}}>{moneyFormat(docInfo.total-totalTaxes)}</strong>
                     </div>
+                    {taxes.map((element,index)=>(
+                        <div key={index} style={{display:"flex",fontSize:"12px"}}>
+                                <span style={{margin:'auto 0'}}>{element.name} ({element.rate}%):</span>
+                                <strong style={{margin:"auto",marginRight:"0"}}>{moneyFormat(element.total)}</strong>
+                        </div>
+                    ))}
                     <div style={{display:"flex",fontSize:"12px", width:'100%'}}>
                         <span style={{margin:'auto 0',fontSize:"12px"}}>TOTAL: </span>
-                        <strong style={{margin:"auto",marginRight:"0",textAlign:'right'}}>{moneyFormat(total)}</strong>
+                        <strong style={{margin:"auto",marginRight:"0",textAlign:'right'}}>{moneyFormat(docInfo.total)}</strong>
                     </div>
                 </div>
             </div>

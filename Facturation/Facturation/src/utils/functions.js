@@ -1016,7 +1016,7 @@ export async function printClientOrder(info,appInfo,barCode){
 
 export async function printSellInvoice(info,appInfo,barCode){
     console.log(info);
-
+    console.log('Imprimiendo factura de venta...');
     function generateBarcodeSVG(value) {
         const svgNode = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
@@ -1227,6 +1227,29 @@ export async function printSellInvoice(info,appInfo,barCode){
                 border-bottom:dashed .5mm #000;
                 display:block;
             "></span>
+             <div style="
+                display:flex;
+                font-size:12px;
+                width:100%;
+                margin-bottom:4mm;
+            ">
+
+                <span style="
+                    margin:auto 0;
+                    font-size:12px;
+                ">
+                    Base impuestos:
+                </span>
+
+                <strong style="
+                    margin:auto;
+                    margin-right:0;
+                    text-align:right;
+                ">
+                    ${moneyFormat(info.docInfo.total - info.totalTaxes)}
+                </strong>
+
+            </div>
             <div style="
                 display:flex;
                 font-size:12px;
@@ -1242,6 +1265,7 @@ export async function printSellInvoice(info,appInfo,barCode){
 
                 return `
                     <div style="
+                        maring-top:2mm;
                         display:flex;
                         font-size:12px;
                     ">
@@ -1274,29 +1298,6 @@ export async function printSellInvoice(info,appInfo,barCode){
                     margin:auto 0;
                     font-size:12px;
                 ">
-                    Base impuestos:
-                </span>
-
-                <strong style="
-                    margin:auto;
-                    margin-right:0;
-                    text-align:right;
-                ">
-                    ${moneyFormat(info.total - info.totalTaxes)}
-                </strong>
-
-            </div>
-
-            <div style="
-                display:flex;
-                font-size:12px;
-                width:100%;
-            ">
-
-                <span style="
-                    margin:auto 0;
-                    font-size:12px;
-                ">
                     TOTAL:
                 </span>
                 <strong style="
@@ -1304,7 +1305,7 @@ export async function printSellInvoice(info,appInfo,barCode){
                     margin-right:0;
                     text-align:right;
                 ">
-                    ${moneyFormat(info.total)}
+                    ${moneyFormat(info.docInfo.total)}
                 </strong>
 
             </div>
