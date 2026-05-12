@@ -11,11 +11,11 @@ export function NoAccess({title,description,img,noExit,noRedirect}){
     const params = useParams();
 
     const handleRedirect = ()=>{
-        navigate(`/SGA_management/login`)
+        navigate(`/SGA_treasury/login`)
     }
 
     const handleGoHome = ()=>{
-        navigate(`/SGA_management/${params.company_key}/${params.user_key}`)
+        navigate(`/SGA_treasury/${params.company_key}/${params.user_key}`)
     }
 
     return(
