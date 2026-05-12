@@ -5,15 +5,25 @@ import { FormButton } from "../../components/FormButton";
 import './GeneralInfo.css'
 import { BoldTitle } from "../../components/BoldTitle";
 import { LabelValue } from "../../components/LabelValue";
+import { useAppInfo } from "../../../../context/context";
+import { postInfo } from "../../../../utils/functions";
 
-export function GeneralInfo({info}){
+export function GeneralInfo({info,reloadFun}){
+
+    // requirements
+    const {userConfig} = useAppInfo();
     // Control
-    const [loading,setLoading] = useState(false);
-    const [disabled,setDisabled] = useState(false);
+    const can_edit = userConfig?.access?.sections?.thirdparties?.can_edit
+    const [disabled,setDisabled] = useState(can_edit? !can_edit:true);
 
     // ParamsForm
     const [names,setNames] = useState(info.names != undefined? info.names:'');
     const [lastNames,setLastNames] = useState(info.lastNames != undefined? info.lastNames:'');
+    //
+    const [first_name,setFirst_name] = useState(info.names != undefined? info.first_name:'');
+    const [second_name,setSecond_name] = useState(info.names != undefined? info.second_name:'');
+    const [first_surname,setFirst_surname] = useState(info.names != undefined? info.first_surname:'');
+    const [second_surname,setSecond_surname] = useState(info.names != undefined? info.second_surname:'');
     const [indentification_type,setIndentification_type] = useState(info.indentification_type != undefined? info.indentification_type:'');
     const [indentification_number,setIndentification_number] = useState(info.indentification_number != undefined? info.indentification_number:'');
     const [mail,setmail] = useState(info.mail != undefined? info.mail:'');
@@ -26,8 +36,10 @@ export function GeneralInfo({info}){
     const formInfo = {
         company_id:info.company_id,
         id:info.id,
-        names,
-        lastNames,
+        first_name,
+        second_name,
+        first_surname,
+        second_surname,
         indentification_type,
         indentification_number,
         mail,
@@ -38,26 +50,42 @@ export function GeneralInfo({info}){
         type
     }
 
+    const updateInfo = async()=>{
+        setDisabled(true);
+        console.log(formInfo)
+        let res = await postInfo('/updateThirdPartyGeneralInfo',formInfo);
+        if(res[0]){
+            console.log('Actualizacion Exitosa');
+            reloadFun?.();
+        }
+        setDisabled(false);
+    }
+
     return(
         <div className="GeneralInfo">
-            <form action="">
-                <FormInput action={setNames} value={names} title={'Nombre(s) o Razon Social'} placeholder={'Nombres del tercero'} disabled={disabled}/>
-                <FormInput action={setLastNames} value={lastNames} title={'Apellidos o Extensiones'} placeholder={'Apellidos o complementos'} disabled={disabled}/>
+            <form action="" onSubmit={(e)=>{
+                e.preventDefault();
+                updateInfo();
+            }}>
+                <FormInput action={setFirst_name} value={first_name} title={'Primer Nombre'} placeholder={'Primer nombre'} disabled={disabled}/>
+                <FormInput action={setSecond_name} value={second_name} title={'Segundo Nombre'} placeholder={'Segundo nombre'} disabled={disabled}/>
+                <FormInput action={setFirst_surname} value={first_surname} title={'Primer Apellido'} placeholder={'Primer Apellido'} disabled={disabled}/>
+                <FormInput action={setSecond_surname} value={second_surname} title={'Segundo Apellido'} placeholder={'Segundo Apellido'} disabled={disabled}/>
                 <div className="SelOp">
                     <h6>Relación comercial</h6>
-                    <SelectOptions action={setType} options={['client','supplier','employee','contractor','partner','other']} value={type}/>
+                    <SelectOptions disabled={disabled} defaultValue={type} action={setType} options={['client','supplier','employee','contractor','partner','other']} value={type}/>
                 </div>
                 <div className="SelOp">
                     <h6>Tipo de documento</h6>
-                    <SelectOptions action={setIndentification_type} options={['CC','NIT','CE','PAS']} value={indentification_type}/>
+                    <SelectOptions disabled={disabled} defaultValue={indentification_type} action={setIndentification_type} options={['CC','NIT','CE','PAS']} value={indentification_type}/>
                 </div>
                 <FormInput action={setIndentification_number} title={'Número de documento'} placeholder={'132...'} disabled={disabled} type={'number'} value={indentification_number}/>
                 <FormInput action={setmail} title={'Correo electronico'} placeholder={'...@gmail.com'} disabled={disabled} type={'mail'} value={mail}/>
                 <FormInput action={setPhone} title={'Número telefonico'} placeholder={'numero telefonico'} disabled={disabled} value={phone}/>
                 <FormInput action={setCountry} title={'País'} placeholder={'Pais de origen o de registro'} disabled={disabled} value={country}/>
                 <FormInput action={setCity} title={'Ciudad'} placeholder={'Ciudad o departamento'} disabled={disabled} value={city}/>
-                <FormInput action={setAddress} title={'Dirección'} placeholder={'Cll - Cra... '} disabled={disabled} value={address}/>
-                {formInfo != info && (
+                <FormInput action={setAddress} title={'Dirección'} placeholder={'Cll - Cra... '} disabled={disabled} required={false} value={address}/>
+                {formInfo != info && can_edit &&(
                     <FormButton text={'Guardar Cambios'} disabled={disabled} />
                 )}
             </form>

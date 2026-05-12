@@ -15,44 +15,11 @@
 .TaxInfo .paramsContainer form{
     display: flex;
     flex-wrap: wrap;
+    gap: 2vh;
 }
 
-.TaxInfo .paramsContainer form .SelOp, .TaxInfo .paramsContainer form .LabelValue{
-    width: 20vw;
-    margin: 1vh 0;
-    margin-right: 4vh;
-}
-
-.TaxInfo form .SelOp{
-    display: flex;
-    flex-direction: column;
-}
-
-.TaxInfo form .SelOp h6{
-    margin-bottom: 1vh;
-    font-size: clamp(2.2px,2.5vh,25px);
-    font-weight: 500;
-    color: var(--descriptionText);
-}
-
-.TaxInfo form .SelOp .contentOptions{
-    box-shadow: none;
-}
-
-
-.TaxInfo form .LabelValue{
-    flex-direction: column;
-    margin: 1vh 0;
-    margin-right: 4vh;
+.TaxInfo .paramsContainer form .FormInput{
     width: fit-content;
-    margin-bottom: 0;
-    padding: 0;
-}
-
-.TaxInfo form .LabelValue .lab, .TaxInfo form .LabelValue .val{
-    width:  100%;
-    margin-top: .5vh;
-    margin-bottom: 0;
 }
 
 
@@ -120,4 +87,12 @@
 
 .TaxInfo .attachedDocumentsContainer .RutContainer:hover .FileInput{
     display: flex;
+}
+
+.TaxInfo form .FormButton{
+    margin: auto 0;
+    margin-bottom: 0;
+    background-color: #007AFF;
+    min-width: 20vw;
+    width: fit-content;
 }
