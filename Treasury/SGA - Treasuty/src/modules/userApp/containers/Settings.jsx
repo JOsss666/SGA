@@ -40,9 +40,9 @@ export function Settings(){
     ]
 
     const handleNavigate = (path)=>{
-        navigate(`/SGA_management/${params.company_key}/${params.user_key}/settings/${path}`)
+        console.log(path)
+        navigate(`/SGA_treasury/${params.company_key}/${params.user_key}/settings/${path}`)
     }
-
 
     return(
         <div className="Settings">
