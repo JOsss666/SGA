@@ -66,3 +66,21 @@
 .FormNewProduct .userPhoto:hover .FileInput{
     display: block;
 }
+
+
+.FormNewProduct .accessSwitch{
+    display: flex;
+    width: 100%;
+    margin: 2vh auto;
+}
+
+.FormNewProduct .accessSwitch h6{
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 400;
+    color: var(--descriptionText);
+}
+
+.FormNewProduct .accessSwitch .SwitchOption{
+    margin: auto;
+    margin-right: 2vh;
+}

@@ -1,7 +1,7 @@
 import './FormNewUser.css'
 import {BoldTitle} from '../../components/BoldTitle'
 import { FileInput } from '../../components/FileInput'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FormInput } from '../../components/FormInput';
 import { FormButton } from '../../components/FormButton';
 import { postInfo } from '../../../../utils/functions';
@@ -18,13 +18,14 @@ export function FormNewUser({info,reloadFun}){
     const [stage,setStage] = useState(0);
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
+    const [roles,setRoles] = useState([]);
     
     // Datos formulario
     const [userPhoto,setUserPhoto] = useState('https://i.pinimg.com/1200x/ba/8d/7a/ba8d7a6364bf8ce99756686cba83c695.jpg');
     const [name,setName] = useState('');
     const [mail,setMail] = useState('');
     const [pass,setPass] = useState('');
-    const [userRol,setUserRol] = useState('');
+    const [userRol,setUserRol] = useState();
     const [accessInventory,setAccessInventory] = useState(false)
     const [accessContability,setAccessContability] = useState(false)
     const [accessProcess,setAccessProcess] = useState(false)
@@ -47,6 +48,28 @@ export function FormNewUser({info,reloadFun}){
         accessCerticloud,
         accessCtools
     }
+
+    const getRoles = async()=>{
+        console.log('Cargando roles')
+        let res = await postInfo('/getRoles',{
+            company_id:appInfo.company_id
+        })
+        console.log(res)
+        if(res[0]){
+            let C = [];
+            res[1].forEach(element => {
+                C.push({
+                    text:element.name,
+                    value:element.id
+                })
+            });
+            setRoles(C);
+        }
+    }
+
+    useEffect(()=>{
+        console.log(userRol)
+    },[userRol])
 
     const createUser = async()=>{
         setDisabled(true)
@@ -74,6 +97,10 @@ export function FormNewUser({info,reloadFun}){
         setDisabled(false);
     }
 
+    useEffect(()=>{
+        getRoles();
+    },[])
+
     return(
         <div className="FormNewUser">
             <BoldTitle text={'Nuevo Usuario'}/>
@@ -99,11 +126,7 @@ export function FormNewUser({info,reloadFun}){
             )}
             {stage == 1 && (
                 <form action="">
-                    <SearchinList action={setUserRol} title={'Cargo del usuario'} placeHolder={'Seleccionar Cargo'} list={[
-                        {text:'Operador'},
-                        {text:'Administrador'},
-                        {text:'Personalizado 1'}
-                    ]} specialOption={<NewElementSelect title={'Crear nuevo roll'}/>}/>
+                    <SearchinList action={setUserRol} title={'Cargo del usuario'} placeHolder={'Seleccionar Cargo'} list={roles} specialOption={<NewElementSelect title={'Crear nuevo roll'}/>}/>
                     <div className="accessSwitch">
                         <h6>Acceso a inventarios</h6>
                         <SwitchOption action={setAccessInventory}/>

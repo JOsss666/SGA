@@ -96,3 +96,14 @@
     margin: auto;
     margin-right: 2vh;
 }
+
+@media (max-width:500px) {
+    .FormNewUser{
+        width: 100dvw;
+    }
+
+    .FormNewUser .userPhoto{
+        width: 100%;
+        height: 30vh;
+    }
+}

@@ -1,10 +1,10 @@
 
 import './FormNewThirdParties.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BoldTitle } from '../../components/BoldTitle';
 import { FormButton } from '../../components/FormButton';
 import { FormInput } from '../../components/FormInput';
-import { postInfo } from '../../../../utils/functions';
+import { getInfo, postInfo } from '../../../../utils/functions';
 import { useAlert, useAppInfo, useNotifications } from '../../../../context/context';  
 import { SelectOptions } from '../../components/SelectOptions';
 import { SearchinList } from '../../components/SearchInList';
@@ -13,25 +13,33 @@ import { NewElementSelect } from '../../components/NewElementSelect';
 import { FileInput } from '../../components/FileInput';
 
 
-export function FormNewThirdParties({reloadFun}){
+export function FormNewThirdParties({reloadFun,quickCreation}){
 
     const {addNotification} = useNotifications();
     const {popOutAlert} = useAlert();
     const {appInfo} = useAppInfo();
+    // control
     const [stage,setStage] = useState(0);
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
     const [autoTaxInfo,setAutoTaxInfo] = useState(false);
+    const [municipalities,setMunicipalities] = useState([]);
 
     // info básica
     const [name,setName] = useState('');
     const [userPhoto,setUserPhoto] = useState('https://i.pinimg.com/1200x/ba/8d/7a/ba8d7a6364bf8ce99756686cba83c695.jpg');
     const [lastNames,setLastName] = useState('');
+    //
+    const [first_name,setFirst_name] = useState('');
+    const [second_name,setSecond_name] = useState('');
+    const [first_surname,setFirst_surname] = useState('');
+    const [second_surname,setSecond_surname] = useState('');
     const [indentification_type,setindentification_type] = useState('');
     const [indentification_number,setindentification_number] = useState('');
     const [mail,setMail] = useState('');
     const [phone,setPhone] = useState('');
     const [country,setCountry] = useState('');
+    const [mucipality_id,setMunicipality_id] = useState();
     const [city,setCity] = useState('');
     const [address,setAddress] = useState('');
     const [type,setType] = useState('');
@@ -42,24 +50,31 @@ export function FormNewThirdParties({reloadFun}){
     const [interest_rate,setInterest_rate] = useState(0);
     const [comercial_state,setComercial_state] = useState('active');
     // info tributaria
+    const [typePerson,setTypePerson] = useState();
+    const [identidicationType_id,setIdentidicationType_id] = useState();
     const [attachedRut,setAttachedRut] = useState();
-    const [regime,seRregime] = useState('');
-    const [IVA_responsability,setIVA_responsability] = useState('');
-    const [retention_type,setRetention_type] = useState('');
-    const [economic_activity,setEconomic_activity] = useState('');
+    const [regime,seRregime] = useState('-');
+    const [IVA_responsability,setIVA_responsability] = useState('-');
+    const [retention_type,setRetention_type] = useState('-');
+    const [economic_activity,setEconomic_activity] = useState('-');
 
     const formInfo = {
         company_id:appInfo.company_id,
-        name,
         userPhoto,
-        lastNames,
+        first_name,
+        second_name,
+        first_surname,
+        second_surname,
         indentification_type,
         indentification_number,
+        identidicationType_id,
         mail,
         phone,
         country,
         city,
         address,
+        mucipality_id,
+        typePerson,
         type,
         credit,
         credit_term,
@@ -73,7 +88,46 @@ export function FormNewThirdParties({reloadFun}){
         attachedRut
     }
 
+    const dictionaryDocumentTypes = {
+        "NIT":6,
+        "CC":3,
+        "CE":5,
+        "TE":4,
+        "PAS":7,
+        "RC":11,
+        "TI":12
+    }
 
+    // Utils
+    const handleUserPhotoChange = (elements)=>{  
+        if(elements.length >0 &&  elements[0].id != undefined){
+            setUserPhoto(elements[0].url)
+        }
+    }
+
+    const handleSetDocumentType = (value)=>{
+        setIdentidicationType_id(dictionaryDocumentTypes[value]);
+        setindentification_type(value);
+    }
+
+    // Getters of info
+    const getMunicipalities = async()=>{
+        let res = await getInfo('/electronicFacturation/getMunicipalities');
+        
+        if(res.status == 'OK'){
+            let C = [];
+            res.data.forEach(element => {
+                C.push({
+                    text:`${element.name} - ${element.department} (${element.code})`,
+                    value:element.id
+                })
+            });
+            setMunicipalities(C);
+        }
+    };
+
+
+    // Creation function
     const createThirdParty = async()=>{
         setDisabled(true)
         setLoading(true)
@@ -81,8 +135,8 @@ export function FormNewThirdParties({reloadFun}){
         if(res){
             addNotification({
                 type:'aproved',
-                title:`Proveedor ${name} creado correctamente`,
-                description:`El proveedor ${name} fue creado correctamente.`
+                title:`Tercero ${first_name} creado correctamente`,
+                description:`El tercero ${first_name} fue creado correctamente.`
             })
             popOutAlert();
             if(reloadFun != undefined){
@@ -92,14 +146,20 @@ export function FormNewThirdParties({reloadFun}){
         else{
             addNotification({
                 type:'error',
-                title:`Error al crear proveedor "${name}"`,
-                description:`Hubo un problema al crear el proveedor "${name}", intentelo de nuevo.`
+                title:`Error al crear tercerp "${first_name}"`,
+                description:`Hubo un problema al crear el tercero "${first_name}", intentelo de nuevo.`
             })
         }
         setLoading(false);
         setDisabled(false);
     }
 
+
+    // Events listeners
+    
+    useEffect(()=>{
+        getMunicipalities();
+    },[])
 
 
 /** PENDIENTE REVISAR **/
@@ -120,19 +180,24 @@ export function FormNewThirdParties({reloadFun}){
                         <div className="actualPhoto">
                             <img src={userPhoto} alt="" />
                         </div>
-                        <FileInput placeholder={'Seleccionar nueva foto'} action={setUserPhoto}>
+                        <FileInput placeholder={'Seleccionar nueva foto'} action={handleUserPhotoChange}>
                             <i className="fa-solid fa-camera"/>
                         </FileInput>
                     </div>
-                    <FormInput action={setName} title={'Nombre o razón social'} placeholder={'Nombre del proveedor'} disabled={disabled} value={name}/>
-                    <FormInput action={setLastName} title={'Apellido o complemento'} placeholder={'Apellido del proveedor'} disabled={disabled} value={lastNames}/>
-                    <SearchinList action={setindentification_type} title={'Tipo de Identificación'} placeHolder={'Tipo de identificación'} list={[
+                    <FormInput action={setFirst_name} value={first_name} title={'Primer Nombre o Razon Social'} placeholder={'Primer nombre'} disabled={disabled}/>
+                    <FormInput action={setSecond_name} value={second_name} title={'Segundo Nombre'} placeholder={'Segundo nombre'} disabled={disabled}/>
+                    <FormInput action={setFirst_surname} value={first_surname} title={'Primer Apellido o Diminutivo'} placeholder={'Primer Apellido'} disabled={disabled}/>
+                    <FormInput action={setSecond_surname} value={second_surname} title={'Segundo Apellido'} placeholder={'Segundo Apellido'} disabled={disabled}/>
+                    <SearchinList action={handleSetDocumentType} title={'Tipo de Identificación'} placeHolder={'Tipo de identificación'} list={[
                         {text:'NIT',value:'NIT'},
                         {text:'Cédula de Ciudadanía',value:'CC'},
                         {text:'Cédula de Extranjería',value:'CE'},
-                        {text:'Pasaporte',value:'PAS'}
+                        {text:'Tarjeta de extranjería',value:'TE'},
+                        {text:'Pasaporte',value:'PAS'},
+                        {text:'Registro civil',value:'RC'},
+                        {text:'Tarjeta de identidad',value:'TI'}
                     ]}/>
-                    <FormInput action={setindentification_number} title={'Número de Identificación'} placeholder={'Número de identificación'} disabled={disabled}/>
+                    <FormInput action={setindentification_number} value={indentification_number} title={'Número de Identificación'} placeholder={'Número de identificación'} disabled={disabled}/>
                 </form>
             )}
             {stage === 1 &&(
@@ -141,6 +206,7 @@ export function FormNewThirdParties({reloadFun}){
                     <FormInput action={setMail} title={'Correo Electrónico'} placeholder={'Correo electrónico del proveedor'} disabled={disabled}/>
                     <FormInput action={setPhone} title={'Teléfono'} placeholder={'Número de teléfono'} disabled={disabled}/>
                     <FormInput action={setCountry} title={'País'} placeholder={'País'} disabled={disabled}/>
+                    <SearchinList action={setMunicipality_id} title={'Municio o region'} placeHolder={'Seleccione munipio o region (Obligatorio)'} list={municipalities} disabled={disabled}/>
                     <FormInput action={setCity} title={'Ciudad'} placeholder={'Ciudad'} disabled={disabled}/>
                     <FormInput action={setAddress} title={'Dirección'} placeholder={'Dirección del proveedor'} disabled={disabled}/>
                 </form>
@@ -148,7 +214,7 @@ export function FormNewThirdParties({reloadFun}){
             {stage === 2 &&(
                 <form action="">
                     <BoldTitle text={'Información Comercial'}/>
-                    <SearchinList action={setType} title={'Tipo de Proveedor'} placeHolder={'Tipo de Proveedor'} list={[
+                    <SearchinList action={setType} title={'Relación con el tercero'} placeHolder={'Tipo de Proveedor'} list={[
                         {text:'Cliente',value:'client'},
                         {text:'Proveedor',value:'supplier'},
                         {text:'Empleado',value:'employee'},
@@ -156,14 +222,16 @@ export function FormNewThirdParties({reloadFun}){
                         {text:'Socio',value:'partner'},
                         {text:'Otro',value:'other'}
                     ]}/>
-                    <div className="accessSwitch">
-                        <h6>Pago a credito</h6>
-                        <SwitchOption action={setCredit}/>
-                    </div>
-                    {credit && (
+                    {!quickCreation && (
+                        <div className="accessSwitch">
+                            <h6>Pago a credito</h6>
+                            <SwitchOption action={setCredit}/>
+                        </div>
+                    )}
+                    {!quickCreation && credit && (
                         <>
                             <FormInput type={'number'} title={'Plazo de credito en días'} min={0} disabled={disabled} value={credit_term} action={setCredit_term}/>
-                            <FormInput type={'number'} moneyF={true} title={'Valor maximo de credito'} min={0} disabled={disabled} value={credit_value} action={setCredit_value}/>
+                            <FormInput type={'number'} title={'Valor maximo de credito'} min={0} disabled={disabled} value={credit_value} action={setCredit_value}/>
                             <FormInput type={'number'} title={'Tasa de interes diario por mora'} min={0} disabled={disabled} value={interest_rate} action={setInterest_rate}/>
                         </>
                     )}
@@ -175,7 +243,7 @@ export function FormNewThirdParties({reloadFun}){
                     ]}/>
                 </form>
             )}
-            {stage === 3 && (
+            {!quickCreation && stage === 3 && (
                 <form action="">
                     <BoldTitle text={'Información tributaria'}/>
                     <div className="setAutomaticTaxIndo" onClick={()=>{
@@ -186,9 +254,17 @@ export function FormNewThirdParties({reloadFun}){
                         <div className="modeTaxInfoIndicator" style={{left:`${autoTaxInfo? '50':'0'}%`}}/>
                     </div>
                     {!autoTaxInfo && (
-                        <>
+                        <>  
+                            <SearchinList placeHolder={'Seleccione una opción'} action={setTypePerson} title={'Naturaleza'} disabled={disabled} list={[
+                                {text:'Persona juridica',value:1},
+                                {text:'Persona Natural',value:2}
+                            ]}/>
+                            <SearchinList placeHolder={'Seleccione una opción'} action={setIVA_responsability} title={'Responsabilidad de IVA'} disabled={disabled} list={[
+                                {text:'No aplica / No responsable de IVA',value:21},
+                                {text:'IVA',value:18},
+                                {text:'No responsable de consumo',value:22},
+                            ]}/>
                             <FormInput title={'Regimen del tercero'} action={seRregime} disabled={disabled} value={regime}/>
-                            <FormInput title={'Responsabilidad de IVA'} action={setIVA_responsability} disabled={disabled} value={IVA_responsability}/>
                             <FormInput title={'Tipo de Retención'} action={setRetention_type} disabled={disabled} value={retention_type}/>
                             <FormInput title={'Actividad Economica'} action={setEconomic_activity} disabled={disabled} value={economic_activity}/>
                         </>
@@ -200,8 +276,8 @@ export function FormNewThirdParties({reloadFun}){
                     )}
                 </form>
             )}
-            <FormButton disabled={disabled} loading={loading} text={stage== 4? 'Registrar Proveedor':'Siguiente'} onClick={()=>{
-                if(stage < 4){
+            <FormButton disabled={disabled} loading={loading} text={stage== (quickCreation? 3:4)? 'Registrar Proveedor':'Siguiente'} onClick={()=>{
+                if(stage < (quickCreation? 3:4)){
                     setStage(stage +1)
                 }else{
                     console.log(formInfo)
@@ -209,8 +285,8 @@ export function FormNewThirdParties({reloadFun}){
                 }
             }}/>
             {stage > 0 && (
-                <FormButton disabled={disabled} loading={loading} negative={true} text={stage== 4? 'Cancelar':'Volver'} onClick={()=>{
-                    if(stage < 4){
+                <FormButton disabled={disabled} loading={loading} negative={true} text={stage== (quickCreation? 3:4)? 'Cancelar':'Volver'} onClick={()=>{
+                    if(stage < (quickCreation? 3:4)){
                         setStage(stage -1)
                     }else{
                         setStage(0)
