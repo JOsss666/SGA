@@ -15,16 +15,17 @@
     --iconHover:#DFF2FE;
     --inputsBg:#fff;
     --inputsBorder:#ddd;
-    --translucidMenu:#fff9;
+    --translucidMenu:#ffffff90;
     --cardHover:#F3F4F6;
     --bgOpacity:#ffffff50;
-    --bgImage: url('https://i.pinimg.com/1200x/89/63/f9/8963f9dcb35aedb10a3803ea4d83a92e.jpg');
+    --bgImage: url('https://i.pinimg.com/1200x/23/5f/8d/235f8df39cf98153029b9cc09495f390.jpg');
+    --mobileBgImage: url('https://i.pinimg.com/1200x/8a/5a/4a/8a5a4adbb2a79bd9d715a0396fc34811.jpg');
     --settingsHover:#f5f5f5;
     --lightSelected:#F3F4F6
 }
 
 :root.dark {
-    --bg: #252525;
+    --bg: #000000;
     --menuAside:#18181B;
     --lightGradient1: #0C0A09;
     --lightGradient2: #121212;
@@ -37,11 +38,12 @@
     --iconHover:#303030;
     --inputsBg:#303030;
     --inputsBorder:#5a5a5a;
-    --translucidMenu:#20202099;
-    --cardHover:#444;
+    --translucidMenu:#00000090;
+    --cardHover:#222;
     --bgOpacity:#00000050;
     --settingsHover:#111;
     --bgImage: url('https://i.pinimg.com/1200x/80/d1/bd/80d1bd8f8c9777a8ff1a8b4ed534418e.jpg');
+    --mobileBgImage: url('https://i.pinimg.com/1200x/74/cd/9b/74cd9bfd5eae92db44061a3664145b4b.jpg');
     --lightSelected:#18181B
 }
 
@@ -75,6 +77,11 @@
     margin: auto 2vh;
 }
 
+.UserApp .headApp .BigTitle{
+    margin: auto 2vh;
+    width: 25%;
+}
+
 .UserApp .headApp .SearchBar{
     margin: 2vh 0;
     width: 25vw;
@@ -83,8 +90,8 @@
 .UserApp .headApp .SearchBar i{
     color: var(--descriptionText);
     font-size: clamp(2px,2vh,20px);
-    top: 1.8vh;
     left: 2.5vh;
+    top: 3vh !important;
 }
 
 .UserApp .headApp .SearchBar input{
@@ -92,6 +99,7 @@
     background-color: var(--menuAside);
     outline: none;
     padding-left: 7vh;
+    outline: solid .1vh var(--inputsBorder);
 }
 
 .UserApp .headApp .resultsQuickSerch{
@@ -142,43 +150,52 @@
     transition: .3s;
 }
 
-.UserApp .asideMenuApp .menusHolder{
+.UserApp .asideMenuApp .menusHolder {
     position: absolute;
     height: 100%;
     width: fit-content;
-    background-color: var(--menuAside);
+    background-color: var(--translucidMenu);
     backdrop-filter: blur(1vh);
-    z-index: 29;
-    z-index: 40;
+    z-index: 40; /* Eliminado el duplicado */
     transition: .3s;
     overflow-y: auto;
     border-top-right-radius: 3vh;
     border-bottom-right-radius: 3vh;
-    scrollbar-width:none;
+    
+    /* Firefox: Por defecto oculto, pero permite scroll */
+    scrollbar-width: none; 
 }
 
-/* ancho del scrollbar */
-.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar {
-    width: 10px;           /* vertical */
-    height:50%;          /* horizontal */
+/* --- Estilos para Chrome, Edge y Safari --- */
+
+/* 1. Definir que la barra existe y su ancho en PX */
+*::-webkit-scrollbar {
+    width: 6px;  /* No uses %, usa px o vh */
+    height: 6px;
+    display: none; /* Oculto por defecto */
 }
 
-.UserApp .asideMenuApp .menusHolder:hover {
-  scrollbar-width: auto; /* Firefox */
+/* 2. Mostrar la barra al hacer hover sobre el contenedor */
+*:hover::-webkit-scrollbar {
+    display: block;
 }
 
+/* 3. Fondo del track */
 
-/* fondo del track */
-.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar-track {
-    background: var((var(--inputsBg)));
+*::-webkit-scrollbar-track {
+    background: var(--cardHover);
     border-radius: 8px;
 }
 
-/* thumb (la "barrita" que se mueve) */
-.UserApp .asideMenuApp .menusHolder::-webkit-scrollbar-thumb {
+/* 4. El tirador (thumb) */
+*::-webkit-scrollbar-thumb {
     border-radius: 8px;
-    border: .1vh solid var(--inputsBg);
+    background-color: var(--inputsBorder); /* O un color más claro */
+    border: 1px solid var(--inputsBorder);
 }
+
+
+
 
 
 
@@ -205,4 +222,146 @@
     transition: .3s;
     background-color: var(--bg);
     overflow: hidden;
+}
+
+.UserApp .closeMenuMobileIcon, .UserApp .openMenuMobileIcon{
+    display: none;
+}
+
+/* Para Chrome, Safari, Edge y Opera (Webkit) */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+/* Para Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/*  Responsive Design -> Mobile  */
+
+@media (max-width:500px) {
+
+    .UserApp .headApp .UserCard,
+    .UserApp .headApp .SearchBar{
+        display: none;
+    }
+
+    .UserApp .headApp .ServicesGrid{
+        position: absolute;
+        top: 40dvh;
+        height: 60dvh;
+        right: 0;
+        width: 100%;
+        max-width: 100%;
+        flex-wrap: wrap;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .UserApp .headApp .ServicesGrid .serviceBubble{
+        margin: 2vh auto;
+        width: 30vw;
+        overflow-x: hidden;
+    }
+
+    .UserApp .asideMenuApp{
+        height: fit-content;
+        position: relative;
+        height: 100%;
+    }
+
+    .UserApp .asideMenuApp .MenuApp{
+        display: none;
+    }
+
+    .UserApp .asideMenuApp .ServiceSgaCard{
+        display: none;
+    }
+
+    .UserApp .asideMenuApp .menusHolder {
+        padding-top: 2vh;
+        position: absolute;
+        height: fit-content;
+        width: fit-content;
+        background-color: var(--menuAside);
+        backdrop-filter: blur(1vh);
+        z-index: 40; /* Eliminado el duplicado */
+        transition: .3s;
+        overflow-y: auto;
+        border-top-right-radius: 0vh;
+        border-bottom-right-radius: 0vh;
+        
+        /* Firefox: Por defecto oculto, pero permite scroll */
+        scrollbar-width: none; 
+    }
+
+    .UserApp .asideMenuApp .activeMenusHolder{
+        width: 100dvw;
+        height: 100%;
+        position: relative;
+    }
+
+    .UserApp .asideMenuApp .activeMenusHolder .MenuApp{
+        display: flex;
+    }
+
+    .UserApp .asideMenuApp .activeMenusHolder .closeMenuMobileIcon{
+        display: flex;
+        position: absolute;
+        top: 3vh;
+        right: 3vh;
+        font-size: clamp(3px,3vh,30px);
+        color: var(--mainText);
+        padding: 1vh;
+        height: 5vh;
+        width: 5vh;
+        text-align: center;
+        border-radius: 100%;
+        background-color: var(--cardHover);
+    }
+
+    .UserApp .asideMenuApp .activeMenusHolder .ServiceSgaCard{
+        display: flex;
+    }
+
+    .UserApp .asideMenuApp .hiddenAsideMenu .openMenuMobileIcon{
+        display: flex;
+        font-size: clamp(3px,3vh,30px);
+        color: var(--mainText);
+        padding: 1vh;
+        height: 5vh;
+        width: 5vh;
+        text-align: center;
+        border-radius: 100%;
+        background-color: var(--cardHover);
+        margin-top: .5vh;
+        margin-left: 2vh;
+    }
+    .UserApp .asideMenuApp .menusHolder .openMenuMobileIcon i{
+        margin: auto;
+    }
+
+    .UserApp .asideMenuApp .activeMenusHolder .closeMenuMobileIcon i{
+        margin: auto;
+    }
+
+    .UserApp .asideMenuApp .hiddenAsideMenu{
+        background-color: transparent;
+        backdrop-filter: none;
+    }
+
+    .UserApp .bodyApp{
+        height: 100dvh;
+        width: 100dvw;
+        padding-left: 0;
+        border-radius: 0;
+        padding-top: 8vh;
+        transition: .3s;
+        background-color: var(--bg);
+        overflow: hidden;
+    }
+
 }
