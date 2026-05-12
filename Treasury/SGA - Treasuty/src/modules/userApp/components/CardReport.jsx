@@ -4,7 +4,7 @@ import { BoldTitle } from './BoldTitle';
 import './CardReport.css';
 import { DescriptionSpan } from './DescriptionSpan';
 
-export function CardReport({type, title, description,onClick}){
+export function CardReport({type, title, description, onClick}){
 
     const t = (type || '').toLowerCase();
 
@@ -17,9 +17,17 @@ export function CardReport({type, title, description,onClick}){
             icon: "fa-solid fa-chart-simple",
             color: "#FF9800" 
         },
+        inventarios: {
+            icon: "fa-solid fa-chart-simple",
+            color: "#FF9800" 
+        },
         contable: {
             icon: "fa-solid fa-file-invoice-dollar",
             color: "#05D57E" 
+        },
+        processes: {
+            icon: "fa-solid fa-people-carry-box",
+            color: '#AD46FF'
         }
     };
 
@@ -30,7 +38,7 @@ export function CardReport({type, title, description,onClick}){
 
 
     return(
-        <div className="CardReport">
+        <div className="CardReport" onClick={onClick} >
             <div className="IconReport" style={{ 
                     backgroundColor:color,
                     boxShadow:`0 0 1dvh ${color}`
