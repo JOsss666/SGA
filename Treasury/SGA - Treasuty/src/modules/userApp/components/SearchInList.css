@@ -4,6 +4,7 @@
     display: flex;
     flex-direction: column;
     padding: 1vh 0;
+    position: relative;
 }
 
 .SearchinList label{
@@ -54,6 +55,20 @@
     animation-fill-mode: both;
 }
 
+.SearchinList .clearSelectedOptionBtn{
+    position: absolute;
+    right: 2vh;
+    top: 1vh;
+    color: var(--descriptionText);
+    z-index: 10;
+    font-size: clamp(2.2px,2.5vh,25px);
+    cursor: pointer;
+}
+ 
+.SearchinList .clearSelectedOptionBtn:hover{
+    color: var(--mainText);
+}
+
 .SearchinList .SlistC .listElementsContainer li{
     padding: 1vh 2vh;
     font-size: clamp(1px,2.2vh,20px);
@@ -68,6 +83,11 @@
     color: var(--mainText);
 }
 
+.SearchinList .SlistC .listElementsContainer .focused-item{
+    background-color: #007AFF;
+    padding-left: 3vh;
+    color: #fff;
+}
 
 @keyframes appearList {
     0%{

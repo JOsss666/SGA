@@ -19,7 +19,6 @@
     z-index: 4;
     padding: 1.25vh 2vh;
     border-radius: 1vh;
-    box-shadow: 0 .2vh 2vh #0003;
 }
 
 .SelectOptions:hover span{
@@ -53,7 +52,7 @@
     width: 100%;
     position: absolute;
     list-style: none;
-    top: 5.1vh;
+    top: 4.5vh;
     border-radius: 1vh;
     background-color: var(--menuAside);
     backdrop-filter: blur(1vh);
@@ -70,15 +69,15 @@
     padding-left: 2vh;
     color: var(--descriptionText);
     cursor: pointer;
-    border-radius: 1vh;
+    border-radius: .5vh;
     transition: .2s;
     position: relative;
-    font-weight: 500;
+    font-weight: 400;
     transition: .3s;
 }
 
 .SelectOptions .listOptions li:hover{
-    background-color: var(--iconHover);
+    background-color: var(--cardHover);
     color: var(--mainText);
     padding-left: 3vh;
     box-shadow: 0 .4vh 1vh #00000040;

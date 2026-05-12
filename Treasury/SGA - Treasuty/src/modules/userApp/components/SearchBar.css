@@ -3,33 +3,41 @@
 .SearchBar{
     position: relative;
     width: 100%;
-    height: fit-content;
+    display: flex;
+    align-items: center;
 }
 
 .SearchBar input{
     width: 100%;
     border-radius: 1vh;
-    height: 100%;
-    font-size: clamp(1px,2vh,20px);
-    font-family: 'Inter',sans-serif;
-    padding: 1.5vh 2vh;
-    padding-left: 6vh;
-    border: hidden;
-    outline: none;
+    font-size: clamp(.75rem, 2vh, 1.3rem);
+    font-family: 'Inter', sans-serif;
+
+    padding: 1.4vh 2vh 1.4vh 5.5vh;
+
+    border: none;
+    outline: .12vh solid var(--inputsBorder);
     color: var(--descriptionText);
-    outline: solid .1vh var(--inputsBorder);
     background-color: var(--inputsBg);
-    transition: .3s;
+
+    transition:
+        outline-color .25s,
+        box-shadow .25s,
+        color .25s;
 }
 
 .SearchBar input:focus{
     color: var(--mainText);
+    outline-color: var(--accentColor);
+    box-shadow: 0 0 0 .2vh color-mix(in srgb, var(--accentColor) 40%, transparent);
 }
 
 .SearchBar i{
     position: absolute;
-    top: 30%;
     left: 2vh;
+    top: 50%;
+    transform: translateY(-50%);
     color: #777;
-    font-size: 2.5vh;
+    font-size: 2.2vh;
+    pointer-events: none;
 }
