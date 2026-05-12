@@ -223,8 +223,18 @@ export function UserApp(){
                             <Route path='/analytics/*' element={<AnalyticDocDetail/>} />
 
                             <Route path='/settings/*' element={<Settings/>} />                            
-                            <Route path='/tutorials' element={<span>tutorials</span>} />
-                            <Route path='/help' element={<span>help</span>} />
+                            <Route path='/tutorials' element={<NoAccess 
+                                title={'Seccion no disponible'}
+                                description={`Estamos trabajando para ofrecer esta seccion lo mas pronto posible :)`}
+                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1761515342/Grupo5logos_4_rhapbp.png'}
+                                noExit={true}
+                                />} />
+                            <Route path='/help' element={<NoAccess 
+                                title={'Seccion no disponible'}
+                                description={`Estamos trabajando para ofrecer esta seccion lo mas pronto posible :)`}
+                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1760911291/AyudaLogo1_v362of.png'}
+                                noExit={true}
+                                />} />
                             <Route path='/logOut' element={<LogOut/>} />
                     </Routes>
                 </main>
