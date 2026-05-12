@@ -239,33 +239,38 @@ export function AppInfoProvider({children}){
     const navigate = useNavigate();
 
     const handleRedirect = ()=>{
-        navigate('/SGA_management/logIn')
+        navigate('/SGA_treasury/logIn')
     }
 
     const handleNavigate = (path)=>{
-        navigate(`/SGA_management/${params.company_key}/${params.user_key}/${path}`)
+        navigate(`/SGA_treasury/${params.company_key}/${params.user_key}/${path}`)
     }
 
     const optionsMenu = [
         {text:'Inicio',path:'',icon:<HomeIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914614/LogoInicio1_nsuzaj.png' />,action:handleNavigate},
         {text:'Crear',path:'new',icon:<i className="fa-solid fa-plus"/>,action:handleNavigate},
         {text:'Terceros',path:'thirdparties',icon:<ThirdPartiesIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
-        //
-        {text:'Movimientos',path:'movements',icon:<MovementIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
-        {text:'Cajas y Tesoreria',path:'treasury',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/a_-90/a_90/c_fill,w_720,h_720/v1767635300/ChatGPT_Image_5_ene_2026_12_36_27_2_y7x9xi.png'/>,action:handleNavigate},
-        {text:'Bancos',path:'banks',icon:<BankIcon/>,action:handleNavigate},
-        {text:'Transferencias',path:'transfers',icon:<DebitCardIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
-        {text:'Pagos',path:'payments',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
-        {text:'Cobros',path:'collections',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
-        {text:'Historial Caja',path:'/cashBoxes/historial',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        // Default tools
+        {text:'Panel Principal',path:'mainPanel',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515340/Grupo5logos_3_qp85tn.png'/>,action:handleNavigate},
+        {text:'Bancos',path:'banks',icon:<BankIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Cartera',path:'briefcases',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Transferencias',path:'transfers',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+
+        //{text:'Movimientos',path:'movements',icon:<MovementIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        //{text:'Cajas y Tesoreria',path:'treasury',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/a_-90/a_90/c_fill,w_720,h_720/v1767635300/ChatGPT_Image_5_ene_2026_12_36_27_2_y7x9xi.png'/>,action:handleNavigate},
+        //{text:'Bancos',path:'banks',icon:<BankIcon/>,action:handleNavigate},
+        //{text:'Transferencias',path:'transfers',icon:<DebitCardIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        //{text:'Pagos',path:'payments',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        //{text:'Cobros',path:'collections',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        //{text:'Historial Caja',path:'/cashBoxes/historial',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
         //{text:'Conciliación Bancaria',path:'bankReconciliation',icon:<ConciliationIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
-        {text:'Gastos menores',path:'minorExpenses',icon:<CartShopIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        //{text:'Gastos menores',path:'minorExpenses',icon:<CartShopIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
         //
     ]
 
     const toolsMenu = [
-        {text:'Mensajes',path:'messages',icon:<MessagesIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913446/MensajesLogo2_y4fjoa.png'/>,action:handleNavigate},
-        {text:'Calendario',path:'calendar',icon:<CalendarIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913184/LogoCalendario1_ig0avt.png'/>,action:handleNavigate},
+        {text:'Mensajes',path:'messages',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913446/MensajesLogo2_y4fjoa.png'/>,action:handleNavigate},
+        {text:'Calendario',path:'calendar',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913184/LogoCalendario1_ig0avt.png'/>,action:handleNavigate},
         {text:'Informes',path:'reports',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
         {text:'Estadisticas',path:'analytics',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579216/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.png'/>,action:handleNavigate},
     ]
@@ -282,14 +287,51 @@ export function AppInfoProvider({children}){
         {text:'Inicio',path:'',icon:<HomeIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914614/LogoInicio1_nsuzaj.png' />,action:handleNavigate},
         {text:'Crear',path:'new',icon:<i className="fa-solid fa-plus"/>,action:handleNavigate},
         {text:'Terceros',path:'thirdparties',icon:<ThirdPartiesIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
-        {text:'Movimientos',path:'movements',icon:<MovementIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
-        {text:'Cajas y Tesoreria',path:'treasury',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/a_-90/a_90/c_fill,w_720,h_720/v1767635300/ChatGPT_Image_5_ene_2026_12_36_27_2_y7x9xi.png'/>,action:handleNavigate},
-        {text:'Bancos',path:'banks',icon:<BankIcon/>,action:handleNavigate},
-        {text:'Transferencias',path:'transfers',icon:<DebitCardIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
-        {text:'Pagos',path:'payments',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
-        {text:'Cobros',path:'collections',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        // New Content
+
+        {text:'Panel Principal',path:'mainPanel',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515340/Grupo5logos_3_qp85tn.png'/>,action:handleNavigate},
+            // CashBoxes
+            {text:'Cajas POS',path:'cashBoxes',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1769618368/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.png'/>,action:handleNavigate},
+                // CashBoxes sections
+                {text:'Cierres de caja',path:'cashBoxes/:cashbox_id/shifts',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+                {text:'Gastos menores',path:'cashBoxes/:cashbox_id/shifts',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+                {text:'Saldo disponible',path:'cashBoxes/:cashbox_id/aviableBalance',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+                {text:'Saldo contable',path:'cashBoxes/:cashbox_id/aviableBalance',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+                {text:'Saldo bancario',path:'cashBoxes/:cashbox_id/aviableBalance',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+                {text:'Saldo proyectado',path:'cashBoxes/:cashbox_id/aviableBalance',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+            // Operative Resume
+            {text:'Resumen Operativo',path:'operativeResume',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+                // mainPanel subRoutes
+                {text:'Pagos',path:'operativeResume/payments',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+                {text:'Reacudos',path:'operativeResume/aviableBalance',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+                {text:'Conciliaciones',path:'operativeResume/aviableBalance',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+
+        {text:'Bancos',path:'banks',icon:<BankIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+            // bank Entities
+            {text:'Mis bancos',path:'banks/entities',icon:<BankIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1769618368/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.png'/>,action:handleNavigate},
+            
+            // banking Accounts
+            {text:'Resumen Operativo',path:'banks/accounts',icon:<BankIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+
+        {text:'Cartera',path:'briefcases',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+            // bank Entities
+            {text:' Acuerdos De Pago',path:'briefcases/paymentAgreds',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1769618368/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.png'/>,action:handleNavigate},
+            
+            // banking Accounts
+            {text:'Anticipos Y Saldos A Favor',path:'briefcases/advances',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+                
+        {text:'Transferencias',path:'transfers',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+
+
+        //{text:'Movimientos',path:'movements',icon:<MovementIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        //{text:'Cajas y Tesoreria',path:'treasury',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/a_-90/a_90/c_fill,w_720,h_720/v1767635300/ChatGPT_Image_5_ene_2026_12_36_27_2_y7x9xi.png'/>,action:handleNavigate},
+        //{text:'Bancos',path:'banks',icon:<BankIcon/>,action:handleNavigate},
+        //{text:'Transferencias',path:'transfers',icon:<DebitCardIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        //{text:'Pagos',path:'payments',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        //{text:'Cobros',path:'collections',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
         //{text:'Conciliación Bancaria',path:'bankReconciliation',icon:<ConciliationIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
-        {text:'Gastos menores',path:'minorExpenses',icon:<CartShopIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        //{text:'Gastos menores',path:'minorExpenses',icon:<CartShopIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},
+        
         {text:'Mensajes',path:'messages',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913446/MensajesLogo2_y4fjoa.png'/>,action:handleNavigate},
         {text:'Calendario',path:'calendar',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913184/LogoCalendario1_ig0avt.png'/>,action:handleNavigate},
         {text:'Informes',path:'reports',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
