@@ -1082,7 +1082,7 @@ export async function printSellInvoice(info,appInfo,barCode){
                 font-family:monospace;
                 margin:0;
             ">
-                ${info.docInfo.doc_type}#${info.docInfo.ownSerial}
+                Comprobante de pago#${info.docInfo.ownSerial}
             </h3>
 
             <span style="font-size:12px;">
