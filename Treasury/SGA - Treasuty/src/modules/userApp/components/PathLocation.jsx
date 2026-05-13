@@ -7,7 +7,7 @@ export function PathLocation(){
     // PathLocation Element
     const location = useLocation();
     const navigate = useNavigate();
-    const filterRoute = location.pathname.split('/SGA_management/');
+    const filterRoute = location.pathname.split('/SGA_treasury/');
     const pathSections = filterRoute[1].split('/')
 
     const handlePathMovement = (path)=>{

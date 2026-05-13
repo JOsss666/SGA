@@ -881,7 +881,7 @@ export async function printClientOrder(info,appInfo,barCode){
                             <span style="width: 50%; line-height: 1.2;">${element.name}</span>
                             <span style="width: 20%; text-align: center;">${element.units}</span>
                             <strong style="width: 30%; text-align: right;">
-                                ${moneyFormat(parseFloat(element.value))}
+                                ${moneyFormat(parseFloat(element.value ?? element.total))}
                             </strong>
                         </div>
                     `;
@@ -889,8 +889,8 @@ export async function printClientOrder(info,appInfo,barCode){
             </div>
 
             <div style="display:flex;fontSize:10px;marginTop:2mm;">
-                <span>TOTAL:</span>
-                <strong style="margin-left:auto;">${Number(info.total).toLocaleString()}</strong>
+                <span style="fontSize:10px;">TOTAL:</span>
+                <strong style="margin-left:auto;fontSize:10px;">${Number(info.total).toLocaleString()}</strong>
             </div>
 
             <span style="
@@ -1082,7 +1082,7 @@ export async function printSellInvoice(info,appInfo,barCode){
                 font-family:monospace;
                 margin:0;
             ">
-                ${info.docInfo.doc_type}#${info.docInfo.ownSerial}
+                Comprobante de pago #${info.docInfo.ownSerial}
             </h3>
 
             <span style="font-size:12px;">
@@ -1090,7 +1090,7 @@ export async function printSellInvoice(info,appInfo,barCode){
             </span>
 
             <span style="font-size:12px;">
-                Tercero: ${info.thirdPartyInfo.thirdParty_name}
+                Tercero: ${info.thirdPartyInfo.names}
             </span>
 
             <span style="font-size:12px;">
@@ -1430,6 +1430,21 @@ export async function printSellInvoice(info,appInfo,barCode){
                         line-height:1.3;
                     ">
                         CUFE: ${info.electronInfo.code}
+                    </h3>
+
+                    <h3 style="
+                        font-size:10px;
+                        font-family:monospace;
+                        text-align:center;
+                        margin-top:4mm;
+                        margin-bottom:4mm;
+                        width:90%;
+                        word-break:break-all;
+                        overflow-wrap:break-word;
+                        white-space:normal;
+                        line-height:1.3;
+                    ">
+                        Este documento no reemplaza la factura electrónica, es solo un comprobante de pago. Consulta tu factura electrónica con el codigo QR o el CUFE en el portal de la DIAN.
                     </h3>
 
                 </div>

@@ -2,13 +2,16 @@
 import './ButtonAccounts.css';
 
 
-export function ButtonAccounts({icon, text}){
+export function ButtonAccounts({icon,children, text}){
     return(
-        <div className="ButtonAccounts">
-            <button className="btn btnAccounts" onClick={() => alert('Funcionalidad pendiente')}>
-                <i className={icon + " btnIcon"} />
+        <button className="ButtonAccounts" onClick={() => alert('Funcionalidad pendiente')}>
+            <div className="buttonContent">
+                {!children && (
+                    <i className={icon + " btnIcon"} />
+                )}
+                {children}
                 <p className='btnText'>{text}</p>
-            </button>
-        </div>
+            </div>
+        </button>
     )
 }

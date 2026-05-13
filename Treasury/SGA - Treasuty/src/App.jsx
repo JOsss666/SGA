@@ -6,6 +6,7 @@ import { Login } from './modules/Login/Login';
 import { SignUp } from './modules/Login/SignUp';
 //export const urlSer = 'http://localhost:3000';
 export const urlSer = 'https://sga-2zgp.onrender.com';
+export const isElectron = navigator.userAgent.toLowerCase().includes('electron');
 
 function App() {
   return (

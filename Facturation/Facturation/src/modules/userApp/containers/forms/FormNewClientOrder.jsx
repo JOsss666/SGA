@@ -323,6 +323,7 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
                 instance_id,
                 instanceOwnSerial,
                 doc_id:res.id,
+                total,
                 services:productsServices,
                 ownSerial:res.ownSerial
             }

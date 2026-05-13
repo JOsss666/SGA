@@ -576,6 +576,21 @@ export function SellInvoiceDesign(){
                         CUFE: {electronInfo.code}
                     </h3>
 
+                    <h3 style={{
+                        fontSize:"10px",
+                        fontFamily:"monospace",
+                        textAlign:"center",
+                        marginTop:"4mm",
+                        marginBottom:"4mm",
+                        width:"100%",
+                        wordBreak:"break-all",
+                        overflowWrap:"break-word",
+                        whiteSpace:"normal",
+                        lineHeight:"1.3"
+                    }}>
+                        Este documento no reemplaza la factura electrónica, es solo un comprobante de pago. Consulta tu factura electrónica con el codigo QR o el CUFE en el portal de la DIAN.
+                    </h3>
+
                 </div>
             )}
             <div style={{ margin: "0 auto", textAlign: "center" }}>

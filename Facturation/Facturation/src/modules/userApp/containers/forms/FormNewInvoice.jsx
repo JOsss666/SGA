@@ -232,7 +232,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             if (selectedInstances.some(item => item.id === element.id)) return;
             setSelectedInstances(prev => [...prev, { 
                 id: element.id, 
-                step_id: element.step_id 
+                step_id: element.step_id,
+                ownSerial: element.ownSerial,
             }]);
         };
         
@@ -813,16 +814,17 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 e_info = await handleCreationOfEinvoice(res.id);
             }
             if(isElectron){
+                console.log(instance_id);
                 let infoToPrtint = {
                     docInfo:{
                         doc_id:res.id,
                         doc_type:FormInfo.doc_type,
-                        instance_id:instance_id[0] ?? undefined,
+                        instance_id:selectedInstances[0] ?? undefined,
                         description:FormInfo.description,
                         ownSerial: res.ownSerial,
                         total,
                         paymentMethod,
-                        instanceOwnSerial:instance_id[0]?.ownSerial ?? undefined 
+                        instanceOwnSerial:selectedInstances[0]?.ownSerial ?? undefined 
                     },
                     thirdPartyInfo:{
                         thirdParty_name:thirdPartyInfo.names

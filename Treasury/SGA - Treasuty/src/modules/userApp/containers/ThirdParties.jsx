@@ -7,12 +7,16 @@ import { useState, useEffect } from 'react';
 import { SearchBar } from '../components/SearchBar';
 import { SelectOptions } from '../components/SelectOptions';
 import { FormButton } from '../components/FormButton';
-import { useAlert } from '../../../context/context';
+import { useAlert, useAppInfo } from '../../../context/context';
 import { FormNewThirdParties } from './forms/FormNewThirdParties';
+import { LoadingSpace } from './LoadingSpace';
+import { NoResults } from './NoResults';
+
 
 export function ThirdParties() {
     const navigate = useNavigate();
     const params = useParams();
+    const {appInfo,userConfig} = useAppInfo();
     const [thirdPartiesData, setThirdPartiesData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -27,7 +31,7 @@ export function ThirdParties() {
         try {
             setLoading(true);
             setError(null);
-            const response = await postInfo('/getThirdParties', { company_id: 1 });
+            const response = await postInfo('/getThirdParties', { company_id: appInfo.company_id});
             
             if (response[0]){
                 setThirdPartiesData(response[1])
@@ -44,7 +48,7 @@ export function ThirdParties() {
     };
 
     const handleCardClick = (thirdPartyId) => {
-        navigate(`/SGA_management/${params.company_key}/${params.user_key}/thirdParties/${thirdPartyId}`);
+        navigate(`/SGA_treasury/${params.company_key}/${params.user_key}/thirdParties/${thirdPartyId}`);
     };
 
     const handleRetry = () => {
@@ -53,23 +57,15 @@ export function ThirdParties() {
 
     // Función de búsqueda
     const handleSearch = (thirdParty) => {
-        if (searchVal === '') return true;
-        
-        const searchLower = searchVal.toLowerCase();
-        
-        const searchableFields = [
-            thirdParty.name,
-            thirdParty.legal_name,
-            thirdParty.trade_name,
-            thirdParty.email,
-            thirdParty.company_mail,
-            thirdParty.phone,
-            thirdParty.contact_phone
-        ].filter(Boolean);
+        if (!searchVal.trim()) return true;
 
-        return searchableFields.some(field => 
-            field.toString().toLowerCase().includes(searchLower)
-        );
+        const searchLower = searchVal.toLowerCase();
+
+        return Object.values(thirdParty)
+            .filter(v => typeof v === "string" || typeof v === "number")
+            .some(v =>
+                v.toString().toLowerCase().includes(searchLower)
+            );
     };
 
 
@@ -112,8 +108,9 @@ export function ThirdParties() {
                                 <div className="header-right">
                                     <div className="thirdparties-search">
                                         <SearchBar
-                                            action={setSearchVal} 
-                                            placeholder={'Buscar...'}
+                                            value={searchVal}
+                                            action={setSearchVal}
+                                            placeholder="Buscar..."
                                         />
                                         <SelectOptions
                                             title={'Orden'}
@@ -132,53 +129,29 @@ export function ThirdParties() {
                                             ]}
                                         />
                                         <FormButton onClick={()=>{
-                                            popInAlert(<FormNewThirdParties reloadFun={fetchThirdParties}/>)
-                                            }}text={'Crear Proveedor'} children={<i className="fa-solid fa-plus"/>}/>
+                                            popInAlert(<FormNewThirdParties reloadFun={fetchThirdParties} quickCreation={!userConfig.access.sections.thirdparties.can_create}/>)
+                                            }}text={'Crear Tercero'} children={<i className="fa-solid fa-plus"/>}/>
                                     </div>
                                 </div>
                             </div>
 
-                            {loading ? (
-                                <div className="thirdparties-loading">
-                                    <i className="fa-solid fa-spinner fa-spin"></i>
-                                    Cargando terceros...
-                                </div>
-                            ) : error ? (
-                                <div className="thirdparties-error">
-                                    <p>{error}</p>
-                                    <button onClick={handleRetry} className="retry-btn">
-                                        Reintentar
-                                    </button>
-                                </div>
-                            ) : thirdPartiesData.length === 0 ? (
-                                <div className="thirdparties-empty">
-                                    <p>No hay terceros registrados</p>
-                                    <button onClick={fetchThirdParties} className="retry-btn">
-                                        Actualizar
-                                    </button>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="thirdparties-grid">
-                                        {filteredThirdParties.map((thirdParty) => (
-                                            <ThirdPartyCard
-                                                key={thirdParty.id}
-                                                info={thirdParty}
-                                                onCardClick={handleCardClick}
-                                            />
-                                        ))}
-                                    </div>
-                                    
-                                    {/* Mensaje cuando no hay resultados de búsqueda */}
-                                    {filteredThirdParties.length === 0 && searchVal !== '' && (
-                                        <div className="thirdparties-no-results">
-                                            <p>No se encontraron terceros que coincidan con "{searchVal}"</p>
-                                            <button onClick={() => setSearchVal('')} className="retry-btn">
-                                                Limpiar búsqueda
-                                            </button>
-                                        </div>
+                            {loading && (
+                                <LoadingSpace title={'Cargando terceros'} description={'Esto no debe tardar mucho'}/>
+                            )}
+                                   
+                            {!loading && (
+                                 <div className="thirdparties-grid">
+                                    {filteredThirdParties.map((thirdParty) => (
+                                        <ThirdPartyCard
+                                            key={thirdParty.id}
+                                            info={thirdParty}
+                                            onCardClick={handleCardClick}
+                                        />
+                                    ))}
+                                    {filteredThirdParties.length == 0 && (
+                                        <NoResults title={'No hay terceros disponibles para mostrar'}/>
                                     )}
-                                </>
+                                </div>
                             )}
                         </div>
                     }

@@ -13,10 +13,11 @@
 }
 
 .ServiceSgaCard img{
-    height: 7vh;
-    width: 7vh;
+    height: 5vh;
+    width: 5vh;
     object-fit: cover;
     border-radius: .5vh;
+    margin: auto 0;
 }
 
 .ServiceSgaCard .serviceInfo{

@@ -12,7 +12,7 @@ export function LogOut(){
     const navigate = useNavigate();
 
     const handleRedirect = ()=>{
-        navigate('/SGA_management/logIn')
+        navigate('/SGA_treasury/logIn')
     }
 
     const logOut = async()=>{

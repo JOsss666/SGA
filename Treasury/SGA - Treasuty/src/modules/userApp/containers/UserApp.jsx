@@ -189,7 +189,7 @@ export function UserApp(){
                 </header>
                 <aside ref={asideMenuC}  className='asideMenuApp'>
                     <div className={`menusHolder ${visibleMenu? 'activeMenusHolder':''}`}>
-                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1761514001/ChatGPT_Image_26_oct_2025_16_24_57_hgpkmn.png'} visbleInfo={visibleMenu} title={'Tesorería'} desc={'SGA - Desarrollos'} />
+                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1772826198/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.png'} visbleInfo={visibleMenu} title={'Tesorería'} desc={'SGA - Desarrollos'} />
                         <MenuApp visibleMenu={visibleMenu} title={'General'} options={optionsMenu}/>
                         <MenuApp visibleMenu={visibleMenu} title={'Herramientas'} options={toolsMenu}/>
                         <MenuApp visibleMenu={visibleMenu} title={'Ajustes'} options={secondOptionsMenu}/>
@@ -223,8 +223,18 @@ export function UserApp(){
                             <Route path='/analytics/*' element={<AnalyticDocDetail/>} />
 
                             <Route path='/settings/*' element={<Settings/>} />                            
-                            <Route path='/tutorials' element={<span>tutorials</span>} />
-                            <Route path='/help' element={<span>help</span>} />
+                            <Route path='/tutorials' element={<NoAccess 
+                                title={'Seccion no disponible'}
+                                description={`Estamos trabajando para ofrecer esta seccion lo mas pronto posible :)`}
+                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1761515342/Grupo5logos_4_rhapbp.png'}
+                                noExit={true}
+                                />} />
+                            <Route path='/help' element={<NoAccess 
+                                title={'Seccion no disponible'}
+                                description={`Estamos trabajando para ofrecer esta seccion lo mas pronto posible :)`}
+                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1760911291/AyudaLogo1_v362of.png'}
+                                noExit={true}
+                                />} />
                             <Route path='/logOut' element={<LogOut/>} />
                     </Routes>
                 </main>

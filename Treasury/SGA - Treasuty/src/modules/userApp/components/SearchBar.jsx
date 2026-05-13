@@ -1,37 +1,24 @@
 import { useRef } from "react";
 import "./SearchBar.css";
 
-export function SearchBar({ placeholder, action, searchAction }) {
-    const inRefSearch = useRef();
+export function SearchBar({ placeholder, action, value, searchAction }) {
 
     const handleKeyDown = (event) => {
-        if (event.key === "Enter") {
-        if (searchAction) {
-            searchAction(inRefSearch.current.value);
-        }
+        if (event.key === "Enter" && searchAction) {
+            searchAction(value.trim());
         }
     };
 
     return (
-        <div>
-            
         <div className="SearchBar">
             <input
-            ref={inRefSearch}
-            type="text"
-            placeholder={placeholder}
-            onChange={(e) => {
-                if (action) {
-                if (e.target.value === " ") {
-                    e.target.value = "";
-                }
-                action(e.target.value);
-                }
-            }}
-            onKeyDown={handleKeyDown} // Agregar evento correctamente
+                type="text"
+                value={value}
+                placeholder={placeholder}
+                onChange={(e)=>action(e.target.value)}
+                onKeyDown={handleKeyDown}
             />
             <i className="fa-solid fa-magnifying-glass"></i>
-        </div>
         </div>
     );
 }

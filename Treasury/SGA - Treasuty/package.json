@@ -20,10 +20,13 @@
     "axios": "^1.11.0",
     "date-fns": "^4.1.0",
     "dom-to-image-more": "^3.7.1",
+    "exceljs": "^4.4.0",
     "html2canvas": "^1.4.1",
+    "jsbarcode": "^3.12.3",
     "jspdf": "^3.0.3",
     "lightweight-charts": "^5.0.9",
     "papaparse": "^5.5.3",
+    "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-pdf": "^10.2.0",
@@ -31,6 +34,7 @@
     "react-virtualized-auto-sizer": "^1.0.26",
     "react-window": "^2.2.1",
     "recharts": "^3.2.1",
+    "socket.io-client": "^4.8.3",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

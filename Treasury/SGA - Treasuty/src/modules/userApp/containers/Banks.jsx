@@ -20,7 +20,7 @@ export function Banks() {
     const navigate = useNavigate();
     
     const handleNavigate = (path)=>{
-        navigate(`/SGA_management/${params.company_key}/${params.user_key}/banks/${path}`);
+        navigate(`/SGA_treasury/${params.company_key}/${params.user_key}/banks/${path}`);
     }
 
 

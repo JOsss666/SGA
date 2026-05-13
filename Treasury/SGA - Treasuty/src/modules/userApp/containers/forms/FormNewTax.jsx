@@ -149,7 +149,7 @@ export function FormNewTax({reloadInfo,info}){
                     title={'Tasa'} 
                     placeholder={'Tasa del impuesto'}
                     type="number"
-                    step="0.01"
+                    step="0.001"
                 />
                 <FormInput 
                     moneyF={true}

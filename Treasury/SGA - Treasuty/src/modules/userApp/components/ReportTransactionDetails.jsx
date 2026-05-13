@@ -52,6 +52,7 @@ export function ReportTransactionDetails() {
         setLoading(true);
         try {
             const res = await postInfo("/getTransactionDetails", settingsReport);
+            console.log(res);
             if (res && res[0]) {
                 setThirdparty_name(res[1][0].thirdparty_name)
                 setInfo(res[1]);
@@ -68,6 +69,33 @@ export function ReportTransactionDetails() {
     useEffect(() => {
         if (transaction_id) GetTransactionDetails();
     }, [transaction_id]);
+
+    const columnMap = {
+        "ID": "id",
+        "Transacción": "transaction_id",
+        "Fecha Documento": "document_date",
+        "Cuenta": "account_name",
+        "Concepto": "concept",
+        "Naturaleza": "nature",
+        "Valor ": "value",
+        "Estado": "status"
+    };
+
+    const setInfoForReportDownload = () => {
+        return info.map(element => {
+            let row = {};
+
+            columns.forEach(col => {
+                const key = columnMap[col];
+
+                row[col] = (key && element[key] !== undefined)
+                    ? element[key]
+                    : "";
+            });
+
+            return row;
+        });
+    };
 
     return (
         <div className="ReportDocument">
@@ -98,7 +126,10 @@ export function ReportTransactionDetails() {
                 {text:'Verifica el contenido de este documento',context:`Procesos - Informe - ${documentTypes[type]}`},
                 {text:'¿Que acciones me recomiendas basado en este documento?',context:`Procesos - Informe - ${documentTypes[type]}`}
             ]}/>
-                <ButtonDownload info={info} title={`Detalle de Transacción #${transaction_id} - Nombre del tercero`} component={tableR.current}/>
+                <ButtonDownload 
+                    info={setInfoForReportDownload()} 
+                    title={`Detalle de Transacción #${transaction_id} - ${thirdparty_name}`}
+                />
             </div>
 
             <div className="SpaceReport" ref={tableR}>
