@@ -812,6 +812,9 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             let e_info = electronicInfo;
             if(e_invoice){
                 e_info = await handleCreationOfEinvoice(res.id);
+                if(e_info.id == undefined);
+                alert('Error al crear la facttura')
+                return;
             }
             if(isElectron){
                 console.log(instance_id);
@@ -971,6 +974,14 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     window.open(`${res.data.bill.public_url}`,'_blank','noopener,noreferrer')
                     //window.open(`${res.data.bill.public_url}`,'_blank','noopener,noreferrer')
                 }
+            })
+        }else{
+            setLoading(false);
+            setDisabled(false);
+            return({
+                id:undefined,
+                code:undefined,
+                url:undefined
             })
         }
         return({
