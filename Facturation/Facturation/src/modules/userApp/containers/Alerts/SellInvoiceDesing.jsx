@@ -333,6 +333,7 @@ export function SellInvoiceDesign(){
                         electronInfo,
                         thirdPartyInfo:thirdPartyInfo,
                         total,
+                        baseValue,
                         totalTaxes,
                         taxes,
                         attachedItems,
