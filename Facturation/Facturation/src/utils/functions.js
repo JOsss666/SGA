@@ -1246,7 +1246,7 @@ export async function printSellInvoice(info,appInfo,barCode){
                     margin-right:0;
                     text-align:right;
                 ">
-                    ${moneyFormat(info.baseValue)}
+                    ${moneyFormat((info.baseValue??0).toFixed(0))}
                 </strong>
 
             </div>
@@ -1280,7 +1280,7 @@ export async function printSellInvoice(info,appInfo,barCode){
                             margin:auto;
                             margin-right:0;
                         ">
-                            ${moneyFormat(element.total)}
+                            ${moneyFormat(element.total.toFixed(0))}
                         </strong>
 
                     </div>
