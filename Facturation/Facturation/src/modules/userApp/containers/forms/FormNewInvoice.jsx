@@ -649,14 +649,13 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
 
     // Control functions
-
     const handleTaxes = (items) => {
         const groupedTaxes = items.reduce((acc, item) => {
             if (!item.tax_id) return acc;
-            let itemTotal = parseFloat(item.unit_value) * parseInt(item.units);
-            console.log('OOOOOOOOOOOOOOOO ',itemTotal)
-            console.log('IIIIIIIIIIIIIIII ',item)
-            const taxTotal = (itemTotal * item.tax_rate) / 100;
+            console.log('YYY ',item)
+            const itemTotal = parseFloat(item.unit_value) * parseFloat(item.units)
+            const itemBase = (itemTotal/(1 + (item.tax_rate/100)))
+            const taxTotal = itemBase * (item.tax_rate/100);
             if (!acc[item.tax_id]) {
                 acc[item.tax_id] = {
                     id: item.tax_id,
@@ -854,8 +853,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     console.log('EL> ',item)
                     FormInfo.transactionDetails.push({
                         account_id:item.exit_account,
-                        subtotal:(parseFloat(item.units)*parseFloat(item.unit_value)*(1-(parseFloat(item.tax_rate??0)/100))),
-                        total:(parseFloat(item.units)*parseFloat(item.unit_value)*(1-(parseFloat(item.tax_rate??0)/100))),
+                        subtotal:(parseFloat(item.units)*parseFloat(item.unit_value)/(1+(parseFloat(item.tax_rate??0)/100))),
+                        total:(parseFloat(item.units)*parseFloat(item.unit_value)/(1+(parseFloat(item.tax_rate??0)/100))),
                         type:item.type == 'service'? 'serviceMovement':'inventoryMovement',
                         nature: documentNature == 'DB'? 'CR':'DB'
                     })

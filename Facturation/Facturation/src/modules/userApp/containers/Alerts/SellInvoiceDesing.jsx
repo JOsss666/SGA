@@ -496,6 +496,10 @@ export function SellInvoiceDesign(){
             </tbody>
         </table>
         </div>
+        <div style={{display:"flex",fontSize:"12px", width:'100%',borderTop:"dashed .5mm #000",padding:'2mm 0'}}>
+            <span style={{margin:'auto 0',fontSize:"12px"}}>Total venta: </span>
+            <strong style={{margin:"auto",marginRight:"0",textAlign:'right'}}>{moneyFormat(docInfo.total)}</strong>
+        </div>
         <span style={{margin:"2mm 0",width:"100%",borderBottom:"dashed .5mm #000"}}></span>
             <div style={{display:"flex",fontSize:"12px"}}>
                 <div style={{display:'flex',flexDirection:'column',gap:'10px 0',width:'100%'}}>

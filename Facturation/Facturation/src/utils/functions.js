@@ -1227,6 +1227,32 @@ export async function printSellInvoice(info,appInfo,barCode){
                 border-bottom:dashed .5mm #000;
                 display:block;
             "></span>
+            <div style="
+                display:flex;
+                font-size:12px;
+                width:100%;
+            ">
+                <span style="
+                    margin:auto 0;
+                    font-size:12px;
+                ">
+                    Valor venta:
+                </span>
+                <strong style="
+                    margin:auto;
+                    margin-right:0;
+                    text-align:right;
+                ">
+                    ${moneyFormat(info.docInfo.total)}
+                </strong>
+
+            </div>
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
              <div style="
                 display:flex;
                 font-size:12px;
@@ -1246,7 +1272,7 @@ export async function printSellInvoice(info,appInfo,barCode){
                     margin-right:0;
                     text-align:right;
                 ">
-                    ${moneyFormat(info.baseValue)}
+                    ${moneyFormat((info.baseValue??0).toFixed(0))}
                 </strong>
 
             </div>
@@ -1280,7 +1306,7 @@ export async function printSellInvoice(info,appInfo,barCode){
                             margin:auto;
                             margin-right:0;
                         ">
-                            ${moneyFormat(element.total)}
+                            ${moneyFormat(element.total.toFixed(0))}
                         </strong>
 
                     </div>
