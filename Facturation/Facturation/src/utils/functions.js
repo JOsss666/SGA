@@ -1227,6 +1227,32 @@ export async function printSellInvoice(info,appInfo,barCode){
                 border-bottom:dashed .5mm #000;
                 display:block;
             "></span>
+            <div style="
+                display:flex;
+                font-size:12px;
+                width:100%;
+            ">
+                <span style="
+                    margin:auto 0;
+                    font-size:12px;
+                ">
+                    Valor venta:
+                </span>
+                <strong style="
+                    margin:auto;
+                    margin-right:0;
+                    text-align:right;
+                ">
+                    ${moneyFormat(info.docInfo.total)}
+                </strong>
+
+            </div>
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
              <div style="
                 display:flex;
                 font-size:12px;
