@@ -1246,7 +1246,7 @@ export async function printSellInvoice(info,appInfo,barCode){
                     margin-right:0;
                     text-align:right;
                 ">
-                    ${moneyFormat(info.docInfo.total - info.totalTaxes)}
+                    ${moneyFormat(info.baseValue)}
                 </strong>
 
             </div>

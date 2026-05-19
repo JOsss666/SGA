@@ -175,6 +175,7 @@ inventoryController.getComercialProducts = (req,res)=>{
                 ac.name AS tax_name,
                 t.base AS tax_base,
                 t.rate AS tax_rate,
+                t.account_id AS tax_account,
                 t.id AS tax_id,
                 c_exit.account_id AS exit_account,
                 c_entry.account_id AS entry_account,
@@ -218,7 +219,8 @@ inventoryController.getComercialProducts = (req,res)=>{
                 ac.name, 
                 t.base, 
                 t.id,
-                t.rate, 
+                t.rate,
+                t.account_id, 
                 c_exit.account_id, 
                 c_entry.account_id
             ORDER BY ps.name ASC, ps.code ASC
@@ -1358,6 +1360,7 @@ inventoryController.getServicesMovements = (req,res)=>{
 
                 ps.tax_id,
                 t.rate AS tax_rate,
+                t.account_id AS tax_account,
                 t.base AS tax_base,
                 ac.name AS tax_name,
 

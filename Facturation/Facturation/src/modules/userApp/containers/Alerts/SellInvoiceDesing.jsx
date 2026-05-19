@@ -22,6 +22,7 @@ export function SellInvoiceDesign(){
     const [docInfo,setDocInfo] = useState({});
     const [paymentMethods,setPaymentMethods] = useState([]);
     const [electronInfo,setElectronInfo] = useState({});
+    const [baseValue,setBaseValue] = useState(0);
     const total = useMemo(() => {
         console.log('///////// ',paymentMethods);
         if(paymentMethods.length == 0) return docInfo.total;
@@ -44,11 +45,23 @@ export function SellInvoiceDesign(){
 
 
     // utils
+    const handleBase = (items)=>{
+        let s = 0;
+        items.forEach(item => {
+            if(item.tax_rate != undefined){
+                s += (item.total/(
+                    1 + (item.tax_rate/100)
+                ))
+            }
+        });
+        setBaseValue(s);
+    }
 
     const handleTaxes = (items) => {
         const groupedTaxes = items.reduce((acc, item) => {
             if (!item.tax_id) return acc;
-            const taxTotal = (item.total * item.tax_rate) / 100;
+            const itemBase = (item.total/(1 + (item.tax_rate/100)))
+            const taxTotal = itemBase * (item.tax_rate/100);
             if (!acc[item.tax_id]) {
                 acc[item.tax_id] = {
                     id: item.tax_id,
@@ -222,7 +235,7 @@ export function SellInvoiceDesign(){
     },[])
 
     useEffect(()=>{
-        console.log(attachedItems)
+        handleBase(attachedItems)
         handleTaxes(attachedItems);
     },[attachedItems])
 
@@ -298,6 +311,7 @@ export function SellInvoiceDesign(){
                         electronInfo,
                         thirdPartyInfo:thirdPartyInfo,
                         total,
+                        baseValue,
                         totalTaxes,
                         taxes,
                         attachedItems,
@@ -486,7 +500,7 @@ export function SellInvoiceDesign(){
                 <div style={{display:'flex',flexDirection:'column',gap:'10px 0',width:'100%'}}>
                     <div style={{display:"flex",fontSize:"12px", width:'100%'}}>
                         <span style={{margin:'auto 0',fontSize:"12px"}}>Base impuestos: </span>
-                        <strong style={{margin:"auto",marginRight:"0",textAlign:'right'}}>{moneyFormat(docInfo.total-totalTaxes)}</strong>
+                        <strong style={{margin:"auto",marginRight:"0",textAlign:'right'}}>{moneyFormat(baseValue)}</strong>
                     </div>
                     {taxes.map((element,index)=>(
                         <div key={index} style={{display:"flex",fontSize:"12px"}}>
