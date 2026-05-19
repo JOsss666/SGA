@@ -662,7 +662,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     id: item.tax_id,
                     rate: item.tax_rate,
                     name: item.tax_name,
-                    total: taxTotal
+                    total: taxTotal,
+                    account:item.tax_account
                 };
             } else {
                 acc[item.tax_id].total += taxTotal;
@@ -812,9 +813,12 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             let e_info = electronicInfo;
             if(e_invoice){
                 e_info = await handleCreationOfEinvoice(res.id);
-                if(e_info.id == undefined);
-                alert('Error al crear la facttura')
-                return;
+                console.log(e_info);
+                if(e_info.id == undefined){
+                    alert('Error al crear la facttura')
+                    return;
+                }
+                
             }
             if(isElectron){
                 console.log(instance_id);
@@ -850,12 +854,22 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     console.log('EL> ',item)
                     FormInfo.transactionDetails.push({
                         account_id:item.exit_account,
-                        subtotal:parseFloat(item.units)*parseFloat(item.unit_value),
-                        total:parseFloat(item.units)*parseFloat(item.unit_value),
+                        subtotal:(parseFloat(item.units)*parseFloat(item.unit_value)*(1-(parseFloat(item.tax_rate??0)/100))),
+                        total:(parseFloat(item.units)*parseFloat(item.unit_value)*(1-(parseFloat(item.tax_rate??0)/100))),
                         type:item.type == 'service'? 'serviceMovement':'inventoryMovement',
                         nature: documentNature == 'DB'? 'CR':'DB'
                     })
                 });
+            });
+            taxes.forEach(tax => {
+                console.log('Tax:  ',tax)
+                FormInfo.transactionDetails.push({
+                    account_id:tax.account,
+                    subtotal:tax.total,
+                    total:tax.total,
+                    type:'tax',
+                    nature: documentNature == 'DB'? 'CR':'DB'
+                })
             });
             paymentMethod.forEach(element => {
                 FormInfo.transactionDetails.push({
@@ -879,6 +893,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 type:'operation',
                 nature: documentNature == 'DB'? 'CR':'DB'
             })*/
+           console.log('==========> ',FormInfo.transactionDetails)
             await toAccount();
             await updatePaidAmount();
         }else{
@@ -985,7 +1000,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             })
         }
         return({
-            id: res.sga_id,
+            id: res.sga_id.id,
             code:res.data.bill.cufe,
             url: res.data.bill.public_url
         })
@@ -1022,6 +1037,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             }
         }
         // Execution after all filters temporal, first implementation of doc_rules
+        console.log(taxes)
         createSellInvoice();
     };
 
