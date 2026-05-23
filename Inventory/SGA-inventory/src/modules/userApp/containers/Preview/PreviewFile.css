@@ -1,0 +1,144 @@
+
+.PreviewFile{
+    display: flex;
+    flex-direction: column;
+    width:99dvw;
+    position: x;
+    top: -1vh;
+    left: -1vw;
+}
+
+.PreviewFile .headPreview{
+    position: fixed;
+    padding: 2vh 2vw;
+    width: 100%;
+    background-color: var(--translucidMenu);
+    backdrop-filter: blur(1vh);
+    display: flex;
+    left: -1vh;
+    top: -1vh;
+}
+
+.PreviewFile .headPreview .nameIconContainer{
+    display: flex;
+    gap: 1vh;
+}
+
+.PreviewFile .headPreview .nameIconContainer i{
+    font-size: clamp(3px, 3vh, 30px);
+    margin: auto 0;
+}
+
+.PreviewFile .headPreview .nameIconContainer strong{
+    font-weight: 500;
+    color: var(--mainText);
+    margin: auto 0;
+    max-width: 50%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    text-wrap: nowrap;
+    white-space: none;
+}
+
+.PreviewFile .headPreview .closePreview{
+    position: absolute;
+    top: 3.5vh;
+    right: 2vw;
+    font-size: clamp(3px,3vh, 30px);
+    cursor: pointer;
+    color: var(--mainText);
+}
+
+
+.PreviewFile .headPreview .optionsDoc{
+    display: flex;
+    margin: auto 2vw;
+    margin-left: auto;
+    gap: .5vw;
+    padding: 0 1vh;
+}
+
+
+.PreviewFile .contentContainer{
+    width: 100%;
+    height: fit-content;
+    display: flex;
+}
+
+.PreviewFile .contentContainer .fileC{
+    width: fit-content;
+    height: fit-content;
+    max-width: inherit;
+    margin: 0 auto;
+    margin-top: 10vh;
+}
+
+
+/*  Estilos iconos  */
+
+.PreviewFile .headPreview .fa-file-image{
+    color: #2B7FFF;
+}
+
+.PreviewFile .headPreview .fa-file-word{
+    color: #1447E6;
+}
+
+.PreviewFile .headPreview .fa-file-pdf{
+    color: #FB2C36;
+}
+
+.PreviewFile .headPreview .fa-file-excel{
+    color: #18786F;
+}
+
+.PreviewFile .headPreview .fa-file-powerpoint{
+    color: #F54927;
+}
+
+.PreviewFile .headPreview .fa-file-lines{
+    color: var(--mainText);
+}
+
+.PreviewFile .headPreview .fa-file-zipper{
+    color: #D0872E;
+}
+
+.PreviewFile .headPreview .fa-photo-film{
+    color: #615FFF;
+}
+
+
+
+@media (max-width:500px) {
+    .PreviewFile .headPreview{
+        flex-direction: column;
+    }
+
+    .PreviewFile .headPreview .nameIconContainer{
+        margin: 1vh auto;
+        padding: 0 4vh;
+    }
+
+    .PreviewFile .headPreview .nameIconContainer strong{
+        max-width: 60%;
+        margin: auto 2vw;
+    }
+
+    .PreviewFile .headPreview .optionsDoc{
+        margin-top: 1vh;
+        margin-left: 2vh;
+    }
+
+    .PreviewFile .headPreview .closePreview{
+        right: 3vh;
+    }
+
+    .PreviewFile .contentContainer .fileC{
+        margin-top: 15vh;
+    }
+
+    .PreviewFile .moreOptC{
+        display: none;
+    }
+}

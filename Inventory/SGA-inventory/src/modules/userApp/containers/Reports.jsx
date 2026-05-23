@@ -23,15 +23,6 @@ import { CashBoxesCloseReport } from './reports/CashBoxesCloseReport';
 import { ReportHistorialInstance } from './reports/ReportHIstorialInstance';
 import { PortfolioReportDetail } from './reports/PortfolioReportDetail';
 
-// Costume modules
-
-    // Z&J S.A.S
-    const CustomZJClicksReport = React.lazy(() => 
-        import('../../../../../../costume-modules/zjSAS.S/src/containers/reports/ClicksReport').then(module => ({ default: module.ClicksReport }))
-    );
-    const CustomZJServicesReport = React.lazy(() => 
-        import('../../../../../../costume-modules/zjSAS.S/src/containers/reports/ServiceMovements').then(module => ({ default: module.ServiceMovements }))
-    );
 
 export function Reports(){
 
@@ -126,16 +117,7 @@ export function Reports(){
                             <CardReport type={'contable'} title={'Informe de cartera (Alpha)'} description={'Versión de prueba Alpha V 0.1'} onClick={()=>{
                                 handleNavigate('BriefCases')
                             }}/>
-                            {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                                <CardReport type={'processes'} title={'Informe de clicks (Beta)'} description={'Versión de prueba Beta V 1.1'} onClick={()=>{
-                                    handleNavigate('zjClicksReport')
-                                }}/>
-                            )}
-                            {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                                <CardReport type={'inventarios'} title={'Informe de servicios (Alpha)'} description={'Versión de prueba Alpha V 1.1'} onClick={()=>{
-                                    handleNavigate('zjServicesReport')
-                                }}/>
-                            )}
+                        
                             <CardReport type={'contable'} title={'Informe Cierres de caja'} description={'Consulte los cierres de caja'} onClick={()=>{
                                 handleNavigate('CashBoxesCloseReport')
                             }}/>
@@ -165,20 +147,7 @@ export function Reports(){
                 <Route path='/BriefCases/:thirdParty_id' element={<PortfolioReportDetail/>}/>
                 <Route path='/ProcessInstanceHistorial' element={<ReportHistorialInstance/>}/>
                 <Route path='/CashBoxesCloseReport' element={<CashBoxesCloseReport/>}/>
-                {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                    <Route path='/zjClicksReport' element={
-                    <Suspense fallback={<div>Cargando componente pesado...</div>}>
-                        <CustomZJClicksReport useAlert={useAlert} appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} useAiAssistant={useAiAssistant}/>
-                    </Suspense>
-                    }/>
-                )}
-                {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                    <Route path='/zjServicesReport' element={
-                    <Suspense fallback={<div>Cargando componente pesado...</div>}>
-                        <CustomZJServicesReport appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} useAiAssistant={useAiAssistant}/>
-                    </Suspense>
-                    }/>
-                )}
+                
             </Routes>
         </div>
     )
