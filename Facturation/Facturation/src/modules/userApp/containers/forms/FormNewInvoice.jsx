@@ -141,14 +141,12 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     };
 
     const handleUserConfig = async()=>{
-        console.log(appConfig.access)
         setDisabled(true)
         setLoading(true)
         await getThirdParties();
         await getConcepts();
         let temInfo = {}
         if(userConfig.access != undefined){
-            console.log(userConfig.access)
             // Filtro para busqueda de tiendas
             if(!userConfig.access.stores.overAll){
                 if(userConfig.access.stores.enabled.length > 1){
@@ -219,7 +217,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
         
         if(temInfo != {}){
-            console.log(temInfo);
             setInfo(temInfo);
         }
         setLoading(false);
@@ -260,15 +257,12 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     }
 
     const handleThirdPartyChange = (element)=>{
-        console.log(element);
         setThirdParty_id(element.id);
         setThirdPartyInfo(element);
     }
 
     const handleCashBoxChange = (element)=>{
-        console.log('zzzzz ',element)
         if(element.id != undefined){
-            console.log('Elemento actualizado correctamente')
             setCashBox_id(element.id)
             setShift_id(element.shift_id)
         }
@@ -358,7 +352,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                             const newPrice = getEffectivePrice(item, value);
                             updatedItem.unit_value = newPrice;
                         }
-                        console.log(updatedItem)
                         return updatedItem;
                     });
 
@@ -412,7 +405,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             status:['active'],
             thirdParty_id
         })
-        console.log(res);
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
@@ -430,18 +422,15 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             company_id:appInfo.company_id
             //user_id:userInfo.user_id
         })
-        console.log(res);
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
-                console.log(element);
                 C.push({
                     text:element.name,
                     value:element,
                     allowedCashBoxes:allowedCashBoxes
                 })
             });
-            console.log(C)
             if(C.length == 1){
                 handleCashBoxChange(C[0].value);
             }
@@ -507,7 +496,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             typePlanAccount:appInfo.accountPlanType,
             allowedConcepts:userConfig.access.sections.concepts.overAll ? undefined:userConfig.access.sections.concepts.enabled
         })
-        console.log(res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -529,7 +517,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             allowedPaymentMethods,
             for_wallet:ableCredit ? undefined:false
         })
-        console.log(res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -561,7 +548,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             // Arreglo temporal de tipo de documentos
             allowedTypes:['Client Order']
         })
-        console.log(res)
         if(res[0]){
             if(instance_id == undefined){
                 let C = []
@@ -574,7 +560,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 setDocuments(C);
             }else{
                 for (const element of res[1]) {
-                console.log('Procesando elemento:', element.id);
                     let attachedItems = await getAttachedServices(element.id);
                     handleAddBlock({
                         docInfo: element,
@@ -592,7 +577,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             id:id,
             limit:limit
         });
-        console.log('Ter ',res)
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
@@ -613,7 +597,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             company_id:appInfo.company_id,
             thirdParty_id
         })
-        console.log(res);
         setBriefCaseBills(res[1]);
     }
 
@@ -632,7 +615,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             allowedCellars,
             type:'service'
         })
-        console.log('=======> ',res);
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -652,7 +634,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const handleTaxes = (items) => {
         const groupedTaxes = items.reduce((acc, item) => {
             if (!item.tax_id) return acc;
-            console.log('YYY ',item)
             const itemTotal = parseFloat(item.unit_value) * parseFloat(item.units)
             const itemBase = (itemTotal/(1 + (item.tax_rate/100)))
             const taxTotal = itemBase * (item.tax_rate/100);
@@ -703,7 +684,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             setDisabledByValue(true)
             return;
         }
-        console.log(paymentMethod)
         setPaymentMethod_code(paymentMethod[0].facturation_code);
         paymentMethod.forEach(element => {
             if(element.value != "" && element.value != undefined){
@@ -734,11 +714,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     // function for update paid ammount
     const updatePaidAmount = async()=>{
         for(let doc of itemBlocks){
-            console.log(itemBlocks)
             if(doc.docInfo != undefined){
-                console.log(doc.docInfo)
                 let res = await postInfo('/facturation/updatePaymentDocument',doc.docInfo);
-                console.log(res);
             }
         }
     }
@@ -768,7 +745,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 }
             };
         }); 
-        console.log(updatedDocuments)
         // 5. Actualizamos el estado de React
         setItemBlocks(updatedDocuments);
     };
@@ -799,7 +775,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         setDisabled(true)
         setLoading(true)
         let res = await postInfo('/facturation/newSellInvoice',FormInfo);
-        console.log(res);
         if(typeof(parseInt(res.id)) == 'number'){
             addNotification({
                 type:'aproved',
@@ -812,7 +787,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             let e_info = electronicInfo;
             if(e_invoice){
                 e_info = await handleCreationOfEinvoice(res.id);
-                console.log(e_info);
                 if(e_info.id == undefined){
                     alert('Error al crear la facttura')
                     return;
@@ -820,7 +794,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 
             }
             if(isElectron){
-                console.log(instance_id);
                 let infoToPrtint = {
                     docInfo:{
                         doc_id:res.id,
@@ -848,9 +821,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             FormInfo["user_id"] = userInfo.user_id,
             FormInfo['transactionDetails'] = []
             itemBlocks.forEach(element => {
-                console.log(element)
                 element.items.forEach(item => {
-                    console.log('EL> ',item)
                     FormInfo.transactionDetails.push({
                         account_id:item.exit_account,
                         subtotal:(parseFloat(item.units)*parseFloat(item.unit_value)/(1+(parseFloat(item.tax_rate??0)/100))),
@@ -861,7 +832,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 });
             });
             taxes.forEach(tax => {
-                console.log('Tax:  ',tax)
                 FormInfo.transactionDetails.push({
                     account_id:tax.account,
                     subtotal:tax.total,
@@ -892,7 +862,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 type:'operation',
                 nature: documentNature == 'DB'? 'CR':'DB'
             })*/
-           console.log('==========> ',FormInfo.transactionDetails)
             await toAccount();
             await updatePaidAmount();
         }else{
@@ -912,7 +881,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     }
 
     const toAccount = async()=>{
-        console.log(FormInfo)
         let res = await postInfo('/createTransaction',FormInfo);
         const insertId = parseInt(res[0]);
         if(typeof(insertId) == 'number' && insertId != NaN && insertId != undefined){
@@ -978,7 +946,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             items:itemsToFac,
             doc_id
         });
-        console.log(res)
         if(res.status == 'Created'){
             addNotification({
                 type:'aproved',
@@ -1027,7 +994,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         setVisibleError(false);
         for (const rule of docRules) {
             const res = await executeDocumentAction(rule.action, FormInfo);
-            console.log(res);
 
             if (res.isValid === false) {
             setError(`Error de validación: ${res.message}`);
@@ -1036,14 +1002,12 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             }
         }
         // Execution after all filters temporal, first implementation of doc_rules
-        console.log(taxes)
         createSellInvoice();
     };
 
     // Event listeners
     
     useEffect(()=>{
-        console.log(thirdPartyInfo)
         if(thirdPartyInfo.id != undefined){
             // Update of crefit conditions of thirdParty
             setAbleCredit(thirdPartyInfo.credit != undefined ? thirdPartyInfo.credit:0);
@@ -1055,7 +1019,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     useEffect(()=>{
         if(thirdPartyInfo.id != undefined){
-            console.log('Obteniedo metodos de pago')
             getPaymentMethods();
         }
     },[aviableCredit,ableCredit])
@@ -1071,10 +1034,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     },[paymentMethod])
 
     useEffect(()=>{
-        console.log(documents)
         if(documents.length > 0){
             let newTotalToPay = 0;
-            console.log('XXX',itemBlocks)
             itemBlocks.forEach(element => {
                 if(element.docInfo == undefined){
                     let tempTtl = 0;
@@ -1137,7 +1098,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     },[thirdParty_id])
 
     useEffect(()=>{
-        console.log('---> ',disabled)
     },[disabled])
 
      useEffect(()=>{

@@ -108,7 +108,6 @@ export function FormNewCategoryTaxes({reloadFun,info}){
             <BoldTitle text={'Nueva categoria impuestos'}/>
             <form action="" onSubmit={(e)=>{
                     e.preventDefault();
-                    console.log(formInfo);
                     createTaxCategory();
             }}>
                 <FormInput title={'Nombre'} action={setName} placeholder={'Nombre de tu centro de costo'} disabled={disabled}/>

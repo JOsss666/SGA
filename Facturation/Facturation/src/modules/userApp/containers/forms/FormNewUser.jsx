@@ -50,11 +50,9 @@ export function FormNewUser({info,reloadFun}){
     }
 
     const getRoles = async()=>{
-        console.log('Cargando roles')
         let res = await postInfo('/getRoles',{
             company_id:appInfo.company_id
         })
-        console.log(res)
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
@@ -68,7 +66,6 @@ export function FormNewUser({info,reloadFun}){
     }
 
     useEffect(()=>{
-        console.log(userRol)
     },[userRol])
 
     const createUser = async()=>{

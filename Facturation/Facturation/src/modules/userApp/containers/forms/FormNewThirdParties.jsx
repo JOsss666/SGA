@@ -280,7 +280,6 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                 if(stage < (quickCreation? 3:4)){
                     setStage(stage +1)
                 }else{
-                    console.log(formInfo)
                     createThirdParty();
                 }
             }}/>

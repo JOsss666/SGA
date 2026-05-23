@@ -154,7 +154,6 @@ export function FormNewProduct({info,update,reloadFun}){
     const createProduct = async()=>{
         setDisabled(true);
         setLoading(true);
-        console.log(formInfo)
         let res = await postInfo('/inventory/createProduct',formInfo);
         if(res){
             addNotification({
@@ -208,7 +207,6 @@ export function FormNewProduct({info,update,reloadFun}){
     },[])
 
     useEffect(()=>{
-        console.log(photo);
     },[photo])
 
     return(
