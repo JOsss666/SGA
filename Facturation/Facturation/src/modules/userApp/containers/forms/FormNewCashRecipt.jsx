@@ -117,14 +117,12 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     };
 
     const handleUserConfig = async()=>{
-        console.log(appConfig.access)
         setDisabled(true)
         setLoading(true)
         await getThirdParties();
         await getConcepts();
         let temInfo = {}
         if(userConfig.access != undefined){
-            console.log(userConfig.access)
             // Filtro para busqueda de tiendas
             if(!userConfig.access.stores.overAll){
                 if(userConfig.access.stores.enabled.length > 1){
@@ -195,7 +193,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         }
         
         if(temInfo != {}){
-            console.log(temInfo);
             setInfo(temInfo);
         }
         setLoading(false);
@@ -221,7 +218,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     }
 
     useEffect(()=>{
-        console.log(documentNature);
     },[documentNature])
 
     const handleThirdPartyChange = (element)=>{
@@ -230,9 +226,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     }
 
     const handleCashBoxChange = (element)=>{
-        console.log('zzzzz ',element)
         if(element.id != undefined){
-            console.log('Elemento actualizado correctamente')
             setCashBox_id(element.id)
             setShift_id(element.shift_id)
         }
@@ -245,7 +239,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     // Getters of info
 
     const handleSelectInstance = (element)=>{
-        console.log(element)
         setInstance_id(element.id)
         setStep_id(element.step_id)
         setInstanceOwnSerial(element.ownSerial)
@@ -265,7 +258,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             company_id:appInfo.company_id,
             status:['active']
         })
-        console.log(res);
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
@@ -283,18 +275,15 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             company_id:appInfo.company_id
             //user_id:userInfo.user_id
         })
-        console.log(res);
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
-                console.log(element);
                 C.push({
                     text:element.name,
                     value:element,
                     allowedCashBoxes:allowedCashBoxes
                 })
             });
-            console.log(C)
             if(C.length == 1){
                 handleCashBoxChange(C[0].value);
             }
@@ -360,7 +349,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             typePlanAccount:appInfo.accountPlanType,
             allowedConcepts:userConfig.access.sections.concepts.overAll ? undefined:userConfig.access.sections.concepts.enabled
         })
-        console.log(res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -382,7 +370,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             allowedPaymentMethods,
             for_wallet:ableCredit ? undefined:false
         })
-        console.log(res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -416,7 +403,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             id:id,
             limit:limit
         });
-        console.log('Ter ',res)
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
@@ -437,7 +423,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             company_id:appInfo.company_id,
             thirdParty_id
         })
-        console.log(res);
         setBriefCaseBills(res[1]);
     }
 
@@ -530,7 +515,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const updatePaidAmount = async()=>{
         for(let doc of documents){
             let res = await postInfo('/facturation/updatePaymentDocument',doc);
-            console.log(res);
         }
     }
 
@@ -556,7 +540,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 paid_amount: paymentForThisDoc
             };
         });
-        console.log(updatedDocuments)
         // 5. Actualizamos el estado de React
         setDocuments(updatedDocuments);
     };
@@ -567,7 +550,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         setDisabled(true)
         setLoading(true)
         let res = await postInfo('/facturation/newCashRecipt',FormInfo);
-        console.log(res);
         if(typeof(parseInt(res.id)) == 'number'){
             addNotification({
                 type:'aproved',
@@ -624,7 +606,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     }
 
     const toAccount = async()=>{
-        console.log(FormInfo)
         let res = await postInfo('/createTransaction',FormInfo);
         const insertId = parseInt(res[0]);
         if(typeof(insertId) == 'number' && insertId != NaN && insertId != undefined){
@@ -665,11 +646,9 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     },[paymentMethod])
 
     useEffect(()=>{
-        console.log(briefCaseBills)
     },[briefCaseBills])
 
     useEffect(()=>{
-        console.log(documents)
         if(documents.length > 0){
             let newTotalToPay = 0;
             documents.forEach(element => {
@@ -688,7 +667,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     },[documents,briefCaseBills])
 
     useEffect(()=>{
-        console.log(thirdPartyInfo)
         if(thirdPartyInfo.id != undefined){
             // Update of crefit conditions of thirdParty
             setAbleCredit(thirdPartyInfo.credit != undefined ? thirdPartyInfo.credit:0);
@@ -699,7 +677,6 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
 
     useEffect(()=>{
         if(thirdPartyInfo.id != undefined){
-            console.log('Obteniedo metodos de pago')
             getPaymentMethods();
         }
     },[aviableCredit,ableCredit])
