@@ -8,7 +8,6 @@ import { useAppInfo, useNotifications } from '../../../../context/context';
 export function TreeFormNewAccount({fatherInfo,reloadINfo}){
     
     const {appInfo} = useAppInfo();
-    console.log(appInfo)
     const [name,setName] = useState('');
     const [type,setType] = useState('DB')
     const [subNacc,setsubNacc] = useState(0);
@@ -24,7 +23,6 @@ export function TreeFormNewAccount({fatherInfo,reloadINfo}){
     }
 
     const createAccount = async()=>{
-        console.log(formInfo)
         let res = await postInfo('/insertNewAccount',formInfo);
         if(res){
             addNotification({
