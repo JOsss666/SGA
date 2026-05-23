@@ -92,7 +92,6 @@ export function FormNewENote({InfoParams,reloadFun}){
             company_id:appInfo.company_id,
             type:'electronic invoice'
         })
-        console.log(res);
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -109,7 +108,6 @@ export function FormNewENote({InfoParams,reloadFun}){
         let res = await postInfo('/electronicFacturationController.getDocumentFullInfo',{
             bill_numer:bill_number
         });
-        console.log(res);
         if(res.status == 'OK'){
             setInvoiceInfo(res.data)
             setThirdPartyInfo({
@@ -179,13 +177,11 @@ export function FormNewENote({InfoParams,reloadFun}){
     // Creation Functions
 
         const handleUserConfig = async()=>{
-        console.log(appConfig.access)
         setDisabled(true)
         setLoading(true)
         await getThirdParties();
         let temInfo = {}
         if(userConfig.access != undefined){
-            console.log(userConfig.access)
             // Filtro para busqueda de tiendas
             if(!userConfig.access.stores.overAll){
                 if(userConfig.access.stores.enabled.length > 1){
@@ -230,7 +226,6 @@ export function FormNewENote({InfoParams,reloadFun}){
         }
         
         if(temInfo != {}){
-            console.log(temInfo);
             setInfo(temInfo);
         }
         setLoading(false);
@@ -240,7 +235,6 @@ export function FormNewENote({InfoParams,reloadFun}){
     const handleCreationOfNote = async(doc_id)=>{
         let itemsToFac = [];
         items.forEach(item => {
-            console.log('??? ',item)
             itemsToFac.push(
                 {
                     "code_reference": item.code_reference? item.code_reference:'-',
@@ -268,7 +262,6 @@ export function FormNewENote({InfoParams,reloadFun}){
             doc_id,
             type
         });
-        console.log(res)
         if(res.status == 'Created'){
             addNotification({
                 type:'aproved',
@@ -285,7 +278,6 @@ export function FormNewENote({InfoParams,reloadFun}){
         setDisabled(true)
         setLoading(true)
         let res = await postInfo('/facturation/newNote',FormInfo.document);
-        console.log(res);
         if(typeof(parseInt(res.id)) == 'number'){
             addNotification({
                 type:'aproved',
@@ -332,7 +324,6 @@ export function FormNewENote({InfoParams,reloadFun}){
     }
 
      const toAccount = async()=>{
-        console.log(FormInfo)
         let res = await postInfo('/createTransaction',FormInfo);
         const insertId = parseInt(res[0]);
         if(typeof(insertId) == 'number' && insertId != NaN && insertId != undefined){
@@ -363,8 +354,6 @@ export function FormNewENote({InfoParams,reloadFun}){
         
         const updateItemValue = (itemIndex, value,units) => {
             items.forEach((element,index) => {
-                console.log(index,itemIndex)
-                console.log(element);
             });
             setItems(prev => 
                 prev.map((item,index) => 
@@ -384,25 +373,18 @@ export function FormNewENote({InfoParams,reloadFun}){
     },[mode]);
 
     useEffect(()=>{
-        console.log(thirdParyInfo)
     },[thirdParyInfo])
 
     useEffect(() => {
-        console.log('Mod Items')
         const s = items.reduce((acc, item) => acc + (parseFloat(item.total) || 0), 0);
         setTotal(s);
     }, [items]);
 
     useEffect(() => {
-        console.log('Act total',total)
         if(invoiceInfo.bill == undefined) return;
-        console.log('Ttl Actual',total);
-        console.log('Ttt Original ',invoiceInfo.bill.total);
         if(total > parseFloat(invoiceInfo.bill.total)){
-            console.log('Es debito')
             setType('Debit Note');
         }else{
-            console.log('Es crédito')
             setType('Credit Note');
         }
     }, [total,invoiceInfo]);
@@ -480,7 +462,6 @@ export function FormNewENote({InfoParams,reloadFun}){
                                         type={'number'}
                                         value={element.price}
                                         action={(value)=>{
-                                            console.log(value)
                                             updateItemValue(index,value,element.quantity);
                                         }}
                                         disabled={disabled}/>
