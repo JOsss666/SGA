@@ -41,7 +41,6 @@ export function FormNewConcept({reloadInfo}){
     }
 
     const getTaxes = async(attached)=>{
-        console.log('Cargando Impuestos');
         let res = await postInfo('/getTaxes',{
             company_id:appInfo.company_id,
         })
