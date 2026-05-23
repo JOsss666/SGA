@@ -60,9 +60,7 @@ export function SelectTpeNewDoc({info,docType,reloadFun}){
     ]
 
     const handleAutoSelectDocType = (type)=>{
-        console.log('Encontrando tipo: ',type)
         const document = documents.find(doc => doc.docType === type);
-        console.log('Formulario entontrado: ',document);
         // Retornamos el alert si existe, de lo contrario un mensaje por defecto o null
         return document ? document.alert : <span>Documento no encontrado</span>;
     }
