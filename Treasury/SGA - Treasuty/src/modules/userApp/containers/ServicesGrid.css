@@ -7,7 +7,7 @@
     backdrop-filter: blur(2vh);
     border-radius: 2vh;
     outline: solid .1vh var(--inputsBorder);
-    max-width: 24vw;
+    max-width: 25vw;
     height: fit-content;
     flex-wrap: wrap;
     padding: 1vh;

@@ -4,7 +4,7 @@ import { useAppInfo } from '../../../../context/context';
 import './CashReciptDesign.css'
 import { QRCodeSVG } from 'qrcode.react';
 import { BoldTitle } from '../../components/BoldTitle';
-import { moneyFormat, postInfo } from '../../../../utils/functions';
+import { moneyFormat, postInfo, printSellInvoice } from '../../../../utils/functions';
 import { SearchinList } from '../../components/SearchInList';
 import { ButtonMenu } from '../../components/ButtonMenu';
 import { printCashRecipt } from '../../../../utils/functions';
@@ -21,7 +21,11 @@ export function SellInvoiceDesign(){
     const [instanceOwnSerial,setInstanceOwnSerial] = useState();
     const [docInfo,setDocInfo] = useState({});
     const [paymentMethods,setPaymentMethods] = useState([]);
+    const [electronInfo,setElectronInfo] = useState({});
+    const [baseValue,setBaseValue] = useState(0);
     const total = useMemo(() => {
+        console.log('///////// ',paymentMethods);
+        if(paymentMethods.length == 0) return docInfo.total;
         return paymentMethods.reduce((acc, el) => acc + parseFloat(el.value || 0), 0);
     }, [paymentMethods]);
     const [thirdPartyInfo,setThirdPartyInfo] = useState({});
@@ -33,6 +37,45 @@ export function SellInvoiceDesign(){
     const [disabled,setDisabled] = useState(false);
     const [barcodeBase64, setBarcodeBase64] = useState(null);
 
+
+    // Invoice Info
+    const [totalTaxes,setTotalTaxes] = useState(0);
+    const [attachedItems,setAttachedItems] = useState([]);
+    const [taxes,setTaxes] = useState([]);
+
+
+    // utils
+    const handleBase = (items)=>{
+        let s = 0;
+        items.forEach(item => {
+            if(item.tax_rate != undefined){
+                s += (item.total/(
+                    1 + (item.tax_rate/100)
+                ))
+            }
+        });
+        setBaseValue(s);
+    }
+
+    const handleTaxes = (items) => {
+        const groupedTaxes = items.reduce((acc, item) => {
+            if (!item.tax_id) return acc;
+            const itemBase = (item.total/(1 + (item.tax_rate/100)))
+            const taxTotal = itemBase * (item.tax_rate/100);
+            if (!acc[item.tax_id]) {
+                acc[item.tax_id] = {
+                    id: item.tax_id,
+                    rate: item.tax_rate,
+                    name: item.tax_name,
+                    total: taxTotal
+                };
+            } else {
+                acc[item.tax_id].total += taxTotal;
+            }
+            return acc;
+        }, {});
+        setTaxes(Object.values(groupedTaxes));
+    };
 
     // Getters of info
     const getInstances = async(allowedInstances,allowedTypes)=>{
@@ -56,11 +99,6 @@ export function SellInvoiceDesign(){
     const getAttachedDocuments = async()=>{
         setDisabled(true)
         setLoading(true)
-        console.log({
-            company_id:appInfo.company_id,
-            allowedTypes:['Cash recipt'],
-            instance_id
-        })
         let res = await postInfo('/getDocuments',{
             company_id:appInfo.company_id,
             allowedTypes:['Sell Invoice'],
@@ -92,6 +130,7 @@ export function SellInvoiceDesign(){
             company_id:appInfo.company_id,
             doc_id:docInfo.id
         })
+        console.log(res);
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
@@ -100,7 +139,10 @@ export function SellInvoiceDesign(){
                     value:element.total
                 })
             });
+            console.log('------> ', C);
             setPaymentMethods(C);
+        }else{
+            setAttachedItems([])
         }
         setLoading(false);
     }
@@ -110,6 +152,53 @@ export function SellInvoiceDesign(){
             if(res[0]){
                 setThirdPartyInfo(res[1][0]);
             }
+    }
+
+    const getAttachedServices = async(doc_id)=>{
+            let res = await postInfo('/getServiceMovements',{
+                company_id:appInfo.company_id,
+                doc_id
+            })
+            if(res[0]){
+                return(res[1])
+            }
+        }
+    
+    const getDocuments = async(instance_id)=>{
+        let res = await postInfo('/getDocuments',{
+            company_id:appInfo.company_id,
+            instance_id,
+            thirdParty_id:docInfo.thirdParty_id,
+            status:'active',
+            // Arreglo temporal de tipo de documentos
+            allowedTypes:['Client Order']
+        })
+        console.log(res)
+        if(res[0]){
+            let C = [];
+            for (const element of res[1]) {
+            console.log('Procesando elemento:', element.id);
+                let attachedItems = await getAttachedServices(element.id);
+                if(attachedItems != undefined){
+                    attachedItems.forEach(item => {
+                        C.push(item);
+                    });
+                }
+                
+            }
+            setAttachedItems(C);
+        }
+    }
+
+    const getElectronInfo = async()=>{
+        let res = await postInfo('/electronicFacturation/getDocuments',{
+            company_id:appInfo.company_id,
+            doc_id:docInfo.id
+        });
+        console.log(res);
+        if(res[0]){
+            setElectronInfo(res[1][0]);
+        }
     }
 
     // Functions
@@ -131,6 +220,10 @@ export function SellInvoiceDesign(){
     }
 
     useEffect(()=>{
+        console.log(paymentMethods);
+    },[paymentMethods])
+
+    useEffect(()=>{
         console.log(instance_id)
         if(instance_id == undefined && instance_id != '') return;
         getAttachedDocuments();
@@ -141,13 +234,29 @@ export function SellInvoiceDesign(){
         getAttachedDocuments();
     },[])
 
+    useEffect(()=>{
+        handleBase(attachedItems)
+        handleTaxes(attachedItems);
+    },[attachedItems])
 
     useEffect(()=>{
         console.log(docInfo)
         if(docInfo.id == undefined) return;
-        getAttachedTransactions();
+        if(stage == 1){
+            getAttachedTransactions();
+        };
         getThirdParties()
-    },[docInfo])
+        getDocuments(docInfo.instance_id);
+        getElectronInfo();
+    },[docInfo,stage])
+
+    useEffect(()=>{
+        let totalTax = 0;
+        taxes.forEach(element => {
+            totalTax += element.total;
+        });
+        setTotalTaxes(totalTax);
+    },[taxes])
 
     useEffect(() => {
         if (!instance_id) return;
@@ -157,7 +266,7 @@ export function SellInvoiceDesign(){
         // Limpia SVG anterior
         barcodeRef.current.innerHTML = '';
 
-        JsBarcode(barcodeRef.current, `1026n${instance_id}`, {
+        JsBarcode(barcodeRef.current, `1026n${docInfo.instance_id}`, {
             format: "CODE128",
             width: 2,
             height: 60,
@@ -165,14 +274,14 @@ export function SellInvoiceDesign(){
             margin: 0
         });
 
-    }, [instance_id, stage]);
+    }, [docInfo, stage]);
 
 
     const qrUrl = `https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${docInfo.id}`;
     const qrUrlProcess = `https://facturation.sga360.co/preview/Process/${appInfo.company_key}/${instance_id}`;
     if(stage == 0)return(
         <div className="SelectCashRecipt">
-            <BoldTitle text={'Seleccione recibo a imprimir'} />  
+            <BoldTitle text={'Seleccione factura a imprimir'} />  
             <SearchinList title={'Proceso adjunto'} placeHolder={'(Opcional)'} action={handleSelectinstance} list={instances}/>
             <SearchinList title={'Factura de venta'} placeHolder={'Seleccione la Factura de venta a imprimir'} action={handleSelectDoc} list={cashRecipts}/>
         </div>
@@ -181,34 +290,54 @@ export function SellInvoiceDesign(){
         <>
         <span className='CashReciptDesign_goBackBtn' onClick={()=>{
             setStage(0);
+            setInstaceId();
         }}><i className="fa-solid fa-arrow-left"/>Volver</span>
         <div className="CashReciptDesign_suitElectronOptions">
             {isElectron && (
                 <ButtonMenu title={"Imprimir"} noRotate={true} onClick={async()=>{
-                    await printCashRecipt({
+                    await printSellInvoice({
                         // FormInfo
-                        doc_id:docInfo.id,
-                        doc_type:docInfo.document_type,
-                        instance_id,
-                        thirdParty_name:thirdPartyInfo.names,
-                        description:docInfo.description,
-                        ownSerial:docInfo.ownSerial,
+                        docInfo:{
+                            doc_id:docInfo.id,
+                            doc_type:docInfo.document_type,
+                            instance_id,
+                            thirdParty_name:thirdPartyInfo.names,
+                            description:docInfo.description,
+                            ownSerial:docInfo.ownSerial,
+                            total:docInfo.total,
+                            paymentMethod:paymentMethods,
+                            instanceOwnSerial
+                        },
+                        electronInfo,
+                        thirdPartyInfo:thirdPartyInfo,
                         total,
-                        paymentMethod:paymentMethods,
-                        instanceOwnSerial
+                        baseValue,
+                        totalTaxes,
+                        taxes,
+                        attachedItems,
+                        paymentMethods
                     },appInfo,true)
-                    await printCashRecipt({
+                    await printSellInvoice({
                         // FormInfo
-                        doc_id:docInfo.id,
-                        doc_type:docInfo.document_type,
-                        instance_id,
-                        instanceOwnSerial,
-                        thirdParty_name:thirdPartyInfo.names,
-                        description:docInfo.description,
-                        ownSerial:docInfo.ownSerial,
+                        docInfo:{
+                            doc_id:docInfo.id,
+                            doc_type:docInfo.document_type,
+                            instance_id,
+                            thirdParty_name:thirdPartyInfo.names,
+                            description:docInfo.description,
+                            ownSerial:docInfo.ownSerial,
+                            total:docInfo.total,
+                            paymentMethod:paymentMethods,
+                            instanceOwnSerial
+                        },
+                        electronInfo,
+                        thirdPartyInfo:thirdPartyInfo,
                         total,
-                        paymentMethod:paymentMethods,
-                        instanceOwnSerial
+                        baseValue,
+                        totalTaxes,
+                        taxes,
+                        attachedItems,
+                        paymentMethods
                     },appInfo,false)
                 }} children={
                     <i className="fa-solid fa-print"/>
@@ -255,6 +384,142 @@ export function SellInvoiceDesign(){
             <span style={{fontSize:"12px"}}>Concepto: Servicio de impresión digital</span>
             <span style={{fontSize:"12px"}}>Tercero: {thirdPartyInfo.names}</span>
             <span style={{margin:"2mm 0",width:"100%",borderBottom:"dashed .5mm #000"}}></span>
+            <div
+    style={{
+        width: "100%",
+        fontSize: "10px",
+        marginTop: "2mm",
+        display: "flex",
+        flexDirection: "column",
+        gap: "1mm"
+    }}
+>
+    <table
+            style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                tableLayout: "fixed"
+            }}
+        >
+            <thead>
+                <tr
+                    style={{
+                        borderBottom: "solid .3mm #000"
+                    }}
+                >
+                    <th
+                        style={{
+                            textAlign: "left",
+                            width: "40%",
+                            paddingBottom: "1mm",
+                            fontSize: "10px"
+                        }}
+                    >ITEM</th>
+                    <th
+                        style={{
+                            textAlign: "center",
+                            width: "15%",
+                            paddingBottom: "1mm",
+                            fontSize: "10px"
+                        }}
+                    >UND</th>
+                    <th
+                        style={{
+                            textAlign: "right",
+                            width: "20%",
+                            paddingBottom: "1mm",
+                            fontSize: "10px"
+                        }}
+                    >PRECIO</th>
+                    <th
+                        style={{
+                            textAlign: "right",
+                            width: "25%",
+                            paddingBottom: "1mm",
+                            fontSize: "10px"
+                        }}
+                    >TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                {attachedItems.map((item, index) => {
+                    const quantity = Number(item.units || 1);
+                    const price = Number(item.unit_value || 0).toFixed(2);
+                    const total = Number(parseFloat(item.units) * parseFloat(item.unit_value) || 0).toFixed(2);
+                    return (
+                        <tr
+                            key={index}
+                            style={{
+                                borderBottom: "dashed .2mm #ccc"
+                            }}
+                        >
+                            <td
+                                style={{
+                                    padding: "1.5mm 0",
+                                    fontSize: "10px",
+                                    wordBreak: "break-word",
+                                    paddingRight: "1mm"
+                                }}
+                            >
+                                {item.service_name}
+                            </td>
+                            <td
+                                style={{
+                                    textAlign: "center",
+                                    fontSize: "10px"
+                                }}
+                            >
+                                {quantity}
+                            </td>
+                            <td
+                                style={{
+                                    textAlign: "right",
+                                    fontSize: "10px",
+                                    whiteSpace: "nowrap"
+                                }}
+                            >
+                                {moneyFormat(price)}
+                            </td>
+                            <td
+                                style={{
+                                    textAlign: "right",
+                                    fontSize: "10px",
+                                    fontWeight: "bold",
+                                    whiteSpace: "nowrap"
+                                }}
+                            >
+                                {moneyFormat(total)}
+                            </td>
+                        </tr>
+                    );
+                })}
+            </tbody>
+        </table>
+        </div>
+        <div style={{display:"flex",fontSize:"12px", width:'100%',borderTop:"dashed .5mm #000",padding:'2mm 0'}}>
+            <span style={{margin:'auto 0',fontSize:"12px"}}>Total venta: </span>
+            <strong style={{margin:"auto",marginRight:"0",textAlign:'right'}}>{moneyFormat(docInfo.total)}</strong>
+        </div>
+        <span style={{margin:"2mm 0",width:"100%",borderBottom:"dashed .5mm #000"}}></span>
+            <div style={{display:"flex",fontSize:"12px"}}>
+                <div style={{display:'flex',flexDirection:'column',gap:'10px 0',width:'100%'}}>
+                    <div style={{display:"flex",fontSize:"12px", width:'100%'}}>
+                        <span style={{margin:'auto 0',fontSize:"12px"}}>Base impuestos: </span>
+                        <strong style={{margin:"auto",marginRight:"0",textAlign:'right'}}>{moneyFormat(baseValue)}</strong>
+                    </div>
+                    {taxes.map((element,index)=>(
+                        <div key={index} style={{display:"flex",fontSize:"12px"}}>
+                                <span style={{margin:'auto 0'}}>{element.name} ({element.rate}%):</span>
+                                <strong style={{margin:"auto",marginRight:"0"}}>{moneyFormat(element.total)}</strong>
+                        </div>
+                    ))}
+                    <div style={{display:"flex",fontSize:"12px", width:'100%'}}>
+                        <span style={{margin:'auto 0',fontSize:"12px"}}>TOTAL: </span>
+                        <strong style={{margin:"auto",marginRight:"0",textAlign:'right'}}>{moneyFormat(docInfo.total)}</strong>
+                    </div>
+                </div>
+            </div>
+            <span style={{margin:"4mm 0",width:"100%",borderBottom:"dashed .5mm #000"}}></span>
             <div style={{
                 display:"flex",
                 flexDirection:"column",
@@ -268,39 +533,85 @@ export function SellInvoiceDesign(){
                     </div>
                 ))}
             </div>
-            <span style={{margin:"4mm 0",width:"100%",borderBottom:"dashed .5mm #000"}}></span>
-            <div style={{display:"flex",fontSize:"12px"}}>
-            <span>TOTAL:</span>
-                <strong style={{margin:"auto",marginRight:"0"}}>{moneyFormat(total)}</strong>
-            </div>
             <span style={{marginTop:"8mm",width:"100%",borderBottom:"solid .2mm #000"}}></span>
-            <div style={{ 
-                display: "flex",
-                flexDirection:"column",
-                justifyContent: "center", 
-                marginBottom: "4mm",
-                padding: "4mm 2mm"
-            }}>
-                <QRCodeSVG 
-                    value={qrUrlProcess}
-                    size={128} // Tamaño en píxeles para el renderizado
-                    level={"M"} // Nivel de corrección de errores (M es ideal para térmicas)
-                    includeMargin={false}
-                    imageSettings={{
-                        src: "", // Puedes poner un logo aquí, pero en térmicas no se recomienda
-                        excavate: true,
-                    }}
-                    style={{
-                        margin:"2mm auto"
-                    }}
-                />
-                <h3 style={{
-                    fontSize:"14px",
-                    fontFamily:"monospace",
-                    textAlign:"center",
-                    marginTop:"2mm"
-                }}>Orden de trabajo #{instanceOwnSerial}</h3>
-            </div>
+            {instance_id != undefined && (
+                <div style={{ 
+                    display: "flex",
+                    flexDirection:"column",
+                    justifyContent: "center", 
+                    marginBottom: "4mm",
+                    padding: "4mm 2mm"
+                }}>
+                    <QRCodeSVG 
+                        value={qrUrlProcess}
+                        size={128} // Tamaño en píxeles para el renderizado
+                        level={"M"} // Nivel de corrección de errores (M es ideal para térmicas)
+                        includeMargin={false}
+                        imageSettings={{
+                            src: "", // Puedes poner un logo aquí, pero en térmicas no se recomienda
+                            excavate: true,
+                        }}
+                        style={{
+                            margin:"2mm auto"
+                        }}
+                    />
+                    <h3 style={{
+                        fontSize:"14px",
+                        fontFamily:"monospace",
+                        textAlign:"center",
+                        marginTop:"2mm"
+                    }}>Orden de trabajo #{instanceOwnSerial}</h3>
+                </div>
+            )}
+            {electronInfo.id != undefined && (
+                <div style={{ 
+                    display: "flex",
+                    flexDirection:"column",
+                    justifyContent: "center",
+                    alignItems:"center",
+                    marginBottom: "4mm",
+                    padding: "2mm",
+                    width:"100%"
+                }}>
+
+                    <QRCodeSVG 
+                        value={electronInfo.url} 
+                        size={138}
+                        level={"M"}
+                        includeMargin={false}
+                    />
+
+                    <h3 style={{
+                        fontSize:"10px",
+                        fontFamily:"monospace",
+                        textAlign:"center",
+                        marginTop:"4mm",
+                        width:"100%",
+                        wordBreak:"break-all",
+                        overflowWrap:"break-word",
+                        whiteSpace:"normal",
+                        lineHeight:"1.3"
+                    }}>
+                        CUFE: {electronInfo.code}
+                    </h3>
+
+                    <h3 style={{
+                        fontSize:"10px",
+                        fontFamily:"monospace",
+                        textAlign:"center",
+                        marginTop:"4mm",
+                        marginBottom:"4mm",
+                        width:"100%",
+                        wordBreak:"break-all",
+                        overflowWrap:"break-word",
+                        whiteSpace:"normal",
+                        lineHeight:"1.3"
+                    }}>
+                        Este documento no reemplaza la factura electrónica, es solo un comprobante de pago. Consulta tu factura electrónica con el codigo QR o el CUFE en el portal de la DIAN.
+                    </h3>
+
+                </div>
+            )}
             <div style={{ margin: "0 auto", textAlign: "center" }}>
                 <svg ref={barcodeRef} style={{
                     width:'50mm',
@@ -383,4 +694,4 @@ export function SellInvoiceDesign(){
         </div>
         </>
     )
-}
+} 

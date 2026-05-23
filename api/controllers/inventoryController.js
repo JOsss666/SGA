@@ -67,7 +67,7 @@ inventoryController.getProducts = (req, res) => {
         values.push(info.company_id)
 
         if (info.category_id != null) {
-            whereClauses.push(`AND c.id = $${values.length +1}`);
+            whereClauses.push(`c.id = $${values.length +1}`);
             values.push(info.category_id);
         }
         
@@ -87,6 +87,7 @@ inventoryController.getProducts = (req, res) => {
                 ps.*,
                 ac.name AS tax_name,
                 t.base AS tax_base,
+                t.id AS tax_id,
                 t.rate AS tax_rate,
                 c_exit.account_id AS exit_account,
                 c_entry.account_id AS entry_account,
@@ -120,6 +121,7 @@ inventoryController.getProducts = (req, res) => {
                 ac.name,
                 t.base,
                 t.rate,
+                t.id,
                 c_exit.account_id
             ORDER BY
                 ps.order_index ASC, ps.name ASC
@@ -174,6 +176,8 @@ inventoryController.getComercialProducts = (req,res)=>{
                 ac.name AS tax_name,
                 t.base AS tax_base,
                 t.rate AS tax_rate,
+                t.account_id AS tax_account,
+                t.id AS tax_id,
                 c_exit.account_id AS exit_account,
                 c_entry.account_id AS entry_account,
                 array_remove(array_agg(DISTINCT c.name), NULL) AS categories,
@@ -211,15 +215,17 @@ inventoryController.getComercialProducts = (req,res)=>{
             ${whereQuery}
             GROUP BY 
                 ps.id, 
+                ps.img,      -- <--- ESTA FALTABA
                 ps.name, 
                 ps.code, 
                 ac.name, 
                 t.base, 
-                t.rate, 
+                t.rate,
+                t.account_id,
+                t.id, 
                 c_exit.account_id, 
                 c_entry.account_id
-            ORDER BY ps.name ASC, ps.code ASC
-            ;
+            ORDER BY ps.name ASC, ps.code ASC;
         `
         let consulta = await useDataBase(sentence,values,1);
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -330,6 +336,7 @@ inventoryController.getPricesListItems = (req, res) => {
             }
 
             const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
+            
             let sentence = `
                 SELECT 
                     pi."priceList_id",
@@ -351,11 +358,25 @@ inventoryController.getPricesListItems = (req, res) => {
                     "Inventory"."products&services" ps
                 ON
                     pi."product&service_id" = ps.id
-                ${whereQuery}
+                ${whereQuery} 
+                GROUP BY 
+                    pi."priceList_id", 
+                    pi."product&service_id", 
+                    pi.id, 
+                    pi.cost, 
+                    pi."tier_min_quantity", 
+                    pi.unit_price, 
+                    pi."discount_percent", 
+                    pi."valid_from", 
+                    pi."valid_to", 
+                    ps.name, 
+                    ps.code, 
+                    ps.description, 
+                    ps.img
                 ORDER BY ps.name ASC
             `;
 
-            // 3. ¡CORRECCIÓN CLAVE!: Pasar el arreglo 'values' completo, no solo info.company_id
+            // Pasamos el arreglo 'values' completo
             let consulta = await useDataBase(sentence, values, 1);
             
             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -1316,11 +1337,15 @@ inventoryController.getKardex = (req,res)=>{
 
 inventoryController.getServicesMovements = (req,res)=>{
     let data = '';
+
     req.on('data',chunk=>{
         data += chunk;
-    })
+    });
+
     req.on('end',async()=>{
+
         let info = JSON.parse(data);
+
         const values = [];
         let whereClauses = [];
 
@@ -1329,7 +1354,7 @@ inventoryController.getServicesMovements = (req,res)=>{
 
         if(info.doc_id != undefined){
             whereClauses.push(`sm.doc_id = $${values.length + 1}`);
-            values.push(info.doc_id)
+            values.push(info.doc_id);
         }
 
         if(info.instance_id != undefined){
@@ -1340,40 +1365,76 @@ inventoryController.getServicesMovements = (req,res)=>{
         const whereQuery = whereClauses.length > 0
         ? `WHERE ${whereClauses.join(" AND ")}`
         : "";
+
         let sentence = `
-           SELECT
-                sm.*, -- Solo el alias
+            SELECT
+                sm.*,
+
                 ps.name AS service_name,
                 ps.img AS service_img,
                 ps.type,
+
+                ps.tax_id,
+                t.rate AS tax_rate,
+                t.account_id AS tax_account,
+                t.base AS tax_base,
+                ac.name AS tax_name,
+
                 c_exit.account_id AS exit_account,
                 c_entry.account_id AS entry_account
+
             FROM
-                "Inventory".services_movement AS sm -- Aquí nace el alias 'sm'
+                "Inventory".services_movement AS sm
+
             LEFT JOIN
-                "Inventory"."products&services" AS ps -- Aquí nace el alias 'ps'
+                "Inventory"."products&services" AS ps
             ON
                 sm.service_id = ps.id
+
+            LEFT JOIN
+                "Ecosystem".taxes AS t
+            ON
+                ps.tax_id = t.id
+
+            LEFT JOIN
+                "Ecosystem".contable_accounts AS ac
+            ON
+                t.account_id = ac.id
+
             LEFT JOIN
                 "Ecosystem".concepts AS c_exit
             ON
                 ps.exit_concept = c_exit.id
+
             LEFT JOIN
                 "Ecosystem".concepts AS c_entry
             ON
                 ps.entry_concept = c_entry.id
+
             ${whereQuery}
+
             ORDER BY
-                ps.order_index ASC, ps.name ASC; -- Usamos los alias
+                ps.order_index ASC,
+                ps.name ASC;
         `;
+
         let consulta = await useDataBase(sentence,values,1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
+
+        res.writeHead(200,{
+            'Content-Type':'application/json'
+        });
+
         res.end(JSON.stringify(consulta));
-    })
+
+    });
+
     req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.writeHead(500,{
+            'Content-Type':'text/plain'
+        });
+
         res.end(JSON.stringify(err));
-    })
+    });
 }
 
 inventoryController.updatePricesList = (req, res) => {

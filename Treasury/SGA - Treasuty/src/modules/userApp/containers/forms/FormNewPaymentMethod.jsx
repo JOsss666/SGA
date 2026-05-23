@@ -100,14 +100,15 @@ export function FormNewPaymentMethod({reloadFun}){
                     <NewElementSelect title={'Crear nueva cuenta'} onClick={()=>{popInAlert(<span>Formulario nueva cuenta</span>)}}/>
                 }/>
                 <SearchinList title={'Tipo de metodo de pago'} placeHolder={'Seleccionar opción'} disabled={disabled} action={setType} list={[
-                    {text:'cash'},
-                    {text:'bank_transfer'},
-                    {text:'debit_card'},
-                    {text:'credit_card'},
-                    {text:'digital_wallet'},
-                    {text:'check'},
-                    {text:'cash_onDelivery'},
-                    {text:'crypto_currency'}
+                    {text:'Efectivo',value:'cash'},
+                    {text:'Transferencia bancaria',value:'bank_transfer'},
+                    {text:'Tarjeta debito',value:'debit_card'},
+                    {text:'Tarjeta credito',value:'credit_card'},
+                    {text:'Billetera digital',value:'digital_wallet'},
+                    {text:'Cheque',value:'check'},
+                    {text:'Pago contraentrega',value:'cash_onDelivery'},
+                    {text:'Criptomoneda',value:'crypto_currency'},
+                    {text:'Saldos a favor',value:'balances favor'}
                 ]}/>
                 <SearchinList title={'Moneda'} placeHolder={'Seleccionar opción'} disabled={disabled} action={setCurrency} list={[
                     {text:'COP'},

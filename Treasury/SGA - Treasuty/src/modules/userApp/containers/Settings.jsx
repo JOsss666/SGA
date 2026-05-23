@@ -13,43 +13,46 @@ import { BillingSettings } from "./SettingsSections/BillingSettings";
 import { SecuritySettings } from "./SettingsSections/SecuritySettings";
 import { SystemSettings } from "./SettingsSections/SystemSettings";
 import { NoResults } from "./NoResults";
+import { SettingsGroup } from "../components/SettingsGroup";
+import { UserCard } from "../components/UserCard";
+import { useAppInfo } from "../../../context/context";
+import { DevicesSettings } from "./SettingsSections/DevicesSettings";
 
 export function Settings(){
-
+    const {userInfo,userConfig} = useAppInfo();
     const navigate = useNavigate();
     const params = useParams();
-    const [activeSection,setActiveSection] = useState(0);
 
-    const menuOptions = [
-        {title:'General',path:'',disabled:false,icon:<i className="fa-solid fa-building"/>},
-        {title:'Cuenta',path:'Account',disabled:false,icon:<i className="fa-solid fa-user"/>},
-        {title:'Notificaciónes',path:'Alerts',disabled:false,icon:<i className="fa-solid fa-bullhorn"/>},
-        {title:'Personalización',path:'Styles',disabled:false,icon:<i className="fa-solid fa-palette"/>},
-        {title:'Facturación',path:'Billing',disabled:false,icon:<i className="fa-solid fa-wallet"/>},
-        {title:'Seguridad',path:'Security',disabled:false,icon:<i className="fa-solid fa-fingerprint"/>},
-        {title:'Dispositivos',path:'devices',disabled:false,icon:<i className="fa-solid fa-mobile-screen"/>},
-        {title:'Sistema',path:'System',disabled:false,icon:<i className="fa-solid fa-terminal"/>}
+    const sec1 = [
+        {text:'General',path:'',value:``,type:'general',icon:<i className="fa-solid fa-building"/>},
+        {text:'Cuenta',path:'Account',value:``,type:'functionality',icon:<i className="fa-solid fa-user"/>},
+        {text:'Notificaciónes',path:'Alerts',value:'',type:'functionality',icon:<i className="fa-solid fa-bullhorn"/>},
+        {text:'Personalización',path:'Styles',value:'',type:'accesibility',icon:<i className="fa-solid fa-palette"/>},
+        {text:'Facturación',path:'Billing',value:'',type:'functionality',icon:<i className="fa-solid fa-wallet"/>},
+        {text:'Seguridad',path:'Security',value:'',type:'functionality',icon:<i className="fa-solid fa-fingerprint"/>},
+        {text:'Dispositivos',path:'devices',value:'',type:'functionality',icon:<i className="fa-solid fa-mobile-screen"/>},
+        {text:'Sistema',path:'System',value:'',type:'system',icon:<i className="fa-solid fa-terminal"/>}
+    ]
+
+    const sec3 = [
+        {text:'Politica de servicio y privacidad',path:'policy',value:'',type:'general',icon:<i className="fa-solid fa-building-shield"/>},
+        {text:'Reestablecer ajustes',path:'resetSettings',value:'',type:'general',icon:<i className="fa-solid fa-triangle-exclamation"/>}
     ]
 
     const handleNavigate = (path)=>{
-        navigate(`/SGA_management/${params.company_key}/${params.user_key}/settings/${path}`)
+        console.log(path)
+        navigate(`/SGA_treasury/${params.company_key}/${params.user_key}/settings/${path}`)
     }
-
 
     return(
         <div className="Settings">
             <div className="asideMenu">
                 <SearchBar placeholder={'Buscar'}/>
-                {menuOptions.map((element,index)=>(
-                    <strong className={`SettingsMenuOptions ${activeSection == index? 'activeSettigsSec':''}`} onClick={()=>{
-                            handleNavigate(element.path);
-                            setActiveSection(index);
-                        }} key={index}>{element.icon}{element.title}
-                        {activeSection == index && (
-                            <div className="activeSecIndicator"/>
-                        )}
-                    </strong>
-                ))}
+                <UserCard name={userInfo.user_name} desc={userInfo.user_mail} imgSrc={userInfo.img} onClick={()=>{
+                    handleNavigate('account')
+                }}/>
+                <SettingsGroup options={sec1} onClick={handleNavigate}/>
+                <SettingsGroup options={sec3} onClick={handleNavigate}/>
             </div>
             <div className="spaceSettings">
                 <div className="headSpace">
@@ -64,7 +67,7 @@ export function Settings(){
                         <Route path="Styles" element={<StylesSettings/>} />
                         <Route path="Billing" element={<BillingSettings/>} />
                         <Route path="Security" element={<SecuritySettings/>} />
-                        <Route path="Devices" element={<NoResults title={'No es posible acceder a tus disposivos fisicos desde la nube'}/>} />
+                        <Route path="Devices" element={<DevicesSettings/>} />
                         <Route path="System" element={<SystemSettings/>} />
                     </Routes>
                 </div>

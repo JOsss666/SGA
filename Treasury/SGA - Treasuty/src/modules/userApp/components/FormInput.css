@@ -10,7 +10,7 @@
 
 .FormInput label{
     margin-bottom: 1.5vh;
-    font-weight: 500;
+    font-weight: 400 !important;
     font-size: clamp(2.5px,2.5vh,25px);
     color: var(--descriptionText);
 }
@@ -22,7 +22,7 @@
 }
 
 .FormInput .inputContainer input{
-    font-size: clamp(2.2px,2.2vh,22px);
+    font-size: clamp(2.2px,2vh,22px) !important;
     color: var(--descriptionText);
 }
 
@@ -45,7 +45,7 @@
     outline: solid .1vh var(--inputsBorder);
     box-shadow: 0 .4vh 1vh var(--translucidMenu);
     background-color: var(--inputsBg);
-    color: #aaa;
+    color: var(--descriptionText);
 }
 
 .FormInput .inputContainer textarea{

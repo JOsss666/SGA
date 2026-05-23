@@ -48,10 +48,11 @@ export function ThirdPartyDetail(){
     const getThirdPartyInfo = async()=>{
         setDisabled(true);
         setLoading(true)
-        let res = await postInfo('/getThirdPartyDetails',{
+        let res = await postInfo('/getThirdParties',{
+            company_id:appInfo.company_id,
+            comercialInfo:true,
             id:params.thirdparty_id,
-            company_id:appInfo.company_id
-        })
+        });
         console.log(res);
         if(res[0]){
             setThirdPartyInfo(res[1][0])
@@ -105,10 +106,10 @@ export function ThirdPartyDetail(){
                         <BoldTitle text={`${menuSections[actualSection]}`}/>
                         <div className="variableContent">
                             {!loading && actualSection == 0 && (
-                                <GeneralInfo info={thirdPartyInfo}/>
+                                <GeneralInfo info={thirdPartyInfo} reloadFun={getThirdPartyInfo}/>
                             )}
                             {!loading && actualSection == 1 && (
-                                <ComercialInfo info={thirdPartyInfo}/>
+                                <ComercialInfo info={thirdPartyInfo} reloadFun={getThirdPartyInfo}/>
                             )}
                             {!loading && actualSection == 2 && (
                                 <TaxInfo info={thirdPartyInfo}/>

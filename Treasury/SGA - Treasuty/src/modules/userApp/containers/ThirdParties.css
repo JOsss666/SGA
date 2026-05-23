@@ -11,7 +11,7 @@
     margin: 0; 
 }
 
-.thirdparties-header { 
+.ThirdParties .thirdparties-header { 
     margin-bottom: 3dvh; 
     display: flex;
     justify-content: space-between;
@@ -19,31 +19,31 @@
     position: relative;
 }
 
-.header-left {
+.ThirdParties .header-left { 
     flex: 1;
 }
 
-.header-right {
+.ThirdParties .header-right {
     display: flex;
     align-items: flex-end;
     margin-bottom: 0.5dvh;
 }
 
-.thirdparties-header h1, 
-.thirdparties-header .BoldTitle {
+.ThirdParties .thirdparties-header h1, 
+.ThirdParties .thirdparties-header .BoldTitle {
     font-size: clamp(1.5rem, 5dvh, 2.5rem) !important;
     color: var(--sectionTitle);
     margin-bottom: 0.5dvh;
 }
 
-.thirdparties-description { 
+.ThirdParties .thirdparties-description { 
     color: var(--descriptionText); 
     font-size: clamp(0.75rem, 5dvh, 1rem); 
     margin-top: 0.31dvh; 
     margin-bottom: 0.625dvh;
 }
 
-.thirdparties-counter {
+.ThirdParties .thirdparties-counter {
     background: transparent;
     padding: 0.5dvh 0dvw;
     display: inline-block;
@@ -52,19 +52,14 @@
     font-size: clamp(0.75rem, 7dvh, 1rem);
 }
 
-.thirdparties-search {
+.ThirdParties .thirdparties-search {
     display: flex;
     align-items: center;
     gap: 1vw;
     margin-left: 2vw;
 }
 
-.thirdparties-search .SearchBar {
-    margin-bottom: 0;
-    width: 200px;
-}
-
-.thirdparties-search .SelectOptions {
+.ThirdParties .thirdparties-search .SelectOptions {
     min-width: 180px;
     background: var(--inputsBg) !important;
     border: 1px solid var(--inputsBorder) !important;
@@ -74,7 +69,7 @@
     outline: none !important;
 }
 
-.thirdparties-search .SelectOptions select {
+.ThirdParties .thirdparties-search .SelectOptions select {
     background: var(--inputsBg) !important;
     color: var(--text) !important;
     border: none !important;
@@ -85,11 +80,11 @@
 
 }
 
-.thirdparties-search .SelectOptions select:focus {
+.ThirdParties .thirdparties-search .SelectOptions select:focus {
     border: 1px solid var(--primary-color) !important;
 }
 
-.thirdparties-search .SelectOptions::after {
+.ThirdParties .thirdparties-search .SelectOptions::after {
     content: "▼";
     font-size: 0.7rem;
     color: var(--descriptionText);
@@ -101,12 +96,12 @@
 }
 
 
-.thirdparties-search .SelectOptions select:-moz-focusring {
+.ThirdParties .thirdparties-search .SelectOptions select:-moz-focusring {
     color: transparent !important;
     text-shadow: 0 0 0 var(--text) !important;
 }
 
-.thirdparties-no-results {
+.ThirdParties .thirdparties-no-results {
     text-align: center;
     padding: 3dvh;
     color: var(--descriptionText);
@@ -121,15 +116,17 @@
     gap: 1dvh;
 }
 
-.thirdparties-grid {
+.ThirdParties .thirdparties-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 2vh;
     overflow-y: auto;
+    gap: 2vh;
     height: 70vh;
+    width: 100%;
+    padding: 1vh 0;
 }
 
-.thirdparties-loading {
+.ThirdParties .thirdparties-loading {
     text-align: center;
     padding: 2dvh;
     color: var(--descriptionText);
@@ -140,12 +137,12 @@
     gap: 0.5dvh;
 }
 
-.thirdparties-loading i {
+.ThirdParties .thirdparties-loading i {
     font-size: clamp(1.2rem, 2.4dvh, 1.8rem);
     margin-bottom: 0.5dvh;
 }
 
-.thirdparties-error {
+.ThirdParties .thirdparties-error {
     text-align: center;
     padding: 2dvh;
     color: #dc3545;
@@ -156,7 +153,7 @@
     gap: 1dvh;
 }
 
-.retry-btn {
+.ThirdParties .retry-btn {
     padding: 0.5dvh 1dvw;
     background-color: var(--primary-color);
     color: white;
@@ -167,31 +164,20 @@
     transition: background-color 0.2s ease;
 }
 
-.retry-btn:hover {
+.ThirdParties .retry-btn:hover {
     background-color: var(--accent-color);
 }
 
-.thirdparties-empty {
-    text-align: center;
-    padding: 2dvh;
-    color: var(--descriptionText);
-    font-size: clamp(0.9rem, 1.6dvh, 1.2rem);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1dvh;
-}
-
-.thirdparty-detail {
+.ThirdParties .thirdparty-detail {
     padding: 2dvh 2dvw;
 }
 
-.thirdparty-detail h2 {
+.ThirdParties .thirdparty-detail h2 {
     color: var(--sectionTitle);
     margin-bottom: 1dvh;
 }
 
-.thirdparty-detail button {
+.ThirdParties .thirdparty-detail button {
     padding: 0.5dvh 1dvw;
     background-color: var(--primary-color);
     color: white;
@@ -201,48 +187,56 @@
     margin-top: 1dvh;
 }
 
+.ThirdParties .thirdparties-search .SearchBar{
+    width: 15vw;
+}
+
+.ThirdParties .thirdparties-search .FormButton{
+    width: fit-content;
+}
+
 @media (max-width: 1600px) {
-    .thirdparties-grid {
+    .ThirdParties .thirdparties-grid {
         grid-template-columns: repeat(4, 1fr);
         gap: 1.8dvh 1.3dvw;
     }
 }
 
 @media (max-width: 1200px) {
-    .thirdparties-grid {
+    .ThirdParties .thirdparties-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 1.6dvh 1.1dvw;
     }
     
-    .thirdparties-search {
+    .ThirdParties .thirdparties-search {
         gap: 0.8vw;
     }
     
-    .thirdparties-search .SearchBar {
+    .ThirdParties .thirdparties-search .SearchBar {
         width: 180px;
     }
     
-    .thirdparties-search .SelectOptions {
+    .ThirdParties .thirdparties-search .SelectOptions {
         min-width: 160px;
     }
     
-    .thirdparties-search .SelectOptions select {
+    .ThirdParties .thirdparties-search .SelectOptions select {
         padding: 0.6dvh 0.7dvw;
     }
 }
 
 @media (max-width: 900px) {
-    .thirdparties-grid {
+    .ThirdParties .thirdparties-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 1.4dvh 0.9dvw;
     }
     
-    .thirdparties-header {
+    .ThirdParties .thirdparties-header {
         flex-direction: column;
         gap: 2vh;
     }
     
-    .thirdparties-search {
+    .ThirdParties .thirdparties-search {
         width: 100%;
         margin-left: 0;
         flex-wrap: wrap;
@@ -250,38 +244,37 @@
         gap: 1vh;
     }
     
-    .header-right {
+    .ThirdParties .header-right {
         width: 100%;
     }
     
-    .thirdparties-search .SearchBar,
-    .thirdparties-search .SelectOptions {
-        width: 48%;
-        min-width: auto;
+    .ThirdParties .thirdparties-search .SearchBar{
+        width: 30vw;
+        display: none;
     }
 }
 
 @media (max-width: 600px) {
-    .ThirdParties {
+    .ThirdParties .ThirdParties {
         padding: 0.94dvh 0.94dvw;
     }
     
-    .thirdparties-grid {
+    .ThirdParties .thirdparties-grid {
         grid-template-columns: 1fr;
         gap: 1.2dvh;
     }
     
-    .thirdparties-search {
+    .ThirdParties .thirdparties-search {
         flex-direction: column;
         gap: 1vh;
     }
     
-    .thirdparties-search .SearchBar,
-    .thirdparties-search .SelectOptions {
+    .ThirdParties .thirdparties-search .SearchBar,
+    .ThirdParties .thirdparties-search .SelectOptions {
         width: 100%;
     }
     
-    .thirdparties-search .SelectOptions select {
+    .ThirdParties .thirdparties-search .SelectOptions select {
         padding: 0.8dvh 0.8dvw;
     }
 }

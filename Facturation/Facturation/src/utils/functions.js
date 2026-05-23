@@ -778,7 +778,6 @@ export async function printCashRecipt(info,appInfo,barCode){
             `}
         </div>
     `;
-
     ipcRenderer.send('print-receipt', contenidoHTML);
 }
 
@@ -882,7 +881,7 @@ export async function printClientOrder(info,appInfo,barCode){
                             <span style="width: 50%; line-height: 1.2;">${element.name}</span>
                             <span style="width: 20%; text-align: center;">${element.units}</span>
                             <strong style="width: 30%; text-align: right;">
-                                ${moneyFormat(parseFloat(element.value))}
+                                ${moneyFormat(parseFloat(element.value ?? element.total))}
                             </strong>
                         </div>
                     `;
@@ -890,8 +889,8 @@ export async function printClientOrder(info,appInfo,barCode){
             </div>
 
             <div style="display:flex;fontSize:10px;marginTop:2mm;">
-                <span>TOTAL:</span>
-                <strong style="margin-left:auto;">${Number(info.total).toLocaleString()}</strong>
+                <span style="fontSize:10px;">TOTAL:</span>
+                <strong style="margin-left:auto;fontSize:10px;">${Number(info.total).toLocaleString()}</strong>
             </div>
 
             <span style="
@@ -944,6 +943,539 @@ export async function printClientOrder(info,appInfo,barCode){
                 </div>
     
             `:``}
+            ${barCode? `
+                <div style="
+                    margin:0 auto;
+                    display:flex;
+                    width:50mm;
+                ">
+                    <div style="
+                        width:20mm;
+                        height:10mm,
+                        margin:0 auto;
+                    ">
+                        ${internalProcessCodeBar}
+                    </div> 
+                </div>
+            `:`
+                <div style="
+                    width:100%;
+                    padding:4mm;
+                    box-sizing:border-box;
+                    display:flex;
+                    align-items:center;
+                    gap:4mm;
+                ">
+                    <div style="
+                            width:22mm;
+                            display:flex;
+                            borderRadius:4mm;
+                            border:solid 1mm #ddd;
+                            align-items:flex-end;
+                            justify-content:center;
+                            gap:4mm;
+                        ">
+                            <img 
+                                src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                                style="
+                                    width:100%;
+                                    height:25mm;
+                                    objectFit:cover;
+                                    display:block;"/>
+                        </div>
+                        <div style="
+                            flex:1;
+                            display:flex;
+                            flex-direction:column;
+                            justify-content:center;
+                        ">
+                            <span style="
+                                font-size:16px;
+                                font-weight:bold;
+                                line-height:1.1;
+                            ">SGA 360°</span>
+                            <span style="
+                                font-size:13px;
+                                margin-top:1mm;
+                            ">SGA Desarrollos.</span>
+                            <span style="
+                                font-size:12px;
+                                margin-top:2mm;
+                            ">Tel: 321 4221021</span>
+                            <span style="font-size:12px;">www.sga360.co</span>
+                        </div>
+                    </div>
+            `}
+        </div>
+    `;
+
+    ipcRenderer.send('print-receipt', contenidoHTML);
+}
+
+
+
+export async function printSellInvoice(info,appInfo,barCode){
+    console.log(info);
+    console.log('Imprimiendo factura de venta...');
+    function generateBarcodeSVG(value) {
+        const svgNode = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+        JsBarcode(svgNode, value, {
+            format: "CODE128",
+            width: 2,
+            height: 60,
+            displayValue: false,
+            margin: 0
+        });
+
+        return svgNode.outerHTML;
+    }
+
+    if (!window.require) {
+        alert("Esta función solo está disponible en la App de Escritorio.");
+    }
+    const expeditionDate = new Date().toLocaleString();
+    const qrUrl = await QRCode.toDataURL(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${info.doc_id}`)
+    let procesqrUrl;
+    let e_invoiceQe;
+    if(info.docInfo.instance_id != undefined){
+        procesqrUrl= await QRCode.toDataURL(`https://facturation.sga360.co/preview/Process/${appInfo.company_key}/${info.docInfo.instance_id}`)
+    }if(info.electronInfo.id != undefined){
+        e_invoiceQe= await QRCode.toDataURL(info.electronInfo.url)
+    }
+    const internalProcessCodeBar = generateBarcodeSVG(`1026n${info.docInfo.instance_id}`)
+    const { ipcRenderer } = window.require('electron');
+
+    const contenidoHTML = `
+        <div style="
+            margin:0;
+            width:72mm;
+            display:flex;
+            flex-direction:column;
+            box-sizing:border-box;
+            background:#fff;
+            height:fit-content;
+            padding:2mm;
+            font-family:sans-serif;
+        ">
+            <div style="
+                display:flex;
+                justify-content:center;
+                margin-bottom:4mm;
+                padding:2mm;
+            ">
+                <img 
+                    src="${qrUrl}" 
+                    style="width:32mm;height:32mm;"
+                />
+            </div>
+
+            <h1 style="
+                font-size:16px;
+                text-align:center;
+                margin:0;
+            ">
+                ${appInfo.legal_name}
+            </h1>
+            <h3 style="
+                font-size:14px;
+                font-family:monospace;
+                margin:0;
+            ">
+                Comprobante de pago #${info.docInfo.ownSerial}
+            </h3>
+
+            <span style="font-size:12px;">
+                Concepto: Servicio de impresión digital
+            </span>
+
+            <span style="font-size:12px;">
+                Tercero: ${info.thirdPartyInfo.names}
+            </span>
+
+            <span style="font-size:12px;">
+                Fecha de generación: ${expeditionDate}
+            </span>
+
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
+
+            <div
+                style="
+                    width: 100%;
+                    fontSize: 10px;
+                    marginTop: 2mm;
+                    display: flex;
+                    flexDirection: column;
+                    gap: 1mm
+                "
+            >
+                <table style="
+                    width:100%;
+                    border-collapse:collapse;
+                    table-layout:fixed;
+                ">
+
+                    <thead style="
+                            border:solid .3mm #000;
+                        ">
+
+                        <tr>
+
+                            <th style="
+                                text-align:left;
+                                width:40%;
+                                padding-bottom:1mm;
+                                font-size:10px;
+                            ">
+                                ITEM
+                            </th>
+
+                            <th style="
+                                text-align:center;
+                                width:15%;
+                                padding-bottom:1mm;
+                                font-size:10px;
+                            ">
+                                UND
+                            </th>
+
+                            <th style="
+                                text-align:right;
+                                width:20%;
+                                padding-bottom:1mm;
+                                font-size:10px;
+                            ">
+                                PRECIO
+                            </th>
+
+                            <th style="
+                                text-align:right;
+                                width:25%;
+                                padding-bottom:1mm;
+                                font-size:10px;
+                            ">
+                                TOTAL
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        ${info.attachedItems.map((item) => {
+
+                            const quantity = Number(item.units || 1);
+                            const price = Number(item.unit_value || 0).toFixed(2);
+                            const total = Number(parseFloat(item.units) * parseFloat(item.unit_value) || 0).toFixed(2);
+
+                            return `
+                                <tr style="
+                                    border-bottom:dashed .2mm #ccc;
+                                ">
+
+                                    <td style="
+                                        padding:1.5mm 0;
+                                        font-size:10px;
+                                        word-break:break-word;
+                                        padding-right:1mm;
+                                    ">
+                                        ${item.service_name ?? item.name ?? '--'}
+                                    </td>
+
+                                    <td style="
+                                        text-align:center;
+                                        font-size:10px;
+                                    ">
+                                        ${quantity}
+                                    </td>
+
+                                    <td style="
+                                        text-align:right;
+                                        font-size:10px;
+                                        white-space:nowrap;
+                                    ">
+                                        ${moneyFormat(price)}
+                                    </td>
+
+                                    <td style="
+                                        text-align:right;
+                                        font-size:10px;
+                                        font-weight:bold;
+                                        white-space:nowrap;
+                                    ">
+                                        ${moneyFormat(total)}
+                                    </td>
+
+                                </tr>
+                            `;
+
+                        }).join('')}
+
+                    </tbody>
+
+                </table>
+            </div>
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
+            <div style="
+                display:flex;
+                font-size:12px;
+                width:100%;
+            ">
+                <span style="
+                    margin:auto 0;
+                    font-size:12px;
+                ">
+                    Valor venta:
+                </span>
+                <strong style="
+                    margin:auto;
+                    margin-right:0;
+                    text-align:right;
+                ">
+                    ${moneyFormat(info.docInfo.total)}
+                </strong>
+
+            </div>
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
+             <div style="
+                display:flex;
+                font-size:12px;
+                width:100%;
+                margin-bottom:4mm;
+            ">
+
+                <span style="
+                    margin:auto 0;
+                    font-size:12px;
+                ">
+                    Base impuestos:
+                </span>
+
+                <strong style="
+                    margin:auto;
+                    margin-right:0;
+                    text-align:right;
+                ">
+                    ${moneyFormat((info.baseValue??0).toFixed(0))}
+                </strong>
+
+            </div>
+            <div style="
+                display:flex;
+                font-size:12px;
+            ">
+                <div style="
+                    display:flex;
+                    flex-direction:column;
+                    gap:10px 0;
+                    width:100%;
+                ">
+
+            ${info.taxes.map((element) => {
+
+                return `
+                    <div style="
+                        maring-top:2mm;
+                        display:flex;
+                        font-size:12px;
+                    ">
+
+                        <span style="
+                            margin:auto 0;
+                        ">
+                            ${element.name} (${element.rate}%):
+                        </span>
+
+                        <strong style="
+                            margin:auto;
+                            margin-right:0;
+                        ">
+                            ${moneyFormat(element.total.toFixed(0))}
+                        </strong>
+
+                    </div>
+                `;
+
+            }).join('')}
+
+            <div style="
+                display:flex;
+                font-size:12px;
+                width:100%;
+            ">
+
+                <span style="
+                    margin:auto 0;
+                    font-size:12px;
+                ">
+                    TOTAL:
+                </span>
+                <strong style="
+                    margin:auto;
+                    margin-right:0;
+                    text-align:right;
+                ">
+                    ${moneyFormat(info.docInfo.total)}
+                </strong>
+
+            </div>
+        </div>
+        </div>
+        <span style="
+            margin:2mm 0;
+            width:100%;
+            border-bottom:dashed .5mm #000;
+            display:block;
+        "></span>
+        <div style="
+            display:flex;
+            flex-direction:column;
+            padding:1mm;
+            gap:1mm;
+        ">
+
+            ${info.paymentMethods.map((element) => {
+                return `
+                    <div style="
+                        display:flex;
+                        font-size:12px;
+                    ">
+
+                        <span>
+                            ${element.name}:
+                        </span>
+
+                        <strong style="
+                            margin:auto;
+                            margin-right:0;
+                        ">
+                            ${moneyFormat(element.value)}
+                        </strong>
+
+                    </div>
+                `;
+
+            }).join('')}
+        </div>
+
+    <span style="
+        margin:2mm 0;
+        width:100%;
+        border-bottom:dashed .5mm #000;
+        display:block;
+    "></span>
+
+            <span style="font-size:12px;">
+                Nota:  ${info.docInfo.description?? '--'}
+            </span>
+
+            <span style="
+                margin-top:8mm;
+                width:100%;
+                border-bottom:solid .2mm #000;
+                display:block;
+            "></span>
+
+            ${info.docInfo.instance_id != undefined ? `
+                <div style="
+                    display:flex;
+                    flex-direction:column;
+                    justify-content:center;
+                    margin-bottom:4mm;
+                    padding:4mm 2mm;
+                ">
+                    <img 
+                        src="${procesqrUrl}" 
+                        style="width:32mm;height:32mm;margin:2mm auto;"
+                    />
+
+                    <h3 style="
+                        font-size:14px;
+                        font-family:monospace;
+                        text-align:center;
+                        margin-top:2mm;
+                    ">
+                        Orden de trabajo #${info.docInfo.instanceOwnSerial}
+                    </h3>
+                    <h3 style="
+                        font-size:10px;
+                        font-family:monospace;
+                        text-align:center;
+                        margin-top:2mm;
+                    ">
+                        Con este código QR consulta el estado en tiempo real de tu proceso.
+                    </h3>
+                </div>
+    
+            `:``}
+            ${info.electronInfo.id != undefined ? `
+                
+                <div style="
+                    display:flex;
+                    flex-direction:column;
+                    justify-content:center;
+                    align-items:center;
+                    margin-bottom:4mm;
+                    padding:2mm;
+                    width:100%;
+                ">
+
+                    <img 
+                        src="${e_invoiceQe}"
+                        style="
+                            width:34mm;
+                            height:34mm;
+                        "
+                    />
+
+                    <h3 style="
+                        font-size:10px;
+                        font-family:monospace;
+                        text-align:center;
+                        margin-top:4mm;
+                        width:90%;
+                        word-break:break-all;
+                        overflow-wrap:break-word;
+                        white-space:normal;
+                        line-height:1.3;
+                    ">
+                        CUFE: ${info.electronInfo.code}
+                    </h3>
+
+                    <h3 style="
+                        font-size:10px;
+                        font-family:monospace;
+                        text-align:center;
+                        margin-top:4mm;
+                        margin-bottom:4mm;
+                        width:90%;
+                        word-break:break-all;
+                        overflow-wrap:break-word;
+                        white-space:normal;
+                        line-height:1.3;
+                    ">
+                        Este documento no reemplaza la factura electrónica, es solo un comprobante de pago. Consulta tu factura electrónica con el codigo QR o el CUFE en el portal de la DIAN.
+                    </h3>
+
+                </div>
+
+            ` : ''}
             ${barCode? `
                 <div style="
                     margin:0 auto;

@@ -71,3 +71,15 @@
     font-weight: 400;
     color: var(--descriptionText);
 }
+
+@media (max-width:500px) {
+    .SelectTpeNewDoc{
+        width: 100dvw;
+        padding-top: 4vh;
+    }
+
+    .SelectTpeNewDoc .gridTypes{
+        margin-top: 1vh;
+        max-height: 75vh;
+    }
+}
