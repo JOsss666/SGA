@@ -136,7 +136,6 @@ export function FormNewTax({reloadInfo,info}){
             <BoldTitle text={'Nuevo Impuesto'}/>
             <form className="createNewTax" onSubmit={(e) => {
                 e.preventDefault();
-                console.log(formInfo)
                 createTax();
             }}>
                 <FormInput 

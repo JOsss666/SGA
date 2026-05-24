@@ -45,13 +45,9 @@ export function FormSelectNewProcess (){
             company_id:appInfo.company_id,
             alloweProcesses:undefined
         })
-        console.log(res);
         if(res[0]){
             setAviableProcess(res[1]);
-            console.log(creationLock.isTriggered);
-            console.log(res[1].length)
             if(res[1].length === 1 && !creationLock.isTriggered) {
-                console.log('Ejecutando primer proceso')
                 creationLock.isTriggered = true; // Bloqueo global inmediato
                 await createProcessInstance(res[1][0]);
             }
@@ -87,15 +83,12 @@ export function FormSelectNewProcess (){
             thirdParty_id,
             user_id:userInfo.user_id
         });
-        console.log(res)
         if(res.id != undefined){
-            console.log('Estancia de proceso creado');
             creationLock.lastInstanceId = res.id;
             let getInfoNewInstance = await postInfo('/process/getProcessState',{
                 company_id:appInfo.company_id,
                 id:res.id
             });
-            console.log(getInfoNewInstance);
             if(getInfoNewInstance[0]){
                 setNewInstanceInfo(getInfoNewInstance[1][0]);
                 await getThirdParties();
@@ -124,9 +117,7 @@ export function FormSelectNewProcess (){
         creationLock.isTriggered = false;
         await popOutAlert();
         if(res[0]){
-            console.log('Intancia de proceso confirmada');
             if(newInstanceInfo.steps[0].required_docs.length > 0){
-                console.log('Abriendo con tipo',newInstanceInfo.steps[0].required_docs[0].docType)
                 popInAlert(<SelectTpeNewDoc info={
                     {   instance_id:newInstanceInfo.id,
                         step_id:newInstanceInfo.step_id,
@@ -169,7 +160,6 @@ export function FormSelectNewProcess (){
     },[]);
 
     useEffect(()=>{
-        console.log(creationLock)
     },[creationLock])
 
     return(

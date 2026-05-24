@@ -72,7 +72,6 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
         new Intl.NumberFormat("es-CO").format(value);
 
     const handleInstnaceSelect = (element)=>{
-        console.log(`Elemento seleccionado: ${element}`)
         setInstace_id(element.id);
         setInstanceOwnSerial(element.ownSerial);
         setStep_id(element.step_id);
@@ -98,7 +97,6 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
     };
 
     const handleAddProduct = (newService) => {
-        console.log(newService)
         if (newService.product_id !== undefined) {
             const uniqueLineId = `${newService.product_id}-${Date.now()}-${Math.random()}`;
 
@@ -110,7 +108,6 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
                 unit_value: getEffectivePrice(0),
                 total: 0
             };
-            console.log(serviceWithLineId);
             setProductsServices(prev => [...prev, serviceWithLineId]);
         }
     };
@@ -140,12 +137,10 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
     // getters of info
 
     const getProducts = async()=>{
-        console.log('Cargando productos')
         let res = await postInfo('/inventory/getComercialProducts',{
             company_id:appInfo.company_id,
             //type:'service',
         })
-        console.log(res);
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -179,7 +174,6 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
         let res = await postInfo('/process/getProcessInstances',{
             company_id:appInfo.company_id
         })
-        console.log(res);
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
@@ -220,7 +214,7 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
         await getProducts();
         let temInfo = {}
         if(userConfig.access != undefined){
-            console.log(userConfig.access)
+
             // Filtro para busqueda de tiendas
             if(!userConfig.access.stores.overAll){
                 if(userConfig.access.stores.enabled.length > 1){
@@ -257,7 +251,6 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
         temInfo.thirdParty_id = info.thirdParty_id;
 
         if(temInfo != {}){
-            console.log(temInfo);
             setInfo(temInfo);
         }
         setLoading(false);
@@ -265,7 +258,6 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
     }
 
     const printItem = async()=>{
-        console.log(formInfo)
         await printClientOrder(formInfo,appInfo,true);
         await printClientOrder(formInfo,appInfo,false);
     }
@@ -273,7 +265,6 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
     // Envents Hooks
 
     useEffect(()=>{
-        console.log(productsServices)
         let newTtl = 0;
         productsServices.forEach(element => {
             if(element.total != "" && element.total != undefined){
@@ -288,7 +279,6 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
     },[])
 
     useEffect(()=>{
-        console.log(`---> ${thirdParty_id}`)
     },[thirdParty_id])
 
     // create function
@@ -343,7 +333,6 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
                     <BoldTitle text={'Nueva orden de cliente'}/>
                     <form action="" onSubmit={(e)=>{
                         e.preventDefault();
-                        console.log(formInfo);
                         createClientOrder();
                     }}>
                         {info.store_id == undefined && (
