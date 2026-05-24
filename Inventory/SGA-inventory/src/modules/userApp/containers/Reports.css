@@ -59,6 +59,7 @@
     gap: 1.5vh;
     margin: auto;
     margin-top: 0;
+    padding: 0;
 }
 
 .Reports .menuBar .optionsBar .IconList{
@@ -87,4 +88,50 @@
 .Reports .menuBar .optionsBar .SelectOptions .contentOptions{
     width: 12vh;
     box-shadow: 0 .2vh .8vh #0003;
+}
+
+@media (max-width:500px) {
+
+    .Reports .headSection{
+        margin-bottom: 0;
+    }
+
+    .Reports .galleryReports{
+        display: flex;
+        max-height: 68vh;
+        overflow-y: scroll;
+        padding-top: 4vh;
+    }
+
+    .Reports .galleryReports .CardReport{
+        margin: auto;
+    }
+
+    .Reports .optionsBar{
+        margin: 0;
+    }
+
+    .Reports .optionsBar .IconList{
+        display: none;
+    }
+    
+    .Reports .menuBar{
+        padding: 0;
+        width: 100%;
+        left: 0;
+        top: 4.5vh;
+    }
+
+    .Reports .menuBar .optionsBar .SearchBar{
+        width: 80vw;
+        left: -1.5vh;
+    }
+
+    .Reports .optionsBar .SelectOptions{
+        display: none;
+    }
+
+    .Reports .spaceSelectReports .DespleList{
+        display: none;
+    }
 }
