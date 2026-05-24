@@ -19,6 +19,7 @@
     "@fullcalendar/timegrid": "^6.1.20",
     "@mui/material": "^7.3.6",
     "@mui/x-date-pickers": "^8.23.0",
+    "@tanstack/react-virtual": "^3.13.25",
     "apexcharts": "^5.3.6",
     "axios": "^1.11.0",
     "date-fns": "^4.1.0",
