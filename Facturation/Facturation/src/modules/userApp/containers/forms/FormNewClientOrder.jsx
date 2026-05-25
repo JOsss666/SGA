@@ -101,13 +101,16 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
             const uniqueLineId = `${newService.product_id}-${Date.now()}-${Math.random()}`;
 
             const serviceWithLineId = {
-                ...newService,
-                id:newService.product_id,
-                lineId: uniqueLineId,
-                units: 0,
-                unit_value: getEffectivePrice(0),
-                total: 0
-            };
+            ...newService,
+            id:newService.product_id,
+            lineId: uniqueLineId,
+            units: 0,
+            manualPrice:false,
+            unit_value: getEffectivePrice(newService, 0),
+            total: 0
+        };
+            console.log(serviceWithLineId);
+            
             setProductsServices(prev => [...prev, serviceWithLineId]);
         }
     };
@@ -116,22 +119,46 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
         setProductsServices(prev => prev.filter(item => item.lineId !== lineId));
     };
 
-    const handleEditItemDetail = (lineId, key, value) => {
-        setProductsServices(prev =>
-            prev.map(item => {
-                if (item.lineId !== lineId) return item;
-                let updatedValue = (key === 'description') ? value : Number(value);
-                let updatedItem = { ...item, [key]: updatedValue };
-                if (key === 'units') {
-                    const newPrice = getEffectivePrice(item, updatedValue);
-                    updatedItem.unit_value = newPrice;
-                }
-                updatedItem.total = (updatedItem.units || 0) * (updatedItem.unit_value || 0);
+  const handleEditItemDetail = (lineId, key, value) => {
+    setProductsServices(prev =>
+        prev.map(item => {
 
-                return updatedItem;
-            })
-        );
-    };
+            if (item.lineId !== lineId) return item;
+
+            let updatedValue =
+                key === 'description'
+                    ? value
+                    : Number(value);
+
+            let updatedItem = {
+                ...item,
+                [key]: updatedValue
+            };
+
+            if (key === 'unit_value') {
+                updatedItem.manualPrice = true;
+            }
+
+            if (
+                key === 'units' &&
+                !updatedItem.manualPrice
+            ) {
+                const newPrice = getEffectivePrice(
+                    item,
+                    updatedValue
+                );
+
+                updatedItem.unit_value = newPrice;
+            }
+
+            updatedItem.total =
+                (updatedItem.units || 0) *
+                (updatedItem.unit_value || 0);
+
+            return updatedItem;
+        })
+    );
+};
             
 
     // getters of info
