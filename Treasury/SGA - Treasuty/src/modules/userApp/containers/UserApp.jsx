@@ -52,6 +52,7 @@ import { MovementsRecord } from './MovementsRecord';
 import { CashHistory } from './CashHistory';
 import { Transactions } from './Transactions';
 import { Analytics2 } from './Analytics2';
+import { ControlPanel } from './ControlPanel';
 
 export function UserApp(){
 
@@ -207,6 +208,7 @@ export function UserApp(){
                                 <Route path='details' element={<MovementsRecord/>} /> 
                             </Route>
 
+                            <Route path='/mainPanel/*' element={<ControlPanel/>}/>
                             <Route path='/treasury' element={<Treasury/>}/>
                             <Route path='/banks' element={<Banks/>}/>
                                 <Route path='/banks/:bank_id' element={<BanksDetails/>}/>

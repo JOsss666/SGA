@@ -465,8 +465,21 @@ inventoryController.createPriceList = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `INSERT INTO "Inventory".pricesList(company_id,store_id,list_name, list_state, list_description) VALUES(?,?,?,?,?);`
-        let consulta = await useDataBase(sentence,[info.company_id,info.store_id,info.list_name,'Pendiente',info.list_description],2);
+        let sentence = `
+            INSERT INTO "Inventory".prices_lists(
+                   company_id, name, description, valid_from, valid_until, status, currency, allowed_stores)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+        `
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.name,
+            info.description,
+            info.valid_from,
+            info.valid_until,
+            info.status ?? 'active',
+            info.currency,
+            info.allowedStores
+        ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })
