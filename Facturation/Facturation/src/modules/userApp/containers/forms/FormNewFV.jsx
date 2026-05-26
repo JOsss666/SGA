@@ -75,7 +75,6 @@ export function FormNewFV({info,reloadFun}){
                 company_id:appInfo.company_id,
                 typePlanAccount:appInfo.accountPlanType
             })
-            console.log(res)
             if(res[0]){
                 let C = []
                 res[1].forEach(element => {
@@ -95,7 +94,6 @@ export function FormNewFV({info,reloadFun}){
             company_id:appInfo.company_id,
             typePlanAccount:appInfo.accountPlanType
         })
-        console.log(res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {

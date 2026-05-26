@@ -47,7 +47,6 @@ export function CreatePricesList({Store}){
     }
 
     useEffect(()=>{
-        console.log(stores)
     },[stores])
 
     useEffect(()=>{

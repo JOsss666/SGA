@@ -1,0 +1,24 @@
+.BriefCaseReport{
+    display: flex;
+    flex-direction: column;
+    padding: 0 2vh;
+}
+
+.BriefCaseReport .headReport{
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+    margin-bottom: 2vh;
+}
+
+.BriefCaseReport .bodyreport{
+    margin-top: 2vh;
+    display: flex;
+    width: 100%;
+    height: fit-content;
+    max-height: 60vh;
+}
+
+.BriefCaseReport .LoadingSpace{
+    height: 65vh;
+}

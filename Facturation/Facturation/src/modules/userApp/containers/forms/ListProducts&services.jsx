@@ -71,7 +71,6 @@ export function ListProductsServices({
     ========================== */
 
     const findSKU = useCallback((sku) => {
-        console.log('SKU ',sku)
         const map = new Map(products.map(p => [p.value.code, p]));
         return map.get(sku);
     }, [products]);

@@ -11,7 +11,7 @@ import { ServicesGrid } from './ServicesGrid';
 import { HomeProcess } from './HomeProcess';
 import { NotificationsApp } from './NotificationsApp';
 import { AlertsHolder } from './AlertsHolder';
-import { Reports } from './Reports';
+import { Reports } from './Reports'; 
 import { DocumentPreview } from './alerts/DocumentPreview';
 import { ChatAi } from './ChatAi';
 import { SwitchColorMode } from '../components/SwitchColorMode';
@@ -202,7 +202,7 @@ export function UserApp(){
                             <Route path='/users/:user_id' element={<DetailsUser/>} />
                             <Route path="Stores" element={<MyBussinesUnits/>}/>
                             <Route path='/Stores/:store_id' element={<StoreDetail/>}/>
-                            <Route path='/reports/*' element={<Reports/>} />
+                            <Route path='/reports/*' element={<Reports />} />
                             <Route path="Movements" element={<MovementsInventory/>}/>
                             <Route path="Movements/record" element={<RecordMovents/>}/>
                             <Route path='/settings/*' element={<Settings/>} />

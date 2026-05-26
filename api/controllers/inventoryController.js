@@ -67,7 +67,7 @@ inventoryController.getProducts = (req, res) => {
         values.push(info.company_id)
 
         if (info.category_id != null) {
-            whereClauses.push(`AND c.id = $${values.length +1}`);
+            whereClauses.push(`c.id = $${values.length +1}`);
             values.push(info.category_id);
         }
         
@@ -121,6 +121,7 @@ inventoryController.getProducts = (req, res) => {
                 ac.name,
                 t.base,
                 t.rate,
+                t.id,
                 c_exit.account_id
             ORDER BY
                 ps.order_index ASC, ps.name ASC
@@ -214,17 +215,17 @@ inventoryController.getComercialProducts = (req,res)=>{
             ${whereQuery}
             GROUP BY 
                 ps.id, 
+                ps.img,      -- <--- ESTA FALTABA
                 ps.name, 
                 ps.code, 
                 ac.name, 
                 t.base, 
-                t.id,
                 t.rate,
-                t.account_id, 
+                t.account_id,
+                t.id, 
                 c_exit.account_id, 
                 c_entry.account_id
-            ORDER BY ps.name ASC, ps.code ASC
-            ;
+            ORDER BY ps.name ASC, ps.code ASC;
         `
         let consulta = await useDataBase(sentence,values,1);
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -335,6 +336,7 @@ inventoryController.getPricesListItems = (req, res) => {
             }
 
             const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
+            
             let sentence = `
                 SELECT 
                     pi."priceList_id",
@@ -356,11 +358,25 @@ inventoryController.getPricesListItems = (req, res) => {
                     "Inventory"."products&services" ps
                 ON
                     pi."product&service_id" = ps.id
-                ${whereQuery}
+                ${whereQuery} 
+                GROUP BY 
+                    pi."priceList_id", 
+                    pi."product&service_id", 
+                    pi.id, 
+                    pi.cost, 
+                    pi."tier_min_quantity", 
+                    pi.unit_price, 
+                    pi."discount_percent", 
+                    pi."valid_from", 
+                    pi."valid_to", 
+                    ps.name, 
+                    ps.code, 
+                    ps.description, 
+                    ps.img
                 ORDER BY ps.name ASC
             `;
 
-            // 3. ¡CORRECCIÓN CLAVE!: Pasar el arreglo 'values' completo, no solo info.company_id
+            // Pasamos el arreglo 'values' completo
             let consulta = await useDataBase(sentence, values, 1);
             
             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -449,8 +465,21 @@ inventoryController.createPriceList = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `INSERT INTO "Inventory".pricesList(company_id,store_id,list_name, list_state, list_description) VALUES(?,?,?,?,?);`
-        let consulta = await useDataBase(sentence,[info.company_id,info.store_id,info.list_name,'Pendiente',info.list_description],2);
+        let sentence = `
+            INSERT INTO "Inventory".prices_lists(
+                   company_id, name, description, valid_from, valid_until, status, currency, allowed_stores)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+        `
+        let consulta = await useDataBase(sentence,[
+            info.company_id,
+            info.name,
+            info.description,
+            info.valid_from,
+            info.valid_until,
+            info.status ?? 'active',
+            info.currency,
+            info.allowedStores
+        ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })

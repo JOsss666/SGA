@@ -66,9 +66,7 @@ export function FormNewOperation({info}){
     const createTransaction = async()=>{
         setloadingCractionTransaction(true)
         setDisabled(true);
-        console.log('Creando nueva transacción',formInfo);
         let res = await postInfo('/createTransaction',formInfo);
-        console.log(res)
         if(typeof(parseInt(res[0])) == 'number'){
             setTransId(parseInt(res[0]))
             setDisabled(false);
@@ -80,9 +78,6 @@ export function FormNewOperation({info}){
     const pushDetailsTrans = ()=>{
         let newSubTtl = 0;
         let newTransDetails = [];
-        console.log(info)
-        console.log(taxes)
-        console.log(conceptInfo)
         newTransDetails.push({
                 account_id:conceptInfo.account_id,
                 account_type:appInfo.accountPlanType,
@@ -93,7 +88,6 @@ export function FormNewOperation({info}){
         })
         newSubTtl += info.total;
         taxes.forEach(element => {
-            console.log('Tp --> ',element)
             newTransDetails.push({
                 account_id:element.account_id,
                 account_type:appInfo.accountPlanType,
@@ -102,18 +96,12 @@ export function FormNewOperation({info}){
                 total: info.total * Number(((element.rate/100)).toFixed(2)),
                 nature:element.type
             })
-            console.log("-->",element.isRetention)
-            console.log('Previo Sub',newSubTtl)
             if(element.isRetention){
                 newSubTtl -= info.total * Number(((element.rate/100)).toFixed(2))
             }else{
                 newSubTtl += info.total * Number(((element.rate/100)).toFixed(2))
             }
-            console.log('Post sub',newSubTtl)
         });
-        console.log('T --> ',newTransDetails);
-        console.log('SubTotal: ',newSubTtl)
-        console.log('Total: ',info.total)
         let paymentMethod = info.paymentMethod != undefined? info.paymentMethod:{};
         newTransDetails.push({
             account_id:paymentMethod.account_id,
@@ -174,7 +162,6 @@ export function FormNewOperation({info}){
     },[taxes])
 
     useEffect(()=>{
-        console.log(formInfo)
         if(transactionDetails.length >0 && !loadingCractionTransaction){
             createTransaction();
         }

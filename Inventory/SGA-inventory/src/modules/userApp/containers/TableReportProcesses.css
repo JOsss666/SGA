@@ -1,0 +1,123 @@
+/* 1. Contenedor Principal: Ahora solo se encarga del layout general */
+.TableReportProcesses {
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+    width: 100%;
+    overflow: hidden; /* Evitamos que este nivel tenga scrolls para no duplicar */
+}
+
+/* 2. Contenedor de Resultados (parentRef): Único responsable del scroll */
+.TableReportProcesses .gridResultsTable {
+    height: 100%;
+    width: 100%;
+    overflow: auto; /* Permite scroll X e Y de forma natural */
+    position: relative;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 1vh;
+}
+
+/* 3. Encabezado: Dentro del scroll para que se mueva en X con las filas */
+.TableReportProcesses .headTable {
+    display: flex;
+    width: fit-content; /* Crece con sus hijos */
+    min-width: 100%;
+    padding: 1vh;
+    background-color: var(--menuAside);
+    outline: solid .1vh var(--inputsBorder);
+    gap: 1vw;
+    /* Sticky opcional: Mantiene los títulos arriba mientras bajas */
+    position: sticky; 
+    top: 0;
+    z-index: 10;
+}
+
+.TableReportProcesses .headTable span {
+    padding: 1vh;
+    margin: auto 0;
+    color: var(--mainText);
+    width: 12vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; /* Simplificado */
+    font-size: clamp(2.2px, 2.2vh, 22px);
+    text-align: center;
+}
+
+/* 4. Contenedor Virtual: DEBE dejar que el JS maneje la altura */
+.TableReportProcesses .gridResultsTable .virtualContainer {
+    width: fit-content;
+    min-width: 100%;
+    /* Eliminamos height: fit-content para no romper el inline style del virtualizador */
+}
+
+/* 5. Filas de Resultados */
+.TableReportProcesses .gridResultsTable .RowResults {
+    display: flex;
+    padding: 1.5vh 1vh;
+    border-bottom: solid .1vh var(--inputsBorder);
+    cursor: pointer;
+    gap: 1vw;
+    transition: .3s;
+    width: 100%; /* Ocupa el ancho total del virtualContainer (fit-content) */
+}
+
+.TableReportProcesses .gridResultsTable .RowResults:hover {
+    background-color: var(--cardHover);
+}
+
+.TableReportProcesses .gridResultsTable .RowResults .elementRow {
+    margin: auto 0;
+    color: var(--descriptionText);
+    width: 12vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: clamp(2.2px, 2vh, 22px);
+    text-align: right;
+}
+
+/* 6. Anchos específicos por columna */
+.TableReportProcesses .headTable .TH_ID,
+.TableReportProcesses .gridResultsTable .RowResults .TH_ID {
+    width: 5vw;
+    text-align: center;
+}
+
+.TableReportProcesses .headTable .TH_Estado,
+.TableReportProcesses .gridResultsTable .RowResults .TH_Estado {
+    text-align: right;
+    width: 8vw;
+}
+
+/* 7. Estados (Colores) */
+:root .TableReportProcesses .gridResultsTable .rowStatus_pending {
+    background-color: #FEFCE8;
+}
+:root.dark .TableReportProcesses .gridResultsTable .rowStatus_pending {
+    background-color: #894B0A40;
+}
+:root .TableReportProcesses .gridResultsTable .rowStatus_cancelled {
+    background-color: #FFE2E2;
+}
+:root.dark .TableReportProcesses .gridResultsTable .rowStatus_cancelled {
+    background-color: #82181A90;
+}
+
+/* 8. Responsivo */
+@media (max-width:500px) {
+    .TableReportProcesses .headTable span,
+    .TableReportProcesses .gridResultsTable .RowResults .elementRow {
+        width: 40vw;
+    }
+
+    .TableReportProcesses .headTable .TH_ID,
+    .TableReportProcesses .gridResultsTable .RowResults .TH_ID {
+        width: 20vw;
+    }
+
+    .TableReportProcesses .headTable .TH_Estado,
+    .TableReportProcesses .gridResultsTable .RowResults .TH_Estado {
+        width: 30vw;
+    }
+}

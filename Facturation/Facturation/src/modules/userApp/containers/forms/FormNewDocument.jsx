@@ -97,17 +97,14 @@ export function FormNewDocument({type,reloadFun,info}){
                     value:element.store_id
                 })
             });
-            console.log(C)
             setStores(C);
         }
-        console.log(res);
     }
 
     useEffect(() => {
         if (store_id != undefined) {
             getCellars();
         }
-        console.log(store_id);
     }, [store_id, cellar_id]);
 
 

@@ -69,3 +69,9 @@
     background-color: var(--iconHover);
     color: var(--mainText);
 }
+
+@media (max-width:500px) {
+    .CardReport{
+        width: 70vw;
+    }
+}
