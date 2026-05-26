@@ -19,8 +19,8 @@ import { isElectron } from "../../../../App";
 export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
 
     // requirements
-    const [info,setInfo] = useState(params != undefined? params:{}) 
-    const {appInfo,userInfo,userConfig} = useAppInfo(); 
+    const [info,setInfo] = useState(params != undefined? params:{})
+    const {appInfo,userInfo,userConfig} = useAppInfo();
     const {addNotification} = useNotifications();
     const {popInAlert,popOutAlert} = useAlert();
     const [stores,setStores] = useState([]);
