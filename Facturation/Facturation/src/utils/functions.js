@@ -12,7 +12,7 @@ import { saveAs } from 'file-saver';
 export async function postInfo(route,informacion){
     console.log('Funcion post');
     return new Promise((resolve, reject) => {
-        console.log(urlSer+route)
+        console.log(urlSer + route);
         fetch(urlSer + route ,{
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
