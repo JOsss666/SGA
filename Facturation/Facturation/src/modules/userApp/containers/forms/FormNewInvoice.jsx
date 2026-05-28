@@ -1057,9 +1057,6 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
         }
     },[instance_id])
 
-    useEffect(()=>{
-        calcTotalFromPayments();
-    },[paymentMethod])
 
     useEffect(()=>{
         if(documents.length > 0){
@@ -1084,9 +1081,14 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             });
             setTotalToPay(newTotalToPay)
         }
-        calcTotalFromPayments();
+
     },[documents,briefCaseBills,itemBlocks])
 
+    useEffect(()=>{
+        calcTotalFromPayments();
+    },[paymentMethod,totalToPay]
+    )
+    
     useEffect(()=>{
         if(itemBlocks.length == 0) return;
         let C = [];
