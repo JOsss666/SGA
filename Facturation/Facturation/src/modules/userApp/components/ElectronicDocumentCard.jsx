@@ -130,9 +130,7 @@ export function ElectronicDocumentCard({info}){
                     <ButtonMenu noRotate={true} title={'Descargar XML'} children={<i className="fa-regular fa-file-code"/>} onClick={()=>{
                         downloadXML();
                     }}/>
-                    <ButtonMenu noRotate={true} title={'Descargar .ZIP'} children={<i className="fa-regular fa-file-zipper"/>} onClick={()=>{
-                        getDocFullInfo();
-                    }}/>
+                    
                 </div>
             </div>
         </div>
