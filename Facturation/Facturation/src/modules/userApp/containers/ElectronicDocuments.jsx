@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAppInfo } from "../../../context/context";
 import { BoldTitle } from "../components/BoldTitle";
 import { ButtonDownload } from "../components/ButtonDownload";
@@ -61,6 +61,23 @@ export function ElectronicDocuments(){
     useEffect(()=>{
         getInvoices();
     },[])
+
+    const filteredDocuments = useMemo(() => {
+        if (!searchValue) return documents;
+
+        const term = searchValue.toLowerCase();
+
+        return documents.filter((doc) => {
+            const info = doc.value;
+            const matchNumber = info.number?.toLowerCase().includes(term);
+            const matchName   = info.thirdParty_names?.toLowerCase().includes(term);
+            const matchType   = info.document_type?.toLowerCase().includes(term) || info.type?.toLowerCase().includes(term);
+            
+            const matchThirdPartyId = info.thirdParty_id?.toLowerCase().includes(term); 
+
+            return matchNumber || matchName || matchType || matchThirdPartyId;
+        });
+    }, [documents, searchValue]);
 
     return(
         <div className="ElectronicDocuments">
@@ -145,7 +162,7 @@ export function ElectronicDocuments(){
             <div className="contentSection">
                 {!loading && (
                     <div className="documentResults">
-                        {documents.map((element,index)=>(
+                        {filteredDocuments.map((element,index)=>(
                             <ElectronicDocumentCard info={element.value} key={index}/>
                         ))}
                     </div>
