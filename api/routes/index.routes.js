@@ -303,6 +303,10 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
 
     router.post('/electronicFacturation/note',electronicFacturationController.newNote);
 
+    router.post('/electronicFacturation/downloadBill',electronicFacturationController.downloadBill);
+
+    router.post('/electronicFacturation/downloadBillXML',electronicFacturationController.downloadBillXML);
+
     router.get('/electronicFacturation/getMunicipalities',electronicFacturationController.getMunicipalities);
 
     router.post('/electronicFacturationController.getDocumentFullInfo',electronicFacturationController.getDocumentFullInfo);

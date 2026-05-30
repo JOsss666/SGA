@@ -8,11 +8,12 @@ import QRCode from 'qrcode';
 import JsBarcode from 'jsbarcode';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import { useNotifications } from "../context/context";
 
 export async function postInfo(route,informacion){
     console.log('Funcion post');
     return new Promise((resolve, reject) => {
-        console.log(urlSer+route)
+        console.log(urlSer + route);
         fetch(urlSer + route ,{
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -245,6 +246,95 @@ export  async function parseToCsv(info,download,name){
         return newLinkDownload;
     }
 }
+
+export const downloadPdfFromResponse = (response) => {
+
+    if (response?.status !== "OK" || !response?.data?.pdf_base_64_encoded) {
+        console.error("Error: La respuesta no contiene un PDF válido", response);
+        return;
+    }
+
+    const { file_name, pdf_base_64_encoded } = response.data;
+
+    try {
+        const byteCharacters = atob(pdf_base_64_encoded);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+        const blobUrl = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        
+        const finalFileName = (`SGA_${file_name}` ?? 'SGA_download').endsWith(".pdf") ? `SGA_${file_name}` : `SGA_${file_name}.pdf`;
+        link.download = finalFileName;
+        
+        document.body.appendChild(link);
+        link.click();
+        
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+
+        return {
+            status:'OK',
+            file_name
+        }
+
+    } catch (error) {
+        console.error("Error al intentar procesar y descargar el PDF:", error);
+    }
+};
+
+export const downloadXmlFromResponse = (response) => {
+
+    // 1. Validamos buscando la propiedad específica del XML
+    if (response?.status !== "OK" || !response?.data?.xml_base_64_encoded) {
+        console.error("Error: La respuesta no contiene un XML válido", response);
+        return;
+    }
+
+    const { file_name, xml_base_64_encoded } = response.data;
+
+    try {
+        const byteCharacters = atob(xml_base_64_encoded);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        
+        // 2. Cambiamos el tipo MIME a application/xml
+        const blob = new Blob([byteArray], { type: "application/xml" });
+        const blobUrl = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        
+        // 3. Aseguramos que la extensión final sea .xml
+        const finalFileName = (`SGA_${file_name}` ?? 'SGA_download').endsWith(".xml") 
+            ? `SGA_${file_name}` 
+            : `SGA_${file_name}.xml`;
+            
+        link.download = finalFileName;
+        
+        document.body.appendChild(link);
+        link.click();
+        
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+
+        return {
+            status: 'OK',
+            file_name
+        }
+
+    } catch (error) {
+        console.error("Error al intentar procesar y descargar el XML:", error);
+    }
+};
 
 export async function componentToPdf(component,download = true,options = {},name = "SGA-descarga.pdf") {
     const { title = "", scale = 2 } = options;
