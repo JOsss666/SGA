@@ -50,6 +50,7 @@ import { ProcessStatusAlert } from './Alerts/ProcessStatusAlert';
 import { ProcessInstanceAnalytics } from './Analytics/ProcessInstanceAnalycs';
 import { Analytics2 } from './Analytics2';
 import { QuickActions } from './QuickActions';
+import { ElectronicDocuments } from './ElectronicDocuments';
 
 export function UserApp(){
 
@@ -224,12 +225,7 @@ export function UserApp(){
                     <Routes>
                             <Route path='/' element={<HomeProcess/>} />
                             <Route path='/new' element={<New></New>} />
-                            <Route path='/edocuments' element={<NoAccess 
-                                title={'Seccion no disponible'}
-                                description={`${appInfo.legal_name} no ha habilitado esta sección aún.`}
-                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1776911074/Gemini_Generated_Image_hqrv0mhqrv0mhqrv-2_lne97l.png'}
-                                noExit={true}
-                                />} />
+                            <Route path='/edocuments' element={<ElectronicDocuments/>} />
                             <Route path='quickActions' element={<QuickActions/>} />
                             <Route path='/myBussines/' element={<MyBussines/>}/>
                             <Route path='/myBussines/costCenters' element={<CostCenters/>}/>

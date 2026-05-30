@@ -470,13 +470,24 @@ electronicFacturationController.getDocuments = (req,res)=>{
             SELECT 
                 "ElectronicFacturation".documents.*,
                 "Ecosystem".documents.id AS doc_id,
-                "Ecosystem".documents."thirdParty_id"
+                "Ecosystem".documents.total AS doc_total,
+                "Ecosystem".documents."thirdParty_id",
+                "Ecosystem".documents."ownSerial" AS "doc_ownSerial",
+                "Ecosystem".documents.document_type,
+                "Ecosystem".documents.status AS doc_status,
+                "Ecosystem".thirdparties.names AS "thirdParty_names",
+                "Ecosystem".thirdparties.mail AS "thirdParty_mail",
+                "Ecosystem".thirdparties.type AS "thirdParty_type"
             FROM
                 "ElectronicFacturation".documents
             LEFT JOIN
                 "Ecosystem".documents
             ON
                 "ElectronicFacturation".documents.doc_id = "Ecosystem".documents.id
+            LEFT JOIN
+                "Ecosystem".thirdparties
+            ON
+                "Ecosystem".documents."thirdParty_id" = "Ecosystem".thirdparties.id
             ${whereQuery}
             ORDER BY id DESC ;
         `;
