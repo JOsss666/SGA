@@ -470,6 +470,10 @@ electronicFacturationController.getDocuments = (req,res)=>{
             SELECT 
                 "ElectronicFacturation".documents.*,
                 "Ecosystem".documents.id AS doc_id,
+                "Ecosystem".docs_instances.instance_id,
+                "Process".process_instance."ownSerial" AS "instance_ownSerial",
+                "Process".process_instance.process_id,
+                "Process".processes.code AS "process_code",
                 "Ecosystem".documents.total AS doc_total,
                 "Ecosystem".documents."thirdParty_id",
                 "Ecosystem".documents."ownSerial" AS "doc_ownSerial",
@@ -488,6 +492,18 @@ electronicFacturationController.getDocuments = (req,res)=>{
                 "Ecosystem".thirdparties
             ON
                 "Ecosystem".documents."thirdParty_id" = "Ecosystem".thirdparties.id
+            LEFT JOIN
+                "Ecosystem".docs_instances
+            ON
+                "Ecosystem".documents.id = "Ecosystem".docs_instances.doc_id
+            LEFT JOIN
+                "Process".process_instance
+            ON
+                "Ecosystem".docs_instances.instance_id = "Process".process_instance.id
+            LEFT JOIN
+                "Process".processes
+            ON
+                "Process".process_instance.process_id = "Process".processes.id
             ${whereQuery}
             ORDER BY id DESC ;
         `;
