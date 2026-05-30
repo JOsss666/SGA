@@ -5,10 +5,18 @@ import { DescriptionSpan } from "./DescriptionSpan";
 import { copyToClipBoard, moneyFormat } from "../../../utils/functions";
 import { ButtonMenu } from "./ButtonMenu";
 import { useNotifications } from "../../../context/context";
+import { useNavigate, useParams } from "react-router-dom";
+import { urlSer } from "../../../App";
 
 export function ElectronicDocumentCard({info}){
 
     const {addNotification} = useNotifications(); 
+    const navigate = useNavigate();
+    const params = useParams();
+
+    const handleNavigate = ()=>{
+        navigate(`${urlSer}/SGA_management/${params.company_key}/${params.user_key}/edocuments/${info.id}`)
+    }
     
     return(
         <div className="ElectronicDocumentCard">
@@ -19,7 +27,9 @@ export function ElectronicDocumentCard({info}){
                     <TagIndicator type={info.doc_status} title={info.doc_status}/>
                 </div>
             </div>
-            <div className="body">
+            <div className="body" onClick={()=>{
+                handleNavigate();
+            }}>
                 <div className="customerInfo">
                     <h5 className="typeClient">
                         {info.thirdParty_type ?? '--'}
@@ -37,7 +47,9 @@ export function ElectronicDocumentCard({info}){
                     <BoldTitle text={`$ ${moneyFormat(info.doc_total?? 0)}`}/>
                 </div>
                 <div className="quickOptions">
-                    <ButtonMenu noRotate={true} title={'Previsualizar'} children={<i className="fa-regular fa-eye"/>}/>
+                    <ButtonMenu noRotate={true} title={'Previsualizar'} children={<i className="fa-regular fa-eye"/>} onClick={()=>{
+                        window.open(`${info.url}`,'_blank','noopener,noreferrer')
+                    }}/>
                     <ButtonMenu noRotate={true} title={'Copiar CUFE'} children={<i className="fa-regular fa-copy"/>} onClick={()=>{
                         copyToClipBoard(info.code)
                         addNotification({
@@ -48,6 +60,7 @@ export function ElectronicDocumentCard({info}){
                     }}/>
                     <ButtonMenu noRotate={true} title={'Descargar PDF'} children={<i className="fa-regular fa-file-pdf"/>}/>
                     <ButtonMenu noRotate={true} title={'Descargar XML'} children={<i className="fa-regular fa-file-code"/>}/>
+                    <ButtonMenu noRotate={true} title={'Descargar .ZIP'} children={<i className="fa-regular fa-file-zipper"/>}/>
                 </div>
             </div>
         </div>

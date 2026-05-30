@@ -68,7 +68,7 @@ export function ElectronicDocuments(){
                 <PathLocation />
                 <div className="headReport">
 
-                    <BoldTitle text={"Documentos electronicos"} />
+                    <BoldTitle text={"Documentos electrónicos"} />
 
                     <DescriptionSpan text={"Consulte sus facturas, notas débito, notas crédito y demas en esta sección"} />
 
