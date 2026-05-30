@@ -226,6 +226,12 @@ export function UserApp(){
                             <Route path='/' element={<HomeProcess/>} />
                             <Route path='/new' element={<New></New>} />
                             <Route path='/edocuments' element={<ElectronicDocuments/>} />
+                            <Route path='/edocuments/:e_doc_id' element={<NoAccess 
+                                title={'Seccion en construcción'}
+                                description={`Estamos trabajando para ofrecer esta seccion lo mas pronto posible :)`}
+                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1776911074/Gemini_Generated_Image_hqrv0mhqrv0mhqrv-2_lne97l.png'}
+                                noExit={true}
+                                />} />
                             <Route path='quickActions' element={<QuickActions/>} />
                             <Route path='/myBussines/' element={<MyBussines/>}/>
                             <Route path='/myBussines/costCenters' element={<CostCenters/>}/>

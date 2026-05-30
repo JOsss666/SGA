@@ -16,7 +16,7 @@ export function ElectronicDocumentCard({info}){
     const params = useParams();
 
     const handleNavigate = ()=>{
-        navigate(`${urlSer}/SGA_management/${params.company_key}/${params.user_key}/edocuments/${info.id}`)
+         navigate(`/SGA_management/${params.company_key}/${params.user_key}/edocuments/${info.id}`);
     }
 
     const downloadPDF = async()=>{
@@ -89,6 +89,10 @@ export function ElectronicDocumentCard({info}){
             <div className="headCard">
                 <TagIndicator type={'indicator'} title={info.type}/>
                 <h4 className="serialDocument">{info.number}</h4>
+                {info.instance_ownSerial != null && (
+                    <TagIndicator type={'suspended'} title={`${info.process_code}#${info.instance_ownSerial}`}/>
+                )}
+                <TagIndicator title={`${info.document_type}#${info.doc_ownSerial}`}/>
                 <div className="statusDoc">
                     <TagIndicator type={info.doc_status} title={info.doc_status}/>
                 </div>

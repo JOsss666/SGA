@@ -10,6 +10,7 @@
 .ElectronicDocumentCard .headCard{
     padding: .5vh;
     display: flex;
+    gap: 1vw;
     position: relative;
 }
 
@@ -20,7 +21,7 @@
 
 .ElectronicDocumentCard .headCard .serialDocument{
     margin: auto 0;
-    margin-left: 2vw;
+    margin-left: 1vw;
     font-weight: 500;
     font-size: clamp(2.2px,2.2vh,22px);
     color: var(--mainText);
