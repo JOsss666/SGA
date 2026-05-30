@@ -2,11 +2,12 @@ import { TagIndicator } from "./TagIndicator";
 import './ElectronicDocumentCard.css'
 import { BoldTitle } from "./BoldTitle";
 import { DescriptionSpan } from "./DescriptionSpan";
-import { copyToClipBoard, moneyFormat } from "../../../utils/functions";
+import { copyToClipBoard, moneyFormat, postInfo } from "../../../utils/functions";
 import { ButtonMenu } from "./ButtonMenu";
 import { useNotifications } from "../../../context/context";
 import { useNavigate, useParams } from "react-router-dom";
 import { urlSer } from "../../../App";
+import { downloadPdfFromResponse, downloadXmlFromResponse } from "../../../utils/functions";
 
 export function ElectronicDocumentCard({info}){
 
@@ -16,6 +17,71 @@ export function ElectronicDocumentCard({info}){
 
     const handleNavigate = ()=>{
         navigate(`${urlSer}/SGA_management/${params.company_key}/${params.user_key}/edocuments/${info.id}`)
+    }
+
+    const downloadPDF = async()=>{
+        let res = await postInfo('/electronicFacturation/downloadBill',{
+            bill_numer:info.number
+        })
+        if(res.status == 'OK'){
+            let download = await downloadPdfFromResponse(res);
+            if(download.status == 'OK'){
+                addNotification({
+                    type:'aproved',
+                    title:`${download.file_name} descargado correctamente.`,
+                    description:`El documento "${download.file_name}" fue descargado correctamente.`
+                })
+            }else{
+                addNotification({
+                    type:'error',
+                    title:`Error al descargar ${info.number}`,
+                    description:`No se pudo descargar "${info.number}", intentelo nuevamente`
+                })
+            }
+        }else{
+            addNotification({
+                type:'error',
+                title:`No se pudo descargar ${info.number}`,
+                description:res.message
+            })
+        }
+    }
+
+    const downloadXML = async()=>{
+        let res = await postInfo('/electronicFacturation/downloadBillXML',{
+            bill_numer:info.number
+        })
+        console.log(res)
+        if(res.status == 'OK'){
+            let download = await downloadXmlFromResponse(res);
+            if(download.status == 'OK'){
+                addNotification({
+                    type:'aproved',
+                    title:`${download.file_name} descargado correctamente.`,
+                    description:`El documento "${download.file_name}" fue descargado correctamente.`
+                })
+            }else{
+                addNotification({
+                    type:'error',
+                    title:`Error al descargar ${info.number}`,
+                    description:`No se pudo descargar "${info.number}", intentelo nuevamente`
+                })
+            }
+        }else{
+            addNotification({
+                type:'error',
+                title:`No se pudo descargar ${info.number}`,
+                description:res.message
+            })
+        }
+    }
+
+    
+
+    const getDocFullInfo = async()=>{
+        let res = await postInfo('/electronicFacturationController.getDocumentFullInfo',{
+            bill_numer:info.number
+        })
     }
     
     return(
@@ -58,9 +124,15 @@ export function ElectronicDocumentCard({info}){
                             description:`Se copio "${info.code}" en el portapapeles.`
                         })
                     }}/>
-                    <ButtonMenu noRotate={true} title={'Descargar PDF'} children={<i className="fa-regular fa-file-pdf"/>}/>
-                    <ButtonMenu noRotate={true} title={'Descargar XML'} children={<i className="fa-regular fa-file-code"/>}/>
-                    <ButtonMenu noRotate={true} title={'Descargar .ZIP'} children={<i className="fa-regular fa-file-zipper"/>}/>
+                    <ButtonMenu noRotate={true} title={'Descargar PDF'} children={<i className="fa-regular fa-file-pdf"/>} onClick={()=>{
+                        downloadPDF()
+                    }}/>
+                    <ButtonMenu noRotate={true} title={'Descargar XML'} children={<i className="fa-regular fa-file-code"/>} onClick={()=>{
+                        downloadXML();
+                    }}/>
+                    <ButtonMenu noRotate={true} title={'Descargar .ZIP'} children={<i className="fa-regular fa-file-zipper"/>} onClick={()=>{
+                        getDocFullInfo();
+                    }}/>
                 </div>
             </div>
         </div>

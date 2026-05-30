@@ -527,10 +527,59 @@ electronicFacturationController.getDocumentFullInfo = (req,res)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
-
 }
 
+electronicFacturationController.downloadBill = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        const auth = await electronicFacturationController.getAuthToken();
+        console.log(`Descargando factura: ${info.bu}`)
+        const response = await fetch(urlSer + `/v1/bills/download-pdf/${info.bill_numer}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${auth.access_token}`,
+                'Accept': 'application/json'
+            }
+        });
+        const resInvoice = await response.json();
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(resInvoice));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
 
+electronicFacturationController.downloadBillXML = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        const auth = await electronicFacturationController.getAuthToken();
+        console.log(`Descargando factura: ${info.bu}`)
+        const response = await fetch(urlSer + `/v1/bills/download-xml/${info.bill_numer}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${auth.access_token}`,
+                'Accept': 'application/json'
+            }
+        });
+        const resInvoice = await response.json();
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(resInvoice));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
 
 // Función para inicializar servicios al arrancar el servidor
 electronicFacturationController.init = async () => {
