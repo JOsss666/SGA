@@ -16,7 +16,7 @@ export function ElectronicDocumentCard({info}){
     const params = useParams();
 
     const handleNavigate = ()=>{
-        navigate(`/SGA_management/${params.company_key}/${params.user_key}/edocuments/${info.id}`);
+         navigate(`/SGA_management/${params.company_key}/${params.user_key}/edocuments/${info.id}`);
     }
 
     const downloadPDF = async()=>{
