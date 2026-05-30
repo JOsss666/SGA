@@ -1,4 +1,5 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAppInfo } from "../../../context/context";
 import { BoldTitle } from "../components/BoldTitle";
 import { ButtonDownload } from "../components/ButtonDownload";
@@ -34,6 +35,9 @@ export function ElectronicDocuments(){
 
     // Info
     const [documents,setDocuments] = useState([]);
+
+    // Virtual scroll
+    const scrollRef = useRef(null);
 
     // getters of info
     const getInvoices = async()=>{
@@ -78,6 +82,14 @@ export function ElectronicDocuments(){
             return matchNumber || matchName || matchType || matchThirdPartyId;
         });
     }, [documents, searchValue]);
+
+    const virtualizer = useVirtualizer({
+        count: filteredDocuments.length,
+        getScrollElement: () => scrollRef.current,
+        estimateSize: () => 185,
+        overscan: 10,
+        measureElement: (el) => el?.getBoundingClientRect().height ?? 185,
+    });
 
     return(
         <div className="ElectronicDocuments">
@@ -161,10 +173,26 @@ export function ElectronicDocuments(){
             
             <div className="contentSection">
                 {!loading && (
-                    <div className="documentResults">
-                        {filteredDocuments.map((element,index)=>(
-                            <ElectronicDocumentCard info={element.value} key={index}/>
-                        ))}
+                    <div className="documentResults" ref={scrollRef}>
+                        <div style={{ height: virtualizer.getTotalSize(), position: 'relative', width: '100%' }}>
+                            {virtualizer.getVirtualItems().map((virtualItem) => (
+                                <div
+                                    key={virtualItem.key}
+                                    data-index={virtualItem.index}
+                                    ref={virtualizer.measureElement}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        transform: `translateY(${virtualItem.start}px)`,
+                                        paddingBottom: '2vh',
+                                    }}
+                                >
+                                    <ElectronicDocumentCard info={filteredDocuments[virtualItem.index].value} />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
                 {loading && (
