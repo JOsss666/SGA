@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import './CardCategory.css'
 import { TreeFormNewAccount } from '../containers/forms/TreeFormNewAccount';
+import { useAlert } from '../../../context/context';
+import { FormNewAccount } from '../containers/forms/FormNewAccount';
 
 export function CardCategory({info,hidden,reloadFun}){
 
     const [hiddenFormNewChildren,sethiddenFormNewChildren] = useState(true);
+    const {popInAlert} = useAlert();
 
     return(
         <div className="CardCategory" style={{
@@ -35,6 +38,12 @@ export function CardCategory({info,hidden,reloadFun}){
                 <i style={{display:!hiddenFormNewChildren? 'inline':''}} onClick={()=>{
                     sethiddenFormNewChildren(!hiddenFormNewChildren);
                 }} title={hiddenFormNewChildren? `Crear subCategoria de ${info.code}`:'Cancelar'} className={`fa-solid fa-${!hiddenFormNewChildren? 'minus':'plus'} createChidren`}/>
+                <i style={{display:!hiddenFormNewChildren? 'inline':''}} onClick={()=>{
+                    popInAlert(<FormNewAccount update={true} updateInfo={info}/>)
+                }} title={`Editar ${info.code}`} className={`fa-solid fa-pen createChidren`} />
+                <i style={{display:!hiddenFormNewChildren? 'inline':''}} onClick={()=>{
+                    popInAlert(<FormNewAccount update={true} updateInfo={info}/>)
+                }} title={`Eliminar ${info.code}`} className={`fa-solid fa-trash-can createChidren`}/>
             </div>
             {!hiddenFormNewChildren && (
                 <TreeFormNewAccount reloadINfo={reloadFun} fatherInfo={info}/>
