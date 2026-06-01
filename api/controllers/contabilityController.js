@@ -185,5 +185,75 @@ contabiltyController.refreshAccountBalanceMaterializedView = (req,res)=>{
 }
 
 
+contabiltyController.updateContableAccount = async (req, res) => {
+    try {
+        const { id } = req.params; 
+        const data = req.body; 
+
+        if (!id || Object.keys(data).length === 0) {
+            return res.status(400).json({ 
+                error: "No se enviaron datos para actualizar o falta el ID." 
+            });
+        }
+
+        if (data.code) {
+            const checkQuery = `
+                SELECT id FROM "Ecosystem".contable_accounts 
+                WHERE code = $1 AND id != $2 AND company_id =$3;
+            `;
+            const checkResult = await useDataBase(checkQuery,[data.code, id, data.company_id],1);
+            
+            if (checkResult.rowCount > 0) {
+                return res.status(409).json({ 
+                    error: "El código ingresado ya existe en otra cuenta contable." 
+                });
+            }
+        }
+
+        const setClauses = [];
+        const values = [];
+        let paramIndex = 1;
+
+        const allowedFields = ['code', 'name', 'type', 'state', 'type_account'];
+
+        for (const [key, value] of Object.entries(data)) {
+            if (allowedFields.includes(key)) {
+                setClauses.push(`${key} = $${paramIndex}`);
+                values.push(value);
+                paramIndex++;
+            }
+        }
+
+        if (setClauses.length === 0) {
+            return res.status(400).json({ 
+                error: "Los campos enviados no son válidos para la actualización." 
+            });
+        }
+
+        values.push(id);
+        const updateQuery = `
+            UPDATE "Ecosystem".contable_accounts
+            SET ${setClauses.join(', ')}
+            WHERE id = $${paramIndex}
+            RETURNING *;
+        `;
+
+        const updateResult = await useDataBase(updateQuery,values,1);
+
+        if (updateResult.rowCount === 0) {
+            return res.status(404).json({ error: "Cuenta contable no encontrada." });
+        }
+
+        return res.status(200).json({
+            message: "Cuenta contable actualizada correctamente.",
+            data: updateResult.rows[0]
+        });
+
+    } catch (error) {
+        console.error("Error al actualizar la cuenta contable:", error);
+        return res.status(500).json({ error: "Error interno del servidor." });
+    }
+};
+
 export default contabiltyController;
 
