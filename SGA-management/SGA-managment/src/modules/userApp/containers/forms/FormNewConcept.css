@@ -26,6 +26,7 @@
 
 .FormNewConcept form .FormButton{
     margin: 1vh auto;
+    margin-top: 3vh;
 }
 
 .FormNewConcept .selectedTaxesC{
@@ -66,4 +67,21 @@
 .FormNewConcept .selectedTaxesC .CardTitleLogo h4{
     font-size: clamp(2.2px,2.2vh,22px);
     color: var(--mainText);
+}
+
+.FormNewConcept form .switchContent{
+    display: flex;
+    gap: 2vw;
+    width: 100%;
+    margin: 1.5vh auto;
+}
+
+.FormNewConcept form .switchContent .SwitchOption{
+    margin: auto;
+    margin-right: 0;
+}
+
+.FormNewConcept form .switchContent .switchLabel{
+    font-size: clamp(2vh,2.2vh,22px);
+    color: var(--descriptionText);
 }

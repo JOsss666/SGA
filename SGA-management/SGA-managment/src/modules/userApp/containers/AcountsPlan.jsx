@@ -11,6 +11,7 @@ import { ButtonMenu } from "../components/ButtonMenu";
 import { SearchBar } from "../components/SearchBar";
 import { CheckSquare } from "../components/CheckSquare";
 import { SelectOptions } from "../components/SelectOptions";
+import { LoadingSpace } from "./LoadingSpace";
 
 export function AcountsPlan(){
 
@@ -73,7 +74,7 @@ export function AcountsPlan(){
                             <ButtonMenu title={'Editar información'} children={<i className="fa-solid fa-pencil"/>}/>
                             <ButtonMenu title={'Crear nuevo plan de cuentas'} children={<i className="fa-solid fa-plus"/>}/>
                             <ButtonMenu title={'Eliminar plan de cuentas'} children={<i className="fa-solid fa-trash-can"/>}/>
-                            
+
                         </div>
                     </div>
                     <div className="accountsContainer" ref={scrollRef}>
@@ -130,7 +131,7 @@ export function AcountsPlan(){
                     </div>
                 </>
             )}{loading && (
-                <span>Cargando plan de cuentas....</span>
+                <LoadingSpace title={'Cargando plan de cuentas'} description={'Esto puede tardar un poco'}/>
             )}
         </div>
     )
