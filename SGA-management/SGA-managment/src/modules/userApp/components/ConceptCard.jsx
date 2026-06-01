@@ -39,7 +39,7 @@ export function ConceptCard({info,hidden,reloadFun}){
 
     const editConcept = ()=>{
         popInAlert(
-            <FormNewConcept update={true} updateInfo={info}/>
+            <FormNewConcept update={true} updateInfo={info} reloadInfo={reloadFun}/>
         )
     }
 

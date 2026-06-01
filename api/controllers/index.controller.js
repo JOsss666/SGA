@@ -1226,6 +1226,7 @@ controller.updateConcept = (req, res) => {
             
             console.log(`Registros usando este concepto: ${countPrevUses}`);
 
+            /*
             if (countPrevUses > 0 && info.account_id) {
                 return res.status(200).json({
                     status: 'Error',
@@ -1233,6 +1234,8 @@ controller.updateConcept = (req, res) => {
                     data: { count: countPrevUses }
                 });
             }
+
+            */
 
             const allowedFields = [
                 'account_id', 

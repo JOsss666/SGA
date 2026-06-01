@@ -89,6 +89,8 @@ export function FormNewConcept({reloadInfo, update, updateInfo={}}){
         setLoading(true)
         let res = await postInfo(`/updateConcept/${updateInfo.id}`,formInfo);
         console.log(res);
+        popOutAlert();
+        reloadInfo?.();
         setLoading(false);
         setsDisabled(false);
     }
