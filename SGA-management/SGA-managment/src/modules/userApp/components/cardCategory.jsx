@@ -1,13 +1,37 @@
 import { useState } from 'react'
 import './CardCategory.css'
 import { TreeFormNewAccount } from '../containers/forms/TreeFormNewAccount';
-import { useAlert } from '../../../context/context';
+import { useAlert, useAppInfo, useNotifications } from '../../../context/context';
 import { FormNewAccount } from '../containers/forms/FormNewAccount';
+import { postInfo } from '../../../utils/functions';
 
 export function CardCategory({info,hidden,reloadFun}){
 
     const [hiddenFormNewChildren,sethiddenFormNewChildren] = useState(true);
+    const {addNotification} = useNotifications();
     const {popInAlert} = useAlert();
+    const {appInfo} = useAppInfo();
+
+    const deleteAccount = async()=>{
+        let res = await postInfo(`/contability/deleteContableAccount/${info.id}`,{
+            company_id:appInfo.company_id
+        });
+        console.log(res);
+        if(res.status == 'OK'){
+            addNotification({
+                type:'aproved',
+                title:`Cuenta ${info.name} elminada`,
+                description:res.message,
+            })
+            reloadFun?.();
+        }else{
+            addNotification({
+                type:'error',
+                title:`Error al eliminar cuenta ${info.name}`,
+                description:res.message,
+            })
+        }
+    }
 
     return(
         <div className="CardCategory" style={{
@@ -42,7 +66,7 @@ export function CardCategory({info,hidden,reloadFun}){
                     popInAlert(<FormNewAccount reloadFun={reloadFun} update={true} updateInfo={info}/>)
                 }} title={`Editar ${info.code}`} className={`fa-solid fa-pen createChidren`} />
                 <i style={{display:!hiddenFormNewChildren? 'inline':''}} onClick={()=>{
-                    popInAlert(<FormNewAccount eloadFun={reloadFun} update={true} updateInfo={info}/>)
+                    deleteAccount();
                 }} title={`Eliminar ${info.code}`} className={`fa-solid fa-trash-can createChidren`}/>
             </div>
             {!hiddenFormNewChildren && (
