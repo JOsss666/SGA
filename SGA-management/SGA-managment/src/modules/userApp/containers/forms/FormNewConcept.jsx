@@ -84,21 +84,34 @@ export function FormNewConcept({reloadInfo, update, updateInfo={}}){
         setsDisabled(false);
     }
 
+    const updateConcept = async()=>{
+        setsDisabled(true)
+        setLoading(true)
+        let res = await postInfo(`/updateConcept/${updateInfo.id}`,formInfo);
+        console.log(res);
+        setLoading(false);
+        setsDisabled(false);
+    }
+
+    const handleAction = async()=>{
+        if(update){
+            await updateConcept();
+        }else{
+            await createConcept();
+        }
+    }
+
     useEffect(()=>{
         getAccounts();
         console.log(updateInfo)
     },[])
-    
-    useEffect(()=>{
-        console.log('SA: ',selectedAccount)
-    },[selectedAccount])
 
     return(
         <div className="FormNewConcept">
                 <BoldTitle text={`Actualizar "${updateInfo.name}"`}/>
                 <form className="createNewConcept" onSubmit={(e)=>{
                     e.preventDefault();
-                    createConcept();
+                    handleAction();
                 }}>
                     <FormInput disabled={disabled} action={setName} title={'Nombre'} placeholder={'Nombre del nuevo concepto'} value={name}/>
                     <SearchinList disabled={disabled} action={(value)=>{

@@ -1190,6 +1190,112 @@ controller.createConcept = (req, res) => {
     });
 };
 
+controller.updateConcept = (req, res) => {
+    let data = '';
+
+    req.on('data', chunk => {
+        data += chunk.toString();
+    });
+
+    req.on('error', err => {
+        console.error("Error al recibir datos para actualizar el concepto:", err);
+        return res.status(500).json({ error: "Error al leer la petición." });
+    });
+
+    req.on('end', async () => {
+        try {
+            let info = {};
+            if (data) {
+                info = JSON.parse(data);
+            }
+
+            const { id } = req.params; 
+
+            if (!id || Object.keys(info).length === 0) {
+                return res.status(400).json({ 
+                    status: 'Error',
+                    message: "Faltan datos para actualizar o el ID del concepto." 
+                });
+            }
+
+            const [countSuccess, countPrevUses] = await useDataBase(`
+                SELECT COUNT(*)
+                FROM "Ecosystem".transactions
+                WHERE concept_id = $1 AND company_id = $2;
+            `, [id, info.company_id], 7);
+            
+            console.log(`Registros usando este concepto: ${countPrevUses}`);
+
+            if (countPrevUses > 0 && info.account_id) {
+                return res.status(200).json({
+                    status: 'Error',
+                    message: `No puedes modificar la cuenta asociada a este concepto porque ya tiene (${countPrevUses}) transacciones.`,
+                    data: { count: countPrevUses }
+                });
+            }
+
+            const allowedFields = [
+                'account_id', 
+                'status', 
+                'name', 
+                'tag', 
+                'for_wallet', 
+                'for_balance', 
+                'for_cashExit', 
+                'order_index'
+            ];
+
+            const setClauses = [];
+            const values = [];
+            let paramIndex = 1;
+
+            for (const [key, value] of Object.entries(info)) {
+                if (allowedFields.includes(key)) {
+                    // El secreto para que PostgreSQL no rompa con for_cashExit
+                    setClauses.push(`"${key}" = $${paramIndex}`);
+                    values.push(value);
+                    paramIndex++;
+                }
+            }
+
+            if (setClauses.length === 0) {
+                return res.status(400).json({ 
+                    status: 'Error',
+                    message: "Los campos enviados no son válidos." 
+                });
+            }
+
+            values.push(id);
+
+            const updateQuery = `
+                UPDATE "Ecosystem".concepts
+                SET ${setClauses.join(', ')}
+                WHERE id = $${paramIndex}
+                RETURNING *;
+            `;
+
+            const updateResult = await useDataBase(updateQuery, values, 3);
+
+            if (!updateResult) {
+                return res.status(404).json({ 
+                    status: 'Error',
+                    message: "Concepto no encontrado o no se hicieron cambios." 
+                });
+            }
+
+            return res.status(200).json({
+                status: 'OK',
+                message: "Concepto actualizado correctamente.",
+                data: updateResult
+            });
+
+        } catch (error) {
+            console.error("Error interno al actualizar concepto:", error);
+            return res.status(500).json({ error: "Error interno del servidor." });
+        }
+    });
+};
+
 
 controller.getConcepts = (req,res)=>{
     let data = '';

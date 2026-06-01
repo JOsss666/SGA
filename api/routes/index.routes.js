@@ -108,6 +108,8 @@ router.post('/createConcept',controller.createConcept);
 
 router.post('/deleteConcept',controller.deleteConcept);
 
+router.post('/updateConcept/:id',controller.updateConcept);
+
 router.post('/getConcepts',controller.getConcepts);
 
 router.post('/getDocParams',controller.getDocParams);
