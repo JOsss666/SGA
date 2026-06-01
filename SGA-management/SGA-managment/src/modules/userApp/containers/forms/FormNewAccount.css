@@ -1,0 +1,19 @@
+.FormNewAccount{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    margin-top: 4vh;
+    width: 30vw;
+    gap: 2vh;
+}
+
+.FormNewAccount form{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.FormNewAccount .LoadingSpace{
+    height: 70dvh;
+    margin: auto;
+}

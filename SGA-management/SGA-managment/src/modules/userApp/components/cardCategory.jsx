@@ -39,10 +39,10 @@ export function CardCategory({info,hidden,reloadFun}){
                     sethiddenFormNewChildren(!hiddenFormNewChildren);
                 }} title={hiddenFormNewChildren? `Crear subCategoria de ${info.code}`:'Cancelar'} className={`fa-solid fa-${!hiddenFormNewChildren? 'minus':'plus'} createChidren`}/>
                 <i style={{display:!hiddenFormNewChildren? 'inline':''}} onClick={()=>{
-                    popInAlert(<FormNewAccount update={true} updateInfo={info}/>)
+                    popInAlert(<FormNewAccount reloadFun={reloadFun} update={true} updateInfo={info}/>)
                 }} title={`Editar ${info.code}`} className={`fa-solid fa-pen createChidren`} />
                 <i style={{display:!hiddenFormNewChildren? 'inline':''}} onClick={()=>{
-                    popInAlert(<FormNewAccount update={true} updateInfo={info}/>)
+                    popInAlert(<FormNewAccount eloadFun={reloadFun} update={true} updateInfo={info}/>)
                 }} title={`Eliminar ${info.code}`} className={`fa-solid fa-trash-can createChidren`}/>
             </div>
             {!hiddenFormNewChildren && (
