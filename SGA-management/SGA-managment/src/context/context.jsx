@@ -295,6 +295,7 @@ export function AppInfoProvider({children}){
         let data = location.pathname.split('/')
         setLoadingAppData(true);
         let appI = await postInfo('/getCompanyInfo',data[2]);
+        console.log('///: ',appI)
         if(appI[0]){
             setAppInfo(appI[1][0]);
             setAppConfig(appI[1][0].config);

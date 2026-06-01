@@ -228,6 +228,10 @@ router.post('/process/getInstanceHistorial',processController.getInstanceHistori
 
 router.post('/contability/contabiltyController', contabiltyController.getBalance);
 
+router.post('/contability/updateContableAccount/:id', contabiltyController.updateContableAccount);
+
+router.post('/contability/deleteContableAccount/:id',contabiltyController.deleteContableAccount)
+
 
 // SGA treasury
 

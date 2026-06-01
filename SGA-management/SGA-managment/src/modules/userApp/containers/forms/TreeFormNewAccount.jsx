@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FormButton } from '../../components/FormButton'
 import {SelectOptions} from '../../components/SelectOptions'
 import './TreeFormNewAccount.css'
@@ -22,6 +22,10 @@ export function TreeFormNewAccount({fatherInfo,reloadINfo}){
         code:`${fatherInfo.code}${subNacc}`,
         typePlanAccount:appInfo.accountPlanType
     }
+
+    useEffect(()=>{
+        console.log(appInfo)
+    },[appInfo])
 
     const createAccount = async()=>{
         console.log(formInfo)

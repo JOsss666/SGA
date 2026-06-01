@@ -185,5 +185,191 @@ contabiltyController.refreshAccountBalanceMaterializedView = (req,res)=>{
 }
 
 
+contabiltyController.updateContableAccount = (req, res) => {
+    let body = '';
+
+    req.on('data', chunk => {
+        body += chunk.toString();
+    });
+
+    req.on('error', err => {
+        console.error("Error al recibir los datos de la petición:", err);
+        return res.status(500).json({ error: "Error al leer la petición." });
+    });
+
+    req.on('end', async () => {
+        try {
+            const { id } = req.params; 
+            let data = {};
+
+            if (body) {
+                try {
+                    data = JSON.parse(body);
+                } catch (parseError) {
+                    console.error("Error al parsear el JSON manual:", parseError);
+                    return res.status(400).json({ error: "El formato JSON enviado es inválido." });
+                }
+            }
+
+            console.log('--- Datos parseados:', data);
+            if (!id || Object.keys(data).length === 0) {
+                return res.status(400).json({ 
+                    error: "No se enviaron datos para actualizar o falta el ID." 
+                });
+            }
+
+            if (data.code) {
+                const checkQuery = `
+                    SELECT id FROM "Ecosystem".contable_accounts 
+                    WHERE code = $1 AND id != $2 AND company_id = $3;
+                `;
+                const checkResult = await useDataBase(checkQuery, [data.code, id, data.company_id], 1);
+                
+                if (checkResult.rowCount > 0) {
+                    return res.status(409).json({ 
+                        error: "El código ingresado ya existe en otra cuenta contable." 
+                    });
+                }
+            }
+
+            const setClauses = [];
+            const values = [];
+            let paramIndex = 1;
+
+            const allowedFields = ['code', 'name', 'type', 'state'];
+
+            for (const [key, value] of Object.entries(data)) {
+                if (allowedFields.includes(key)) {
+                    setClauses.push(`${key} = $${paramIndex}`);
+                    values.push(value);
+                    paramIndex++;
+                }
+            }
+
+            if (setClauses.length === 0) {
+                return res.status(400).json({ 
+                    error: "Los campos enviados no son válidos para la actualización." 
+                });
+            }
+
+            values.push(id);
+            const updateQuery = `
+                UPDATE "Ecosystem".contable_accounts
+                SET ${setClauses.join(', ')}
+                WHERE id = $${paramIndex}
+                RETURNING *;
+            `;
+
+            const updateResult = await useDataBase(updateQuery, values, 1);
+
+            if (updateResult[0] == false){
+                return res.status(404).json({ 
+                    status:'Error',
+                    message:'Cuenta contable no encontrada.',
+                    data:[] 
+                });
+            }
+
+            return res.status(200).json({
+                status:'OK',
+                message: "Cuenta contable actualizada correctamente.",
+                data: updateResult[1]
+            });
+
+        } catch (error) {
+            console.error("Error al actualizar la cuenta contable:", error);
+            return res.status(500).json({ error: "Error interno del servidor." });
+        }
+    });
+};
+
+contabiltyController.deleteContableAccount = (req, res) => {
+    let data = '';
+
+    req.on('data', chunk => {
+        data += chunk.toString();
+    });
+
+    req.on('error', err => {
+        console.error("Error al recibir datos para eliminar:", err);
+        return res.status(500).json({ error: "Error al leer la petición." });
+    });
+
+    req.on('end', async () => {
+        try {
+            let info = {};
+            if (data) {
+                info = JSON.parse(data);
+            }
+
+            const { id } = req.params; 
+            
+            if (!id) {
+                return res.status(400).json({ error: "No se proporcionó el ID de la cuenta." });
+            }
+
+            const accountQuery = `SELECT code FROM "Ecosystem".contable_accounts WHERE id = $1`;
+            const accountInfo = await useDataBase(accountQuery, [id], 3); 
+            
+            if (!accountInfo) {
+                return res.status(404).json({ error: "La cuenta contable no existe." });
+            }
+            
+            const parentCode = accountInfo.code;
+            const childCountQuery = `
+                SELECT COUNT(*)
+                FROM "Ecosystem".contable_accounts
+                WHERE code LIKE $1 AND id != $2;
+            `;
+            
+            const [childSuccess, childrenCount] = await useDataBase(childCountQuery, [`${parentCode}%`, id], 7);
+            
+            if (childrenCount > 0) {
+                return res.status(200).json({
+                    status: 'Error',
+                    message: `No puedes eliminar esta cuenta porque tiene (${childrenCount}) subcuentas (hijas) asociadas.`,
+                    data: { count: childrenCount }
+                });
+            }
+
+            let prevCountSentence = `
+                SELECT COUNT(*)
+                FROM "Ecosystem".transaction_detail
+                WHERE account_id = $1;
+            `;
+            
+            let prevCountResult = await useDataBase(prevCountSentence, [id], 7);
+            const transaccionesActivas = Number(prevCountResult[1]);
+            console.log('Transacciones asociadas encontradas:', transaccionesActivas);
+
+            if (transaccionesActivas > 0) {
+                return res.status(200).json({
+                    status:'Error',
+                    message:`No puedes eliminar esta cuenta porque ya tiene (${transaccionesActivas}) transacciones asociadas.` ,
+                    data:{count:transaccionesActivas}
+                });
+            }
+
+            const delteTransaction = await useDataBase(`
+                DELETE FROM
+                    "Ecosystem".contable_accounts
+                WHERE
+                    id = $1 ;
+            `,[id],2)
+
+            console.log("Resultado del delete:", delteTransaction);
+
+            return res.status(200).json({ 
+                status:'OK',
+                message: "Cuenta contable eliminada correctamente.",
+                data:[]
+            });
+
+        } catch (error) {
+            console.error("Error en la validación/eliminación:", error);
+            return res.status(500).json({ error: "Error interno del servidor." });
+        }
+    });
+};
 export default contabiltyController;
 
