@@ -77,17 +77,7 @@ export function ConceptCard({info,hidden,reloadFun}){
                             <strong className="account_Concept">{info.code} - {info.account_name}</strong>
                         </div>
                         <div className="textVal">
-                            <span className="topicBody">Metodo de págo</span>
-                            <strong className="account_Concept">{info.paymentMethodName}</strong>
-                        </div>
-                        <div className="taxesHolder">
-                            <span className="topicBody">Impuestos seleccionados</span>
-                            {attachetTaxes.map((element,index)=>(   
-                                <div className="tax" key={index}>
-                                    <span>#{element.code} {element.name}</span>
-                                    <TagIndicator title={`${element.rate}%`}/>
-                                </div>
-                            ))}
+                            <span className="topicBody">{info.description??'--'}</span>
                         </div>
                     </div>
                 )}

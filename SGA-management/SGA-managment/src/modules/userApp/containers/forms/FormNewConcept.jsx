@@ -31,9 +31,9 @@ export function FormNewConcept({reloadInfo, update, updateInfo={}}){
     const [description,setDescription] = useState('');
     const [order_index,setOrderIndex] = useState(null);
     // Type concept control
-        const [for_wallet,setForWallet]= useState(appInfo.for_wallet?? false);
-        const [for_balance,setForBalance]= useState(appInfo.for_balance ?? false);
-        const [for_cashExit,setForCashExit]= useState(appInfo.for_cashExit?? false);
+        const [for_wallet,setForWallet]= useState(updateInfo.for_wallet?? false);
+        const [for_balance,setForBalance]= useState(updateInfo.for_balance ?? false);
+        const [for_cashExit,setForCashExit]= useState(updateInfo.for_cashExit?? false);
 
     const getAccounts = async()=>{
         let res = await postInfo('/getAccountsPlan',{
@@ -89,6 +89,9 @@ export function FormNewConcept({reloadInfo, update, updateInfo={}}){
         console.log(updateInfo)
     },[])
     
+    useEffect(()=>{
+        console.log('SA: ',selectedAccount)
+    },[selectedAccount])
 
     return(
         <div className="FormNewConcept">
@@ -98,20 +101,24 @@ export function FormNewConcept({reloadInfo, update, updateInfo={}}){
                     createConcept();
                 }}>
                     <FormInput disabled={disabled} action={setName} title={'Nombre'} placeholder={'Nombre del nuevo concepto'} value={name}/>
-                    <SearchinList disabled={disabled} action={setSelectedAccount} title={'Cuenta'} list={accounts} placeHolder={'Seleccionar Cuenta'} specialOption={
+                    <SearchinList disabled={disabled} action={(value)=>{
+                        if(value != ""){
+                            setSelectedAccount(value)
+                        }
+                    }} title={'Cuenta'} list={accounts} placeHolder={selectedAccount? `Actual: ${selectedAccount}`:'Seleccionar Cuenta'} specialOption={
                         <NewElementSelect title={'Crear nueva cuenta'} onClick={()=>{popInAlert(<FormNewAccount/>)}}/>
                     }/>
                     <div className="switchContent">
                         <span className="switchLabel">Es para cartera?</span>
-                        <SwitchOption action={setForWallet}/>
+                        <SwitchOption action={setForWallet} defaultValue={for_wallet}/>
                     </div>
                     <div className="switchContent">
                         <span className="switchLabel">Es para anticipos?</span>
-                        <SwitchOption action={setForBalance}/>
+                        <SwitchOption action={setForBalance} defaultValue={for_balance}/>
                     </div>
                     <div className="switchContent">
                         <span className="switchLabel">Es para gastos?</span>
-                        <SwitchOption action={setForCashExit}/>
+                        <SwitchOption action={setForCashExit} defaultValue={for_cashExit}/>
                     </div>
                     <FormButton text={update? `Actuaizar concepto`:'Crear nuevo concepto'} disabled={disabled} loading={loading}/>
                 </form>

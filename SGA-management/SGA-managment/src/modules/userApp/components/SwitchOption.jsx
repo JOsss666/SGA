@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
 import './SwitchOption.css'
 
-export function SwitchOption({state1,state2,action}){
+export function SwitchOption({state1,state2,action,defaultValue}){
 
-    const [switched,setSwitched] = useState(false);
+    const [switched,setSwitched] = useState(defaultValue??false);
 
     useEffect(()=>{
         if(action!= undefined){
