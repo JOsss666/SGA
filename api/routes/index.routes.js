@@ -108,6 +108,8 @@ router.post('/createConcept',controller.createConcept);
 
 router.post('/deleteConcept',controller.deleteConcept);
 
+router.post('/updateConcept/:id',controller.updateConcept);
+
 router.post('/getConcepts',controller.getConcepts);
 
 router.post('/getDocParams',controller.getDocParams);
@@ -227,6 +229,10 @@ router.post('/process/getInstanceHistorial',processController.getInstanceHistori
 // SGA contability
 
 router.post('/contability/contabiltyController', contabiltyController.getBalance);
+
+router.post('/contability/updateContableAccount/:id', contabiltyController.updateContableAccount);
+
+router.post('/contability/deleteContableAccount/:id',contabiltyController.deleteContableAccount)
 
 
 // SGA treasury
