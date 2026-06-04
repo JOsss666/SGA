@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAppInfo } from "../../../context/context";
 import { postInfo } from "../../../utils/functions";
 import { BoldTitle } from "../components/BoldTitle";
@@ -10,6 +11,7 @@ import { ButtonMenu } from "../components/ButtonMenu";
 import { SearchBar } from "../components/SearchBar";
 import { CheckSquare } from "../components/CheckSquare";
 import { SelectOptions } from "../components/SelectOptions";
+import { LoadingSpace } from "./LoadingSpace";
 
 export function AcountsPlan(){
 
@@ -19,12 +21,23 @@ export function AcountsPlan(){
     const [loading,setLoading] = useState(true);
     const [searchAccount,setSeacrhAccount] = useState('');
 
-    const handleHiddElement = (element) => {
-        return searchAccount === '' 
-            ? true 
-            : element.code.startsWith(searchAccount) ||   
-            element.name.toLowerCase().includes(searchAccount.toLowerCase());
-    };
+    const filteredAccounts = useMemo(() => {
+        if (!searchAccount) return accounts;
+        const term = searchAccount.toLowerCase();
+        return accounts.filter((element) =>
+            element.code.startsWith(searchAccount) ||
+            element.name.toLowerCase().includes(term)
+        );
+    }, [accounts, searchAccount]);
+
+    const scrollRef = useRef(null);
+    const virtualizer = useVirtualizer({
+        count: filteredAccounts.length,
+        getScrollElement: () => scrollRef.current,
+        estimateSize: () => 42,
+        overscan: 10,
+        measureElement: (el) => el?.getBoundingClientRect().height ?? 42,
+    });
 
 
     const getAccountsplan = async()=>{
@@ -61,15 +74,32 @@ export function AcountsPlan(){
                             <ButtonMenu title={'Editar información'} children={<i className="fa-solid fa-pencil"/>}/>
                             <ButtonMenu title={'Crear nuevo plan de cuentas'} children={<i className="fa-solid fa-plus"/>}/>
                             <ButtonMenu title={'Eliminar plan de cuentas'} children={<i className="fa-solid fa-trash-can"/>}/>
-                            
+
                         </div>
                     </div>
-                    <div className="accountsContainer">
-                        {accounts.length > 0 && accounts.map((element,index)=>(
-                            <>
-                                <CardCategory reloadFun={getAccountsplan} hidden={!handleHiddElement(element)} info={element} key={index}/>
-                            </>
-                        ))}
+                    <div className="accountsContainer" ref={scrollRef}>
+                        <div style={{ height: virtualizer.getTotalSize(), position: 'relative', width: '100%' }}>
+                            {virtualizer.getVirtualItems().map((virtualItem) => (
+                                <div
+                                    key={virtualItem.key}
+                                    data-index={virtualItem.index}
+                                    ref={virtualizer.measureElement}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        transform: `translateY(${virtualItem.start}px)`,
+                                    }}
+                                >
+                                    <CardCategory
+                                        reloadFun={getAccountsplan}
+                                        hidden={false}
+                                        info={filteredAccounts[virtualItem.index]}
+                                    />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                     <div className="filterAccountPLan">
                         <h4>Busqueda e información de cuentas</h4>
@@ -101,7 +131,7 @@ export function AcountsPlan(){
                     </div>
                 </>
             )}{loading && (
-                <span>Cargando plan de cuentas....</span>
+                <LoadingSpace title={'Cargando plan de cuentas'} description={'Esto puede tardar un poco'}/>
             )}
         </div>
     )

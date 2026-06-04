@@ -135,6 +135,10 @@ const useDataBase = async (sentence, values, typeConsult) => {
 
             case 6: // INSERT RETURNING insertId personalizado
                 return [true, result.rows[0]?.id];
+            case 7: 
+                // PostgreSQL devuelve el COUNT en una columna llamada "count" y en formato String.
+                const conteoStr = result.rows[0]?.count || "0";
+                return [true, parseInt(conteoStr, 10)];
 
             default:
                 throw new Error("Tipo de consulta no válido");
