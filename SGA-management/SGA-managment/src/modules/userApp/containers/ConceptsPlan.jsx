@@ -167,7 +167,7 @@ export function ConceptsPlan(){
                     <div className="conceptsC">
                         {!loading && concepts.map((element,index)=>(
                             <ConceptCard hidden={!handleSearchConcept(element)} info={element} key={index} reloadFun={getConcepts} />
-                        ))}
+                        ))} 
                         {loading && (
                             <LoadingSpace title={'Cargando Conceptos'} description={'Esto no debe tardar mucho...'}/>
                         )}
