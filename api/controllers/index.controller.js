@@ -2051,6 +2051,7 @@ controller.getThirdParties = (req,res)=>{
                 ci.aviable_credit,
                 tti."IVA_responsability",
                 tti.municipality_id,
+                tti.dv,
                 tti.nature AS "thirdParty_nature",
                 tti."identidicationType_id",
                 COALESCE(b.total_debt, 0) AS "thirdParty_totalDebt",

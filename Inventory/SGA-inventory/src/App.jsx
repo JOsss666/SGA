@@ -15,7 +15,7 @@ function App() {
         <div className="appSpace">
           <Router>
                 <Routes>
-                    <Route path="" element={
+                    <Route path="/" element={
                       <AppInfoProvider>
                         <Login/>
                       </AppInfoProvider>

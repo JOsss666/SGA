@@ -307,7 +307,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     index === 0
                         ? { 
                             ...block, 
-                            items: [...block.items, element] // Copia los items actuales y añade el nuevo
+                            items: [...block.items, { ...element, manualPrice: false }] // Copia los items actuales y añade el nuevo
                         }
                         : block // Mantiene los demás bloques sin cambios
                 )
@@ -340,25 +340,53 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             });
         };
 
-        const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
-            setItemBlocks(prev =>
-                prev.map((block, bIdx) => {
-                    if (bIdx !== blockIndex) return block;
+const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
+    setItemBlocks(prev =>
+        prev.map((block, bIdx) => {
 
-                    const updatedItems = block.items.map((item, iIdx) => {
-                        if (iIdx !== itemIndex) return item;
-                        let updatedItem = { ...item, [key]: value };
-                        if (key === 'units') {
-                            const newPrice = getEffectivePrice(item, value);
-                            updatedItem.unit_value = newPrice;
-                        }
-                        return updatedItem;
-                    });
+            if (bIdx !== blockIndex) return block;
 
-                    return { ...block, items: updatedItems };
-                })
-            );
-        };
+            const updatedItems = block.items.map((item, iIdx) => {
+
+                if (iIdx !== itemIndex) return item;
+
+                let updatedValue =
+                    key === 'description'
+                        ? value
+                        : Number(value);
+
+                let updatedItem = {
+                    ...item,
+                    [key]: updatedValue
+                };
+
+                // marcar precio manual
+                if (key === 'unit_value') {
+                    updatedItem.manualPrice = true;
+                }
+
+                if (
+                    key === 'units' &&
+                    !updatedItem.manualPrice
+                ) {
+                    const newPrice = getEffectivePrice(
+                        item,
+                        updatedValue
+                    );
+
+                    updatedItem.unit_value = newPrice;
+                }
+
+                return updatedItem;
+            });
+
+            return {
+                ...block,
+                items: updatedItems
+            };
+        })
+    );
+};
 
     const handleDeleteItem = (blockIndex, itemIndex) => {
         setItemBlocks(prev =>
@@ -1029,9 +1057,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
     },[instance_id])
 
-    useEffect(()=>{
-        calcTotalFromPayments();
-    },[paymentMethod])
 
     useEffect(()=>{
         if(documents.length > 0){
@@ -1056,9 +1081,14 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             });
             setTotalToPay(newTotalToPay)
         }
-        calcTotalFromPayments();
+
     },[documents,briefCaseBills,itemBlocks])
 
+    useEffect(()=>{
+        calcTotalFromPayments();
+    },[paymentMethod,totalToPay]
+    )
+    
     useEffect(()=>{
         if(itemBlocks.length == 0) return;
         let C = [];
