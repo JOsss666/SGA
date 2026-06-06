@@ -1,0 +1,63 @@
+@import '../UserApp.css';
+
+.FormNewPriceList {
+    display: flex;
+    flex-direction: column;
+    width: 30vw;
+    background-color: var(--bg);
+    padding: 2vh;
+    border-radius: 2vh;
+}
+
+.FormNewPriceList .BoldTitle {
+    margin: 4vh auto;
+}
+
+.FormNewPriceList form {
+    display: flex;
+    flex-direction: column;
+    padding: 0 1vh;
+}
+
+.FormNewPriceList form .FormInput,
+.FormNewPriceList form .statusSelectWrapper {
+    margin-bottom: 4.5vh;
+}
+
+.FormNewPriceList form .statusSelectWrapper {
+    display: flex;
+    flex-direction: column;  
+    align-items: flex-start; 
+    gap: 1vh;                
+    width: 100%;
+}
+
+.FormNewPriceList form .statusSelectWrapper .statusLabel {
+    font-size: clamp(2vh, 2.2vh, 22px); /* 22px se mantiene porque es un valor límite, pero puedes cambiarlo a vh si prefieres, ej: 2.5vh */
+    color: var(--descriptionText);
+    font-weight: 500;
+}
+
+.FormNewPriceList form .SelectOptions {
+    width: 27vw;       
+}
+
+.FormNewPriceList form .FormButton {
+    margin: 4vh auto 1vh auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .FormNewPriceList {
+        width: 85vw;
+        padding: 4vh;
+    }
+    .FormNewPriceList form .statusSelectWrapper {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1vh;
+    }
+    .FormNewPriceList form .SelectOptions {
+        width: 100%;
+    }
+}
