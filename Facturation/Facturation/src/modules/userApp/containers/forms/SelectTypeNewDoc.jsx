@@ -12,6 +12,7 @@ import { FormNewClientOrder } from "./FormNewClientOrder";
 import { FormNewCashRecipt } from "./FormNewCashRecipt";
 import { FormSelectMachine } from "../../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormSelectMachine";
 import { FormNewInvoice } from "./FormNewInvoice";
+import { FormNewBudget } from "./FormNewBudget";
 
 export function SelectTpeNewDoc({info,docType,reloadFun}){
     const {userConfig,appInfo,userInfo} = useAppInfo();
@@ -39,6 +40,7 @@ export function SelectTpeNewDoc({info,docType,reloadFun}){
         {title:'Comprobante contable',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_6_uh2t9n.png',alert:<span>No disponible aún</span>},
         {title:'Nota débito',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072386/ChatGPT_Image_17_dic_2025_18_27_41_7_jpbmlq.png',alert:<span>No disponible aún</span>},
         {title:'Nota de crédito',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072386/ChatGPT_Image_17_dic_2025_18_27_41_8_bn5s5o.png',alert:<span>No disponible aún</span>},
+        {title:'Presupuesto',docType:'Budget',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766076220/Cuadricula3Documentos_5_she308.png',alert:<FormNewBudget info={info} reloadFun={endProcess}/>},
         {title:'Saldo inicial',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072387/ChatGPT_Image_17_dic_2025_18_27_41_11_xywpmt.png',alert:<span>No disponible aún</span>},
         {title:'Recibo de precio',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_2_vkujiv.png',alert:<span>No disponible aún</span>},
         {title:'Recibo de precio',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1766072385/ChatGPT_Image_17_dic_2025_18_27_41_2_vkujiv.png',alert:<span>No disponible aún</span>},
