@@ -246,7 +246,7 @@ electronicFacturationController.newInvoice = (req,res)=>{
         "payment_method_code": info.document.paymentMethod_code,
         "customer": {
             "identification": info.customer.indentification_number,
-            "dv": "3",
+            "dv": `${info.customer.dv}` ?? "3",
             "company": `${info.customer.names} ${info.customer.lastNames}`,
             "trade_name": info.customer.names,
             "names": info.customer.names,
@@ -256,7 +256,7 @@ electronicFacturationController.newInvoice = (req,res)=>{
             "phone": info.customer.phone,
             "legal_organization_id": info.customer.thirdParty_nature,
             "tribute_id": info.customer.IVA_responsability ?? '18',
-            "identification_document_id": "3",
+            "identification_document_id": info.customer.identidicationType_id,
             "municipality_id": info.customer.municipality_id?? 149
         },
         /*"items": [
@@ -294,7 +294,52 @@ electronicFacturationController.newInvoice = (req,res)=>{
         },
         body: JSON.stringify(params)
     });
-    const resInvoice = await response.json();
+    let resInvoice = await response.json();
+
+    if (!response.ok && (resInvoice.message?.includes('pendiente') || response.status === 409)) {
+        let pendingReference = resInvoice.reference_code;
+
+        if (!pendingReference) {
+            // Search for invoice pending of validation
+            console.log('Buscando factura pendiente... ',pendingReference)
+            const pendingRes = await fetch(urlSer + '/v1/bills?state=pending', {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${auth.access_token}`, 'Accept': 'application/json' }
+            });
+            const pendingData = await pendingRes.json();
+            pendingReference = pendingData?.data?.data?.[0]?.reference_code;
+        }
+
+        if (pendingReference) {
+
+            // CASE FOR INVOICE PENDING OF VALIDATION BLOKING THE CHANNEL
+
+            console.log('Eliminado factura... ',pendingReference)
+            const deleteRes = await fetch(urlSer + `/v1/bills/destroy/reference/${pendingReference}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${auth.access_token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (deleteRes.ok) {
+                console.log(' Canal liberado exitosamente. Reintentando validación de la factura actual...');
+                let newResponse = await fetch(urlSer + '/v1/bills/validate', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${auth.access_token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(params)
+                });
+                resInvoice = await newResponse.json();
+            }
+        }
+
+    }
+
     if(resInvoice.status == 'Created'){
         let data = resInvoice.data
         let insertRes = await electronicFacturationController.registerEFactDocument({
@@ -378,17 +423,17 @@ electronicFacturationController.newNote = (req,res)=>{
         "payment_method_code": "10",
         "customer": {
             "identification": info.customer.indentification_number,
-            "dv": "3",
+            "dv": `${info.customer.dv}` ?? "3",
             "company": `${info.customer.names} ${info.customer.lastNames}`,
             "trade_name": info.customer.names,
             "names": info.customer.names,
             "address": info.customer.address,
             "email": info.customer.mail,
             "phone": info.customer.phone,
-            "legal_organization_id": "2",
-            "tribute_id": "21",
-            "identification_document_id": "3",
-            "municipality_id": 169
+            "legal_organization_id": info.customer.thirdParty_nature,
+            "tribute_id": info.customer.IVA_responsability ?? '18',
+            "identification_document_id": info.customer.identidicationType_id,
+            "municipality_id": info.customer.municipality_id?? 149
         },
         "items":info.items
     }
@@ -595,6 +640,27 @@ electronicFacturationController.downloadBillXML = (req,res)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
+}
+
+// Función auxiliar interna para limpiar el bache en Factus
+async function deletePendingBillInternal(company_id, reference_code) {
+    try {
+        const auth = await electronicFacturationController.getAuthToken();
+        console.log(`🧹 Limpiando factura pendiente con referencia: ${reference_code}`);
+        const response = await fetch(`https://api-sandbox.factus.com.co/v1/bills/destroy/reference/${reference_code}`, {
+            method: 'DELETE', 
+            headers: {
+                'Authorization': `Bearer ${auth.access_token}`,
+                'Accept': 'application/json'
+            }
+        });
+
+        const resData = await response.json();
+        console.log('Respuesta de eliminación en Factus:', resData);
+        return response.ok;
+    } catch (error) {
+        return false;
+    }
 }
 
 // Función para inicializar servicios al arrancar el servidor
