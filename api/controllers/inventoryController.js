@@ -458,36 +458,66 @@ inventoryController.getCellars = (req,res)=>{
     })
 }
 
-inventoryController.createPriceList = (req,res)=>{
+inventoryController.createPriceList = (req, res) => {
     let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            INSERT INTO "Inventory".prices_lists(
-                   company_id, name, description, valid_from, valid_until, status, currency, allowed_stores)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-        `
-        let consulta = await useDataBase(sentence,[
-            info.company_id,
-            info.name,
-            info.description,
-            info.valid_from,
-            info.valid_until,
-            info.status ?? 'active',
-            info.currency,
-            info.allowedStores
-        ],2);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-        req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
+    req.on('data', chunk => { data += chunk; });
+    req.on('end', async () => {
+        try {
+            const info = JSON.parse(data);
+            const name = info.list_name || info.name;
+            const description = info.list_description || info.description;
+            const status = info.status || 'active';
+
+            // ✅ Consulta corregida para PostgreSQL
+            const sentence = `
+                INSERT INTO "Inventory".prices_lists (company_id, name, description, status)
+                VALUES ($1, $2, $3, $4)
+                RETURNING id;
+            `;
+            const values = [info.company_id, name, description, status];
+            const result = await useDataBase(sentence, values, 3);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify([true, result]));
+        } catch (error) {
+            console.error('Error en createPriceList:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify([false, { message: error.message }]));
+        }
+    });
+    req.on('error', (err) => {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify([false, { message: err.message }]));
+    });
+};
+
+// Obtener todas las listas de precios de una compañía (sin filtrar por tienda)
+inventoryController.getAllLists = (req, res) => {
+    let data = '';
+    req.on('data', chunk => { data += chunk; });
+    req.on('end', async () => {
+        try {
+            const info = JSON.parse(data);
+            const sentence = `
+                SELECT id, name, description, status, created_at, updated_at
+                FROM "Inventory".prices_lists
+                WHERE company_id = $1
+                ORDER BY name
+            `;
+            const consulta = await useDataBase(sentence, [info.company_id], 1);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(consulta));
+        } catch (error) {
+            console.error('Error en getAllLists:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify([false, { message: error.message }]));
+        }
+    });
+    req.on('error', (err) => {
+        console.error('Request error:', err);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify([false, { message: err.message }]));
+    });
+};
 
 
 inventoryController.getPricesList = (req, res) => {
@@ -557,29 +587,29 @@ inventoryController.getPricesList = (req, res) => {
 };
 
 /* ELEMINAR LISTA DE PRECIOS */
-inventoryController.deletePriceList = (req,res)=>{
+inventoryController.deletePriceList = (req, res) => {
     let data = '';
-    req.on('data',chunk=>{
-        data += chunk;
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        const idListsArray = info.lists.map(() => "?").join(",");
-        let sentence = `
-                DELETE FROM "Inventory".pricesList
-                WHERE id IN (${idListsArray});
-            `;
-        let consulta = await useDataBase(sentence,[
-            info.lists
-        ],2);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
-}
+    req.on('data', chunk => { data += chunk; });
+    req.on('end', async () => {
+        try {
+            const info = JSON.parse(data);
+            // Genera placeholders: $1, $2, ... según la cantidad de IDs
+            const placeholders = info.lists.map((_, i) => `$${i+1}`).join(',');
+            const sentence = `DELETE FROM "Inventory".prices_lists WHERE id IN (${placeholders})`;
+            const consulta = await useDataBase(sentence, info.lists, 2);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify([true, consulta]));
+        } catch (error) {
+            console.error(error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify([false, { message: error.message }]));
+        }
+    });
+    req.on('error', (err) => {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify([false, { message: err.message }]));
+    });
+};
 
 
 
