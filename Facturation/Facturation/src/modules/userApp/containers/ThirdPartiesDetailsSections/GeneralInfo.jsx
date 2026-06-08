@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormInput } from "../../components/FormInput";
 import { SelectOptions } from "../../components/SelectOptions";
 import { FormButton } from "../../components/FormButton";
@@ -61,6 +61,11 @@ export function GeneralInfo({info,reloadFun}){
         setDisabled(false);
     }
 
+
+    useEffect(()=>{
+        console.log("Data tercero: ",info)
+    },[info])
+
     return(
         <div className="GeneralInfo">
             <form action="" onSubmit={(e)=>{
@@ -73,11 +78,11 @@ export function GeneralInfo({info,reloadFun}){
                 <FormInput action={setSecond_surname} value={second_surname} title={'Segundo Apellido'} placeholder={'Segundo Apellido'} disabled={disabled}/>
                 <div className="SelOp">
                     <h6>Relación comercial</h6>
-                    <SelectOptions disabled={disabled} defaultValue={type} action={setType} options={['client','supplier','employee','contractor','partner','other']} value={type}/>
+                    <SelectOptions disabled={disabled} defaultValue={{value:info.type}} action={setType} options={['client','supplier','employee','contractor','partner','other']} value={type}/>
                 </div>
                 <div className="SelOp">
                     <h6>Tipo de documento</h6>
-                    <SelectOptions disabled={disabled} defaultValue={indentification_type} action={setIndentification_type} options={['CC','NIT','CE','PAS']} value={indentification_type}/>
+                    <SelectOptions disabled={disabled} defaultValue={{text:'NIT',value:info.indentification_type}} action={setIndentification_type} options={['CC','NIT','CE','PAS']} value={indentification_type}/>
                 </div>
                 <FormInput action={setIndentification_number} title={'Número de documento'} placeholder={'132...'} disabled={disabled} type={'number'} value={indentification_number}/>
                 <FormInput action={setmail} title={'Correo electronico'} placeholder={'...@gmail.com'} disabled={disabled} type={'mail'} value={mail}/>
