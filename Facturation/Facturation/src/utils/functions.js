@@ -629,6 +629,13 @@ export async function showAPITaxes() {
 }
 
 
+export function getTextFromValue(value,list) {
+    console.log('Val: ',value);
+    console.log('LIST: ',list)
+    const result = list.find(element => element.value == value);
+    return result ? result.text : undefined;
+}
+
 
 
 

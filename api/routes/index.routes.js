@@ -156,6 +156,8 @@ router.post('/inventory/getCellars',inventoryController.getCellars);
 
 router.post('/inventory/createPriceList',inventoryController.createPriceList);
 
+router.post('/getAllPriceLists', inventoryController.getAllLists);
+
 router.post('/inventory/getPricesList',inventoryController.getPricesList);
 
 router.post('/inventory/deletePriceList',inventoryController.deletePriceList);
