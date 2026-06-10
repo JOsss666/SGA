@@ -1,5 +1,6 @@
-
 import { useDataBase } from "../app.js";
+import {utilsController} from './utilsController.js'
+
 const treasuryController = {};
 
 treasuryController.getThirdPartyPortfolio = (req,res)=>{
@@ -200,6 +201,25 @@ treasuryController.newPaymentOfBriefCase = async(info,element,doc_id)=>{
 
 treasuryController.refreshThirdPartyBalance = async()=>{
     await useDataBase('REFRESH MATERIALIZED VIEW CONCURRENTLY "Ecosystem".mv_thirdparty_account_balances;',[],2);
+}
+
+
+treasuryController.purchase = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        const document = await utilsController.registerDocument(info)
+    })
+}
+
+treasuryController.accountPayable = async()=>{
+    let info = "";
+    let sentence = `
+        
+    `;
 }
 
 export default treasuryController;
