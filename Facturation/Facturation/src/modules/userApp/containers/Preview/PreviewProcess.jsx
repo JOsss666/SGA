@@ -44,7 +44,26 @@ export function PreviewProcess({id}){
             setProcessInfo(res[1][0])
         }
     }
-
+    const getElectronicInvoices = async(docsArray) => {
+        let updatedDocs = [...docsArray];
+        for(const doc of docsArray){
+            let res = await postInfo('/electronicFacturation/getDocuments',{
+                company_id: appInfo.company_id,
+                doc_id: doc.id
+            });
+            if(res[0] && res[1]?.length > 0){
+                const invoice = res[1][0];
+                updatedDocs.push({
+                    id: invoice.id,
+                    document_type: `Factura de venta electrónica`,
+                    ownSerial: invoice.number,
+                    created_at: invoice.created_at,
+                    electronicData: invoice
+                });
+            }
+        }
+        setAttachedDocuments(updatedDocs);
+    }
     const getAttachedDocuments = async()=>{
         setDisabled(true)
         setLoadingDocuments(true)
@@ -55,14 +74,13 @@ export function PreviewProcess({id}){
         })
         console.log(res)
         if(res[0]){
-            setAttachedDocuments(res[1])
+            await getElectronicInvoices(res[1])
         }else(
             setAttachedDocuments([])
         )
         setDisabled(false)
         setLoadingDocuments(false)
     }
-
     const getInstanceInfo = async()=>{
         setDisabled(true);
         setLoading(true);
@@ -228,7 +246,11 @@ export function PreviewProcess({id}){
                     <div className="gridAttDocs">
                         {attachedDocuments.map((element,index)=>(
                             <div className={`attDocCard`} key={index} onClick={()=>{
-                                window.open(`https://facturation.sga360.co/preview/Document/${params.company_key}/${element.id}`,'_blank','noopener,noreferrer')
+                            if(element.electronicData){  
+                                window.open(element.electronicData.url,'_blank')
+                                return;
+                            }   
+                                window.open(`https://facturation.sga360.co/documentPreview/${appInfo.company_key}/${element.id}`,'_blank')
                             }}>
                                 <i className="fa-solid fa-file-image fileIcon"/>
                                 <strong className="fileName">

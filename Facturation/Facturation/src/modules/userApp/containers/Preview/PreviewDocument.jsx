@@ -65,8 +65,8 @@ export function PreviewDocument({doc_id}){
         "video/quicktime": <i className="fa-solid fa-photo-film fileIcon"/>,
         "audio/mpeg":<i className="fa-solid fa-file-audio fileIcon"/>,
         "audio/wav": <i className="fa-solid fa-file-audio fileIcon"/>,
-        "application/json": <i className="fa-solid fa-code fileIcon"/>,
-        "electronic invoice": <i className="fa-solid fa-receipt fileIcon"/>}
+        "application/json": <i className="fa-solid fa-code fileIcon"/>
+    };
 
     const dictionaryDocTypes = {
         "Sell Invoice": "Factura de Venta",
@@ -137,10 +137,9 @@ export function PreviewDocument({doc_id}){
         })
         console.log(res);
         if(res[0]){
-        getElectronicInvoice([...res[1]]);
-        } else {
-            getElectronicInvoice([]);
-        }}
+            setAttachedFiles(res[1]);
+        }
+    }
 
     const getAttachedTransactions = async(paymentMethod_id)=>{
         setLoading(true);
@@ -165,29 +164,6 @@ export function PreviewDocument({doc_id}){
             setAttacedServices(res[1])
         }
     }
-
-    const getElectronicInvoice = async(attachedFilesArray = [])=>{
-    let res = await postInfo('/electronicFacturation/getDocuments',{
-        company_id: appInfo.company_id,
-        doc_id: docInfo.id
-    });
-
-    if(res[0] && res[1]?.length > 0){
-
-        const invoice = res[1][0];
-
-        attachedFilesArray.push({
-            id: invoice.id,
-            name: `Factura de venta electrónica ${invoice.number}`,
-            type: 'electronic invoice',
-            size: 0,
-            created_at: invoice.created_at,
-            electronicData: invoice
-        });
-    }
-
-    setAttachedFiles(attachedFilesArray);
-}
 /*
     useEffect(() => {
         const root = document.documentElement; // <html>
@@ -220,10 +196,10 @@ export function PreviewDocument({doc_id}){
                 getAttachedDodcs(attArray)
             }
         }
-        },[docInfo])
+    },[docInfo])
 
-        return(
-            <div className="PreviewDocument">
+    return(
+        <div className="PreviewDocument">
             {!loading && (
                 <>
                     <div className="titleDocContainer">
@@ -288,12 +264,7 @@ export function PreviewDocument({doc_id}){
                         <div className="attachedDocumentsGrid">
                             {attachedFiles.map((element,index)=>(
                                 <div className="attDocCard" key={index} onClick={()=>{
-                                    console.log('type',element.type);
-                                    if(element.type === 'electronic invoice'){
-                                        window.open(element.electronicData.url,'_blank');
-                                        return;
-                                    }
-                                    popInAlert(<PreviewFile id={element.id}/>)                                                          
+                                    popInAlert(<PreviewFile id={element.id}/>)
                                 }}>
                                     {iconDocsContainer[`${element.type}`]}
                                     <strong className="fileName">{element.name}</strong>
