@@ -164,6 +164,28 @@ export function PreviewDocument({doc_id}){
             setAttacedServices(res[1])
         }
     }
+
+
+const getSellInvoiceServices = async(instance_id)=>{
+    let res = await postInfo('/getDocuments',{
+        company_id:appInfo.company_id,
+        instance_id,
+        allowedTypes:['Client Order']
+    });
+
+    if(!res[0] || res[1].length === 0) return;
+
+    const clientOrder = res[1][0];
+
+    let services = await postInfo('/getServiceMovements',{
+        company_id:appInfo.company_id,
+        doc_id: clientOrder.id
+    });
+
+    if(services[0]){
+        setAttacedServices(services[1]);
+    }
+}
 /*
     useEffect(() => {
         const root = document.documentElement; // <html>
@@ -183,8 +205,15 @@ export function PreviewDocument({doc_id}){
         if(docInfo.id != undefined){
             getThirdParties();
             switch(docInfo.document_type){
-                case "Cash Recipt": getAttachedTransactions();
-                case "Client Order": getAttachedServices();;
+                case "Cash Recipt": 
+                getAttachedTransactions();
+                break;
+                case "Client Order": 
+                getAttachedServices();
+                break;
+                case "Sell Invoice":
+                getSellInvoiceServices(docInfo.instance_id);
+                break;
             }
             let attArray = []
             let docsAtt = JSON.parse(typeof(JSON.parse(docInfo.attached)) == "object"? docInfo.attached:"[]");
@@ -209,27 +238,65 @@ export function PreviewDocument({doc_id}){
                     <div className="thirdPartyAndCompanyInfo">
                         <UserCard name={thirdParyInfo.names} desc={thirdParyInfo.type} imgSrc={thirdParyInfo.img? thirdParyInfo.img:'https://i.pinimg.com/736x/55/62/fb/5562fb835d1de1ea974bdf0039726208.jpg'}/>
                     </div>
+                    {docInfo.description && (
                     <DescriptionSpan text={`Descripción: ${docInfo.description}`}/>
+                    )}
                     {docInfo.document_type == 'Client Order' && (
                         <div className="detailsDocument">
                             {attachedServices.length > 0 && attachedServices.map((element,index)=>(
+                        <div className="serviceDescriptionCard" key={index}>
+                            <UserCard
+                                imgSrc={element.service_img}
+                                name={element.service_name}
+                                desc={element.service_type}
+                            />
+
+                        <div className="jobDesc">
+                                <span>Unidades</span>
+                            <strong>{element.units}</strong>
+                        </div>
+
+                        <div className="jobDesc">
+                            <span>Descripción</span>
+                            <strong>{element.description}</strong>
+                        </div>
+
+                        <div className="jobDesc">
+                            <span>Fecha</span>
+                        <strong>{(element.created_at).substring(0,10)}</strong>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+                    {docInfo.document_type == 'Sell Invoice' && (
+                        <div className="detailsDocument">
+                            {attachedServices.map((element,index)=>(
                                 <div className="serviceDescriptionCard" key={index}>
                                     <UserCard imgSrc={element.service_img} name={element.service_name} desc={element.service_type}/>
+
                                     <div className="jobDesc">
                                         <span>Unidades</span>
                                         <strong>{element.units}</strong>
                                     </div>
+
                                     <div className="jobDesc">
                                         <span>Descripción</span>
                                         <strong>{element.description}</strong>
                                     </div>
+
                                     <div className="jobDesc">
-                                        <span>Fecha</span>
-                                        <strong>{(element.created_at).substring(0,10)}</strong>
-                                    </div>
-                                </div>
-                            ))}
+                                        <span>Total</span>
+                                        <strong>
+                            ${Number(element.total).toLocaleString('es-CO', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            })}
+                                </strong>
+                            </div>
                         </div>
+                        ))}
+                    </div>
                     )}
  
                     {docInfo.document_type == 'Cash Recipt' && attachedTransactions.length > 0 && (

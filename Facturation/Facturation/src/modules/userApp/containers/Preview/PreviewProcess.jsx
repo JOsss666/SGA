@@ -15,6 +15,7 @@ export function PreviewProcess({id}){
     const params = useParams();
     const instance_id = id? id:params.instance_id;
     const [info,setInfo] = useState({});
+    const [docInfo,setDocInfo] = useState({});
     const [processInfo,setProcessInfo] = useState({});
     const [attachedDocuments,setAttachedDocuments] = useState([]);
 
@@ -39,12 +40,53 @@ export function PreviewProcess({id}){
             company_id:appInfo.company_id,
             id:instance_id
         });
-        console.log('--- ',res)
         if(res[0]){
             setProcessInfo(res[1][0])
         }
     }
+const getElectronicInvoices = async(docsArray) => {
 
+    const invoiceRes = await postInfo('/getDocuments',{
+        company_id: appInfo.company_id,
+        instance_id: instance_id,
+        allowedTypes:['Sell Invoice']
+    });
+
+    if(!invoiceRes[0] || !invoiceRes[1]?.length){
+        setAttachedDocuments(docsArray);
+        return;
+    }
+
+    const sellInvoice = invoiceRes[1][0];
+
+    const electronicRes = await postInfo(
+        '/electronicFacturation/getDocuments',
+        {
+            company_id: appInfo.company_id,
+            doc_id: sellInvoice.id
+        }
+    );
+
+    if(!electronicRes[0] || !electronicRes[1]?.length){
+        setAttachedDocuments(docsArray);
+        return;
+    }
+
+    const invoice = electronicRes[1][0];
+
+    console.log("URL FACTURA:", invoice.url);
+
+    setAttachedDocuments([
+        ...docsArray,
+        {
+            id: invoice.id,
+            document_type: 'Factura de venta electrónica',
+            ownSerial: invoice.number,
+            created_at: invoice.created_at,
+            electronicData: invoice
+        }
+    ]);
+};
     const getAttachedDocuments = async()=>{
         setDisabled(true)
         setLoadingDocuments(true)
@@ -55,14 +97,13 @@ export function PreviewProcess({id}){
         })
         console.log(res)
         if(res[0]){
-            setAttachedDocuments(res[1])
+            await getElectronicInvoices(res[1])
         }else(
             setAttachedDocuments([])
         )
         setDisabled(false)
         setLoadingDocuments(false)
     }
-
     const getInstanceInfo = async()=>{
         setDisabled(true);
         setLoading(true);
@@ -226,18 +267,37 @@ export function PreviewProcess({id}){
                         <h5>Documentos Adjuntos</h5>
                     </div>
                     <div className="gridAttDocs">
-                        {attachedDocuments.map((element,index)=>(
-                            <div className={`attDocCard`} key={index} onClick={()=>{
-                                window.open(`https://facturation.sga360.co/preview/Document/${params.company_key}/${element.id}`,'_blank','noopener,noreferrer')
-                            }}>
-                                <i className="fa-solid fa-file-image fileIcon"/>
-                                <strong className="fileName">
-                                    {`${element.document_type}#${element.ownSerial}`}
-                                </strong>
-                                <span>{(element.created_at).substring(0,10)}</span>
-                            </div>
-                        ))}
-                    </div>
+    {attachedDocuments.map((element, index) => (
+        <div className={`attDocCard ${element.electronicData ? 'electronicCard' : ''}`} key={index} 
+            onClick={() => {
+                if (element.electronicData) {
+                    window.open(element.electronicData.url, '_blank')
+                    return;
+                }
+                window.open(`https://facturation.sga360.co/documentPreview/${appInfo.company_key}/${element.id}`, '_blank')
+            }}>
+            
+            {element.electronicData 
+                ? <i className="fa-solid fa-file-invoice fileIcon"/>
+                : <i className="fa-solid fa-file-image fileIcon"/>
+            }
+            
+            <div className="cardDocInfo">
+                <strong className="fileName">
+                    {`${element.document_type} #${element.ownSerial}`}
+                </strong>
+                <span>{(element.created_at).substring(0, 10)}</span>
+            </div>
+
+            {element.electronicData && (
+                <div className="electronicBadge">
+                    <i className="fa-solid fa-bolt"/>
+                    <span>Electrónica</span>
+                </div>
+            )}
+        </div>
+    ))}
+</div>
                     <button className="shareProcess" onClick={()=>{
                         handleShare({
                             title:`${processInfo.process_name}#${processInfo.ownSerial}`,
