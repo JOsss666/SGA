@@ -3,11 +3,20 @@
 .TableReport{
     max-height: 100%;
     height: fit-content;
-    width: fit-content;
+    width: 100%;
     display: flex;
     flex-direction: column;
     position: relative;
     padding: .1vh;
+    overflow: hidden;
+}
+
+.TableReport .scrollContainerX {
+    width: 100%;
+    overflow-x: auto;        /* solo scroll horizontal */
+    overflow-y: hidden;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 1vh;
 }
 
 .TableReport .headTable{
@@ -19,7 +28,8 @@
     outline: solid .1vh var(--inputsBorder);
     z-index: 2;
     transition: .3s;
-    width: 100%;
+    width: fit-content;     
+    min-width: 100%;
     position: sticky;
     top: 0;
 }
@@ -32,6 +42,7 @@
     border-bottom: none;
     border-radius: .5vh .5vh 0 0;
     width: fit-content;
+    min-width: 100%;
     transition: .3s;
     position: sticky;
     top: 0;
@@ -74,6 +85,7 @@
 .TableReport .bodyTable{
     height: 50vh;
     overflow-y: auto;
+    overflow-x: hidden;
     position: relative;
 }
 
