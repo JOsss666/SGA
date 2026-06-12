@@ -1636,7 +1636,7 @@ controller.createTransaction = (req,res)=>{
                 }
                 console.log('---> ',element);
                 if(element.for_wallet == true){
-                    let insertForWallet = await treasuryController.newAccountReceivable(info,element)
+                    let insertForWallet = await treasuryController.newPendingAccount(info,element)
                     console.log('Estado creacion cartera: ',insertForWallet);
                 }
                 if(element.for_balance){

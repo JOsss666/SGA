@@ -110,7 +110,7 @@ treasuryController.getThirdPartyPortfolio = (req,res)=>{
     })
 }
 
-treasuryController.newAccountReceivable = async(info,element)=>{
+treasuryController.newPendingAccount = async(info,element)=>{
     let res = {}
     let senInsBreafcase = `
         INSERT INTO "Treasury".accounts_receivable(
@@ -213,13 +213,6 @@ treasuryController.purchase = (req,res)=>{
         let info = JSON.parse(data);
         const document = await utilsController.registerDocument(info)
     })
-}
-
-treasuryController.accountPayable = async()=>{
-    let info = "";
-    let sentence = `
-        
-    `;
 }
 
 export default treasuryController;
