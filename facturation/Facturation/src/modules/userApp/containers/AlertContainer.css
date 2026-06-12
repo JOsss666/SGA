@@ -1,0 +1,54 @@
+@import './UserApp.css';
+
+.AlertContainer{
+    height: inherit;
+    padding: 1vh;
+    width: fit-content;
+    position: relative;
+    box-shadow: 0 -.2vh 1vh #0002;
+    overflow: auto;
+    animation-name: appearAlert;
+    animation-duration:1s;
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+    width: 100%;
+    background-color: var(--bg);
+    z-index: 30;
+}
+
+:root.dark .AlertContainer{
+    background-color: var(--menuAside);
+}
+
+.AlertContainer .optionsAlert{
+    position: absolute;
+    padding: 1vh;
+    top: 2vh;
+    right: 2vh;
+}
+
+.AlertContainer .optionsAlert i{
+    cursor: pointer;
+    font-size: clamp(3.5px,3vh,350px);
+    color: var(--mainText);
+}
+
+@keyframes appearAlert {
+    0%{
+        top: 100%;
+    }
+
+    100%{
+        top: 0;
+    }
+}
+
+@media (max-width:500px) {
+    .AlertContainer{
+        padding: 0;
+    }
+
+    .AlertContainer .optionsAlert{
+        padding: 0;
+    }
+}

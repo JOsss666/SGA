@@ -1,0 +1,114 @@
+
+.LoadingAppDataPage{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background-color: var(--bg);
+}
+
+.LoadingAppDataPage img{
+    height: 40vh;
+    object-fit: cover;
+    padding: 1vh;
+    margin: auto;
+    margin-bottom: 0;
+}
+
+.LoadingAppDataPage .searchServiceAnimal{
+    padding: 1vh 2vh;
+    border-radius: 1vh;
+    width: fit-content;
+    margin: 1vh auto;
+    cursor: pointer;
+}
+
+.LoadingAppDataPage .searchServiceAnimal span{
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 400;
+    color: var(--descriptionText);
+    transition: .3s;
+}
+
+.LoadingAppDataPage .searchServiceAnimal span:hover{
+    color: #ED6AFF;
+}
+
+.LoadingAppDataPage .searchServiceAnimal span i{
+    margin-left: 1vh;
+}
+
+.LoadingAppDataPage .loadingDotsA{
+    display: flex;
+    padding: 1vh;
+    margin: 2vh auto;
+    margin-top: 6vh;
+}
+
+.LoadingAppDataPage .loadingDotsA .loadingDot{
+    height: 1vh;
+    width: 1vh;
+    border-radius: 100%;
+    background-color: #FDA5D5;
+    margin: auto 1vh;
+    position: relative;
+    animation-name: dotLoading;
+    animation-timing-function: ease;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    animation-duration: 2s;
+}
+
+.LoadingAppDataPage .loadingDotsA .loadingDot:nth-child(2){animation-delay: .1s;}
+.LoadingAppDataPage .loadingDotsA .loadingDot:nth-child(3){animation-delay: .2s;}
+.LoadingAppDataPage .loadingDotsA .loadingDot:nth-child(4){animation-delay: .3s;}
+.LoadingAppDataPage .loadingDotsA .loadingDot:nth-child(5){animation-delay: .4s;}
+.LoadingAppDataPage .loadingDotsA .loadingDot:nth-child(6){animation-delay: .5s;}
+.LoadingAppDataPage .loadingDotsA .loadingDot:nth-child(7){animation-delay: .6s;}
+.LoadingAppDataPage .loadingDotsA .loadingDot:nth-child(8){animation-delay: .7s;}
+
+
+.LoadingAppDataPage h6{
+    margin: 1vh auto;
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 400;
+    color: #000;
+    color: #838383;
+}
+
+.LoadingAppDataPage strong{
+    margin: auto;
+    margin-top: 8vh;
+    font-weight: 400;
+    color: #838383;
+    font-size: clamp(3px,3vh,30px);
+
+}
+
+@keyframes dotLoading {
+    0%{
+        bottom: 0;
+        background-color: #ED6AFF;
+    }
+
+    60%{
+        bottom: 4vh;
+        background-color: #F4A8FF;
+    }
+
+    90%{
+        bottom: 0;
+        background-color: #FDF4FF;
+    }
+}
+
+@media (max-width:500px) {
+    .LoadingAppDataPage{
+        width: 100%;
+        margin: auto;
+    }
+
+    .LoadingAppDataPage img{
+        height: 20vh;
+    }
+}

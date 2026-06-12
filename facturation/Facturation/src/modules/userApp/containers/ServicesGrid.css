@@ -1,0 +1,96 @@
+
+@import '../containers/UserApp.css';
+
+.ServicesGrid{
+    display: flex;
+    background-color: var(--translucidMenu);
+    backdrop-filter: blur(2vh);
+    border-radius: 2vh;
+    outline: solid .1vh var(--inputsBorder);
+    max-width: 25vw;
+    height: fit-content;
+    flex-wrap: wrap;
+    padding: 1vh;
+    z-index: 3;
+    animation-name: appearServices;
+    animation-duration: .3s;
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+    box-shadow: 0 .2vh 1vh #4473;
+    transition: .3s;
+}
+
+.ServicesGrid .serviceBubble{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+    margin: 1vh;
+    cursor: pointer;
+    height: fit-content;
+    border-radius: 2vh;
+    padding: 1vh;
+    width: 6.5vw;
+    transition: .3s;
+    animation-name: appearServicesBubble;
+    animation-duration: .3s;
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+}
+
+.ServicesGrid .serviceBubble:nth-child(1){animation-delay: .2s;}
+.ServicesGrid .serviceBubble:nth-child(2){animation-delay: .25s;}
+.ServicesGrid .serviceBubble:nth-child(3){animation-delay: .3s;}
+.ServicesGrid .serviceBubble:nth-child(4){animation-delay: .35s;}
+.ServicesGrid .serviceBubble:nth-child(5){animation-delay: .4s;}
+.ServicesGrid .serviceBubble:nth-child(6){animation-delay: .45s;}
+.ServicesGrid .serviceBubble:nth-child(7){animation-delay: .5s;}
+.ServicesGrid .serviceBubble:nth-child(8){animation-delay: .55s;}
+
+
+
+.ServicesGrid .serviceBubble:hover{
+    background-color: var(--cardHover);
+}
+
+.ServicesGrid .serviceBubble img{
+    height: 7vh;
+    width: 7vh;
+    border-radius: 100%;
+    object-fit: cover;
+    outline: solid .1vh #ddd;
+    margin: 0 auto;
+    transition: .3s;
+    background-color: #fff;
+}
+
+.ServicesGrid .serviceBubble span{
+    margin: 0 auto;
+    margin-top: 1.5vh;
+    font-size: clamp(2.2px,2vh,22px);
+    color: var(--sectionTitle);
+    font-weight: 400;
+}
+
+@keyframes appearServices {
+    0%{
+        opacity: 20%;
+        transform: scale(0.9);
+    }
+
+    100%{
+        opacity: 100%;
+        transform: scale(1.0);
+    }
+}
+
+@keyframes appearServicesBubble {
+    0%{
+        opacity: 0%;
+        transform: scale(0.8);
+    }
+
+    100%{
+        opacity: 100%;
+        transform: scale(1.0);
+    }
+}

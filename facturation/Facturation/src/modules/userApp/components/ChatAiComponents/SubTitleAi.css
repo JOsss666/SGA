@@ -1,0 +1,6 @@
+
+.SubTitleAi{
+    font-size: clamp(2.8px,2.8vh,28px);
+    font-weight: 500;
+    color: var(--mainText);
+}

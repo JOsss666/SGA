@@ -1,0 +1,85 @@
+
+.ListProductsServices{
+    padding: 2vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.ListProductsServices .NewElementSelect{
+    margin: 2vh auto;
+    width: 100%;
+}
+
+.ListProductsServices .addNewP{
+    height: 40dvh;
+    border-radius: 3vh;
+    outline: dashed .1vh var(--inputsBorder);
+    background-color: var(--cardHover);
+    width: 100%;
+    position: relative;
+    display: flex;
+}
+
+.ListProductsServices .addNewP .resumeList{
+    margin: auto;
+    width: 20%;
+}
+
+.ListProductsServices .addNewP .gunRegister{
+    width: 70%;
+    margin:auto;
+    height: 100%;
+    display: flex;
+}
+
+.ListProductsServices .addNewP .SearchinList{
+    margin: auto;
+    margin-right: 2vw;
+    width: 25vw;
+}
+
+.ListProductsServices .addNewP .gunRegister img{
+    height: 100%;
+    object-fit: cover;
+    margin: auto;
+    margin-right: 2vh;
+}
+
+.ListProductsServices .addNewP .gunRegister .inputSKU{
+    height: fit-content;
+    margin: auto 1vh;
+    border: solid .1vh var(--inputsBorder);
+    outline: none;
+    padding: 1vh 2vh;
+    border-radius: 1vh;
+}
+
+.ListProductsServices .addNewP .gunRegister .inputSKU:focus{
+    outline: solid .2vh #007AFF;
+}
+
+.ListProductsServices .addNewP .gunRegister .optionsGun{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    margin: auto 2vh;
+    width: 40%;
+}
+
+.ListProductsServices .addNewP .gunRegister .optionsGun strong{
+    font-size: clamp(2.5px,3vh,30px);
+    font-weight: 500;
+    color: var(--descriptionText);
+    transition: .3s;
+    cursor: pointer;
+    text-wrap: nowrap;
+}
+
+.ListProductsServices .addNewP .gunRegister .optionsGun strong i{
+    margin-left: 2vh;
+    font-size: clamp(3px,3vh,30px);
+}
+
+.ListProductsServices .addNewP .gunRegister .optionsGun strong:hover{
+    color: var(--mainText);
+}

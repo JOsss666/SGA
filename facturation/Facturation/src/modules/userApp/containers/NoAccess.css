@@ -1,0 +1,43 @@
+
+.NoAccess{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.NoAccess img{
+    width: clamp(20px,20dvw,400px);
+    margin: auto;
+    margin-bottom: 2vh;
+}
+
+.NoAccess .descriptionMessage{
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    max-width: 80%;
+    text-align: center;
+}
+
+.NoAccess .descriptionMessage .BoldTitle{
+    margin: 1vh auto;
+    font-weight: 600;
+    font-size: clamp(4px,4vh,40px);
+}
+
+.NoAccess .redirect{
+    margin: auto;
+    margin-top: 6vh;
+    cursor: pointer;
+    color: #007AFF;
+    transition: .3s;
+}
+
+.NoAccess .redirect i{
+    margin-right: 2vh;
+}
+
+.NoAccess .redirect:hover{
+    transform: scale(1.05);
+}

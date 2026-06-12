@@ -1,0 +1,124 @@
+
+.Settings{
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.Settings .asideMenu{
+    width: 25%;
+    height: 100%;
+    background-color: var(--menuAside);
+    border-top-right-radius: 2vh;
+    border-bottom-right-radius: 2vh;
+    padding:  2vh;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    transition: .3s;
+    overflow-y: auto;
+}
+
+.Settings .asideMenu .UserCard{
+    padding: 1vh;
+    border-radius: 1vh;
+    cursor: pointer;
+}
+
+.Settings .asideMenu .UserCard img{
+    margin-right: 2vh;
+}
+
+.Settings .asideMenu .UserCard:hover{
+    background-color:var(--settingsHover);
+}
+
+.Settings .asideMenu .SettingLine{
+    border: hidden;
+    padding: 1.5vh 1vh;
+}
+
+.Settings .asideMenu .SearchBar{
+    margin-bottom: 2vh;
+}
+
+.Settings .asideMenu .SearchBar i{
+    top: 1vh;
+}
+
+.Settings .asideMenu .SearchBar input{
+    border-radius: 1vh;
+    padding-top: 1vh;
+    padding-bottom: 1vh;
+}
+
+.Settings .asideMenu .SettingsMenuOptions{
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 400;
+    color: var(--descriptionText);
+    cursor: pointer;
+    width: 100%;
+    padding: 1vh 2vh;
+    border-radius: 1vh;
+    margin: 1vh 0;
+    transition: .3s;
+    position: relative;
+}
+
+.Settings .asideMenu .SettingsMenuOptions i{
+    margin-right: 1.5vh;
+}
+
+.Settings .asideMenu .SettingsMenuOptions:hover{
+    background-color: var(--iconHover);
+}
+
+.Settings .asideMenu .activeSettigsSec{
+    font-weight: 500;
+}
+
+:root .Settings .asideMenu .activeSettigsSec{
+    background-color:#D0FAE5;
+    color:var(--mainText);
+}
+
+:root.dark .Settings .asideMenu .activeSettigsSec{
+    background-color: #444;
+    color:var(--mainText);
+}
+
+.Settings .asideMenu .activeSettigsSec .activeSecIndicator{
+    height: 1.5vh;
+    width: 1.5vh;
+    position: absolute;
+    border-radius: 100%;
+    background-color: #05D57E;
+    top: 1.5vh;
+    right: 1.5vh;
+}
+
+.Settings .spaceSettings{
+    width: 80%;
+    height: 100%;
+    padding: 2vh;
+    padding-left: 6vh;
+    margin: 0 auto;
+}
+
+.Settings .spaceSettings .headSpace{
+    display: flex;
+    margin-bottom: 2vh;
+}
+.Settings .spaceSettings .headSpace .BoldTitle{
+    margin-right: 2vh;
+    font-weight: 500;
+    font-size: 5vh;
+}
+
+.Settings .spaceSettings .headSpace .PathLocation{
+    margin: auto 0;
+}
+
+.Settings .NoResults{
+    height: 60vh;
+}

@@ -1,0 +1,29 @@
+
+.FormNewFV{
+    background-color:var(--bg);
+    padding: 2vh 3vh;
+    margin-top: 4vh;
+    width: 30vw;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}
+
+.FormNewFV .BoldTitle{
+    margin: auto 2vh;
+    margin-bottom: 3vh;
+}
+
+.FormNewFV form{
+    display: flex;
+    flex-direction: column;
+}
+
+.FormNewFV form .FormInput, .FormNewDC form .SearchinList{
+    margin: 1vh auto;
+    width: 100%;
+}
+
+.FormNewFV form .FormButton{
+    margin-top: 2vh;
+}

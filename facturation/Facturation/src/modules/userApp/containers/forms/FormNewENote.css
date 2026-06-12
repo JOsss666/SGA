@@ -1,0 +1,121 @@
+
+.FormNewENote{
+    padding: 2vh;
+    padding-top: 6vh;
+    background-color: var(--bg);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    width: 93vw;
+
+}
+
+.FormNewENote .headForm{
+    margin: 0 auto;
+}
+
+.FormNewENote .step1Form{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    margin: auto;
+    margin-top: 5vh;
+}
+.FormNewENote .step2Form{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2vw;
+    margin-top: 2vh;
+}
+
+.FormNewENote .step2Form .submitContainer{
+    width: 100%;
+    display: flex;
+    gap: 2vw;
+}
+
+.FormNewENote .step2Form .invoiceInfoContainer{
+    padding: 2vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 2vh;
+    outline: dashed .2vh var(--inputsBorder);
+}
+
+.FormNewENote .step2Form .invoiceInfoContainer .invoiceHead{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2vw;
+}
+
+.FormNewENote .step2Form .invoiceInfoContainer .invoiceHead .FormInput{
+    width: 25vw;
+}
+
+.FormNewENote .step2Form .resumeInvoice{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    width: 100%;
+}
+
+.FormNewENote .step2Form .resumeInvoice .itemRow{
+    display: flex;
+    gap: 1vw;
+    width: 100%;
+}
+
+.FormNewENote .step2Form .resumeInvoice .itemRow .FormInput{
+    width: 12vw;
+    min-width: 0;
+    margin: auto 0;
+}
+
+.FormNewENote .step2Form .resumeInvoice .itemRow .totalItemValue{
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    margin-right: 1vh;
+    gap: 1vh;
+    font-size: clamp(2px,2.2vh,22px);
+    text-align: right;
+}
+
+.FormNewENote .step2Form .resumeInvoice .itemRow .totalItemValue span{
+    color: var(--descriptionText);
+}
+
+.FormNewENote .step2Form .resumeInvoice .itemRow .totalItemValue strong{
+    color: var(--mainText);
+    font-weight: 500;
+    font-size: clamp(2.4px,2.4vh,24px);
+}
+
+.FormNewENote .step2Form .sumaryContainer{
+    width: 100%;
+    display: flex;
+    padding: 2vh 1vh;
+}
+
+.FormNewENote .step2Form .sumaryContainer .sumary{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    width: fit-content;
+    margin: auto;
+    margin-right: 2vw;
+}
+
+.FormNewENote .step2Form .sumaryContainer .sumary span{
+    font-size: clamp(2px,2.2vh,22px);
+    text-align: right;
+    font-weight: 500;
+    color: var(--descriptionText);
+}
+
+.FormNewENote .step2Form .sumaryContainer .sumary span b{
+    font-size: clamp(2.4px,2.4vh,24px);
+    color: var(--mainText);
+    margin-left: 2vw;
+}

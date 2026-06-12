@@ -1,0 +1,51 @@
+
+.TagIndicator{
+    padding: .5vh 1.5vh;
+    border-radius: 2vh;
+    display: flex;
+    background-color: #DEE5E5;
+    width: fit-content;
+    height: fit-content;
+}
+
+.TagIndicator h5{
+    font-size: clamp(2.2px,2vh,22px);
+    font-weight: 500;
+    color: #00022E;
+}
+
+.active_color{
+    background-color: #CBFBF1;
+}
+
+.active_color h5{
+    color: #1F7A55;
+}
+
+.disabled_color{
+    background-color: #FFBBAD;
+}
+
+.suspended_color{
+    background-color: #FBF5B9;
+}
+
+.indicator_color{
+    background-color: #DBEAFE;
+}
+
+.indicator_color h5{
+    color: #155DFC;
+}
+
+
+.category_color{
+    background-color: #BFB6F3;
+}
+
+.TagIndicator i{
+    font-size: clamp(2px,2vh,20px);
+    margin: auto;
+    margin-left: .7vh;
+    cursor: pointer;
+}

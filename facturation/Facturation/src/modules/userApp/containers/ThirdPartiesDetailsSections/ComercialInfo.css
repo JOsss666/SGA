@@ -1,0 +1,64 @@
+
+.ComercialInfo{
+    margin: 3vh auto;
+    margin-top: 1vh;
+    display: flex;
+    width: 100%;
+    height: fit-content;
+}
+
+.ComercialInfo form{
+    display: flex;
+    flex-wrap: wrap;
+    width: 50%;
+    padding: 1vh;
+    gap: 4vh;
+}
+
+.ComercialInfo form .FormInput, .ComercialInfo form .SelOp , .ComercialInfo form .FormButton{
+    width: 20vw;
+    margin: auto 0;
+    margin-right: 2vh;
+}
+
+.ComercialInfo form .SelOp{
+    display: flex;
+    flex-direction: column;
+}
+
+.ComercialInfo form .SelOp h6{
+    margin-bottom: 1vh;
+    font-size: clamp(2.2px,2.5vh,25px);
+    font-weight: 500;
+    color: var(--descriptionText);
+}
+
+.ComercialInfo form .SelOp .contentOptions{
+    box-shadow: none;
+}
+
+.ComercialInfo .listDiscounts{
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+}
+
+.ComercialInfo .listDiscounts h6{
+    font-size: clamp(2.2px,2.5vh,25px);
+    font-weight: 500;
+    color: var(--descriptionText);
+    margin: 0 2vh;
+    margin-bottom: 2vh;
+}
+
+.ComercialInfo form .FormButton{
+    margin: auto 0;
+    margin-bottom: 0;
+    background-color: #007AFF;
+}
+
+.ComercialInfo form .SelectOptions{
+    width: 20vw;
+    margin-right: 2vh;
+}
