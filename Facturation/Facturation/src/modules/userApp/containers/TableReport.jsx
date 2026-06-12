@@ -33,93 +33,95 @@ export function TableReport({ columns, info, type, searchValue, navigation, summ
 
     return (
         <div className={`TableReport ${summaryValues ? "TableReport_withSummary" : ""}`}>
-            {summaryValues && (
-                <div className="summaryTable">
-                    <span className="summaryCheckSpace">
-                        <CheckSquare />
-                    </span>
+            {/* Contenedor único para scroll horizontal */}
+            <div className="scrollContainerX">
+                <div style={{ width: 'fit-content', minWidth: '100%' }}>
+                    {/* SUMMARY (si existe) */}
+                    {summaryValues && (
+                        <div className="summaryTable">
+                            <span className="summaryCheckSpace">
+                                <CheckSquare />
+                            </span>
+                            {columns.map((element, index) => (
+                                <>
+                                    {summaryValues[element] != undefined && (
+                                        <span
+                                            className={`summaryColumn summaryColum_${element} headColum_${element}`}
+                                            key={index}
+                                            title={summaryValues[element] || ""}
+                                        >
+                                            {summaryValues[element] || ""}
+                                        </span>
+                                    )}
+                                </>
+                            ))}
+                        </div>
+                    )}
 
-                    {columns.map((element, index) => (
-                        <>
-                            {summaryValues[element] != undefined && (
-                                <span
-                                    className={`summaryColumn summaryColum_${element} headColum_${element}`}
-                                    key={index}
-                                    title={summaryValues[element] || ""}
-                                >
-                                    {summaryValues[element] || ""}
-                                </span>
-                            )}
-                        </>
-                    ))}
-                </div>
-            )}
-
-            {/* HEADER */}
-            <div className="headTable">
-                <span>
-                    <CheckSquare />
-                </span>
-
-                {columns.map((element, index) => (
-                    <span
-                        className={`headColumn headColum_${element}`}
-                        key={index}
-                    >
-                        {element}
-                    </span>
-                ))}
-            </div>
-
-            {/* BODY */}
-            {filteredInfo.length > 0 ? (
-                <div
-                    ref={parentRef}
-                    className="bodyTable"
-                    style={{
-                        height: "500px",
-                        overflowY: "auto"
-                    }}
-                >
-                    <div
-                        style={{
-                            height: `${rowVirtualizer.getTotalSize()}px`,
-                            width: "100%",
-                            position: "relative"
-                        }}
-                    >
-                        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-
-                            const element = filteredInfo[virtualRow.index];
-
-                            return (
-                                <div
-                                    key={virtualRow.key}
-                                    style={{
-                                        position: "absolute",
-                                        top: 0,
-                                        left: 0,
-                                        width: "100%",
-                                        transform: `translateY(${virtualRow.start}px)`
-                                    }}
-                                >
-                                    <RowTableReport
-                                        type={type}
-                                        columns={columns}
-                                        info={element}
-                                        navigation={navigation}
-                                    />
-                                </div>
-                            );
-                        })}
+                    {/* HEADER */}
+                    <div className="headTable">
+                        <span>
+                            <CheckSquare />
+                        </span>
+                        {columns.map((element, index) => (
+                            <span
+                                className={`headColumn headColum_${element}`}
+                                key={index}
+                            >
+                                {element}
+                            </span>
+                        ))}
                     </div>
-                </div>
-            ) : (
-                <div className="bodyTable">
-                    <NoResults title={"No hay resultados disponibles"} />
-                </div>
-            )}
 
+                    {/* BODY (con virtualizador) */}
+                    {filteredInfo.length > 0 ? (
+                        <div
+                            ref={parentRef}
+                            className="bodyTable"
+                            style={{
+                                height: "500px",
+                                overflowY: "auto",
+                                overflowX: "hidden"
+                            }}
+                        >
+                            <div
+                                style={{
+                                    height: `${rowVirtualizer.getTotalSize()}px`,
+                                    width: "100%",
+                                    position: "relative"
+                                }}
+                            >
+                                {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                                    const element = filteredInfo[virtualRow.index];
+                                    return (
+                                        <div
+                                            key={virtualRow.key}
+                                            style={{
+                                                position: "absolute",
+                                                top: 0,
+                                                left: 0,
+                                                width: "100%",
+                                                transform: `translateY(${virtualRow.start}px)`
+                                            }}
+                                        >
+                                            <RowTableReport
+                                                type={type}
+                                                columns={columns}
+                                                info={element}
+                                                navigation={navigation}
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="bodyTable">
+                            <NoResults title={"No hay resultados disponibles"} />
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }
