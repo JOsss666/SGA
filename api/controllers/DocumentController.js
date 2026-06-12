@@ -1,13 +1,21 @@
-import processController from "./processController";
+import { useDataBase } from "../app.js";
 
-const utilsController = {};
+const documentController = {};
 
-utilsController.registerDocument = async(data)=>{
+documentController.applyPaymentToDocument = async(documentId, amount)=>{
+    return await useDataBase(`
+        UPDATE "Ecosystem".documents
+            SET paid_amount = paid_amount + $1
+        WHERE id = $2;
+    `,[amount, documentId],2);
+}
+
+documentController.registerDocument = async(data)=>{
     let info = JSON.parse(data)
         console.log(info)
         let docCreation = `
             INSERT INTO "Ecosystem".documents(
-	            company_id,
+                company_id,
                 store_id, 
                 "thirdParty_id", 
                 document_type, 
@@ -19,7 +27,7 @@ utilsController.registerDocument = async(data)=>{
                 attached, 
                 instance_id,
                 step_instance)
-	    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id, "ownSerial";
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id, "ownSerial";
     `;
     let consulta = await useDataBase(docCreation,[
         info.company_id,
@@ -41,5 +49,4 @@ utilsController.registerDocument = async(data)=>{
     return consulta;
 }
 
-
-export default utilsController;
+export default documentController;

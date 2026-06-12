@@ -3,7 +3,10 @@ import fs from "fs";
 import path from "path";
 import { uploadToCloudinary } from "../uploadMiddleWare.js";
 import { send_API_AI } from "../ApiFunctions.js";
-import treasuryController from "./TreasuryController.js";
+import documentController from "./DocumentController.js";
+import materializedViewsController from "./MaterializedViewsController.js";
+import transactionController from "./TransactionController.js";
+import transactionDetailController from "./TransactionDetailController.js";
 const controller = {};
 
 controller.uploadChunk = (req, res) => {
@@ -1536,117 +1539,13 @@ controller.createTransaction = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `
-            INSERT INTO
-                "Ecosystem".transactions
-                (
-                    user_id,
-                    "thirdParty_id",
-                    company_id,
-                    store_id,
-                    concept_id,
-                    doc_date,
-                    doc_type,
-                    doc_id,
-                    "subTotal",
-                    total,
-                    "costCenter_id",
-                    bussines_id
-                )
-            VALUES
-                ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id;
-        `;
-        let consulta = await useDataBase(sentence,[
-            info.user_id,
-            info.thirdParty_id,
-            info.company_id,
-            info.store_id,
-            info.concept_id,
-            info.doc_date != undefined ? info.doc_date.replace(/\//g, '-'):undefined,
-            info.doc_type,
-            info.doc_id,
-            info.subTotal,
-            info.total,
-            info.costCenter_id,
-            info.bussines_id
-        ],3)
+        let consulta = await transactionController.createHeader(info);
+        const transId = parseInt(consulta.id);
 
-        let updateDocPaidValue = useDataBase(`
-            UPDATE "Ecosystem".documents
-                SET paid_amount = paid_amount + $1
-            WHERE id = $2;
-        `,[info.total,info.doc_id],2);
-        
-        const transId = parseInt(consulta.id)
-        console.log('- ',transId)
-        const cashBoxTypes = ['Cash Recipt','Sell Invoice'];
-        if(typeof(transId) == 'number'){
-            let resultDetails = [];
-            for(const element of info.transactionDetails){
-                let sentence = `
-                    INSERT INTO "Ecosystem".transaction_detail(
-                        company_id,
-                        transaction_id,
-                        "thirdParty_id",
-                        account_id,
-                        type,
-                        "subTotal",
-                        total,
-                        nature,
-                        "paymentMethod_id",
-                        voucher)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;
-                `;
-                console.log('---> ',transId);
-                console.log('---> ',element);
-                let postConsulta = await useDataBase(sentence,[
-                    info.company_id,
-                    transId,
-                    info.thirdParty_id,
-                    element.account_id,
-                    element.type,
-                    element.subtotal,
-                    element.total,
-                    element.nature,
-                    element.paymentMethod_id != undefined? element.paymentMethod_id:undefined,
-                    element.voucher
-                ],3);
-                console.log(`ID detalle transacción: ${postConsulta.id}`)
-                console.log(`Es doc de caja: ${cashBoxTypes.includes(info.docType)}`)
-                console.log(`Comparación tipos de documento: ${JSON.stringify(cashBoxTypes)} -- ${info.doc_type}`)
-                console.log(`Es pago en caja: ${element.type == 'payment'}`)
-                if(cashBoxTypes.includes(info.doc_type) && element.type == 'payment' && postConsulta.id != undefined){
-                    console.log('Insertando movimiento de caja')
-                    let srSentence = `
-                        INSERT INTO "Facturation".shift_settlement_details(
-                            company_id, 
-                            user_id,
-                            "cashBox_id",
-                            "transactionDetail_id",
-                            shift_id)
-                        VALUES ($1, $2, $3, $4, $5);
-                    `;
-                    let setElementRegister = await useDataBase(srSentence,[
-                        info.company_id,
-                        info.user_id,
-                        element.cashBox_id,
-                        postConsulta.id,
-                        element.shift_id
-                    ],2);
-                }
-                console.log('---> ',element);
-                if(element.for_wallet == true){
-                    let insertForWallet = await treasuryController.newPendingAccount(info,element)
-                    console.log('Estado creacion cartera: ',insertForWallet);
-                }
-                if(element.for_balance){
-
-                }
-                // Espacio para actualizar aviable credit
-                resultDetails.push([postConsulta.id != undefined,postConsulta.id]);
-            }
-            useDataBase(`REFRESH MATERIALIZED VIEW CONCURRENTLY "Facturation".mv_shift_payment_summaries`,[],1);
-            useDataBase(`REFRESH MATERIALIZED VIEW CONCURRENTLY "Ecosystem".mv_thirdparty_account_balances`,[],1)
+        if(Number.isFinite(transId)){
+            await documentController.applyPaymentToDocument(info.doc_id, info.total);
+            let resultDetails = await transactionDetailController.createMany(info, transId);
+            materializedViewsController.refreshAfterTransaction();
             res.writeHead(200,{'Content-Type':'text/plain'})
             res.end(JSON.stringify([consulta.id,resultDetails]));
         }else{
