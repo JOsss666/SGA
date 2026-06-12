@@ -1,9 +1,0 @@
-
-@import '../containers/UserApp.css';
-
-.BigTitle{
-    font-size: clamp(4px,4vh,40px);
-    font-weight: 500;
-    /* color: #4A4848; */
-    color:var(--mainText);
-}

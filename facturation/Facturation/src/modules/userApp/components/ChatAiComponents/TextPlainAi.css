@@ -1,6 +1,0 @@
-
-.TextPlainAI{
-    font-size: clamp(2.2px,2.2vh,22px);
-    font-weight: 00;
-    color: var(--descriptionText);
-}
