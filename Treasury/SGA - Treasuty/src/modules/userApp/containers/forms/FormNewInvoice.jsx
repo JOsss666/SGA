@@ -872,7 +872,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 subtotal:total,
                 total:total,
                 type:'operation',
-                nature: documentNature == 'DB'? 'CR':'DB'
+                nature: documentNatu˜re == 'DB'? 'CR':'DB'
             })*/
             await toAccount();
             await updatePaidAmount();
