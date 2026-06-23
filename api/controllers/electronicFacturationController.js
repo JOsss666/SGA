@@ -295,7 +295,7 @@ electronicFacturationController.newInvoice = (req,res)=>{
         body: JSON.stringify(params)
     });
     let resInvoice = await response.json();
-
+    console.log('Respuesta:  ',resInvoice)
     if (!response.ok && (resInvoice.message?.includes('pendiente') || response.status === 409)) {
         let pendingReference = resInvoice.reference_code;
 
@@ -334,6 +334,7 @@ electronicFacturationController.newInvoice = (req,res)=>{
                     },
                     body: JSON.stringify(params)
                 });
+                console.log('Re intento de creación: ',newResponse)
                 resInvoice = await newResponse.json();
             }
         }

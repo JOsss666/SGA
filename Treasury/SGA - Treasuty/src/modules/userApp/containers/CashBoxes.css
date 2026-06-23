@@ -1,0 +1,48 @@
+
+.CashBoxes{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+}
+
+.CashBoxes .headC{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    gap: 1vh;
+}
+
+.CashBoxes .searchOptions{
+    display: flex;
+    width: 100%;
+    gap: 2vh;
+    margin: 2vh 0;
+    margin-top: 2vh;
+    padding-left: 2vh;
+}
+
+.CashBoxes .searchOptions .FormButton{
+    width: 10vw;
+}
+
+.CashBoxes .searchOptions .ButtonMenu{
+    background-color:#DFF2FE;
+    margin: auto 1vh;
+    height: 6vh;
+    width: 6vh;
+}
+
+.CashBoxes .searchOptions .ButtonMenu i{
+    color: #007AFF;
+}
+
+.CashBoxes .gridCashBoxes{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2vh;
+    padding: 1vh 2vh;
+}
+
+.CashBoxes .LoadingSpace{
+    height: 60vh;
+}
