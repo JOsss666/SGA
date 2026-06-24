@@ -25,9 +25,19 @@ const pool = new Pool({
     port: PG_PORT,
     max: 10,
     idleTimeoutMillis: 30000,
+    keepAlive: true, // evita que Render corte conexiones inactivas tan agresivamente
+    connectionTimeoutMillis: 10000,
     ssl: {
         rejectUnauthorized: false
     }
+});
+
+// CRÍTICO: el Pool de pg emite 'error' cuando una conexión INACTIVA (idle) se cae
+// (p.ej. Render corta conexiones ociosas). Sin este listener, Node trata ese evento
+// como "Unhandled 'error' event" y MATA todo el proceso. Con él, el cliente roto se
+// descarta y el pool crea uno nuevo en la siguiente query, sin tumbar el servidor.
+pool.on('error', (err) => {
+    console.error('⚠️ Error en cliente inactivo del pool de PostgreSQL (se descarta y continúa):', err.message);
 });
 
 
@@ -111,10 +121,29 @@ function encrypt(data) {
     return sha96Hash.toString('hex');
 }
 
+// Errores transitorios de conexión que justifican un reintento (no son errores de SQL).
+const isTransientConnError = (err) =>
+    err && (
+        /Connection terminated/i.test(err.message || '') ||
+        ['ECONNRESET', 'EPIPE', 'ETIMEDOUT', '57P01', '08006', '08003'].includes(err.code)
+    );
+
 const useDataBase = async (sentence, values, typeConsult) => {
     console.log(sentence, values);
     try {
-        const result = await pool.query(sentence, values);
+        let result;
+        try {
+            result = await pool.query(sentence, values);
+        } catch (err) {
+            // Si la conexión se cayó (cliente muerto del pool), reintentamos UNA vez:
+            // el pool ya descartó el cliente roto y nos dará uno nuevo.
+            if (isTransientConnError(err)) {
+                console.warn('🔁 Conexión caída, reintentando query una vez...');
+                result = await pool.query(sentence, values);
+            } else {
+                throw err;
+            }
+        }
 
         switch (typeConsult) {
 
