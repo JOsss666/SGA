@@ -295,19 +295,23 @@ electronicFacturationController.newInvoice = (req,res)=>{
         body: JSON.stringify(params)
     });
     let resInvoice = await response.json();
-
+    console.log('Respuesta:  ',resInvoice)
     if (!response.ok && (resInvoice.message?.includes('pendiente') || response.status === 409)) {
         let pendingReference = resInvoice.reference_code;
 
         if (!pendingReference) {
-            // Search for invoice pending of validation
+            // Search for invoice pending of validation.
+            // OJO: la lista de Factus viene SIN filtrar; solo status 0 (pendiente DIAN)
+            // bloquea el canal. status 1 = validada -> NUNCA borrar.
             console.log('Buscando factura pendiente... ',pendingReference)
-            const pendingRes = await fetch(urlSer + '/v1/bills?state=pending', {
+            const pendingRes = await fetch(urlSer + '/v1/bills', {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${auth.access_token}`, 'Accept': 'application/json' }
             });
             const pendingData = await pendingRes.json();
-            pendingReference = pendingData?.data?.data?.[0]?.reference_code;
+            const allBills = pendingData?.data?.data ?? pendingData?.data ?? [];
+            const pendingBill = allBills.find(b => String(b.status) === '0');
+            pendingReference = pendingBill?.reference_code;
         }
 
         if (pendingReference) {
@@ -335,6 +339,12 @@ electronicFacturationController.newInvoice = (req,res)=>{
                     body: JSON.stringify(params)
                 });
                 resInvoice = await newResponse.json();
+                // Logueamos el CUERPO, no el objeto Response, para poder ver
+                // el motivo real si Factus responde 422 (datos inválidos).
+                console.log(`Re intento de creación [HTTP ${newResponse.status}]: `, JSON.stringify(resInvoice));
+            } else {
+                const deleteBody = await deleteRes.json().catch(() => ({}));
+                console.log(`No se pudo liberar el canal [HTTP ${deleteRes.status}]: `, JSON.stringify(deleteBody));
             }
         }
 

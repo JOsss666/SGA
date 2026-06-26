@@ -261,10 +261,6 @@
     margin-right: 1vh;
 }
 
-.PreviewProcess .processAttached .gridAttDocs .electronicCard {
-    border-left: .4vh solid #1447E6;
-}
-
 .PreviewProcess .processAttached .gridAttDocs .cardDocInfo {
     display: flex;
     flex-direction: column;
@@ -275,7 +271,7 @@
     display: flex;
     align-items: center;
     gap: .5vh;
-    background-color: #1447E620;
+    background-color: #BEDBFF;
     border-radius: 1vh;
     padding: .5vh 1vh;
     margin-left: auto;

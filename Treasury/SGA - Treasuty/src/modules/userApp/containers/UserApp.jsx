@@ -53,6 +53,8 @@ import { CashHistory } from './CashHistory';
 import { Transactions } from './Transactions';
 import { Analytics2 } from './Analytics2';
 import { ControlPanel } from './ControlPanel';
+import { CashBoxes } from './CashBoxes';
+import { CashBoxesDeetail } from './CashBoxesDetail';
 
 export function UserApp(){
 
@@ -209,6 +211,8 @@ export function UserApp(){
                             </Route>
 
                             <Route path='/mainPanel/*' element={<ControlPanel/>}/>
+                            <Route path='/CashBoxes' element={<CashBoxes/>}/>
+                            <Route path='/CashBoxes/:cashBox_id' element={<CashBoxesDeetail/>}/>
                             <Route path='/treasury' element={<Treasury/>}/>
                             <Route path='/banks' element={<Banks/>}/>
                                 <Route path='/banks/:bank_id' element={<BanksDetails/>}/>

@@ -65,8 +65,7 @@ export function PreviewDocument({doc_id}){
         "video/quicktime": <i className="fa-solid fa-photo-film fileIcon"/>,
         "audio/mpeg":<i className="fa-solid fa-file-audio fileIcon"/>,
         "audio/wav": <i className="fa-solid fa-file-audio fileIcon"/>,
-        "application/json": <i className="fa-solid fa-code fileIcon"/>,
-        "electronic_invoice": <i className="fa-solid fa-file-invoice fileIcon"/>
+        "application/json": <i className="fa-solid fa-code fileIcon"/>
     };
 
     const dictionaryDocTypes = {
@@ -138,55 +137,9 @@ export function PreviewDocument({doc_id}){
         })
         console.log(res);
         if(res[0]){
-            if(docInfo.document_type == 'Sell Invoice'){
-                getElectronicInvoice(res[1]);
-            }else{
-                setAttachedFiles(res[1]);
-            }
+            setAttachedFiles(res[1]);
         }
     }
-
-    const getElectronicInvoice = async(docsArray = []) => {
-
-    const invoiceRes = await postInfo('/getDocuments',{
-        company_id: appInfo.company_id,
-        instance_id: docInfo.instance_id,
-        allowedTypes:['Sell Invoice']
-    });
-
-    if(!invoiceRes[0] || !invoiceRes[1]?.length){
-        setAttachedFiles(docsArray);
-        return;
-    }
-
-    const sellInvoice = invoiceRes[1][0];
-
-    const electronicRes = await postInfo(
-        '/electronicFacturation/getDocuments',
-        {
-            company_id: appInfo.company_id,
-            doc_id: sellInvoice.id
-        }
-    );
-
-    if(!electronicRes[0] || !electronicRes[1]?.length){
-        setAttachedFiles(docsArray);
-        return;
-    }
-
-    const invoice = electronicRes[1][0];
-
-    setAttachedFiles([
-        ...docsArray,
-        {
-            id: invoice.id,
-            name: `Factura electrónica ${invoice.number}`,
-            type: 'electronic_invoice',
-            created_at: invoice.created_at,
-            electronicData: invoice
-        }
-    ]);
-};
 
     const getAttachedTransactions = async(paymentMethod_id)=>{
         setLoading(true);
@@ -270,8 +223,6 @@ const getSellInvoiceServices = async(instance_id)=>{
                     attArray.push(element.id);
                 });
                 getAttachedDodcs(attArray)
-            } else if(docInfo.document_type == 'Sell Invoice'){
-                getElectronicInvoice();
             }
         }
     },[docInfo])
@@ -379,22 +330,13 @@ const getSellInvoiceServices = async(instance_id)=>{
                         <h6>Archivos adjuntos</h6>
                         <div className="attachedDocumentsGrid">
                             {attachedFiles.map((element,index)=>(
-                                <div 
-                                className="attDocCard" 
-                                key={index} 
-                                onClick={()=>{
-                                    if(element.electronicData?.url){
-                                        window.open(element.electronicData.url, '_blank');
-                                        return;
-                                    }
+                                <div className="attDocCard" key={index} onClick={()=>{
                                     popInAlert(<PreviewFile id={element.id}/>)
                                 }}>
                                     {iconDocsContainer[`${element.type}`]}
                                     <strong className="fileName">{element.name}</strong>
-                                    <span>
-                                    {element.type === 'electronic_invoice' ? 'Factura electrónica': element.type}
-                                    </span>
-                                    <span>    {element.type === 'electronic_invoice' ? element.electronicData?.number : formatBytes(element.size)} </span>
+                                    <span>{element.type}</span>
+                                    <span>{formatBytes(element.size)}</span>
                                     <span>{(element.created_at).substring(0,10)}</span>
                                     <MoreOptions options={[
                                         {text:'Descargar',icon:<i className="fa-solid fa-download"/>},

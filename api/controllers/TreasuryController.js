@@ -1,5 +1,6 @@
-
 import { useDataBase } from "../app.js";
+import documentController from "./DocumentController.js";
+
 const treasuryController = {};
 
 treasuryController.getThirdPartyPortfolio = (req,res)=>{
@@ -109,7 +110,7 @@ treasuryController.getThirdPartyPortfolio = (req,res)=>{
     })
 }
 
-treasuryController.newAccountReceivable = async(info,element)=>{
+treasuryController.newPendingAccount = async(info,element)=>{
     let res = {}
     let senInsBreafcase = `
         INSERT INTO "Treasury".accounts_receivable(
@@ -118,8 +119,9 @@ treasuryController.newAccountReceivable = async(info,element)=>{
             document_id,
             total,
             paid_amount,
+            type,
             due_date)
-        VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;
+        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;
     `;
     let insertBreafCaseBill = await useDataBase(senInsBreafcase,[
         info.company_id,
@@ -127,7 +129,8 @@ treasuryController.newAccountReceivable = async(info,element)=>{
         info.doc_id,
         element.total,
         0,
-        element.due_date
+        element.pendingType ?? undefined,
+        element.due_date,
     ])
     if(insertBreafCaseBill.id != undefined && insertBreafCaseBill.id != null){
         res.status = "OK"
@@ -200,6 +203,42 @@ treasuryController.newPaymentOfBriefCase = async(info,element,doc_id)=>{
 
 treasuryController.refreshThirdPartyBalance = async()=>{
     await useDataBase('REFRESH MATERIALIZED VIEW CONCURRENTLY "Ecosystem".mv_thirdparty_account_balances;',[],2);
+}
+
+treasuryController.shouldRegisterCashMovement = (info, element)=>{
+    const cashBoxTypes = ['Cash Recipt','Sell Invoice'];
+    return cashBoxTypes.includes(info.doc_type) && element.type == 'payment';
+}
+
+treasuryController.registerShiftSettlementDetail = async(info, element, transactionDetailId)=>{
+    console.log('Insertando movimiento de caja')
+    let srSentence = `
+        INSERT INTO "Facturation".shift_settlement_details(
+            company_id, 
+            user_id,
+            "cashBox_id",
+            "transactionDetail_id",
+            shift_id)
+        VALUES ($1, $2, $3, $4, $5);
+    `;
+    return await useDataBase(srSentence,[
+        info.company_id,
+        info.user_id,
+        element.cashBox_id,
+        transactionDetailId,
+        element.shift_id
+    ],2);
+}
+
+
+treasuryController.purchase = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        const document = await documentController.registerDocument(data)
+    })
 }
 
 export default treasuryController;
