@@ -514,6 +514,42 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         )
     }
 
+    const buildTransactionDetails = () => {
+        const transactionDetails = [];
+
+        paymentMethod.forEach(element => {
+            transactionDetails.push({
+                account_id:element.account_id,
+                subtotal:element.value,
+                total:element.value,
+                type:'payment',
+                paymentMethod_id:element.id,
+                nature: documentNature,
+                due_date:addDaysToCurrentDate(thirdPartyInfo.credit_term != undefined? thirdPartyInfo.credit_term:0),
+                for_wallet:element.for_wallet,
+                voucher:element.voucher,
+                cashBox_id,
+                shift_id,
+            });
+        });
+
+        transactionDetails.push({
+            account_id:conceptAccount_id,
+            subtotal:total,
+            total:total,
+            type:'operation',
+            nature: documentNature == 'DB'? 'CR':'DB'
+        });
+
+        return transactionDetails;
+    }
+
+    const buildCashReceiptPayload = () => ({
+        ...FormInfo,
+        user_id:userInfo.user_id,
+        transactionDetails:buildTransactionDetails()
+    });
+
 
     // Function for control payments of BirefCaseBills
     const updateBriefCasePayedValue = (newValue,id)=>{
@@ -566,52 +602,28 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const createCashRecipt = async()=>{
         setDisabled(true)
         setLoading(true)
-        let res = await postInfo('/facturation/newCashRecipt',FormInfo);
+        const cashReceiptPayload = buildCashReceiptPayload();
+        let res = await postInfo('/facturation/newCashRecipt',cashReceiptPayload);
         console.log(res);
-        if(typeof(parseInt(res.id)) == 'number'){
+        if(res.status === "OK" && Number.isFinite(Number(res.id))){
             addNotification({
                 type:'aproved',
                 title:`Recibo de caja #${res.id} creado correctamente`,
                 description:`El recibo de caja #${res.id} fue creado correctamente`
             })
-            FormInfo["doc_id"] = res.id
-            FormInfo['instance_id'] = instance_id;
-            FormInfo["ownSerial"] = res.ownSerial;
+            cashReceiptPayload["doc_id"] = res.id
+            cashReceiptPayload['instance_id'] = instance_id;
+            cashReceiptPayload["ownSerial"] = res.ownSerial;
             if(isElectron){
-                await printCashRecipt(FormInfo,appInfo,true);
-                await printCashRecipt(FormInfo,appInfo,false);
+                await printCashRecipt(cashReceiptPayload,appInfo,true);
+                await printCashRecipt(cashReceiptPayload,appInfo,false);
             }
-            FormInfo["user_id"] = userInfo.user_id,
-            FormInfo['transactionDetails'] = []
-            paymentMethod.forEach(element => {
-                FormInfo.transactionDetails.push({
-                    account_id:element.account_id,
-                    subtotal:element.value,
-                    total:element.value,
-                    type:'payment',
-                    paymentMethod_id:element.id,
-                    nature: documentNature,
-                    due_date:addDaysToCurrentDate(thirdPartyInfo.credit_term != undefined? thirdPartyInfo.credit_term:0),
-                    for_wallet:element.for_wallet,
-                    voucher:element.voucher,
-                    cashBox_id,
-                    shift_id,
-                })
-            });
-            FormInfo.transactionDetails.push({
-                account_id:conceptAccount_id,
-                subtotal:total,
-                total:total,
-                type:'operation',
-                nature: documentNature == 'DB'? 'CR':'DB'
-            })
-            await toAccount();
             await updatePaidAmount();
         }else{
             addNotification({
                 type:'error',
                 title:`Error al crear recibo de caja #`,
-                description:`Hubo un problema al crear el recibo de caja #.`
+                description:res.message ?? `Hubo un problema al crear el recibo de caja #.`
             })
         }
         popOutAlert();

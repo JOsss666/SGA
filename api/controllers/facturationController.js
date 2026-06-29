@@ -1,7 +1,7 @@
 import { useDataBase } from "../app.js";
 import processController from "./processController.js";
-import treasuryController from "./TreasuryController.js";
 import sellInvoiceService from "../services/sellInvoiceService.js";
+import cashReceiptService from "../services/cashReceiptService.js";
 import utilsController from "./utilsController.js";
 const facturationController = {};
 
@@ -94,61 +94,20 @@ facturationController.updateThirdPartyPortfolio = async()=>{
 
 
 facturationController.newCashRecipt = (req,res)=>{
-    let data = '';
-    req.on('data',chunk=>{
-        data += chunk    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data)
-        console.log(info)
-        let docCreation = `
-            INSERT INTO "Ecosystem".documents(
-	            company_id,
-                store_id, 
-                "thirdParty_id", 
-                document_type, 
-                status, 
-                "subTotal", 
-                total, 
-                created_by,  
-                description, 
-                attached, 
-                instance_id,
-                step_instance)
-	    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id, "ownSerial";
-    `;
-        let consulta = await useDataBase(docCreation,[
-            info.company_id,
-            info.store_id,
-            info.thirdParty_id,
-            info.doc_type,
-            info.status,
-            info.subTotal,
-            info.total,
-            info.created_by,
-            info.description,
-            JSON.stringify(info.attached),
-            info.instance_id != "" && info.instance_id != undefined? info.instance_id:undefined,
-            info.instance_id != "" && info.instance_id != undefined? info.step_id:undefined
-        ],3);
-        if(info.instance_id != undefined && consulta.id != undefined){
-            await processController.relatedoc_instances(consulta.id, info.instances)
-        }
-        if((info.payedBills != undefined || info.payedBills.length > 0) && consulta.id != undefined){
-            console.log('-------------------------------------')
-            console.log('ACTUALIZANDO CARTERA')
-            console.log('-------------------------------------')
-            for(const element of info.payedBills){
-                await treasuryController.newPaymentOfBriefCase(info,element,consulta.id)
-            }
-        }
-        facturationController.updateThirdPartyPortfolio();
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
+    utilsController.readJsonBody(req)
+        .then(async(info)=>{
+            const result = await cashReceiptService.register(info);
+            res.writeHead(result.status === "OK" ? 200 : 400, {'Content-Type':'application/json'});
+            res.end(JSON.stringify(result));
+        })
+        .catch((err)=>{
+            console.error("Error al crear recibo de caja:", err);
+            res.writeHead(500, {'Content-Type':'application/json'});
+            res.end(JSON.stringify({
+                status: "Error",
+                message: err.message
+            }));
+        });
 }
 
 facturationController.newSellInvoice = (req,res)=>{
@@ -159,6 +118,7 @@ facturationController.newSellInvoice = (req,res)=>{
             res.end(JSON.stringify(result));
         })
         .catch((err)=>{
+            console.error("Error al crear factura de venta:", err);
             res.writeHead(500, {'Content-Type':'application/json'});
             res.end(JSON.stringify({
                 status: "Error",

@@ -820,7 +820,9 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                 subtotal:tax.total,
                 total:tax.total,
                 type:'tax',
-                nature: documentNature == 'DB'? 'CR':'DB'
+                nature: documentNature == 'DB'? 'CR':'DB',
+                cashBox_id,
+                shift_id,
             });
         });
 

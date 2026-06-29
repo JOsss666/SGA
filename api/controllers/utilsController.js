@@ -203,6 +203,17 @@ utilsController.updateDocumentPaidAmount = async (docId, amount, options = {}) =
     return await useDataBase(sentence, values, 2);
 };
 
+utilsController.getDocumentPaidAmount = (info) => {
+    if (info.doc_type !== "Sell Invoice") {
+        return info.total;
+    }
+
+    const paymentDetails = info.transactionDetails ?? [];
+    return paymentDetails
+        .filter(detail => detail.type === "payment" && detail.for_wallet !== true)
+        .reduce((sum, detail) => sum + Number(detail.total || 0), 0);
+};
+
 
 // CONTABILITY UTILS --> TRANSACTIONS AND TRANSACTION DETAILS
 
@@ -289,7 +300,9 @@ utilsController.updateDocumentPaidAmount = async (docId, amount, options = {}) =
 
     utilsController.shouldRegisterCashMovement = (info, detail) => {
         const cashBoxTypes = ["Cash Recipt", "Sell Invoice"];
-        return cashBoxTypes.includes(info.doc_type) && detail.type === "payment";
+        return cashBoxTypes.includes(info.doc_type)
+            && detail.type === "payment"
+            && detail.for_wallet !== true;
     };
 
     utilsController.registerShiftSettlementDetail = async (info, detail, transactionDetailId, options = {}) => {
@@ -327,9 +340,8 @@ utilsController.updateDocumentPaidAmount = async (docId, amount, options = {}) =
                 document_id,
                 total,
                 paid_amount,
-                type,
                 due_date)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id;
         `;
         const values = [
@@ -338,7 +350,6 @@ utilsController.updateDocumentPaidAmount = async (docId, amount, options = {}) =
             info.doc_id,
             detail.total,
             0,
-            detail.pendingType ?? undefined,
             detail.due_date
         ];
 
@@ -402,7 +413,7 @@ utilsController.updateDocumentPaidAmount = async (docId, amount, options = {}) =
         const execute = async (clientOptions) => {
             const paidAmountResult = await utilsController.updateDocumentPaidAmount(
                 info.doc_id,
-                info.total,
+                utilsController.getDocumentPaidAmount(info),
                 clientOptions
             );
             const transaction = await utilsController.createAccountTransactionHeader(info, clientOptions);

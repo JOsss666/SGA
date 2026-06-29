@@ -1,20 +1,18 @@
 import utilsController from "../controllers/utilsController.js";
 
-const sellInvoiceService = {};
+const cashReceiptService = {};
 
-sellInvoiceService.register = async (info) => {
+cashReceiptService.register = async (info) => {
     const steps = [];
-    console.log('Información recibida para la factura de venta: ',info)
+
     const { document, portfolioResult, accountResult, processResult } = await utilsController.withTransaction(async (client) => {
         const document = await utilsController.registerDocument(info, {
             includeProcessFields: false,
             client
         });
 
-        console.log('Fase 1 Documento creado', document)
-
         if (document?.id === undefined) {
-            throw new Error("No se pudo crear la factura de venta.");
+            throw new Error("No se pudo crear el recibo de caja.");
         }
 
         const documentInfo = {
@@ -30,14 +28,10 @@ sellInvoiceService.register = async (info) => {
             { client }
         );
 
-        console.log('Fase 2 Control Cartera: ', portfolioResult)
-
         const accountResult = await utilsController.accountDocument(
             documentInfo,
             { client }
         );
-
-        console.log('Fase 3 Contabilidad: ', portfolioResult)
 
         const processResult = await utilsController.linkDocumentInstances(
             document.id,
@@ -52,15 +46,6 @@ sellInvoiceService.register = async (info) => {
             processResult
         };
     });
-
-    if (document?.id === undefined) {
-        return {
-            status: "Error",
-            message: "No se pudo crear la factura de venta.",
-            document,
-            steps
-        };
-    }
 
     steps.push({
         name: "registerDocument",
@@ -84,24 +69,23 @@ sellInvoiceService.register = async (info) => {
         ...processResult
     });
 
-    const refreshPortfolioResult = await utilsController.refreshDocumentViews();
+    const refreshViewsResult = await utilsController.refreshDocumentViews();
     steps.push({
         name: "refreshDocumentViews",
-        ...refreshPortfolioResult
+        ...refreshViewsResult
     });
 
     return {
         status: "OK",
-        message: `Factura de venta #${document.ownSerial} creada correctamente.`,
+        message: `Recibo de caja #${document.ownSerial} creado correctamente.`,
         id: document.id,
         ownSerial: document.ownSerial,
         steps
     };
 };
 
+cashReceiptService.delete = async(info)=>{};
 
-sellInvoiceService.delete = async(info)=>{};
+cashReceiptService.suspend = async(info)=>{};
 
-sellInvoiceService.suspend = async(info)=>{};
-
-export default sellInvoiceService;
+export default cashReceiptService;

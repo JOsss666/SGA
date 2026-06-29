@@ -119,9 +119,8 @@ treasuryController.newPendingAccount = async(info,element)=>{
             document_id,
             total,
             paid_amount,
-            type,
             due_date)
-        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;
+        VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;
     `;
     let insertBreafCaseBill = await useDataBase(senInsBreafcase,[
         info.company_id,
@@ -129,9 +128,8 @@ treasuryController.newPendingAccount = async(info,element)=>{
         info.doc_id,
         element.total,
         0,
-        element.pendingType ?? undefined,
         element.due_date,
-    ])
+    ],3)
     if(insertBreafCaseBill.id != undefined && insertBreafCaseBill.id != null){
         res.status = "OK"
         res.description = `Cuenta de cobro #${insertBreafCaseBill.id} creada correctamente.`
