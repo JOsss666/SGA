@@ -178,6 +178,22 @@ const useDataBase = async (sentence, values, typeConsult) => {
     }
 };
 
+const withTransaction = async (callback) => {
+    const client = await pool.connect();
+
+    try {
+        await client.query("BEGIN");
+        const result = await callback(client);
+        await client.query("COMMIT");
+        return result;
+    } catch (err) {
+        await client.query("ROLLBACK");
+        throw err;
+    } finally {
+        client.release();
+    }
+};
+
 
 export async function sendMailF(infoR, mailsSend) { // FUNCION PARA ENVIAR CORREO ELECTRONICO
     console.log('Enviando Mail');
@@ -350,7 +366,7 @@ async function createTax(rows){
 
 export{
     encrypt,
-    useDataBase
+    useDataBase,
+    withTransaction
 }
-
 
