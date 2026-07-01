@@ -15,7 +15,7 @@ export function ElectronicDocumentCard({info}){
     const navigate = useNavigate();
     const params = useParams();
 
-    const handleNavigate = ()=>{
+    const handleNavigate = ()=>{ 
          navigate(`/SGA_management/${params.company_key}/${params.user_key}/edocuments/${info.id}`);
     }
 

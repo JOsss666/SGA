@@ -48,7 +48,7 @@
     "papaparse": "^5.5.3",
     "pdf-to-img": "^5.0.0",
     "pdf-to-printer": "^5.6.1",
-    "pg": "^8.16.3",
+    "pg": "^8.21.0",
     "react": "^19.2.0",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.0",

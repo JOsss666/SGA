@@ -156,6 +156,8 @@ router.post('/inventory/getCellars',inventoryController.getCellars);
 
 router.post('/inventory/createPriceList',inventoryController.createPriceList);
 
+router.post('/getAllPriceLists', inventoryController.getAllLists);
+
 router.post('/inventory/getPricesList',inventoryController.getPricesList);
 
 router.post('/inventory/deletePriceList',inventoryController.deletePriceList);
@@ -284,6 +286,8 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     router.post('/zj852/getlastClickControl',zjController.getlastClickControl);
 
     router.post('/zj852/getHistorialClicksControl',zjController.getHistorialClicksControl);
+
+    router.post('/zj852/getAuditClicksReport',zjController.getAuditClicksReport);
 
     router.post('/zj852/openClickControl',zjController.openClickControl);
 

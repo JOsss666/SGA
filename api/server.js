@@ -16,8 +16,12 @@ export const allowedOrigins = [
         "https://sga-1-wv7x.onrender.com", // Tesoreria
         "https://facturation.sga360.co", // Facturación
         "https://www.inventory.sga360.co", // Inventario
+        "https://inventory.sga360.co", // Inventario
         "https://www.management.sga360.co", // Administración
+        "https://management.sga360.co", // Administración
         "https://www.process.sga360.co", // Procesos
+        "https://process.sga360.co", // Procesos
+        "https://treasury.sga360.co", // Tesorería
     ]
 
 app.use(express.urlencoded({ extended: true }))

@@ -307,7 +307,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     index === 0
                         ? { 
                             ...block, 
-                            items: [...block.items, element] // Copia los items actuales y añade el nuevo
+                            items: [...block.items, { ...element, manualPrice: false }] // Copia los items actuales y añade el nuevo
                         }
                         : block // Mantiene los demás bloques sin cambios
                 )
@@ -340,25 +340,53 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             });
         };
 
-        const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
-            setItemBlocks(prev =>
-                prev.map((block, bIdx) => {
-                    if (bIdx !== blockIndex) return block;
+const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
+    setItemBlocks(prev =>
+        prev.map((block, bIdx) => {
 
-                    const updatedItems = block.items.map((item, iIdx) => {
-                        if (iIdx !== itemIndex) return item;
-                        let updatedItem = { ...item, [key]: value };
-                        if (key === 'units') {
-                            const newPrice = getEffectivePrice(item, value);
-                            updatedItem.unit_value = newPrice;
-                        }
-                        return updatedItem;
-                    });
+            if (bIdx !== blockIndex) return block;
 
-                    return { ...block, items: updatedItems };
-                })
-            );
-        };
+            const updatedItems = block.items.map((item, iIdx) => {
+
+                if (iIdx !== itemIndex) return item;
+
+                let updatedValue =
+                    key === 'description'
+                        ? value
+                        : Number(value);
+
+                let updatedItem = {
+                    ...item,
+                    [key]: updatedValue
+                };
+
+                // marcar precio manual
+                if (key === 'unit_value') {
+                    updatedItem.manualPrice = true;
+                }
+
+                if (
+                    key === 'units' &&
+                    !updatedItem.manualPrice
+                ) {
+                    const newPrice = getEffectivePrice(
+                        item,
+                        updatedValue
+                    );
+
+                    updatedItem.unit_value = newPrice;
+                }
+
+                return updatedItem;
+            });
+
+            return {
+                ...block,
+                items: updatedItems
+            };
+        })
+    );
+};
 
     const handleDeleteItem = (blockIndex, itemIndex) => {
         setItemBlocks(prev =>
@@ -769,100 +797,139 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         )
     }
 
+    const buildTransactionDetails = () => {
+        const transactionDetails = [];
+
+        itemBlocks.forEach(element => {
+            element.items.forEach(item => {
+                const subtotal = parseFloat(item.units) * parseFloat(item.unit_value) / (1 + (parseFloat(item.tax_rate ?? 0) / 100));
+
+                transactionDetails.push({
+                    account_id:item.exit_account,
+                    subtotal,
+                    total:subtotal,
+                    type:item.type == 'service'? 'serviceMovement':'inventoryMovement',
+                    nature: documentNature == 'DB'? 'CR':'DB'
+                });
+            });
+        });
+
+        taxes.forEach(tax => {
+            transactionDetails.push({
+                account_id:tax.account,
+                subtotal:tax.total,
+                total:tax.total,
+                type:'tax',
+                nature: documentNature == 'DB'? 'CR':'DB',
+                cashBox_id,
+                shift_id,
+            });
+        });
+
+        paymentMethod.forEach(element => {
+            transactionDetails.push({
+                account_id:element.account_id,
+                subtotal:element.value,
+                total:element.value,
+                type:'payment',
+                paymentMethod_id:element.id,
+                nature: documentNature,
+                due_date:addDaysToCurrentDate(thirdPartyInfo.credit_term != undefined? thirdPartyInfo.credit_term:0),
+                for_wallet:element.for_wallet,
+                voucher:element.voucher,
+                cashBox_id,
+                shift_id,
+            });
+        });
+
+        return transactionDetails;
+    };
+
+    const buildSellInvoicePayload = () => ({
+        ...FormInfo,
+        user_id:userInfo.user_id,
+        transactionDetails:buildTransactionDetails()
+    });
+
+    const printPhisicalInvoice = async(docResult, electronInfo)=>{
+        let infoToPrtint = {
+            docInfo:{
+                doc_id:docResult.id,
+                doc_type:FormInfo.doc_type,
+                instance_id:selectedInstances[0] ?? undefined,
+                description:FormInfo.description,
+                ownSerial: docResult.ownSerial,
+                total,
+                paymentMethod,
+                instanceOwnSerial:selectedInstances[0]?.ownSerial ?? undefined 
+            },
+            thirdPartyInfo:{
+                thirdParty_name:thirdPartyInfo.names
+            },
+            total,
+            paymentMethods:paymentMethod,
+            electronInfo,
+            totalTaxes,
+            taxes,
+            attachedItems
+        }
+        await printSellInvoice(infoToPrtint,appInfo,true);
+        await printSellInvoice(infoToPrtint,appInfo,false);
+    }
+
     // Creation Function
 
     const createSellInvoice = async()=>{
         setDisabled(true)
         setLoading(true)
-        let res = await postInfo('/facturation/newSellInvoice',FormInfo);
-        if(typeof(parseInt(res.id)) == 'number'){
+        const sellInvoicePayload = buildSellInvoicePayload();
+        let res = await postInfo('/facturation/newSellInvoice',sellInvoicePayload);
+        console.log('Creation of Sell Invoice: ',res)
+        if(res.status !== "OK" || !Number.isFinite(Number(res.id))){
+            addNotification({
+                type:'error',
+                title:`Error al crear Factura de venta`,
+                description:res.message ?? `Error al crear Factura de venta`
+            });
+            setLoading(false);
+            setDisabled(false);
+            return;
+        }
+        if(res.status === "OK"){
             addNotification({
                 type:'aproved',
                 title:`Factura de venta #${res.ownSerial} creada correctamente`,
                 description:`La factura de venta #${res.ownSerial} fue creada correctamente`
             })
-            FormInfo["doc_id"] = res.id
-            FormInfo['instance_id'] = instance_id[0] ?? undefined ;
-            FormInfo["ownSerial"] = res.ownSerial;
+            sellInvoicePayload["doc_id"] = res.id
+            sellInvoicePayload['instance_id'] = instance_id[0] ?? undefined ;
+            sellInvoicePayload["ownSerial"] = res.ownSerial;
+
+            // Creation and controll of electronic invoice
             let e_info = electronicInfo;
             if(e_invoice){
                 e_info = await handleCreationOfEinvoice(res.id);
+                console.log("Electronic Factuation validation: ",e_info)
                 if(e_info.id == undefined){
-                    alert('Error al crear la facttura')
+                    const errorDetails = formatElectronicInvoiceErrors(e_info.errors);
+                    alert([
+                        'Error al emitir factura electronica:',
+                        e_info.message,
+                        errorDetails
+                    ].filter(Boolean).join('\n\n'));
+                    setLoading(false);
+                    setDisabled(false);
                     return;
                 }
                 
             }
+
+            // Printintg Document Control
             if(isElectron){
-                let infoToPrtint = {
-                    docInfo:{
-                        doc_id:res.id,
-                        doc_type:FormInfo.doc_type,
-                        instance_id:selectedInstances[0] ?? undefined,
-                        description:FormInfo.description,
-                        ownSerial: res.ownSerial,
-                        total,
-                        paymentMethod,
-                        instanceOwnSerial:selectedInstances[0]?.ownSerial ?? undefined 
-                    },
-                    thirdPartyInfo:{
-                        thirdParty_name:thirdPartyInfo.names
-                    },
-                    total,
-                    paymentMethods:paymentMethod,
-                    electronInfo:e_info,
-                    totalTaxes,
-                    taxes,
-                    attachedItems
-                }
-                await printSellInvoice(infoToPrtint,appInfo,true);
-                await printSellInvoice(infoToPrtint,appInfo,false);
+                await printPhisicalInvoice(res, e_info);
             }
-            FormInfo["user_id"] = userInfo.user_id,
-            FormInfo['transactionDetails'] = []
-            itemBlocks.forEach(element => {
-                element.items.forEach(item => {
-                    FormInfo.transactionDetails.push({
-                        account_id:item.exit_account,
-                        subtotal:(parseFloat(item.units)*parseFloat(item.unit_value)/(1+(parseFloat(item.tax_rate??0)/100))),
-                        total:(parseFloat(item.units)*parseFloat(item.unit_value)/(1+(parseFloat(item.tax_rate??0)/100))),
-                        type:item.type == 'service'? 'serviceMovement':'inventoryMovement',
-                        nature: documentNature == 'DB'? 'CR':'DB'
-                    })
-                });
-            });
-            taxes.forEach(tax => {
-                FormInfo.transactionDetails.push({
-                    account_id:tax.account,
-                    subtotal:tax.total,
-                    total:tax.total,
-                    type:'tax',
-                    nature: documentNature == 'DB'? 'CR':'DB'
-                })
-            });
-            paymentMethod.forEach(element => {
-                FormInfo.transactionDetails.push({
-                    account_id:element.account_id,
-                    subtotal:element.value,
-                    total:element.value,
-                    type:'payment',
-                    paymentMethod_id:element.id,
-                    nature: documentNature,
-                    due_date:addDaysToCurrentDate(thirdPartyInfo.credit_term != undefined? thirdPartyInfo.credit_term:0),
-                    for_wallet:element.for_wallet,
-                    voucher:element.voucher,
-                    cashBox_id,
-                    shift_id,
-                })
-            });
-            /*FormInfo.transactionDetails.push({
-                account_id:conceptAccount_id,
-                subtotal:total,
-                total:total,
-                type:'operation',
-                nature: documentNature == 'DB'? 'CR':'DB'
-            })*/
-            await toAccount();
+
+
             await updatePaidAmount();
         }else{
             addNotification({
@@ -914,6 +981,28 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
     }
 
+    const formatElectronicInvoiceErrors = (errors) => {
+        if (!errors) return '';
+
+        if (Array.isArray(errors)) {
+            return errors
+                .map(error => typeof error === 'string' ? error : JSON.stringify(error))
+                .join('\n');
+        }
+
+        if (typeof errors === 'object') {
+            return Object.entries(errors)
+                .flatMap(([field, fieldErrors]) => {
+                    const messages = Array.isArray(fieldErrors) ? fieldErrors : [fieldErrors];
+
+                    return messages.map(message => `${field}: ${message}`);
+                })
+                .join('\n');
+        }
+
+        return String(errors);
+    }
+
 
     const handleCreationOfEinvoice = async(doc_id)=>{
         let itemsToFac = [];
@@ -946,6 +1035,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             items:itemsToFac,
             doc_id
         });
+        console.log('RES Factus: --> ',res)
         if(res.status == 'Created'){
             addNotification({
                 type:'aproved',
@@ -962,7 +1052,9 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             return({
                 id:undefined,
                 code:undefined,
-                url:undefined
+                url:undefined,
+                errors:res.data.errors,
+                message:res.message
             })
         }
         return({
@@ -1029,9 +1121,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
     },[instance_id])
 
-    useEffect(()=>{
-        calcTotalFromPayments();
-    },[paymentMethod])
 
     useEffect(()=>{
         if(documents.length > 0){
@@ -1056,9 +1145,14 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             });
             setTotalToPay(newTotalToPay)
         }
-        calcTotalFromPayments();
+
     },[documents,briefCaseBills,itemBlocks])
 
+    useEffect(()=>{
+        calcTotalFromPayments();
+    },[paymentMethod,totalToPay]
+    )
+    
     useEffect(()=>{
         if(itemBlocks.length == 0) return;
         let C = [];

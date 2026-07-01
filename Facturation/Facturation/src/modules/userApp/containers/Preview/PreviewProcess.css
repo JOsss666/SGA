@@ -260,3 +260,27 @@
 .PreviewProcess .processAttached .shareProcess i{
     margin-right: 1vh;
 }
+
+.PreviewProcess .processAttached .gridAttDocs .cardDocInfo {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.PreviewProcess .processAttached .gridAttDocs .electronicBadge {
+    display: flex;
+    align-items: center;
+    gap: .5vh;
+    background-color: #BEDBFF;
+    border-radius: 1vh;
+    padding: .5vh 1vh;
+    margin-left: auto;
+}
+
+.PreviewProcess .processAttached .gridAttDocs .electronicBadge i,
+.PreviewProcess .processAttached .gridAttDocs .electronicBadge span {
+    color: #1447E6 !important;
+    font-size: clamp(1.5px, 1.5vh, 15px) !important;
+    font-weight: 600;
+    margin: 0 !important;
+}

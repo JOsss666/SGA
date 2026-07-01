@@ -799,7 +799,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         setLoading(true)
         let res = await postInfo('/facturation/newSellInvoice',FormInfo);
         console.log(res);
-        if(typeof(parseInt(res.id)) == 'number'){
+        if(res.status === "OK" && Number.isFinite(Number(res.id))){
             addNotification({
                 type:'aproved',
                 title:`Factura de venta #${res.ownSerial} creada correctamente`,
@@ -872,9 +872,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 subtotal:total,
                 total:total,
                 type:'operation',
-                nature: documentNature == 'DB'? 'CR':'DB'
+                nature: documentNatu˜re == 'DB'? 'CR':'DB'
             })*/
-            await toAccount();
             await updatePaidAmount();
         }else{
             addNotification({

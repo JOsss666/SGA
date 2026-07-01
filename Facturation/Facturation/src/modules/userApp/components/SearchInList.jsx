@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './SearchInList.css'
 
-export function SearchinList({title, placeHolder, list, disabled, action, children, specialOption, noActVal,canClear}){
+export function SearchinList({title, placeHolder, list, disabled, action, children, specialOption, noActVal,canClear, defaultValue = {}}){
     
     const [searchValue, setSearchValue] = useState('');
     const [visibleList, setVisibleList] = useState(false);
@@ -86,6 +86,12 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
             action(selectedOption);
         }
     }, [selectedOption]);
+
+    useEffect(()=>{
+        if(defaultValue.value != undefined){
+            handleSelect(defaultValue)
+        }
+    },[])
 
     return(
         <div className="SearchinList" onClick={()=>{

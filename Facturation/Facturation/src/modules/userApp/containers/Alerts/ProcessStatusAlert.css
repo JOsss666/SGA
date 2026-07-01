@@ -4,6 +4,7 @@
     padding: 2vh;
     width: 30vw;
     background-color: var(--bg);
+    border-radius: 2vh;
 }
 
 .ProcessStatusAlert .headProcess{
@@ -122,7 +123,7 @@
 
 .ProcessStatusAlert .gridStepsProces .ActualStep .steepIndicator{
     background-color: #007AFF;
-    outline: solid .6vh #8EC5FF;
+    outline: solid .6vh #8EC5FF90;
 }
 
 .ProcessStatusAlert .gridStepsProces .PendingStep{
