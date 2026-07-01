@@ -1,0 +1,132 @@
+.AuditoryClicksReport{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding: 0 2vh;
+}
+
+.AuditoryClicksReport .headReport{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    margin-bottom: 2vh;
+}
+
+.AuditoryClicksReport .headReport .PathLocation{
+    margin-left: -1vh;
+}
+
+.AuditoryClicksReport .settingsReport{
+    margin-bottom: 2vh;
+    display:flex;
+    gap: 2vh;
+    align-items: center;
+}
+
+.AuditoryClicksReport .settingsReport .SearchBar{
+    width: fit-content;
+}
+
+.AuditoryClicksReport .settingsReport .SearchBar input{
+    width: 15vw;
+}
+
+.AuditoryClicksReport .settingsReport .SearchBar input:focus{
+    width: 30vw;
+    outline: solid .2vh #2B7FFF;
+}
+
+.AuditoryClicksReport .settingsReport .ButtonDownload{
+    width: fit-content;
+    margin: auto;
+    margin-right: 2vh;
+}
+
+.AuditoryClicksReport .settingsReport .ButtonDownload .downloadMenu{
+    bottom: -180%;
+}
+
+
+.AuditoryClicksReport .settingsReport .rangeInput{
+    display: flex;
+    gap:2vh;
+    justify-content: center;
+    align-items: center;
+    color: var(--mainText);
+}
+
+.AuditoryClicksReport .settingsReport .rangeInput .rangeINput{
+    border-radius: 1vh;
+    border: hidden;
+    outline: solid .1vh var(--inputsBorder);
+    padding: 1.25vh 2vh;
+    font-size: clamp(2px , 2vh , 20px);
+    width: 10vw;
+    height: fit-content;
+    background-color: var(--inputsBg);
+    color: var(--descriptionText);
+    transition: .3s;
+}
+
+.AuditoryClicksReport .settingsReport .rangeInput .rangeINput:focus{
+    color:var(--mainText);
+}
+
+
+.AuditoryClicksReport .totalsIndicator{
+    position: absolute;
+    right: 4vw;
+    display: flex;
+    gap: 2vw;
+}
+
+.AuditoryClicksReport .totalsIndicator .ttlIndicator{
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    gap: .5vh;
+}
+
+.AuditoryClicksReport .totalsIndicator .ttlIndicator span{
+    color: var(--descriptionText);
+    font-size: clamp(2.2px,2.2vh,22px);
+}
+
+.AuditoryClicksReport .totalsIndicator .ttlIndicator strong{
+    color: var(--mainText);
+    font-size: clamp(2.5px,2.5vh,25px);
+    font-weight: 500;
+}
+
+
+.AuditoryClicksReport .contentReport{
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.AuditoryClicksReport .totalsBalanceC{
+    position: absolute;
+    display: flex;
+    gap: 4vh;
+    right: 3vw;
+    top: 2vh;
+}
+
+.AuditoryClicksReport .totalsBalanceC .LabelValue{
+    display: flex;
+    flex-direction: column;
+    max-width: 12vw;
+}
+
+.AuditoryClicksReport .totalsBalanceC .LabelValue .lab ,.ReportDocument .totalsBalanceC .LabelValue .val{
+    width: 100% ;
+    text-wrap: nowrap;
+    margin-right:0;
+}
+
+.AuditoryClicksReport .totalsBalanceC .LabelValue .val{
+    font-weight: 400 !important;
+    margin-top: 1vh;
+    text-align: right;
+    width: 100%;
+}

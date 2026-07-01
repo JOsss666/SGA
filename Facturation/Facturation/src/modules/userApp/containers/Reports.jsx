@@ -33,6 +33,10 @@ import { PortfolioReportDetail } from './reports/PortfolioReportDetail';
         import('../../../../../../costume-modules/zjSAS.S/src/containers/reports/ServiceMovements').then(module => ({ default: module.ServiceMovements }))
     );
 
+    const CustomZJAuditoryClicksReport = React.lazy(() => 
+        import('../../../../../../costume-modules/zjSAS.S/src/containers/reports/AuditoryClicksReport').then(module => ({ default: module.AuditoryClicksReport }))
+    );
+
 export function Reports(){
 
     const {userConfig,userInfo,appInfo,appConfig} = useAppInfo();
@@ -136,6 +140,11 @@ export function Reports(){
                                     handleNavigate('zjServicesReport')
                                 }}/>
                             )}
+                            {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
+                                <CardReport type={'processes'} title={'Auditoria de clicks (V0.01)'} description={'Versión de prueba Alpha V 1.1'} onClick={()=>{
+                                    handleNavigate('zjAuditoryClicksReport')
+                                }}/>
+                            )}
                             <CardReport type={'contable'} title={'Informe Cierres de caja'} description={'Consulte los cierres de caja'} onClick={()=>{
                                 handleNavigate('CashBoxesCloseReport')
                             }}/>
@@ -169,6 +178,13 @@ export function Reports(){
                     <Route path='/zjClicksReport' element={
                     <Suspense fallback={<div>Cargando componente pesado...</div>}>
                         <CustomZJClicksReport useAlert={useAlert} appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} useAiAssistant={useAiAssistant}/>
+                    </Suspense>
+                    }/>
+                )}
+                {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
+                    <Route path='/zjAuditoryClicksReport' element={
+                    <Suspense fallback={<div>Cargando modulo personalizado...</div>}>
+                        <CustomZJAuditoryClicksReport useAlert={useAlert} appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} useAiAssistant={useAiAssistant}/>
                     </Suspense>
                     }/>
                 )}
