@@ -121,6 +121,8 @@ function encrypt(data) {
     return sha96Hash.toString('hex');
 }
 
+console.log('KEY --> ',encrypt('JM_2026*'));
+
 // Errores transitorios de conexión que justifican un reintento (no son errores de SQL).
 const isTransientConnError = (err) =>
     err && (
