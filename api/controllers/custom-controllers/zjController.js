@@ -111,6 +111,158 @@ zjController.getHistorialClicksControl = (req,res)=>{
     })
 }
 
+zjController.getAuditClicksReport = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        console.log(data);
+        let info = JSON.parse(data);
+        let values = [];
+        let dailyClicksWhere = [];
+        let serviceClicksWhere = [];
+        let finalWhere = [];
+
+        values.push(info.company_id);
+        dailyClicksWhere.push(`cc.company_id = $${values.length}`);
+        serviceClicksWhere.push(`sm.company_id = $${values.length}`);
+
+        if(info.machine_id != undefined){
+            values.push(info.machine_id);
+            dailyClicksWhere.push(`cc.asset_id = $${values.length}`);
+            serviceClicksWhere.push(`sec.machine_id = $${values.length}`);
+        }
+
+        if(info.start_date != undefined){
+            values.push(info.start_date);
+            finalWhere.push(`rc.report_date >= $${values.length}`);
+        }
+
+        if(info.end_date != undefined){
+            values.push(info.end_date);
+            finalWhere.push(`rc.report_date <= $${values.length}`);
+        }
+
+        const dailyClicksWhereQuery = `WHERE ${dailyClicksWhere.join(" AND ")}`;
+        const serviceClicksWhereQuery = `WHERE ${serviceClicksWhere.join(" AND ")}`;
+        const finalWhereQuery = finalWhere.length > 0
+        ? `WHERE ${finalWhere.join(" AND ")}`
+        : "";
+
+        let sentence = `
+            WITH daily_clicks AS (
+                SELECT DISTINCT ON (
+                    cc.company_id,
+                    cc.asset_id,
+                    cc.created_at::date
+                )
+                    cc.company_id,
+                    cc.asset_id,
+                    cc.attached AS "clickControlAttached",
+                    cc.created_at::date AS report_date,
+                    cc.created_at AS click_record_created_at,
+                    cc."initialClicks"::numeric AS initial_clicks
+                FROM "Custom"."z&j_clickControl" cc
+                ${dailyClicksWhereQuery}
+                ORDER BY
+                    cc.company_id,
+                    cc.asset_id,
+                    cc.created_at::date,
+                    cc.created_at ASC
+            ),
+
+            clicks_with_next AS (
+                SELECT
+                    dc.*,
+                    LEAD(dc.report_date) OVER (
+                        PARTITION BY dc.company_id, dc.asset_id
+                        ORDER BY dc.report_date
+                    ) AS next_report_date,
+                    LEAD(dc.initial_clicks) OVER (
+                        PARTITION BY dc.company_id, dc.asset_id
+                        ORDER BY dc.report_date
+                    ) AS next_initial_clicks
+                FROM daily_clicks dc
+            ),
+
+            registered_clicks AS (
+                SELECT
+                    cwn.company_id,
+                    cwn.asset_id,
+                    cwn.report_date,
+                    cwn.click_record_created_at,
+                    cwn.initial_clicks,
+                    cwn."clickControlAttached",
+                    cwn.next_report_date,
+                    cwn.next_initial_clicks,
+                    CASE
+                        WHEN cwn.next_initial_clicks IS NULL THEN NULL
+                        ELSE cwn.next_initial_clicks - cwn.initial_clicks
+                    END AS "clicksRegistrados"
+                FROM clicks_with_next cwn
+            ),
+
+            service_clicks AS (
+                SELECT
+                    sm.company_id,
+                    sec.machine_id AS asset_id,
+                    sm.created_at::date AS report_date,
+                    COUNT(sm.id)::int AS services_count,
+                    COALESCE(SUM(sm.units), 0)::numeric AS services_units,
+                    COALESCE(
+                        SUM(sm.units::numeric * COALESCE(eq.clicks, 0)::numeric),
+                        0
+                    ) AS "clicksEjecutados"
+                FROM "Custom"."z&j_serviceExecutionControl" sec
+                INNER JOIN "Inventory".services_movement sm
+                    ON sm.id = sec."serviceMovement_id"
+                LEFT JOIN "Custom"."z&j_clicksEquivalence" eq
+                    ON eq.service_id = sm.service_id
+                ${serviceClicksWhereQuery}
+                GROUP BY
+                    sm.company_id,
+                    sec.machine_id,
+                    sm.created_at::date
+            )
+
+            SELECT
+                rc.report_date AS fecha,
+                rc.asset_id AS machine_id,
+                a.name AS machine_name,
+                a.model AS machine_model,
+                a.img AS machine_img,
+                rc.initial_clicks,
+                rc."clickControlAttached",
+                rc.next_initial_clicks,
+                rc.next_report_date,
+                COALESCE(rc."clicksRegistrados", 0) AS "clicksRegistrados",
+                COALESCE(sc.services_count, 0) AS services_count,
+                COALESCE(sc.services_units, 0) AS services_units,
+                COALESCE(sc."clicksEjecutados", 0) AS "clicksEjecutados",
+                COALESCE(rc."clicksRegistrados", 0) - COALESCE(sc."clicksEjecutados", 0) AS diferencia
+            FROM registered_clicks rc
+            LEFT JOIN service_clicks sc
+                ON sc.company_id = rc.company_id
+               AND sc.asset_id = rc.asset_id
+               AND sc.report_date = rc.report_date
+            LEFT JOIN "AssetManagement".assets a
+                ON a.id = rc.asset_id
+            ${finalWhereQuery}
+            ORDER BY
+                rc.report_date DESC,
+                a.name ASC;
+        `;
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 zjController.openClickControl = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
