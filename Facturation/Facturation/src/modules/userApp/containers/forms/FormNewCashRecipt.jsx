@@ -532,6 +532,12 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const buildCashReceiptPayload = () => ({
         ...FormInfo,
         user_id:userInfo.user_id,
+        // Solo enviamos las carteras con un abono válido (> 0). Las que el usuario
+        // dejó vacías o en 0 no se pagan en este recibo y no deben viajar al backend.
+        payedBills: briefCaseBills.filter(bill => {
+            const value = Number(bill.paid_value);
+            return Number.isFinite(value) && value > 0;
+        }),
         transactionDetails:buildTransactionDetails()
     });
 
@@ -541,7 +547,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         setBriefCaseBills(prev => 
             prev.map(item => 
                 item.id === id 
-                    ? { ...item, ["paid_value"]: newValue } 
+                    ? { ...item, ["paid_value"]: newValue != ""? newValue:0 } 
                     : item
             )
         );

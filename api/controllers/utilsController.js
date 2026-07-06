@@ -458,65 +458,68 @@ utilsController.applyPortfolioPayments = async (info, payedBills, creationDocume
 
         for (const bill of payedBills) {
             const paymentValue = Number(bill.paid_value);
+            if(paymentValue != 0 && paymentValue != NaN){
+                console.log('Valor a pagar --> ',paymentValue);
+                console.log('Tipo Valor a pagar --> ',typeof(paymentValue));
+                if (!Number.isFinite(paymentValue) || paymentValue <= 0) {
+                    throw new Error(`Valor de pago inválido para cartera #${bill.id}.`);
+                }
 
-            if (!Number.isFinite(paymentValue) || paymentValue <= 0) {
-                throw new Error(`Valor de pago inválido para cartera #${bill.id}.`);
+                const accountResult = await client.query(`
+                    SELECT
+                        id,
+                        total,
+                        paid_amount,
+                        document_id
+                    FROM "Treasury".accounts_receivable
+                    WHERE id = $1
+                    FOR UPDATE;
+                `, [bill.id]);
+
+                const account = accountResult.rows[0];
+                if (!account) {
+                    throw new Error(`No existe la cuenta por cobrar #${bill.id}.`);
+                }
+
+                const pendingAmount = Number(account.total) - Number(account.paid_amount);
+                if (paymentValue > pendingAmount) {
+                    throw new Error(`El pago ${paymentValue} supera el saldo pendiente ${pendingAmount} de cartera #${bill.id}.`);
+                }
+
+                const insertPayment = await client.query(`
+                    INSERT INTO "Treasury".portfolio_payments(
+                        company_id,
+                        store_id,
+                        "thirdParty_id",
+                        document_id,
+                        instance_id,
+                        paid_value,
+                        "creationDocument_id")
+                    VALUES ($1, $2, $3, $4, $5, $6, $7)
+                    RETURNING id;
+                `, [
+                    info.company_id,
+                    info.store_id,
+                    info.thirdParty_id,
+                    bill.document_id ?? account.document_id,
+                    bill.instance_id,
+                    paymentValue,
+                    creationDocumentId
+                ]);
+
+                await client.query(`
+                    UPDATE "Treasury".accounts_receivable
+                    SET paid_amount = paid_amount + $2
+                    WHERE id = $1;
+                `, [bill.id, paymentValue]);
+
+                results.push({
+                    status: "OK",
+                    bill_id: bill.id,
+                    payment_id: insertPayment.rows[0]?.id,
+                    paid_value: paymentValue
+                });
             }
-
-            const accountResult = await client.query(`
-                SELECT
-                    id,
-                    total,
-                    paid_amount,
-                    document_id
-                FROM "Treasury".accounts_receivable
-                WHERE id = $1
-                FOR UPDATE;
-            `, [bill.id]);
-
-            const account = accountResult.rows[0];
-            if (!account) {
-                throw new Error(`No existe la cuenta por cobrar #${bill.id}.`);
-            }
-
-            const pendingAmount = Number(account.total) - Number(account.paid_amount);
-            if (paymentValue > pendingAmount) {
-                throw new Error(`El pago ${paymentValue} supera el saldo pendiente ${pendingAmount} de cartera #${bill.id}.`);
-            }
-
-            const insertPayment = await client.query(`
-                INSERT INTO "Treasury".portfolio_payments(
-                    company_id,
-                    store_id,
-                    "thirdParty_id",
-                    document_id,
-                    instance_id,
-                    paid_value,
-                    "creationDocument_id")
-                VALUES ($1, $2, $3, $4, $5, $6, $7)
-                RETURNING id;
-            `, [
-                info.company_id,
-                info.store_id,
-                info.thirdParty_id,
-                bill.document_id ?? account.document_id,
-                bill.instance_id,
-                paymentValue,
-                creationDocumentId
-            ]);
-
-            await client.query(`
-                UPDATE "Treasury".accounts_receivable
-                SET paid_amount = paid_amount + $2
-                WHERE id = $1;
-            `, [bill.id, paymentValue]);
-
-            results.push({
-                status: "OK",
-                bill_id: bill.id,
-                payment_id: insertPayment.rows[0]?.id,
-                paid_value: paymentValue
-            });
         }
 
         return results;
