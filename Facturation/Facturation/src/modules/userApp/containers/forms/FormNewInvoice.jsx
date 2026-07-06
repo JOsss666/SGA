@@ -901,6 +901,8 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                 title:`Factura de venta #${res.ownSerial} creada correctamente`,
                 description:`La factura de venta #${res.ownSerial} fue creada correctamente`
             })
+            console.log(res);
+            FormInfo["ownSerial"] = res.ownSerial
             sellInvoicePayload["doc_id"] = res.id
             sellInvoicePayload['instance_id'] = instance_id[0] ?? undefined ;
             sellInvoicePayload["ownSerial"] = res.ownSerial;

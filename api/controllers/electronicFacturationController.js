@@ -76,15 +76,28 @@ electronicFacturationController.getAuthToken = async (grantType = 'password', re
     // Si bypassCache es true, ignoramos el archivo (esto rompe el bucle)
     let stored = bypassCache ? null : await readFile(TOKEN_PATH);
 
-    if (stored && finalGrantType === 'password') {
+    // La caché solo es confiable si trae un access_token no vacío y un expires_at
+    // numérico. Si el archivo está vacío, corrupto, incompleto o no se pudo leer
+    // (readFile devolvió null), lo tratamos como inexistente y pedimos un token nuevo.
+    const isUsableCache = stored
+        && typeof stored.access_token === 'string'
+        && stored.access_token.trim().length > 0
+        && Number.isFinite(stored.expires_at);
+
+    if (!bypassCache && !isUsableCache) {
+        console.warn('⚠️ Caché de token vacía, corrupta o ilegible. Solicitando un token nuevo.');
+    }
+
+    if (isUsableCache && finalGrantType === 'password') {
         const now = Date.now();
         const fiveMinutes = 5 * 60 * 1000;
-        
+
         if (now < (stored.expires_at - fiveMinutes)) {
             return stored;
         }
-        
-        if (stored.refresh_token) {
+
+        // Token vencido: intentamos refrescar solo si hay un refresh_token válido.
+        if (typeof stored.refresh_token === 'string' && stored.refresh_token.trim().length > 0) {
             finalGrantType = 'refresh_token';
             refreshToken = stored.refresh_token;
         }
