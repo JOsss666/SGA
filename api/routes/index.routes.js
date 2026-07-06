@@ -249,6 +249,8 @@ router.post('/facturation/newCashRecipt',facturationController.newCashRecipt);
 
 router.post('/facturation/newSellInvoice',facturationController.newSellInvoice);
 
+router.post('/facturation/newPurchase',facturationController.newPurchase);
+
 router.post('/facturation/newNote',facturationController.newNote);
 
 router.post('/facturation/newClientOrder',facturationController.newClientOrder);

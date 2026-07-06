@@ -109,6 +109,67 @@ utilsController.registerDocument = async (info, options = {}) => {
     return await useDataBase(docCreation, values, 3);
 };
 
+utilsController.registerPurchaseItems = async (info, docId, options = {}) => {
+    const items = Array.isArray(info.items) ? info.items : [];
+
+    if (items.length === 0) {
+        return {
+            status: "skipped",
+            description: "La compra no trae ítems para registrar."
+        };
+    }
+
+    const sentence = `
+        INSERT INTO "Inventory".services_movement(
+            company_id,
+            store_id,
+            "thirdParty_id",
+            service_id,
+            units,
+            unit_value,
+            total,
+            description,
+            instance_id,
+            doc_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING id;
+    `;
+    const instanceId = utilsController.normalizeOptionalId(info.instance_id);
+    const results = [];
+
+    for (const item of items) {
+        const productId = item.product_id ?? item.service_id ?? item.id;
+        const values = [
+            info.company_id,
+            info.store_id,
+            info.thirdParty_id,
+            productId,
+            item.units,
+            item.unit_value,
+            item.total,
+            item.description,
+            instanceId,
+            docId
+        ];
+
+        const row = options.client
+            ? (await options.client.query(sentence, values)).rows[0]
+            : await useDataBase(sentence, values, 3);
+
+        results.push({
+            status: row?.id !== undefined ? "OK" : "Error",
+            id: row?.id,
+            product_id: productId
+        });
+    }
+
+    return {
+        status: results.every(item => item.status === "OK") ? "OK" : "Error",
+        items: results,
+        description: "Ítems de la compra registrados correctamente."
+    };
+};
+
 utilsController.linkDocumentInstances = async (docId, infoOrInstances, options = {}) => {
     const instances = Array.isArray(infoOrInstances)
         ? utilsController.normalizeProcessInstances({ instances: infoOrInstances })
@@ -169,10 +230,24 @@ utilsController.refreshThirdPartyPortfolio = async () => {
     };
 };
 
+utilsController.refreshThirdPartyPayables = async () => {
+    const result = await useDataBase(
+        'REFRESH MATERIALIZED VIEW CONCURRENTLY "Treasury".mv_thirdparty_payable_balances;',
+        [],
+        2
+    );
+
+    return {
+        status: result?.[0] ? "OK" : "Error",
+        result
+    };
+};
+
 utilsController.refreshDocumentViews = async () => {
     const results = {};
 
     results.thirdPartyPortfolio = await utilsController.refreshThirdPartyPortfolio();
+    results.thirdPartyPayables = await utilsController.refreshThirdPartyPayables();
     results.shiftPaymentSummaries = await useDataBase(
         'REFRESH MATERIALIZED VIEW CONCURRENTLY "Facturation".mv_shift_payment_summaries;',
         [],
@@ -180,7 +255,9 @@ utilsController.refreshDocumentViews = async () => {
     );
 
     return {
-        status: results.thirdPartyPortfolio.status === "OK" && results.shiftPaymentSummaries?.[0]
+        status: results.thirdPartyPortfolio.status === "OK"
+            && results.thirdPartyPayables.status === "OK"
+            && results.shiftPaymentSummaries?.[0]
             ? "OK"
             : "Error",
         results
@@ -203,15 +280,31 @@ utilsController.updateDocumentPaidAmount = async (docId, amount, options = {}) =
     return await useDataBase(sentence, values, 2);
 };
 
+utilsController.isPurchaseDocument = (docType) => (
+    ["Purchase Invoice", "Purchase Document", "Equivalent Purchase Document"].includes(docType)
+);
+
 utilsController.getDocumentPaidAmount = (info) => {
-    if (info.doc_type !== "Sell Invoice") {
+    if (info.doc_type !== "Sell Invoice" && !utilsController.isPurchaseDocument(info.doc_type)) {
         return info.total;
     }
 
     const paymentDetails = info.transactionDetails ?? [];
-    return paymentDetails
+    const paid = paymentDetails
         .filter(detail => detail.type === "payment" && detail.for_wallet !== true)
         .reduce((sum, detail) => sum + Number(detail.total || 0), 0);
+
+    // En compras, las retenciones practicadas extinguen parte de la obligación con el
+    // proveedor (se giran a la DIAN, no al tercero), por lo que cuentan como "pagado"
+    // para efectos del saldo pendiente del documento (pending_value = total - paid_amount).
+    if (utilsController.isPurchaseDocument(info.doc_type)) {
+        const withheld = paymentDetails
+            .filter(detail => detail.type === "withholding")
+            .reduce((sum, detail) => sum + Number(detail.total || 0), 0);
+        return paid + withheld;
+    }
+
+    return paid;
 };
 
 
@@ -299,7 +392,7 @@ utilsController.getDocumentPaidAmount = (info) => {
     };
 
     utilsController.shouldRegisterCashMovement = (info, detail) => {
-        const cashBoxTypes = ["Cash Recipt", "Sell Invoice"];
+        const cashBoxTypes = ["Cash Recipt", "Sell Invoice", "Purchase Invoice", "Purchase Document"];
         return cashBoxTypes.includes(info.doc_type)
             && detail.type === "payment"
             && detail.for_wallet !== true;
@@ -361,6 +454,35 @@ utilsController.getDocumentPaidAmount = (info) => {
         return await useDataBase(sentence, values, 3);
     };
 
+    utilsController.createPayableFromTransactionDetail = async (info, detail, options = {}) => {
+        const sentence = `
+            INSERT INTO "Treasury".accounts_payable(
+                company_id,
+                "thirdParty_id",
+                document_id,
+                total,
+                paid_amount,
+                due_date)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id;
+        `;
+        const values = [
+            info.company_id,
+            info.thirdParty_id,
+            info.doc_id,
+            detail.total,
+            0,
+            detail.due_date
+        ];
+
+        if (options.client) {
+            const result = await options.client.query(sentence, values);
+            return result.rows[0];
+        }
+
+        return await useDataBase(sentence, values, 3);
+    };
+
     utilsController.createAccountTransactionDetails = async (info, transactionId, options = {}) => {
         const details = info.transactionDetails ?? [];
         const results = [];
@@ -389,11 +511,19 @@ utilsController.getDocumentPaidAmount = (info) => {
             }
 
             if (detail.for_wallet === true && transactionDetail?.id !== undefined) {
-                result.receivable = await utilsController.createReceivableFromTransactionDetail(
-                    info,
-                    detail,
-                    options
-                );
+                if (utilsController.isPurchaseDocument(info.doc_type)) {
+                    result.payable = await utilsController.createPayableFromTransactionDetail(
+                        info,
+                        detail,
+                        options
+                    );
+                } else {
+                    result.receivable = await utilsController.createReceivableFromTransactionDetail(
+                        info,
+                        detail,
+                        options
+                    );
+                }
             }
 
             results.push(result);

@@ -2,6 +2,7 @@ import { useDataBase } from "../app.js";
 import processController from "./processController.js";
 import sellInvoiceService from "../services/sellInvoiceService.js";
 import cashReceiptService from "../services/cashReceiptService.js";
+import purchaseService from "../services/purchaseService.js";
 import utilsController from "./utilsController.js";
 const facturationController = {};
 
@@ -119,6 +120,23 @@ facturationController.newSellInvoice = (req,res)=>{
         })
         .catch((err)=>{
             console.error("Error al crear factura de venta:", err);
+            res.writeHead(500, {'Content-Type':'application/json'});
+            res.end(JSON.stringify({
+                status: "Error",
+                message: err.message
+            }));
+        });
+}
+
+facturationController.newPurchase = (req,res)=>{
+    utilsController.readJsonBody(req)
+        .then(async(info)=>{
+            const result = await purchaseService.register(info);
+            res.writeHead(result.status === "OK" ? 200 : 400, {'Content-Type':'application/json'});
+            res.end(JSON.stringify(result));
+        })
+        .catch((err)=>{
+            console.error("Error al crear la compra:", err);
             res.writeHead(500, {'Content-Type':'application/json'});
             res.end(JSON.stringify({
                 status: "Error",
