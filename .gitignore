@@ -35,3 +35,6 @@ coverage/
 
 # Optional cache
 .cache/
+
+# Local DB backups (contain sensitive data — never commit)
+db/backups/
