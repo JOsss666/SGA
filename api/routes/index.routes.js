@@ -66,6 +66,13 @@ router.post('/updateThirdPartyTaxInfo',controller.updateThirdPartyTaxInfo);
 
 router.post('/createThirdParty',controller.createThirdParty);
 
+router.post('/blockThirdParty',controller.blockThirdParty);
+
+router.post('/unblockThirdParty',controller.unblockThirdParty);
+
+// Etapa 5: el controller deleteThirdParty existía sin ruta (código muerto); se expone ya con auditoría.
+router.post('/deleteThirdParty',controller.deleteThirdParty);
+
 router.post('/getThirdPartyDetails',controller.getThirdPartyDetails);
 
 router.post('/getStores',controller.getStores);
