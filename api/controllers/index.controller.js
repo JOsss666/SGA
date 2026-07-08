@@ -1942,7 +1942,12 @@ controller.getThirdParties = (req,res)=>{
         let joinClause = "";
         // Si se requiere información comercial, añadimos las columnas y el JOIN
         if (info.comercialInfo === true) {
-            // Ajustado a los nuevos campos de la MV de Cartera
+            // Ajustado a los nuevos campos de la MV de Cartera.
+            // Etapa 6 (refactor terceros): los datos fiscales ya NO se leen de
+            // "Ecosystem"."thirdPartyTaxInfo" sino de la vista de compatibilidad
+            // "Fiscal".v_third_party_current_tax_info (mismo shape + campos extra
+            // que antes no se devolvían: regime, retention_type, economic_activity,
+            // attachedRut y municipality_name).
             selectColumns += `,
                 ci.credit,
                 ci.credit_value,
@@ -1954,21 +1959,27 @@ controller.getThirdParties = (req,res)=>{
                 tti.dv,
                 tti.nature AS "thirdParty_nature",
                 tti."identidicationType_id",
+                tti.regime,
+                tti.retention_type,
+                tti.economic_activity,
+                tti."attachedRut",
+                tti.municipality_name,
                 COALESCE(b.total_debt, 0) AS "thirdParty_totalDebt",
                 COALESCE(b.total_paid, 0) AS "thirdParty_totalPaid",
                 COALESCE(b.balance, 0) AS "thirdParty_balance",
                 COALESCE(b.current_balance, 0) AS "thirdParty_currentBalance",
                 COALESCE(b.overdue_balance, 0) AS "thirdParty_overdueBalance"
             `;
-            
+
             joinClause = `
                 LEFT JOIN "Ecosystem"."thirdPartyComercialInfo" ci
                     ON "Ecosystem".thirdparties.id = ci."thirdParty_id"
                 LEFT JOIN "Ecosystem".mv_thirdparty_account_balances b
                     ON "Ecosystem".thirdparties.id = b."thirdParty_id"
                     AND "Ecosystem".thirdparties.company_id = b.company_id
-                LEFT JOIN "Ecosystem"."thirdPartyTaxInfo" tti
+                LEFT JOIN "Fiscal".v_third_party_current_tax_info tti
                     ON "Ecosystem".thirdparties.id = tti."thirdParty_id"
+                    AND "Ecosystem".thirdparties.company_id = tti.company_id
             `;
         }
 
