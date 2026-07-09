@@ -893,6 +893,15 @@ controller.createTax = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        const validTaxTypes = ['purchase', 'sell', 'both'];
+        const taxType = `${info.type ?? info.tax_type ?? 'both'}`.trim().toLowerCase();
+
+        if (!validTaxTypes.includes(taxType)) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify([false, `Tipo de impuesto inválido: ${taxType}`]));
+            return;
+        }
+
         let sentence = `
             INSERT INTO
                 "Ecosystem".taxes(
@@ -903,9 +912,10 @@ controller.createTax = (req,res)=>{
                     base,
                     parent_id,
                     path,
-                    "isRetention"
+                    "isRetention",
+                    "type"
                 )
-            VALUES($1,$2,$3,$4,$5,$6,$7,$8);
+            VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9);
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -915,7 +925,8 @@ controller.createTax = (req,res)=>{
             info.base,
             info.parent_id != undefined? info.parent_id:0,
             info.path != undefined? info.path:'/',
-            info.isRetention
+            info.isRetention,
+            taxType
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -960,7 +971,10 @@ controller.getTaxes = (req, res) => {
                     "Ecosystem"."taxes".base,
                     "Ecosystem"."taxes".parent_id,
                     "Ecosystem"."taxes".path,
-                    "Ecosystem"."contable_accounts".type,
+                    "Ecosystem"."taxes"."isRetention",
+                    "Ecosystem"."taxes"."type",
+                    "Ecosystem"."taxes"."type" AS tax_type,
+                    "Ecosystem"."contable_accounts".type AS account_type,
                     "Ecosystem"."contable_accounts".name
                 FROM "Ecosystem"."taxes"
                 LEFT JOIN "Ecosystem"."contable_accounts"
@@ -978,15 +992,35 @@ controller.getTaxes = (req, res) => {
                 where.push(`"Ecosystem".taxes.id = $${values.length}`);
             }
 
+            const taxType = info.type ?? info.tax_type;
+            if (taxType != null) {
+                const normalizedTaxType = `${taxType}`.trim().toLowerCase();
+                const validTypes = ['purchase', 'sell', 'both'];
+                if (!validTypes.includes(normalizedTaxType)) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify([false, `Tipo de impuesto inválido: ${taxType}`]));
+                    return;
+                }
+
+                if (normalizedTaxType === 'purchase' || normalizedTaxType === 'sell') {
+                    values.push(normalizedTaxType);
+                    where.push(`"Ecosystem".taxes."type" IN ($${values.length}::tax_type, 'both'::tax_type)`);
+                } else {
+                    where.push(`"Ecosystem".taxes."type" = 'both'::tax_type`);
+                }
+            }
+
             // Combinar WHERE dinámico
             sentence += where.join(' AND ');
-            
+
+            sentence += ` ORDER BY "Ecosystem".taxes.account_id ASC`;
+
             if (info.limit != null) {
                 values.push(info.limit);
                 sentence += ` LIMIT $${values.length}`;
             }
 
-            sentence += ` ORDER BY "Ecosystem".taxes.account_id ASC;`;
+            sentence += `;`;
 
             const consulta = await useDataBase(sentence, values, 1);
             res.writeHead(200, { 'Content-Type': 'application/json' });

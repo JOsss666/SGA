@@ -31,6 +31,7 @@ export function FormNewTax({reloadInfo,info}){
     const [parent_id,setParent_id] = useState(info.id != undefined? info.id:0);
     const [path,setPath] = useState(info.path != undefined? info.path:'/');
     const [base,setBase] = useState(0);
+    const [type,setType] = useState('sell');
     
     const formInfo = {
         company_id: appInfo.company_id,
@@ -41,7 +42,8 @@ export function FormNewTax({reloadInfo,info}){
         account_id: selectedAccount,
         company_id:appInfo.company_id,
         path:path,
-        isRetention
+        isRetention,
+        type
     };
 
     const getAccounts = async () => {
@@ -142,11 +144,13 @@ export function FormNewTax({reloadInfo,info}){
                 <FormInput 
                     action={setCode} 
                     title={'Código'} 
+                    disabled={disabled}
                     placeholder={'Código del impuesto'}
                 />
                 <FormInput 
                     action={setRate} 
                     title={'Tasa'} 
+                    disabled={disabled}
                     placeholder={'Tasa del impuesto'}
                     type="number"
                     step="0.001"
@@ -156,22 +160,35 @@ export function FormNewTax({reloadInfo,info}){
                     action={setBase} 
                     title={'Base'} 
                     type={'number'}
+                    disabled={disabled}
                     placeholder={'A partir de '}
                 />
                 <SearchinList
                     title={'Categoria'}
                     action={setIdentationAndId}
+                    disabled={disabled}
                     placeHolder={path !='/' ? path:'/..'}
                     list={categories}/>
                 <SearchinList 
                     action={setSelectedAccount} 
                     title={'Cuenta'} 
                     list={accounts}
+                    disabled={disabled}
                     placeHolder={'Seleccionar Cuenta'}
                     specialOption={
                         <NewElementSelect title={'Crear nueva cuenta'}/>
                     }
                 />
+                <SearchinList 
+                    title={'Tipo de impuesto'} 
+                    placeHolder={'Seleccione El tipo de impuesto'} 
+                    disabled={disabled} 
+                    action={setType}
+                    list={[
+                        {text:'Para venta',value:'sell'},
+                        {text:'Para compra',value:'purchase'},
+                        {text:'Para ambas',value:'both'}
+                ]}/>
                 <div className="FlexOption">
                     <h6>Es retención</h6>
                     <SwitchOption action={setIsRetention}/>
