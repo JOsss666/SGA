@@ -50,7 +50,7 @@ controller.uploadFile = async (req, res) => {
     console.log("Archivo recibido");
     try {
         const archivos = req.files;
-        const info = JSON.parse(req.body.info);
+        const info = req.body.info ? JSON.parse(req.body.info) : {};
         if (!archivos || archivos.length === 0) {
             return res.status(400).json({ mensaje: "No se enviaron archivos" });
         }
@@ -61,20 +61,26 @@ controller.uploadFile = async (req, res) => {
         for (const archivo of archivos) {
             console.log(archivo);
             const resultado = await uploadToCloudinary(archivo.buffer, archivo.originalname);
-            let insertUpload = await useDataBase(`
-                INSERT INTO "Ecosystem".attached(
-                    company_id, uploaded_by, name, size, type,url)
-                VALUES ($1,$2,$3,$4,$5,$6) RETURNING id;
-            `,[
-                info.company_id,
-                info.user_id,
-                archivo.originalname,
-                archivo.size,
-                archivo.mimetype,
-                resultado.secure_url
-            ],3);
-            if(insertUpload.id != undefined){
-                urls.push({id:insertUpload.id,url:resultado.secure_url})   
+            if (info.company_id != undefined) {
+                let insertUpload = await useDataBase(`
+                    INSERT INTO "Ecosystem".attached(
+                        company_id, uploaded_by, name, size, type,url)
+                    VALUES ($1,$2,$3,$4,$5,$6) RETURNING id;
+                `,[
+                    info.company_id,
+                    info.user_id ?? null,
+                    archivo.originalname,
+                    archivo.size,
+                    archivo.mimetype,
+                    resultado.secure_url
+                ],3);
+                if(insertUpload.id != undefined){
+                    urls.push({id:insertUpload.id,url:resultado.secure_url})   
+                } else {
+                    urls.push(resultado.secure_url);
+                }
+            } else {
+                urls.push(resultado.secure_url);
             }
         }
 

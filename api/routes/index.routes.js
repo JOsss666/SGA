@@ -155,6 +155,14 @@ router.post(`/inventory/getComercialProducts`,inventoryController.getComercialPr
 
 router.post('/inventory/createProduct',inventoryController.createProduct);
 
+router.post('/inventory/updateProduct',inventoryController.updateProduct);
+
+router.post('/inventory/disableProduct',inventoryController.disableProduct);
+
+router.post('/inventory/deleteProduct',inventoryController.deleteProduct);
+
+router.post('/inventory/getProductTaxRelations',inventoryController.getProductTaxRelations);
+
 router.post('/inventory/getPricesListItems',inventoryController.getPricesListItems);
 
 router.post('/inventory/createCellar',inventoryController.createCellar);
@@ -331,4 +339,3 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     router.post('/electronicFacturationController.getDocumentFullInfo',electronicFacturationController.getDocumentFullInfo);
 
 export default router;
-

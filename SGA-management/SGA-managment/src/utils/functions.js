@@ -284,12 +284,13 @@ export async function ScreenShotElement(elemet,name){
 }
 
 
-export const uploadFiles = async (files) => {
+export const uploadFiles = async (files, info = {}) => {
     if (!files || files.length === 0) {
         throw new Error("Debe proporcionar al menos un archivo.");
     }
 
     const formData = new FormData();
+    formData.append('info', JSON.stringify(info));
 
     // Append de varios archivos
     for (let i = 0; i < files.length; i++) {
@@ -356,4 +357,3 @@ export const arrayToTree = (flatArray, rootIdValue = null) => {
 
     return tree;
 };
-

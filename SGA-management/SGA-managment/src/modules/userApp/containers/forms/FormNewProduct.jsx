@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { BoldTitle } from '../../components/BoldTitle'
 import { FormInput } from '../../components/FormInput'
 import {FormButton} from '../../components/FormButton'
@@ -36,7 +36,13 @@ export function FormNewProduct({info,update,reloadFun}){
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
     const [stage,setStage] = useState(0);
-    const [taxes,setTaxes] = useState([]);
+    const [error,setError] = useState('');
+    const [visibleError,setVisibleError] = useState(false);
+    const formContainerRef = useRef();
+    const [purchaseTaxes,setPurchaseTaxes] = useState([]);
+    const [purchaseRetentionTaxes,setPurchaseRetentionTaxes] = useState([]);
+    const [sellTaxes,setSellTaxes] = useState([]);
+    const [sellRetentionTaxes,setSellRetentionTaxes] = useState([]);
 
     // form info
 
@@ -82,9 +88,86 @@ export function FormNewProduct({info,update,reloadFun}){
         sellDescription,
         sellConcept,
         purchaseConcept,
+        purchaseTax_id,
+        purchaseTaxed,
+        purchaseWithholdings,
         tax_id,
         taxed,
+        sellWithholdings,
         type_product
+    }
+
+    const maxStage = 3;
+
+    const isEmpty = (value)=> value === undefined || value === null || `${value}`.trim() === '';
+
+    const scrollFormToTop = ()=>{
+        const container = formContainerRef.current;
+        if(!container) return;
+
+        container.scrollTo?.({top:0, behavior:'smooth'});
+        container.scrollIntoView?.({behavior:'smooth', block:'start'});
+
+        let parent = container.parentElement;
+        while(parent){
+            if(parent.scrollHeight > parent.clientHeight){
+                parent.scrollTo({top:0, behavior:'smooth'});
+                break;
+            }
+            parent = parent.parentElement;
+        }
+    }
+
+    const requiredFieldsByStage = {
+        0: [
+            {label:'Tipo de producto o servicio', value:type_product},
+            {label:'Código', value:code},
+            {label:'Nombre', value:name},
+        ],
+        1: [
+            ...(inventariable ? [
+                {label:'Unidades de medida', value:units},
+                {label:'Stock inicial', value:stock},
+                {label:'Stock mínimo', value:minStock},
+                {label:'Stock máximo', value:maxStock}
+            ] : [])
+        ],
+        2: [
+            {label:'Concepto de compra', value:purchaseConcept},
+            ...(purchaseTaxed ? [
+                {label:'Impuesto asociado a la compra', value:purchaseTax_id}
+            ] : [])
+        ],
+        3: [
+            {label:'Concepto de venta', value:sellConcept},
+            ...(taxed ? [
+                {label:'Impuesto asociado a la venta', value:tax_id}
+            ] : [])
+        ]
+    };
+
+    const validateStage = (stageToValidate)=>{
+        const missingFields = requiredFieldsByStage[stageToValidate].filter(field => isEmpty(field.value));
+
+        if(missingFields.length > 0){
+            setError(`Error de validación: completa ${missingFields.map(field => field.label).join(', ')}.`);
+            setVisibleError(true);
+            setTimeout(scrollFormToTop, 0);
+            return false;
+        }
+
+        setVisibleError(false);
+        return true;
+    }
+
+    const validateFullForm = ()=>{
+        for(let index = 0; index <= maxStage; index++){
+            if(!validateStage(index)){
+                setStage(index);
+                return false;
+            }
+        }
+        return true;
     }
 
     const getThirdParties = async()=>{
@@ -133,19 +216,78 @@ export function FormNewProduct({info,update,reloadFun}){
         }
     }
 
+    const formatTaxOption = (tax) => ({
+        text: `${tax.name}${tax.rate != undefined ? ` - ${tax.rate}%` : ''}`,
+        value: tax.tax_id
+    });
+
+    const sortTaxesByUse = (taxesList) => {
+        const purchaseTaxOptions = [];
+        const purchaseRetentionOptions = [];
+        const sellTaxOptions = [];
+        const sellRetentionOptions = [];
+
+        taxesList.forEach((tax) => {
+            const taxType = `${tax.tax_type ?? tax.type ?? ''}`.toLowerCase();
+            const isRetention = tax.isRetention === true || tax.isRetention === 'true';
+            const isPurchaseTax = taxType === 'purchase' || taxType === 'both';
+            const isSellTax = taxType === 'sell' || taxType === 'both';
+            const taxOption = formatTaxOption(tax);
+
+            if (isRetention) {
+                if (isPurchaseTax) {
+                    purchaseRetentionOptions.push(taxOption);
+                }
+                if (isSellTax) {
+                    sellRetentionOptions.push(taxOption);
+                }
+                return;
+            }
+
+            if (isPurchaseTax) {
+                purchaseTaxOptions.push(taxOption);
+            }
+            if (isSellTax) {
+                sellTaxOptions.push(taxOption);
+            }
+        });
+
+        console.log('Impuestos compra ',purchaseTaxOptions);
+        console.log('Impuestos compra retenciones ',purchaseRetentionOptions);
+        console.log('Impuestos venta ',sellTaxOptions);
+        console.log('Impuestos venta retenciones ',sellRetentionOptions);
+
+        setPurchaseTaxes(purchaseTaxOptions);
+        setPurchaseRetentionTaxes(purchaseRetentionOptions);
+        setSellTaxes(sellTaxOptions);
+        setSellRetentionTaxes(sellRetentionOptions);
+    };
+
+    const addTaxToList = (taxId, sourceList, selectedList, setSelectedList) => {
+        if (taxId == undefined || taxId === '') {
+            return;
+        }
+
+        const selectedTax = sourceList.find((tax) => tax.value == taxId);
+        if (!selectedTax) {
+            return;
+        }
+
+        const exists = selectedList.some((tax) => tax.value == selectedTax.value);
+        setSelectedList(exists ? selectedList : [...selectedList, selectedTax]);
+    };
+
+    const removeTaxFromList = (taxValue, list, setList) => {
+        setList(list.filter((selectedTax) => selectedTax.value != taxValue));
+    };
+
     const getTaxes = async()=>{
         let res = await postInfo('/getTaxes',{
             company_id:appInfo.company_id,
         })
+        console.log('Taxes aviable: ',res)
         if(res[0]){
-            let C = []
-            res[1].forEach(element => {
-                C.push({
-                    text:element.name,
-                    value:element.tax_id
-                })
-            });
-            setTaxes(C);
+            sortTaxesByUse(res[1]);
         }
     }
 
@@ -166,6 +308,9 @@ export function FormNewProduct({info,update,reloadFun}){
     }
 
     const createProduct = async()=>{
+        if(!validateFullForm()){
+            return;
+        }
         setDisabled(true);
         setLoading(true);
         console.log(formInfo)
@@ -191,6 +336,17 @@ export function FormNewProduct({info,update,reloadFun}){
         setDisabled(false);
     }
 
+    const handlePrimaryAction = ()=>{
+        if(stage < maxStage){
+            if(validateStage(stage)){
+                setStage(stage +1)
+            }
+            return;
+        }
+
+        createProduct();
+    }
+
     const getRequierdData = async()=>{
         setDisabled(true);
         setLoading(true);
@@ -198,6 +354,7 @@ export function FormNewProduct({info,update,reloadFun}){
         await getCategories();
         await getAccounts();
         await getConcepts();
+        await getTaxes();
         setLoading(false);
         setDisabled(false);
     }
@@ -212,10 +369,14 @@ export function FormNewProduct({info,update,reloadFun}){
     useEffect(()=>{
         if(!taxed){
             setTax_id(undefined);
-        }else{
-            getTaxes();
         }
     },[taxed])
+
+    useEffect(()=>{
+        if(!purchaseTaxed){
+            setPurchaseTax_id(undefined);
+        }
+    },[purchaseTaxed])
 
     useEffect(()=>{
         getRequierdData();
@@ -226,15 +387,19 @@ export function FormNewProduct({info,update,reloadFun}){
     },[photo])
 
     return(
-        <div className="FormNewProduct">
+        <div className="FormNewProduct" ref={formContainerRef}>
+            {visibleError && (
+                <div className="errorContainer">
+                    <span>{error}</span>
+                    <i title="Ocultar advertencia" className="fa-solid fa-xmark closeErrorBtn" onClick={()=>{
+                        setVisibleError(false);
+                    }}/>
+                </div>
+            )}
             <BoldTitle text={'Nuevo Producto'}/>
             <form action="" onSubmit={(e)=>{
                 e.preventDefault();
-                if(stage == 3){
-                    createProduct();
-                }else{
-                    setStage(stage +1)
-                }
+                handlePrimaryAction();
             }}>
                 {/* Stage for general info -- Etapa para configurar la info general*/}
                 {stage == 0 && (
@@ -301,11 +466,30 @@ export function FormNewProduct({info,update,reloadFun}){
                             <SwitchOption action={setPurchaseTaxed} defaultValue={purchaseTaxed}/>
                         </div>
                         {purchaseTaxed && (
-                            <SearchinList title={'Impuesto asociado a la compra'} action={setPurchaseTax_id} placeHolder={'Seleccione el impuesto'} list={taxes} disabled={disabled}/>  
+                            <>
+                                <SearchinList title={'Impuesto asociado a la compra'} action={setPurchaseTax_id} placeHolder={'Seleccione el impuesto'} list={purchaseTaxes} disabled={disabled}/>  
+                                <div className="withholdingsContainer">
+                                    <SearchinList
+                                        title={'Retenciones de compra'}
+                                        action={(taxId)=>{addTaxToList(taxId, purchaseRetentionTaxes, purchaseWithholdings, setPurchaseWithholdings)}}
+                                        placeHolder={'Seleccione una retención'}
+                                        list={purchaseRetentionTaxes}
+                                        disabled={disabled}
+                                        noActVal={true}
+                                    />
+                                    {purchaseWithholdings.map((tax)=>(
+                                        <div className="selectedWithholding" key={tax.value} >
+                                            <span className='withHoldingName'>
+                                                {tax.text}
+                                            </span>
+                                            <i className="fa-solid fa-xmark deleteWithholding" onClick={()=>{
+                                                removeTaxFromList(tax.value, purchaseWithholdings, setPurchaseWithholdings)
+                                            }}/>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
                         )}
-                        <div className="withholdingsContainer">
-
-                        </div>
                     </section>
                 )}
                 {/* Stage for sell -- Etapa para configurar la venta*/}
@@ -320,19 +504,40 @@ export function FormNewProduct({info,update,reloadFun}){
                             <SwitchOption action={setTaxed} defaultValue={taxed}/>
                         </div>
                         {taxed && (
-                            <SearchinList title={'Impuesto asociado a la venta'} action={setTax_id} placeHolder={'Seleccione el impuesto'} list={taxes} disabled={disabled}/>  
+                            <>
+                                <SearchinList title={'Impuesto asociado a la venta'} action={setTax_id} placeHolder={'Seleccione el impuesto'} list={sellTaxes} disabled={disabled}/>  
+                                <div className="withholdingsContainer">
+                                    <SearchinList
+                                        title={'Retenciones de venta'}
+                                        action={(taxId)=>{addTaxToList(taxId, sellRetentionTaxes, sellWithholdings, setSellWithholdings)}}
+                                        placeHolder={'Seleccione una retención'}
+                                        list={sellRetentionTaxes}
+                                        disabled={disabled}
+                                        noActVal={true}
+                                    />
+                                    {sellWithholdings.map((tax)=>(
+                                        <div className="selectedWithholding" key={tax.value} >
+                                            <span className='withHoldingName'>
+                                                {tax.text}
+                                            </span>
+                                            <i className="fa-solid fa-xmark deleteWithholding" onClick={()=>{
+                                                removeTaxFromList(tax.value, sellWithholdings, setSellWithholdings)
+                                            }}/>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
                         )}
                         <FormInput title={'Descripción para la venta'} action={setSellDescription} value={sellDescription} placeholder={'Detalles del producto para la venta'} disabled={disabled} textArea={true}/>
-                        <div className="withholdingsContainer">
-
-                        </div>
+                        
                     </section>
                 )}
 
-            <FormButton disabled={disabled} loading={loading} text={stage== 3? 'Crear Producto':'Siguiente'}/>
+            <FormButton disabled={disabled} loading={loading} text={stage== maxStage? 'Crear Producto':'Siguiente'}/>
             {stage > 0 && (
-                <FormButton disabled={disabled} loading={loading} negative={true} text={stage== 3? 'Cancelar':'Volver'} onClick={()=>{
-                    if(stage < 3){
+                <FormButton disabled={disabled} loading={loading} negative={true} text={stage== maxStage? 'Cancelar':'Volver'} onClick={(e)=>{
+                    e.preventDefault();
+                    if(stage < maxStage){
                         setStage(stage -1)
                     }else{
                         setStage(0)

@@ -403,16 +403,40 @@ export function FormNewPurchase({InfoParams,reloadFun}){
         }
 
         const getProductsAndServices = async()=>{
-            let res = await postInfo('/inventory/getComercialProducts',{
+            let res = await postInfo('/inventory/getProducts',{
                 company_id:appInfo.company_id
-            })
-            console.log('Servicios disponibles: ',res)
+            });
+            let purchaseTaxesRes = await postInfo('/inventory/getProductTaxRelations',{
+                company_id:appInfo.company_id,
+                type:'purchase_tax'
+            });
+            console.log('Servicios disponibles para compra: ',res)
             if(res[0]){
+                const purchaseTaxByProduct = {};
+                if(purchaseTaxesRes[0]){
+                    purchaseTaxesRes[1].forEach(relation => {
+                        if(purchaseTaxByProduct[relation.product_id] == undefined){
+                            purchaseTaxByProduct[relation.product_id] = relation;
+                        }
+                    });
+                }
+
                 let C = []
                 res[1].forEach(element => {
+                    const purchaseTax = purchaseTaxByProduct[element.id];
+                    const item = {
+                        ...element,
+                        product_id: element.id,
+                        tax_id: purchaseTax?.tax_id ?? null,
+                        tax_name: purchaseTax?.tax_name ?? null,
+                        tax_base: purchaseTax?.base ?? 0,
+                        tax_rate: purchaseTax?.rate ?? 0,
+                        tax_account: purchaseTax?.tax_account ?? null
+                    };
+
                     C.push({
                         text:`${element.code} ${element.name}`,
-                        value:element
+                        value:item
                     })
                 });
                 setProductsAndServices(C)

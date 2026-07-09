@@ -1,24 +1,31 @@
 import { useRef, useState } from "react"
 import {uploadFiles} from '../../../utils/functions'
 import './FileInput.css'
+import { useAppInfo } from "../../../context/context";
 
 export function FileInput({action,disabled,setDisabled,placeholder,children,multiple}){
 
+    const {appInfo,userInfo} = useAppInfo();
     const inRef = useRef();
     const [loading,setLoading] = useState(false);
     const [urls,setUrls] = useState([]);
+
+    const getUrl = (fileInfo) => fileInfo?.url ?? fileInfo;
 
     const uplF = async(files)=>{
         setDisabled?.(true);
         console.log('Accion')
         setLoading(true);
-        let res = await uploadFiles(files);
+        let res = await uploadFiles(files,{
+            company_id:appInfo?.company_id,
+            user_id:userInfo?.user_id
+        });
         console.log(res)
         if(action != undefined){
             if(multiple){
                 action(res.urls);
             }else{
-                action(res.urls[0]);
+                action(getUrl(res.urls[0]));
             }
         }
         setUrls(res.urls)
@@ -57,7 +64,7 @@ export function FileInput({action,disabled,setDisabled,placeholder,children,mult
                     <ul className="gridUrl">
                         {urls.map((element,index)=>(
                             <li key={index}>
-                                <a href={element} target="NBLANK">{element}</a>
+                                <a href={getUrl(element)} target="NBLANK">{getUrl(element)}</a>
                             </li>
                         ))}
                     </ul>

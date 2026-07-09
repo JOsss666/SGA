@@ -1,5 +1,26 @@
 import { useDataBase } from "../app.js";
+import productsServicesService from "../services/productsServicesService.js";
 const inventoryController = {};
+
+const readJsonBody = (req) => new Promise((resolve, reject) => {
+    let data = '';
+    req.on('data', chunk => {
+        data += chunk;
+    });
+    req.on('end', () => {
+        try {
+            resolve(data ? JSON.parse(data) : {});
+        } catch (err) {
+            reject(err);
+        }
+    });
+    req.on('error', reject);
+});
+
+const sendJson = (res, statusCode, payload) => {
+    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(payload));
+};
 
 inventoryController.getSubCategories = (req,res)=>{
     let data = ''
@@ -237,77 +258,74 @@ inventoryController.getComercialProducts = (req,res)=>{
     })
 }
 
-inventoryController.createProduct = (req,res)=>{
-    let data = '';
-    req.on('data',chunk=>{
-        data += chunk
-    })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        console.log(info)
-        let sentence = `
-            INSERT INTO
-                "Inventory"."products&services"(
-                    company_id,
-                    code,
-                    name,
-                    stock,
-                    units,
-                    entry_concept,
-                    exit_concept,
-                    taxed,
-                    tax_id,
-                    img,
-                    type,
-                    description)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id ;`
-        let consulta = await useDataBase(sentence,[
-                    info.company_id,
-                    info.code,
-                    info.name,
-                    info.stock,
-                    info.units,
-                    info.purchaseConcept,
-                    info.sellConcept,
-                    info.taxed,
-                    info.tax_id,
-                    info.photo,
-                    info.type_product,
-                    info.description],3);
-        console.log('---> ',consulta);
-        let insert_id = parseInt(consulta.id);
-        console.log('---> ',insert_id);
-        if(typeof(parseInt(consulta.id)) == 'number' && info.category_id != null){
-            let postSen = `
-                INSERT INTO "Inventory".product_categories(
-                    company_id, product_id, category_id)
-                VALUES ($1, $2, $3);
-            `
-            let postCons = await useDataBase(postSen,[
-                info.company_id,
-                insert_id,
-                info.category_id
-            ],2);
-            res.writeHead(200,{'Content-Type':'text/plain'})
-            if(postCons[0]){
-                res.end(JSON.stringify(true));
-            }else{
-                res.end(JSON.stringify(false));
-            }
-        }else{
-            res.writeHead(200,{'Content-Type':'text/plain'})
-            if(parseInt(consulta.id) == 'number'){
-                res.end(JSON.stringify(true));
-            }else{
-                res.end(JSON.stringify(false));
-            }
-        }
-        
-    })
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
+inventoryController.createProduct = async (req,res)=>{
+    try {
+        const info = await readJsonBody(req);
+        const result = await productsServicesService.register(info);
+        sendJson(res, 200, result);
+    } catch (err) {
+        console.error('Error en createProduct:', err);
+        sendJson(res, 500, {
+            status: 'Error',
+            message: err.message
+        });
+    }
+}
+
+inventoryController.updateProduct = async (req,res)=>{
+    try {
+        const info = await readJsonBody(req);
+        const result = await productsServicesService.update(info);
+        sendJson(res, 200, result);
+    } catch (err) {
+        console.error('Error en updateProduct:', err);
+        sendJson(res, 500, {
+            status: 'Error',
+            message: err.message
+        });
+    }
+}
+
+inventoryController.disableProduct = async (req,res)=>{
+    try {
+        const info = await readJsonBody(req);
+        const result = await productsServicesService.disable(info);
+        sendJson(res, 200, result);
+    } catch (err) {
+        console.error('Error en disableProduct:', err);
+        sendJson(res, 500, {
+            status: 'Error',
+            message: err.message
+        });
+    }
+}
+
+inventoryController.deleteProduct = async (req,res)=>{
+    try {
+        const info = await readJsonBody(req);
+        const result = await productsServicesService.delete(info);
+        sendJson(res, 200, result);
+    } catch (err) {
+        console.error('Error en deleteProduct:', err);
+        sendJson(res, 500, {
+            status: 'Error',
+            message: err.message
+        });
+    }
+}
+
+inventoryController.getProductTaxRelations = async (req,res)=>{
+    try {
+        const info = await readJsonBody(req);
+        const result = await productsServicesService.getTaxRelations(info);
+        sendJson(res, 200, result);
+    } catch (err) {
+        console.error('Error en getProductTaxRelations:', err);
+        sendJson(res, 500, {
+            status: 'Error',
+            message: err.message
+        });
+    }
 }
 
 inventoryController.getPricesListItems = (req, res) => {
@@ -1588,5 +1606,3 @@ inventoryController.deleteItemPricesList = (req,res)=>{
 }
 
 export default inventoryController;
-
-
