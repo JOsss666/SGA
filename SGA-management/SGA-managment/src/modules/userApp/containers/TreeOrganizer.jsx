@@ -14,15 +14,15 @@ export function TreeOrganizer({list,allOpen,popNewOption}){
                     <div className="listTitle">
                         <div className="identOrganizator"/>
                         <strong>
-                            {element.children != undefined && element.children.length >0 && (
-                                <i className={'fatherIcon' + openChildren? `fa-regular fa-folder-open openIconFolder`:`fa-solid fa-folder`}/>
+                            {element.children != undefined && element.children.length > 0 && (
+                                <i className={`fatherIcon ${openChildren ? 'fa-regular fa-folder-open openIconFolder' : 'fa-solid fa-folder closedIconFolder'}`}/>
                             )}
-                            {element.children.length == 0 && (
-                                <i class="fa-solid fa-file FinalChildren"/>
+                            {(!element.children || element.children.length == 0) && (
+                                <i className="fa-solid fa-file FinalChildren"/>
                             )}
                             {element.name}
                         </strong>
-                        {element.children.length> 0 && (
+                        {element.children != undefined && element.children.length > 0 && (
                             <div className="despleChildren" onClick={()=>{setOpenChildren(!openChildren)}}>
                                 <i className={`fa-solid fa-angle-${openChildren? 'up':'down'}`}></i>
                             </div>
