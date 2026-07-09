@@ -26,6 +26,10 @@
     gap: 2vh;
 }
 
+.FormNewProduct form section .tagSection{
+    margin: 0 auto;
+}
+
 .FormNewProduct form .FormButton{
     margin-top: 2vh;
 }
