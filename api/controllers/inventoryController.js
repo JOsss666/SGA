@@ -328,6 +328,76 @@ inventoryController.getProductTaxRelations = async (req,res)=>{
     }
 }
 
+inventoryController.createThirdPartyProductTaxRelation = async (req,res)=>{
+    try {
+        const info = await readJsonBody(req);
+        const result = await productsServicesService.registerThirdPartyProductTaxRelation(info);
+        sendJson(res, 200, result);
+    } catch (err) {
+        console.error('Error en createThirdPartyProductTaxRelation:', err);
+        sendJson(res, 500, {
+            status: 'Error',
+            message: err.message
+        });
+    }
+}
+
+inventoryController.updateThirdPartyProductTaxRelation = async (req,res)=>{
+    try {
+        const info = await readJsonBody(req);
+        const result = await productsServicesService.updateThirdPartyProductTaxRelation(info);
+        sendJson(res, 200, result);
+    } catch (err) {
+        console.error('Error en updateThirdPartyProductTaxRelation:', err);
+        sendJson(res, 500, {
+            status: 'Error',
+            message: err.message
+        });
+    }
+}
+
+inventoryController.disableThirdPartyProductTaxRelation = async (req,res)=>{
+    try {
+        const info = await readJsonBody(req);
+        const result = await productsServicesService.disableThirdPartyProductTaxRelation(info);
+        sendJson(res, 200, result);
+    } catch (err) {
+        console.error('Error en disableThirdPartyProductTaxRelation:', err);
+        sendJson(res, 500, {
+            status: 'Error',
+            message: err.message
+        });
+    }
+}
+
+inventoryController.deleteThirdPartyProductTaxRelation = async (req,res)=>{
+    try {
+        const info = await readJsonBody(req);
+        const result = await productsServicesService.deleteThirdPartyProductTaxRelation(info);
+        sendJson(res, 200, result);
+    } catch (err) {
+        console.error('Error en deleteThirdPartyProductTaxRelation:', err);
+        sendJson(res, 500, {
+            status: 'Error',
+            message: err.message
+        });
+    }
+}
+
+inventoryController.getThirdPartyProductTaxRelations = async (req,res)=>{
+    try {
+        const info = await readJsonBody(req);
+        const result = await productsServicesService.getThirdPartyProductTaxRelations(info);
+        sendJson(res, 200, result);
+    } catch (err) {
+        console.error('Error en getThirdPartyProductTaxRelations:', err);
+        sendJson(res, 500, {
+            status: 'Error',
+            message: err.message
+        });
+    }
+}
+
 inventoryController.getPricesListItems = (req, res) => {
     let data = '';
     req.on('data', chunk => { data += chunk; });

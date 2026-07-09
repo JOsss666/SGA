@@ -32,10 +32,15 @@ sellInvoiceService.register = async (info) => {
 
         console.log('Fase 2 Control Cartera: ', portfolioResult)
 
-        const accountResult = await utilsController.accountDocument(
-            documentInfo,
-            { client }
-        );
+        // Saltarse Contabilización de la factura
+        const accountResult = { status: "skipped", description: "Contabilización desactivada temporalmente" };
+
+        /*        
+            const accountResult = await utilsController.accountDocument(
+                documentInfo,
+                { client }
+            );
+        */
 
         console.log('Fase 3 Contabilidad: ', portfolioResult)
 

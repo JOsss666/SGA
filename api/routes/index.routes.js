@@ -163,6 +163,16 @@ router.post('/inventory/deleteProduct',inventoryController.deleteProduct);
 
 router.post('/inventory/getProductTaxRelations',inventoryController.getProductTaxRelations);
 
+router.post('/inventory/createThirdPartyProductTaxRelation',inventoryController.createThirdPartyProductTaxRelation);
+
+router.post('/inventory/updateThirdPartyProductTaxRelation',inventoryController.updateThirdPartyProductTaxRelation);
+
+router.post('/inventory/disableThirdPartyProductTaxRelation',inventoryController.disableThirdPartyProductTaxRelation);
+
+router.post('/inventory/deleteThirdPartyProductTaxRelation',inventoryController.deleteThirdPartyProductTaxRelation);
+
+router.post('/inventory/getThirdPartyProductTaxRelations',inventoryController.getThirdPartyProductTaxRelations);
+
 router.post('/inventory/getPricesListItems',inventoryController.getPricesListItems);
 
 router.post('/inventory/createCellar',inventoryController.createCellar);
