@@ -200,11 +200,7 @@ electronicFacturationController.showActualToken = async()=>{
 
 electronicFacturationController.getMunicipalities = async (req, res) => {
     try {
-        // 1. Obtenemos el token
-        const auth = await electronicFacturationController.getAuthToken();
-
-        // 2. Hacemos la petición a Factus (Sin el req.on('end'))
-        const response = await fetch(urlSer + '/v1/municipalities', {
+        const fetchMunicipalities = async (auth) => fetch(urlSer + '/v1/municipalities', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -212,13 +208,21 @@ electronicFacturationController.getMunicipalities = async (req, res) => {
             },
         });
 
+        let auth = await electronicFacturationController.getAuthToken();
+        let response = await fetchMunicipalities(auth);
+
+        if (response.status === 401) {
+            console.warn('⚠️ Token Factus rechazado al obtener municipios. Reintentando autenticación...');
+            auth = await electronicFacturationController.getAuthToken('password', null, true);
+            response = await fetchMunicipalities(auth);
+        }
+
         if (!response.ok) {
             throw new Error(`Error en Factus: ${response.status}`);
         }
 
         const data = await response.json();
 
-        // 3. ¡VITAL! Enviamos la respuesta al cliente
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(data));
 

@@ -161,6 +161,11 @@
     margin: 1vh auto;
 }
 
+.FormNewThirdParties section form .ProductLinkFiscalConditionsCard .SearchinList{
+    width: 100%;
+    margin: 0;
+}
+
 
 .FormNewThirdParties form .BoldTitle{
     font-size: clamp(2.5px,3vh,30px);

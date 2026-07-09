@@ -12,6 +12,7 @@ import { FileInput } from '../../components/FileInput';
 import { TagIndicator } from '../../components/TagIndicator';
 import { ThirdPartyFactusIdentificationTypeCodes, ThirdPartyIvaResponsabilityCodes, ThirdPartyNatureCodes } from '../../../../utils/Constants';
 import { DescriptionSpan } from '../../components/DescriptionSpan';
+import { ProductLinkFiscalConditionsCard } from '../../components/ProductLinkFiscalConditionsCard';
 
 
 export function FormNewThirdParties({reloadFun,quickCreation}){
@@ -53,6 +54,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
     const [credit_value,setCredit_value] = useState(0);
     const [interest_rate,setInterest_rate] = useState(0);
     const [comercial_state,setComercial_state] = useState('active');
+    const [thirdPartyProductTaxRelations,setThirdPartyProductTaxRelations] = useState([]);
     // info tributaria
     const [typePerson,setTypePerson] = useState(2);
     const [identidicationType_id,setIdentidicationType_id] = useState();
@@ -221,7 +223,31 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
         setDisabled(true)
         setLoading(true)
         let res = await postInfo('/createThirdParty',formInfo);
-        if(res){
+        const thirdPartyId = res?.[1] ?? res?.id ?? res?.thirdParty_id;
+        if(res?.[0] || thirdPartyId){
+            if(thirdPartyProductTaxRelations.length > 0 && thirdPartyId != undefined){
+                try {
+                    const relationsRes = await postInfo('/inventory/createThirdPartyProductTaxRelation',{
+                        company_id:appInfo.company_id,
+                        third_party_id:thirdPartyId,
+                        relations:thirdPartyProductTaxRelations
+                    });
+
+                    if(relationsRes?.status !== 'OK'){
+                        addNotification({
+                            type:'error',
+                            title:'Tercero creado con relaciones fiscales pendientes',
+                            description:'El tercero fue creado, pero no se pudieron guardar todas las condiciones fiscales por producto.'
+                        });
+                    }
+                } catch (err) {
+                    addNotification({
+                        type:'error',
+                        title:'Tercero creado con relaciones fiscales pendientes',
+                        description:err?.message ?? 'No se pudieron guardar las condiciones fiscales por producto.'
+                    });
+                }
+            }
             addNotification({
                 type:'aproved',
                 title:`Tercero ${first_name} creado correctamente`,
@@ -363,6 +389,15 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                 <FormInput type={'number'} title={'Valor maximo de credito'} min={0} disabled={disabled} value={credit_value} action={setCredit_value} required={true}/>
                                 <FormInput type={'number'} title={'Tasa de interes diario por mora'} min={0} disabled={disabled} value={interest_rate} action={setInterest_rate} required={true}/>
                             </>
+                        )}
+                        {!quickCreation && (
+                            <ProductLinkFiscalConditionsCard
+                                companyId={appInfo.company_id}
+                                info={formInfo}
+                                disabled={disabled}
+                                value={thirdPartyProductTaxRelations}
+                                action={setThirdPartyProductTaxRelations}
+                            />
                         )}
                     </form>
                 </section>
