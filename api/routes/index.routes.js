@@ -292,6 +292,8 @@ router.post('/facturation/getCashRegisterReport',facturationController.getCashRe
 
 router.post('/facturation/getTransactionsOfCashRecord',facturationController.getTransactionsOfCashRecord);
 
+router.post('/facturation/getSettlementReportByPeriod',facturationController.getSettlementReportByPeriod);
+
 router.post('/facturation/getBriefcaseBills',facturationController.getBriefcaseBills);
 
 router.post('/facturation/updatePaymentDocument',facturationController.updatePaymentDocument);

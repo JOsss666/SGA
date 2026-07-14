@@ -580,6 +580,148 @@ facturationController.getTransactionsOfCashRecord = (req, res) => {
 };
 
 
+// Informe de liquidaciones de caja por periodo (ej. mensual).
+// Devuelve TODOS los transaction_detail liquidados en caja dentro del rango,
+// en filas planas (el frontend las agrupa/anida por paymentMethod_code).
+// Cada fila incluye las mismas columnas del informe de cierre + el
+// "responsable de cierre" (usuario dueño de ese shift_settlement).
+facturationController.getSettlementReportByPeriod = (req, res) => {
+    let data = '';
+
+    req.on('data', chunk => {
+        data += chunk;
+    });
+
+    req.on('end', async () => {
+        try {
+            const info = JSON.parse(data);
+
+            let values = [];
+            let whereClauses = [];
+
+            whereClauses.push(`"Facturation".shift_settlement_details.company_id = $${values.length + 1}`);
+            values.push(info.company_id);
+
+            if (info.start_date != undefined) {
+                whereClauses.push(`"Facturation".shift_settlement_details.crated_at >= $${values.length + 1}`);
+                values.push(info.start_date);
+            }
+
+            if (info.end_date != undefined) {
+                whereClauses.push(`"Facturation".shift_settlement_details.crated_at <= $${values.length + 1}`);
+                values.push(info.end_date);
+            }
+
+            if (info.cash_box_id != undefined) {
+                whereClauses.push(`"Facturation".shift_settlement_details."cashBox_id" = $${values.length + 1}`);
+                values.push(info.cash_box_id);
+            }
+
+            if (info.store_id != undefined) {
+                whereClauses.push(`"Ecosystem".transactions.store_id = $${values.length + 1}`);
+                values.push(info.store_id);
+            }
+
+            const whereQuery = whereClauses.length > 0
+                ? `WHERE ${whereClauses.join(" AND ")}`
+                : "";
+
+            let sentence = `
+                SELECT
+                    "Facturation".shift_settlement_details.id AS shift_settlement_id,
+                    "Facturation".shift_settlement_details.crated_at AS settlement_date,
+                    "Facturation".shift_settlement_details."cashBox_id",
+                    "Ecosystem".transaction_detail.*,
+                    "Ecosystem".concepts.name AS concept_name,
+                    "Ecosystem".contable_accounts.code AS account_code,
+                    "Ecosystem".transactions.doc_type,
+                    "Ecosystem".transactions.doc_id,
+                    "Ecosystem".transactions.store_id,
+                    "Ecosystem".documents.instance_id,
+                    "Ecosystem".documents."ownSerial",
+                    "Process".process_instance."ownSerial" AS instance_serial,
+                    "Process".processes.code AS process_code,
+                    "Ecosystem".payment_methods.name AS payment_name,
+                    "Ecosystem".payment_methods.code AS "paymentMethod_code",
+                    "Ecosystem".payment_methods.type AS "paymentMethod_type",
+                    "Ecosystem".thirdparties.names AS thirdParty_name,
+                    "ElectronicFacturation".documents.number AS e_doc_number,
+                    "ElectronicFacturation".documents.url AS e_doc_url,
+                    "Ecosystem".thirdparties.img AS thirdParty_img,
+                    "Ecosystem".users.user_name AS settlement_responsible,
+                    "Ecosystem".users.img AS settlement_responsible_img
+                FROM
+                    "Facturation".shift_settlement_details
+                LEFT JOIN
+                    "Ecosystem".transaction_detail
+                LEFT JOIN
+                    "Ecosystem".transactions
+                ON
+                    "Ecosystem".transaction_detail.transaction_id = "Ecosystem".transactions.id
+                ON
+                    "Facturation".shift_settlement_details."transactionDetail_id" = "Ecosystem".transaction_detail.id
+                LEFT JOIN
+                    "Ecosystem".concepts
+                ON
+                    "Ecosystem".transactions.concept_id = "Ecosystem".concepts.id
+                LEFT JOIN
+                    "Ecosystem".contable_accounts
+                ON
+                    "Ecosystem".concepts.account_id = "Ecosystem".contable_accounts.id
+                LEFT JOIN
+                    "Ecosystem".payment_methods
+                ON
+                    "Ecosystem".transaction_detail."paymentMethod_id" = "Ecosystem".payment_methods.id
+                LEFT JOIN
+                    "Ecosystem".thirdparties
+                ON
+                    "Ecosystem".transaction_detail."thirdParty_id" = "Ecosystem".thirdparties.id
+                LEFT JOIN
+                    "Ecosystem".documents
+                ON
+                    "Ecosystem".transactions.doc_id = "Ecosystem".documents.id
+                LEFT JOIN
+                    "ElectronicFacturation".documents
+                ON
+                    "Ecosystem".transactions.doc_id = "ElectronicFacturation".documents.doc_id
+                LEFT JOIN
+                    "Ecosystem".docs_instances
+                ON
+                    "Ecosystem".transactions.doc_id = "Ecosystem".docs_instances.doc_id
+                LEFT JOIN
+                    "Process".process_instance
+                ON
+                    "Ecosystem".docs_instances.instance_id = "Process".process_instance.id
+                LEFT JOIN
+                    "Process".processes
+                ON
+                    "Process".process_instance.process_id = "Process".processes.id
+                LEFT JOIN
+                    "Ecosystem".users
+                ON
+                    "Facturation".shift_settlement_details.user_id = "Ecosystem".users.user_id
+                ${whereQuery}
+                ORDER BY "Ecosystem".payment_methods.code ASC, "Facturation".shift_settlement_details.crated_at DESC;
+            `;
+
+            const consulta = await useDataBase(sentence, values, 1);
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(consulta));
+
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        }
+    });
+
+    req.on('error', err => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(err));
+    });
+};
+
+
 facturationController.getBriefcaseBills = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{
