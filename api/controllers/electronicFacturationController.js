@@ -24,9 +24,13 @@ async function readFile(path){
 // Función auxiliar para guardar el token
 async function saveToken(tokenData) {
     // Agregamos la fecha de expiración real (ej: ahora + 60 min)
+    // y una firma del entorno (client_id + api link) para no reutilizar
+    // un token de sandbox contra producción (o viceversa).
     const dataToSave = {
         ...tokenData,
-        expires_at: Date.now() + (tokenData.expires_in * 1000)
+        expires_at: Date.now() + (tokenData.expires_in * 1000),
+        client_id: process.env.FACTUS_CLIENT_ID,
+        api_link: process.env.FACTUS_API_LINK
     };
     await fs.writeFile(TOKEN_PATH, JSON.stringify(dataToSave));
     return dataToSave;
@@ -75,6 +79,14 @@ electronicFacturationController.getAuthToken = async (grantType = 'password', re
 
     // Si bypassCache es true, ignoramos el archivo (esto rompe el bucle)
     let stored = bypassCache ? null : await readFile(TOKEN_PATH);
+
+    // Si el token cacheado pertenece a otro entorno/cliente (ej: sandbox
+    // vs producción), lo descartamos para forzar una nueva autenticación.
+    if (stored && (stored.client_id !== process.env.FACTUS_CLIENT_ID ||
+                   stored.api_link !== process.env.FACTUS_API_LINK)) {
+        console.warn('⚠️ Token cacheado pertenece a otro entorno Factus. Re-autenticando...');
+        stored = null;
+    }
 
     if (stored && finalGrantType === 'password') {
         const now = Date.now();
@@ -147,17 +159,26 @@ electronicFacturationController.getNumberingRanges = async () => {
         }
 
         // CORRECCIÓN: Obtener el auth ANTES de usarlo
-        const auth = await electronicFacturationController.getAuthToken();
-        
-        const response = await fetch(urlSer + '/v1/numbering-ranges', {
+        const fetchRanges = async (auth) => fetch(urlSer + '/v1/numbering-ranges', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'Authorization': `Bearer ${auth.access_token}`
             },
         });
+
+        let auth = await electronicFacturationController.getAuthToken();
+        let response = await fetchRanges(auth);
+
+        // Si el token fue rechazado, forzamos una nueva autenticación (bypassCache)
+        if (response.status === 401) {
+            console.warn('⚠️ Token Factus rechazado al obtener rangos. Reintentando autenticación...');
+            auth = await electronicFacturationController.getAuthToken('password', null, true);
+            response = await fetchRanges(auth);
+        }
+
         const data = await response.json();
-        
+
         if (!response.ok) throw new Error(data.message || 'Error al obtener rangos');
 
         // Guardamos en caché
@@ -692,6 +713,8 @@ electronicFacturationController.init = async () => {
         console.log(error)
         console.error('⚠️ No se pudo obtener el token inicial de Factus:', error.message);
         console.log('ℹ️ El sistema reintentará la conexión en la primera solicitud de factura.');
+        console.log('reintentanto token')
+        let retry = await electronicFacturationController.getAuthToken('password');
     }
 };
 
