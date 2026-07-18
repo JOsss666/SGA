@@ -7,6 +7,7 @@ import documentController from "./DocumentController.js";
 import materializedViewsController from "./MaterializedViewsController.js";
 import transactionController from "./TransactionController.js";
 import transactionDetailController from "./TransactionDetailController.js";
+import thirdPartyService from "../services/thirdPartyService.js";
 const controller = {};
 
 controller.uploadChunk = (req, res) => {
@@ -49,7 +50,7 @@ controller.uploadFile = async (req, res) => {
     console.log("Archivo recibido");
     try {
         const archivos = req.files;
-        const info = JSON.parse(req.body.info);
+        const info = req.body.info ? JSON.parse(req.body.info) : {};
         if (!archivos || archivos.length === 0) {
             return res.status(400).json({ mensaje: "No se enviaron archivos" });
         }
@@ -60,20 +61,26 @@ controller.uploadFile = async (req, res) => {
         for (const archivo of archivos) {
             console.log(archivo);
             const resultado = await uploadToCloudinary(archivo.buffer, archivo.originalname);
-            let insertUpload = await useDataBase(`
-                INSERT INTO "Ecosystem".attached(
-                    company_id, uploaded_by, name, size, type,url)
-                VALUES ($1,$2,$3,$4,$5,$6) RETURNING id;
-            `,[
-                info.company_id,
-                info.user_id,
-                archivo.originalname,
-                archivo.size,
-                archivo.mimetype,
-                resultado.secure_url
-            ],3);
-            if(insertUpload.id != undefined){
-                urls.push({id:insertUpload.id,url:resultado.secure_url})   
+            if (info.company_id != undefined) {
+                let insertUpload = await useDataBase(`
+                    INSERT INTO "Ecosystem".attached(
+                        company_id, uploaded_by, name, size, type,url)
+                    VALUES ($1,$2,$3,$4,$5,$6) RETURNING id;
+                `,[
+                    info.company_id,
+                    info.user_id ?? null,
+                    archivo.originalname,
+                    archivo.size,
+                    archivo.mimetype,
+                    resultado.secure_url
+                ],3);
+                if(insertUpload.id != undefined){
+                    urls.push({id:insertUpload.id,url:resultado.secure_url})   
+                } else {
+                    urls.push(resultado.secure_url);
+                }
+            } else {
+                urls.push(resultado.secure_url);
             }
         }
 
@@ -892,6 +899,15 @@ controller.createTax = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        const validTaxTypes = ['purchase', 'sell', 'both'];
+        const taxType = `${info.type ?? info.tax_type ?? 'both'}`.trim().toLowerCase();
+
+        if (!validTaxTypes.includes(taxType)) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify([false, `Tipo de impuesto inválido: ${taxType}`]));
+            return;
+        }
+
         let sentence = `
             INSERT INTO
                 "Ecosystem".taxes(
@@ -902,9 +918,10 @@ controller.createTax = (req,res)=>{
                     base,
                     parent_id,
                     path,
-                    "isRetention"
+                    "isRetention",
+                    "type"
                 )
-            VALUES($1,$2,$3,$4,$5,$6,$7,$8);
+            VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9);
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -914,7 +931,8 @@ controller.createTax = (req,res)=>{
             info.base,
             info.parent_id != undefined? info.parent_id:0,
             info.path != undefined? info.path:'/',
-            info.isRetention
+            info.isRetention,
+            taxType
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -959,7 +977,10 @@ controller.getTaxes = (req, res) => {
                     "Ecosystem"."taxes".base,
                     "Ecosystem"."taxes".parent_id,
                     "Ecosystem"."taxes".path,
-                    "Ecosystem"."contable_accounts".type,
+                    "Ecosystem"."taxes"."isRetention",
+                    "Ecosystem"."taxes"."type",
+                    "Ecosystem"."taxes"."type" AS tax_type,
+                    "Ecosystem"."contable_accounts".type AS account_type,
                     "Ecosystem"."contable_accounts".name
                 FROM "Ecosystem"."taxes"
                 LEFT JOIN "Ecosystem"."contable_accounts"
@@ -977,15 +998,35 @@ controller.getTaxes = (req, res) => {
                 where.push(`"Ecosystem".taxes.id = $${values.length}`);
             }
 
+            const taxType = info.type ?? info.tax_type;
+            if (taxType != null) {
+                const normalizedTaxType = `${taxType}`.trim().toLowerCase();
+                const validTypes = ['purchase', 'sell', 'both'];
+                if (!validTypes.includes(normalizedTaxType)) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify([false, `Tipo de impuesto inválido: ${taxType}`]));
+                    return;
+                }
+
+                if (normalizedTaxType === 'purchase' || normalizedTaxType === 'sell') {
+                    values.push(normalizedTaxType);
+                    where.push(`"Ecosystem".taxes."type" IN ($${values.length}::tax_type, 'both'::tax_type)`);
+                } else {
+                    where.push(`"Ecosystem".taxes."type" = 'both'::tax_type`);
+                }
+            }
+
             // Combinar WHERE dinámico
             sentence += where.join(' AND ');
-            
+
+            sentence += ` ORDER BY "Ecosystem".taxes.account_id ASC`;
+
             if (info.limit != null) {
                 values.push(info.limit);
                 sentence += ` LIMIT $${values.length}`;
             }
 
-            sentence += ` ORDER BY "Ecosystem".taxes.account_id ASC;`;
+            sentence += `;`;
 
             const consulta = await useDataBase(sentence, values, 1);
             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -1941,7 +1982,12 @@ controller.getThirdParties = (req,res)=>{
         let joinClause = "";
         // Si se requiere información comercial, añadimos las columnas y el JOIN
         if (info.comercialInfo === true) {
-            // Ajustado a los nuevos campos de la MV de Cartera
+            // Ajustado a los nuevos campos de la MV de Cartera.
+            // Etapa 6 (refactor terceros): los datos fiscales ya NO se leen de
+            // "Ecosystem"."thirdPartyTaxInfo" sino de la vista de compatibilidad
+            // "Fiscal".v_third_party_current_tax_info (mismo shape + campos extra
+            // que antes no se devolvían: regime, retention_type, economic_activity,
+            // attachedRut y municipality_name).
             selectColumns += `,
                 ci.credit,
                 ci.credit_value,
@@ -1953,21 +1999,27 @@ controller.getThirdParties = (req,res)=>{
                 tti.dv,
                 tti.nature AS "thirdParty_nature",
                 tti."identidicationType_id",
+                tti.regime,
+                tti.retention_type,
+                tti.economic_activity,
+                tti."attachedRut",
+                tti.municipality_name,
                 COALESCE(b.total_debt, 0) AS "thirdParty_totalDebt",
                 COALESCE(b.total_paid, 0) AS "thirdParty_totalPaid",
                 COALESCE(b.balance, 0) AS "thirdParty_balance",
                 COALESCE(b.current_balance, 0) AS "thirdParty_currentBalance",
                 COALESCE(b.overdue_balance, 0) AS "thirdParty_overdueBalance"
             `;
-            
+
             joinClause = `
                 LEFT JOIN "Ecosystem"."thirdPartyComercialInfo" ci
                     ON "Ecosystem".thirdparties.id = ci."thirdParty_id"
                 LEFT JOIN "Ecosystem".mv_thirdparty_account_balances b
                     ON "Ecosystem".thirdparties.id = b."thirdParty_id"
                     AND "Ecosystem".thirdparties.company_id = b.company_id
-                LEFT JOIN "Ecosystem"."thirdPartyTaxInfo" tti
+                LEFT JOIN "Fiscal".v_third_party_current_tax_info tti
                     ON "Ecosystem".thirdparties.id = tti."thirdParty_id"
+                    AND "Ecosystem".thirdparties.company_id = tti.company_id
             `;
         }
 
@@ -2026,6 +2078,8 @@ controller.getThirdPartyDetails = (req,res)=>{
 
 // Crear Nuevo Tercero
 
+// Etapa 5 (refactor terceros): la lógica vive en thirdPartyService, que escribe
+// el modelo legacy (fuente de verdad) y sincroniza el modelo "Fiscal".
 controller.createThirdParty = (req, res) => {
     let data = '';
     req.on('data', chunk => {
@@ -2035,85 +2089,9 @@ controller.createThirdParty = (req, res) => {
     req.on('end', async () => {
         try {
             const info = JSON.parse(data);
-            console.log(info);
-            const sentence = `
-                INSERT INTO "Ecosystem".thirdparties(
-                    company_id, 
-                    names,
-                    "lastNames",
-                    first_name,
-                    second_name,
-                    first_surname,
-                    second_surname,
-                    indentification_type,
-                    indentification_number,
-                    mail,
-                    phone,
-                    country,
-                    city,
-                    address,
-                    type)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING id;
-            `;
-
-            const values = [
-                info.company_id,
-                `${info.first_name}${info.second_name? ` ${info.second_name}`:''}`,
-                `${info.first_surname}${info.second_surname? ` ${info.second_surname}`:''}`,
-                info.first_name,
-                info.second_name,
-                info.first_surname,
-                info.second_surname,
-                info.indentification_type,
-                info.indentification_number,
-                info.mail,
-                info.phone,
-                info.country,
-                info.city,
-                info.address,
-                info.type
-            ];
-            const result = await useDataBase(sentence, values, 3);
-            let idNewThirdParty = parseInt(result.id);
-            console.log(idNewThirdParty);
-            if(typeof(parseInt(result))== 'number'){
-                let comercialInfoSen = `
-                    INSERT INTO "Ecosystem"."thirdPartyComercialInfo"(
-                        "thirdParty_id", company_id, credit, credit_term, credit_value, interest_rate, comercial_state)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7);
-                ` 
-                let comercialInfoCons = await useDataBase(comercialInfoSen,[
-                    idNewThirdParty,
-                    info.company_id,
-                    info.credit,
-                    info.credit_term,
-                    info.credit_value,
-                    info.interest_rate,
-                    info.comercial_state
-                ],2);
-                let taxInfo = `
-                    INSERT INTO "Ecosystem"."thirdPartyTaxInfo"(
-	                    "thirdParty_id", company_id, regime, "IVA_responsability", retention_type, economic_activity, "attachedRut", municipality_id, nature, "identidicationType_id")
-	                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
-                `;
-                let taxInfoCons = await useDataBase(taxInfo,[
-                    idNewThirdParty,
-                    info.company_id,
-                    info.regime,
-                    info.IVA_responsability,
-                    info.retention_type,
-                    info.economic_activity,
-                    info.attachedRut != undefined? info.attachedRut:'',
-                    info.mucipality_id,
-                    info.typePerson,
-                    info.identidicationType_id
-                ],2);
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(comercialInfoCons && taxInfoCons));
-            }else{
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(false));
-            }
+            const result = await thirdPartyService.register(info);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(result));
         } catch (err) {
             console.error('Error en createThirdParty:', err);
             res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -2127,6 +2105,49 @@ controller.createThirdParty = (req, res) => {
     })
 };
 
+// Bloqueo/desbloqueo de terceros (capacidad nueva del modelo Fiscal, Etapa 5)
+controller.blockThirdParty = (req, res) => {
+    let data = '';
+    req.on('data', chunk => { data += chunk; });
+    req.on('end', async () => {
+        try {
+            const info = JSON.parse(data);
+            const result = await thirdPartyService.block(info);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(result));
+        } catch (err) {
+            console.error('Error en blockThirdParty:', err);
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify([false, err.message || err]));
+        }
+    });
+    req.on('error', (err) => {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end(JSON.stringify(err));
+    });
+};
+
+controller.unblockThirdParty = (req, res) => {
+    let data = '';
+    req.on('data', chunk => { data += chunk; });
+    req.on('end', async () => {
+        try {
+            const info = JSON.parse(data);
+            const result = await thirdPartyService.unblock(info);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(result));
+        } catch (err) {
+            console.error('Error en unblockThirdParty:', err);
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify([false, err.message || err]));
+        }
+    });
+    req.on('error', (err) => {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end(JSON.stringify(err));
+    });
+};
+
 
 // Eliminar Terceros
 
@@ -2136,17 +2157,18 @@ controller.deleteThirdParty = (req,res)=>{
         data += chunk;
     })
     req.on('end',async()=>{
-        let info = JSON.parse(data);
-        const placeholders = info.suppliers.map((_, i) => `$${i + 1}`).join(",");
-        let sentence = `
-                DELETE FROM "Ecosystem".thirdParties
-                WHERE id IN (${placeholders});
-            `;
-        let consulta = await useDataBase(sentence,[
-            info.suppliers
-        ],2);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
+        try {
+            let info = JSON.parse(data);
+            // Etapa 5: audita snapshot antes de borrar; el CASCADE limpia el
+            // modelo Fiscal. Corrige el bug legacy de placeholders (multi-delete).
+            let consulta = await thirdPartyService.remove(info);
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(consulta));
+        } catch (err) {
+            console.error('Error en deleteThirdParty:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify([false, err.message || err]));
+        }
     })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
@@ -2390,45 +2412,17 @@ controller.getDocAnalyticDocNumberTable = async (req, res) => {
             data += chunk;
         });
         req.on('end',async()=>{
-            let info = JSON.parse(data);
-            let sentence = `
-                UPDATE "Ecosystem".thirdparties
-                    SET
-                        names= $1,
-                        "lastNames"= $2,
-                        first_name = $3,
-                        second_name = $4,
-                        first_surname = $5,
-                        second_surname = $6,
-                        indentification_type=$7,
-                        indentification_number=$8,
-                        mail=$9,
-                        phone=$10,
-                        country=$11,
-                        city=$12, 
-                        address=$13,
-                        type=$14
-                WHERE id = $15;
-            `
-            let consulta = await useDataBase(sentence,[
-                `${info.first_name}${info.second_name? ` ${info.second_name}`:''}`,
-                `${info.first_surname}${info.second_surname? ` ${info.second_surname}`:''}`,
-                info.first_name,
-                info.second_name,
-                info.first_surname,
-                info.second_surname,
-                info.indentification_type,
-                info.indentification_number,
-                info.mail,
-                info.phone,
-                info.country,
-                info.city,
-                info.address,
-                info.type,
-                info.id
-            ],2);
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(consulta));
+            try {
+                let info = JSON.parse(data);
+                // Etapa 5: legacy UPDATE + sync de roles Fiscal si cambió el type.
+                let consulta = await thirdPartyService.updateGeneralInfo(info);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(consulta));
+            } catch (err) {
+                console.error('Error en updateThirdPartyGeneralInfo:', err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify([false, err.message || err]));
+            }
         })
         req.on('error', (err) => {
             console.error("⚠️ Error en la recepción de datos:", err);
@@ -2445,27 +2439,17 @@ controller.getDocAnalyticDocNumberTable = async (req, res) => {
             data += chunk;
         });
         req.on('end',async()=>{
-            let info = JSON.parse(data);
-            let sentence = `
-                UPDATE "Ecosystem"."thirdPartyComercialInfo"
-	                SET 
-                        credit=$1,
-                        credit_term=$2,
-                        credit_value=$3,
-                        interest_rate=$4,
-                        comercial_state=$5
-	            WHERE "thirdParty_id" = $6 ;
-            `
-            let consulta = await useDataBase(sentence,[
-                info.credit,
-                info.credit_term,
-                info.credit_value,
-                info.interest_rate,
-                info.comercial_state,
-                info.id
-            ],2);
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(consulta));
+            try {
+                let info = JSON.parse(data);
+                // Etapa 5: legacy UPDATE + status de la relación Fiscal + auditoría.
+                let consulta = await thirdPartyService.updateComercialInfo(info);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(consulta));
+            } catch (err) {
+                console.error('Error en updateThirdPartyComercialInfo:', err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify([false, err.message || err]));
+            }
         })
         req.on('error', (err) => {
             console.error("⚠️ Error en la recepción de datos:", err);
@@ -2483,30 +2467,9 @@ controller.getDocAnalyticDocNumberTable = async (req, res) => {
         req.on('end', async () => {
             try {
                 let info = JSON.parse(data);
-                let sentence = `
-                    UPDATE "Ecosystem"."thirdPartyTaxInfo"
-                    SET 
-                        regime = $1, 
-                        "IVA_responsability" = $2, 
-                        retention_type = $3, 
-                        economic_activity = $4, 
-                        "attachedRut" = $5, 
-                        nature = $6,
-                        "identidicationType_id" = $7
-                    WHERE "thirdParty_id" = $8 AND company_id = $9;
-                `;
-
-                let consulta = await useDataBase(sentence, [
-                    info.regime,                    
-                    info.IVA_responsability,        
-                    info.retention_type,            
-                    info.economic_activity,         
-                    info.attachedRut ?? '-',               
-                    info.nature,              
-                    info.identidicationType_id,      
-                    info.thirdParty_id,             
-                    info.company_id                 
-                ], 2);
+                // Etapa 5: legacy UPDATE + INSERT de nueva clasificación Fiscal
+                // por cada tipo cuyo valor cambió (historia, nunca UPDATE).
+                let consulta = await thirdPartyService.updateTaxInfo(info);
 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify(consulta));

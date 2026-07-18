@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAppInfo } from "../../../../context/context";
-import { postInfo } from "../../../../utils/functions";
+import { postInfo, parseSettlementReportByPeriodToXlsx } from "../../../../utils/functions";
 import { BoldTitle } from "../../components/BoldTitle";
 import { ButtonMenu } from "../../components/ButtonMenu";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
@@ -25,6 +25,13 @@ export function CashBoxesCloseReport({type}) {
 
     // Actions Page
     const [loading, setLoading] = useState(false);
+    
+    
+    // Filters
+    const [startDate,setStartDate] = useState();
+    const [endDate,setEndDate] = useState();
+    const [cashStore_id,setStore_id] = useState();
+    const [cashBox_id,setCashBox_id] = useState();
 
     // Settings Report
     const documentTypes = {
@@ -110,6 +117,25 @@ export function CashBoxesCloseReport({type}) {
         });
     };
 
+    // Descarga el informe consolidado (liquidaciones de caja por periodo).
+    const downloadConsolidado = async () => {
+        let res = await postInfo('/facturation/getSettlementReportByPeriod', {
+            company_id: appInfo.company_id,
+            start_date: startDate || undefined,
+            end_date: endDate || undefined,
+            store_id: cashStore_id || undefined,
+            cash_box_id: cashBox_id || undefined
+        });
+        if (!res[0]) {
+            throw new Error('No se pudo obtener el informe consolidado.');
+        }
+        await parseSettlementReportByPeriodToXlsx(res[1], {
+            title: `Informe_Consolidado_Cierres_Caja_${appInfo.legal_name}`,
+            period: startDate && endDate ? `${startDate} a ${endDate}` : '',
+            companyName: appInfo.legal_name
+        });
+    };
+
     return (
         <div className="ReportDocument">
         <PathLocation />
@@ -120,11 +146,11 @@ export function CashBoxesCloseReport({type}) {
         <div className="settingsReport">
             <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
             <div className="rangeInput">
-            <FormInput type={"date"} title={"Fecha Inicial"} />
+            <FormInput type={"date"} title={"Fecha Inicial"} action={setStartDate} />
             <span>-</span>
-            <FormInput type={"date"} title={"Fecha Final"} />
+            <FormInput type={"date"} title={"Fecha Final"} action={setEndDate} />
             </div>
-            <SelectOptions
+            {false && (<SelectOptions
             options={[
                 "Ascendente (fecha)",
                 "Descendente (fecha)",
@@ -132,7 +158,7 @@ export function CashBoxesCloseReport({type}) {
                 "Descendente (Nombre)",
             ]}
             title={"Orden"}
-            />
+            />)}
             <ButtonMenu title={"Mas Ajustes"} children={<i className="fa-solid fa-sliders" />} noRotate={true} />
             <ButtonMenu title={"Agregar a favoritos"} children={<i className="fa-regular fa-star" />} noRotate={true} />
             <AiButton attached={info} sugerence={[
@@ -140,10 +166,18 @@ export function CashBoxesCloseReport({type}) {
                 {text:'Realiza un analisis de este informe',context:`Procesos - Informe - `},
                 {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Informe - `}
             ]}/>
-            <ButtonDownload
-                info={setInfoForReportDownload()}
-                title={"Informe_Cierres_Caja"}
-            />
+            <div className="downloadContainer">
+                <ButtonDownload
+                    info={setInfoForReportDownload()}
+                    title={"Informe_Cierres_Caja"}
+                    text={'Consolidado'}
+                    onDownload={downloadConsolidado}
+                />
+                <ButtonDownload
+                    info={setInfoForReportDownload()}
+                    title={"Informe_Cierres_Caja"}
+                />
+            </div>
         </div>
         <div className="SpaceReport" id="SpaceReport">
             {!loading && (

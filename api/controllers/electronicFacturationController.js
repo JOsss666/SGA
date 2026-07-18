@@ -24,9 +24,13 @@ async function readFile(path){
 // Función auxiliar para guardar el token
 async function saveToken(tokenData) {
     // Agregamos la fecha de expiración real (ej: ahora + 60 min)
+    // y una firma del entorno (client_id + api link) para no reutilizar
+    // un token de sandbox contra producción (o viceversa).
     const dataToSave = {
         ...tokenData,
-        expires_at: Date.now() + (tokenData.expires_in * 1000)
+        expires_at: Date.now() + (tokenData.expires_in * 1000),
+        client_id: process.env.FACTUS_CLIENT_ID,
+        api_link: process.env.FACTUS_API_LINK
     };
     await fs.writeFile(TOKEN_PATH, JSON.stringify(dataToSave));
     return dataToSave;
@@ -79,13 +83,22 @@ electronicFacturationController.getAuthToken = async (grantType = 'password', re
     // La caché solo es confiable si trae un access_token no vacío y un expires_at
     // numérico. Si el archivo está vacío, corrupto, incompleto o no se pudo leer
     // (readFile devolvió null), lo tratamos como inexistente y pedimos un token nuevo.
-    const isUsableCache = stored
+    let isUsableCache = stored
         && typeof stored.access_token === 'string'
         && stored.access_token.trim().length > 0
         && Number.isFinite(stored.expires_at);
 
+    // Si el token cacheado pertenece a otro entorno/cliente (ej: sandbox
+    // vs producción), lo descartamos para forzar una nueva autenticación.
+    if (isUsableCache && (stored.client_id !== process.env.FACTUS_CLIENT_ID ||
+                          stored.api_link !== process.env.FACTUS_API_LINK)) {
+        console.warn('⚠️ Token cacheado pertenece a otro entorno Factus. Re-autenticando...');
+        stored = null;
+        isUsableCache = false;
+    }
+
     if (!bypassCache && !isUsableCache) {
-        console.warn('⚠️ Caché de token vacía, corrupta o ilegible. Solicitando un token nuevo.');
+        console.warn('⚠️ Caché de token vacía, corrupta, ilegible o de otro entorno. Solicitando un token nuevo.');
     }
 
     if (isUsableCache && finalGrantType === 'password') {
@@ -160,17 +173,26 @@ electronicFacturationController.getNumberingRanges = async () => {
         }
 
         // CORRECCIÓN: Obtener el auth ANTES de usarlo
-        const auth = await electronicFacturationController.getAuthToken();
-        
-        const response = await fetch(urlSer + '/v1/numbering-ranges', {
+        const fetchRanges = async (auth) => fetch(urlSer + '/v1/numbering-ranges', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'Authorization': `Bearer ${auth.access_token}`
             },
         });
+
+        let auth = await electronicFacturationController.getAuthToken();
+        let response = await fetchRanges(auth);
+
+        // Si el token fue rechazado, forzamos una nueva autenticación (bypassCache)
+        if (response.status === 401) {
+            console.warn('⚠️ Token Factus rechazado al obtener rangos. Reintentando autenticación...');
+            auth = await electronicFacturationController.getAuthToken('password', null, true);
+            response = await fetchRanges(auth);
+        }
+
         const data = await response.json();
-        
+
         if (!response.ok) throw new Error(data.message || 'Error al obtener rangos');
 
         // Guardamos en caché
@@ -213,11 +235,7 @@ electronicFacturationController.showActualToken = async()=>{
 
 electronicFacturationController.getMunicipalities = async (req, res) => {
     try {
-        // 1. Obtenemos el token
-        const auth = await electronicFacturationController.getAuthToken();
-
-        // 2. Hacemos la petición a Factus (Sin el req.on('end'))
-        const response = await fetch(urlSer + '/v1/municipalities', {
+        const fetchMunicipalities = async (auth) => fetch(urlSer + '/v1/municipalities', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -225,13 +243,21 @@ electronicFacturationController.getMunicipalities = async (req, res) => {
             },
         });
 
+        let auth = await electronicFacturationController.getAuthToken();
+        let response = await fetchMunicipalities(auth);
+
+        if (response.status === 401) {
+            console.warn('⚠️ Token Factus rechazado al obtener municipios. Reintentando autenticación...');
+            auth = await electronicFacturationController.getAuthToken('password', null, true);
+            response = await fetchMunicipalities(auth);
+        }
+
         if (!response.ok) {
             throw new Error(`Error en Factus: ${response.status}`);
         }
 
         const data = await response.json();
 
-        // 3. ¡VITAL! Enviamos la respuesta al cliente
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(data));
 
@@ -701,6 +727,8 @@ electronicFacturationController.init = async () => {
         console.log(error)
         console.error('⚠️ No se pudo obtener el token inicial de Factus:', error.message);
         console.log('ℹ️ El sistema reintentará la conexión en la primera solicitud de factura.');
+        console.log('reintentanto token')
+        let retry = await electronicFacturationController.getAuthToken('password');
     }
 };
 

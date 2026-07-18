@@ -30,6 +30,7 @@ import { NoResults } from "./NoResults";
 import { ClientOrderPreview } from "./Alerts/ClientOrderPreview";
 import { FormButton } from "../components/FormButton";
 import { FormNewInvoice } from "./forms/FormNewInvoice";
+import { FormNewPurchase } from "./forms/FormNewPurchase";
 import { FormNewENote } from "./forms/FormNewENote";
 import { NoAccess } from "./NoAccess";
 import { SellInvoiceDesign } from "./Alerts/SellInvoiceDesing";
@@ -74,6 +75,8 @@ export function New(){
             [{ text: 'Crear recibo de caja', children: <FormNewCashRecipt />, icon: <i className="fa-solid fa-receipt" /> }] : []),
         
         {text:'Factura de venta',children:<FormNewInvoice/>,icon:<i className="fa-solid fa-file-invoice"/>},
+
+        {text:'Compra',children:<FormNewPurchase/>,icon:<i className="fa-solid fa-cart-shopping"/>},
 
         {text:'Nota débito o crédito',children:<FormNewENote/>,icon:<i className="fa-solid fa-note-sticky"/>},
         

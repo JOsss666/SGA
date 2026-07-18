@@ -39,6 +39,24 @@ export function ConceptsPlan(){
     const searchValConLowerCase = searchValCon.toLowerCase();
     const searchValTaxLowerCase = searchValTax.toLowerCase();
 
+    const normalizeTaxCategoryNode = (category) => ({
+        ...category,
+        id: `category-${category.id}`,
+        original_id: category.id,
+        parent_id: Number(category.parent_id) === 0 ? null : `category-${category.parent_id}`,
+        node_type: 'category',
+    });
+
+    const normalizeTaxNode = (tax) => ({
+        ...tax,
+        id: `tax-${tax.tax_id}`,
+        original_id: tax.tax_id,
+        parent_id: Number(tax.parent_id) === 0 ? null : `category-${tax.parent_id}`,
+        name: tax.name,
+        node_type: 'tax',
+        value: tax,
+    });
+
     const getConcepts = async()=>{
         let res = await postInfo('/getConcepts',{
             company_id:appInfo.company_id,
@@ -84,15 +102,9 @@ export function ConceptsPlan(){
     }
 
     useEffect(()=>{
-            let C = []
-            categories.forEach(element => {
-                C.push(element);
-            });
-            noOrganizedTaxes.forEach(element => {
-                C.push(element)
-            });
-            console.log(C);
-            let orgTaxes = arrayToTree(C);
+            const categoryNodes = categories.map(normalizeTaxCategoryNode);
+            const taxNodes = noOrganizedTaxes.map(normalizeTaxNode);
+            let orgTaxes = arrayToTree([...categoryNodes, ...taxNodes]);
             setOrganizedTaxes(orgTaxes)
     },[noOrganizedTaxes,categories])
 
@@ -167,7 +179,7 @@ export function ConceptsPlan(){
                     <div className="conceptsC">
                         {!loading && concepts.map((element,index)=>(
                             <ConceptCard hidden={!handleSearchConcept(element)} info={element} key={index} reloadFun={getConcepts} />
-                        ))}
+                        ))} 
                         {loading && (
                             <LoadingSpace title={'Cargando Conceptos'} description={'Esto no debe tardar mucho...'}/>
                         )}

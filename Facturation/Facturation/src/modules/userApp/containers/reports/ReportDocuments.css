@@ -82,6 +82,12 @@
     padding: 1vh 2vh;
 }
 
+.ReportDocument .settingsReport .downloadContainer{
+    display: flex;
+    margin: auto;
+    margin-right: 0;
+}
+
 .ReportDocument .SpaceReport{
     margin-top: 2vh;
     max-width: 100%;
