@@ -1,0 +1,274 @@
+.FormNewPurchase{
+    width: 93dvw;
+    position: relative;
+}
+
+.FormNewPurchase .headForm{
+    width: 92%;
+    padding: 2vh 2vw;
+}
+
+.FormNewPurchase .errorContainer{
+    position: fixed;
+    width: 90%;
+    top: 12vh;
+    left: 8vw;
+    background-color: #FEF2F2;
+    border-radius: 1vh;
+    padding: 2vh;
+    border: solid .2vh #FF6467;
+    z-index: 40;
+}
+
+.FormNewPurchase .errorContainer .closeErrorBtn{
+    cursor: pointer;
+    position: absolute;
+    top: 1.5vh;
+    right: 2vh;
+    font-size: clamp(3px,3vh,30px);
+    color: #FF6467;
+}
+
+.FormNewPurchase .errorContainer span{
+    color: #FF6467;
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+}
+
+.FormNewPurchase .headForm .valuesCashRecipt{
+    flex-direction: row;
+    display: flex;
+    gap: 2vw;
+}
+
+.FormNewPurchase form{
+    padding-top: 4vh;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 2vh 4vw;
+}
+
+.FormNewPurchase form .paymentMehtodsContainer{
+    padding: 2vh;
+    border-radius: 2vh;
+    width: 100%;
+}
+
+.FormNewPurchase form .gridItemsContainer{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 1vh 2vh;
+    border-radius: 1vh;
+    outline: solid .1vh var(--inputsBorder);
+    gap: 2vh;
+}
+
+.FormNewPurchase .itemBlock{
+    padding: 1vh 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.FormNewPurchase .itemBlock .headBlock{
+    display: flex;
+    gap: 2vw;
+}
+
+.FormNewPurchase .itemBlock .headBlock strong{
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--mainText);
+    font-weight: 500;
+    margin: auto 0;
+}
+
+.FormNewPurchase .itemBlock .headBlock span{
+    margin: auto;
+    margin-right: 1vh;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--descriptionText);
+}
+
+.FormNewPurchase .itemBlock .gridItems{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding-left: 1vw;
+}
+
+.FormNewPurchase .itemBlock .gridItems .itemRow{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 2vw;
+    padding: 1vh;
+    border-radius: 1vh;
+    border-bottom: .2vh dashed var(--inputsBorder);
+}
+
+.FormNewPurchase .itemBlock .gridItems .itemRow:hover{
+    background-color: var(--cardHover);
+}
+
+.FormNewPurchase .itemBlock .gridItems .UserCard{
+    width: 40%;
+}
+
+.FormNewPurchase .itemBlock .gridItems .valueItemRow{
+    margin: auto 0;
+    text-align: right;
+    width: 15%;
+    font-weight: 400;
+    color: var(--descriptionText);
+}
+
+.FormNewPurchase .itemBlock .gridItems .rowInputItem .FormInput{
+    width: 10vw;
+    min-width: 0;
+}
+
+.FormNewPurchase .itemBlock .gridItems .rowInputItem .FormInput label{
+    font-weight: 400;
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
+}
+
+.FormNewPurchase .itemBlock .gridItems .itemRow .quitContainer{
+    margin: auto 0;
+}
+
+.FormNewPurchase .itemBlock .gridItems .itemRow .quitContainer i{
+    cursor: pointer;
+    transition: .3s ease all;
+}
+
+.FormNewPurchase .itemBlock .gridItems .itemRow .quitContainer i:hover{
+    color: #FB2C36;
+    transform: rotateZ(15deg);
+}
+
+.FormNewPurchase form .FileInput{
+    height: fit-content;
+}
+
+/* Retenciones (opcionales) */
+
+.FormNewPurchase form .retentionsContainer{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding: 1vh 2vh;
+    border-radius: 1vh;
+    outline: solid .1vh var(--inputsBorder);
+}
+
+.FormNewPurchase .retentionsContainer > strong{
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--mainText);
+    font-weight: 500;
+}
+
+.FormNewPurchase .gridRetentions{
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+}
+
+.FormNewPurchase .retentionRow{
+    display: flex;
+    align-items: center;
+    gap: 1vw;
+    padding: 1vh;
+    border-radius: 1vh;
+    cursor: pointer;
+    border-bottom: .2vh dashed var(--inputsBorder);
+}
+
+.FormNewPurchase .retentionRow:hover{
+    background-color: var(--cardHover);
+}
+
+.FormNewPurchase .retentionRow .retentionName{
+    flex: 1;
+    font-size: clamp(2px,2vh,20px);
+    color: var(--mainText);
+}
+
+.FormNewPurchase .retentionRow .retentionAmount{
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+    text-align: right;
+}
+
+.FormNewPurchase .retentionRow.retentionApplied .retentionAmount{
+    color: var(--mainText);
+    font-weight: 500;
+}
+
+/* Resumen de totales */
+
+.FormNewPurchase form .purchaseTotalsResume{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+    padding: 1vh 2vh;
+}
+
+.FormNewPurchase .purchaseTotalsResume .totalRow{
+    display: flex;
+    justify-content: space-between;
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+}
+
+.FormNewPurchase .purchaseTotalsResume .totalRowNet{
+    padding-top: 1vh;
+    border-top: .1vh solid var(--inputsBorder);
+    color: var(--mainText);
+    font-size: clamp(2.5px,2.5vh,25px);
+}
+
+@media (max-width:500px) {
+    .FormNewPurchase{
+        width: 100dvw;
+    }
+
+    .FormNewPurchase .headForm{
+        padding: 2vh;
+        padding-top: 10vh;
+        width: 100dvw;
+    }
+
+    .FormNewPurchase .LoadingSpace{
+        width: 100dvw;
+    }
+
+    .FormNewPurchase form{
+        margin-top: 28vh;
+    }
+
+    .FormNewPurchase form .SearchinList{
+        width: 100%;
+    }
+
+    .FormNewPurchase .itemBlock .gridItems .UserCard{
+        width: 100%;
+    }
+
+    .FormNewPurchase .itemBlock .gridItems .itemRow{
+        flex-direction: column;
+    }
+
+    .FormNewPurchase .itemBlock .gridItems .rowInputItem .FormInput{
+        width: 72dvw;
+    }
+
+    .FormNewPurchase .itemBlock .gridItems .valueItemRow{
+        width: 100%;
+        margin-top: .5vh;
+    }
+}

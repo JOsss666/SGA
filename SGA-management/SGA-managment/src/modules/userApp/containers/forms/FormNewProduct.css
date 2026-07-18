@@ -12,6 +12,34 @@
     margin-bottom: 2vh;
 }
 
+.FormNewProduct .errorContainer{
+    position: absolute;
+    width:90%;
+    top: 8vh;
+    right: 5%;
+    background-color: #FEF2F2;
+    border-radius: 1vh;
+    padding: 2vh;
+    padding-right: 4vh;
+    border: solid .2vh #FF6467;
+    z-index: 40;
+}
+
+.FormNewProduct .errorContainer .closeErrorBtn{
+    cursor: pointer;
+    position: absolute;
+    top: 1.5vh;
+    right: 2vh;
+    font-size: clamp(3px,3vh,30px);
+    color: #FF6467;   
+}
+
+.FormNewProduct .errorContainer span{
+    color: #FF6467;   
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+}
+
 .FormNewProduct form{
     display: flex;
     flex-direction: column;
@@ -24,6 +52,10 @@
     display: flex;
     flex-direction: column;
     gap: 2vh;
+}
+
+.FormNewProduct form section .tagSection{
+    margin: 0 auto;
 }
 
 .FormNewProduct form .FormButton{
@@ -83,4 +115,43 @@
 .FormNewProduct .accessSwitch .SwitchOption{
     margin: auto;
     margin-right: 2vh;
+}
+
+.FormNewProduct .withholdingsContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.FormNewProduct .selectedWithholding{
+    display: flex;
+    gap: 1vh;
+    width: 100%;
+    border: none;
+    border-radius: 1vh;
+    padding: 1vh 2vh;
+    background-color: var(--inputsBg);
+    color: var(--primaryText);
+    position: relative;
+}
+
+.FormNewProduct .selectedWithholding .withHoldingName{
+    color: var(--mainText);
+    font-size: clamp(2.2px,2.2vh,22px);
+}
+
+.FormNewProduct .deleteWithholding{
+    margin: auto;
+    margin-right: 0;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.FormNewProduct .deleteWithholding:hover{
+    color: #FF6467;
+    transform: scale(1.25);
+}
+
+.FormNewProduct .selectedWithholding i{
+    color: var(--descriptionText);
 }
