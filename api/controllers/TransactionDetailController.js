@@ -4,6 +4,7 @@ import treasuryController from "./TreasuryController.js";
 const transactionDetailController = {};
 
 transactionDetailController.createDetail = async(info, transactionId, element)=>{
+    const detailStatus = element.status ?? (info.status === 'draft' ? 'draft' : 'posted');
     let sentence = `
         INSERT INTO "Ecosystem".transaction_detail(
             company_id,
@@ -15,8 +16,9 @@ transactionDetailController.createDetail = async(info, transactionId, element)=>
             total,
             nature,
             "paymentMethod_id",
-            voucher)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;
+            voucher,
+            status)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id;
     `;
     return await useDataBase(sentence,[
         info.company_id,
@@ -28,7 +30,8 @@ transactionDetailController.createDetail = async(info, transactionId, element)=>
         element.total,
         element.nature,
         element.paymentMethod_id != undefined ? element.paymentMethod_id:undefined,
-        element.voucher
+        element.voucher,
+        detailStatus
     ],3);
 }
 

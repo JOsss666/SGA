@@ -355,6 +355,7 @@ utilsController.getDocumentPaidAmount = (info) => {
     };
 
     utilsController.createAccountTransactionDetail = async (info, transactionId, detail, options = {}) => {
+        const detailStatus = detail.status ?? (info.status === 'draft' ? 'draft' : 'posted');
         const sentence = `
             INSERT INTO "Ecosystem".transaction_detail(
                 company_id,
@@ -366,8 +367,9 @@ utilsController.getDocumentPaidAmount = (info) => {
                 total,
                 nature,
                 "paymentMethod_id",
-                voucher)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                voucher,
+                status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             RETURNING id;
         `;
         const values = [
@@ -380,7 +382,8 @@ utilsController.getDocumentPaidAmount = (info) => {
             detail.total,
             detail.nature,
             detail.paymentMethod_id != undefined ? detail.paymentMethod_id : undefined,
-            detail.voucher
+            detail.voucher,
+            detailStatus
         ];
 
         if (options.client) {
