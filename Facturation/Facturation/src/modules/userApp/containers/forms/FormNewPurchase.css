@@ -6,6 +6,12 @@
 .FormNewPurchase .headForm{
     width: 92%;
     padding: 2vh 2vw;
+    box-shadow: 0 .5vh 1vh var(--translucidMenu);
+}
+
+.FormNewPurchase .headForm .headerTotalsContainer{
+    display: flex;
+    gap: 2vw;
 }
 
 .FormNewPurchase .errorContainer{
@@ -13,7 +19,7 @@
     width: 90%;
     top: 12vh;
     left: 8vw;
-    background-color: #FEF2F2;
+    background-color: #FEF2F2 !important;
     border-radius: 1vh;
     padding: 2vh;
     border: solid .2vh #FF6467;
@@ -53,6 +59,7 @@
     padding: 2vh;
     border-radius: 2vh;
     width: 100%;
+    border: solid .1vh var(--inputsBorder);
 }
 
 .FormNewPurchase form .gridItemsContainer{
@@ -60,7 +67,7 @@
     display: flex;
     flex-direction: column;
     padding: 1vh 2vh;
-    border-radius: 1vh;
+    border-radius: 2vh;
     outline: solid .1vh var(--inputsBorder);
     gap: 2vh;
 }
@@ -103,7 +110,8 @@
     align-items: center;
     width: 100%;
     gap: 2vw;
-    padding: 1vh;
+    padding:1vh 1vh;
+    padding-bottom: 3vh;
     border-radius: 1vh;
     border-bottom: .2vh dashed var(--inputsBorder);
 }
@@ -122,17 +130,7 @@
     width: 15%;
     font-weight: 400;
     color: var(--descriptionText);
-}
-
-.FormNewPurchase .itemBlock .gridItems .rowInputItem .FormInput{
-    width: 10vw;
-    min-width: 0;
-}
-
-.FormNewPurchase .itemBlock .gridItems .rowInputItem .FormInput label{
-    font-weight: 400;
-    color: var(--descriptionText);
-    font-size: clamp(2px,2vh,20px);
+    font-size: clamp(2px,2.2vh,22px);
 }
 
 .FormNewPurchase .itemBlock .gridItems .itemRow .quitContainer{
@@ -142,6 +140,8 @@
 .FormNewPurchase .itemBlock .gridItems .itemRow .quitContainer i{
     cursor: pointer;
     transition: .3s ease all;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--mainText);
 }
 
 .FormNewPurchase .itemBlock .gridItems .itemRow .quitContainer i:hover{
@@ -231,6 +231,36 @@
     color: var(--mainText);
     font-size: clamp(2.5px,2.5vh,25px);
 }
+
+.FormNewPurchase form .FormInput{
+    width: fit-content;
+    margin: auto 0;
+}
+
+.FormNewPurchase .itemBlock .gridItems .rowInputItem .FormInput{
+    width: 10vw;
+    min-width: 0;
+}
+
+.FormNewPurchase .itemBlock .gridItems .rowInputItem .FormInput label{
+    font-weight: 400;
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
+}
+
+.FormNewPurchase form .footerDetailsContainer{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+
+.FormNewPurchase form .footerDetailsContainer .FormInput{
+    width: 100%;
+}
+
+
 
 @media (max-width:500px) {
     .FormNewPurchase{

@@ -370,6 +370,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                 company_id:appInfo.company_id,
                 for_wallet:undefined
             })
+            console.log('PaymentMethods: ',res);
             if(res[0]){
                 let C = []
                 res[1].forEach(element => {
@@ -741,6 +742,10 @@ export function FormNewPurchase({InfoParams,reloadFun}){
         getProductsAndServices();
     },[])
 
+    useEffect(()=>{
+        console.log('PM list: ',paymentMehtods);
+    },[paymentMehtods])
+
     return(
         <div className="FormNewCashRecipt FormNewPurchase">
             {visibleError && (
@@ -752,11 +757,18 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                 </div>
             )}
             <div className="headForm">
-                <BoldTitle text={'Compra'}>
+                <BoldTitle text={thirdPartyInfo.id != undefined ? `Nueva compra a ${thirdPartyInfo.names}`:'Nueva compra'}>
                     <i className="fa-solid fa-cart-shopping"/>
                 </BoldTitle>
-                <div className="valuesCashRecipt">
-                    <h6 className="valueCashRecipt">Valor: $ {formatCurrency(total)}</h6>
+                <div className="headerTotalsContainer">
+                    <div className="valuesCashRecipt">
+                        <h6 className="valueCashRecipt">Valor a pagar: $ {formatCurrency(totalToPay)}</h6>
+                    </div>
+                    {total > 0 && (
+                        <div className="valuesCashRecipt">
+                            <h6 className="valueCashRecipt">Valor pago: $ {formatCurrency(total)}</h6>
+                        </div>
+                    )}
                 </div>
                 <i className="fa-solid fa-xmark closeFormBtn" onClick={()=>{
                     popOutAlert();
@@ -787,14 +799,21 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                     {info.concept_id == undefined && (
                         <SearchinList action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
                     )}
+                    {info.thirdPatyPurchaseTerm == undefined && (
+                        <FormInput title={'Plazo pago (días)'} type={'number'} placeholder={'Plazo pago a proveedor en (días)'} min={0} required={false} value={creditTerm} action={setCreditTerm} disabled={disabled}/>
+                    )}
                     {info.cashBox_id == undefined && (
                         <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja (si aplica pago en efectivo)'} list={cashBoxes} disabled={disabled}/>
                     )}
+                    
                     <div className="gridItemsContainer">
                         <div className="itemBlock">
                             <div className="headBlock">
                                 <strong>Ítems de la compra</strong>
                                 <span>Total: $ {formatCurrency(totalToPay)}</span>
+                            </div>
+                            <div className="personalizaedView">
+                                <SearchinList noActVal={true} list={productsAndServices} action={handleAddItem} placeHolder={'+ Agregar producto o servicio comprado'}/>
                             </div>
                             <div className="gridItems">
                                 {items.map((element,index)=>(
@@ -806,7 +825,8 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                                                 type={'number'}
                                                 min={0}
                                                 required={true}
-                                                value={element.units || ''}
+                                                value={element.units != undefined ? element.units: 0}
+                                                placeholder={element.units != undefined ? element.units: 0}
                                                 action={(value) => {
                                                     handleEditItemDetail(index, 'units', value);
                                                 }}
@@ -819,8 +839,8 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                                                 step={0.01}
                                                 min={0}
                                                 required={false}
-                                                defaultValue={element.unit_value}
-                                                placeholder={element.unit_value}
+                                                defaultValue={element.unit_value ?? 0}
+                                                placeholder={element.unit_value ?? 0}
                                                 disabled={disabled}
                                                 action={(value) => {
                                                     handleEditItemDetail(index, 'unit_value', value);
@@ -831,14 +851,12 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                                         <span className="quitContainer" onClick={()=>{
                                             handleDeleteItem(index)
                                         }}>
-                                            <i className="fa-solid fa-trash"/>
+                                            <i className="fa-solid fa-trash"/>    
                                         </span>
                                     </div>
                                 ))}
                             </div>
-                            <div className="personalizaedView">
-                                <SearchinList noActVal={true} list={productsAndServices} action={handleAddItem} placeHolder={'+ Agregar producto o servicio comprado'}/>
-                            </div>
+                            
                         </div>
                     </div>
                     {availableRetentions.length > 0 && (
@@ -863,16 +881,8 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                             </div>
                         </div>
                     )}
-                    <div className="purchaseTotalsResume">
-                        <div className="totalRow"><span>Subtotal (con IVA)</span><span>$ {formatCurrency(totalToPay)}</span></div>
-                        {totalRetentions > 0 && (
-                            <div className="totalRow"><span>Retenciones</span><span>- $ {formatCurrency(totalRetentions)}</span></div>
-                        )}
-                        <div className="totalRow totalRowNet"><strong>Neto a pagar</strong><strong>$ {formatCurrency(totalToPay - totalRetentions)}</strong></div>
-                    </div>
                     <div className="paymentMehtodsContainer">
-                        <FormInput title={'Plazo de crédito con el proveedor (días)'} type={'number'} min={0} required={false} value={creditTerm} action={setCreditTerm} disabled={disabled}/>
-                        <SearchinList title={'Metodos de pago'} action={addPaymentMethod} noActVal={true} placeHolder={'Selecione metodos de pago'} list={paymentMehtods}/>
+                        <SearchinList disabled={disabled} action={addPaymentMethod} list={paymentMehtods} placeHolder={'Seleccione los metodos de pago'} title={'Metodos de pago'} noActVal={true}/>
                         <div className="gridPaymentMethods">
                             {disabledByValue && (
                                 <span className="warnByValue">
@@ -902,12 +912,13 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                                     {element.aplyVoucher && (
                                         <div className="voucherC">
                                             <strong>
+                                                <i className="fa-solid fa-ticket"/>
                                                 Voucher o referencia
                                             </strong>
                                             <input type="text" placeholder="Ej: AR23..." onChange={(e)=>{
                                                 updateVoucher(element.id,e.target.value);
                                             }}/>
-                                            <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
+                                            <i title={`Eliminar voucher de ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
                                                 setAplyVoucher(element.id,false)
                                             }}/>
                                         </div>
@@ -916,9 +927,11 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                             ))}
                         </div>
                     </div>
-                    <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
-                    <FileInput action={setAttached} placeholder={'Adjuntar soporte'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
-                    <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor ingresado no es valido':'Crear compra'} disabled={disabledToSubmit? true:disabled} loading={loading}/>
+                    <div className="footerDetailsContainer">
+                        <FormInput title={'Descripción'} textArea={true} placeholder={'Añade una descripción a tu compra'} action={setDescription} disabled={disabled}/>
+                        <FileInput action={setAttached} placeholder={'Adjuntar soporte'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
+                        <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor ingresado no es valido':'Crear compra'} disabled={disabledToSubmit? true:disabled} loading={loading}/>
+                    </div>
                 </form>
             )}
             {loading && (
