@@ -392,7 +392,7 @@ utilsController.getDocumentPaidAmount = (info) => {
     };
 
     utilsController.shouldRegisterCashMovement = (info, detail) => {
-        const cashBoxTypes = ["Cash Recipt", "Sell Invoice", "Purchase Invoice", "Purchase Document"];
+        const cashBoxTypes = ["Cash Recipt", "Sell Invoice"];
         return cashBoxTypes.includes(info.doc_type)
             && detail.type === "payment"
             && detail.for_wallet !== true;

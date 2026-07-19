@@ -237,6 +237,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                 company_id:appInfo.company_id,
                 docType:'Purchase Invoice'
             })
+            console.log('Reglas compra: ',res);
             if(res.status == 'OK'){
                 setDocRules(res.data);
             }
