@@ -261,6 +261,86 @@
 }
 
 
+/* 
+    STYLES FOR RETENTIONS CONTAINER 
+*/
+
+.FormNewPurchase form .withholdingsContainer{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-radius: 2vh;
+    border: solid .1vh var(--inputsBorder);
+    padding: 1vh 2vh;
+}
+
+.FormNewPurchase form .withholdingsContainer .headWithholding{
+    display: flex;
+    position: relative;
+    width: 100%;
+    margin: 1vh 0;
+    padding: 2vh 0;
+    border-bottom: solid .1vh var(--inputsBorder);
+}
+
+.FormNewPurchase form .withholdingsContainer .headWithholding .controlRetentionsC{
+    margin: auto;
+    margin-right: 1vh;
+    display: flex;
+    gap: 1vw;
+    justify-items: center;
+    align-items: center;
+}
+
+.FormNewPurchase form .withholdingsContainer .headWithholding .controlRetentionsC span{
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+}
+
+.FormNewPurchase form .withholdingsContainer .headWithholding h6{
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--mainText);
+    font-weight: 600;
+    margin: auto 0;
+}
+
+.FormNewPurchase form .withholdingsContainer .bodyRetentions{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding: 1vh 0;
+    margin: 1vh 0;
+    border-top: solid .1vh var(--descriptionText);
+    border-bottom: solid .1vh var(--descriptionText);
+    padding-bottom: 2vh;
+}
+
+.FormNewPurchase form .withholdingsContainer .bodyRetentions .RetentionCard{
+    border-bottom: dashed .2vh var(--inputsBorder);
+    padding-bottom: 2vh;
+}
+
+.FormNewPurchase form .withholdingsContainer .subTotalContainer{
+    display: flex;
+    width: 100%;
+    padding: 1vh 2vh;
+    align-items: center;
+}
+
+.FormNewPurchase form .withholdingsContainer .subTotalContainer span{
+    margin: auto 0;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--mainText);
+}
+
+.FormNewPurchase form .withholdingsContainer .subTotalContainer h6{
+    margin: auto;
+    margin-right: 2vw;
+    font-size: clamp(2.5px,2.5vh,25px);
+    font-weight: 600;
+    color: var(--mainText);
+}
+
 
 @media (max-width:500px) {
     .FormNewPurchase{

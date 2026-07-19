@@ -13,6 +13,8 @@ import { moneyFormat, postInfo } from "../../../../utils/functions";
 import { executeDocumentAction } from "../../../../utils/DocumentsControl";
 import './FormNewCashRecipt.css'
 import './FormNewPurchase.css'
+import { SwitchOption } from "../../components/SwitchOption";
+import { RetentionCard } from "../../components/RetentionCard";
 
 export function FormNewPurchase({InfoParams,reloadFun}){
 
@@ -70,6 +72,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
     // Control para retenciones (opcionales, parametrizadas por concepto vía taxes.isRetention)
     const [availableRetentions,setAvailableRetentions] = useState([]);
     const [totalRetentions,setTotalRetentions] = useState(0);
+    const [aplyRetentions,setAplyretentions] = useState(true);
 
     // Object FormInfo
     let FormInfo = {
@@ -196,7 +199,14 @@ export function FormNewPurchase({InfoParams,reloadFun}){
 
         const handleAddItem = (element) => {
             if(element.name == undefined) return;
-            setItems(prev => [...prev, { ...element, manualPrice:false }]);
+            // El producto trae unit_cost y units como texto ("unit"): inicializamos
+            // valores numéricos para que los cálculos de impuestos no den NaN.
+            setItems(prev => [...prev, {
+                ...element,
+                manualPrice:false,
+                unit_value: Number(element.unit_cost) || 0,
+                units: 1
+            }]);
         };
 
         const handleEditItemDetail = (index, key, value) => {
@@ -357,11 +367,18 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                         rate: parseFloat(t.rate) || 0,
                         base: parseFloat(t.base) || 0,
                         account_id: t.account_id,
-                        applied: false
+                        source: 'concept',
+                        applied: aplyRetentions
                     }));
-                setAvailableRetentions(rets);
+                // Conservamos las retenciones de los items: si la misma retención
+                // viene por item y por concepto, gana la del item (más específica).
+                setAvailableRetentions(prev => {
+                    const itemRets = prev.filter(r => r.source === 'item');
+                    const newOnes = rets.filter(r => !itemRets.some(i => i.id === r.id));
+                    return [...itemRets, ...newOnes];
+                });
             }else{
-                setAvailableRetentions([]);
+                setAvailableRetentions(prev => prev.filter(r => r.source === 'item'));
             }
         }
 
@@ -407,24 +424,24 @@ export function FormNewPurchase({InfoParams,reloadFun}){
             let res = await postInfo('/inventory/getProducts',{
                 company_id:appInfo.company_id
             });
-            let purchaseTaxesRes = await postInfo('/inventory/getProductTaxRelations',{
-                company_id:appInfo.company_id,
-                type:'purchase_tax'
+            let purchaseRelationsRes = await postInfo('/inventory/getPurchaseRelations',{
+                company_id:appInfo.company_id
             });
             console.log('Servicios disponibles para compra: ',res)
+            console.log('Relaciones para compra: ',purchaseRelationsRes)
             if(res[0]){
-                const purchaseTaxByProduct = {};
-                if(purchaseTaxesRes[0]){
-                    purchaseTaxesRes[1].forEach(relation => {
-                        if(purchaseTaxByProduct[relation.product_id] == undefined){
-                            purchaseTaxByProduct[relation.product_id] = relation;
-                        }
+                const relationsByProduct = {};
+                if(purchaseRelationsRes[0]){
+                    purchaseRelationsRes[1].forEach(relation => {
+                        relationsByProduct[relation.product_id] = relation;
                     });
                 }
 
                 let C = []
                 res[1].forEach(element => {
-                    const purchaseTax = purchaseTaxByProduct[element.id];
+                    const relations = relationsByProduct[element.id];
+                    // purchase_taxes viene ordenado por priority: el primero es el principal.
+                    const purchaseTax = relations?.purchase_taxes?.[0];
                     const item = {
                         ...element,
                         product_id: element.id,
@@ -432,9 +449,9 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                         tax_name: purchaseTax?.tax_name ?? null,
                         tax_base: purchaseTax?.base ?? 0,
                         tax_rate: purchaseTax?.rate ?? 0,
-                        tax_account: purchaseTax?.tax_account ?? null
+                        tax_account: purchaseTax?.tax_account ?? null,
+                        retentions: relations?.retentions ?? []
                     };
-
                     C.push({
                         text:`${element.code} ${element.name}`,
                         value:item
@@ -449,18 +466,21 @@ export function FormNewPurchase({InfoParams,reloadFun}){
     // Funciones de control
 
         const handleTaxes = (elements) => {
+            console.log('Elemntos agregados con id: ',elements);
             const groupedTaxes = elements.reduce((acc, item) => {
                 if (!item.tax_id) return acc;
                 const itemTotal = parseFloat(item.unit_value) * parseFloat(item.units)
                 const itemBase = (itemTotal/(1 + (item.tax_rate/100)))
-                const taxTotal = itemBase * (item.tax_rate/100);
+                // Number(...) porque toFixed devuelve string y rompería la suma acumulada.
+                const taxTotal = Number((itemBase * (item.tax_rate/100)).toFixed(2));
                 if (!acc[item.tax_id]) {
                     acc[item.tax_id] = {
                         id: item.tax_id,
                         rate: item.tax_rate,
                         name: item.tax_name,
                         total: taxTotal,
-                        account:item.tax_account
+                        account:item.tax_account,
+                        retention:item.retention ? true:false
                     };
                 } else {
                     acc[item.tax_id].total += taxTotal;
@@ -468,6 +488,40 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                 return acc;
             }, {});
             setTaxes(Object.values(groupedTaxes));
+        };
+
+        // Agrupa las retenciones de compra que traen los items (relaciones
+        // purchase_withholding) y las expone como disponibles. Conserva las del
+        // concepto y el estado applied que el usuario ya haya marcado.
+        const handleRetentions = (elements) => {
+            const groupedRetentions = elements.reduce((acc, item) => {
+                (item.retentions ?? []).forEach(ret => {
+                    if (!ret.tax_id || acc[ret.tax_id]) return;
+                    acc[ret.tax_id] = {
+                        id: ret.tax_id,
+                        code: ret.tax_code,
+                        name: ret.tax_name,
+                        rate: parseFloat(ret.rate) || 0,
+                        base: parseFloat(ret.base) || 0,
+                        account_id: ret.tax_account,
+                        source: 'item',
+                        applied: aplyRetentions
+                    };
+                });
+                return acc;
+            }, {});
+
+            setAvailableRetentions(prev => {
+                const itemRets = Object.values(groupedRetentions);
+                // Las del concepto sobreviven salvo que el item traiga la misma.
+                const conceptRets = prev.filter(r =>
+                    r.source !== 'item' && groupedRetentions[r.id] === undefined
+                );
+                return [...conceptRets, ...itemRets].map(ret => {
+                    const existing = prev.find(p => p.id === ret.id);
+                    return existing ? { ...ret, applied: existing.applied } : ret;
+                });
+            });
         };
 
         // Base de retención: subtotal neto del documento (antes de IVA).
@@ -481,6 +535,14 @@ export function FormNewPurchase({InfoParams,reloadFun}){
         const toggleRetention = (id) => {
             setAvailableRetentions(prev =>
                 prev.map(r => r.id === id ? { ...r, applied: !r.applied } : r)
+            );
+        };
+
+        // Switch maestro: aplica (o quita) todas las retenciones de una vez.
+        const toggleAllRetentions = (value) => {
+            setAplyretentions(value);
+            setAvailableRetentions(prev =>
+                prev.map(r => ({ ...r, applied: value }))
             );
         };
 
@@ -711,6 +773,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
             itemsTotal += (parseFloat(item.unit_value || 0) * parseFloat(item.units || 0));
         });
         handleTaxes(items);
+        handleRetentions(items);
         setTotalToPay(itemsTotal);
     },[items])
 
@@ -743,8 +806,8 @@ export function FormNewPurchase({InfoParams,reloadFun}){
     },[])
 
     useEffect(()=>{
-        console.log('PM list: ',paymentMehtods);
-    },[paymentMehtods])
+        console.log('Taxes list: ',taxes);
+    },[taxes])
 
     return(
         <div className="FormNewCashRecipt FormNewPurchase">
@@ -859,28 +922,6 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                             
                         </div>
                     </div>
-                    {availableRetentions.length > 0 && (
-                        <div className="retentionsContainer">
-                            <strong>Retenciones (opcional)</strong>
-                            <div className="gridRetentions">
-                                {availableRetentions.map((retention)=>{
-                                    const amount = getRetentionAmount(retention, getSubtotalNet());
-                                    return(
-                                        <label key={retention.id} className={`retentionRow ${retention.applied? 'retentionApplied':''}`}>
-                                            <input
-                                                type="checkbox"
-                                                checked={retention.applied}
-                                                disabled={disabled}
-                                                onChange={()=>toggleRetention(retention.id)}
-                                            />
-                                            <span className="retentionName">{retention.code} · {retention.name} ({retention.rate}%)</span>
-                                            <span className="retentionAmount">$ {formatCurrency(amount)}</span>
-                                        </label>
-                                    )
-                                })}
-                            </div>
-                        </div>
-                    )}
                     <div className="paymentMehtodsContainer">
                         <SearchinList disabled={disabled} action={addPaymentMethod} list={paymentMehtods} placeHolder={'Seleccione los metodos de pago'} title={'Metodos de pago'} noActVal={true}/>
                         <div className="gridPaymentMethods">
@@ -925,6 +966,45 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                                     )}
                                 </div>
                             ))}
+                        </div>
+                    </div>
+                    <div className="withholdingsContainer">
+                        <div className="headWithholding">
+                            <h6>Resumen de la compra</h6>
+                            <div className="controlRetentionsC">
+                                <span>Desea aplicar las retenciones?</span>
+                                <SwitchOption action={toggleAllRetentions} defaultValue={aplyRetentions}/>
+                            </div>
+                        </div>
+                        <div className="subTotalContainer">
+                            <span>Subtotal: </span>
+                            <h6>$ {moneyFormat(totalToPay - totalTaxes)}</h6>
+                        </div>
+                        {(taxes.length > 0 || availableRetentions.length > 0) && (
+                            <div className="bodyRetentions">
+                                {taxes.map((element,index)=>(
+                                    <RetentionCard info={element} key={index}/>
+                                ))}
+                                {availableRetentions.map((retention)=>(
+                                    <RetentionCard
+                                        key={retention.id}
+                                        aply={retention.applied}
+                                        setAplyRetention={()=>toggleRetention(retention.id)}
+                                        info={{
+                                            name: retention.name,
+                                            rate: retention.rate,
+                                            // Mostramos el monto potencial (applied:true); el checkbox
+                                            // y el estilo atenuado indican si está aplicada o no.
+                                            total: getRetentionAmount({ ...retention, applied:true }, getSubtotalNet()),
+                                            retention: true
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                        <div className="subTotalContainer">
+                            <span>Valor total compra: </span>
+                            <h6>$ {moneyFormat(totalToPay)}</h6>
                         </div>
                     </div>
                     <div className="footerDetailsContainer">

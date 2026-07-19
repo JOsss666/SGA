@@ -122,10 +122,12 @@
     font-size: clamp(2px,2vh,20px);
     width: 26.25%;
     transition: .3s;
+    color: var(--descriptionText);
 }
 
 .FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .PaymentMethodCard .voucherC input:focus{
     outline: solid .2vh #007AFF;
+    color: var(--mainText);
 }
 
 .FormNewCashRecipt form .gridPaymentMethods .PaymentMethodCard:hover > .addVoucherToPayment{

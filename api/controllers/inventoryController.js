@@ -328,6 +328,20 @@ inventoryController.getProductTaxRelations = async (req,res)=>{
     }
 }
 
+inventoryController.getProductPurchaseRelations = async (req,res)=>{
+    try {
+        const info = await readJsonBody(req);
+        const result = await productsServicesService.getPurchaseRelations(info);
+        sendJson(res, 200, result);
+    } catch (err) {
+        console.error('Error en getProductPurchaseRelations:', err);
+        sendJson(res, 500, {
+            status: 'Error',
+            message: err.message
+        });
+    }
+}
+
 inventoryController.createThirdPartyProductTaxRelation = async (req,res)=>{
     try {
         const info = await readJsonBody(req);
