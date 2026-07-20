@@ -12,7 +12,7 @@
     margin-bottom: 1.5vh;
     font-weight: 400 !important;
     font-size: clamp(2.5px,2.5vh,25px);
-    color: var(--descriptionText);
+    color: var(--mainText) !important;
 }
 
 .FormInput .inputContainer{
@@ -46,6 +46,7 @@
     box-shadow: 0 .4vh 1vh var(--translucidMenu);
     background-color: var(--inputsBg);
     color: var(--descriptionText);
+    transition: .3s;
 }
 
 .FormInput .inputContainer textarea{
@@ -55,4 +56,5 @@
 
 .FormInput .inputContainer input:focus, .FormInput .inputContainer textarea:focus{
     color: var(--mainText);
+    outline: solid .2vh #155DFC;
 }

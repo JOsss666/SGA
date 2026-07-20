@@ -1537,7 +1537,7 @@ controller.getDocParams = (req,res)=>{
         let values = [];
         let whereClauses = [];
 
-        whereClauses.push(`company_id = $1`);
+        whereClauses.push(`(company_id = 0 OR company_id = $1)`);
         values.push(info.company_id)
 
         if(info.docType != undefined){
@@ -1551,6 +1551,7 @@ controller.getDocParams = (req,res)=>{
             SELECT * FROM
                 "Ecosystem".documents_rules
             ${whereQuery}
+            ORDER BY company_id ASC, execution_order ASC
         `
 
         let consulta = await useDataBase(sentence,values,1);
@@ -1560,7 +1561,7 @@ controller.getDocParams = (req,res)=>{
             response.data = consulta[1];
             response.message = 'Reglas obtenidas correctamente'
         }else{
-            response.sttus = 'Error',
+            response.status = 'Error',
             response.data = [],
             response.message = consulta[1]
         }

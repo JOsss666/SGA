@@ -455,6 +455,73 @@ productsServicesService.getTaxRelations = async (info) => {
     `, values, 1);
 };
 
+
+// Trae, agrupadas por producto, las relaciones fiscales de COMPRA:
+// impuestos (type = 'purchase_tax') y retenciones (type = 'purchase_withholding').
+// Solo relación+tax con product_id: la info del producto ya la carga el front aparte.
+productsServicesService.getPurchaseRelations = async (info) => {
+    const values = [info.company_id];
+    const where = ['ptr.company_id = $1'];
+
+    if (info.product_id !== undefined || info.id !== undefined) {
+        values.push(info.product_id ?? info.id);
+        where.push(`ptr.product_id = $${values.length}`);
+    }
+
+    if (info.active_only !== false) {
+        where.push('ptr.is_active = true');
+    }
+
+    where.push(`ptr.type IN (
+        'purchase_tax'::"Fiscal".product_tax_relation_type,
+        'purchase_withholding'::"Fiscal".product_tax_relation_type
+    )`);
+
+    const [ok, rows] = await useDataBase(`
+        SELECT
+            ptr.*,
+            ptr.type::text AS relation_type,
+            t.code AS tax_code,
+            t.rate,
+            t.base,
+            t.account_id AS tax_account,
+            t."isRetention",
+            t.type::text AS tax_type,
+            ca.name AS tax_name,
+            ca.type AS account_type
+        FROM "Fiscal".product_tax_relations ptr
+        JOIN "Ecosystem".taxes t
+            ON t.id = ptr.tax_id
+        LEFT JOIN "Ecosystem".contable_accounts ca
+            ON ca.id = t.account_id
+        WHERE ${where.join(' AND ')}
+        ORDER BY ptr.product_id ASC, ptr.priority ASC, ptr.id ASC;
+    `, values, 1);
+
+    if (!ok) return [false, []];
+
+    // Agrupamos por producto: todas las relaciones de impuesto en purchase_taxes
+    // y todas las retenciones (con los mismos campos del tax) en retentions.
+    const grouped = {};
+    rows.forEach(row => {
+        if (grouped[row.product_id] === undefined) {
+            grouped[row.product_id] = {
+                product_id: row.product_id,
+                purchase_taxes: [],
+                retentions: []
+            };
+        }
+
+        if (row.relation_type === 'purchase_withholding') {
+            grouped[row.product_id].retentions.push(row);
+        } else {
+            grouped[row.product_id].purchase_taxes.push(row);
+        }
+    });
+
+    return [true, Object.values(grouped)];
+};
+
 productsServicesService.registerThirdPartyProductTaxRelation = async (info) => {
     const rows = Array.isArray(info.relations) && info.relations.length > 0
         ? info.relations.map((relation, index) => normalizeThirdPartyProductTaxRelation({

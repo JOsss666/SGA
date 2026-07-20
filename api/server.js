@@ -12,6 +12,7 @@ const server = http.createServer(app);
 export const allowedOrigins = [
         "http://localhost:5173", // Developer
         "http://localhost:5174", // Developer
+        "http://localhost:5175", // Developer
         "http://localhost:3000", // localHost
         "https://sga-1-wv7x.onrender.com", // Tesoreria
         "https://facturation.sga360.co", // Facturación

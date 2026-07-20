@@ -38,6 +38,7 @@ export function PricesList({ setActualist }) {
             company_id: appInfo.company_id,
             allowedStores: userConfig.access.stores.enabled.length > 0 ? userConfig.access.stores.enabled : undefined
         });
+        console.log('Prices Lists: ',res)
         if (res && res[0]) {
             setListPrices(res[1]);
         } else {
