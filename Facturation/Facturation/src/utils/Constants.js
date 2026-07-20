@@ -1,3 +1,4 @@
+import { postInfo } from "./functions";
 
 
 
@@ -21,3 +22,20 @@ export const ThirdPartyFactusIdentificationTypeCodes = [
     { text: 'Registro civil', value: 11 },
     { text: 'Tarjeta de identidad', value: 12 }
 ];
+
+
+export async function insertCredentials(){
+    let res = await postInfo('/electronicFacturation/providerCredentials',{
+        "company_id": 0,
+        "provider": "factus",
+        "environment": "sandbox",
+        "api_url": "https://api-sandbox.factus.com.co",
+        "client_id": "--",
+        "client_secret": "--",
+        "username": "--",
+        "password": "--",
+        "status": "active"
+        });
+    console.log('CR res: ',res);
+}
+

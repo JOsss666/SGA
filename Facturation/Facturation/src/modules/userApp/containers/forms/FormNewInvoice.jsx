@@ -643,6 +643,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             allowedCellars,
             type:'service'
         })
+        console.log('Servicios disponibles: ',res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {

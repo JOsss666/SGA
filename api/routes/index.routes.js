@@ -14,6 +14,7 @@ import facturationController from '../controllers/facturationController.js';
 import assetsController from '../controllers/assetsController.js';
 import AnalyticController from '../controllers/AnalyticsController.js';
 import electronicFacturationController from '../controllers/electronicFacturationController.js';
+import electronicProviderCredentialsController from '../controllers/electronicProviderCredentialsController.js';
 import treasuryController from '../controllers/TreasuryController.js';
 
 const router = express.Router();
@@ -334,6 +335,12 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     router.get('/electronicFacturation/getNumberingRanges', electronicFacturationController.getNumberingRanges);
 
     router.get('/electronicFacturation/showActualToken', electronicFacturationController.showActualToken);
+
+    router.post('/electronicFacturation/providerCredentials', electronicProviderCredentialsController.upsert);
+
+    router.post('/electronicFacturation/getProviderCredentials', electronicProviderCredentialsController.list);
+
+    router.post('/electronicFacturation/providerCredentials/:id/disable', electronicProviderCredentialsController.disable);
 
     router.post('/electronicFacturation/invoice', electronicFacturationController.newInvoice);
 

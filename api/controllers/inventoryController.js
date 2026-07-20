@@ -658,9 +658,9 @@ inventoryController.getPricesList = (req, res) => {
                     spl.priority,
                     s.name as store_name
                 FROM
-                    "Inventory"."store_pricesLists" spl
-                LEFT JOIN
                     "Inventory".prices_lists pl
+                LEFT JOIN
+                    "Inventory"."store_pricesLists" spl
                 ON
                     spl."priceList_id" = pl.id
                 LEFT JOIN 
