@@ -183,6 +183,11 @@
     justify-content: center;
     border: 0dvh dashed var(--descriptionText);
     margin-bottom: 1vh;
+    background-color: var(--cardHover);
+}
+
+.ThirdpartyCard .ImageSection img{
+    object-fit: contain;
 }
 
 .ThirdpartyCard .ImagePlaceholder {
