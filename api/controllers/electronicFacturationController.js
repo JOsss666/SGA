@@ -1,265 +1,124 @@
-import fs from 'fs/promises';
-import path from 'path';
 import { useDataBase } from '../app.js';
 import dotenv from 'dotenv';
+import factusService from '../services/factusService.js';
 
 dotenv.config();
-const urlSer = process.env.FACTUS_API_LINK;
 
 const electronicFacturationController = {};
-const TOKEN_PATH = path.resolve('./factus_token.json');
-const RANGES_PATH = path.resolve('./numbering_ranges.json');
+const DEFAULT_FACTUS_ENVIRONMENT = 'sandbox';
 
-// Función auxiliar para leer el token guardado
+const getCompanyIdFromInfo = (info = {}) => (
+    info.company_id
+    ?? info.company_info?.company_id
+    ?? info.document?.company_id
+    ?? info.company?.company_id
+    ?? 0
+);
 
-async function readFile(path){
-  try{
-    const content = await fs.readFile(path,'utf-8')
-    return JSON.parse(content);
-  }catch(err){
-    return null;
-  }
+const getEnvironmentFromInfo = (info = {}) => (
+    info.environment
+    ?? info.company_info?.factus_environment
+    ?? DEFAULT_FACTUS_ENVIRONMENT
+);
+
+export async function getNumercRangeData(type, company_id = 0, environment = DEFAULT_FACTUS_ENVIRONMENT) {
+    return factusService.getNumberingRangeId({ company_id, environment, type });
 }
 
-// Función auxiliar para guardar el token
-async function saveToken(tokenData) {
-    // Agregamos la fecha de expiración real (ej: ahora + 60 min)
-    // y una firma del entorno (client_id + api link) para no reutilizar
-    // un token de sandbox contra producción (o viceversa).
-    const dataToSave = {
-        ...tokenData,
-        expires_at: Date.now() + (tokenData.expires_in * 1000),
-        client_id: process.env.FACTUS_CLIENT_ID,
-        api_link: process.env.FACTUS_API_LINK
-    };
-    await fs.writeFile(TOKEN_PATH, JSON.stringify(dataToSave));
-    return dataToSave;
-}
+electronicFacturationController.getAuthToken = async (grantType = 'password', refreshToken = null, bypassCache = false, info = {}) => (
+    factusService.getAuthToken({
+        company_id: getCompanyIdFromInfo(info),
+        environment: getEnvironmentFromInfo(info),
+        bypassCache
+    })
+);
 
-// Función auxiliar para guardar el token
-async function saveNumberingRanges(ranges) {
-    // Agregamos la fecha de expiración real (ej: ahora + 60 min)
-    const THIRTY_MINUTES = 30 * 60 * 1000;
-    const dataToSave = {
-        numbering_ranges:[ranges],
-        expires_at:Date.now() + THIRTY_MINUTES
-    };
-    await fs.writeFile(RANGES_PATH, JSON.stringify(dataToSave));
-    return dataToSave;
-}
-
-export async function getNumercRangeData(type) {
-    const cache = await readFile(RANGES_PATH);
-    if (!cache) return null;
-    const rawData = cache.numbering_ranges ? cache.numbering_ranges : cache;
-    const rangesArray = Object.values(rawData);
-    if (rangesArray.length === 0) return null;
-
-    switch (type) {
-        case 'invoice':
-            const invoiceRange = rangesArray.find(item => item.document === 'Factura de Venta');
-            return invoiceRange ? invoiceRange.id : null;
-
-        case 'cr_note':
-            const crNoteRange = rangesArray.find(item => item.document === 'Nota Crédito');
-            return crNoteRange ? crNoteRange.id : null;
-
-        case 'db_note':
-            const dbNoteRange = rangesArray.find(item => item.document === 'Nota Débito');
-            return dbNoteRange ? dbNoteRange.id : null;
-
-        default:
-            return null;
-    }
-}
-
-electronicFacturationController.getAuthToken = async (grantType = 'password', refreshToken = null, bypassCache = false) => {
-    const validGrants = ['password', 'refresh_token'];
-    let finalGrantType = validGrants.includes(grantType) ? grantType : 'password';
-
-    // Si bypassCache es true, ignoramos el archivo (esto rompe el bucle)
-    let stored = bypassCache ? null : await readFile(TOKEN_PATH);
-
-    // La caché solo es confiable si trae un access_token no vacío y un expires_at
-    // numérico. Si el archivo está vacío, corrupto, incompleto o no se pudo leer
-    // (readFile devolvió null), lo tratamos como inexistente y pedimos un token nuevo.
-    let isUsableCache = stored
-        && typeof stored.access_token === 'string'
-        && stored.access_token.trim().length > 0
-        && Number.isFinite(stored.expires_at);
-
-    // Si el token cacheado pertenece a otro entorno/cliente (ej: sandbox
-    // vs producción), lo descartamos para forzar una nueva autenticación.
-    if (isUsableCache && (stored.client_id !== process.env.FACTUS_CLIENT_ID ||
-                          stored.api_link !== process.env.FACTUS_API_LINK)) {
-        console.warn('⚠️ Token cacheado pertenece a otro entorno Factus. Re-autenticando...');
-        stored = null;
-        isUsableCache = false;
-    }
-
-    if (!bypassCache && !isUsableCache) {
-        console.warn('⚠️ Caché de token vacía, corrupta, ilegible o de otro entorno. Solicitando un token nuevo.');
-    }
-
-    if (isUsableCache && finalGrantType === 'password') {
-        const now = Date.now();
-        const fiveMinutes = 5 * 60 * 1000;
-
-        if (now < (stored.expires_at - fiveMinutes)) {
-            return stored;
-        }
-
-        // Token vencido: intentamos refrescar solo si hay un refresh_token válido.
-        if (typeof stored.refresh_token === 'string' && stored.refresh_token.trim().length > 0) {
-            finalGrantType = 'refresh_token';
-            refreshToken = stored.refresh_token;
-        }
-    }
-
+electronicFacturationController.getNumberingRanges = async (req, res) => {
     try {
-        const payload = {
-            grant_type: finalGrantType,
-            client_id: process.env.FACTUS_CLIENT_ID,
-            client_secret: process.env.FACTUS_CLIENT_SECRET,
+        const info = {
+            ...req.query,
+            ...(req.body ?? {})
         };
-
-        if (finalGrantType === 'password') {
-            payload.username = process.env.FACTUS_USERNAME;
-            payload.password = process.env.FACTUS_PASSWORD;
-        } else {
-            if (!refreshToken) throw new Error("Falta refresh_token");
-            payload.refresh_token = refreshToken;
-        }
-
-        console.log(`🚀 Solicitando token a Factus: [${finalGrantType}]`);
-
-        const response = await fetch(urlSer + '/oauth/token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify(payload)
+        const ranges = await factusService.getNumberingRanges({
+            company_id: getCompanyIdFromInfo(info),
+            environment: getEnvironmentFromInfo(info)
         });
-
-        const data = await response.json();
-        
-        if (!response.ok) {
-            // SI FALLA EL REFRESH, reintentamos pasando bypassCache = true
-            if (finalGrantType === 'refresh_token') {
-                console.warn('⚠️ Refresh token inválido. Reintentando login con credenciales directas...');
-                // Aquí pasamos TRUE en el tercer parámetro
-                return await electronicFacturationController.getAuthToken('password', null, true);
-            }
-            
-            console.error('❌ Error crítico de Factus:', data);
-            throw new Error(data.message || 'Error de autenticación');
-        }
-
-        const savedToken = await saveToken(data);
-        console.log('✨ Token actualizado correctamente');
-        return savedToken;
-
-    } catch (error) {
-        console.error('🚨 Error Factus Auth:', error.message);
-        throw error;
-    }   
-};
-
-electronicFacturationController.getNumberingRanges = async () => {
-    try {
-        let stored = await readFile(RANGES_PATH);
-        // Validamos si la caché existe y no ha pasado más de 30 mins
-        if(stored && (Date.now() < stored.expires_at)){
-            console.log('📦 Usando rangos de numeración desde caché');
-            return (stored.numbering_ranges);
-        }
-
-        // CORRECCIÓN: Obtener el auth ANTES de usarlo
-        const fetchRanges = async (auth) => fetch(urlSer + '/v1/numbering-ranges', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${auth.access_token}`
-            },
-        });
-
-        let auth = await electronicFacturationController.getAuthToken();
-        let response = await fetchRanges(auth);
-
-        // Si el token fue rechazado, forzamos una nueva autenticación (bypassCache)
-        if (response.status === 401) {
-            console.warn('⚠️ Token Factus rechazado al obtener rangos. Reintentando autenticación...');
-            auth = await electronicFacturationController.getAuthToken('password', null, true);
-            response = await fetchRanges(auth);
-        }
-
-        const data = await response.json();
-
-        if (!response.ok) throw new Error(data.message || 'Error al obtener rangos');
-
-        // Guardamos en caché
-        await saveNumberingRanges(data.data.data);
-        return data.data.data;
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify([ranges.length > 0, ranges]));
     } catch (error) {
         console.error('Error en Rangos:', error.message);
-        throw error;
+        if (res) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'Error', message: error.message }));
+        }
     }   
 };
 
-electronicFacturationController.getTaxes = async () => {
-    const auth = await electronicFacturationController.getAuthToken();
+electronicFacturationController.getTaxes = async (req, res) => {
     try {
-        const response = await fetch(urlSer + '/v1/tributes/products', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${auth.access_token}` // ¡ESTO ES VITAL!
-            },
+        const info = {
+            ...req.query,
+            ...(req.body ?? {})
+        };
+        const response = await factusService.request({
+            company_id: getCompanyIdFromInfo(info),
+            environment: getEnvironmentFromInfo(info),
+            path: '/v1/tributes/products'
         });
-
-        const data = await response.json();
-        console.log('Productos: ',data);
-        if (!response.ok) throw new Error(data.message || 'Error al obtener rangos');
-        return data;
+        if (!response.ok) throw new Error(response.data?.message || 'Error al obtener tributos');
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(response.data));
     } catch (error) {
-        console.error('Error en Rangos:', error.message);
-        throw error;
+        console.error('Error en Tributos Factus:', error.message);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'Error', message: error.message }));
     }   
 };
 
-electronicFacturationController.showActualToken = async()=>{
-    let tokenInfo = await readFile(TOKEN_PATH);
-    const storedToken = tokenInfo.access_token;
-    const refreshToken = tokenInfo.refresh_token;
-    console.log('Token Actual: ',storedToken);
-    console.log('Token Refresh: ',refreshToken);
+electronicFacturationController.showActualToken = async(req, res)=>{
+    try {
+        const info = {
+            ...req.query,
+            ...(req.body ?? {})
+        };
+        const tokenInfo = await factusService.getAuthToken({
+            company_id: getCompanyIdFromInfo(info),
+            environment: getEnvironmentFromInfo(info)
+        });
+        const payload = {
+            status: 'OK',
+            company_id: tokenInfo.company_id,
+            provider: tokenInfo.provider,
+            environment: tokenInfo.environment,
+            token_type: tokenInfo.token_type,
+            expires_at: tokenInfo.expires_at
+        };
+        console.log('Token Factus actual:', payload);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(payload));
+    } catch (error) {
+        console.error('Error consultando token Factus:', error.message);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'Error', message: error.message }));
+    }
 }
 
 electronicFacturationController.getMunicipalities = async (req, res) => {
     try {
-        const fetchMunicipalities = async (auth) => fetch(urlSer + '/v1/municipalities', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${auth.access_token}`
-            },
+        const info = {
+            ...req.query,
+            ...(req.body ?? {})
+        };
+        const response = await factusService.request({
+            company_id: getCompanyIdFromInfo(info),
+            environment: getEnvironmentFromInfo(info),
+            path: '/v1/municipalities'
         });
 
-        let auth = await electronicFacturationController.getAuthToken();
-        let response = await fetchMunicipalities(auth);
-
-        if (response.status === 401) {
-            console.warn('⚠️ Token Factus rechazado al obtener municipios. Reintentando autenticación...');
-            auth = await electronicFacturationController.getAuthToken('password', null, true);
-            response = await fetchMunicipalities(auth);
-        }
-
-        if (!response.ok) {
-            throw new Error(`Error en Factus: ${response.status}`);
-        }
-
-        const data = await response.json();
+        if (!response.ok) throw new Error(response.data?.message || `Error en Factus: ${response.status}`);
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(data));
+        res.end(JSON.stringify(response.data));
 
     } catch (error) {
         console.error('Error al obtener municipios:', error.message);
@@ -273,13 +132,18 @@ electronicFacturationController.newInvoice = (req,res)=>{
   req.on('data',chunk=>{
       bodyData += chunk;
   })
-  req.on('end',async()=>{
-    let info = JSON.parse(bodyData);
-    console.log('--X ',info);
-    const auth = await electronicFacturationController.getAuthToken();
-    let params = {
-        "document": "01",
-        "numbering_range_id": await getNumercRangeData('invoice'),
+	  req.on('end',async()=>{
+	    let info = JSON.parse(bodyData);
+	    console.log('--X ',info);
+        const companyId = getCompanyIdFromInfo(info);
+        const environment = getEnvironmentFromInfo(info);
+	    let params = {
+	        "document": "01",
+	        "numbering_range_id": await factusService.getNumberingRangeId({
+                company_id: companyId,
+                environment,
+                type: 'invoice'
+            }),
         "reference_code": `FVE_${info.document.ownSerial}`,
         "observation": "",
         "payment_method_code": info.document.paymentMethod_code,
@@ -324,67 +188,58 @@ electronicFacturationController.newInvoice = (req,res)=>{
             },*/
        "items":info.items
     }
-    const response = await fetch(urlSer + '/v1/bills/validate', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${auth.access_token}`,
-            'Content-Type': 'application/json', // ¡Faltaba este!
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify(params)
-    });
-    let resInvoice = await response.json();
-    console.log('Respuesta:  ',resInvoice)
-    if (!response.ok && (resInvoice.message?.includes('pendiente') || response.status === 409)) {
-        let pendingReference = resInvoice.reference_code;
+	    const response = await factusService.validateInvoice({
+            company_id: companyId,
+            environment,
+            payload: params
+        });
+	    let resInvoice = response.data;
+	    console.log('Respuesta:  ',resInvoice)
+	    if (!response.ok && (resInvoice.message?.includes('pendiente') || response.status === 409)) {
+	        let pendingReference = resInvoice.reference_code;
 
         if (!pendingReference) {
             // Search for invoice pending of validation.
             // OJO: la lista de Factus viene SIN filtrar; solo status 0 (pendiente DIAN)
             // bloquea el canal. status 1 = validada -> NUNCA borrar.
             console.log('Buscando factura pendiente... ',pendingReference)
-            const pendingRes = await fetch(urlSer + '/v1/bills', {
-                method: 'GET',
-                headers: { 'Authorization': `Bearer ${auth.access_token}`, 'Accept': 'application/json' }
-            });
-            const pendingData = await pendingRes.json();
-            const allBills = pendingData?.data?.data ?? pendingData?.data ?? [];
-            const pendingBill = allBills.find(b => String(b.status) === '0');
+	            const pendingRes = await factusService.request({
+                    company_id: companyId,
+                    environment,
+                    path: '/v1/bills'
+	            });
+	            const pendingData = pendingRes.data;
+	            const allBills = pendingData?.data?.data ?? pendingData?.data ?? [];
+	            const pendingBill = allBills.find(b => String(b.status) === '0');
             pendingReference = pendingBill?.reference_code;
         }
 
         if (pendingReference) {
 
-            // CASE FOR INVOICE PENDING OF VALIDATION BLOKING THE CHANNEL
+	            // CASE FOR INVOICE PENDING OF VALIDATION BLOKING THE CHANNEL
 
-            console.log('Eliminado factura... ',pendingReference)
-            const deleteRes = await fetch(urlSer + `/v1/bills/destroy/reference/${pendingReference}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${auth.access_token}`,
-                    'Accept': 'application/json'
-                }
-            });
+	            console.log('Eliminado factura... ',pendingReference)
+	            const deleteRes = await factusService.request({
+                    company_id: companyId,
+                    environment,
+                    path: `/v1/bills/destroy/reference/${pendingReference}`,
+                    method: 'DELETE'
+	            });
 
-            if (deleteRes.ok) {
-                console.log(' Canal liberado exitosamente. Reintentando validación de la factura actual...');
-                let newResponse = await fetch(urlSer + '/v1/bills/validate', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${auth.access_token}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(params)
-                });
-                resInvoice = await newResponse.json();
-                // Logueamos el CUERPO, no el objeto Response, para poder ver
-                // el motivo real si Factus responde 422 (datos inválidos).
-                console.log(`Re intento de creación [HTTP ${newResponse.status}]: `, JSON.stringify(resInvoice));
-            } else {
-                const deleteBody = await deleteRes.json().catch(() => ({}));
-                console.log(`No se pudo liberar el canal [HTTP ${deleteRes.status}]: `, JSON.stringify(deleteBody));
-            }
+	            if (deleteRes.ok) {
+	                console.log(' Canal liberado exitosamente. Reintentando validación de la factura actual...');
+	                let newResponse = await factusService.validateInvoice({
+                        company_id: companyId,
+                        environment,
+                        payload: params
+                    });
+	                resInvoice = newResponse.data;
+	                // Logueamos el CUERPO, no el objeto Response, para poder ver
+	                // el motivo real si Factus responde 422 (datos inválidos).
+	                console.log(`Re intento de creación [HTTP ${newResponse.status}]: `, JSON.stringify(resInvoice));
+	            } else {
+	                console.log(`No se pudo liberar el canal [HTTP ${deleteRes.status}]: `, JSON.stringify(deleteRes.data));
+	            }
         }
 
     }
@@ -458,11 +313,16 @@ electronicFacturationController.newNote = (req,res)=>{
   req.on('data',chunk=>{
       bodyData += chunk;
   })
-  req.on('end',async()=>{
-    let info = JSON.parse(bodyData);
-    const auth = await electronicFacturationController.getAuthToken();
-    let params = {
-        "numbering_range_id": await getNumercRangeData(info.type == 'Credit Note'? 'cr_note':'db_note'),
+	  req.on('end',async()=>{
+	    let info = JSON.parse(bodyData);
+        const companyId = getCompanyIdFromInfo(info);
+        const environment = getEnvironmentFromInfo(info);
+	    let params = {
+	        "numbering_range_id": await factusService.getNumberingRangeId({
+                company_id: companyId,
+                environment,
+                type: info.type == 'Credit Note'? 'cr_note':'db_note'
+            }),
         "correction_concept_code": 2,
         // System use 22 when the note dont have an asociated bill. --> bill_id becomes optional
         "customization_id": info.bill_id != undefined? 20:22,
@@ -485,18 +345,14 @@ electronicFacturationController.newNote = (req,res)=>{
             "municipality_id": info.customer.municipality_id?? 149
         },
         "items":info.items
-    }
-    console.log(params)
-    const response = await fetch(urlSer + '/v1/credit-notes/validate', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${auth.access_token}`,
-            'Content-Type': 'application/json', // ¡Faltaba este!
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify(params)
-    });
-    const resInvoice = await response.json();
+	    }
+	    console.log(params)
+	    const response = await factusService.validateCreditNote({
+            company_id: companyId,
+            environment,
+            payload: params
+        });
+	    const resInvoice = response.data;
     console.log(resInvoice)
     if(resInvoice.status == 'Created'){
         let data = resInvoice.data
@@ -616,19 +472,17 @@ electronicFacturationController.getDocumentFullInfo = (req,res)=>{
     req.on('data',chunk=>{
         data += chunk;
     })
-    req.on('end',async()=>{
-        const auth = await electronicFacturationController.getAuthToken();
-        let info = JSON.parse(data);
-        console.log('bill_number: ',info.bill_numer);
-        console.log(`Ruta: ${urlSer}/v1/bills/show-bill/`);
-        const response = await fetch(urlSer + `/v1/bills/show/${info.bill_numer}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${auth.access_token}`,
-                'Accept': 'application/json'
-            }
+	req.on('end',async()=>{
+	    let info = JSON.parse(data);
+        const companyId = getCompanyIdFromInfo(info);
+        const environment = getEnvironmentFromInfo(info);
+	    console.log('bill_number: ',info.bill_numer);
+	    const response = await factusService.request({
+            company_id: companyId,
+            environment,
+            path: `/v1/bills/show/${info.bill_numer}`
         });
-        const resInvoice = await response.json();
+	    const resInvoice = response.data;
         console.log(resInvoice)
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(resInvoice));
@@ -644,18 +498,17 @@ electronicFacturationController.downloadBill = (req,res)=>{
     req.on('data',chunk=>{
         data += chunk
     })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        const auth = await electronicFacturationController.getAuthToken();
-        console.log(`Descargando factura: ${info.bu}`)
-        const response = await fetch(urlSer + `/v1/bills/download-pdf/${info.bill_numer}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${auth.access_token}`,
-                'Accept': 'application/json'
-            }
+	req.on('end',async()=>{
+	    let info = JSON.parse(data);
+        const companyId = getCompanyIdFromInfo(info);
+        const environment = getEnvironmentFromInfo(info);
+	    console.log(`Descargando factura: ${info.bu}`)
+	    const response = await factusService.request({
+            company_id: companyId,
+            environment,
+            path: `/v1/bills/download-pdf/${info.bill_numer}`
         });
-        const resInvoice = await response.json();
+	    const resInvoice = response.data;
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(resInvoice));
     })
@@ -670,18 +523,17 @@ electronicFacturationController.downloadBillXML = (req,res)=>{
     req.on('data',chunk=>{
         data += chunk
     })
-    req.on('end',async()=>{
-        let info = JSON.parse(data);
-        const auth = await electronicFacturationController.getAuthToken();
-        console.log(`Descargando factura: ${info.bu}`)
-        const response = await fetch(urlSer + `/v1/bills/download-xml/${info.bill_numer}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${auth.access_token}`,
-                'Accept': 'application/json'
-            }
+	req.on('end',async()=>{
+	    let info = JSON.parse(data);
+        const companyId = getCompanyIdFromInfo(info);
+        const environment = getEnvironmentFromInfo(info);
+	    console.log(`Descargando factura: ${info.bu}`)
+	    const response = await factusService.request({
+            company_id: companyId,
+            environment,
+            path: `/v1/bills/download-xml/${info.bill_numer}`
         });
-        const resInvoice = await response.json();
+	    const resInvoice = response.data;
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(resInvoice));
     })
@@ -692,19 +544,17 @@ electronicFacturationController.downloadBillXML = (req,res)=>{
 }
 
 // Función auxiliar interna para limpiar el bache en Factus
-async function deletePendingBillInternal(company_id, reference_code) {
+async function deletePendingBillInternal(company_id, reference_code, environment = DEFAULT_FACTUS_ENVIRONMENT) {
     try {
-        const auth = await electronicFacturationController.getAuthToken();
         console.log(`🧹 Limpiando factura pendiente con referencia: ${reference_code}`);
-        const response = await fetch(`https://api-sandbox.factus.com.co/v1/bills/destroy/reference/${reference_code}`, {
-            method: 'DELETE', 
-            headers: {
-                'Authorization': `Bearer ${auth.access_token}`,
-                'Accept': 'application/json'
-            }
+        const response = await factusService.request({
+            company_id: company_id ?? 0,
+            environment,
+            path: `/v1/bills/destroy/reference/${reference_code}`,
+            method: 'DELETE'
         });
 
-        const resData = await response.json();
+        const resData = response.data;
         console.log('Respuesta de eliminación en Factus:', resData);
         return response.ok;
     } catch (error) {
@@ -714,22 +564,8 @@ async function deletePendingBillInternal(company_id, reference_code) {
 
 // Función para inicializar servicios al arrancar el servidor
 electronicFacturationController.init = async () => {
-    try {
-        console.log('Ambiente funcionamiento: ',urlSer)
-        console.log('--- 🔐 Iniciando Autenticación Factus ---');
-        const auth = await electronicFacturationController.getAuthToken('password');
-        if (auth) {
-            console.log('✅ Conexión inicial con Factus establecida.');
-            // Opcional: También puedes precargar los rangos de numeración
-            await electronicFacturationController.getNumberingRanges();
-        }
-    } catch (error) {
-        console.log(error)
-        console.error('⚠️ No se pudo obtener el token inicial de Factus:', error.message);
-        console.log('ℹ️ El sistema reintentará la conexión en la primera solicitud de factura.');
-        console.log('reintentanto token')
-        let retry = await electronicFacturationController.getAuthToken('password');
-    }
+    console.log('--- Facturación electrónica lista para usar credenciales dinámicas ---');
+    console.log('La autenticación contra Factus se hará bajo demanda por company_id.');
 };
 
 export default electronicFacturationController;

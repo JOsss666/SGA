@@ -340,6 +340,8 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
 
     router.post('/electronicFacturation/getProviderCredentials', electronicProviderCredentialsController.list);
 
+    router.post('/electronicFacturation/providerCredentials/testConnection', electronicProviderCredentialsController.testConnection);
+
     router.post('/electronicFacturation/providerCredentials/:id/disable', electronicProviderCredentialsController.disable);
 
     router.post('/electronicFacturation/invoice', electronicFacturationController.newInvoice);

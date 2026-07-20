@@ -139,7 +139,7 @@ electronicProviderCredentialsService.getActive = async (info) => {
     const sentence = `
         SELECT *
         FROM "Facturation".electronic_provider_credentials
-        WHERE company_id = ANY($1)
+        WHERE company_id = ANY($1::bigint[])
             AND provider = $2
             AND environment = $3
             AND status = 'active'

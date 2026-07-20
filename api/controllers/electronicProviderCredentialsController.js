@@ -1,5 +1,6 @@
 import utilsController from "./utilsController.js";
 import electronicProviderCredentialsService from "../services/electronicProviderCredentialsService.js";
+import factusService from "../services/factusService.js";
 
 const electronicProviderCredentialsController = {};
 
@@ -46,6 +47,43 @@ electronicProviderCredentialsController.disable = async (req, res) => {
         sendJson(res, result.status === "OK" ? 200 : 404, result);
     } catch (error) {
         console.error('Error en electronicProviderCredentialsController.disable:', error);
+        sendJson(res, 400, {
+            status: "Error",
+            message: error.message
+        });
+    }
+};
+
+electronicProviderCredentialsController.testConnection = async (req, res) => {
+    try {
+        const info = await utilsController.readJsonBody(req);
+        const companyId = info.company_id ?? 0;
+        const environment = info.environment ?? 'sandbox';
+
+        const auth = await factusService.getAuthToken({
+            company_id: companyId,
+            environment,
+            bypassCache: true
+        });
+
+        const ranges = await factusService.getNumberingRanges({
+            company_id: companyId,
+            environment,
+            bypassCache: true
+        });
+
+        sendJson(res, 200, {
+            status: "OK",
+            company_id: companyId,
+            credential_company_id: auth.credential?.company_id,
+            provider: auth.credential?.provider,
+            environment: auth.credential?.environment,
+            token_type: auth.token_type,
+            expires_at: auth.expires_at,
+            numbering_ranges_count: ranges.length
+        });
+    } catch (error) {
+        console.error('Error en electronicProviderCredentialsController.testConnection:', error);
         sendJson(res, 400, {
             status: "Error",
             message: error.message

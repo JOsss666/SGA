@@ -43,7 +43,7 @@ END $$;
 
 CREATE TABLE IF NOT EXISTS "Facturation".electronic_provider_credentials (
     id                      bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    company_id              bigint NOT NULL REFERENCES "Ecosystem".companies(company_id) ON DELETE CASCADE,
+    company_id              bigint NOT NULL,
     provider                "Facturation".electronic_provider NOT NULL DEFAULT 'factus',
     environment             "Facturation".electronic_provider_environment NOT NULL DEFAULT 'production',
     api_url                 text NOT NULL,
@@ -68,6 +68,9 @@ CREATE INDEX IF NOT EXISTS idx_ep_credentials_company_status
 
 COMMENT ON TABLE "Facturation".electronic_provider_credentials IS
     'Credenciales por empresa para proveedores de facturacion electronica. client_secret y password se guardan cifrados por la aplicacion.';
+
+COMMENT ON COLUMN "Facturation".electronic_provider_credentials.company_id IS
+    'Usar 0 para credenciales globales fallback. Si existe una credencial activa de la empresa, tiene prioridad.';
 
 COMMENT ON COLUMN "Facturation".electronic_provider_credentials.client_secret_encrypted IS
     'Client secret cifrado con APP_ENCRYPTION_KEY; nunca guardar el secreto en claro.';
@@ -122,7 +125,7 @@ CREATE TABLE IF NOT EXISTS "Facturation".electronic_provider_numbering_ranges (
     created_at          timestamptz NOT NULL DEFAULT now(),
     updated_at          timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT uq_electronic_provider_range
-        UNIQUE (credential_id, provider_range_id),
+        UNIQUE (credential_id, company_id, provider_range_id),
     CONSTRAINT chk_electronic_provider_range_dates
         CHECK (valid_until IS NULL OR valid_from IS NULL OR valid_until >= valid_from)
 );

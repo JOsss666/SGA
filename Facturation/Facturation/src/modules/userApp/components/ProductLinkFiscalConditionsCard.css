@@ -10,7 +10,7 @@
     border: solid .1vh var(--inputsBorder);
     border-radius: .8vh;
     padding: 1vh;
-    background-color: #FE9A37;
+    background-color:var(--cardHover);
     color: var(--mainText);
     cursor: pointer;
     padding-right: 2vh;

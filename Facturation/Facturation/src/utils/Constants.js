@@ -26,16 +26,23 @@ export const ThirdPartyFactusIdentificationTypeCodes = [
 
 export async function insertCredentials(){
     let res = await postInfo('/electronicFacturation/providerCredentials',{
-        "company_id": 0,
+        "company_id": 1,
         "provider": "factus",
-        "environment": "sandbox",
-        "api_url": "https://api-sandbox.factus.com.co",
-        "client_id": "--",
-        "client_secret": "--",
-        "username": "--",
-        "password": "--",
+        "environment": "production",
+        "api_url": "https://api.factus.com.co",
+        "client_id": "a1990244-e151-41de-bd0c-c9a27a9a56ad",
+        "client_secret": "s11tghu07gYTubA9TvEWuie8s3u6FOo1WFf39dvV",
+        "username": "zyjdigitalimpresion@gmail.com",
+        "password": "79741447",
         "status": "active"
         });
     console.log('CR res: ',res);
 }
 
+export async function handShakeFacturationCredentials(){
+    let res = await postInfo('/electronicFacturation/providerCredentials/testConnection',{
+        "company_id": 1,
+        "environment": "production"
+    })
+    console.log('handShake facturation credentials: ',res);
+}
