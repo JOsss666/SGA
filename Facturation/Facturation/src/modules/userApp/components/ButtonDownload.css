@@ -10,10 +10,10 @@
 .ButtonDownload .buttonDownloadDefault, .buttonDownloadLoading, .buttonDownloadSuccess {
     width: 100%;
     color: #fff;
-    padding: 1.5vh 2vh;
+    padding: 1.5vh;
     border: none;
     border-radius: 1vh;                 
-    font-size: clamp(2px, 2.2vh, 25px);  
+    font-size: clamp(2px, 2vh, 25px);  
     font-weight: 400;
     cursor: pointer;
     text-align: center;

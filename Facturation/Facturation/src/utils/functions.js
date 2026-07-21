@@ -233,6 +233,157 @@ export async function parseCashBoxeToXlsx(data,title) {
     saveAs(blob, `${name}_${new Date().getTime()}.xlsx`);
 }
 
+// Descarga el informe de liquidaciones de caja por periodo (ej. mensual).
+// Recibe las filas planas que devuelve /facturation/getSettlementReportByPeriod
+// y las agrupa/anida por método de pago aquí en el frontend (por eficiencia).
+export async function parseSettlementReportByPeriodToXlsx(rows = [], options = {}) {
+    const title = options.title || "Informe de liquidaciones de caja";
+    const period = options.period || "";
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Liquidaciones de caja');
+
+    const headers = [
+        'Instancia',
+        'Documento',
+        'Concepto',
+        'Cuenta',
+        'Tercero',
+        'Naturaleza',
+        'Sub-total',
+        'Total',
+        'Responsable de cierre',
+        'Fecha',
+        'Doc. electrónico'
+    ];
+    const columnCount = headers.length;
+    const lastCol = String.fromCharCode(64 + columnCount); // "K"
+
+    // Naturaleza CR resta en caja; aplicamos el signo para que cuadre.
+    const signed = (value, nature) => {
+        const n = Number(value) || 0;
+        return nature === 'CR' ? -n : n;
+    };
+
+    // 1. Encabezado general
+    worksheet.mergeCells(`A1:${lastCol}1`);
+    const mainTitle = worksheet.getCell('A1');
+    mainTitle.value = options.companyName ? `${options.companyName} - ${title}` : title;
+    mainTitle.font = { size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
+    mainTitle.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '262626' } };
+    mainTitle.alignment = { horizontal: 'center' };
+
+    worksheet.getCell('A2').value = `Generado el: ${new Date().toLocaleString()}`;
+    worksheet.getCell('A3').value = period ? `Periodo: ${period}` : "";
+    worksheet.getCell('A4').value = `Total de movimientos: ${rows.length}`;
+
+    // 2. Agrupar por método de pago (anidación en el frontend)
+    const groupsMap = new Map();
+    rows.forEach((row) => {
+        const key = row.paymentMethod_code ?? 'SIN_CODIGO';
+        if (!groupsMap.has(key)) {
+            groupsMap.set(key, {
+                code: row.paymentMethod_code ?? '---',
+                name: row.payment_name ?? 'Sin método de pago',
+                transactions: []
+            });
+        }
+        groupsMap.get(key).transactions.push(row);
+    });
+
+    const groups = Array.from(groupsMap.values())
+        .sort((a, b) => String(a.code).localeCompare(String(b.code)));
+
+    let currentRow = 6;
+    let grandTotal = 0;
+
+    // 3. Una sección por método de pago
+    groups.forEach((group) => {
+        // Título de la sección (código + nombre del método)
+        worksheet.mergeCells(`A${currentRow}:${lastCol}${currentRow}`);
+        const methodCell = worksheet.getCell(`A${currentRow}`);
+        methodCell.value = `${group.code} — ${String(group.name).toUpperCase()}`;
+        methodCell.font = { bold: true, size: 12 };
+        methodCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'E5E5E5' } };
+        currentRow++;
+
+        // Encabezados de la tabla
+        const headerRow = worksheet.getRow(currentRow);
+        headerRow.values = headers;
+        headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        headerRow.eachCell((cell) => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '262626' } };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        });
+        currentRow++;
+
+        let groupTotal = 0;
+
+        // Transacciones del método
+        group.transactions.forEach((trans) => {
+            const subTotalSigned = signed(trans.subTotal, trans.nature);
+            const totalSigned = signed(trans.total, trans.nature);
+            groupTotal += totalSigned;
+
+            const fecha = trans.settlement_date || trans.created_at || '---';
+            const row = worksheet.addRow([
+                trans.instance_serial ? `${trans.process_code}#${trans.instance_serial}` : '---',
+                trans.ownSerial ? `${trans.doc_type}#${trans.ownSerial}` : (trans.doc_type || '---'),
+                trans.concept_name || '---',
+                trans.account_code || '---',
+                trans.thirdparty_name || '---',
+                trans.nature || '---',
+                subTotalSigned,
+                totalSigned,
+                trans.settlement_responsible || '---',
+                typeof fecha === 'string' ? fecha.replace('T', ' ').substring(0, 19) : fecha,
+                trans.e_doc_number || '---'
+            ]);
+            row.getCell(7).numFmt = '"$"#,##0';
+            row.getCell(8).numFmt = '"$"#,##0';
+        });
+
+        // Subtotal por método
+        const totalRow = worksheet.getRow(currentRow + group.transactions.length);
+        totalRow.getCell(7).value = `Total ${group.name}:`;
+        totalRow.getCell(7).font = { bold: true };
+        totalRow.getCell(8).value = groupTotal;
+        totalRow.getCell(8).font = { bold: true };
+        totalRow.getCell(8).numFmt = '"$"#,##0';
+
+        grandTotal += groupTotal;
+        currentRow += group.transactions.length + 2; // fila subtotal + espacio
+    });
+
+    // 4. Total general
+    const grandRow = worksheet.getRow(currentRow);
+    grandRow.getCell(7).value = 'TOTAL GENERAL:';
+    grandRow.getCell(7).font = { bold: true, size: 12 };
+    grandRow.getCell(8).value = grandTotal;
+    grandRow.getCell(8).font = { bold: true, size: 12 };
+    grandRow.getCell(8).numFmt = '"$"#,##0';
+
+    // 5. Anchos de columna
+    worksheet.columns = [
+        { width: 16 }, // Instancia
+        { width: 18 }, // Documento
+        { width: 30 }, // Concepto
+        { width: 14 }, // Cuenta
+        { width: 26 }, // Tercero
+        { width: 12 }, // Naturaleza
+        { width: 15 }, // Sub-total
+        { width: 15 }, // Total
+        { width: 22 }, // Responsable de cierre
+        { width: 20 }, // Fecha
+        { width: 18 }  // Doc. electrónico
+    ];
+
+    // 6. Descarga
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    saveAs(blob, `${title}${period ? ' - ' + period : ''}.xlsx`);
+}
+
 export  async function parseToCsv(info,download,name){
     const newCsv = Papa.unparse(info);
     const blob = new Blob([newCsv],{type:"text/csv;charset=utf-8;"})

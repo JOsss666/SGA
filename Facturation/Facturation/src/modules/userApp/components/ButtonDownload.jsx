@@ -2,14 +2,14 @@ import { useState } from 'react';
 import './ButtonDownload.css';
 import { componentToPdf, parseToCsv, parseToXlsx,ScreenShotElement } from '../../../utils/functions';
 
-export function ButtonDownload({info,columns,formats,title,component,xlsxOptions}) {
+export function ButtonDownload({info,columns,formats,title,component,xlsxOptions, text, onDownload}) {
     const [status, setStatus] = useState("default");
     const [showMenu, setShowMenu] = useState(false);
 
     const states = [
         {
             key: "default",
-            text: "Descargar",
+            text: text? text:'Descargar',
             icon: <i className="fa-solid fa-arrow-down" />,
             className: "buttonDownloadDefault",
         },
@@ -28,6 +28,22 @@ export function ButtonDownload({info,columns,formats,title,component,xlsxOptions
     ];
 
     const current = states.find((s) => s.key === status);
+
+    // Descarga con acción personalizada (ej. informe consolidado por periodo).
+    const handleCustomDownload = async () => {
+        setStatus("loading");
+        try {
+            await onDownload();
+            setStatus("success");
+        } catch (e) {
+            console.error("Error en la descarga:", e);
+            setStatus("default");
+            return;
+        }
+        setTimeout(() => {
+            setStatus("default");
+        }, 2000);
+    };
 
     const handleFormatClick = async(format) => {
         if(info != undefined){
@@ -49,9 +65,13 @@ export function ButtonDownload({info,columns,formats,title,component,xlsxOptions
 
     return (
         <div className="ButtonDownload">
-            <button onClick={() => setShowMenu(!showMenu)} disabled={status === "loading"} className={current.className}> {current.text} {current.icon} </button>
+            <button
+                onClick={() => onDownload ? handleCustomDownload() : setShowMenu(!showMenu)}
+                disabled={status === "loading"}
+                className={current.className}
+            > {current.text} {current.icon} </button>
 
-            {showMenu && status === "default" && (
+            {!onDownload && showMenu && status === "default" && (
                 <div className="downloadMenu">
                     <button className='optionListFormat' onClick={()=>handleFormatClick('xlsx')}><i className="fa-regular fa-file-excel"/> XLSX</button>
                     <button className="optionListFormat" onClick={() => handleFormatClick("csv")}><i className="fa-solid fa-file-csv"/> CSV</button>

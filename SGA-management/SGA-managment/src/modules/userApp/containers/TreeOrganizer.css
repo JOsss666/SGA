@@ -87,6 +87,7 @@
     color: #A65F1B;
 }
 
+.TreeOrganizer .closedIconFolder,
 .TreeOrganizer .openIconFolder{
     color: #F0B13B ;
     margin-right: 1vh;

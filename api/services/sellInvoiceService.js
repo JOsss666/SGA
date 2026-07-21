@@ -31,7 +31,7 @@ sellInvoiceService.register = async (info) => {
         );
 
         console.log('Fase 2 Control Cartera: ', portfolioResult)
-
+        
         const accountResult = await utilsController.accountDocument(
             documentInfo,
             { client }

@@ -1,0 +1,84 @@
+COPY 147
+COPY 147
+COPY 147
+                                                                                                          Tabla «Ecosystem.thirdparties»
+        Columna         |           Tipo           | Ordenamiento | Nulable  |                                               Por omisión                                               | Almacenamiento | Compresión | Estadísticas | Descripción 
+------------------------+--------------------------+--------------+----------+---------------------------------------------------------------------------------------------------------+----------------+------------+--------------+-------------
+ company_id             | bigint                   |              | not null |                                                                                                         | plain          |            |              | 
+ id                     | bigint                   |              | not null | generated always as identity                                                                            | plain          |            |              | 
+ names                  | character varying(200)   |              | not null |                                                                                                         | extended       |            |              | 
+ lastNames              | character varying(200)   |              | not null |                                                                                                         | extended       |            |              | 
+ indentification_type   | identification_type      |              | not null |                                                                                                         | plain          |            |              | 
+ indentification_number | character varying(100)   |              | not null |                                                                                                         | extended       |            |              | 
+ mail                   | character varying(300)   |              | not null |                                                                                                         | extended       |            |              | 
+ phone                  | character varying(100)   |              |          |                                                                                                         | extended       |            |              | 
+ country                | character varying(100)   |              |          |                                                                                                         | extended       |            |              | 
+ city                   | character varying(100)   |              |          |                                                                                                         | extended       |            |              | 
+ address                | character varying(100)   |              |          |                                                                                                         | extended       |            |              | 
+ created_at             | timestamp with time zone |              | not null | CURRENT_TIMESTAMP                                                                                       | plain          |            |              | 
+ type                   | thirdparty_type          |              | not null |                                                                                                         | plain          |            |              | 
+ img                    | character varying(2000)  |              |          | 'https://res.cloudinary.com/djjxugmni/image/upload/v1765477400/noUserImg_p817rb.jpg'::character varying | extended       |            |              | 
+ first_name             | character varying(100)   |              |          |                                                                                                         | extended       |            |              | 
+ second_name            | character varying(100)   |              |          |                                                                                                         | extended       |            |              | 
+ first_surname          | character varying(100)   |              |          |                                                                                                         | extended       |            |              | 
+ second_surname         | character varying(100)   |              |          |                                                                                                         | extended       |            |              | 
+Índices:
+    "thirdPartyId" PRIMARY KEY, btree (id)
+    "unique_company_id" UNIQUE CONSTRAINT, btree (company_id, indentification_number)
+Restricciones de llave foránea:
+    "company_id" FOREIGN KEY (company_id) REFERENCES "Ecosystem".companies(company_id)
+Referenciada por:
+    TABLE ""Ecosystem".transaction_detail" CONSTRAINT "thirdParty" FOREIGN KEY ("thirdParty_id") REFERENCES "Ecosystem".thirdparties(id)
+    TABLE ""Ecosystem".documents" CONSTRAINT "thirdParty_id" FOREIGN KEY ("thirdParty_id") REFERENCES "Ecosystem".thirdparties(id) NOT VALID
+    TABLE ""Ecosystem"."thirdPartyComercialInfo"" CONSTRAINT "thirdParty_id" FOREIGN KEY ("thirdParty_id") REFERENCES "Ecosystem".thirdparties(id) ON DELETE CASCADE NOT VALID
+    TABLE ""Ecosystem"."thirdPartyTaxInfo"" CONSTRAINT "thirdParty_id" FOREIGN KEY ("thirdParty_id") REFERENCES "Ecosystem".thirdparties(id) ON DELETE CASCADE NOT VALID
+    TABLE ""Ecosystem".transactions" CONSTRAINT "thirdParty_id" FOREIGN KEY ("thirdParty_id") REFERENCES "Ecosystem".thirdparties(id) NOT VALID
+    TABLE ""Inventory"."inventoryMovements"" CONSTRAINT "thirdParty_id" FOREIGN KEY ("thirdParty_id") REFERENCES "Ecosystem".thirdparties(id)
+    TABLE ""Inventory".services_movement" CONSTRAINT "thirdParty_id" FOREIGN KEY ("thirdParty_id") REFERENCES "Ecosystem".thirdparties(id)
+    TABLE ""Process".process_instance" CONSTRAINT "thirdParty_id" FOREIGN KEY ("thirdParty_id") REFERENCES "Ecosystem".thirdparties(id) NOT VALID
+    TABLE ""Treasury".accounts_receivable" CONSTRAINT "thirdParty_id" FOREIGN KEY ("thirdParty_id") REFERENCES "Ecosystem".thirdparties(id)
+    TABLE ""Treasury".portfolio_payments" CONSTRAINT "thirdParty_id" FOREIGN KEY ("thirdParty_id") REFERENCES "Ecosystem".thirdparties(id)
+    TABLE ""Treasury".accounts_payable" CONSTRAINT "thirdParty_id" FOREIGN KEY ("thirdParty_id") REFERENCES "Ecosystem".thirdparties(id)
+Método de acceso: heap
+
+                                                                                Tabla «Ecosystem.thirdPartyComercialInfo»
+     Columna     |      Tipo       | Ordenamiento | Nulable  |                                  Por omisión                                   | Almacenamiento | Compresión | Estadísticas | Descripción 
+-----------------+-----------------+--------------+----------+--------------------------------------------------------------------------------+----------------+------------+--------------+-------------
+ thirdParty_id   | bigint          |              | not null |                                                                                | plain          |            |              | 
+ company_id      | bigint          |              | not null |                                                                                | plain          |            |              | 
+ credit          | boolean         |              | not null | false                                                                          | plain          |            |              | 
+ credit_term     | integer         |              | not null | 0                                                                              | plain          |            |              | 
+ credit_value    | real            |              | not null | 0                                                                              | plain          |            |              | 
+ interest_rate   | real            |              | not null | 0                                                                              | plain          |            |              | 
+ credit_balance  | numeric(18,6)   |              | not null | 0                                                                              | main           |            |              | 
+ aviable_credit  | numeric(18,6)   |              | not null | generated always as ((credit_value - credit_balance::double precision)) stored | main           |            |              | 
+ comercial_state | comercial_state |              | not null | 'active'::comercial_state                                                      | plain          |            |              | 
+ favor_balance   | numeric(18,6)   |              | not null | 0                                                                              | main           |            |              | 
+Restricciones de llave foránea:
+    "company_id" FOREIGN KEY (company_id) REFERENCES "Ecosystem".companies(company_id)
+    "thirdParty_id" FOREIGN KEY ("thirdParty_id") REFERENCES "Ecosystem".thirdparties(id) ON DELETE CASCADE NOT VALID
+Método de acceso: heap
+
+                                                        Tabla «Ecosystem.thirdPartyTaxInfo»
+        Columna        |          Tipo           | Ordenamiento | Nulable  | Por omisión | Almacenamiento | Compresión | Estadísticas | Descripción 
+-----------------------+-------------------------+--------------+----------+-------------+----------------+------------+--------------+-------------
+ thirdParty_id         | bigint                  |              | not null |             | plain          |            |              | 
+ company_id            | bigint                  |              | not null |             | plain          |            |              | 
+ regime                | character varying(500)  |              |          |             | extended       |            |              | 
+ IVA_responsability    | character varying(500)  |              | not null |             | extended       |            |              | 
+ retention_type        | character varying(500)  |              |          |             | extended       |            |              | 
+ economic_activity     | character varying(500)  |              |          |             | extended       |            |              | 
+ attachedRut           | character varying(1000) |              |          |             | extended       |            |              | 
+ municipality_id       | character varying(100)  |              | not null | 149         | extended       |            |              | 
+ nature                | character varying(100)  |              | not null | 2           | extended       |            |              | 
+ identidicationType_id | character varying(100)  |              | not null |             | extended       |            |              | 
+ dv                    | integer                 |              |          |             | plain          |            |              | 
+Índices:
+    "unique_thirdparty_tax_info" UNIQUE CONSTRAINT, btree ("thirdParty_id")
+Restricciones de llave foránea:
+    "company_id" FOREIGN KEY (company_id) REFERENCES "Ecosystem".companies(company_id)
+    "thirdParty_id" FOREIGN KEY ("thirdParty_id") REFERENCES "Ecosystem".thirdparties(id) ON DELETE CASCADE NOT VALID
+Triggers:
+    trigger_auto_dv BEFORE INSERT OR UPDATE ON "Ecosystem"."thirdPartyTaxInfo" FOR EACH ROW EXECUTE FUNCTION "Ecosystem".sincronizar_dv_tercero()
+Método de acceso: heap
+

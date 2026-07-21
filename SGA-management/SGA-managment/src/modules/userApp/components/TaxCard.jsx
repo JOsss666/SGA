@@ -12,7 +12,7 @@ export function TaxCard({hidden,info,reloadFun}){
 
     const deleteTax = async()=>{
         let res = await postInfo('/deleteTax',{
-            taxes:[info.id]
+            taxes:[info.tax_id]
         })
         if(res){
             addNotification({

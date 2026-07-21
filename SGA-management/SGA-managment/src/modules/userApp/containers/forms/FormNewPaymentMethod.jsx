@@ -18,7 +18,7 @@ export function FormNewPaymentMethod({reloadFun}){
     // Control
     const [disabled,setsDisabled] = useState(false);
     const [loading,setLoading] = useState(false);
-    const [accounts,setAccounts] = useState(false);
+    const [accounts,setAccounts] = useState([]);
 
     // FormInfo
     const [name,setName] = useState('');

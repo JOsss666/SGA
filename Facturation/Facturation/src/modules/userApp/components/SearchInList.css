@@ -31,6 +31,12 @@
     background-color: var(--inputsBg);
     z-index: 5;
     font-size: clamp(2.2px,2.2vh,22px);
+    transition: .3s;
+}
+
+.SearchinList .SlistC input:focus{
+    color: var(--mainText);
+    outline: solid .2vh #155DFC;
 }
 
 .SearchinList .SlistC .listElementsContainer{

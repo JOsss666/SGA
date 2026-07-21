@@ -14,6 +14,7 @@ import facturationController from '../controllers/facturationController.js';
 import assetsController from '../controllers/assetsController.js';
 import AnalyticController from '../controllers/AnalyticsController.js';
 import electronicFacturationController from '../controllers/electronicFacturationController.js';
+import electronicProviderCredentialsController from '../controllers/electronicProviderCredentialsController.js';
 import treasuryController from '../controllers/TreasuryController.js';
 
 const router = express.Router();
@@ -65,6 +66,13 @@ router.post('/updateThirdPartyComercialInfo',controller.updateThirdPartyComercia
 router.post('/updateThirdPartyTaxInfo',controller.updateThirdPartyTaxInfo);
 
 router.post('/createThirdParty',controller.createThirdParty);
+
+router.post('/blockThirdParty',controller.blockThirdParty);
+
+router.post('/unblockThirdParty',controller.unblockThirdParty);
+
+// Etapa 5: el controller deleteThirdParty existía sin ruta (código muerto); se expone ya con auditoría.
+router.post('/deleteThirdParty',controller.deleteThirdParty);
 
 router.post('/getThirdPartyDetails',controller.getThirdPartyDetails);
 
@@ -147,6 +155,25 @@ router.post('/inventory/getProducts',inventoryController.getProducts);
 router.post(`/inventory/getComercialProducts`,inventoryController.getComercialProducts);
 
 router.post('/inventory/createProduct',inventoryController.createProduct);
+
+router.post('/inventory/updateProduct',inventoryController.updateProduct);
+
+router.post('/inventory/disableProduct',inventoryController.disableProduct);
+
+router.post('/inventory/deleteProduct',inventoryController.deleteProduct);
+
+router.post('/inventory/getProductTaxRelations',inventoryController.getProductTaxRelations);
+router.post('/inventory/getPurchaseRelations',inventoryController.getProductPurchaseRelations);
+
+router.post('/inventory/createThirdPartyProductTaxRelation',inventoryController.createThirdPartyProductTaxRelation);
+
+router.post('/inventory/updateThirdPartyProductTaxRelation',inventoryController.updateThirdPartyProductTaxRelation);
+
+router.post('/inventory/disableThirdPartyProductTaxRelation',inventoryController.disableThirdPartyProductTaxRelation);
+
+router.post('/inventory/deleteThirdPartyProductTaxRelation',inventoryController.deleteThirdPartyProductTaxRelation);
+
+router.post('/inventory/getThirdPartyProductTaxRelations',inventoryController.getThirdPartyProductTaxRelations);
 
 router.post('/inventory/getPricesListItems',inventoryController.getPricesListItems);
 
@@ -249,6 +276,8 @@ router.post('/facturation/newCashRecipt',facturationController.newCashRecipt);
 
 router.post('/facturation/newSellInvoice',facturationController.newSellInvoice);
 
+router.post('/facturation/newPurchase',facturationController.newPurchase);
+
 router.post('/facturation/newNote',facturationController.newNote);
 
 router.post('/facturation/newClientOrder',facturationController.newClientOrder);
@@ -264,6 +293,8 @@ router.post('/facturation/closeCashRegister',facturationController.closeCashRegi
 router.post('/facturation/getCashRegisterReport',facturationController.getCashRegisterReport);
 
 router.post('/facturation/getTransactionsOfCashRecord',facturationController.getTransactionsOfCashRecord);
+
+router.post('/facturation/getSettlementReportByPeriod',facturationController.getSettlementReportByPeriod);
 
 router.post('/facturation/getBriefcaseBills',facturationController.getBriefcaseBills);
 
@@ -305,6 +336,14 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
 
     router.get('/electronicFacturation/showActualToken', electronicFacturationController.showActualToken);
 
+    router.post('/electronicFacturation/providerCredentials', electronicProviderCredentialsController.upsert);
+
+    router.post('/electronicFacturation/getProviderCredentials', electronicProviderCredentialsController.list);
+
+    router.post('/electronicFacturation/providerCredentials/testConnection', electronicProviderCredentialsController.testConnection);
+
+    router.post('/electronicFacturation/providerCredentials/:id/disable', electronicProviderCredentialsController.disable);
+
     router.post('/electronicFacturation/invoice', electronicFacturationController.newInvoice);
 
     router.get('/electronicFacturation/taxes', electronicFacturationController.getTaxes);
@@ -322,4 +361,3 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     router.post('/electronicFacturationController.getDocumentFullInfo',electronicFacturationController.getDocumentFullInfo);
 
 export default router;
-
