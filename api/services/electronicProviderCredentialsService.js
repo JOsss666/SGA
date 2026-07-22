@@ -161,6 +161,31 @@ electronicProviderCredentialsService.getActive = async (info) => {
     };
 };
 
+electronicProviderCredentialsService.getPreferredEnvironment = async (info) => {
+    const companyId = normalizeCompanyId(info.company_id);
+    const provider = normalizeProvider(info.provider);
+    const allowedCompanyIds = companyId === 0 ? [0] : [companyId, 0];
+
+    const sentence = `
+        SELECT environment
+        FROM "Facturation".electronic_provider_credentials
+        WHERE company_id = ANY($1::bigint[])
+            AND provider = $2
+            AND status = 'active'
+        ORDER BY
+            company_id DESC,
+            CASE environment
+                WHEN 'production' THEN 0
+                WHEN 'sandbox' THEN 1
+                ELSE 2
+            END
+        LIMIT 1;
+    `;
+
+    const result = await useDataBase(sentence, [allowedCompanyIds, provider], 1);
+    return result[0] ? result[1][0].environment : null;
+};
+
 electronicProviderCredentialsService.list = async (info) => {
     const companyId = normalizeCompanyId(info.company_id);
 

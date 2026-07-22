@@ -1,6 +1,7 @@
 import { useDataBase } from '../app.js';
 import dotenv from 'dotenv';
 import factusService from '../services/factusService.js';
+import electronicProviderCredentialsService from '../services/electronicProviderCredentialsService.js';
 
 dotenv.config();
 
@@ -18,6 +19,19 @@ const getCompanyIdFromInfo = (info = {}) => (
 const getEnvironmentFromInfo = (info = {}) => (
     info.environment
     ?? info.company_info?.factus_environment
+    ?? info.company_info?.electronic_environment
+    ?? info.company?.factus_environment
+    ?? info.company?.electronic_environment
+    ?? info.document?.factus_environment
+    ?? info.document?.electronic_environment
+);
+
+const resolveEnvironmentFromInfo = async (info = {}) => (
+    getEnvironmentFromInfo(info)
+    ?? await electronicProviderCredentialsService.getPreferredEnvironment({
+        company_id: getCompanyIdFromInfo(info),
+        provider: 'factus'
+    })
     ?? DEFAULT_FACTUS_ENVIRONMENT
 );
 
@@ -28,7 +42,7 @@ export async function getNumercRangeData(type, company_id = 0, environment = DEF
 electronicFacturationController.getAuthToken = async (grantType = 'password', refreshToken = null, bypassCache = false, info = {}) => (
     factusService.getAuthToken({
         company_id: getCompanyIdFromInfo(info),
-        environment: getEnvironmentFromInfo(info),
+        environment: await resolveEnvironmentFromInfo(info),
         bypassCache
     })
 );
@@ -39,9 +53,10 @@ electronicFacturationController.getNumberingRanges = async (req, res) => {
             ...req.query,
             ...(req.body ?? {})
         };
+        const environment = await resolveEnvironmentFromInfo(info);
         const ranges = await factusService.getNumberingRanges({
             company_id: getCompanyIdFromInfo(info),
-            environment: getEnvironmentFromInfo(info)
+            environment
         });
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify([ranges.length > 0, ranges]));
@@ -60,9 +75,10 @@ electronicFacturationController.getTaxes = async (req, res) => {
             ...req.query,
             ...(req.body ?? {})
         };
+        const environment = await resolveEnvironmentFromInfo(info);
         const response = await factusService.request({
             company_id: getCompanyIdFromInfo(info),
-            environment: getEnvironmentFromInfo(info),
+            environment,
             path: '/v1/tributes/products'
         });
         if (!response.ok) throw new Error(response.data?.message || 'Error al obtener tributos');
@@ -81,9 +97,10 @@ electronicFacturationController.showActualToken = async(req, res)=>{
             ...req.query,
             ...(req.body ?? {})
         };
+        const environment = await resolveEnvironmentFromInfo(info);
         const tokenInfo = await factusService.getAuthToken({
             company_id: getCompanyIdFromInfo(info),
-            environment: getEnvironmentFromInfo(info)
+            environment
         });
         const payload = {
             status: 'OK',
@@ -109,9 +126,10 @@ electronicFacturationController.getMunicipalities = async (req, res) => {
             ...req.query,
             ...(req.body ?? {})
         };
+        const environment = await resolveEnvironmentFromInfo(info);
         const response = await factusService.request({
             company_id: getCompanyIdFromInfo(info),
-            environment: getEnvironmentFromInfo(info),
+            environment,
             path: '/v1/municipalities'
         });
 
@@ -133,10 +151,12 @@ electronicFacturationController.newInvoice = (req,res)=>{
       bodyData += chunk;
   })
 	  req.on('end',async()=>{
+        try {
 	    let info = JSON.parse(bodyData);
-	    console.log('--X ',info);
+		    console.log('--X ',info);
         const companyId = getCompanyIdFromInfo(info);
-        const environment = getEnvironmentFromInfo(info);
+        const environment = await resolveEnvironmentFromInfo(info);
+        console.log('Ambiente Factus para factura:', environment);
 	    let params = {
 	        "document": "01",
 	        "numbering_range_id": await factusService.getNumberingRangeId({
@@ -263,9 +283,17 @@ electronicFacturationController.newInvoice = (req,res)=>{
         });
     resInvoice.sga_id = insertRes;
     }
-    res.writeHead(200,{'Content-Type':'text/plain'})
-    res.end(JSON.stringify(resInvoice));
-  })
+	    res.writeHead(200,{'Content-Type':'text/plain'})
+	    res.end(JSON.stringify(resInvoice));
+        } catch (error) {
+            console.error('Error creando factura electronica:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                status: 'Error',
+                message: error.message
+            }));
+        }
+	  })
   req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
@@ -314,9 +342,11 @@ electronicFacturationController.newNote = (req,res)=>{
       bodyData += chunk;
   })
 	  req.on('end',async()=>{
+        try {
 	    let info = JSON.parse(bodyData);
         const companyId = getCompanyIdFromInfo(info);
-        const environment = getEnvironmentFromInfo(info);
+        const environment = await resolveEnvironmentFromInfo(info);
+        console.log('Ambiente Factus para nota:', environment);
 	    let params = {
 	        "numbering_range_id": await factusService.getNumberingRangeId({
                 company_id: companyId,
@@ -373,9 +403,17 @@ electronicFacturationController.newNote = (req,res)=>{
         });
     resInvoice.sga_id = insertRes;
     }
-    res.writeHead(200,{'Content-Type':'text/plain'})
-    res.end(JSON.stringify(resInvoice));
-  })
+	    res.writeHead(200,{'Content-Type':'text/plain'})
+	    res.end(JSON.stringify(resInvoice));
+        } catch (error) {
+            console.error('Error creando nota electronica:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                status: 'Error',
+                message: error.message
+            }));
+        }
+	  })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
@@ -473,9 +511,9 @@ electronicFacturationController.getDocumentFullInfo = (req,res)=>{
         data += chunk;
     })
 	req.on('end',async()=>{
-	    let info = JSON.parse(data);
+		    let info = JSON.parse(data);
         const companyId = getCompanyIdFromInfo(info);
-        const environment = getEnvironmentFromInfo(info);
+        const environment = await resolveEnvironmentFromInfo(info);
 	    console.log('bill_number: ',info.bill_numer);
 	    const response = await factusService.request({
             company_id: companyId,
@@ -499,9 +537,9 @@ electronicFacturationController.downloadBill = (req,res)=>{
         data += chunk
     })
 	req.on('end',async()=>{
-	    let info = JSON.parse(data);
+		    let info = JSON.parse(data);
         const companyId = getCompanyIdFromInfo(info);
-        const environment = getEnvironmentFromInfo(info);
+        const environment = await resolveEnvironmentFromInfo(info);
 	    console.log(`Descargando factura: ${info.bu}`)
 	    const response = await factusService.request({
             company_id: companyId,
@@ -524,9 +562,9 @@ electronicFacturationController.downloadBillXML = (req,res)=>{
         data += chunk
     })
 	req.on('end',async()=>{
-	    let info = JSON.parse(data);
+		    let info = JSON.parse(data);
         const companyId = getCompanyIdFromInfo(info);
-        const environment = getEnvironmentFromInfo(info);
+        const environment = await resolveEnvironmentFromInfo(info);
 	    console.log(`Descargando factura: ${info.bu}`)
 	    const response = await factusService.request({
             company_id: companyId,
