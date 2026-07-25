@@ -33,18 +33,26 @@ const auditEvent = async ({ companyId, eventType, entityTable, entityId, payload
 
 // Garantiza la relación tercero↔compañía en el modelo nuevo y devuelve sus ids.
 // Si no se conoce company_id, la resuelve desde el propio tercero legacy.
-const ensureRelations = async (thirdPartyId, companyId = null, { status, municipalityExtCode } = {}) => {
+const ensureRelations = async (thirdPartyId, companyId = null, { status, municipalityExtCode, localityId } = {}) => {
     await useDataBase(`
         INSERT INTO "Fiscal".third_party_company_relations
-            (third_party_id, company_id, status, jurisdiction_id, notes)
+            (third_party_id, company_id, status, jurisdiction_id, locality_id, notes)
         SELECT t.id, t.company_id, COALESCE($2, 'active'),
                (SELECT j.id FROM "Fiscal".jurisdictions j
                  WHERE j.level = 'municipality' AND j.external_code = COALESCE(NULLIF(TRIM($3), ''), '164')),
+               (SELECT l.id
+                  FROM "Fiscal".localities l
+                  JOIN "Fiscal".jurisdictions j ON j.id = l.municipality_id
+                 WHERE j.level = 'municipality'
+                   AND j.external_code = COALESCE(NULLIF(TRIM($3), ''), '164')
+                   AND ($4::bigint IS NULL OR l.id = $4)
+                 ORDER BY (l.id = $4::bigint) DESC, l.is_municipal_seat DESC
+                 LIMIT 1),
                'Creado por doble escritura (Etapa 5)'
         FROM "Ecosystem".thirdparties t
         WHERE t.id = $1
         ON CONFLICT ON CONSTRAINT uq_tp_company_relation DO NOTHING;
-    `, [thirdPartyId, status ?? null, municipalityExtCode ?? null], 2);
+    `, [thirdPartyId, status ?? null, municipalityExtCode ?? null, localityId ?? null], 2);
 
     const [ok, rows] = await useDataBase(`
         SELECT id, company_id
@@ -172,7 +180,8 @@ const setRelationStatus = async (relationIds, status) => {
 const syncFiscalCreate = async (thirdPartyId, info, performedBy) => {
     const relations = await ensureRelations(thirdPartyId, info.company_id, {
         status: info.comercial_state,
-        municipalityExtCode: info.mucipality_id ?? info.municipality_id // typo legacy respetado
+        municipalityExtCode: info.mucipality_id ?? info.municipality_id, // typo legacy respetado
+        localityId: info.locality_id
     });
     if (!relations.length) throw new Error(`Sin relación Fiscal para tercero ${thirdPartyId}`);
 

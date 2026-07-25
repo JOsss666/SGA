@@ -16,6 +16,7 @@ import AnalyticController from '../controllers/AnalyticsController.js';
 import electronicFacturationController from '../controllers/electronicFacturationController.js';
 import electronicProviderCredentialsController from '../controllers/electronicProviderCredentialsController.js';
 import treasuryController from '../controllers/TreasuryController.js';
+import geographyController from '../controllers/geographyController.js';
 
 const router = express.Router();
 
@@ -75,6 +76,11 @@ router.post('/unblockThirdParty',controller.unblockThirdParty);
 router.post('/deleteThirdParty',controller.deleteThirdParty);
 
 router.post('/getThirdPartyDetails',controller.getThirdPartyDetails);
+
+router.get('/geography/countries', geographyController.getCountries);
+router.get('/geography/departments', geographyController.getDepartments);
+router.get('/geography/municipalities', geographyController.getMunicipalities);
+router.get('/geography/localities', geographyController.getLocalities);
 
 router.post('/getStores',controller.getStores);
 
