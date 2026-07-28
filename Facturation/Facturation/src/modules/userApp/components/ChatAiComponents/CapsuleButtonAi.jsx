@@ -1,6 +1,7 @@
 import './CapsuleButtonAi.css';
 
 export function CapsuleButtonAi({
+    onClick,
     title,
     children,
     className = '',
@@ -9,6 +10,7 @@ export function CapsuleButtonAi({
 }) {
     return (
         <button
+        onClick={onClick}
         title={title}
             className={`CapsuleButtonAi ${className}`.trim()}
             type={type}

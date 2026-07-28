@@ -15,6 +15,23 @@
     border-radius: 2vh;
 }
 
+.FormNewThirdParties .headtThirdPartyForm .CapsuleButtonAi{
+    position: absolute;
+    top: 4vh;
+    right: 2vh;
+}
+
+.FormNewThirdParties .headtThirdPartyForm .CapsuleButtonAi span{
+    font-size: clamp(2px,2vh,20px);
+    color: #fff;
+    display: flex;
+    align-items: center;
+}
+
+.FormNewThirdParties .headtThirdPartyForm .CapsuleButtonAi span i{
+    margin-left: 1vh;
+}
+
 .FormNewThirdParties .headtThirdPartyForm .mainHeadInfo{
     margin: auto 0;
     display: flex;
@@ -231,6 +248,125 @@
     margin-right: 2vh;
 }
 
+.FormNewThirdParties .retentionsList{
+    display: grid;
+    grid-template-columns: minmax(240px, .8fr) minmax(320px, 1.2fr);
+    gap: 2vh;
+    padding: 1vh;
+}
+
+.FormNewThirdParties .retentionsList > .SearchinList{
+    width: 100%;
+    margin: 0;
+}
+
+.FormNewThirdParties .aplyRetentionsContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    min-height: 12vh;
+    padding: 1.5vh;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 1vh;
+    background-color: var(--inputsBg);
+}
+
+.FormNewThirdParties .selectedRetentionsHeader{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--mainText);
+}
+
+.FormNewThirdParties .selectedRetentionsHeader span{
+    min-width: 3vh;
+    padding: .3vh .8vh;
+    border-radius: 2vh;
+    background-color: #007AFF;
+    color: white;
+    text-align: center;
+}
+
+.FormNewThirdParties .selectedRetention{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 1.5vh;
+    padding: 1.2vh;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: .8vh;
+    background-color: var(--bg);
+}
+
+.FormNewThirdParties .selectedRetentionInfo,
+.FormNewThirdParties .selectedRetentionValues{
+    display: flex;
+    flex-direction: column;
+    gap: .3vh;
+    min-width: 0;
+}
+
+.FormNewThirdParties .selectedRetentionInfo strong{
+    overflow: hidden;
+    color: var(--mainText);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.FormNewThirdParties .selectedRetentionInfo span,
+.FormNewThirdParties .selectedRetentionValues small{
+    color: var(--descriptionText);
+}
+
+.FormNewThirdParties .selectedRetentionValues{
+    text-align: right;
+    color: var(--mainText);
+}
+
+.FormNewThirdParties .selectedRetention button{
+    width: 4vh;
+    height: 4vh;
+    border: none;
+    border-radius: .7vh;
+    cursor: pointer;
+    background-color: #FEF2F2;
+    color: #FF6467;
+}
+
+.FormNewThirdParties .selectedRetention button:disabled{
+    cursor: not-allowed;
+    opacity: .5;
+}
+
+.FormNewThirdParties .retentionsSection .taxRentSection{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    width: 100%;
+}
+
+.FormNewThirdParties .retentionsSection .taxRentSection .labelSwitch{
+    display: flex;
+    width: 100%;
+    align-items: center;
+    padding: 1vh 2vh;
+}
+
+.FormNewThirdParties .retentionsSection .taxRentSection .labelSwitch .SwitchOption{
+    margin: auto;
+    margin-right: 2vh;
+}
+
+.FormNewThirdParties .retentionsSection .taxRentSection .labelSwitch span{
+    color: var(--mainText);
+    font-weight: 400;
+    font-size: clamp(2.2px,2.2vh,22px);
+}
+
+.FormNewThirdParties .retentionsSection .taxRentSection .SelectOptions{
+    margin: 0 1vh;
+}
+
 @media (max-width:500px) {
     .FormNewThirdParties{
         width: 100dvw;
@@ -241,6 +377,10 @@
     }
 
     .FormNewThirdParties .stageLabels{
+        grid-template-columns: 1fr;
+    }
+
+    .FormNewThirdParties .retentionsList{
         grid-template-columns: 1fr;
     }
 }

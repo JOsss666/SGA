@@ -13,12 +13,17 @@ import { TagIndicator } from '../../components/TagIndicator';
 import { ThirdPartyFactusIdentificationTypeCodes, ThirdPartyIvaResponsabilityCodes, ThirdPartyNatureCodes } from '../../../../utils/Constants';
 import { DescriptionSpan } from '../../components/DescriptionSpan';
 import { ProductLinkFiscalConditionsCard } from '../../components/ProductLinkFiscalConditionsCard';
-
+import { NoResults } from '../NoResults';
+import { LoadingSpace } from '../LoadingSpace';
+import { SelectOptions } from '../../components/SelectOptions';
+import { CollapsableItem } from '../../components/CollapsableItem';
+import {CapsuleButtonAi} from '../../components/ChatAiComponents/CapsuleButtonAi'
+import { AutoCompleteThirdParties } from './AiAutoComplete/AutoCompleteThirdParties';
 
 export function FormNewThirdParties({reloadFun,quickCreation}){
 
     const {addNotification} = useNotifications();
-    const {popOutAlert} = useAlert();
+    const {popOutAlert, popInAlert} = useAlert();
     const {appInfo} = useAppInfo();
     // control
     const formContainerRef = useRef();
@@ -28,7 +33,41 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
     const [autoTaxInfo,setAutoTaxInfo] = useState(false);
+    const [countries,setCountries] = useState([]);
+    const [departments,setDepartments] = useState([]);
     const [municipalities,setMunicipalities] = useState([]);
+    const [localities,setLocalities] = useState([]);
+    const [retentions,setRetentions] = useState([]);
+    const [withholdingRetentions,setWithholdingRetentions] = useState({
+        selfWithholdingAgent:false,
+        regime:'Regimen Ordinario Renta',
+        rent:{
+            rentTaxResponsable:false,
+            rentTaxDeclarant:false,
+            rentWithholdingAgent:false,
+            rentSelfWithholdingAgent:false,
+            rentSpecialSelfWithholdingAgent:false
+        },
+        iva:{
+            stateEntity:false,
+            DIANMajorTaxpayer:false,
+            ivaTaxResponsable:false,
+            ivaWithholdingAgent:false,
+            ivaWithholdingAgentByCI:false
+        },
+        ring:{
+            ringTaxResponsable:false,
+            ringWithholdingAgent:false,
+            ringSelfWithholdingAgent:false
+        },
+        consumption:{
+            consumptionTaxResponsable:false,
+            consumptionWithholdingAgent:false,
+            consumptionSelfWithholdingAgent:false
+        },
+        territorialTaxes:[]
+    });
+    const [loadingRetentions,setLoadingRetentions] = useState(false);
 
     // info básica
     const [name,setName] = useState('');
@@ -44,7 +83,11 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
     const [mail,setMail] = useState('');
     const [phone,setPhone] = useState('');
     const [country,setCountry] = useState('Colombia');
+    const [country_id,setCountry_id] = useState();
+    const [department_id,setDepartment_id] = useState();
+    const [municipality_jurisdiction_id,setMunicipality_jurisdiction_id] = useState();
     const [mucipality_id,setMunicipality_id] = useState();
+    const [locality_id,setLocality_id] = useState();
     const [city,setCity] = useState('');
     const [address,setAddress] = useState('');
     const [type,setType] = useState('client');
@@ -64,7 +107,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
     const [retention_type,setRetention_type] = useState('NO_AGENTE');
     const [economic_activity,setEconomic_activity] = useState('');
 
-    const maxStage = 2;
+    const maxStage = 3;
 
     const formInfo = {
         company_id:appInfo.company_id,
@@ -79,9 +122,13 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
         mail,
         phone,
         country,
+        country_id,
+        department_id,
+        municipality_jurisdiction_id,
         city,
         address,
         mucipality_id,
+        locality_id,
         typePerson,
         type,
         credit,
@@ -93,7 +140,8 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
         IVA_responsability,
         retention_type,
         economic_activity,
-        attachedRut
+        attachedRut,
+        withholdingRetentions
     }
 
     const dictionaryDocumentTypes = {
@@ -126,6 +174,147 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
         setindentification_type(value);
     }
 
+    const normalizeGeographyName = (value='')=> value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim()
+        .toLowerCase();
+
+    const applyAiThirdPartyData = async(data)=>{
+        setFirst_name(data.first_name ?? '');
+        setSecond_name(data.second_name ?? '');
+        setFirst_surname(data.first_surname ?? '');
+        setSecond_surname(data.second_surname ?? '');
+        setindentification_number(data.indentification_number ?? '');
+        setMail(data.mail ?? '');
+        setPhone(data.phone ?? '');
+        setAddress(data.address ?? '');
+        setTypePerson(data.typePerson ?? 2);
+        seRregime(data.regime || 'ORDINARIO');
+        setIVA_responsability(data.IVA_responsability ?? 21);
+        setRetention_type(data.retention_type || 'NO_AGENTE');
+        setEconomic_activity(data.economic_activity ?? '');
+        setAttachedRut(data.attachedRut ?? '');
+        setWithholdingRetentions(current => (
+            data.withholdingRetentions ?? current
+        ));
+
+        if(data.type){
+            setType(data.type);
+        }
+        setCredit(data.credit ?? false);
+        setCredit_term(data.credit_term ?? 0);
+        setCredit_value(data.credit_value ?? 0);
+        setInterest_rate(data.interest_rate ?? 0);
+        setComercial_state(data.comercial_state || 'active');
+
+        if(data.indentification_type){
+            handleSetDocumentType(data.indentification_type);
+        }
+
+        try {
+            const countriesResponse = await getInfo('/geography/countries');
+            const countryRows = countriesResponse?.status === 'OK'
+                ? countriesResponse.data
+                : [];
+            const countryRow = countryRows.find(element => (
+                normalizeGeographyName(element.name)
+                === normalizeGeographyName(data.country || 'Colombia')
+            )) ?? countryRows.find(element => element.iso_code_2 === 'CO');
+
+            if(!countryRow){
+                setCountry(data.country ?? '');
+                setCity(data.city ?? data.municipality ?? '');
+                return;
+            }
+
+            setCountries(countryRows.map(element => ({
+                text:element.name,
+                value:element.id
+            })));
+            setCountry_id(countryRow.id);
+            setCountry(countryRow.name);
+
+            const departmentsResponse = await getInfo(
+                `/geography/departments?country_id=${countryRow.id}`
+            );
+            const departmentRows = departmentsResponse?.status === 'OK'
+                ? departmentsResponse.data
+                : [];
+            const departmentOptions = departmentRows.map(element => ({
+                text:element.name,
+                value:element.id
+            }));
+            setDepartments(departmentOptions);
+
+            const departmentRow = departmentRows.find(element => (
+                normalizeGeographyName(element.name)
+                === normalizeGeographyName(data.department)
+            ));
+            if(!departmentRow){
+                setCity(data.city ?? data.municipality ?? '');
+                return;
+            }
+            setDepartment_id(departmentRow.id);
+
+            const municipalitiesResponse = await getInfo(
+                `/geography/municipalities?country_id=${countryRow.id}&department_id=${departmentRow.id}`
+            );
+            const municipalityRows = municipalitiesResponse?.status === 'OK'
+                ? municipalitiesResponse.data
+                : [];
+            setMunicipalities(municipalityRows.map(element => ({
+                text:`${element.name} (${element.code})`,
+                value:element.id,
+                externalCode:element.external_code,
+                name:element.name
+            })));
+
+            const municipalityRow = municipalityRows.find(element => (
+                `${element.external_code}` === `${data.municipality_code || data.mucipality_id}`
+            )) ?? municipalityRows.find(element => (
+                normalizeGeographyName(element.name)
+                === normalizeGeographyName(data.municipality || data.city)
+            ));
+            if(!municipalityRow){
+                setMunicipality_id(
+                    data.municipality_code || data.mucipality_id || undefined
+                );
+                setCity(data.city ?? data.municipality ?? '');
+                return;
+            }
+
+            setMunicipality_jurisdiction_id(municipalityRow.id);
+            setMunicipality_id(municipalityRow.external_code);
+
+            const localitiesResponse = await getInfo(
+                `/geography/localities?municipality_id=${municipalityRow.id}`
+            );
+            const localityRows = localitiesResponse?.status === 'OK'
+                ? localitiesResponse.data
+                : [];
+            setLocalities(localityRows.map(element => ({
+                text:element.is_municipal_seat
+                    ? `${element.name} (cabecera municipal)`
+                    : element.name,
+                value:element.id,
+                name:element.name
+            })));
+
+            const localityRow = localityRows.find(element => (
+                normalizeGeographyName(element.name)
+                === normalizeGeographyName(data.city)
+            )) ?? localityRows.find(element => element.is_municipal_seat);
+
+            setLocality_id(localityRow?.id);
+            setCity(localityRow?.name ?? data.city ?? municipalityRow.name);
+        } catch(err) {
+            console.error('No se pudo resolver la geografía extraída por IA:', err);
+            setCountry(data.country ?? '');
+            setCity(data.city ?? data.municipality ?? '');
+        }
+    };
+
     const isEmpty = (value)=> value === undefined || value === null || `${value}`.trim() === '';
 
     const scrollFormToTop = ()=>{
@@ -152,8 +341,9 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
             {label:'Número de Identificación', value:indentification_number},
             {label:'Correo Electrónico', value:mail},
             {label:'País', value:country},
+            {label:'Departamento', value:department_id},
             {label:'Municipio o región', value:mucipality_id},
-            {label:'Ciudad', value:city},
+            {label:'Ciudad o localidad', value:locality_id},
             {label:'Dirección', value:address}
         ],
         1: [
@@ -171,7 +361,8 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
             {label:'Tipo Identificación Facturación', value:identidicationType_id},
             {label:'Régimen del tercero', value:regime},
             {label:'Tipo de Retención', value:retention_type}
-        ]
+        ],
+        3: []
     };
 
     const validateStage = (stageToValidate)=>{
@@ -199,21 +390,111 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
     }
 
     // Getters of info
-    const getMunicipalities = async()=>{
-        let res = await getInfo('/electronicFacturation/getMunicipalities');
-        
-        if(res.status == 'OK'){
-            let C = [];
-            res.data.forEach(element => {
-                C.push({
-                    text:`${element.name} - ${element.department} (${element.code})`,
-                    value:element.id
-                })
-            });
-            setMunicipalities(C);
+    const getCountries = async()=>{
+        const res = await getInfo('/geography/countries');
+        if(res.status === 'OK'){
+            const options = res.data.map(element => ({ text:element.name, value:element.id }));
+            setCountries(options);
+            const colombia = res.data.find(element => element.iso_code_2 === 'CO');
+            if(colombia){
+                setCountry_id(colombia.id);
+                setCountry(colombia.name);
+            }
         }
     };
 
+    const getDepartments = async(selectedCountryId)=>{
+        const res = await getInfo(`/geography/departments?country_id=${selectedCountryId}`);
+        if(res.status === 'OK'){
+            setDepartments(res.data.map(element => ({ text:element.name, value:element.id })));
+        }
+    };
+
+    const getMunicipalities = async(selectedCountryId, selectedDepartmentId)=>{
+        const res = await getInfo(`/geography/municipalities?country_id=${selectedCountryId}&department_id=${selectedDepartmentId}`);
+        if(res.status === 'OK'){
+            setMunicipalities(res.data.map(element => ({
+                text:`${element.name} (${element.code})`,
+                value:element.id,
+                externalCode:element.external_code,
+                name:element.name
+            })));
+        }
+    };
+
+    const getLocalities = async(selectedMunicipalityId)=>{
+        const res = await getInfo(`/geography/localities?municipality_id=${selectedMunicipalityId}`);
+        if(res.status === 'OK'){
+            const options = res.data.map(element => ({
+                text:element.is_municipal_seat ? `${element.name} (cabecera municipal)` : element.name,
+                value:element.id,
+                name:element.name
+            }));
+            setLocalities(options);
+            if(options.length === 1){
+                setLocality_id(options[0].value);
+                setCity(options[0].name);
+            }
+        }
+    };
+
+    const getRetentions = async()=>{
+        if(!appInfo.company_id) return;
+
+        setLoadingRetentions(true);
+        try {
+            const res = await getInfo(`/taxes/withholdings?company_id=${appInfo.company_id}`);
+            if(res?.[0]){
+                const options = res[1].map(element => ({
+                    text:`${element.name} ${element.rate} % (${element.code})`,
+                    value:element
+                }));
+                setRetentions(options ?? []);
+                return;
+            }
+            setRetentions([]);
+        } catch (err) {
+            console.error('Error cargando retenciones de la compañía:', err);
+            setRetentions([]);
+        } finally {
+            setLoadingRetentions(false);
+        }
+    };
+
+    // Handlers
+
+    const handleCountry = (id)=>{
+        const selected = countries.find(element => element.value === id);
+        setCountry_id(id);
+        setCountry(selected?.text ?? '');
+        setDepartment_id(undefined);
+        setMunicipality_jurisdiction_id(undefined);
+        setMunicipality_id(undefined);
+        setLocality_id(undefined);
+        setCity('');
+    };
+
+    const handleDepartment = (id)=>{
+        setDepartment_id(id);
+        setMunicipality_jurisdiction_id(undefined);
+        setMunicipality_id(undefined);
+        setLocality_id(undefined);
+        setCity('');
+    };
+
+    const handleMunicipality = (id)=>{
+        const selected = municipalities.find(element => element.value === id);
+        setMunicipality_jurisdiction_id(id);
+        setMunicipality_id(selected?.externalCode);
+        setLocality_id(undefined);
+        setCity('');
+    };
+
+    const handleLocality = (id)=>{
+        const selected = localities.find(element => element.value === id);
+        setLocality_id(id);
+        setCity(selected?.name ?? '');
+    };
 
     // Creation function
     const createThirdParty = async()=>{
@@ -271,7 +552,8 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
 
     const handlePrimaryAction = ()=>{
         if(stage < maxStage){
-            if(validateStage(stage)){
+            //if(validateStage(stage)){
+            if(true){
                 setStage(stage +1)
             }
             return;
@@ -284,8 +566,24 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
     // Events listeners
     
     useEffect(()=>{
-        getMunicipalities();
+        getCountries();
     },[])
+
+    useEffect(()=>{
+        if(country_id) getDepartments(country_id);
+    },[country_id])
+
+    useEffect(()=>{
+        if(country_id && department_id) getMunicipalities(country_id, department_id);
+    },[country_id, department_id])
+
+    useEffect(()=>{
+        if(municipality_jurisdiction_id) getLocalities(municipality_jurisdiction_id);
+    },[municipality_jurisdiction_id])
+
+    useEffect(()=>{
+        getRetentions();
+    },[appInfo.company_id])
 
 
 /** PENDIENTE REVISAR **/
@@ -319,6 +617,20 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                             />
                     ) }
                 </div>
+                <div className="AIads">
+                    <CapsuleButtonAi title={'Autocompleta este formulario con IA'} onClick={()=>{
+                        popInAlert(
+                            <AutoCompleteThirdParties
+                                updateFunction={applyAiThirdPartyData}
+                            />
+                        )
+                    }} >
+                        <span>
+                            Completar con IA
+                            <i className="fa-solid fa-flask"/>
+                        </span>
+                    </CapsuleButtonAi>
+                </div>
             </div>
 
             {stage === 0 &&(
@@ -346,9 +658,40 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                         <FormInput type={'number'} action={setindentification_number} value={indentification_number} title={'Número de Identificación'} placeholder={'Número de identificación'} disabled={disabled} required={true}/>
                         <FormInput type={'text'} action={setMail} title={'Correo Electrónico'} placeholder={'Correo electrónico del proveedor'} disabled={disabled} required={true}/>
                         <FormInput type={'number'} action={setPhone} title={'Teléfono'} placeholder={'Número de teléfono'} disabled={disabled} required={false}/>
-                        <FormInput type={'text'} action={setCountry} title={'País'} placeholder={'País'} disabled={disabled} required={true}/>
-                        <SearchinList action={setMunicipality_id} title={'Municio o region'} placeHolder={'Seleccione munipio o region (Obligatorio)'} list={municipalities} disabled={disabled}/>
-                        <FormInput type={'text'} action={setCity} title={'Ciudad'} placeholder={'Ciudad'} disabled={disabled} required={true}/>
+                        <SearchinList
+                            key={`country-${countries.length}`}
+                            action={handleCountry}
+                            title={'País'}
+                            placeHolder={'Seleccione un país'}
+                            list={countries}
+                            disabled={disabled || countries.length === 0}
+                            defaultValue={country_id ? {text:country, value:country_id} : {}}
+                        />
+                        <SearchinList
+                            key={`department-${country_id}`}
+                            action={handleDepartment}
+                            title={'Departamento'}
+                            placeHolder={'Seleccione un departamento'}
+                            list={departments}
+                            disabled={disabled || !country_id}
+                        />
+                        <SearchinList
+                            key={`municipality-${department_id}`}
+                            action={handleMunicipality}
+                            title={'Municipio o distrito'}
+                            placeHolder={'Seleccione un municipio'}
+                            list={municipalities}
+                            disabled={disabled || !department_id}
+                        />
+                        <SearchinList
+                            key={`locality-${municipality_jurisdiction_id}-${localities.length}`}
+                            action={handleLocality}
+                            title={'Ciudad o localidad'}
+                            placeHolder={'Seleccione una ciudad o localidad'}
+                            list={localities}
+                            disabled={disabled || !municipality_jurisdiction_id}
+                            defaultValue={localities.length === 1 ? localities[0] : {}}
+                        />
                         <FormInput type={'text'} action={setAddress} title={'Dirección'} placeholder={'Dirección del proveedor'} disabled={disabled} required={true}/>
                     </form>
                 </section>
@@ -451,6 +794,115 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                         <>
                             <span>Esta opción no esta disponible por el momento</span>
                         </>
+                    )}
+                </section>
+            )}
+            {stage == 3 && (
+                <section className='retentionsSection'>
+                    <div className="tagSection">
+                        <TagIndicator title={'Información de Retenciones'} type={'suspended'}/>
+                    </div>
+                    {loadingRetentions && (
+                        <LoadingSpace title={'Cargando retenciones'} description={'Esto no debe tardar mucho'}/>
+                    )}
+                    {!loadingRetentions && retentions.length === 0 && (
+                        <NoResults title={'La compañía no tiene retenciones configuradas.'}/>
+                    )}
+                    {!loadingRetentions && retentions.length > 0 && (
+                        <form action="" onSubmit={(e)=>{
+                            e.preventDefault();
+                            handlePrimaryAction();
+                        }}>
+                            {/* Rent Ta */}
+                            <CollapsableItem title={'RENTA'}>
+                                <section className='taxRentSection'>
+                                    <div className="labelSwitch">
+                                        <span>Responsable del impuesto sobre RENTA</span>
+                                        <SwitchOption/>
+                                    </div>
+                                    <div className="labelSwitch">
+                                        <span>Declarante impuesto sobre la RENTA</span>
+                                        <SwitchOption/>
+                                    </div>
+                                    <SelectOptions title={'Regimen'} defaultValue={'Regimen Ordinario de renta'} options={[
+                                        'Ordinario de renta',
+                                        'Simple de tributación',
+                                    ]}/>
+                                    <div className="labelSwitch">
+                                        <span>Regímen tributario Espcial RENTA</span>
+                                        <SwitchOption/>
+                                    </div>
+                                    <div className="labelSwitch">
+                                        <span>Agente retenedor a titulo de RENTA</span>
+                                        <SwitchOption/>
+                                    </div>
+                                    <div className="labelSwitch">
+                                        <span>Autorreteneor a titulo de RENTA</span>
+                                        <SwitchOption/>
+                                    </div>
+                                    <div className="labelSwitch">
+                                        <span>Autoretenedor especial de RENTA</span>
+                                        <SwitchOption/>
+                                    </div>
+                                </section>
+                            </CollapsableItem>
+                            <CollapsableItem title={'IVA'}>
+                                <section className='taxRentSection'>
+                                    <div className="labelSwitch">
+                                        <span>Entidad estatal</span>
+                                        <SwitchOption/>
+                                    </div>
+                                    <div className="labelSwitch">
+                                        <span>Gran Contribuyente DIAN</span>
+                                        <SwitchOption/>
+                                    </div>
+                                    <div className="labelSwitch">
+                                        <span>Responsable de IVA</span>
+                                        <SwitchOption/>
+                                    </div>
+                                    <div className="labelSwitch">
+                                        <span>Agente retenedor a titulo de IVA</span>
+                                        <SwitchOption/>
+                                    </div>
+                                    <div className="labelSwitch">
+                                        <span>Agente retenedor a titulo de IVA por ventas CI</span>
+                                        <SwitchOption/>
+                                    </div>
+                                </section>
+                            </CollapsableItem>
+                            <CollapsableItem title={'TIMBRE'}>
+                                <section className='taxRentSection'>
+                                    <div className="labelSwitch">
+                                        <span>Responsable impuesto de timbre</span>
+                                        <SwitchOption/>
+                                    </div>
+                                    <div className="labelSwitch">
+                                        <span>Agente retenedor a titulo de timbre</span>
+                                        <SwitchOption/>
+                                    </div>
+                                    <div className="labelSwitch">
+                                        <span>Autorretenedor a titulo de timbre</span>
+                                        <SwitchOption/>
+                                    </div>
+                                </section>
+                            </CollapsableItem>
+                            <CollapsableItem title={'CONSMUMO'}>
+                                <section className='taxRentSection'>
+                                    <div className="labelSwitch">
+                                        <span>Responsable impuesto al Consumo</span>
+                                        <SwitchOption/>
+                                    </div>
+                                    <div className="labelSwitch">
+                                        <span>Agente retenedor a titulo de impuesto al consumo</span>
+                                        <SwitchOption/>
+                                    </div>
+                                    <div className="labelSwitch">
+                                        <span>Autorretenedor a titulo de impuesto al consumo</span>
+                                        <SwitchOption/>
+                                    </div>
+                                </section>
+                            </CollapsableItem>
+                        </form>
                     )}
                 </section>
             )}

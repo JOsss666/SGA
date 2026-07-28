@@ -2,7 +2,7 @@ import { encrypt, isRelevanPrompt, useDataBase, actualDate } from "../app.js";
 import fs from "fs";
 import path from "path";
 import { uploadToCloudinary } from "../uploadMiddleWare.js";
-import { send_API_AI } from "../ApiFunctions.js";
+import { send_API_AI, sendCustom_API_AI } from "../ApiFunctions.js";
 import documentController from "./DocumentController.js";
 import materializedViewsController from "./MaterializedViewsController.js";
 import transactionController from "./TransactionController.js";
@@ -1037,6 +1037,74 @@ controller.getTaxes = (req, res) => {
             res.end(JSON.stringify(err));
         }
     });
+};
+
+// Retenciones configuradas por compañía. A diferencia de /getTaxes, este
+// catálogo siempre restringe el resultado a taxes."isRetention" = true.
+controller.getWithholdings = async (req, res) => {
+    try {
+        const companyId = req.query.company_id;
+        const taxType = req.query.type ?? req.query.tax_type;
+
+        if (companyId === undefined || companyId === null || `${companyId}`.trim() === '') {
+            res.status(400).json([false, 'company_id es obligatorio']);
+            return;
+        }
+
+        if (!/^\d+$/.test(`${companyId}`) || Number(companyId) <= 0) {
+            res.status(400).json([false, 'company_id debe ser un entero positivo']);
+            return;
+        }
+
+        const values = [companyId];
+        const where = [
+            `"Ecosystem".taxes.company_id = $1`,
+            `"Ecosystem".taxes."isRetention" IS TRUE`
+        ];
+
+        if (taxType !== undefined && taxType !== null && `${taxType}`.trim() !== '') {
+            const normalizedTaxType = `${taxType}`.trim().toLowerCase();
+            const validTypes = ['purchase', 'sell', 'both'];
+
+            if (!validTypes.includes(normalizedTaxType)) {
+                res.status(400).json([false, `Tipo de impuesto inválido: ${taxType}`]);
+                return;
+            }
+
+            if (normalizedTaxType === 'purchase' || normalizedTaxType === 'sell') {
+                values.push(normalizedTaxType);
+                where.push(`"Ecosystem".taxes."type" IN ($2::tax_type, 'both'::tax_type)`);
+            } else {
+                where.push(`"Ecosystem".taxes."type" = 'both'::tax_type`);
+            }
+        }
+
+        const query = `
+            SELECT
+                "Ecosystem".taxes.id AS tax_id,
+                "Ecosystem".taxes.code,
+                "Ecosystem".taxes.rate,
+                "Ecosystem".taxes.base,
+                "Ecosystem".taxes.parent_id,
+                "Ecosystem".taxes.path,
+                "Ecosystem".taxes."isRetention",
+                "Ecosystem".taxes."type",
+                "Ecosystem".taxes."type" AS tax_type,
+                "Ecosystem".contable_accounts.type AS account_type,
+                "Ecosystem".contable_accounts.name
+            FROM "Ecosystem".taxes
+            LEFT JOIN "Ecosystem".contable_accounts
+              ON "Ecosystem".contable_accounts.id = "Ecosystem".taxes.account_id
+            WHERE ${where.join(' AND ')}
+            ORDER BY "Ecosystem".taxes.account_id ASC;
+        `;
+
+        const result = await useDataBase(query, values, 1);
+        res.status(200).json(result);
+    } catch (error) {
+        console.error('Error consultando retenciones:', error);
+        res.status(500).json([false, error.message || 'Error consultando retenciones']);
+    }
 };
 
 controller.getConceptTaxes = (req,res)=>{
@@ -2200,6 +2268,47 @@ controller.processAiRequest= (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
+
+controller.processCustomAiRequest = (req, res) => {
+    let data = '';
+
+    req.on('data', chunk => {
+        data += chunk;
+    });
+
+    req.on('end', async () => {
+        try {
+            const info = JSON.parse(data);
+
+            if (!info.masterPrompt || !info.prompt) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    ok: false,
+                    error: 'masterPrompt y prompt son requeridos.'
+                }));
+                return;
+            }
+
+            const result = await sendCustom_API_AI(info);
+            res.writeHead(result.ok ? 200 : 502, {
+                'Content-Type': 'application/json'
+            });
+            res.end(JSON.stringify(result));
+        } catch (err) {
+            console.error('Error en processCustomAiRequest:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                ok: false,
+                error: err.message || 'No se pudo procesar la tarea de IA.'
+            }));
+        }
+    });
+
+    req.on('error', err => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: err.message }));
+    });
+};
 
 
 controller.getDocAnalyticDocNumber = async (req, res) => {

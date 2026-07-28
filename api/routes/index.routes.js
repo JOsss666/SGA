@@ -35,6 +35,7 @@ const upload = multer({ dest: CHUNKS_DIR });
     router.post("/merge-chunks", controller.mergeChunks);
 
     router.post('/processAiRequest',controller.processAiRequest);
+    router.post('/processCustomAiRequest', controller.processCustomAiRequest);
 
     router.post('/getAttachedFiles',controller.getAttachedFiles);
 
@@ -111,6 +112,8 @@ router.post('/createTax',controller.createTax);
 router.post('/deleteTax',controller.deleteTax);
 
 router.post('/getTaxes',controller.getTaxes);
+
+router.get('/taxes/withholdings',controller.getWithholdings);
 
 router.post('/getConceptTaxes',controller.getConceptTaxes);
 
