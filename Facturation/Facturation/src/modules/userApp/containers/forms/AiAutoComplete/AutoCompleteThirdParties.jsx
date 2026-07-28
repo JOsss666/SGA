@@ -32,6 +32,7 @@ const thirdPartySchema = {
         municipality: { type: 'string' },
         municipality_code: { type: 'string' },
         mucipality_id: { type: 'string' },
+        locality: { type: 'string' },
         city: { type: 'string' },
         address: { type: 'string' },
         type: {
@@ -219,6 +220,7 @@ const thirdPartySchema = {
         'municipality',
         'municipality_code',
         'mucipality_id',
+        'locality',
         'city',
         'address',
         'type',
@@ -297,7 +299,14 @@ export function AutoCompleteThirdParties({updateFunction}){
                     - department y municipality deben contener sus nombres.
                     - municipality_code debe ser el código DANE sin separadores.
                     - mucipality_id debe contener el mismo código DANE.
+                    - locality contiene la localidad, comuna, corregimiento o
+                      subdivisión local cuando el documento la indique.
                     - city y address corresponden al domicilio principal.
+                    - country_id, department_id,
+                      municipality_jurisdiction_id y locality_id siempre serán
+                      null. La aplicación resolverá esos IDs dinámicamente contra
+                      sus catálogos usando los nombres y códigos extraídos; nunca
+                      inventes un ID.
 
                     REGLAS FISCALES:
                     - regime: ORDINARIO, SIMPLE, ESPECIAL o NO_CONTRIBUYENTE.
@@ -324,6 +333,18 @@ export function AutoCompleteThirdParties({updateFunction}){
                     actividades, tarifa y base mínima. Si no existe información
                     territorial devuelve territorialTaxes como [].
 
+                    REGLA OBLIGATORIA PARA MÚLTIPLES RIT:
+                    - Cada documento RIT representa una inscripción territorial
+                      independiente.
+                    - Dentro del objeto ICA de territorialTaxes, agrega exactamente
+                      un objeto a regions por cada documento RIT adjunto.
+                    - No combines dos RIT en una misma región, incluso si pertenecen
+                      al mismo municipio o contienen actividades similares.
+                    - Conserva en cada región únicamente los datos y actividades
+                      del RIT que originó ese objeto.
+                    - Si hay tres RIT, ICA.regions debe contener tres objetos; si
+                      hay dos RIT, debe contener dos objetos.
+
                     withholdingRetentions.regime debe ser descriptivo, por ejemplo
                     "Regimen Ordinario Renta", "Regimen Simple" o "Regimen
                     Especial".
@@ -345,8 +366,7 @@ export function AutoCompleteThirdParties({updateFunction}){
             });
             console.log('Respuesta IA:', response.data);
 
-            const applyUpdate = updateFunction ?? updatFunction;
-            await applyUpdate?.({
+            await updateFunction?.({
                 ...response.data,
                 attachedRut: files[0]?.url ?? files[0]
             });

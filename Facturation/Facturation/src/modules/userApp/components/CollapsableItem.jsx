@@ -4,7 +4,7 @@ import './CollapsableItem.css'
 export function CollapsableItem({title,children}){
 
     // Control
-    const [visible,setVisible] = useState(false);
+    const [visible,setVisible] = useState(true);
 
     return(
         <div className="CollapsableItem">
