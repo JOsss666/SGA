@@ -107,7 +107,6 @@ export function ReportAccountTransactions(){
     const getAccountInfo = async()=>{
         setLoadingAccInfo(true)
         let res = await postInfo('/getAccounts',settingsAccount);
-        console.log(res)
         if(res[0]){
             setAccount_info(res[1][0])
         }
