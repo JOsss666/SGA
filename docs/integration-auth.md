@@ -109,3 +109,35 @@ El `client_secret` nunca debe registrarse en logs ni enviarse por correo sin un
 canal seguro. La API de token tiene límite básico por dirección IP y responde
 siempre con el mismo error para cliente inexistente, suspendido o secreto
 incorrecto.
+
+## Documentación OpenAPI y Scalar
+
+Con el backend en ejecución, la documentación interactiva está disponible en:
+
+```text
+http://localhost:3000/api/integrations/v1/docs
+```
+
+El contrato OpenAPI en formato JSON está disponible en:
+
+```text
+http://localhost:3000/api/integrations/v1/openapi.json
+```
+
+Scalar permite consultar los modelos, revisar ejemplos y ejecutar peticiones.
+Para probar una operación protegida:
+
+1. Ejecutar `POST /auth/token` con el `client_id` y el `client_secret`.
+2. Copiar únicamente el valor `access_token` de la respuesta.
+3. Abrir la opción de autenticación Bearer en Scalar y pegar el token.
+4. Ejecutar primero `GET /handshake` para verificar la conexión.
+5. Continuar con los catálogos y las operaciones permitidas por los scopes de
+   la credencial.
+
+La fuente versionada del contrato es
+`docs/openapi/zj-integration.openapi.json`. Cualquier cambio en rutas, cuerpos,
+respuestas o códigos de error debe reflejarse allí y requiere reiniciar el
+backend para volver a cargar el archivo.
+
+La documentación nunca debe contener un `client_secret` real. Cada empresa
+debe recibir sus credenciales por un canal seguro.
