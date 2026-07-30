@@ -453,5 +453,11 @@ zjController.getServiceMovements = (req,res)=>{
 }
 
 
+zjController.tiketService = {};
+
+zjController.tiketService.getThirdParties = async()=>{
+    // Pending of complete
+}
+
 
 export default zjController;
