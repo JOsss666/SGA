@@ -16,6 +16,7 @@ import AnalyticController from '../controllers/AnalyticsController.js';
 import electronicFacturationController from '../controllers/electronicFacturationController.js';
 import electronicProviderCredentialsController from '../controllers/electronicProviderCredentialsController.js';
 import treasuryController from '../controllers/TreasuryController.js';
+import integrationRouter from './integration.routes.js';
 
 const router = express.Router();
 
@@ -23,6 +24,8 @@ const router = express.Router();
 const CHUNKS_DIR = path.join(process.cwd(), "chunks");
 const upload = multer({ dest: CHUNKS_DIR });
 
+// API máquina-a-máquina para integraciones empresariales.
+router.use('/api/integrations/v1', integrationRouter);
 
 // SGA General
 
