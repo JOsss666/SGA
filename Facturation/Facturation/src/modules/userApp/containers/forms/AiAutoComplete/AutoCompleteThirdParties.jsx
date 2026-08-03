@@ -386,6 +386,7 @@ export function AutoCompleteThirdParties({updateFunction}){
                 <DescriptionSpan text={'Para continuar seleeccione el RUT y/o RUT del tercero el cual quiere crear.'}/>
             </div>
             <FileInput
+                category="thirdPartiesDocs"
                 placeholder={'Seleccione uno o varios archivos'}
                 action={setFiles}
                 disabled={disabled}

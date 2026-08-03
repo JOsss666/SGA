@@ -22,7 +22,7 @@ import { AutoCompleteThirdParties } from './AiAutoComplete/AutoCompleteThirdPart
 
 const createInitialFormData = (companyId = null) => ({
     company_id:companyId,
-    userPhoto:'https://res.cloudinary.com/djjxugmni/image/upload/v1765477400/noUserImg_p817rb.jpg',
+    userPhoto:'https://cdnmain.sga360.co/static/noUserImg_p817rb.webp',
     first_name:'',
     second_name:'',
     first_surname:'',
@@ -721,7 +721,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                     <div className="actualPhoto">
                         <img src={userPhoto} alt="" />
                     </div>
-                    <FileInput placeholder={'Seleccionar nueva foto'} action={handleUserPhotoChange}>
+                    <FileInput category="assets" placeholder={'Seleccionar nueva foto'} action={handleUserPhotoChange}>
                         <i className="fa-solid fa-camera"/>
                     </FileInput>
                 </div>
@@ -935,6 +935,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                 ]}/>
                                 <FormInput type={'text'} title={'Actividad Economica'} action={value=>updateField('economic_activity',value)} disabled={disabled} value={economic_activity} placeholder={'Código o descripción de actividad económica'} required={false}/>
                                 <FileInput
+                                    category="thirdPartiesDocs"
                                     action={handleRutAttachmentChange}
                                     placeholder={'Adjuntar soporte RUT'}
                                     disabled={disabled}

@@ -71,7 +71,7 @@ export function MyBussinesUnits(){
                                     {stores.map((element,index)=>(
                                         <CardMyBussinesUnits onClick={()=>{
                                             handleNavigateStore(element.id)
-                                        }} info={element} image={element.image != undefined? element.image:'https://res.cloudinary.com/djjxugmni/image/upload/v1764436577/ChatGPT_Image_29_nov_2025_12_15_47_kxqs81.png'} key={index} reloadFun={getStores}/>
+                                        }} info={element} image={element.image != undefined? element.image:'https://cdnmain.sga360.co/static/ChatGPT_Image_29_nov_2025_12_15_47_kxqs81.webp'} key={index} reloadFun={getStores}/>
                                     ))}
                                 </>
                         )}

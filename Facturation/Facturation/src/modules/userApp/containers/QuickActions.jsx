@@ -70,10 +70,10 @@ export function QuickActions(){
                 </form>
             </div>
             <div className="img1C">
-                <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1772629039/unnamed-2_rg2vg1.png" alt="" />
+                <img src="https://cdnmain.sga360.co/static/unnamed-2_rg2vg1.webp" alt="" />
             </div>
             <div className="img2C">
-                <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1772630354/Gemini_Generated_Image_ovmwk1ovmwk1ovmw-2_a3j4iw.png" alt="" />
+                <img src="https://cdnmain.sga360.co/static/Gemini_Generated_Image_ovmwk1ovmwk1ovmw-2_a3j4iw.webp" alt="" />
             </div>
         </div>
     )

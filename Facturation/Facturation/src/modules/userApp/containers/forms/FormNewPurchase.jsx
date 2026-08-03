@@ -1010,7 +1010,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                     </div>
                     <div className="footerDetailsContainer">
                         <FormInput title={'Descripción'} textArea={true} placeholder={'Añade una descripción a tu compra'} action={setDescription} disabled={disabled}/>
-                        <FileInput action={setAttached} placeholder={'Adjuntar soporte'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
+                        <FileInput category="files" action={setAttached} placeholder={'Adjuntar soporte'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
                         <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor ingresado no es valido':'Crear compra'} disabled={disabledToSubmit? true:disabled} loading={loading}/>
                     </div>
                 </form>

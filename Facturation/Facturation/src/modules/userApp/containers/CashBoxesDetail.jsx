@@ -157,7 +157,7 @@ export function CashBoxesDeetail(){
                         `} onClick={()=>{
                             openCashRegister();
                         }}>
-                            <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1769627888/Gemini_Generated_Image_mjegonmjegonmjeg-2_nmyqul.png" alt="" />
+                            <img src="https://cdnmain.sga360.co/static/Gemini_Generated_Image_mjegonmjegonmjeg-2_nmyqul.webp" alt="" />
                             <strong className="ttlImg">Abrir caja</strong>
                         </div>
                         <div className={`CashBoxOption 
@@ -165,13 +165,13 @@ export function CashBoxesDeetail(){
                             `} onClick={()=>{
                                 closeCashRegister();
                             }}>
-                            <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1769628055/Gemini_Generated_Image_ddi13yddi13yddi1-2_cehfsk.png" alt="" />
+                            <img src="https://cdnmain.sga360.co/static/Gemini_Generated_Image_ddi13yddi13yddi1-2_cehfsk.webp" alt="" />
                             <strong className="ttlImg">Cerrar caja</strong>
                         </div>
                         <div className={`CashBoxOption `} onClick={()=>{
                                 generateReportCashRegister();
                             }}>
-                            <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1769628329/Gemini_Generated_Image_8f3lkr8f3lkr8f3l-2_awzvoa.png" alt="" />
+                            <img src="https://cdnmain.sga360.co/static/Gemini_Generated_Image_8f3lkr8f3lkr8f3l-2_awzvoa.webp" alt="" />
                             <strong className="ttlImg">Generar informe de cierre de caja</strong>
                         </div>
                     </div>

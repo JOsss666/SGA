@@ -1,7 +1,9 @@
 import { encrypt, isRelevanPrompt, useDataBase, actualDate } from "../app.js";
 import fs from "fs";
 import path from "path";
+import sharp from "sharp";
 import { uploadToCloudinary } from "../uploadMiddleWare.js";
+import storage from "../services/storage.service.js";
 import { send_API_AI, sendCustom_API_AI } from "../ApiFunctions.js";
 import documentController from "./DocumentController.js";
 import materializedViewsController from "./MaterializedViewsController.js";
@@ -46,8 +48,14 @@ controller.mergeChunks = (req, res) => {
     res.json({ message: "Archivo ensamblado correctamente", path: finalPath });
 };
 
+// Imágenes raster que convertimos a WebP para optimizar peso/velocidad.
+// SVG/GIF se dejan igual (vector/animación); PDF, XML y demás se suben tal cual.
+const CONVERTIBLE_IMAGE = new Set([
+    "image/jpeg", "image/jpg", "image/png", "image/webp",
+    "image/tiff", "image/avif", "image/bmp",
+]);
+
 controller.uploadFile = async (req, res) => {
-    console.log("Archivo recibido");
     try {
         const archivos = req.files;
         const info = req.body.info ? JSON.parse(req.body.info) : {};
@@ -55,36 +63,90 @@ controller.uploadFile = async (req, res) => {
             return res.status(400).json({ mensaje: "No se enviaron archivos" });
         }
 
-        const urls = [];
+        const useR2 = storage.isR2Configured();
 
-        // Subir archivos uno por uno
-        for (const archivo of archivos) {
-            console.log(archivo);
-            const resultado = await uploadToCloudinary(archivo.buffer, archivo.originalname);
-            if (info.company_id != undefined) {
-                let insertUpload = await useDataBase(`
-                    INSERT INTO "Ecosystem".attached(
-                        company_id, uploaded_by, name, size, type,url)
-                    VALUES ($1,$2,$3,$4,$5,$6) RETURNING id;
-                `,[
-                    info.company_id,
-                    info.user_id ?? null,
-                    archivo.originalname,
-                    archivo.size,
-                    archivo.mimetype,
-                    resultado.secure_url
-                ],3);
-                if(insertUpload.id != undefined){
-                    urls.push({id:insertUpload.id,url:resultado.secure_url})   
-                } else {
-                    urls.push(resultado.secure_url);
-                }
-            } else {
-                urls.push(resultado.secure_url);
-            }
+        // Carpeta de la compañía (storageKey) para las keys de R2. Se resuelve en el
+        // backend a partir del company_id — no se confía en que lo mande el cliente.
+        let storageKey = null;
+        if (useR2 && info.company_id != undefined) {
+            const companyRow = await useDataBase(
+                `SELECT "storageKey" FROM "Ecosystem".companies WHERE company_id = $1`,
+                [info.company_id], 3
+            );
+            storageKey = companyRow?.storageKey ?? null;
         }
 
-        // Espacio para insertar en la base de datos,
+        // Carpeta destino según el formulario. Sin categoría → 'others'.
+        const category = info.category ?? "others";
+        const storeId = info.store_id ?? null;
+
+        const urls = [];
+
+        for (const archivo of archivos) {
+            let buffer = archivo.buffer;
+            let contentType = archivo.mimetype;
+            let filename = archivo.originalname;
+            let provider = "cloudinary";
+            let key = null;
+            let secureUrl;
+
+            if (useR2 && storageKey) {
+                // Optimización de imágenes → WebP redimensionado (máx 2000px).
+                if (CONVERTIBLE_IMAGE.has((contentType || "").toLowerCase())) {
+                    try {
+                        buffer = await sharp(archivo.buffer)
+                            .rotate() // respeta orientación EXIF
+                            .resize({ width: 2000, height: 2000, fit: "inside", withoutEnlargement: true })
+                            .webp({ quality: 82 })
+                            .toBuffer();
+                        contentType = "image/webp";
+                        filename = filename.replace(/\.[^.]+$/, "") + ".webp";
+                    } catch (imgErr) {
+                        console.warn("sharp no pudo procesar la imagen, se sube original:", imgErr.message);
+                        buffer = archivo.buffer;
+                        contentType = archivo.mimetype;
+                        filename = archivo.originalname;
+                    }
+                }
+
+                key = storage.buildKey({ storageKey, category, storeId, filename, buffer });
+                const up = await storage.uploadBuffer(buffer, key, contentType);
+                secureUrl = up.url;
+                provider = "r2";
+            } else {
+                // Fallback: Cloudinary (comportamiento original, sin optimizar).
+                const resultado = await uploadToCloudinary(archivo.buffer, archivo.originalname);
+                secureUrl = resultado.secure_url;
+            }
+
+            if (info.company_id != undefined) {
+                const insertUpload = await useDataBase(`
+                    INSERT INTO "Ecosystem".attached(
+                        company_id, uploaded_by, name, size, type, url,
+                        storage_provider, storage_key, category, store_id)
+                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id;
+                `, [
+                    info.company_id,
+                    info.user_id ?? null,
+                    filename,
+                    buffer.length,
+                    contentType,
+                    secureUrl,
+                    provider,
+                    key,
+                    category,
+                    storeId,
+                ], 3);
+
+                if (insertUpload?.id != undefined) {
+                    urls.push({ id: insertUpload.id, url: secureUrl });
+                } else {
+                    urls.push(secureUrl);
+                }
+            } else {
+                urls.push(secureUrl);
+            }
+        }
 
         res.json({ urls });
 

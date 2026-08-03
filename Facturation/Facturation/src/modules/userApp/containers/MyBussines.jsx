@@ -22,11 +22,11 @@ export function MyBussines(){
 
     const VISIBLE = 4;
     const info = [
-        { name: "Unidades de Negocio", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1764436577/ChatGPT_Image_29_nov_2025_12_15_47_kxqs81.png',form:<FormNewStore/>,path:'Units'},
-        { name: "Centros de costo", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.",image:'https://res.cloudinary.com/djjxugmni/image/upload/v1763930815/3d-business-wallet-finance-illustration-free-png_vr9tvx.png',form:<FormNewCostCenter/>,path:'costCenters'},
-        { name: "Negocios", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1765903321/ChatGPT_Image_16_dic_2025_11_41_43_zhakuf.png',form:<FormNewUser/>,path:'Bussines'},
-        { name: "Clientes y Proveedores", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1763930685/ChatGPT_Image_23_nov_2025_15_41_45_xvrjtd.png', form:<FormNewThirdParties/>,path:'thirdParties'},
-        { name: "Listas de precios", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://res.cloudinary.com/djjxugmni/image/upload/v1764363272/ChatGPT_Image_28_nov_2025_15_54_16_tl5bv3.png',form:<FormNewUser/>,path:'PricesLists'}
+        { name: "Unidades de Negocio", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://cdnmain.sga360.co/static/ChatGPT_Image_29_nov_2025_12_15_47_kxqs81.webp',form:<FormNewStore/>,path:'Units'},
+        { name: "Centros de costo", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.",image:'https://cdnmain.sga360.co/static/3d-business-wallet-finance-illustration-free-png_vr9tvx.webp',form:<FormNewCostCenter/>,path:'costCenters'},
+        { name: "Negocios", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://cdnmain.sga360.co/static/ChatGPT_Image_16_dic_2025_11_41_43_zhakuf.webp',form:<FormNewUser/>,path:'Bussines'},
+        { name: "Clientes y Proveedores", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://cdnmain.sga360.co/static/ChatGPT_Image_23_nov_2025_15_41_45_xvrjtd.webp', form:<FormNewThirdParties/>,path:'thirdParties'},
+        { name: "Listas de precios", text: "Crea y administra todas las unidades de negocio, franquicias y tiendas que tengas disponibles.", image:'https://cdnmain.sga360.co/static/ChatGPT_Image_28_nov_2025_15_54_16_tl5bv3.webp',form:<FormNewUser/>,path:'PricesLists'}
     ];
 
 

@@ -129,7 +129,7 @@ export function ListProductsServices({
                 />
                 ) : (
                 <>
-                    <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1767055082/CodeScan_ifoxi8.png" />
+                    <img src="https://cdnmain.sga360.co/static/CodeScan_ifoxi8.webp" />
                     <input
                         className="inputSKU"
                         ref={inputSKU}

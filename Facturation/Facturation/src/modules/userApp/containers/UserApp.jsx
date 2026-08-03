@@ -216,7 +216,7 @@ export function UserApp(){
                             }}>
                             <i className="fa-solid fa-xmark"/>
                         </div>
-                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1772826198/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.png'} visbleInfo={visibleMenu} title={'Ventas'} desc={'SGA - Desarrollos'} />
+                        <ServiceSgaCard imgRef={'https://cdnmain.sga360.co/static/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.webp'} visbleInfo={visibleMenu} title={'Ventas'} desc={'SGA - Desarrollos'} />
                         <MenuApp setVisibleMenu={setVisibleMenu} visibleMenu={visibleMenu} title={'General'} options={optionsMenu}/>
                         <MenuApp setVisibleMenu={setVisibleMenu} visibleMenu={visibleMenu} title={'Ajustes'} options={secondOptionsMenu}/>
                     </div>
@@ -229,7 +229,7 @@ export function UserApp(){
                             <Route path='/edocuments/:e_doc_id' element={<NoAccess 
                                 title={'Seccion en construcción'}
                                 description={`Estamos trabajando para ofrecer esta seccion lo mas pronto posible :)`}
-                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1776911074/Gemini_Generated_Image_hqrv0mhqrv0mhqrv-2_lne97l.png'}
+                                img={'https://cdnmain.sga360.co/static/Gemini_Generated_Image_hqrv0mhqrv0mhqrv-2_lne97l.webp'}
                                 noExit={true}
                                 />} />
                             <Route path='quickActions' element={<QuickActions/>} />
@@ -263,13 +263,13 @@ export function UserApp(){
                             <Route path='/tutorials' element={<NoAccess 
                                 title={'Seccion no disponible'}
                                 description={`Estamos trabajando para ofrecer esta seccion lo mas pronto posible :)`}
-                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1761515342/Grupo5logos_4_rhapbp.png'}
+                                img={'https://cdnmain.sga360.co/static/Grupo5logos_4_rhapbp.webp'}
                                 noExit={true}
                                 />} />
                             <Route path='/help' element={<NoAccess 
                                 title={'Seccion no disponible'}
                                 description={`Estamos trabajando para ofrecer esta seccion lo mas pronto posible :)`}
-                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1760911291/AyudaLogo1_v362of.png'}
+                                img={'https://cdnmain.sga360.co/static/AyudaLogo1_v362of.webp'}
                                 noExit={true}
                                 />} />
                             <Route path='/logOut' element={<LogOut/>} />

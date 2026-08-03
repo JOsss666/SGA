@@ -10,7 +10,9 @@ export function FileInput({
     placeholder,
     children,
     multiple,
-    includeFiles = false
+    includeFiles = false,
+    category = 'others',   // carpeta destino en R2: assets | files | thirdPartiesDocs | others
+    storeId,               // opcional: sube bajo la tienda en vez del nivel compañía
 }){
     const {appInfo,userInfo} = useAppInfo();
     const inRef = useRef();
@@ -23,7 +25,9 @@ export function FileInput({
         setLoading(true);
         let res = await uploadFiles(files,{
             company_id:appInfo.company_id,
-            user_id:userInfo.user_id
+            user_id:userInfo.user_id,
+            category,
+            ...(storeId != undefined ? { store_id: storeId } : {})
         });
         console.log(res)
         if(action != undefined){

@@ -217,7 +217,7 @@ export function ProductLinkFiscalConditionsCard({
                 disabled={disabled}
                 onClick={() => setOpen(!open)}
             >
-                <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1766076215/Cuadricula3Documentos_2_ujr8ce.png" alt="" />
+                <img src="https://cdnmain.sga360.co/static/Cuadricula3Documentos_2_ujr8ce.webp" alt="" />
                 <span>
                     Productos asociados al tercero
                 </span>

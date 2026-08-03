@@ -994,7 +994,7 @@ export async function printCashRecipt(info,appInfo,barCode){
                             gap:4mm;
                         ">
                             <img 
-                                src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                                src="https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.webp"
                                 style="
                                     width:100%;
                                     height:25mm;
@@ -1224,7 +1224,7 @@ export async function printClientOrder(info,appInfo,barCode){
                             gap:4mm;
                         ">
                             <img 
-                                src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                                src="https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.webp"
                                 style="
                                     width:100%;
                                     height:25mm;
@@ -1757,7 +1757,7 @@ export async function printSellInvoice(info,appInfo,barCode){
                             gap:4mm;
                         ">
                             <img 
-                                src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                                src="https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.webp"
                                 style="
                                     width:100%;
                                     height:25mm;

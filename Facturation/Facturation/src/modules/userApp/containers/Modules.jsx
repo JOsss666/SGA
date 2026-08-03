@@ -14,7 +14,7 @@ export function Modules(){
             id: 'administration',
             name: 'Administración',
             description: 'Analiza, gestiona y parametriza los módulos de tu empresa',
-            image: 'https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png',
+            image: 'https://cdnmain.sga360.co/static/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.webp',
             buttons: [
                 { text: 'Ajustes', action: 'settings', icon: 'fa-solid fa-gear' },
                 { text: 'Administrar', action: 'view', icon: 'fa-solid fa-arrow-right' }
@@ -24,7 +24,7 @@ export function Modules(){
             id: 'process',
             name: 'Procesos',
             description: 'Analiza, gestiona y parametriza los módulos de tu empresa',
-            image: 'https://res.cloudinary.com/djjxugmni/image/upload/v1759181339/ChatGPT_Image_7_sept_2025_13_29_09_v2xl9a.png',
+            image: 'https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_13_29_09_v2xl9a.webp',
             buttons: [
                 { text: 'Ajustes', action: 'settings', icon: 'fa-solid fa-gear' },
                 { text: 'Administrar', action: 'view', icon: 'fa-solid fa-arrow-right' }
@@ -34,7 +34,7 @@ export function Modules(){
             id: 'inventory',
             name: 'Inventarios',
             description: 'Analiza, gestiona y parametriza los módulos de tu empresa',
-            image: 'https://res.cloudinary.com/djjxugmni/image/upload/v1759181476/ChatGPT_Image_25_ago_2025_15_43_35_s9jwrf.png',
+            image: 'https://cdnmain.sga360.co/static/ChatGPT_Image_25_ago_2025_15_43_35_s9jwrf.webp',
             buttons: [
                 { text: 'Ajustes', action: 'settings', icon: 'fa-solid fa-gear' },
                 { text: 'Administrar', action: 'view', icon: 'fa-solid fa-arrow-right' }
@@ -54,7 +54,7 @@ export function Modules(){
             id: 'billing',
             name: 'Facturación',
             description: 'Analiza, gestiona y parametriza los módulos de tu empresa',
-            image: 'https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png', 
+            image: 'https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.webp', 
             buttons: [
                 { text: 'Ajustes', action: 'settings', icon: 'fa-solid fa-gear' },
                 { text: 'Administrar', action: 'view', icon: 'fa-solid fa-arrow-right' }
@@ -74,7 +74,7 @@ export function Modules(){
             id: 'certicloud',
             name: 'CertiCloud',
             description: 'Analiza, gestiona y parametriza los módulos de tu empresa',
-            image: 'https://res.cloudinary.com/djjxugmni/image/upload/v1759160717/logo_certicloud-_perfil_azul_2_ljka0q.png',
+            image: 'https://cdnmain.sga360.co/static/logo_certicloud-_perfil_azul_2_ljka0q.webp',
             buttons: [
                 { text: 'Ajustes', action: 'settings', icon: 'fa-solid fa-gear' },
                 { text: 'Comprar', action: 'buy', icon: 'fa-solid fa-box' }

@@ -530,7 +530,7 @@ export function FormNewMovement({info}){
                         {stage == 2 && (
                             <>
                                 <FormInput textArea={true} title={'Descripción'} disabled={disabled} action={setDescription} placeholder={'Nota del movimiento'}/>
-                                <FileInput action={setAttached_document} disabled={disabled} placeholder={'Adjuntar comprobante'}/>
+                                <FileInput category="files" action={setAttached_document} disabled={disabled} placeholder={'Adjuntar comprobante'}/>
                             </>
                         )}
                         <div className="buttonsC">

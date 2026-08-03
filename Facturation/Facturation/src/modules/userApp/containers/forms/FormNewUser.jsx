@@ -112,7 +112,7 @@ export function FormNewUser({info,reloadFun}){
                         <div className="actualPhoto">
                             <img src={userPhoto} alt="" />
                         </div>
-                        <FileInput placeholder={'Seleccionar nueva foto'}>
+                        <FileInput category="assets" placeholder={'Seleccionar nueva foto'}>
                             <i className="fa-solid fa-camera"/>
                         </FileInput>
                     </div>
