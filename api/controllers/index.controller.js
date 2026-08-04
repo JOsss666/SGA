@@ -356,7 +356,11 @@ controller.getCompanyInfo = (req,res)=>{
                     "Ecosystem".companies.*,
                     "Ecosystem".account_plans.id AS "accountPlanId",
                     "Ecosystem".account_plans.type AS "accountPlanType",
-                    "Ecosystem".company_settings.config
+                    "Ecosystem".company_settings.config,
+                    COALESCE(
+                        "Ecosystem".company_settings."taxConfig",
+                        '{}'::jsonb
+                    ) AS "taxConfig"
                 FROM
                     "Ecosystem".companies 
                 LEFT JOIN
@@ -2135,6 +2139,7 @@ controller.getThirdParties = (req,res)=>{
                 tti.economic_activity,
                 tti."attachedRut",
                 tti.municipality_name,
+                COALESCE(legacy_tti."taxConfig", '{}'::jsonb) AS "taxConfig",
                 COALESCE(b.total_debt, 0) AS "thirdParty_totalDebt",
                 COALESCE(b.total_paid, 0) AS "thirdParty_totalPaid",
                 COALESCE(b.balance, 0) AS "thirdParty_balance",
@@ -2151,6 +2156,9 @@ controller.getThirdParties = (req,res)=>{
                 LEFT JOIN "Fiscal".v_third_party_current_tax_info tti
                     ON "Ecosystem".thirdparties.id = tti."thirdParty_id"
                     AND "Ecosystem".thirdparties.company_id = tti.company_id
+                LEFT JOIN "Ecosystem"."thirdPartyTaxInfo" legacy_tti
+                    ON "Ecosystem".thirdparties.id = legacy_tti."thirdParty_id"
+                    AND "Ecosystem".thirdparties.company_id = legacy_tti.company_id
             `;
         }
 
@@ -2186,12 +2194,18 @@ controller.getThirdPartyDetails = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             SELECT
-                "Ecosystem".thirdParties.*
+                "Ecosystem".thirdParties.*,
+                COALESCE(tti."taxConfig", '{}'::jsonb) AS "taxConfig"
             FROM
                 "Ecosystem".thirdParties
+            LEFT JOIN
+                "Ecosystem"."thirdPartyTaxInfo" tti
+            ON
+                "Ecosystem".thirdParties.id = tti."thirdParty_id"
+                AND "Ecosystem".thirdParties.company_id = tti.company_id
             WHERE
-                company_id = $1
-                AND id = $2 ;
+                "Ecosystem".thirdParties.company_id = $1
+                AND "Ecosystem".thirdParties.id = $2 ;
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -2291,14 +2305,19 @@ controller.deleteThirdParty = (req,res)=>{
         try {
             let info = JSON.parse(data);
             // Etapa 5: audita snapshot antes de borrar; el CASCADE limpia el
-            // modelo Fiscal. Corrige el bug legacy de placeholders (multi-delete).
+            // modelo Fiscal. Los movimientos contables se validan en el servicio.
             let consulta = await thirdPartyService.remove(info);
-            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.writeHead(200,{'Content-Type':'application/json'})
             res.end(JSON.stringify(consulta));
         } catch (err) {
             console.error('Error en deleteThirdParty:', err);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify([false, err.message || err]));
+            res.writeHead(err.statusCode ?? 500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                status: 'Error',
+                code: err.code ?? 'THIRD_PARTY_DELETE_ERROR',
+                message: err.message || 'No se pudo eliminar el tercero.',
+                dependencies: err.dependencies ?? {}
+            }));
         }
     })
     req.on('error',(err)=>{
