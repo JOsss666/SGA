@@ -20,6 +20,70 @@ import { CollapsableItem } from '../../components/CollapsableItem';
 import {CapsuleButtonAi} from '../../components/ChatAiComponents/CapsuleButtonAi'
 import { AutoCompleteThirdParties } from './AiAutoComplete/AutoCompleteThirdParties';
 
+const createInitialTaxConfig = () => ({
+    rent:{
+        regime:'',
+        rentTaxResponsable:false,
+        rentTaxDeclarant:false,
+        rentWithholdingAgent:false,
+        rentSelfWithholdingAgent:false,
+        rentSpecialSelfWithholdingAgent:false,
+        aceptMinimumBase:true,
+        forceExeption:false
+    },
+    iva:{
+        stateEntity:false,
+        DIANMajorTaxpayer:false,
+        ivaTaxResponsable:false,
+        ivaWithholdingAgent:false,
+        ivaWithholdingAgentByCI:false,
+        aceptMinimumBase:true,
+        forceExeption:false
+    },
+    ring:{
+        ringTaxResponsable:false,
+        ringWithholdingAgent:false,
+        ringSelfWithholdingAgent:false,
+        aceptMinimumBase:true,
+        forceExeption:false
+    },
+    consumption:{
+        consumptionTaxResponsable:false,
+        consumptionWithholdingAgent:false,
+        consumptionSelfWithholdingAgent:false,
+        aceptMinimumBase:true,
+        forceExeption:false
+    },
+    territorialTaxes:[]
+});
+
+const normalizeTaxConfig = (taxConfig = {}) => {
+    const initialConfig = createInitialTaxConfig();
+
+    return {
+        rent:{
+            ...initialConfig.rent,
+            ...(taxConfig.rent ?? {}),
+            regime:taxConfig.rent?.regime ?? taxConfig.regime ?? ''
+        },
+        iva:{
+            ...initialConfig.iva,
+            ...(taxConfig.iva ?? {})
+        },
+        ring:{
+            ...initialConfig.ring,
+            ...(taxConfig.ring ?? {})
+        },
+        consumption:{
+            ...initialConfig.consumption,
+            ...(taxConfig.consumption ?? {})
+        },
+        territorialTaxes:Array.isArray(taxConfig.territorialTaxes)
+            ? taxConfig.territorialTaxes
+            : []
+    };
+};
+
 const createInitialFormData = (companyId = null) => ({
     company_id:companyId,
     userPhoto:'https://cdnmain.sga360.co/static/noUserImg_p817rb.webp',
@@ -52,35 +116,7 @@ const createInitialFormData = (companyId = null) => ({
     retention_type:'NO_AGENTE',
     economic_activity:'',
     attachedRut:'',
-    withholdingRetentions:{
-        selfWithholdingAgent:false,
-        regime:'Regimen Ordinario Renta',
-        rent:{
-            rentTaxResponsable:false,
-            rentTaxDeclarant:false,
-            rentWithholdingAgent:false,
-            rentSelfWithholdingAgent:false,
-            rentSpecialSelfWithholdingAgent:false
-        },
-        iva:{
-            stateEntity:false,
-            DIANMajorTaxpayer:false,
-            ivaTaxResponsable:false,
-            ivaWithholdingAgent:false,
-            ivaWithholdingAgentByCI:false
-        },
-        ring:{
-            ringTaxResponsable:false,
-            ringWithholdingAgent:false,
-            ringSelfWithholdingAgent:false
-        },
-        consumption:{
-            consumptionTaxResponsable:false,
-            consumptionWithholdingAgent:false,
-            consumptionSelfWithholdingAgent:false
-        },
-        territorialTaxes:[]
-    },
+    withholdingRetentions:createInitialTaxConfig(),
     thirdPartyProductTaxRelations:[]
 });
 
@@ -389,7 +425,8 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
             economic_activity:data.economic_activity ?? '',
             attachedRut:data.attachedRut ?? '',
             withholdingRetentions:data.withholdingRetentions
-                ?? current.withholdingRetentions,
+                ? normalizeTaxConfig(data.withholdingRetentions)
+                : current.withholdingRetentions,
             type:data.type || current.type,
             credit:data.credit ?? false,
             credit_term:data.credit_term ?? 0,
@@ -614,9 +651,14 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
         }
         setDisabled(true)
         setLoading(true)
+        const {
+            withholdingRetentions,
+            ...thirdPartyData
+        } = formData;
         const payload = {
-            ...formData,
-            company_id:appInfo.company_id ?? formData.company_id
+            ...thirdPartyData,
+            company_id:appInfo.company_id ?? formData.company_id,
+            taxConfig:normalizeTaxConfig(withholdingRetentions)
         };
         let res = await postInfo('/createThirdParty',payload);
         const thirdPartyId = res?.[1] ?? res?.id ?? res?.thirdParty_id;
@@ -990,10 +1032,10 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         />
                                     </div>
                                     <SelectOptions
-                                        key={`withholding-regime-${withholdingRetentions.regime}`}
+                                        key={`withholding-regime-${withholdingRetentions.rent.regime}`}
                                         title={'Regimen'}
-                                        defaultValue={{value:withholdingRetentions.regime}}
-                                        action={value=>updateNestedField(['withholdingRetentions','regime'],value)}
+                                        defaultValue={{value:withholdingRetentions.rent.regime}}
+                                        action={value=>updateNestedField(['withholdingRetentions','rent','regime'],value)}
                                         options={[
                                             'Regimen Ordinario Renta',
                                             'Regimen Simple',
@@ -1013,19 +1055,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <SwitchOption
                                             key={`rent-self-withholding-${withholdingRetentions.rent.rentSelfWithholdingAgent}`}
                                             defaultValue={withholdingRetentions.rent.rentSelfWithholdingAgent}
-                                            action={value=>{
-                                                setFormData(current => ({
-                                                    ...current,
-                                                    withholdingRetentions:{
-                                                        ...current.withholdingRetentions,
-                                                        selfWithholdingAgent:value,
-                                                        rent:{
-                                                            ...current.withholdingRetentions.rent,
-                                                            rentSelfWithholdingAgent:value
-                                                        }
-                                                    }
-                                                }));
-                                            }}
+                                            action={value=>updateNestedField(['withholdingRetentions','rent','rentSelfWithholdingAgent'],value)}
                                         />
                                     </div>
                                     <div className="labelSwitch">
