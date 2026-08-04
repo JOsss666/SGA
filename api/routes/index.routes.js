@@ -121,6 +121,8 @@ router.post('/createTaxCategory',controller.createTaxCategory);
 
 router.post('/getTaxCategories',controller.getTaxCategory);
 
+router.post('/getFiscalTaxTypes',controller.getFiscalTaxTypes);
+
 router.post('/createConcept',controller.createConcept);
 
 router.post('/deleteConcept',controller.deleteConcept);

@@ -985,9 +985,10 @@ controller.createTax = (req,res)=>{
                     parent_id,
                     path,
                     "isRetention",
-                    "type"
+                    "type",
+                    fiscal_tax_id
                 )
-            VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9);
+            VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -998,7 +999,8 @@ controller.createTax = (req,res)=>{
             info.parent_id != undefined? info.parent_id:0,
             info.path != undefined? info.path:'/',
             info.isRetention,
-            taxType
+            taxType,
+            info.fiscal_tax_id != undefined? info.fiscal_tax_id:null
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -1046,11 +1048,16 @@ controller.getTaxes = (req, res) => {
                     "Ecosystem"."taxes"."isRetention",
                     "Ecosystem"."taxes"."type",
                     "Ecosystem"."taxes"."type" AS tax_type,
+                    "Ecosystem"."taxes".fiscal_tax_id,
+                    "Fiscal"."taxes".code AS fiscal_tax_code,
+                    "Fiscal"."taxes".name AS fiscal_tax_name,
                     "Ecosystem"."contable_accounts".type AS account_type,
                     "Ecosystem"."contable_accounts".name
                 FROM "Ecosystem"."taxes"
                 LEFT JOIN "Ecosystem"."contable_accounts"
                     ON "Ecosystem"."contable_accounts".id = "Ecosystem"."taxes".account_id
+                LEFT JOIN "Fiscal"."taxes"
+                    ON "Fiscal"."taxes".id = "Ecosystem"."taxes".fiscal_tax_id
                 WHERE
             `
 
@@ -1297,6 +1304,39 @@ controller.getTaxCategory = (req,res)=>{
 }
 
 
+
+// Devuelve el catálogo estándar de familias/tipos fiscales (Fiscal.taxes)
+// filtrado por país. El país llega desde el front (por ahora fijo 'Colombia').
+controller.getFiscalTaxTypes = (req,res)=>{
+    let data = ''
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        const country = info.country ?? 'Colombia';
+        let sentence = `
+            SELECT
+                t.id,
+                t.code,
+                t.name,
+                t.scope
+            FROM "Fiscal".taxes t
+            JOIN "Fiscal".tax_authorities a ON a.id = t.tax_authority_id
+            JOIN "Fiscal".countries c ON c.id = a.country_id
+            WHERE c.name = $1
+              AND t.active = TRUE
+            ORDER BY t.name ASC;
+        `
+        let consulta = await useDataBase(sentence,[country],1);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
 
 controller.createConcept = (req, res) => {
     let data = '';
