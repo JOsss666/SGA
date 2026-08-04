@@ -9,7 +9,7 @@ import { NewElementSelect } from "../../components/NewElementSelect";
 import { UserCard } from "../../components/UserCard";
 import { FormNewThirdParties } from "./FormNewThirdParties";
 import { LoadingSpace } from "../LoadingSpace";
-import { moneyFormat, postInfo } from "../../../../utils/functions";
+import { colombiaPurchaseRetentionHandler, moneyFormat, postInfo } from "../../../../utils/functions";
 import { executeDocumentAction } from "../../../../utils/DocumentsControl";
 import './FormNewCashRecipt.css'
 import './FormNewPurchase.css'
@@ -73,6 +73,13 @@ export function FormNewPurchase({InfoParams,reloadFun}){
     const [availableRetentions,setAvailableRetentions] = useState([]);
     const [totalRetentions,setTotalRetentions] = useState(0);
     const [aplyRetentions,setAplyretentions] = useState(true);
+
+    // Retenciones agrupadas calculadas por ítem (base gravable y total por retención,
+    // sumando bases/totales cuando la misma retención aparece en varios ítems).
+    const [aviableRetentions,setAviableRetentions] = useState([]);
+
+    // Retenciones que el árbol de decisión (Colombia compra) determinó aplicar.
+    const [withholdingsToAply,setWithholdingsToAply] = useState([]);
 
     // Object FormInfo
     let FormInfo = {
@@ -525,6 +532,47 @@ export function FormNewPurchase({InfoParams,reloadFun}){
             });
         };
 
+        // Construye la lista de retenciones agrupadas calculando cada una sobre la
+        // base gravable (neta) del ítem que la origina. Si una retención se repite
+        // en varios ítems, acumula sus bases y sus totales en una sola entrada.
+        const handleAviableRetentions = (elements) => {
+            const grouped = elements.reduce((acc, item) => {
+                // Base gravable del ítem: total del ítem descontando su propio impuesto.
+                const itemTotal = parseFloat(item.unit_value || 0) * parseFloat(item.units || 0);
+                const itemBase = itemTotal / (1 + (parseFloat(item.tax_rate || 0) / 100));
+
+                (item.retentions ?? []).forEach(ret => {
+                    if (!ret.tax_id) return;
+                    const rate = parseFloat(ret.rate) || 0;
+                    // Total de la retención para este ítem: base gravable * tasa.
+                    const retTotal = Number((itemBase * (rate / 100)).toFixed(2));
+
+                    if (!acc[ret.tax_id]) {
+                        acc[ret.tax_id] = {
+                            id: ret.tax_id,
+                            code: ret.tax_code,
+                            name: ret.tax_name,
+                            rate,
+                            account_id: ret.tax_account,
+                            // Umbral (UVT) que trae el backend en taxes.base; se preserva aparte.
+                            minimumBase: parseFloat(ret.base) || 0,
+                            base: Number(itemBase.toFixed(2)),
+                            total: retTotal,
+                        };
+                    } else {
+                        // Misma retención en otro ítem: acumular base gravable y total.
+                        acc[ret.tax_id].base = Number((acc[ret.tax_id].base + itemBase).toFixed(2));
+                        acc[ret.tax_id].total = Number((acc[ret.tax_id].total + retTotal).toFixed(2));
+                    }
+                });
+                return acc;
+            }, {});
+
+            const list = Object.values(grouped);
+            setAviableRetentions(list);
+            console.log('Retenciones agrupadas disponibles (aviableRetentions): ', list);
+        };
+
         // Base de retención: subtotal neto del documento (antes de IVA).
         const getSubtotalNet = () => items.reduce((sum, item) => {
             const itemTotal = parseFloat(item.unit_value || 0) * parseFloat(item.units || 0);
@@ -655,18 +703,20 @@ export function FormNewPurchase({InfoParams,reloadFun}){
 
             // Retenciones practicadas: crédito a la cuenta de retención por pagar.
             // Disminuyen el neto a pagar al proveedor manteniendo el documento cuadrado.
-            const subtotalNet = getSubtotalNet();
-            availableRetentions.forEach(retention => {
-                const amount = getRetentionAmount(retention, subtotalNet);
-                if(amount <= 0) return;
-                transactionDetails.push({
-                    account_id:retention.account_id,
-                    subtotal:amount,
-                    total:amount,
-                    type:'withholding',
-                    nature:'CR',
+            // Se toman las que determinó el árbol de decisión (withholdingsToAply).
+            if(aplyRetentions){
+                withholdingsToAply.forEach(retention => {
+                    const amount = Number(retention.total) || 0;
+                    if(amount <= 0) return;
+                    transactionDetails.push({
+                        account_id:retention.account_id,
+                        subtotal:amount,
+                        total:amount,
+                        type:'withholding',
+                        nature:'CR',
+                    });
                 });
-            });
+            }
 
             paymentMethod.forEach(element => {
                 transactionDetails.push({
@@ -775,6 +825,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
         });
         handleTaxes(items);
         handleRetentions(items);
+        handleAviableRetentions(items);
         setTotalToPay(itemsTotal);
     },[items])
 
@@ -786,15 +837,14 @@ export function FormNewPurchase({InfoParams,reloadFun}){
         setTotalTaxes(totalTax);
     },[taxes])
 
-    // Recalcula el total de retenciones ante cambios en ítems o en las retenciones marcadas.
+    // Total de retenciones = las que el árbol determinó aplicar (withholdingsToAply),
+    // sujeto al switch maestro. Alimenta el neto a pagar y la validación de pagos.
     useEffect(()=>{
-        const subtotalNet = getSubtotalNet();
-        let total = 0;
-        availableRetentions.forEach(retention => {
-            total += getRetentionAmount(retention, subtotalNet);
-        });
+        const total = aplyRetentions
+            ? withholdingsToAply.reduce((sum, r) => sum + (Number(r.total) || 0), 0)
+            : 0;
         setTotalRetentions(total);
-    },[items,availableRetentions])
+    },[withholdingsToAply,aplyRetentions])
 
     useEffect(()=>{
         calcTotalFromPayments();
@@ -809,6 +859,22 @@ export function FormNewPurchase({InfoParams,reloadFun}){
     useEffect(()=>{
         console.log('Taxes list: ',taxes);
     },[taxes])
+
+    // Ejecuta el árbol de decisión de retenciones de compra (Colombia) con las
+    // retenciones ya agrupadas y muestra el resultado por consola.
+    useEffect(()=>{
+        const result = colombiaPurchaseRetentionHandler(
+            thirdPartyInfo?.taxConfig,
+            appInfo?.taxConfig,
+            aviableRetentions,
+            {
+                minimumBase: 0, // valor fijo temporal (UVT global pendiente)
+                municipalityCode: thirdPartyInfo?.municipality_code ?? null,
+            }
+        );
+        setWithholdingsToAply(result);
+        console.log('Resultado árbol de retenciones (Colombia compra): ', result);
+    },[aviableRetentions,thirdPartyInfo])
 
     return(
         <div className="FormNewCashRecipt FormNewPurchase">
@@ -981,22 +1047,19 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                             <span>Subtotal: </span>
                             <h6>$ {moneyFormat(totalToPay - totalTaxes)}</h6>
                         </div>
-                        {(taxes.length > 0 || availableRetentions.length > 0) && (
+                        {(taxes.length > 0 || withholdingsToAply.length > 0) && (
                             <div className="bodyRetentions">
-                                {taxes.map((element,index)=>(
+                                {taxes.filter(element => !element.retention).map((element,index)=>(
                                     <RetentionCard info={element} key={index}/>
                                 ))}
-                                {availableRetentions.map((retention)=>(
+                                {withholdingsToAply.map((retention)=>(
                                     <RetentionCard
                                         key={retention.id}
-                                        aply={retention.applied}
-                                        setAplyRetention={()=>toggleRetention(retention.id)}
+                                        aply={true}
                                         info={{
                                             name: retention.name,
                                             rate: retention.rate,
-                                            // Mostramos el monto potencial (applied:true); el checkbox
-                                            // y el estilo atenuado indican si está aplicada o no.
-                                            total: getRetentionAmount({ ...retention, applied:true }, getSubtotalNet()),
+                                            total: retention.total,
                                             retention: true
                                         }}
                                     />
