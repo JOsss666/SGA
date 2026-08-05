@@ -7,6 +7,7 @@ import { FileInput } from '../../../components/FileInput'
 import { FormButton } from '../../../components/FormButton'
 import { WarningForm } from '../../../components/WarningForm'
 import { runAiTask } from '../../../../../utils/aiUtils'
+import { LoaderAiUtoComplete } from './LoaderAiUtoComplete'
 import './AutoCompleteThirdParties.css'
 
 
@@ -253,6 +254,8 @@ export function AutoCompleteThirdParties({updateFunction}){
     // Control
     const [disabled,setDisabled] = useState(false);
     const [loading,setLoading] = useState(false);
+    const [loadingMessage,setLoadingMessage] = useState('Preparando documentos');
+    const [completedSteps,setCompletedSteps] = useState([]);
     const [files,setFiles] = useState([]);
     const [error,setError] = useState('');
 
@@ -264,6 +267,8 @@ export function AutoCompleteThirdParties({updateFunction}){
 
         setDisabled(true);
         setLoading(true);
+        setLoadingMessage('Analizando RUT y RIT');
+        setCompletedSteps(['Documentos cargados']);
         setError('');
 
         try {
@@ -365,11 +370,14 @@ export function AutoCompleteThirdParties({updateFunction}){
                 temperature: 0
             });
             console.log('Respuesta IA:', response.data);
+            setCompletedSteps(current => [...current, 'Información fiscal extraída']);
+            setLoadingMessage('Parametrizando información del tercero');
 
             await updateFunction?.({
                 ...response.data,
                 attachedRut: files[0]?.url ?? files[0]
             });
+            setCompletedSteps(current => [...current, 'Información del tercero parametrizada']);
             popOutAlert();
         } catch (err) {
             setError(err.message || 'No se pudieron procesar los documentos.');
@@ -378,6 +386,10 @@ export function AutoCompleteThirdParties({updateFunction}){
             setDisabled(false);
         }
     };
+
+    if(loading){
+        return <LoaderAiUtoComplete loadingMessage={loadingMessage} completedSteps={completedSteps} />;
+    }
 
     return(
         <div className="AutoCompleteThirdParties">
@@ -410,9 +422,7 @@ export function AutoCompleteThirdParties({updateFunction}){
                     disabled={disabled || files.length === 0}
                     onClick={handleAutoComplete}
                 >
-                    <span>
-                        {loading ? 'Analizando...' : 'Enviar a la IA'}
-                    </span>
+                    <span>Enviar a la IA</span>
                 </CapsuleButtonAi>
             </div>
         </div>

@@ -8,7 +8,8 @@ import { useAlert, useAppInfo, useNotifications } from "../../../../../context/c
 import { CapsuleButtonAi } from "../../../components/ChatAiComponents/CapsuleButtonAi";
 import { FormButton } from "../../../components/FormButton";
 import { postInfo } from "../../../../../utils/functions";
-
+import { LoaderAiUtoComplete } from "./LoaderAiUtoComplete";
+import './AutoCompletePurchase.css'
 
 // Datos del EMISOR / VENDEDOR extraídos directamente del documento.
 const purchaseValidationSchema = {
@@ -69,6 +70,8 @@ export function AutoCompletePurchase({thirdParties,onComplete}){
     // Control
     const [disabled,setDisabled] = useState(false);
     const [loading,setloading] = useState(false);
+    const [loadingMessage,setLoadingMessage] = useState('Enviando solicitud');
+    const [completedSteps,setCompletedSteps] = useState([]);
     const [files,setFiles] = useState([]);
 
     // Getters of info
@@ -161,7 +164,7 @@ export function AutoCompletePurchase({thirdParties,onComplete}){
         // Se entrega el arreglo original completo para que el modelo tenga acceso a
         // toda la información disponible de cada tercero.
         const thirdPartiesList = thirdParties ?? [];
-
+        setLoadingMessage('Validando documento')
         const response = await runAiTask({
                 masterPrompt: `
                     Eres un agente especializado EXCLUSIVAMENTE en la VERIFICACIÓN
@@ -339,7 +342,7 @@ export function AutoCompletePurchase({thirdParties,onComplete}){
         if(systemItemsList.length === 0){
             throw new Error('No hay productos o servicios registrados para relacionar con la compra.');
         }
-
+        setLoadingMessage('Relacionando ítems de la factura')
         const response = await runAiTask({
             masterPrompt: `
                 Eres un especialista en normalización de líneas de compras. Lee el
@@ -424,17 +427,27 @@ export function AutoCompletePurchase({thirdParties,onComplete}){
         }
         setDisabled(true);
         setloading(true);
+        setCompletedSteps(['Documento cargado']);
+        setLoadingMessage('Validando documento');
         try {
             const validationResult = await verifyDocument();
             if(validationResult.status !== 'OK'){
                 throw new Error(validationResult.message);
             }
+            setCompletedSteps(current => [...current, 'Documento validado']);
 
+            setLoadingMessage('Consultando catálogo de productos');
             const availableItems = await getItems(validationResult.selectedThirdParty);
+            setCompletedSteps(current => [...current, 'Catálogo de productos consultado']);
+
+            setLoadingMessage('Relacionando ítems de la factura');
             const mappedItems = await SelectInformation(availableItems);
+            setCompletedSteps(current => [...current, 'Ítems de la factura relacionados']);
             const result = {...validationResult, items:mappedItems};
 
+            setLoadingMessage('Parametrizando compra');
             onComplete?.(result);
+            setCompletedSteps(current => [...current, 'Compra parametrizada']);
             addNotification({
                 type:'aproved',
                 title:'Compra analizada correctamente',
@@ -455,9 +468,13 @@ export function AutoCompletePurchase({thirdParties,onComplete}){
         }
     }
 
+    if(loading){
+        return <LoaderAiUtoComplete loadingMessage={loadingMessage} completedSteps={completedSteps} />;
+    }
+
     return(
         <div className="AutoCompletePurchase">
-            <div className="hea">
+            <div className="head">
                 <MainTitleAi text={'Registrar compra con IA'}/>
                 <DescriptionSpan text={'Completa y registra tus compras con ayuda de la IA'}/>
             </div>
@@ -477,11 +494,9 @@ export function AutoCompletePurchase({thirdParties,onComplete}){
                     disabled={disabled || files.length === 0}
                     onClick={handleAutoComplete}
                 >
-                    <span>
-                        {loading ? 'Analizando...' : 'Enviar a la IA'}
-                    </span>
+                    <span className="statusMessage">Enviar a la IA</span>
                 </CapsuleButtonAi>
             </div>
         </div>
-    )
+    );
 }
