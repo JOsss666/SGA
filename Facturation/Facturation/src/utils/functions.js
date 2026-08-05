@@ -2072,3 +2072,16 @@ export async function scanDevices() {
         // Parametrización del arbol de decision retenciones colombia ventas
         return({})
     }
+
+
+
+
+
+    // Test clone Company:
+    export async function cloneCompany(){
+        let res = await postInfo('/companies/clone-configuration', {
+            source_company_id: 5,
+            target_company_id: 6,
+        });
+        console.log('|||||||||||||||||||||||| REspuesta clonación: ',res);
+    }

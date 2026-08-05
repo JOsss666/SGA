@@ -1,4 +1,11 @@
 import { postInfo } from './functions';
+import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
+import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
+
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+
+const MAX_VISUAL_PDF_PAGES = 12;
+const pdfVisualCache = new WeakMap();
 
 const fileToDataUrl = file => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -18,44 +25,98 @@ const fileToDataUrl = file => new Promise((resolve, reject) => {
     reader.readAsDataURL(file);
 });
 
+const isPdfFile = file => file?.type === 'application/pdf'
+    || /\.pdf$/i.test(file?.name ?? '');
+
+const pdfToVisualPages = file => {
+    if (pdfVisualCache.has(file)) return pdfVisualCache.get(file);
+
+    const conversion = (async () => {
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        const pdfDocument = await pdfjs.getDocument({ data: bytes }).promise;
+        const pageCount = Math.min(pdfDocument.numPages, MAX_VISUAL_PDF_PAGES);
+        const pages = [];
+
+        for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
+            const page = await pdfDocument.getPage(pageNumber);
+            const viewport = page.getViewport({ scale: 1.7 });
+            const canvas = window.document.createElement('canvas');
+            canvas.width = Math.ceil(viewport.width);
+            canvas.height = Math.ceil(viewport.height);
+            const context = canvas.getContext('2d', { alpha: false });
+
+            await page.render({ canvasContext: context, viewport }).promise;
+            pages.push({
+                name: `${file.name.replace(/\.pdf$/i, '')}-pagina-${pageNumber}.jpg`,
+                type: 'image/jpeg',
+                data: canvas.toDataURL('image/jpeg', 0.9),
+                source: 'pdf-visual-page',
+                pageNumber
+            });
+            page.cleanup();
+        }
+
+        await pdfDocument.destroy();
+        return pages;
+    })();
+
+    pdfVisualCache.set(file, conversion);
+    return conversion;
+};
+
+const normalizeLocalFile = async file => {
+    const original = await fileToDataUrl(file);
+    if (!isPdfFile(file)) return [original];
+
+    try {
+        const visualPages = await pdfToVisualPages(file);
+        return [original, ...visualPages];
+    } catch (error) {
+        console.warn(`No fue posible generar la vista visual de "${file.name}":`, error);
+        return [original];
+    }
+};
+
 const normalizeFiles = async ({ file, files }) => {
     const receivedFiles = files ?? (file ? [file] : []);
     const fileList = Array.from(receivedFiles);
 
-    return Promise.all(fileList.map(currentFile => {
+    const normalizedGroups = await Promise.all(fileList.map(currentFile => {
         if (currentFile instanceof File) {
-            return fileToDataUrl(currentFile);
+            return normalizeLocalFile(currentFile);
         }
 
         if (currentFile?.file instanceof File) {
-            return fileToDataUrl(currentFile.file);
+            return normalizeLocalFile(currentFile.file);
         }
 
         if (currentFile?.name && currentFile?.data) {
-            return currentFile;
+            return [currentFile];
         }
 
         if (typeof currentFile === 'string') {
-            return {
+            return [{
                 name: currentFile.split('/').pop()?.split('?')[0] || 'document',
                 data: currentFile
-            };
+            }];
         }
 
         if (currentFile?.url) {
-            return {
+            return [{
                 name: currentFile.name
                     || currentFile.url.split('/').pop()?.split('?')[0]
                     || `document-${currentFile.id ?? Date.now()}`,
                 type: currentFile.type,
                 data: currentFile.url
-            };
+            }];
         }
 
         throw new Error(
             'Cada archivo debe ser File, una URL o un objeto { name, data } / { url }.'
         );
     }));
+
+    return normalizedGroups.flat();
 };
 
 const parseJsonResponse = content => {

@@ -17,6 +17,7 @@ import electronicFacturationController from '../controllers/electronicFacturatio
 import electronicProviderCredentialsController from '../controllers/electronicProviderCredentialsController.js';
 import treasuryController from '../controllers/TreasuryController.js';
 import geographyController from '../controllers/geographyController.js';
+import companyConfigurationController from '../controllers/companyConfigurationController.js';
 
 const router = express.Router();
 
@@ -52,6 +53,8 @@ const upload = multer({ dest: CHUNKS_DIR });
     router.post('/getDocuments',controller.getDocuments);
 
 router.post('/getCompanyInfo',controller.getCompanyInfo);
+
+router.post('/companies/clone-configuration', express.json(), companyConfigurationController.clone);
 
 router.post('/getUserInfo',controller.getUserInfo);
 

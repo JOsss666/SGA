@@ -196,6 +196,18 @@ export function AutoCompletePurchase({thirdParties,onComplete}){
                     completes por intuición. Si un dato necesario no aparece,
                     considéralo ausente y falla la validación que lo requiera.
 
+                    DOCUMENTOS ESCANEADOS O BASADOS EN IMÁGENES:
+                    - El PDF original puede no tener texto extraíble. La solicitud
+                      puede incluir imágenes llamadas "*-pagina-N.jpg", generadas
+                      desde cada página del mismo PDF.
+                    - Cuando existan esas imágenes, debes leerlas visualmente y
+                      tratarlas como parte integral y fuente principal del documento;
+                      no concluyas que faltan datos solo porque el parser del PDF no
+                      haya extraído texto.
+                    - Encabezados como "FACTURA ELECTRÓNICA DE VENTA", "Vendido a",
+                      "Razón Comercial", "NIT", "Total a pagar" y la tabla de ítems
+                      son evidencia válida aunque solo aparezcan en la imagen.
+
                     DATOS MÍNIMOS A EXTRAER (para poder validar):
                     - Tipo de documento (ej. "Factura electrónica de venta",
                       "Documento equivalente").
