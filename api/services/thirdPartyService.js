@@ -131,12 +131,18 @@ const attachRutIfPresent = async (relationId, attachedRut, performedBy) => {
     const inserted = await useDataBase(`
         INSERT INTO "Fiscal".third_party_documents
             (relation_id, document_type_id, file_url, status, uploaded_by)
-        SELECT $1, dt.id, $2, 'valid', $3
+        SELECT
+            $1::bigint,
+            dt.id,
+            $2::varchar(2000),
+            'valid'::varchar(20),
+            $3::varchar(200)
         FROM "Fiscal".document_types dt
         WHERE dt.code = 'RUT'
           AND NOT EXISTS (
               SELECT 1 FROM "Fiscal".third_party_documents e
-              WHERE e.relation_id = $1 AND e.file_url = $2
+              WHERE e.relation_id = $1::bigint
+                AND e.file_url = $2::varchar(2000)
           )
         RETURNING id;
     `, [relationId, url, performedBy ?? 'api'], 3);

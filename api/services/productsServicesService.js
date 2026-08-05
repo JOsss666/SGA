@@ -66,6 +66,7 @@ const normalizeThirdPartyProductTaxRelation = (info) => {
         valid_from: info.valid_from ?? null,
         valid_until: info.valid_until ?? null,
         notes: info.notes ?? null,
+        third_party_reference: info.third_party_reference ?? info.thirdPartyReference ?? null,
         created_by: info.created_by ?? performedByFrom(info)
     };
 };
@@ -548,13 +549,14 @@ productsServicesService.registerThirdPartyProductTaxRelation = async (info) => {
                     valid_from,
                     valid_until,
                     notes,
+                    third_party_reference,
                     created_by
                 )
                 VALUES (
                     $1, $2, $3, $4,
                     $5::"Fiscal".third_party_product_tax_operation,
                     $6::"Fiscal".third_party_product_tax_role,
-                    $7, $8, $9, $10, $11, $12
+                    $7, $8, $9, $10, $11, $12, $13
                 )
                 ON CONFLICT ON CONSTRAINT uq_third_party_product_tax_relation
                 DO UPDATE SET
@@ -563,6 +565,7 @@ productsServicesService.registerThirdPartyProductTaxRelation = async (info) => {
                     valid_from = EXCLUDED.valid_from,
                     valid_until = EXCLUDED.valid_until,
                     notes = EXCLUDED.notes,
+                    third_party_reference = EXCLUDED.third_party_reference,
                     updated_at = now()
                 RETURNING *;
             `, [
@@ -577,6 +580,7 @@ productsServicesService.registerThirdPartyProductTaxRelation = async (info) => {
                 row.valid_from,
                 row.valid_until,
                 row.notes,
+                row.third_party_reference,
                 row.created_by
             ]);
 
@@ -621,7 +625,8 @@ productsServicesService.updateThirdPartyProductTaxRelation = async (info) => {
         priority: info.priority !== undefined ? parseInt(info.priority) : null,
         valid_from: info.valid_from ?? null,
         valid_until: info.valid_until ?? null,
-        notes: info.notes ?? null
+        notes: info.notes ?? null,
+        third_party_reference: info.third_party_reference ?? info.thirdPartyReference ?? null
     };
 
     if (normalized.tax_id !== null && !Number.isInteger(normalized.tax_id)) {
@@ -640,9 +645,10 @@ productsServicesService.updateThirdPartyProductTaxRelation = async (info) => {
                 valid_from = CASE WHEN $6::boolean THEN $7::date ELSE valid_from END,
                 valid_until = CASE WHEN $8::boolean THEN $9::date ELSE valid_until END,
                 notes = CASE WHEN $10::boolean THEN $11::text ELSE notes END,
+                third_party_reference = CASE WHEN $12::boolean THEN $13::text ELSE third_party_reference END,
                 updated_at = now()
-            WHERE id = $12
-              AND ($13::bigint IS NULL OR company_id = $13)
+            WHERE id = $14
+              AND ($15::bigint IS NULL OR company_id = $15)
             RETURNING *;
         `, [
             normalized.tax_id,
@@ -656,6 +662,8 @@ productsServicesService.updateThirdPartyProductTaxRelation = async (info) => {
             normalized.valid_until,
             info.notes !== undefined,
             normalized.notes,
+            info.third_party_reference !== undefined || info.thirdPartyReference !== undefined,
+            normalized.third_party_reference,
             relationId,
             info.company_id ?? null
         ]);

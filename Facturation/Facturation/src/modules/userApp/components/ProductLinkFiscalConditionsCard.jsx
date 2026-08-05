@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { postInfo } from '../../../utils/functions';
 import { SearchinList } from './SearchInList';
 import './ProductLinkFiscalConditionsCard.css';
+import { FormInput } from './FormInput';
 
 const RELATION_CONFIG = {
     purchase_tax: { operation_type: 'purchase', tax_role: 'tax' },
@@ -50,6 +51,15 @@ export function ProductLinkFiscalConditionsCard({
     const [relationsByProduct, setRelationsByProduct] = useState({});
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [selectedRelations, setSelectedRelations] = useState(value);
+    const [referencesByProduct, setReferencesByProduct] = useState({});
+
+    const referenceLabel = info?.type === 'client'
+        ? 'Referencia cliente'
+        : info?.type === 'supplier'
+            ? 'Referencia proveedor'
+            : info?.type === 'both'
+                ? 'Referencia cliente/proveedor'
+                : 'Referencia del tercero';
 
     const selectedRelationsKeys = useMemo(() => {
         return new Set(selectedRelations.map((relation) => (
@@ -114,10 +124,12 @@ export function ProductLinkFiscalConditionsCard({
             tax_id: relation.tax_id,
             operation_type: relation.operation_type,
             tax_role: relation.tax_role,
-            priority: index
+            priority: index,
+            third_party_reference: referencesByProduct[product.id] ?? ''
         }));
 
         setSelectedProducts((prev) => [...prev, product]);
+        setReferencesByProduct((prev) => ({...prev, [product.id]:prev[product.id] ?? ''}));
         setSelectedRelations((prev) => {
             const existing = new Set(prev.map((relation) => (
                 `${relation.product_id}-${relation.operation_type}-${relation.tax_role}-${relation.tax_id}`
@@ -132,6 +144,20 @@ export function ProductLinkFiscalConditionsCard({
     const removeProduct = (productId) => {
         setSelectedProducts((prev) => prev.filter((product) => product.id !== productId));
         setSelectedRelations((prev) => prev.filter((relation) => relation.product_id !== productId));
+        setReferencesByProduct((prev) => {
+            const next = {...prev};
+            delete next[productId];
+            return next;
+        });
+    };
+
+    const updateProductReference = (productId, reference) => {
+        setReferencesByProduct((prev) => ({...prev, [productId]:reference}));
+        setSelectedRelations((prev) => prev.map((relation) => (
+            relation.product_id === productId
+                ? {...relation, third_party_reference:reference}
+                : relation
+        )));
     };
 
     const toggleRelation = (relation) => {
@@ -155,7 +181,8 @@ export function ProductLinkFiscalConditionsCard({
                     tax_id: relation.tax_id,
                     operation_type: relation.operation_type,
                     tax_role: relation.tax_role,
-                    priority: prev.length
+                    priority: prev.length,
+                    third_party_reference: referencesByProduct[relation.product_id] ?? ''
                 }
             ];
         });
@@ -261,6 +288,16 @@ export function ProductLinkFiscalConditionsCard({
                             <div className="operationsGrid">
                                 {renderOperation(product, 'purchase')}
                                 {renderOperation(product, 'sell')}
+                            </div>
+                            <div className="thirdPartyProductReference">
+                                <FormInput
+                                    title={referenceLabel}
+                                    placeholder={'Como el proveedor llama este item, puede ser util para completar con la IA y demas.'}
+                                    disabled={disabled}
+                                    textArea={true}
+                                    value={referencesByProduct[product.id] ?? ''}
+                                    action={(reference) => updateProductReference(product.id,reference)}
+                                />
                             </div>
                         </article>
                     ))}

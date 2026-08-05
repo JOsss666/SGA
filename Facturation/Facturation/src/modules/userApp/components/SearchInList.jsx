@@ -106,9 +106,19 @@ export function SearchinList({
             return;
         }
 
+        const comparableValue = currentValue => {
+            if(currentValue && typeof currentValue === 'object'){
+                return currentValue.id
+                    ?? currentValue.thirdParty_id
+                    ?? currentValue.product_id
+                    ?? currentValue.value;
+            }
+            return currentValue;
+        };
+
         const selectedElement = list.find(element => {
             const optionValue = element.value !== undefined ? element.value : element.text;
-            return String(optionValue) === String(selectedValue);
+            return String(comparableValue(optionValue)) === String(comparableValue(selectedValue));
         });
 
         setInputValue(selectedElement?.text ?? defaultValue.text ?? '');

@@ -216,6 +216,7 @@ export function PreviewProvider({children}){
 
 export function AppInfoProvider({children}){
     const [appInfo,setAppInfo] = useState({});
+    const [appTaxConfig,setAppTaxConfig] = useState({});
     const [appConfig,setAppConfig] = useState({});
     const [darkMode,setDarkMode] = useState(false);
     const [userInfo,setUserInfo] = useState({});
@@ -284,6 +285,7 @@ export function AppInfoProvider({children}){
         if(appI[0]){
             setAppInfo(appI[1][0]);
             setAppConfig(appI[1][0].config);
+            console.log('YYYYYYYYYYYYY: ',appI)
         }else{
             console.log('No se encontro info compa')
             handleRedirect();
@@ -325,6 +327,7 @@ export function AppInfoProvider({children}){
         const value = {
         appInfo,
         appConfig,
+        appTaxConfig,
         setAppInfo,
         userInfo,
         userConfig,

@@ -15,6 +15,30 @@ import './FormNewCashRecipt.css'
 import './FormNewPurchase.css'
 import { SwitchOption } from "../../components/SwitchOption";
 import { RetentionCard } from "../../components/RetentionCard";
+import { CapsuleButtonAi } from "../../components/ChatAiComponents/CapsuleButtonAi";
+import { AutoCompletePurchase } from "./AiAutoComplete/AutoCompletePurchase";
+
+// JSON prefabricado con los campos EDITABLES del formulario de compra. Los valores
+// derivados (impuestos, retenciones, totales) NO viven aquí: se recalculan aparte.
+const createInitialPurchaseData = () => ({
+    thirdParty_id:null,
+    thirdPartyInfo:{},
+    bussines_id:null,
+    store_id:null,
+    costCenter_id:null,
+    concept_id:null,
+    cashBox_id:null,
+    shift_id:null,
+    instance_id:null,
+    step_id:null,
+    status:'active',
+    description:null,
+    attached:'-',
+    creditTerm:0,
+    aplyRetentions:true,
+    paymentMethod:[],
+    items:[]
+});
 
 export function FormNewPurchase({InfoParams,reloadFun}){
 
@@ -33,7 +57,6 @@ export function FormNewPurchase({InfoParams,reloadFun}){
     const [cashBoxes,setCashBoxes] = useState([]);
     const [instances,setInstances] = useState([]);
     const [productsAndServices,setProductsAndServices] = useState([]);
-    const [items,setItems] = useState([]);
 
     // control
     const [error,setError] = useState(``);
@@ -43,27 +66,41 @@ export function FormNewPurchase({InfoParams,reloadFun}){
     const [disabledToSubmit,setDisabledToSubmit] = useState(false);
     const [disabledByValue,setDisabledByValue] = useState(false);
 
-    // form info
-    const [thirdParty_id,setThirdParty_id] = useState();
-    const [thirdPartyInfo,setThirdPartyInfo] = useState({});
-    const [paymentMethod,setPaymentMethod] = useState([]);
-    const [bussines_id,setBussines_id] = useState();
-    const [store_id,setStore_id] = useState();
-    const [costCenter_id,setCostCenter_id] = useState();
+    // form info — JSON prefabricado; solo se editan sus valores.
+    const [formData,setFormData] = useState(() => ({
+        ...createInitialPurchaseData(),
+        ...(InfoParams ?? {})
+    }));
+    const {
+        thirdParty_id,
+        thirdPartyInfo,
+        paymentMethod,
+        bussines_id,
+        store_id,
+        costCenter_id,
+        description,
+        attached,
+        instance_id,
+        step_id,
+        concept_id,
+        cashBox_id,
+        shift_id,
+        status,
+        creditTerm,
+        aplyRetentions,
+        items
+    } = formData;
+
+    // Setters sobre el JSON prefabricado.
+    const updateField = (field,value) => setFormData(cur => ({...cur, [field]:value}));
+    const updateFields = (fields) => setFormData(cur => ({...cur, ...fields}));
+    const updateItems = (updater) => setFormData(cur => ({...cur, items:updater(cur.items)}));
+    const updatePayments = (updater) => setFormData(cur => ({...cur, paymentMethod:updater(cur.paymentMethod)}));
+
+    // Valores derivados / de control (no forman parte del JSON editable).
     const [total,setTotal] = useState(0);
         // Valor indicativo a pagar (items + impuestos)
         const [totalToPay,setTotalToPay] = useState(0);
-    const [description,setDescription] = useState();
-    const [attached,setAttached] = useState('-');
-        // Instancia de proceso (opcional)
-        const [instance_id,setInstance_id] = useState();
-        const [step_id,setStep_id] = useState();
-    const [concept_id,setConcept_id] = useState();
-    const [cashBox_id,setCashBox_id] = useState();
-    const [shift_id,setShift_id] = useState();
-    const [status,setStatus] = useState('active');
-        // Plazo de crédito otorgado por el proveedor, en días (para compras a crédito)
-        const [creditTerm,setCreditTerm] = useState(0);
 
     // Control para impuestos
     const [totalTaxes,setTotalTaxes] = useState(0);
@@ -72,7 +109,6 @@ export function FormNewPurchase({InfoParams,reloadFun}){
     // Control para retenciones (opcionales, parametrizadas por concepto vía taxes.isRetention)
     const [availableRetentions,setAvailableRetentions] = useState([]);
     const [totalRetentions,setTotalRetentions] = useState(0);
-    const [aplyRetentions,setAplyretentions] = useState(true);
 
     // Retenciones agrupadas calculadas por ítem (base gravable y total por retención,
     // sumando bases/totales cuando la misma retención aparece en varios ítems).
@@ -122,12 +158,20 @@ export function FormNewPurchase({InfoParams,reloadFun}){
         await getSuppliers();
         await getConcepts();
         if(userConfig.access != undefined){
+            const conceptAccess = userConfig.access.sections?.concepts;
+            if(conceptAccess?.overAll === false && conceptAccess.enabled?.length === 1){
+                const onlyConceptId = conceptAccess.enabled[0];
+                updateField('concept_id',onlyConceptId);
+                await getConceptRetentions(onlyConceptId);
+            }
+
             // Filtro para busqueda de tiendas
             if(!userConfig.access.stores.overAll){
                 if(userConfig.access.stores.enabled.length > 1){
                     await getStores(userConfig.access.stores.enabled);
                 }else{
-                    setStore_id(userConfig.access.stores.enabled[0])
+                    console.log('Tienda ya definida')
+                    updateField('store_id',userConfig.access.stores.enabled[0])
                 }
             }else{
                 await getStores();
@@ -138,7 +182,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                 if(userConfig.access.bussines.enabled.length > 1){
                     await getBussines(userConfig.access.bussines.enabled)
                 }else{
-                    setBussines_id(userConfig.access.bussines.enabled[0])
+                    updateField('bussines_id',userConfig.access.bussines.enabled[0])
                 }
             }else{
                 await getBussines();
@@ -156,7 +200,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                 if(userConfig.access.costCenters.enabled.length > 1){
                     await getCostCenters(userConfig.access.costCenters.enabled)
                 }else{
-                    setCostCenter_id(userConfig.access.costCenters.enabled[0])
+                    updateField('costCenter_id',userConfig.access.costCenters.enabled[0])
                 }
             }else{
                 await getCostCenters();
@@ -167,7 +211,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                 if(userConfig.access.process_instances.enabled.length > 1){
                     await getInstances(userConfig.access.process_instances.enabled);
                 }else{
-                    setInstance_id(userConfig.access.process_instances.enabled[0])
+                    updateField('instance_id',userConfig.access.process_instances.enabled[0])
                 }
             }else{
                 await getInstances()
@@ -179,27 +223,24 @@ export function FormNewPurchase({InfoParams,reloadFun}){
 
     let handleConceptChange = (element)=>{
         if(element.id != undefined){
-            setConcept_id(element.id);
+            updateField('concept_id',element.id);
             getConceptRetentions(element.id);
         }
     }
 
     const handleThirdPartyChange = (element)=>{
-        setThirdParty_id(element.id);
-        setThirdPartyInfo(element);
+        updateFields({thirdParty_id:element.id, thirdPartyInfo:element});
     }
 
     const handleCashBoxChange = (element)=>{
         if(element.id != undefined){
-            setCashBox_id(element.id)
-            setShift_id(element.shift_id)
+            updateFields({cashBox_id:element.id, shift_id:element.shift_id});
         }
     }
 
     const handleSelectInstance = (element) => {
         if (!element.id) return;
-        setInstance_id(element.id);
-        setStep_id(element.step_id);
+        updateFields({instance_id:element.id, step_id:element.step_id});
     };
 
     // Control de ítems de la compra
@@ -208,7 +249,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
             if(element.name == undefined) return;
             // El producto trae unit_cost y units como texto ("unit"): inicializamos
             // valores numéricos para que los cálculos de impuestos no den NaN.
-            setItems(prev => [...prev, {
+            updateItems(prev => [...prev, {
                 ...element,
                 manualPrice:false,
                 unit_value: Number(element.unit_cost) || 0,
@@ -217,7 +258,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
         };
 
         const handleEditItemDetail = (index, key, value) => {
-            setItems(prev =>
+            updateItems(prev =>
                 prev.map((item, idx) => {
                     if(idx !== index) return item;
 
@@ -234,7 +275,48 @@ export function FormNewPurchase({InfoParams,reloadFun}){
         };
 
         const handleDeleteItem = (index) => {
-            setItems(prev => prev.filter((_, idx) => idx !== index));
+            updateItems(prev => prev.filter((_, idx) => idx !== index));
+        };
+
+        const handleAutoCompletePurchase = ({selectedThirdParty,items: mappedItems}) => {
+            if(!selectedThirdParty) return;
+
+            const onlyDigits = value => String(value ?? '').replace(/\D/g,'');
+            const normalizeText = value => String(value ?? '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g,'')
+                .trim()
+                .toLowerCase();
+            const extractedIdentification = onlyDigits(selectedThirdParty.identificationNumber);
+            const extractedMail = normalizeText(selectedThirdParty.mail);
+            const supplierOption = suppliers.find(option => {
+                const supplier = option?.value ?? option;
+                const supplierIdentification = onlyDigits(supplier?.indentification_number);
+                const supplierMail = normalizeText(supplier?.mail);
+                const sameIdentification = extractedIdentification
+                    && (
+                        supplierIdentification === extractedIdentification
+                        || supplierIdentification.slice(0,-1) === extractedIdentification
+                        || extractedIdentification.slice(0,-1) === supplierIdentification
+                    );
+                const sameMail = extractedMail && supplierMail === extractedMail;
+                return sameIdentification || sameMail;
+            });
+            const registeredThirdParty = supplierOption?.value ?? supplierOption;
+
+            updateFields({
+                thirdParty_id:registeredThirdParty?.id ?? registeredThirdParty?.thirdParty_id ?? null,
+                thirdPartyInfo:registeredThirdParty ?? selectedThirdParty,
+                items:mappedItems ?? []
+            });
+
+            if(!registeredThirdParty){
+                addNotification({
+                    type:'error',
+                    title:'Proveedor sin relacionar',
+                    description:'Los ítems fueron cargados, pero no se encontró el proveedor registrado por identificación o correo.'
+                });
+            }
         };
 
     // Getters de información
@@ -269,15 +351,15 @@ export function FormNewPurchase({InfoParams,reloadFun}){
 
         const getCashBoxes = async(allowedCashBoxes)=>{
             let res = await postInfo('/facturation/getCashBoxes',{
-                company_id:appInfo.company_id
+                company_id:appInfo.company_id,
+                allowedCashBoxes
             })
             if(res[0]){
                 let C = [];
                 res[1].forEach(element => {
                     C.push({
                         text:element.name,
-                        value:element,
-                        allowedCashBoxes:allowedCashBoxes
+                        value:element
                     })
                 });
                 if(C.length == 1){
@@ -292,7 +374,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                 company_id:appInfo.company_id,
                 allowedStores
             })
-            console.log('Res')
+            console.log('Res tiendas: ',res)
             if(res[0]){
                 let C = []
                 res[1].forEach(element => {
@@ -589,10 +671,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
 
         // Switch maestro: aplica (o quita) todas las retenciones de una vez.
         const toggleAllRetentions = (value) => {
-            setAplyretentions(value);
-            setAvailableRetentions(prev =>
-                prev.map(r => ({ ...r, applied: value }))
-            );
+            updateField('aplyRetentions', value);
         };
 
         // Monto de una retención aplicada, redondeado a pesos (0 si no supera la base).
@@ -603,16 +682,16 @@ export function FormNewPurchase({InfoParams,reloadFun}){
 
         const addPaymentMethod = (newPayment) => {
             if(newPayment.id != undefined){
-                setPaymentMethod(prev => [...prev, newPayment]);
+                updatePayments(prev => [...prev, newPayment]);
             }
         };
 
         const removePaymentMethod = (id) => {
-            setPaymentMethod(prev => prev.filter(item => item.id !== id));
+            updatePayments(prev => prev.filter(item => item.id !== id));
         };
 
         const setAplyVoucher = (id,value)=>{
-            setPaymentMethod(prev=>
+            updatePayments(prev=>
                 prev.map(item =>
                     item.id === id
                         ?{...item,["aplyVoucher"]:value}
@@ -622,7 +701,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
         }
 
         const updateVoucher = (id,voucher)=>{
-            setPaymentMethod(prev =>
+            updatePayments(prev =>
                 prev.map(item =>
                     item.id === id
                         ? { ...item, ["voucher"]: voucher }
@@ -632,13 +711,22 @@ export function FormNewPurchase({InfoParams,reloadFun}){
         }
 
         const updatePaymentValue = (id, key, newValue) => {
-            setPaymentMethod(prev =>
+            updatePayments(prev =>
                 prev.map(item =>
                     item.id === id
-                        ? { ...item, [key]: newValue }
+                        ? { ...item, [key]: newValue, autoGenerated:false }
                         : item
                 )
             );
+        };
+
+        const getDefaultPayableMethod = () => {
+            const option = paymentMehtods.find(methodOption => {
+                const method = methodOption?.value ?? methodOption;
+                return method.for_wallet === true
+                    && method.name?.toUpperCase().includes('COMPRA');
+            });
+            return option?.value ?? option;
         };
 
         const calcTotalFromPayments = ()=>{
@@ -850,6 +938,30 @@ export function FormNewPurchase({InfoParams,reloadFun}){
         calcTotalFromPayments();
     },[paymentMethod,totalToPay,totalRetentions])
 
+    // Si la compra no tiene un medio de pago seleccionado, se asume a crédito.
+    // El detalle for_wallet=true hace que el backend cree accounts_payable.
+    useEffect(()=>{
+        const netToPay = Math.max(0,totalToPay - totalRetentions);
+        const defaultPayableMethod = getDefaultPayableMethod();
+
+        if(items.length > 0 && paymentMethod.length === 0 && defaultPayableMethod && netToPay > 0){
+            updatePayments(() => [{
+                ...defaultPayableMethod,
+                value:netToPay,
+                autoGenerated:true
+            }]);
+            return;
+        }
+
+        if(paymentMethod.some(method => method.autoGenerated)){
+            updatePayments(prev => prev.map(method => (
+                method.autoGenerated
+                    ? {...method,value:netToPay}
+                    : method
+            )));
+        }
+    },[items.length,paymentMethod.length,paymentMehtods,totalToPay,totalRetentions])
+
     useEffect(()=>{
         getDocumentRules();
         handleUserConfig();
@@ -875,6 +987,17 @@ export function FormNewPurchase({InfoParams,reloadFun}){
         setWithholdingsToAply(result);
         console.log('Resultado árbol de retenciones (Colombia compra): ', result);
     },[aviableRetentions,thirdPartyInfo])
+
+    const hasSingleEnabledStore = userConfig.access?.stores?.overAll === false
+        && userConfig.access.stores.enabled?.length === 1;
+    const hasSingleEnabledBussines = userConfig.access?.bussines?.overAll === false
+        && userConfig.access.bussines.enabled?.length === 1;
+    const hasSingleEnabledCostCenter = userConfig.access?.costCenters?.overAll === false
+        && userConfig.access.costCenters.enabled?.length === 1;
+    const hasSingleEnabledConcept = userConfig.access?.sections?.concepts?.overAll === false
+        && userConfig.access.sections.concepts.enabled?.length === 1;
+    const hasSingleEnabledCashBox = userConfig.access?.sections?.cashBoxes?.overAll === false
+        && userConfig.access.sections.cashBoxes.enabled?.length === 1;
 
     return(
         <div className="FormNewCashRecipt FormNewPurchase">
@@ -903,22 +1026,35 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                 <i className="fa-solid fa-xmark closeFormBtn" onClick={()=>{
                     popOutAlert();
                 }}/>
+                <CapsuleButtonAi onClick={()=>{
+                    popInAlert(
+                        <AutoCompletePurchase
+                            thirdParties={suppliers}
+                            onComplete={handleAutoCompletePurchase}
+                        />
+                    )
+                }}>
+                    <span>
+                        Registrar con IA
+                        <i className="fa-solid fa-flask"/>
+                    </span>
+                </CapsuleButtonAi>
             </div>
             {!loading && (
                 <form action="" disabled={disabledToSubmit? true:disabled} onSubmit={(e)=>{
                     e.preventDefault();
                     validateDocument();
                 }}>
-                    {info.store_id == undefined && (
-                        <SearchinList action={setStore_id} title={'Tienda'} placeHolder={'Seleccione la tienda'} list={stores} disabled={disabled}/>
+                    {info.store_id == undefined && !hasSingleEnabledStore && (
+                        <SearchinList value={store_id} action={(v)=>updateField('store_id',v)} title={'Tienda'} placeHolder={'Seleccione la tienda'} list={stores} disabled={disabled}/>
                     )}
-                    {info.bussines_id == undefined && (
-                        <SearchinList action={setBussines_id} title={'Negocio'} placeHolder={'Seleccione el negocio'} list={bussines} disabled={disabled}/>
+                    {info.bussines_id == undefined && !hasSingleEnabledBussines && (
+                        <SearchinList value={bussines_id} action={(v)=>updateField('bussines_id',v)} title={'Negocio'} placeHolder={'Seleccione el negocio'} list={bussines} disabled={disabled}/>
                     )}
-                    {info.costCenter_id == undefined && (
-                        <SearchinList action={setCostCenter_id} title={'Centro de costo'} placeHolder={'Seleccione el centro de costo'} list={costCenters} disabled={disabled}/>
+                    {info.costCenter_id == undefined && !hasSingleEnabledCostCenter && (
+                        <SearchinList value={costCenter_id} action={(v)=>updateField('costCenter_id',v)} title={'Centro de costo'} placeHolder={'Seleccione el centro de costo'} list={costCenters} disabled={disabled}/>
                     )}
-                    <SearchinList action={handleThirdPartyChange} title={'Proveedor'} placeHolder={'Seleccione el proveedor'} list={suppliers} disabled={disabled} specialOption={
+                    <SearchinList value={thirdParty_id} action={handleThirdPartyChange} title={'Proveedor'} placeHolder={'Seleccione el proveedor'} list={suppliers} disabled={disabled} specialOption={
                         <NewElementSelect title={'Crear nuevo'} onClick={()=>{
                             popInAlert(<FormNewThirdParties reloadFun={getSuppliers} quickCreation={true}/>)
                         }}/>
@@ -926,14 +1062,14 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                     {info.instance_id == undefined && (
                         <SearchinList action={handleSelectInstance} noActVal={true} title={'Proceso adjunto'} placeHolder={'Seleccione el proceso (opcional)'} list={instances} disabled={disabled}/>
                     )}
-                    {info.concept_id == undefined && (
-                        <SearchinList action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
+                    {info.concept_id == undefined && !hasSingleEnabledConcept && (
+                        <SearchinList value={concept_id} action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
                     )}
                     {info.thirdPatyPurchaseTerm == undefined && (
-                        <FormInput title={'Plazo pago (días)'} type={'number'} placeholder={'Plazo pago a proveedor en (días)'} min={0} required={false} value={creditTerm} action={setCreditTerm} disabled={disabled}/>
+                        <FormInput title={'Plazo pago (días)'} type={'number'} placeholder={'Plazo pago a proveedor en (días)'} min={0} required={false} value={creditTerm} action={(v)=>updateField('creditTerm',v)} disabled={disabled}/>
                     )}
-                    {info.cashBox_id == undefined && (
-                        <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja (si aplica pago en efectivo)'} list={cashBoxes} disabled={disabled}/>
+                    {info.cashBox_id == undefined && !hasSingleEnabledCashBox && (
+                        <SearchinList value={cashBox_id} action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja (si aplica pago en efectivo)'} list={cashBoxes} disabled={disabled}/>
                     )}
                     
                     <div className="gridItemsContainer">
@@ -1002,7 +1138,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                                 <div key={index} className={`PaymentMethodCard ${disabledByValue? 'disabledPaymentMethodCard':''}`}>
                                     <div className="payMC">
                                         <strong>{element.name}</strong>
-                                        <input className="inputPaymentValue" step={0.001} type="number" placeholder="$0" onChange={(e)=>{
+                                        <input className="inputPaymentValue" step={0.001} type="number" placeholder="$0" value={element.value ?? ''} onChange={(e)=>{
                                             updatePaymentValue(element.id,"value",e.target.value)
                                         }}/>
                                         <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
@@ -1072,8 +1208,8 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                         </div>
                     </div>
                     <div className="footerDetailsContainer">
-                        <FormInput title={'Descripción'} textArea={true} placeholder={'Añade una descripción a tu compra'} action={setDescription} disabled={disabled}/>
-                        <FileInput category="files" action={setAttached} placeholder={'Adjuntar soporte'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
+                        <FormInput title={'Descripción'} textArea={true} placeholder={'Añade una descripción a tu compra'} action={(v)=>updateField('description',v)} disabled={disabled}/>
+                        <FileInput category="files" action={(v)=>updateField('attached',v)} placeholder={'Adjuntar soporte'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
                         <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor ingresado no es valido':'Crear compra'} disabled={disabledToSubmit? true:disabled} loading={loading}/>
                     </div>
                 </form>
