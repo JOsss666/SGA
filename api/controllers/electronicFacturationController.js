@@ -35,6 +35,65 @@ const resolveEnvironmentFromInfo = async (info = {}) => (
     ?? DEFAULT_FACTUS_ENVIRONMENT
 );
 
+const resolveElectronicDocumentContext = async (info = {}) => {
+    const billNumber = `${info.bill_numer ?? ''}`.trim();
+    if (!billNumber) {
+        throw new Error('bill_numer es requerido.');
+    }
+
+    let companyId = parseInt(getCompanyIdFromInfo(info));
+
+    // Compatibilidad con clientes anteriores que solo enviaban el número.
+    // La factura local conoce la compañía cuyas credenciales deben usarse.
+    if (!Number.isInteger(companyId) || companyId <= 0) {
+        const result = await useDataBase(`
+            SELECT company_id
+            FROM "ElectronicFacturation".documents
+            WHERE number = $1
+            ORDER BY id DESC
+            LIMIT 1;
+        `, [billNumber], 1);
+
+        if (!result[0]) {
+            throw new Error(`No se encontró la factura electrónica ${billNumber} en la base de datos local.`);
+        }
+
+        companyId = parseInt(result[1][0].company_id);
+    }
+
+    if (!Number.isInteger(companyId) || companyId <= 0) {
+        throw new Error(`La factura electrónica ${billNumber} no tiene una compañía válida.`);
+    }
+
+    const requestInfo = {
+        ...info,
+        company_id: companyId
+    };
+
+    return {
+        billNumber,
+        companyId,
+        environment: await resolveEnvironmentFromInfo(requestInfo)
+    };
+};
+
+const sendFactusDownloadResponse = (res, response, billNumber) => {
+    const payload = response.data ?? {};
+
+    if (!response.ok) {
+        const message = payload.message
+            ?? payload.error
+            ?? `No se pudo descargar el documento ${billNumber}`;
+
+        res.writeHead(response.status || 502, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'Error', message }));
+        return;
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(payload));
+};
+
 export async function getNumercRangeData(type, company_id = 0, environment = DEFAULT_FACTUS_ENVIRONMENT) {
     return factusService.getNumberingRangeId({ company_id, environment, type });
 }
@@ -537,18 +596,21 @@ electronicFacturationController.downloadBill = (req,res)=>{
         data += chunk
     })
 	req.on('end',async()=>{
-		    let info = JSON.parse(data);
-        const companyId = getCompanyIdFromInfo(info);
-        const environment = await resolveEnvironmentFromInfo(info);
-	    console.log(`Descargando factura: ${info.bu}`)
-	    const response = await factusService.request({
-            company_id: companyId,
-            environment,
-            path: `/v1/bills/download-pdf/${info.bill_numer}`
-        });
-	    const resInvoice = response.data;
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(resInvoice));
+        try {
+            const info = JSON.parse(data);
+            const context = await resolveElectronicDocumentContext(info);
+            console.log(`Descargando PDF de factura ${context.billNumber} para company_id ${context.companyId} (${context.environment})`);
+            const response = await factusService.request({
+                company_id: context.companyId,
+                environment: context.environment,
+                path: `/v1/bills/download-pdf/${encodeURIComponent(context.billNumber)}`
+            });
+            sendFactusDownloadResponse(res, response, context.billNumber);
+        } catch (error) {
+            console.error('Error descargando PDF de Factus:', error.message);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'Error', message: error.message }));
+        }
     })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
@@ -562,18 +624,21 @@ electronicFacturationController.downloadBillXML = (req,res)=>{
         data += chunk
     })
 	req.on('end',async()=>{
-		    let info = JSON.parse(data);
-        const companyId = getCompanyIdFromInfo(info);
-        const environment = await resolveEnvironmentFromInfo(info);
-	    console.log(`Descargando factura: ${info.bu}`)
-	    const response = await factusService.request({
-            company_id: companyId,
-            environment,
-            path: `/v1/bills/download-xml/${info.bill_numer}`
-        });
-	    const resInvoice = response.data;
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(resInvoice));
+        try {
+            const info = JSON.parse(data);
+            const context = await resolveElectronicDocumentContext(info);
+            console.log(`Descargando XML de factura ${context.billNumber} para company_id ${context.companyId} (${context.environment})`);
+            const response = await factusService.request({
+                company_id: context.companyId,
+                environment: context.environment,
+                path: `/v1/bills/download-xml/${encodeURIComponent(context.billNumber)}`
+            });
+            sendFactusDownloadResponse(res, response, context.billNumber);
+        } catch (error) {
+            console.error('Error descargando XML de Factus:', error.message);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'Error', message: error.message }));
+        }
     })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})

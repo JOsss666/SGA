@@ -10,59 +10,61 @@ import { urlSer } from "../../../App";
 import { downloadPdfFromResponse, downloadXmlFromResponse } from "../../../utils/functions";
 
 export function getElectronicDocumentOptions(info, addNotification){
-    const downloadPDF = async()=>{
-        let res = await postInfo('/electronicFacturation/downloadBill',{
-            bill_numer:info.number
+    const notifyDownloadError = (message)=>{
+        addNotification({
+            type:'error',
+            title:`No se pudo descargar ${info.number}`,
+            description:message ?? `No se pudo descargar "${info.number}", intentelo nuevamente`
         })
-        if(res.status == 'OK'){
-            let download = await downloadPdfFromResponse(res);
-            if(download.status == 'OK'){
-                addNotification({
-                    type:'aproved',
-                    title:`${download.file_name} descargado correctamente.`,
-                    description:`El documento "${download.file_name}" fue descargado correctamente.`
-                })
-            }else{
-                addNotification({
-                    type:'error',
-                    title:`Error al descargar ${info.number}`,
-                    description:`No se pudo descargar "${info.number}", intentelo nuevamente`
-                })
-            }
-        }else{
-            addNotification({
-                type:'error',
-                title:`No se pudo descargar ${info.number}`,
-                description:res.message
+    }
+
+    const downloadPDF = async()=>{
+        try {
+            let res = await postInfo('/electronicFacturation/downloadBill',{
+                bill_numer:info.number,
+                company_id:info.company_id
             })
+            if(res.status == 'OK'){
+                let download = await downloadPdfFromResponse(res);
+                if(download.status == 'OK'){
+                    addNotification({
+                        type:'aproved',
+                        title:`${download.file_name} descargado correctamente.`,
+                        description:`El documento "${download.file_name}" fue descargado correctamente.`
+                    })
+                }else{
+                    notifyDownloadError()
+                }
+            }else{
+                notifyDownloadError(res.message)
+            }
+        } catch (error) {
+            notifyDownloadError(error?.message)
         }
     }
 
     const downloadXML = async()=>{
-        let res = await postInfo('/electronicFacturation/downloadBillXML',{
-            bill_numer:info.number
-        })
-        if(res.status == 'OK'){
-            let download = await downloadXmlFromResponse(res);
-            if(download.status == 'OK'){
-                addNotification({
-                    type:'aproved',
-                    title:`${download.file_name} descargado correctamente.`,
-                    description:`El documento "${download.file_name}" fue descargado correctamente.`
-                })
-            }else{
-                addNotification({
-                    type:'error',
-                    title:`Error al descargar ${info.number}`,
-                    description:`No se pudo descargar "${info.number}", intentelo nuevamente`
-                })
-            }
-        }else{
-            addNotification({
-                type:'error',
-                title:`No se pudo descargar ${info.number}`,
-                description:res.message
+        try {
+            let res = await postInfo('/electronicFacturation/downloadBillXML',{
+                bill_numer:info.number,
+                company_id:info.company_id
             })
+            if(res.status == 'OK'){
+                let download = await downloadXmlFromResponse(res);
+                if(download.status == 'OK'){
+                    addNotification({
+                        type:'aproved',
+                        title:`${download.file_name} descargado correctamente.`,
+                        description:`El documento "${download.file_name}" fue descargado correctamente.`
+                    })
+                }else{
+                    notifyDownloadError()
+                }
+            }else{
+                notifyDownloadError(res.message)
+            }
+        } catch (error) {
+            notifyDownloadError(error?.message)
         }
     }
 
