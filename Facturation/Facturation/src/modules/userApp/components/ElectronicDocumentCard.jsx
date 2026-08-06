@@ -9,16 +9,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { urlSer } from "../../../App";
 import { downloadPdfFromResponse, downloadXmlFromResponse } from "../../../utils/functions";
 
-export function ElectronicDocumentCard({info}){
-
-    const {addNotification} = useNotifications(); 
-    const navigate = useNavigate();
-    const params = useParams();
-
-    const handleNavigate = ()=>{ 
-         navigate(`/SGA_management/${params.company_key}/${params.user_key}/edocuments/${info.id}`);
-    }
-
+export function getElectronicDocumentOptions(info, addNotification){
     const downloadPDF = async()=>{
         let res = await postInfo('/electronicFacturation/downloadBill',{
             bill_numer:info.number
@@ -51,7 +42,6 @@ export function ElectronicDocumentCard({info}){
         let res = await postInfo('/electronicFacturation/downloadBillXML',{
             bill_numer:info.number
         })
-        console.log(res)
         if(res.status == 'OK'){
             let download = await downloadXmlFromResponse(res);
             if(download.status == 'OK'){
@@ -76,13 +66,52 @@ export function ElectronicDocumentCard({info}){
         }
     }
 
-    
+    return [
+        {
+            text:'Previsualizar',
+            title:'Previsualizar',
+            icon:<i className="fa-regular fa-eye"/>,
+            action:()=>window.open(`${info.url}`,'_blank','noopener,noreferrer')
+        },
+        {
+            text:'Copiar CUFE',
+            title:'Copiar CUFE',
+            icon:<i className="fa-regular fa-copy"/>,
+            action:()=>{
+                copyToClipBoard(info.code)
+                addNotification({
+                    type:'info',
+                    title:'Copiado en el portapapeles',
+                    description:`Se copio "${info.code}" en el portapapeles.`
+                })
+            }
+        },
+        {
+            text:'Descargar PDF',
+            title:'Descargar PDF',
+            icon:<i className="fa-regular fa-file-pdf"/>,
+            action:downloadPDF
+        },
+        {
+            text:'Descargar XML',
+            title:'Descargar XML',
+            icon:<i className="fa-regular fa-file-code"/>,
+            action:downloadXML
+        }
+    ];
+}
 
-    const getDocFullInfo = async()=>{
-        let res = await postInfo('/electronicFacturationController.getDocumentFullInfo',{
-            bill_numer:info.number
-        })
+export function ElectronicDocumentCard({info}){
+
+    const {addNotification} = useNotifications(); 
+    const navigate = useNavigate();
+    const params = useParams();
+
+    const handleNavigate = ()=>{ 
+         navigate(`/SGA_management/${params.company_key}/${params.user_key}/edocuments/${info.id}`);
     }
+
+    const documentOptions = getElectronicDocumentOptions(info, addNotification);
     
     return(
         <div className="ElectronicDocumentCard">
@@ -117,24 +146,15 @@ export function ElectronicDocumentCard({info}){
                     <BoldTitle text={`$ ${moneyFormat(info.doc_total?? 0)}`}/>
                 </div>
                 <div className="quickOptions">
-                    <ButtonMenu noRotate={true} title={'Previsualizar'} children={<i className="fa-regular fa-eye"/>} onClick={()=>{
-                        window.open(`${info.url}`,'_blank','noopener,noreferrer')
-                    }}/>
-                    <ButtonMenu noRotate={true} title={'Copiar CUFE'} children={<i className="fa-regular fa-copy"/>} onClick={()=>{
-                        copyToClipBoard(info.code)
-                        addNotification({
-                            type:'info',
-                            title:'Copiado en el portapapeles',
-                            description:`Se copio "${info.code}" en el portapapeles.`
-                        })
-                    }}/>
-                    <ButtonMenu noRotate={true} title={'Descargar PDF'} children={<i className="fa-regular fa-file-pdf"/>} onClick={()=>{
-                        downloadPDF()
-                    }}/>
-                    <ButtonMenu noRotate={true} title={'Descargar XML'} children={<i className="fa-regular fa-file-code"/>} onClick={()=>{
-                        downloadXML();
-                    }}/>
-                    
+                    {documentOptions.map((option)=>(
+                        <ButtonMenu
+                            key={option.text}
+                            noRotate={true}
+                            title={option.title}
+                            children={option.icon}
+                            onClick={option.action}
+                        />
+                    ))}
                 </div>
             </div>
         </div>

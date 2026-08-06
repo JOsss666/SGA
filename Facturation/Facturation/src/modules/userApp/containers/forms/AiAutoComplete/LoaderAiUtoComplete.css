@@ -14,7 +14,7 @@
 .LoaderAiUtoComplete > video{
     width: 60%;
     height: 100%;
-    display: block;
+    display: none; /* Temporal: animación de video oculta */
     object-fit: cover;
     margin: auto;
     margin-top: -10%;

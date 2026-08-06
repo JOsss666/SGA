@@ -274,7 +274,7 @@ const getElectronicInvoices = async(docsArray) => {
                     window.open(element.electronicData.url, '_blank')
                     return;
                 }
-                window.open(`https://facturation.sga360.co/documentPreview/${appInfo.company_key}/${element.id}`, '_blank')
+                window.open(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${element.id}`, '_blank')
             }}>
             
             {element.electronicData 

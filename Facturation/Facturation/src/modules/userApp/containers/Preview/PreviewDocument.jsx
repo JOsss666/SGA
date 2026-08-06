@@ -2,7 +2,7 @@ import { useEffect,useState } from "react";
 import { BoldTitle } from "../../components/BoldTitle";
 import './PreviewDocument.css'
 import { postInfo } from "../../../../utils/functions";
-import { useAlert, useAppInfo } from "../../../../context/context";
+import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
 import { UserCard } from "../../components/UserCard";
 import { MoreOptions } from "../../components/MoreOptions";
@@ -10,12 +10,14 @@ import { useParams } from "react-router-dom";
 import { LoadingAppDataPage } from "../LoadingAppDataPage";
 import { AlertsHolder } from "../AlertsHolder";
 import { PreviewFile } from "./PreviewFile";
+import { getElectronicDocumentOptions } from "../../components/ElectronicDocumentCard";
 
 export function PreviewDocument({doc_id}){
 
     // Requirements
     const {appInfo} = useAppInfo();
     const {popInAlert} = useAlert();
+    const {addNotification} = useNotifications();
     const [docInfo,setDocInfo] = useState({})
     const [attachedServices,setAttacedServices] = useState([]);
     const [attachedFiles,setAttachedFiles] = useState([]);
@@ -23,6 +25,7 @@ export function PreviewDocument({doc_id}){
     const [thirdParyInfo, setThirdPartyInfo] = useState({});
     const [id,setId] = useState(doc_id? doc_id:params.doc_id);
     const [attachedTransactions,setAttachedTransactions] = useState([]);
+    const [electronicInvoices,setElectronicInvoices] = useState([]);
 
     // Control
     const [loading,setLoading] = useState(true);
@@ -141,6 +144,19 @@ export function PreviewDocument({doc_id}){
         }
     }
 
+    const getElectronicInvoices = async() => {
+
+        const res = await postInfo('/electronicFacturation/getDocuments',{
+                company_id: appInfo.company_id,
+                doc_id:id
+            }
+        );
+        console.log('Facturas electronicas: ',res);
+        if(res[0]){
+            setElectronicInvoices(res[1]);
+        }
+    };
+
     const getAttachedTransactions = async(paymentMethod_id)=>{
         setLoading(true);
         let res = await postInfo('/facturation/getTransactionsOfCashRecord',{
@@ -204,6 +220,7 @@ const getSellInvoiceServices = async(instance_id)=>{
         console.log(docInfo)
         if(docInfo.id != undefined){
             getThirdParties();
+            getElectronicInvoices();
             switch(docInfo.document_type){
                 case "Cash Recipt": 
                 getAttachedTransactions();
@@ -346,7 +363,14 @@ const getSellInvoiceServices = async(instance_id)=>{
                                     ]}/>
                                 </div>
                             ))}
-                            {attachedFiles.length == 0 && (
+                            {electronicInvoices.map((element,index)=>(
+                                <div className="electronicInvoiceCard" key={index}>
+                                    <i className="fa-solid fa-file-invoice iconSellInvoice"/>
+                                    <h6>Factura electronica {element.number}</h6>
+                                    <MoreOptions options={getElectronicDocumentOptions(element, addNotification)}/>
+                                </div>
+                            ))}
+                            {attachedFiles.length == 0 && electronicInvoices.length ==0 && (
                                 <div className="noResults">
                                     <strong>
                                         <i className="fa-solid fa-ghost"/>

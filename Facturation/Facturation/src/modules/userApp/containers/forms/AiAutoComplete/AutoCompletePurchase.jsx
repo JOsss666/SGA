@@ -69,7 +69,7 @@ export function AutoCompletePurchase({thirdParties,onComplete}){
 
     // Control
     const [disabled,setDisabled] = useState(false);
-    const [loading,setloading] = useState(false);
+    const [loading,setloading] = useState(true);
     const [loadingMessage,setLoadingMessage] = useState('Enviando solicitud');
     const [completedSteps,setCompletedSteps] = useState([]);
     const [files,setFiles] = useState([]);
