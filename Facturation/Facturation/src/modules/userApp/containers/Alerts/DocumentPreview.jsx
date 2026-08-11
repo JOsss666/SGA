@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNotifications, usePreview } from "../../../../context/context";
+import { useAlert, useNotifications, usePreview } from "../../../../context/context";
 import { BoldTitle } from "../../components/BoldTitle";
 import { ButtonMenu } from "../../components/ButtonMenu";
 import './DocumentPreview.css'
@@ -7,14 +7,15 @@ import { ShareDocuments } from "./ShareDocument";
 import { ChatSpace } from "../ChatSpace";
 import { OpCard } from "../../components/OpCard";
 import { DocumentCard } from "../../components/DocumentCard";
+import { SellInvoiceRender } from "./documents render/SellInvoiceRender";
+import { formatDate } from "../../../../utils/functions";
 
-export function DocumentPreview({children}){
+export function DocumentPreview({data}){
+    const {popInAlert,popOutAlert} = useAlert();
     const [openTools,setOpenTools] = useState(false);
     const [activeTool, setActiveTool] = useState('Share')
     const {addNotification} = useNotifications();
-    const {previewInfo,setOpenPreview} = usePreview();
-
-    let info = previewInfo;
+    const [info,setInfo] = useState(data != undefined ? data:{});
 
     const messageTest = {
         user_name:'Nombre Usuario1',
@@ -42,26 +43,19 @@ export function DocumentPreview({children}){
     }
 
     useEffect(()=>{
-        console.log(previewInfo)
-    },[previewInfo])
+        console.log(info)
+    },[info])
 
     return(
         <div className="DocumentPreview">
             <header>
-                <div className="CloseDocPrev" onClick={()=>{
-                        setOpenPreview(false)
-                    }}>
-                    <i className="fa-solid fa-xmark" />
-                </div>
                 <div className="docInfo">
-                    {info.type == 'Document' && (
-                        <>
-                            <i class="fa-solid fa-file-code "/>
-                            <strong>{info.docType}#{info.id}</strong>
-                        </>
-                    )}
+                    <i class="fa-solid fa-file-code "/>
+                    <strong>{`${info.doc_type} # ${info.ownSerial}`}</strong>
+                    <span>{formatDate(info.created_at)}</span>
                 </div>
                 <div className="MenuPreviewOptions">
+                    <ButtonMenu title={'Documentos asociados'} noRotate={true} onClick={()=>handleToolChange('linkedDocs')}><i className="fa-regular fa-folder-open"/></ButtonMenu>
                     <ButtonMenu title={'Guardar'}><i className="fa-solid fa-floppy-disk"/></ButtonMenu>
                     <ButtonMenu title={'Descargar'}><i className="fa-solid fa-cloud-arrow-down"/></ButtonMenu>
                     <ButtonMenu title={'Imprimir'}><i className="fa-solid fa-print"/></ButtonMenu>
@@ -69,6 +63,7 @@ export function DocumentPreview({children}){
                     <ButtonMenu noRotate={true} onClick={()=>{handleToolChange('Comments')}} title={'Comentarios'}><i className="fa-regular fa-comments"/></ButtonMenu>
                     <ButtonMenu title={'Reportar'} onClick={()=>{handleToolChange('Report')}} ><i className="fa-regular fa-flag"/></ButtonMenu>
                     <ButtonMenu noRotate={true} title={'Fijar En Favoritos'}><i className="fa-regular fa-bookmark"/></ButtonMenu>
+                    <ButtonMenu title={'Cerrar previsualización'} noRotate={true} onClick={()=>popOutAlert()}><i className="fa-solid fa-xmark"/></ButtonMenu>
                 </div>
                 {openTools && (
                     <div className="ToolsContainer">
@@ -85,16 +80,7 @@ export function DocumentPreview({children}){
                 )}
             </header>
             <div className="spaceDoc">
-                {info.type == 'Document' && (
-                    <>
-                        {info.docType == 'OP' && (
-                            <OpCard data={info} />
-                        )}
-                        {info.docType != 'OP' && (
-                            <DocumentCard data={info}/>
-                        )}
-                    </>
-                )}
+                <SellInvoiceRender id={info.doc_id}/>
             </div>
         </div>
     )

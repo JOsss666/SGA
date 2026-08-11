@@ -8,7 +8,6 @@ import { UserCard } from "../../components/UserCard";
 import { MoreOptions } from "../../components/MoreOptions";
 import { useParams } from "react-router-dom";
 import { LoadingAppDataPage } from "../LoadingAppDataPage";
-import { AlertsHolder } from "../AlertsHolder";
 import { PreviewFile } from "./PreviewFile";
 import { getElectronicDocumentOptions } from "../../components/ElectronicDocumentCard";
 
@@ -385,7 +384,6 @@ const getSellInvoiceServices = async(instance_id)=>{
             {loading && (
                 <LoadingAppDataPage/>
             )}
-            <AlertsHolder/>
         </div>
     )
 }

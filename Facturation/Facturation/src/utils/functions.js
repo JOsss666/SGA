@@ -10,6 +10,17 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { useNotifications } from "../context/context";
 
+export const transactionTypeDictionary = {
+    serviceMovement: 'Servicio',
+    inventoryMovement: 'Inventario',
+    tax: 'Impuesto',
+    payment: 'Pago'
+};
+
+export function translateTransactionType(type) {
+    return transactionTypeDictionary[type] ?? type ?? '--';
+}
+
 export async function postInfo(route,informacion){
     console.log('Funcion post');
     return new Promise((resolve, reject) => {

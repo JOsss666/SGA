@@ -25,8 +25,8 @@
 }
 
 :root.dark {
-    --bg: #000000;
-    --menuAside:#18181B;
+    --bg: #09090B;
+    --menuAside:#121212;
     --lightGradient1: #0C0A09;
     --lightGradient2: #121212;
     --lightGradient3: #1E1E1E;
@@ -36,10 +36,10 @@
     --sectionTitle:#E1E1E1;
     --descriptionText:#bbb;
     --iconHover:#303030;
-    --inputsBg:#303030;
-    --inputsBorder:#5a5a5a;
+    --inputsBg:#19181D;
+    --inputsBorder:#2c2c2c;
     --translucidMenu:#00000090;
-    --cardHover:#222;
+    --cardHover:#191919;
     --bgOpacity:#00000050;
     --settingsHover:#111;
     --bgImage: url('https://i.pinimg.com/1200x/80/d1/bd/80d1bd8f8c9777a8ff1a8b4ed534418e.jpg');

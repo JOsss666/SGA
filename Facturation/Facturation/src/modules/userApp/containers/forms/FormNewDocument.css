@@ -60,12 +60,12 @@
     flex-wrap: wrap;
 }
 
-.FormNewDocument .topParameters .SearchinList{
+.FormNewDocument .topParameters .FacturationSearchinList{
     width: 30vh;
     margin: .5vh 2vh;
 }
 
-.FormNewDocument .topParameters .FormInput{
+.FormNewDocument .topParameters .FacturationFormInput{
     min-width: 30vh;
     width: 30vh; 
     margin: 1vh 2vh;
@@ -83,7 +83,7 @@
     margin: 2vh 0;
 }
 
-.FormNewDocument .footerParameters .FormInput{
+.FormNewDocument .footerParameters .FacturationFormInput{
     min-width: 35vh;
     width: 50vh;
     margin: auto 0;

@@ -237,6 +237,24 @@ processController.getDocuments = (req,res)=>{
             `);
         }
 
+        if(info.type == 'Sell Invoice'){
+            variableColumns.push('electronic_document.number AS electronic_invoice_number')
+            variableColumns.push('electronic_document.url AS electronic_invoice_url')
+            variableJoins.push(`
+                LEFT JOIN LATERAL (
+                    SELECT
+                        electronic_invoice.number,
+                        electronic_invoice.url
+                    FROM "ElectronicFacturation".documents electronic_invoice
+                    WHERE electronic_invoice.doc_id = "Ecosystem".documents.id
+                        AND electronic_invoice.company_id = "Ecosystem".documents.company_id
+                        AND electronic_invoice.type = 'electronic invoice'
+                    ORDER BY electronic_invoice.id DESC
+                    LIMIT 1
+                ) electronic_document ON TRUE
+            `);
+        }
+
         whereClauses.push(`"Ecosystem".documents.company_id = $${values.length +1}`)
         values.push(info.company_id);
 

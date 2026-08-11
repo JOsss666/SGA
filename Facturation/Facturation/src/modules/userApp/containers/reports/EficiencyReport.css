@@ -46,7 +46,7 @@
     gap: .25vw;
 }
 
-.EficiencyReport .ReportFiltersContainer .InputRangeContainer .FormInput{
+.EficiencyReport .ReportFiltersContainer .InputRangeContainer .FacturationFormInput{
     padding: 0;
     margin: auto 0;
     height: fit-content;
@@ -54,11 +54,11 @@
     min-width: 0vh;
 }
 
-.EficiencyReport .ReportFiltersContainer .InputRangeContainer .FormInput label{
+.EficiencyReport .ReportFiltersContainer .InputRangeContainer .FacturationFormInput label{
     display: none;
 }
 
-.EficiencyReport .ReportFiltersContainer .InputRangeContainer .FormInput input{
+.EficiencyReport .ReportFiltersContainer .InputRangeContainer .FacturationFormInput input{
     width: fit-content;
 }
 

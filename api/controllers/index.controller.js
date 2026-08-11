@@ -1930,6 +1930,11 @@ controller.getTransactionDetails = (req,res)=>{
             values.push(info.transaction_id)
         }
 
+        if(info.doc_id != undefined){
+            whereClauses.push(`"Ecosystem".transactions.doc_id = $${values.length +1}`)
+            values.push(info.doc_id)
+        }
+
         if (info.account_code != undefined) {
             whereClauses.push(`"Ecosystem".contable_accounts.code LIKE $${values.length + 1}`);
             values.push(`${info.account_code}%`);

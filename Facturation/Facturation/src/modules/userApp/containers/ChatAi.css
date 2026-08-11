@@ -197,11 +197,11 @@
 }
 
 
-.ChatAi .chatAiInput .FormInput label{
+.ChatAi .chatAiInput .FacturationFormInput label{
     display: none;
 }
 
-.ChatAi .chatAiInput .FormInput input{
+.ChatAi .chatAiInput .FacturationFormInput input{
     border: none;
     outline: none;
     box-shadow: none;

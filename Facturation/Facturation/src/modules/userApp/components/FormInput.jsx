@@ -19,7 +19,7 @@ export function FormInput({action,title,defaultValue,placeholder,children,type,d
     };
 
     return(
-        <div className="FormInput">
+        <div className="FacturationFormInput">
             <label htmlFor="">{title}</label>
             <div className="inputContainer">
                 {moneyF && (

@@ -168,17 +168,17 @@
     flex-wrap: wrap;
 }
 
-.FormNewThirdParties section form .FormInput{
+.FormNewThirdParties section form .FacturationFormInput{
     width: 20vw;
     margin: 1vh auto;
 }
 
-.FormNewThirdParties section form .SearchinList{
+.FormNewThirdParties section form .FacturationSearchinList{
     width: 20vw;
     margin: 1vh auto;
 }
 
-.FormNewThirdParties section form .ProductLinkFiscalConditionsCard .SearchinList{
+.FormNewThirdParties section form .ProductLinkFiscalConditionsCard .FacturationSearchinList{
     width: 100%;
     margin: 0;
 }
@@ -255,7 +255,7 @@
     padding: 1vh;
 }
 
-.FormNewThirdParties .retentionsList > .SearchinList{
+.FormNewThirdParties .retentionsList > .FacturationSearchinList{
     width: 100%;
     margin: 0;
 }

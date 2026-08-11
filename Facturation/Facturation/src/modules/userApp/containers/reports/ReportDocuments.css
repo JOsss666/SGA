@@ -49,17 +49,17 @@
     color: #aaa;
 }
 
-.ReportDocument .settingsReport .rangeInput .FormInput{
+.ReportDocument .settingsReport .rangeInput .FacturationFormInput{
     margin: auto 1vh;
     position: relative;
     min-width: 10vw;
 }
 
-.ReportDocument .settingsReport .rangeInput .FormInput .inputContainer input{
+.ReportDocument .settingsReport .rangeInput .FacturationFormInput .inputContainer input{
     box-shadow: none;
 }
 
-.ReportDocument .settingsReport .FormInput label{
+.ReportDocument .settingsReport .FacturationFormInput label{
     position: absolute;
     top: -3vh;
     font-size: clamp(2px,2.2vh,22px);

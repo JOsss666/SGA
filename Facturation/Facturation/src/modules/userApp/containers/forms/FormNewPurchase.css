@@ -244,17 +244,17 @@
     font-size: clamp(2.5px,2.5vh,25px);
 }
 
-.FormNewPurchase form .FormInput{
+.FormNewPurchase form .FacturationFormInput{
     width: fit-content;
     margin: auto 0;
 }
 
-.FormNewPurchase .itemBlock .gridItems .rowInputItem .FormInput{
+.FormNewPurchase .itemBlock .gridItems .rowInputItem .FacturationFormInput{
     width: 10vw;
     min-width: 0;
 }
 
-.FormNewPurchase .itemBlock .gridItems .rowInputItem .FormInput label{
+.FormNewPurchase .itemBlock .gridItems .rowInputItem .FacturationFormInput label{
     font-weight: 400;
     color: var(--descriptionText);
     font-size: clamp(2px,2vh,20px);
@@ -268,7 +268,7 @@
 }
 
 
-.FormNewPurchase form .footerDetailsContainer .FormInput{
+.FormNewPurchase form .footerDetailsContainer .FacturationFormInput{
     width: 100%;
 }
 
@@ -373,7 +373,7 @@
         margin-top: 28vh;
     }
 
-    .FormNewPurchase form .SearchinList{
+    .FormNewPurchase form .FacturationSearchinList{
         width: 100%;
     }
 
@@ -385,7 +385,7 @@
         flex-direction: column;
     }
 
-    .FormNewPurchase .itemBlock .gridItems .rowInputItem .FormInput{
+    .FormNewPurchase .itemBlock .gridItems .rowInputItem .FacturationFormInput{
         width: 72dvw;
     }
 

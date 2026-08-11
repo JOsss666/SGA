@@ -125,7 +125,7 @@ export function SearchinList({
     }, [value, selectedOption, defaultValue.value, defaultValue.text, list, noActVal]);
 
     return(
-        <div className="SearchinList" onClick={()=>{
+        <div className="FacturationSearchinList" onClick={()=>{
             setVisibleList(true)
         }} onBlur={(e) => {
             if (!e.currentTarget.contains(e.relatedTarget)) {

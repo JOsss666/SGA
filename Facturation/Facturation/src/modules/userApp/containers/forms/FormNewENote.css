@@ -49,7 +49,7 @@
     gap: 2vw;
 }
 
-.FormNewENote .step2Form .invoiceInfoContainer .invoiceHead .FormInput{
+.FormNewENote .step2Form .invoiceInfoContainer .invoiceHead .FacturationFormInput{
     width: 25vw;
 }
 
@@ -66,7 +66,7 @@
     width: 100%;
 }
 
-.FormNewENote .step2Form .resumeInvoice .itemRow .FormInput{
+.FormNewENote .step2Form .resumeInvoice .itemRow .FacturationFormInput{
     width: 12vw;
     min-width: 0;
     margin: auto 0;

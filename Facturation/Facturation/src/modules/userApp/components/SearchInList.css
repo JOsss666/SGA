@@ -1,32 +1,33 @@
 @import '../containers/UserApp.css';
 
-.SearchinList{
+.FacturationSearchinList{
     display: flex;
     flex-direction: column;
     padding: 1vh 0;
     position: relative;
 }
 
-.SearchinList label{
-    margin-bottom: 1.5vh;
+.FacturationSearchinList label{
+    margin-bottom: 2vh;
+    padding-left: 2vh;
     font-size: clamp(1px,2.5vh,20px);
-    font-weight: 500;
+    font-weight: 400;
     color: var(--mainText);
 }
 
-.SearchinList .SlistC{
+.FacturationSearchinList .SlistC{
     display: flex;
     width: 100%;
     position: relative;
 }
 
-.SearchinList .SlistC input{
+.FacturationSearchinList .SlistC input{
     width:100%;
     padding: 1vh 2vh;
-    border-radius: .5vh;
+    border-radius: 1vh;
     border: hidden;
     outline: solid .1vh var(--inputsBorder);
-    box-shadow: 0 .4vh 1vh var(--translucidMenu);
+    box-shadow: 0 0vh 1vh var(--translucidMenu);
     color: var(--descriptionText);
     background-color: var(--inputsBg);
     z-index: 5;
@@ -34,12 +35,12 @@
     transition: .3s;
 }
 
-.SearchinList .SlistC input:focus{
+.FacturationSearchinList .SlistC input:focus{
     color: var(--mainText);
     outline: solid .2vh #155DFC;
 }
 
-.SearchinList .SlistC .listElementsContainer{
+.FacturationSearchinList .SlistC .listElementsContainer{
     position: absolute;
     top: 4.8vh;
     left: 0;
@@ -61,7 +62,7 @@
     animation-fill-mode: both;
 }
 
-.SearchinList .clearSelectedOptionBtn{
+.FacturationSearchinList .clearSelectedOptionBtn{
     position: absolute;
     right: 2vh;
     top: 1vh;
@@ -71,11 +72,11 @@
     cursor: pointer;
 }
  
-.SearchinList .clearSelectedOptionBtn:hover{
+.FacturationSearchinList .clearSelectedOptionBtn:hover{
     color: var(--mainText);
 }
 
-.SearchinList .SlistC .listElementsContainer li{
+.FacturationSearchinList .SlistC .listElementsContainer li{
     padding: 1vh 2vh;
     font-size: clamp(1px,2.2vh,20px);
     cursor: pointer;
@@ -83,13 +84,13 @@
     transition: .3s;
 }
 
-.SearchinList .SlistC .listElementsContainer li:hover{
-    background-color: var(--iconHover);
+.FacturationSearchinList .SlistC .listElementsContainer li:hover{
+    background-color: #007AFF;
     padding-left: 3vh;
-    color: var(--mainText);
+    color: #fff;
 }
 
-.SearchinList .SlistC .listElementsContainer .focused-item{
+.FacturationSearchinList .SlistC .listElementsContainer .focused-item{
     background-color: #007AFF;
     padding-left: 3vh;
     color: #fff;

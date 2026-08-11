@@ -138,12 +138,12 @@
     color: var(--descriptionText);
 }
 
-.FormNewInvoice .itemBlock .gridItems .rowInputItem .FormInput{
+.FormNewInvoice .itemBlock .gridItems .rowInputItem .FacturationFormInput{
     width: 10vw;
     min-width: 0;
 }
 
-.FormNewInvoice .itemBlock .gridItems .rowInputItem .FormInput label{
+.FormNewInvoice .itemBlock .gridItems .rowInputItem .FacturationFormInput label{
     font-weight: 400;
     color: var(--descriptionText);
     font-size: clamp(2px,2vh,20px);
@@ -178,7 +178,7 @@
         margin-top: 28vh;
     }
 
-    .FormNewInvoice form .SearchinList{
+    .FormNewInvoice form .FacturationSearchinList{
         width: 100%;
     }
 
@@ -190,7 +190,7 @@
         flex-direction: column;
     }
 
-    .FormNewInvoice .itemBlock .gridItems .rowInputItem .FormInput{
+    .FormNewInvoice .itemBlock .gridItems .rowInputItem .FacturationFormInput{
         width: 72dvw;
     }
 

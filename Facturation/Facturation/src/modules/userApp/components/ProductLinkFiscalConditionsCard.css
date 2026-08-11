@@ -56,7 +56,7 @@
     padding: 1.5vh 0;
 }
 
-.ProductLinkFiscalConditionsCard .productFiscalBody .SearchinList{
+.ProductLinkFiscalConditionsCard .productFiscalBody .FacturationSearchinList{
     width: 100%;
     margin: 0;
 }
@@ -146,7 +146,7 @@
     padding: 1vh;
 }
 
-.ProductLinkFiscalConditionsCard .thirdPartyProductReference .FormInput{
+.ProductLinkFiscalConditionsCard .thirdPartyProductReference .FacturationFormInput{
     width: 100%;
 }
 
