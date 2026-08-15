@@ -589,8 +589,11 @@ export function moneyFormat(value){
     }
 
     // Usamos Intl.NumberFormat para máxima eficiencia
-    // 'de-DE' usa el punto como separador de miles
-    return new Intl.NumberFormat('de-DE').format(value);
+    // 'de-DE' usa el punto como separador de miles y la coma como decimal
+    return new Intl.NumberFormat('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(value);
 
 }
 
