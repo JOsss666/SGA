@@ -1,0 +1,46 @@
+.LinkPreviewMessage{
+    display: flex;
+    align-items: center;
+    gap: 1.4vh;
+    min-width: 26vh;
+    padding: .4vh;
+}
+
+.LinkPreviewMessage .linkIcon{
+    height: 5.2vh;
+    width: 5.2vh;
+    min-width: 5.2vh;
+    border-radius: 1.2vh;
+    background-color: var(--chatAccent);
+    display: flex;
+}
+
+.LinkPreviewMessage .linkIcon i{
+    margin: auto;
+    color: #fff;
+    font-size: clamp(2.4px,2.2vh,22px);
+}
+
+.LinkPreviewMessage .linkInfo{
+    display: flex;
+    flex-direction: column;
+    gap: .3vh;
+    overflow: hidden;
+}
+
+.LinkPreviewMessage .linkInfo strong{
+    font-size: clamp(2px,1.8vh,18px);
+    font-weight: 600;
+    color: var(--mainText);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.LinkPreviewMessage .linkInfo span{
+    font-size: clamp(1.8px,1.5vh,15px);
+    color: var(--chatAccent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

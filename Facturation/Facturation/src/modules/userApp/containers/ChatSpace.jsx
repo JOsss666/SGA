@@ -1,5 +1,6 @@
 import { ChatMessage } from "../components/ChatMessage";
-import { InputBarChat } from "../components/InputBarChat";
+import { ChatDateDivider } from "../components/ChatDateDivider";
+import { ChatInputBar } from "../components/ChatInputBar";
 import './ChatSpace.css'
 
 export function ChatSpace({chatInfo,icon,messages,state}){
@@ -17,12 +18,15 @@ export function ChatSpace({chatInfo,icon,messages,state}){
                 </div>
             </div>
             <div className="spaceChatText">
+                {messages.length > 0 && (
+                    <ChatDateDivider label={'Hoy'}/>
+                )}
                 {messages.length > 0 && messages.map((element,index)=>(
-                    <ChatMessage info={element}/>
+                    <ChatMessage info={element} key={index}/>
                 ))}
             </div>
             <div className="inputChat">
-                <InputBarChat placeholder={'Enviar un ménsaje'}/>
+                <ChatInputBar placeholder={'Escribe un mensaje'}/>
             </div>
         </div>
     )

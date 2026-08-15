@@ -18,19 +18,33 @@ export function DocumentPreview({data}){
     const {addNotification} = useNotifications();
     const [info,setInfo] = useState(data != undefined ? data:{});
 
-    const messageTest = {
-        user_name:'Nombre Usuario1',
-        text:'Este es el contenido del mensaje',
-        user_id:0
-    }
-
-    const messageTest2 = {
-        user_name:'Nombre Usuario2',
-        text:'Este es un mensaje própio ',
-        user_id:1
-    }
-
-    const messages = [messageTest,messageTest2,messageTest,messageTest,messageTest2,messageTest];
+    const messages = [
+        {
+            user_name:'Ana Torres',
+            text:'Hola! Ya revisé la factura, se ve todo correcto por ahora.',
+            user_id:0,
+            timestamp:'9:32'
+        },
+        {
+            user_name:'Ana Torres',
+            kind:'voice',
+            voice:{duration:'00:35'},
+            user_id:0,
+            timestamp:'9:32'
+        },
+        {
+            text:'Aquí está el enlace para la reunión de revisión, revísala por favor',
+            user_id:1,
+            timestamp:'9:33'
+        },
+        {
+            kind:'link',
+            link:{title:'Revisión de factura',subtitle:'meet.google.com/factura-review'},
+            reaction:'👍',
+            user_id:1,
+            timestamp:'9:33'
+        }
+    ];
 
     const handleToolChange = (tool)=>{
         if(openTools){

@@ -1,0 +1,10 @@
+.TextMessage{
+    display: flex;
+    flex-direction: column;
+}
+
+.TextMessage .childrenMess{
+    margin-top: 1vh;
+    display: flex;
+    flex-direction: column;
+}
