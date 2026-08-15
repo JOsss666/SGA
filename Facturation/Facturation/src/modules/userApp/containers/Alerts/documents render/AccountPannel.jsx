@@ -6,12 +6,11 @@ import './AccountPannel.css'
 
 const columns = [
     {text:'ID',value:'id'},
-    {text:'Concepto',value:'concept_name'},
-    {text:'Tipo',value:'type'},
-    {text:'Sub total',value:'subTotal'},
-    {text:'Total',value:'total'},
-    {text:'Naturaleza',value:'nature'},
     {text:'Cuenta',value:'account_code'},
+    {text:'Concepto',value:'concept_name'},
+    {text:'Naturaleza',value:'nature'},
+    {text:'Tipo',value:'type'},
+    {text:'Total',value:'total'},
 ];
 
 export function AccountPannel({id}){
