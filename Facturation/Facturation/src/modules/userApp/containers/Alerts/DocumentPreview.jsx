@@ -9,6 +9,7 @@ import { OpCard } from "../../components/OpCard";
 import { DocumentCard } from "../../components/DocumentCard";
 import { SellInvoiceRender } from "./documents render/SellInvoiceRender";
 import { formatDate } from "../../../../utils/functions";
+import { PreviewLinkedDocument } from "./documents render/PreviewLinkedDocuments";
 
 export function DocumentPreview({data}){
     const {popInAlert,popOutAlert} = useAlert();
@@ -57,7 +58,7 @@ export function DocumentPreview({data}){
                 <div className="MenuPreviewOptions">
                     <ButtonMenu title={'Documentos asociados'} noRotate={true} onClick={()=>handleToolChange('linkedDocs')}><i className="fa-regular fa-folder-open"/></ButtonMenu>
                     <ButtonMenu title={'Guardar'}><i className="fa-solid fa-floppy-disk"/></ButtonMenu>
-                    <ButtonMenu title={'Descargar'}><i className="fa-solid fa-cloud-arrow-down"/></ButtonMenu>
+                    <ButtonMenu title={'Descargar'} noRotate={true} ><i className="fa-solid fa-download"/></ButtonMenu>
                     <ButtonMenu title={'Imprimir'}><i className="fa-solid fa-print"/></ButtonMenu>
                     <ButtonMenu noRotate={true} onClick={()=>{handleToolChange('Share')}}  title={'Compartir'}><i className="fa-solid fa-share-nodes"/></ButtonMenu>
                     <ButtonMenu noRotate={true} onClick={()=>{handleToolChange('Comments')}} title={'Comentarios'}><i className="fa-regular fa-comments"/></ButtonMenu>
@@ -67,6 +68,9 @@ export function DocumentPreview({data}){
                 </div>
                 {openTools && (
                     <div className="ToolsContainer">
+                        {activeTool == 'linkedDocs' && (
+                            <PreviewLinkedDocument id={info.doc_id}/>
+                        )}
                         {activeTool == 'Share' && (
                             <ShareDocuments info={info}/>
                         )}{activeTool == 'Comments' && (
