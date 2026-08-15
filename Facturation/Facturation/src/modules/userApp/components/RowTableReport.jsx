@@ -24,7 +24,8 @@ export function RowTableReport({columns,info,hidden,navigation}){
         "ID":<span className="Redirect idHolder rowSpan" onClick={()=>{
             info.type = 'Document'
             setPreviewInfo(info);
-            setOpenPreview(true)
+            //setOpenPreview(true)
+            popInAlert(<DocumentPreview data={info}/>)
         }} >{info.docType}# {info.ownSerial != undefined? info.ownSerial:info.id}</span>,
         "Transacción":<span className="Redirect rowSpan" onClick={()=>{
             info.type = 'Document'
