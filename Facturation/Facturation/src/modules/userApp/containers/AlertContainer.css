@@ -1,19 +1,36 @@
 @import './UserApp.css';
 
 .AlertContainer{
-    height: inherit;
-    padding: 1vh;
     width: fit-content;
+    min-width: min(420px, calc(100vw - 32px));
+    margin: 4vh auto;
+    padding: 6vh 4vh 2vh;
     position: relative;
-    box-shadow: 0 -.2vh 1vh #0002;
-    overflow: auto;
-    animation-name: appearAlert;
-    animation-duration:1s;
-    animation-fill-mode: both;
-    animation-timing-function: ease;
-    width: 100%;
+    border: 1px solid color-mix(in srgb, var(--mainText) 10%, transparent);
+    border-radius: clamp(16px, 2vw, 24px);
+    box-shadow: 0 28px 80px #00000038, 0 8px 24px #0000001c;
+    overflow: visible;
+    animation: appearAlert .28s cubic-bezier(.2, .8, .2, 1) both;
     background-color: var(--bg);
     z-index: 30;
+    transform-origin: center;
+    transition: transform .22s ease, opacity .22s ease, filter .22s ease;
+}
+
+.AlertContainer.fullScale{
+    width: 100vw;
+    min-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+}
+
+.AlertContainer.inactive{
+    pointer-events: none;
+    user-select: none;
+}
+
+.AlertContainer.active{
+    pointer-events: auto;
 }
 
 :root.dark .AlertContainer{
@@ -22,33 +39,64 @@
 
 .AlertContainer .optionsAlert{
     position: absolute;
-    padding: 1vh;
     top: 2vh;
     right: 2vh;
+    z-index: 20;
 }
 
-.AlertContainer .optionsAlert i{
+.AlertContainer .closeAlertButton{
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--mainText) 14%, transparent);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    box-shadow: 0 6px 18px #0002;
     cursor: pointer;
-    font-size: clamp(3.5px,3vh,350px);
     color: var(--mainText);
+    font-size: 1.25rem;
+    transition: background-color .18s ease, transform .18s ease, box-shadow .18s ease;
+    backdrop-filter: blur(10px);
+}
+
+.AlertContainer .closeAlertButton:hover{
+    background: color-mix(in srgb, var(--mainText) 10%, var(--bg));
+    transform: scale(1.04);
+}
+
+.AlertContainer .closeAlertButton:active{
+    transform: scale(.96);
+}
+
+.AlertContainer .closeAlertButton:focus-visible{
+    outline: 3px solid var(--principalColor, #376cfb);
+    outline-offset: 3px;
 }
 
 @keyframes appearAlert {
     0%{
-        top: 100%;
+        opacity: 0;
+        transform: translateY(18px) scale(.975);
     }
 
     100%{
-        top: 0;
+        opacity: 1;
+        transform: translateX(0);
     }
 }
 
 @media (max-width:500px) {
     .AlertContainer{
-        padding: 0;
+        min-width: min(320px, 100vw);
     }
 
-    .AlertContainer .optionsAlert{
-        padding: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .AlertContainer{
+        animation-duration: .01ms;
+        transition-duration: .01ms;
     }
 }

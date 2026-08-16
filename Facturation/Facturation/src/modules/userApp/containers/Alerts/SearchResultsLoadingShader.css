@@ -1,0 +1,137 @@
+.SearchResultsLoadingShader{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 2.2vh;
+    padding: .2vh .5vh 1vh 0;
+}
+
+.SearchResultsLoadingShader.compact{
+    gap: 0;
+    padding: .45vh 0 0;
+}
+
+.SearchResultsLoadingShader .shaderAccessibleText{
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.SearchResultsLoadingShader .shaderSection{
+    display: flex;
+    flex-direction: column;
+    gap: 1.1vh;
+}
+
+.SearchResultsLoadingShader .shaderSectionHead,
+.SearchResultsLoadingShader .shaderRow{
+    display: flex;
+    align-items: center;
+}
+
+.SearchResultsLoadingShader .shaderSectionHead{
+    gap: .8vh;
+}
+
+.SearchResultsLoadingShader .shaderRows{
+    display: flex;
+    flex-direction: column;
+    gap: .45vh;
+}
+
+.SearchResultsLoadingShader .shaderRow{
+    min-height: 5.6vh;
+    padding: 1vh;
+    border-radius: 1.2vh;
+    background: color-mix(in srgb, var(--cardHover) 42%, transparent);
+}
+
+.SearchResultsLoadingShader .shaderBlock{
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--descriptionText) 13%, var(--menuAside));
+}
+
+.SearchResultsLoadingShader .shaderBlock::after{
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-110%);
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        color-mix(in srgb, var(--mainText) 10%, transparent) 46%,
+        color-mix(in srgb, var(--mainText) 16%, transparent) 52%,
+        transparent 100%
+    );
+    animation: searchShaderSweep 1.35s ease-in-out infinite;
+}
+
+.SearchResultsLoadingShader .shaderSectionIcon{
+    width: 2vh;
+    height: 2vh;
+    border-radius: .55vh;
+}
+
+.SearchResultsLoadingShader .shaderSectionTitle{
+    width: 11vh;
+    height: 1.5vh;
+    border-radius: 999px;
+}
+
+.SearchResultsLoadingShader .shaderResultIcon{
+    flex: 0 0 3.6vh;
+    width: 3.6vh;
+    height: 3.6vh;
+    margin-right: 1.2vh;
+    border-radius: 1vh;
+}
+
+.SearchResultsLoadingShader .shaderResultText{
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 1vh;
+    min-width: 0;
+}
+
+.SearchResultsLoadingShader .shaderPrimaryLine,
+.SearchResultsLoadingShader .shaderSecondaryLine{
+    height: 1.5vh;
+    border-radius: 999px;
+}
+
+.SearchResultsLoadingShader .shaderPrimaryLine{
+    width: min(34%, 16vh);
+}
+
+.SearchResultsLoadingShader .shaderSecondaryLine{
+    width: min(52%, 25vh);
+}
+
+@keyframes searchShaderSweep {
+    to{
+        transform: translateX(110%);
+    }
+}
+
+@media (max-width: 500px) {
+    .SearchResultsLoadingShader .shaderSecondaryLine{
+        width: 45%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .SearchResultsLoadingShader .shaderBlock::after{
+        animation: none;
+        transform: none;
+        opacity: .45;
+    }
+}

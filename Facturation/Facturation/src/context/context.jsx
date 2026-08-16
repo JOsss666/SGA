@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { postInfo } from '../utils/functions';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
@@ -148,44 +148,103 @@ export function AiAssistanProvider({children}){
 }
 
 export function AlertProvider({ children }) {
-    const [openAlert, setOpenAlert] = useState(false);
     const [tailAlerts, setTailAlerts] = useState([]);
-    
-    const popInAlert = (child) => {
-        console.log('Abriendo alerta')
-        setTailAlerts(prev => [...prev, {alert:child}]);
-        setOpenAlert(true);
-    }
 
-    const popOutAlert = () => {
-        if(tailAlerts.length >1){
-            let C = []
-            tailAlerts.map((element,index)=>{
-                if(index != tailAlerts.length -1){
-                    C.push(element);
+    const popInAlert = useCallback((alert, options = {}) => {
+        const id = options.id ?? `alert-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+        setTailAlerts(current => {
+            const existingIndex = current.findIndex(entry => entry.id === id);
+            const nextAlert = {
+                id,
+                alert,
+                fullScale: options.fullScale ?? false,
+                closeLabel: options.closeLabel ?? 'Cerrar alerta',
+            };
+
+            if (existingIndex === -1) return [...current, nextAlert];
+
+            return current.map((entry, index) => index === existingIndex
+                ? { ...entry, ...nextAlert }
+                : entry
+            );
+        });
+
+        return id;
+    }, []);
+
+    // LIFO: sin argumentos siempre retira exclusivamente la alerta superior.
+    // expectedId permite que una tarea asincrona cierre su propia alerta solo
+    // cuando esta sigue siendo la que esta en primer plano.
+    const popOutAlert = useCallback((expectedId) => {
+        setTailAlerts(current => {
+            if (current.length === 0) return current;
+
+            const topAlert = current[current.length - 1];
+            if (expectedId != null && topAlert.id !== expectedId) return current;
+
+            return current.slice(0, -1);
+        });
+    }, []);
+
+    const removeAlert = useCallback((id) => {
+        if (id == null) return;
+        setTailAlerts(current => current.filter(entry => entry.id !== id));
+    }, []);
+
+    const replaceTopAlert = useCallback((alert, options = {}) => {
+        setTailAlerts(current => {
+            if (current.length === 0) return current;
+
+            const topIndex = current.length - 1;
+            return current.map((entry, index) => index === topIndex
+                ? {
+                    ...entry,
+                    alert,
+                    fullScale: options.fullScale ?? entry.fullScale,
+                    closeLabel: options.closeLabel ?? entry.closeLabel,
                 }
-            });
-            setTailAlerts(C);
-        }else{
-        setOpenAlert(false)
-        setTailAlerts([])
-        }
-    }
+                : entry
+            );
+        });
+    }, []);
 
-    const value = {
+    const updateAlert = useCallback((id, alert, options = {}) => {
+        setTailAlerts(current => current.map(entry => entry.id === id
+            ? {
+                ...entry,
+                alert,
+                fullScale: options.fullScale ?? entry.fullScale,
+                closeLabel: options.closeLabel ?? entry.closeLabel,
+            }
+            : entry
+        ));
+    }, []);
+
+    const clearAlerts = useCallback(() => setTailAlerts([]), []);
+    const openAlert = tailAlerts.length > 0;
+
+    // Adaptador temporal para consumidores antiguos del contexto.
+    const setOpenAlert = useCallback((isOpen) => {
+        if (typeof isOpen === 'function') {
+            setTailAlerts(current => isOpen(current.length > 0) ? current : []);
+            return;
+        }
+        if (!isOpen) clearAlerts();
+    }, [clearAlerts]);
+
+    const value = useMemo(() => ({
         openAlert,
         setOpenAlert,
         tailAlerts,
         setTailAlerts,
         popInAlert,
-        popOutAlert
-    };
-
-    useEffect(()=>{
-        if(openAlert == false){
-            setTailAlerts([])
-        }
-    },[openAlert])
+        popOutAlert,
+        removeAlert,
+        replaceTopAlert,
+        updateAlert,
+        clearAlerts,
+    }), [openAlert, tailAlerts, popInAlert, popOutAlert, removeAlert, replaceTopAlert, updateAlert, clearAlerts, setOpenAlert]);
 
     return (
         <AppAlerts.Provider value={value}>

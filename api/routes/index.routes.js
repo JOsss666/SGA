@@ -18,6 +18,7 @@ import electronicProviderCredentialsController from '../controllers/electronicPr
 import treasuryController from '../controllers/TreasuryController.js';
 import geographyController from '../controllers/geographyController.js';
 import companyConfigurationController from '../controllers/companyConfigurationController.js';
+import searchController from '../controllers/searchController.js';
 
 const router = express.Router();
 
@@ -55,6 +56,8 @@ const upload = multer({ dest: CHUNKS_DIR });
 router.post('/getCompanyInfo',controller.getCompanyInfo);
 
 router.post('/companies/clone-configuration', express.json(), companyConfigurationController.clone);
+
+router.post('/search', express.json(), searchController.search);
 
 router.post('/getUserInfo',controller.getUserInfo);
 

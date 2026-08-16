@@ -51,6 +51,7 @@ import { ProcessInstanceAnalytics } from './Analytics/ProcessInstanceAnalycs';
 import { Analytics2 } from './Analytics2';
 import { QuickActions } from './QuickActions';
 import { ElectronicDocuments } from './ElectronicDocuments';
+import { SearchResultsPannel } from './Alerts/SearchResultsPannel';
 
 export function UserApp(){
 
@@ -58,7 +59,7 @@ export function UserApp(){
     const {appInfo,userInfo,loadingAppData,darkMode,getAppData,optionsMenu,secondOptionsMenu,routesApp,userConfig} = useAppInfo();
     const {openPreview,setOpenPreview} = usePreview();
     const {addNotification} = useNotifications();
-    const {openAlert,popInAlert,popOutAlert} = useAlert();
+    const {openAlert,popInAlert,removeAlert} = useAlert();
     const {visibleChatAi,setVisibleChatAi} = useAiAssistant();
     const [statusPage,setStatusPage] = useState('loading');
 
@@ -89,16 +90,16 @@ export function UserApp(){
         console.log(loadingAppData);
     },[loadingAppData])
 
-    window.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
-            if(openAlert){
-                popOutAlert();
-            }
-            if(openPreview){
+    useEffect(() => {
+        const handlePreviewEscape = (event) => {
+            if (event.key === 'Escape' && !openAlert && openPreview) {
                 setOpenPreview(false);
             }
-        }
-    });
+        };
+
+        window.addEventListener('keydown', handlePreviewEscape);
+        return () => window.removeEventListener('keydown', handlePreviewEscape);
+    }, [openAlert, openPreview, setOpenPreview]);
         
     const filterOptions = (value) => {
         if (!quickSearch) return true; 
@@ -112,10 +113,19 @@ export function UserApp(){
     }, [darkMode]);
 
     useEffect(()=>{
-        if(quickSearch != ""){
-            setVisibleResultsSearch(true)
-        }
-    },[quickSearch])
+        if(quickSearch == "") return;
+
+        const initialSearchValue = quickSearch;
+        popInAlert(
+            <SearchResultsPannel searchValue={initialSearchValue}/>,
+            { id: 'quick-search', closeLabel: 'Cerrar búsqueda' }
+        );
+        setQuickSearch("");
+    },[quickSearch, popInAlert])
+
+    useEffect(() => () => {
+        removeAlert('quick-search');
+    }, [removeAlert]);
 
     useEffect(() => {
         if (visibleChatAi) {
@@ -165,7 +175,7 @@ export function UserApp(){
             {!loadingAppData && statusPage=='page' &&(
                 <>
                     <header className='headApp'>
-                    <SearchBar placeholder={`Buscar en ${appInfo.legal_name} - Ventas`} action={setQuickSearch}/>
+                    <SearchBar placeholder={`Buscar en ${appInfo.legal_name} - Ventas`} value={quickSearch} action={setQuickSearch}/>
                     {visibleResultsSearch && (
                         <div className="resultsQuickSerch">
                             {quickSearch != "" && routesApp.map((element,index)=>(
