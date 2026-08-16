@@ -47,7 +47,6 @@
 }
 
 .FormNewInvoice form{
-    padding-top: 4vh;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
