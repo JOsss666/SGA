@@ -1,15 +1,10 @@
 import { MainTitleAi } from '../../../components/ChatAiComponents/MainTitleAi';
 import { DescriptionSpan } from '../../../components/DescriptionSpan';
-import aiLoaderVideo from '../../../../../assets/A2.mp4';
 import './LoaderAiUtoComplete.css';
 
 export function LoaderAiUtoComplete({ loadingMessage, completedSteps = [] }) {
     return (
         <div className="LoaderAiUtoComplete">
-            <video autoPlay muted loop playsInline preload="auto">
-                <source src={aiLoaderVideo} type="video/mp4" />
-            </video>
-
             <div className="loaderContent">
                 <MainTitleAi text="Cargando solicitud IA" />
                 <DescriptionSpan text="Esto puede tardar un poco, el tiempo de carga es externo a nuestros servicios" />

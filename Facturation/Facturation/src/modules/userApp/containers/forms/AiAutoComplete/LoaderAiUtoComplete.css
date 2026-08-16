@@ -11,17 +11,6 @@
     background-color:var(--menuAside);
 }
 
-.LoaderAiUtoComplete > video{
-    width: 60%;
-    height: 100%;
-    display: none; /* Temporal: animación de video oculta */
-    object-fit: cover;
-    margin: auto;
-    margin-top: -10%;
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 14%, #000 86%, transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0%, #000 14%, #000 86%, transparent 100%);
-}
-
 .LoaderAiUtoComplete .loaderContent{
     position: absolute;
     inset: 0;
