@@ -1,11 +1,12 @@
 .FormNewInvoice{
-    width: 93dvw;
+    width:85dvw;
     position: relative;
 }
 
 .FormNewInvoice .headForm{
-    width: 92%;
+    width: 100%;
     padding: 2vh 2vw;
+    left: 0;
 }
 
 .FormNewInvoice .errorContainer{
