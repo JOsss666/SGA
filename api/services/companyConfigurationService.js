@@ -257,14 +257,20 @@ async function cloneConceptTaxes(client, maps) {
 async function cloneCompanySettings(client, sourceCompanyId, targetCompanyId) {
     if (!await tableExists(client, 'Ecosystem', 'company_settings')) return { count: 0, skipped: true };
     const source = await client.query(
-        'SELECT config, "taxConfig" FROM "Ecosystem".company_settings WHERE company_id = $1',
+        'SELECT config, "taxConfig", time_zone FROM "Ecosystem".company_settings WHERE company_id = $1',
         [sourceCompanyId]
     );
     if (source.rowCount === 0) return { count: 0 };
     await client.query(
-        `INSERT INTO "Ecosystem".company_settings (company_id, config, created_at, updated_at, "taxConfig")
-         VALUES ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $3)`,
-        [targetCompanyId, removeExcludedModules(source.rows[0].config), source.rows[0].taxConfig]
+        `INSERT INTO "Ecosystem".company_settings
+            (company_id, config, created_at, updated_at, "taxConfig", time_zone)
+         VALUES ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $3, $4)`,
+        [
+            targetCompanyId,
+            removeExcludedModules(source.rows[0].config),
+            source.rows[0].taxConfig,
+            source.rows[0].time_zone
+        ]
     );
     return { count: 1 };
 }

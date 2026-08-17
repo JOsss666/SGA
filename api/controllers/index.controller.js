@@ -10,6 +10,7 @@ import materializedViewsController from "./MaterializedViewsController.js";
 import transactionController from "./TransactionController.js";
 import transactionDetailController from "./TransactionDetailController.js";
 import thirdPartyService from "../services/thirdPartyService.js";
+import { appendBusinessDateRange, companyTimeZoneSql } from "../services/businessTimeZoneService.js";
 const controller = {};
 
 controller.uploadChunk = (req, res) => {
@@ -357,6 +358,7 @@ controller.getCompanyInfo = (req,res)=>{
                     "Ecosystem".account_plans.id AS "accountPlanId",
                     "Ecosystem".account_plans.type AS "accountPlanType",
                     "Ecosystem".company_settings.config,
+                    "Ecosystem".company_settings.time_zone,
                     COALESCE(
                         "Ecosystem".company_settings."taxConfig",
                         '{}'::jsonb
@@ -1944,25 +1946,13 @@ controller.getTransactionDetails = (req,res)=>{
             whereClauses.push(`"Ecosystem".transaction_detail.account_id = $${values.length +1}`)
             values.push(info.account_id)
         }
-        if (start && end) {
-            values.push(start, end);
-            whereClauses.push(
-                `${columnDate} >= $${values.length - 1}::timestamp
-                AND ${columnDate} < ($${values.length}::timestamp + INTERVAL '1 day')`
-            );
-
-        } else if (start) {
-            values.push(start);
-            whereClauses.push(
-                `${columnDate} >= $${values.length}::timestamp`
-            );
-
-        } else if (end) {
-            values.push(end);
-            whereClauses.push(
-                `${columnDate} < ($${values.length}::timestamp + INTERVAL '1 day')`
-            );
-        }
+        appendBusinessDateRange({
+            whereClauses,
+            values,
+            column: columnDate,
+            start,
+            end
+        });
 
 
         const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
@@ -1970,6 +1960,9 @@ controller.getTransactionDetails = (req,res)=>{
         let sentence = `
             SELECT
                 "Ecosystem".transaction_detail.*,
+                ${columnDate} AT TIME ZONE (${companyTimeZoneSql('$1')}) AS created_at_local,
+                (${columnDate} AT TIME ZONE (${companyTimeZoneSql('$1')}))::date AS business_date,
+                ${companyTimeZoneSql('$1')} AS business_time_zone,
                 "Ecosystem".contable_accounts.name AS concept_name,
                 "Ecosystem".contable_accounts.code AS account_code,
                 "Ecosystem".transactions.doc_type,
