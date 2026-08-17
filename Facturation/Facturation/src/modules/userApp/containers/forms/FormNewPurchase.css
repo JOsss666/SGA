@@ -1,10 +1,10 @@
 .FormNewPurchase{
-    width: 93dvw;
+    width: 80dvw;
     position: relative;
 }
 
 .FormNewPurchase .headForm{
-    width: 92%;
+    width: 100%;
     padding: 2vh 2vw;
     box-shadow: 0 .5vh 1vh var(--translucidMenu);
     position: fixed;
