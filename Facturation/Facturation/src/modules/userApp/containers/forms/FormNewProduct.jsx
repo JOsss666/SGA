@@ -37,7 +37,7 @@ export function FormNewProduct({info,update,reloadFun}){
     const [taxes,setTaxes] = useState([]);
     // form info
         // Sec 1
-        const [photo,setPhoto] = useState('https://res.cloudinary.com/djjxugmni/image/upload/v1764620093/ChatGPT_Image_1_dic_2025_15_04_38_3_hcdqxl.png');
+        const [photo,setPhoto] = useState('https://cdnmain.sga360.co/static/ChatGPT_Image_1_dic_2025_15_04_38_3_hcdqxl.webp');
         const [type_product,setType_product] = useState('product');
         const [name,setName] = useState('');
         const [code,setCode] = useState('');
@@ -226,7 +226,7 @@ export function FormNewProduct({info,update,reloadFun}){
                             <div className="actualPhoto">
                                 <img src={photo} alt="" />
                             </div>
-                            <FileInput action={setPhoto} placeholder={'Seleccionar nueva foto'}>
+                            <FileInput category="assets" action={setPhoto} placeholder={'Seleccionar nueva foto'}>
                                 <i className="fa-solid fa-camera"/>
                             </FileInput>
                         </div>

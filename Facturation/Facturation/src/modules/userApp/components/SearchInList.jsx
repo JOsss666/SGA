@@ -1,14 +1,26 @@
 import { useEffect, useRef, useState } from 'react'
 import './SearchInList.css'
 
-export function SearchinList({title, placeHolder, list, disabled, action, children, specialOption, noActVal,canClear, defaultValue = {}}){
+export function SearchinList({
+    title,
+    placeHolder,
+    list = [],
+    disabled,
+    action,
+    children,
+    specialOption,
+    noActVal,
+    canClear,
+    defaultValue = {},
+    value
+}){
     
     const [searchValue, setSearchValue] = useState('');
+    const [inputValue, setInputValue] = useState(defaultValue.text ?? '');
+    const [selectedOption, setSelectedOption] = useState(defaultValue.value);
     const [visibleList, setVisibleList] = useState(false);
-    const [selectedOption, setSelectedOption] = useState(noActVal ? undefined : "");
     const [focusedIndex, setFocusedIndex] = useState(-1);
     
-    const inRef = useRef();
     const listE = useRef(); // Referencia al contenedor <ul>
 
     const filteredList = list.filter(element => 
@@ -37,16 +49,19 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
                 }
             }
         }
-    }, [focusedIndex, visibleList]); 
+    }, [focusedIndex, visibleList, specialOption]);
     // ----------------------------------
 
     const handleSelect = (element) => {
+        const optionValue = element.value !== undefined ? element.value : element.text;
+
         if(!noActVal){
-            inRef.current.value = element.text;
-            setSelectedOption(element.value !== undefined ? element.value : element.text);
-        } else {
-            if(action) action(element.value !== undefined ? element.value : element.text);
+            setInputValue(element.text);
+            setSearchValue('');
+            setSelectedOption(optionValue);
         }
+
+        if(action) action(optionValue);
         setVisibleList(false);
         setFocusedIndex(-1);
     };
@@ -55,10 +70,9 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
         setFocusedIndex(-1);
         setVisibleList(false);
         setSearchValue('');
-        setSelectedOption(undefined); // o "" según tu lógica
-        if (inRef.current) {
-            inRef.current.value = "";
-        }
+        setInputValue('');
+        setSelectedOption('');
+        if(action && !noActVal) action('');
     };
 
     const handleKeyDown = (e) => {
@@ -80,21 +94,38 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
         }
     };
 
-    useEffect(() => {
-        console.log(selectedOption)
-        if(selectedOption !== undefined && action !== undefined){
-            action(selectedOption);
-        }
-    }, [selectedOption]);
-
     useEffect(()=>{
-        if(defaultValue.value != undefined){
-            handleSelect(defaultValue)
+        if(noActVal) return;
+
+        const isControlled = value !== undefined;
+        const selectedValue = isControlled
+            ? value
+            : selectedOption ?? defaultValue.value;
+        if(selectedValue === undefined || selectedValue === null || selectedValue === ''){
+            setInputValue('');
+            return;
         }
-    },[])
+
+        const comparableValue = currentValue => {
+            if(currentValue && typeof currentValue === 'object'){
+                return currentValue.id
+                    ?? currentValue.thirdParty_id
+                    ?? currentValue.product_id
+                    ?? currentValue.value;
+            }
+            return currentValue;
+        };
+
+        const selectedElement = list.find(element => {
+            const optionValue = element.value !== undefined ? element.value : element.text;
+            return String(comparableValue(optionValue)) === String(comparableValue(selectedValue));
+        });
+
+        setInputValue(selectedElement?.text ?? defaultValue.text ?? '');
+    }, [value, selectedOption, defaultValue.value, defaultValue.text, list, noActVal]);
 
     return(
-        <div className="SearchinList" onClick={()=>{
+        <div className="FacturationSearchinList" onClick={()=>{
             setVisibleList(true)
         }} onBlur={(e) => {
             if (!e.currentTarget.contains(e.relatedTarget)) {
@@ -104,15 +135,15 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
             {title && <label>{title}</label>}
             <div className="SlistC">
                 <input 
-                    ref={inRef} 
                     type="text"
+                    value={inputValue}
                     placeholder={disabled ? "Sin opciones disponibles" : placeHolder} 
                     disabled={disabled} 
                     onFocus={() => setVisibleList(true)}
                     onKeyDown={handleKeyDown}
                     onChange={(e) => {
+                        setInputValue(e.target.value);
                         setSearchValue(e.target.value);
-                        setSelectedOption('');
                         setFocusedIndex(-1);
                     }}
                 />

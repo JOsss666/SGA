@@ -38,6 +38,9 @@ Después de aplicar cada migración, registrar:
 INSERT INTO public.schema_migrations (filename) VALUES ('NNNN_descripcion_corta.sql') ON CONFLICT DO NOTHING;
 ```
 
+El modelo geográfico y su uso en terceros están documentados en
+`db/docs/geography_model.md`.
+
 ## Cómo aplicar
 
 No hay runner automático; se aplican manualmente con `psql` contra la DB de Render:

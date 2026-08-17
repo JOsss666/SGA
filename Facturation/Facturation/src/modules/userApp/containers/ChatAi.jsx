@@ -141,7 +141,7 @@ export function ChatAi({visible}){
             )}
             {chat.length == 0 && (
                 <div className={`noChatIMg`}>
-                    <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1759180939/ChatGPT_Image_29_sept_2025_16_21_31_shjyfv.png" alt="" />
+                    <img src="https://cdnmain.sga360.co/static/ChatGPT_Image_29_sept_2025_16_21_31_shjyfv.webp" alt="" />
                     <div className="mainChatWelcome">
                         <span>😎 Hola {userInfo.user_name}</span>
                         <MainTitleAi text={`¿ Listo para empezar ?`}/>
@@ -166,7 +166,7 @@ export function ChatAi({visible}){
                         {text:'Creación',value:'creation',children:<i className="fa-solid fa-palette"/>},
                         {text:'Analisis',value:'analysis',children:<i className="fa-solid fa-brain"/>},
                         {text:'Busqueda',value:'search',children:<i className="fa-solid fa-magnifying-glass"/>},
-                        {text:'Acciones',value:'action',children:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1772826198/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.png'/>}
+                        {text:'Acciones',value:'action',children:<img src='https://cdnmain.sga360.co/static/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.webp'/>}
                     ]} children={<i className="fa-solid fa-sliders"/>}/>
                     <div className="rightAlOptions">
                         <OptionsChatAi options={[

@@ -1,13 +1,16 @@
 import { encrypt, isRelevanPrompt, useDataBase, actualDate } from "../app.js";
 import fs from "fs";
 import path from "path";
+import sharp from "sharp";
 import { uploadToCloudinary } from "../uploadMiddleWare.js";
-import { send_API_AI } from "../ApiFunctions.js";
+import storage from "../services/storage.service.js";
+import { send_API_AI, sendCustom_API_AI } from "../ApiFunctions.js";
 import documentController from "./DocumentController.js";
 import materializedViewsController from "./MaterializedViewsController.js";
 import transactionController from "./TransactionController.js";
 import transactionDetailController from "./TransactionDetailController.js";
 import thirdPartyService from "../services/thirdPartyService.js";
+import { appendBusinessDateRange, companyTimeZoneSql } from "../services/businessTimeZoneService.js";
 const controller = {};
 
 controller.uploadChunk = (req, res) => {
@@ -46,8 +49,14 @@ controller.mergeChunks = (req, res) => {
     res.json({ message: "Archivo ensamblado correctamente", path: finalPath });
 };
 
+// Imágenes raster que convertimos a WebP para optimizar peso/velocidad.
+// SVG/GIF se dejan igual (vector/animación); PDF, XML y demás se suben tal cual.
+const CONVERTIBLE_IMAGE = new Set([
+    "image/jpeg", "image/jpg", "image/png", "image/webp",
+    "image/tiff", "image/avif", "image/bmp",
+]);
+
 controller.uploadFile = async (req, res) => {
-    console.log("Archivo recibido");
     try {
         const archivos = req.files;
         const info = req.body.info ? JSON.parse(req.body.info) : {};
@@ -55,36 +64,90 @@ controller.uploadFile = async (req, res) => {
             return res.status(400).json({ mensaje: "No se enviaron archivos" });
         }
 
-        const urls = [];
+        const useR2 = storage.isR2Configured();
 
-        // Subir archivos uno por uno
-        for (const archivo of archivos) {
-            console.log(archivo);
-            const resultado = await uploadToCloudinary(archivo.buffer, archivo.originalname);
-            if (info.company_id != undefined) {
-                let insertUpload = await useDataBase(`
-                    INSERT INTO "Ecosystem".attached(
-                        company_id, uploaded_by, name, size, type,url)
-                    VALUES ($1,$2,$3,$4,$5,$6) RETURNING id;
-                `,[
-                    info.company_id,
-                    info.user_id ?? null,
-                    archivo.originalname,
-                    archivo.size,
-                    archivo.mimetype,
-                    resultado.secure_url
-                ],3);
-                if(insertUpload.id != undefined){
-                    urls.push({id:insertUpload.id,url:resultado.secure_url})   
-                } else {
-                    urls.push(resultado.secure_url);
-                }
-            } else {
-                urls.push(resultado.secure_url);
-            }
+        // Carpeta de la compañía (storageKey) para las keys de R2. Se resuelve en el
+        // backend a partir del company_id — no se confía en que lo mande el cliente.
+        let storageKey = null;
+        if (useR2 && info.company_id != undefined) {
+            const companyRow = await useDataBase(
+                `SELECT "storageKey" FROM "Ecosystem".companies WHERE company_id = $1`,
+                [info.company_id], 3
+            );
+            storageKey = companyRow?.storageKey ?? null;
         }
 
-        // Espacio para insertar en la base de datos,
+        // Carpeta destino según el formulario. Sin categoría → 'others'.
+        const category = info.category ?? "others";
+        const storeId = info.store_id ?? null;
+
+        const urls = [];
+
+        for (const archivo of archivos) {
+            let buffer = archivo.buffer;
+            let contentType = archivo.mimetype;
+            let filename = archivo.originalname;
+            let provider = "cloudinary";
+            let key = null;
+            let secureUrl;
+
+            if (useR2 && storageKey) {
+                // Optimización de imágenes → WebP redimensionado (máx 2000px).
+                if (CONVERTIBLE_IMAGE.has((contentType || "").toLowerCase())) {
+                    try {
+                        buffer = await sharp(archivo.buffer)
+                            .rotate() // respeta orientación EXIF
+                            .resize({ width: 2000, height: 2000, fit: "inside", withoutEnlargement: true })
+                            .webp({ quality: 82 })
+                            .toBuffer();
+                        contentType = "image/webp";
+                        filename = filename.replace(/\.[^.]+$/, "") + ".webp";
+                    } catch (imgErr) {
+                        console.warn("sharp no pudo procesar la imagen, se sube original:", imgErr.message);
+                        buffer = archivo.buffer;
+                        contentType = archivo.mimetype;
+                        filename = archivo.originalname;
+                    }
+                }
+
+                key = storage.buildKey({ storageKey, category, storeId, filename, buffer });
+                const up = await storage.uploadBuffer(buffer, key, contentType);
+                secureUrl = up.url;
+                provider = "r2";
+            } else {
+                // Fallback: Cloudinary (comportamiento original, sin optimizar).
+                const resultado = await uploadToCloudinary(archivo.buffer, archivo.originalname);
+                secureUrl = resultado.secure_url;
+            }
+
+            if (info.company_id != undefined) {
+                const insertUpload = await useDataBase(`
+                    INSERT INTO "Ecosystem".attached(
+                        company_id, uploaded_by, name, size, type, url,
+                        storage_provider, storage_key, category, store_id)
+                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id;
+                `, [
+                    info.company_id,
+                    info.user_id ?? null,
+                    filename,
+                    buffer.length,
+                    contentType,
+                    secureUrl,
+                    provider,
+                    key,
+                    category,
+                    storeId,
+                ], 3);
+
+                if (insertUpload?.id != undefined) {
+                    urls.push({ id: insertUpload.id, url: secureUrl });
+                } else {
+                    urls.push(secureUrl);
+                }
+            } else {
+                urls.push(secureUrl);
+            }
+        }
 
         res.json({ urls });
 
@@ -294,7 +357,12 @@ controller.getCompanyInfo = (req,res)=>{
                     "Ecosystem".companies.*,
                     "Ecosystem".account_plans.id AS "accountPlanId",
                     "Ecosystem".account_plans.type AS "accountPlanType",
-                    "Ecosystem".company_settings.config
+                    "Ecosystem".company_settings.config,
+                    "Ecosystem".company_settings.time_zone,
+                    COALESCE(
+                        "Ecosystem".company_settings."taxConfig",
+                        '{}'::jsonb
+                    ) AS "taxConfig"
                 FROM
                     "Ecosystem".companies 
                 LEFT JOIN
@@ -919,9 +987,10 @@ controller.createTax = (req,res)=>{
                     parent_id,
                     path,
                     "isRetention",
-                    "type"
+                    "type",
+                    fiscal_tax_id
                 )
-            VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9);
+            VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -932,7 +1001,8 @@ controller.createTax = (req,res)=>{
             info.parent_id != undefined? info.parent_id:0,
             info.path != undefined? info.path:'/',
             info.isRetention,
-            taxType
+            taxType,
+            info.fiscal_tax_id != undefined? info.fiscal_tax_id:null
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -980,11 +1050,16 @@ controller.getTaxes = (req, res) => {
                     "Ecosystem"."taxes"."isRetention",
                     "Ecosystem"."taxes"."type",
                     "Ecosystem"."taxes"."type" AS tax_type,
+                    "Ecosystem"."taxes".fiscal_tax_id,
+                    "Fiscal"."taxes".code AS fiscal_tax_code,
+                    "Fiscal"."taxes".name AS fiscal_tax_name,
                     "Ecosystem"."contable_accounts".type AS account_type,
                     "Ecosystem"."contable_accounts".name
                 FROM "Ecosystem"."taxes"
                 LEFT JOIN "Ecosystem"."contable_accounts"
                     ON "Ecosystem"."contable_accounts".id = "Ecosystem"."taxes".account_id
+                LEFT JOIN "Fiscal"."taxes"
+                    ON "Fiscal"."taxes".id = "Ecosystem"."taxes".fiscal_tax_id
                 WHERE
             `
 
@@ -1037,6 +1112,74 @@ controller.getTaxes = (req, res) => {
             res.end(JSON.stringify(err));
         }
     });
+};
+
+// Retenciones configuradas por compañía. A diferencia de /getTaxes, este
+// catálogo siempre restringe el resultado a taxes."isRetention" = true.
+controller.getWithholdings = async (req, res) => {
+    try {
+        const companyId = req.query.company_id;
+        const taxType = req.query.type ?? req.query.tax_type;
+
+        if (companyId === undefined || companyId === null || `${companyId}`.trim() === '') {
+            res.status(400).json([false, 'company_id es obligatorio']);
+            return;
+        }
+
+        if (!/^\d+$/.test(`${companyId}`) || Number(companyId) <= 0) {
+            res.status(400).json([false, 'company_id debe ser un entero positivo']);
+            return;
+        }
+
+        const values = [companyId];
+        const where = [
+            `"Ecosystem".taxes.company_id = $1`,
+            `"Ecosystem".taxes."isRetention" IS TRUE`
+        ];
+
+        if (taxType !== undefined && taxType !== null && `${taxType}`.trim() !== '') {
+            const normalizedTaxType = `${taxType}`.trim().toLowerCase();
+            const validTypes = ['purchase', 'sell', 'both'];
+
+            if (!validTypes.includes(normalizedTaxType)) {
+                res.status(400).json([false, `Tipo de impuesto inválido: ${taxType}`]);
+                return;
+            }
+
+            if (normalizedTaxType === 'purchase' || normalizedTaxType === 'sell') {
+                values.push(normalizedTaxType);
+                where.push(`"Ecosystem".taxes."type" IN ($2::tax_type, 'both'::tax_type)`);
+            } else {
+                where.push(`"Ecosystem".taxes."type" = 'both'::tax_type`);
+            }
+        }
+
+        const query = `
+            SELECT
+                "Ecosystem".taxes.id AS tax_id,
+                "Ecosystem".taxes.code,
+                "Ecosystem".taxes.rate,
+                "Ecosystem".taxes.base,
+                "Ecosystem".taxes.parent_id,
+                "Ecosystem".taxes.path,
+                "Ecosystem".taxes."isRetention",
+                "Ecosystem".taxes."type",
+                "Ecosystem".taxes."type" AS tax_type,
+                "Ecosystem".contable_accounts.type AS account_type,
+                "Ecosystem".contable_accounts.name
+            FROM "Ecosystem".taxes
+            LEFT JOIN "Ecosystem".contable_accounts
+              ON "Ecosystem".contable_accounts.id = "Ecosystem".taxes.account_id
+            WHERE ${where.join(' AND ')}
+            ORDER BY "Ecosystem".taxes.account_id ASC;
+        `;
+
+        const result = await useDataBase(query, values, 1);
+        res.status(200).json(result);
+    } catch (error) {
+        console.error('Error consultando retenciones:', error);
+        res.status(500).json([false, error.message || 'Error consultando retenciones']);
+    }
 };
 
 controller.getConceptTaxes = (req,res)=>{
@@ -1163,6 +1306,39 @@ controller.getTaxCategory = (req,res)=>{
 }
 
 
+
+// Devuelve el catálogo estándar de familias/tipos fiscales (Fiscal.taxes)
+// filtrado por país. El país llega desde el front (por ahora fijo 'Colombia').
+controller.getFiscalTaxTypes = (req,res)=>{
+    let data = ''
+    req.on('data',chunk=>{
+        data += chunk
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        const country = info.country ?? 'Colombia';
+        let sentence = `
+            SELECT
+                t.id,
+                t.code,
+                t.name,
+                t.scope
+            FROM "Fiscal".taxes t
+            JOIN "Fiscal".tax_authorities a ON a.id = t.tax_authority_id
+            JOIN "Fiscal".countries c ON c.id = a.country_id
+            WHERE c.name = $1
+              AND t.active = TRUE
+            ORDER BY t.name ASC;
+        `
+        let consulta = await useDataBase(sentence,[country],1);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
 
 controller.createConcept = (req, res) => {
     let data = '';
@@ -1756,6 +1932,11 @@ controller.getTransactionDetails = (req,res)=>{
             values.push(info.transaction_id)
         }
 
+        if(info.doc_id != undefined){
+            whereClauses.push(`"Ecosystem".transactions.doc_id = $${values.length +1}`)
+            values.push(info.doc_id)
+        }
+
         if (info.account_code != undefined) {
             whereClauses.push(`"Ecosystem".contable_accounts.code LIKE $${values.length + 1}`);
             values.push(`${info.account_code}%`);
@@ -1765,25 +1946,13 @@ controller.getTransactionDetails = (req,res)=>{
             whereClauses.push(`"Ecosystem".transaction_detail.account_id = $${values.length +1}`)
             values.push(info.account_id)
         }
-        if (start && end) {
-            values.push(start, end);
-            whereClauses.push(
-                `${columnDate} >= $${values.length - 1}::timestamp
-                AND ${columnDate} < ($${values.length}::timestamp + INTERVAL '1 day')`
-            );
-
-        } else if (start) {
-            values.push(start);
-            whereClauses.push(
-                `${columnDate} >= $${values.length}::timestamp`
-            );
-
-        } else if (end) {
-            values.push(end);
-            whereClauses.push(
-                `${columnDate} < ($${values.length}::timestamp + INTERVAL '1 day')`
-            );
-        }
+        appendBusinessDateRange({
+            whereClauses,
+            values,
+            column: columnDate,
+            start,
+            end
+        });
 
 
         const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
@@ -1791,6 +1960,9 @@ controller.getTransactionDetails = (req,res)=>{
         let sentence = `
             SELECT
                 "Ecosystem".transaction_detail.*,
+                ${columnDate} AT TIME ZONE (${companyTimeZoneSql('$1')}) AS created_at_local,
+                (${columnDate} AT TIME ZONE (${companyTimeZoneSql('$1')}))::date AS business_date,
+                ${companyTimeZoneSql('$1')} AS business_time_zone,
                 "Ecosystem".contable_accounts.name AS concept_name,
                 "Ecosystem".contable_accounts.code AS account_code,
                 "Ecosystem".transactions.doc_type,
@@ -2005,6 +2177,7 @@ controller.getThirdParties = (req,res)=>{
                 tti.economic_activity,
                 tti."attachedRut",
                 tti.municipality_name,
+                COALESCE(legacy_tti."taxConfig", '{}'::jsonb) AS "taxConfig",
                 COALESCE(b.total_debt, 0) AS "thirdParty_totalDebt",
                 COALESCE(b.total_paid, 0) AS "thirdParty_totalPaid",
                 COALESCE(b.balance, 0) AS "thirdParty_balance",
@@ -2021,6 +2194,9 @@ controller.getThirdParties = (req,res)=>{
                 LEFT JOIN "Fiscal".v_third_party_current_tax_info tti
                     ON "Ecosystem".thirdparties.id = tti."thirdParty_id"
                     AND "Ecosystem".thirdparties.company_id = tti.company_id
+                LEFT JOIN "Ecosystem"."thirdPartyTaxInfo" legacy_tti
+                    ON "Ecosystem".thirdparties.id = legacy_tti."thirdParty_id"
+                    AND "Ecosystem".thirdparties.company_id = legacy_tti.company_id
             `;
         }
 
@@ -2056,12 +2232,18 @@ controller.getThirdPartyDetails = (req,res)=>{
         let info = JSON.parse(data);
         let sentence = `
             SELECT
-                "Ecosystem".thirdParties.*
+                "Ecosystem".thirdParties.*,
+                COALESCE(tti."taxConfig", '{}'::jsonb) AS "taxConfig"
             FROM
                 "Ecosystem".thirdParties
+            LEFT JOIN
+                "Ecosystem"."thirdPartyTaxInfo" tti
+            ON
+                "Ecosystem".thirdParties.id = tti."thirdParty_id"
+                AND "Ecosystem".thirdParties.company_id = tti.company_id
             WHERE
-                company_id = $1
-                AND id = $2 ;
+                "Ecosystem".thirdParties.company_id = $1
+                AND "Ecosystem".thirdParties.id = $2 ;
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -2161,14 +2343,19 @@ controller.deleteThirdParty = (req,res)=>{
         try {
             let info = JSON.parse(data);
             // Etapa 5: audita snapshot antes de borrar; el CASCADE limpia el
-            // modelo Fiscal. Corrige el bug legacy de placeholders (multi-delete).
+            // modelo Fiscal. Los movimientos contables se validan en el servicio.
             let consulta = await thirdPartyService.remove(info);
-            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.writeHead(200,{'Content-Type':'application/json'})
             res.end(JSON.stringify(consulta));
         } catch (err) {
             console.error('Error en deleteThirdParty:', err);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify([false, err.message || err]));
+            res.writeHead(err.statusCode ?? 500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                status: 'Error',
+                code: err.code ?? 'THIRD_PARTY_DELETE_ERROR',
+                message: err.message || 'No se pudo eliminar el tercero.',
+                dependencies: err.dependencies ?? {}
+            }));
         }
     })
     req.on('error',(err)=>{
@@ -2200,6 +2387,47 @@ controller.processAiRequest= (req,res)=>{
         res.end(JSON.stringify(err));
     })
 }
+
+controller.processCustomAiRequest = (req, res) => {
+    let data = '';
+
+    req.on('data', chunk => {
+        data += chunk;
+    });
+
+    req.on('end', async () => {
+        try {
+            const info = JSON.parse(data);
+
+            if (!info.masterPrompt || !info.prompt) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    ok: false,
+                    error: 'masterPrompt y prompt son requeridos.'
+                }));
+                return;
+            }
+
+            const result = await sendCustom_API_AI(info);
+            res.writeHead(result.ok ? 200 : 502, {
+                'Content-Type': 'application/json'
+            });
+            res.end(JSON.stringify(result));
+        } catch (err) {
+            console.error('Error en processCustomAiRequest:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                ok: false,
+                error: err.message || 'No se pudo procesar la tarea de IA.'
+            }));
+        }
+    });
+
+    req.on('error', err => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: err.message }));
+    });
+};
 
 
 controller.getDocAnalyticDocNumber = async (req, res) => {

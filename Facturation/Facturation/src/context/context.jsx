@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { postInfo } from '../utils/functions';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
@@ -148,44 +148,103 @@ export function AiAssistanProvider({children}){
 }
 
 export function AlertProvider({ children }) {
-    const [openAlert, setOpenAlert] = useState(false);
     const [tailAlerts, setTailAlerts] = useState([]);
-    
-    const popInAlert = (child) => {
-        console.log('Abriendo alerta')
-        setTailAlerts(prev => [...prev, {alert:child}]);
-        setOpenAlert(true);
-    }
 
-    const popOutAlert = () => {
-        if(tailAlerts.length >1){
-            let C = []
-            tailAlerts.map((element,index)=>{
-                if(index != tailAlerts.length -1){
-                    C.push(element);
+    const popInAlert = useCallback((alert, options = {}) => {
+        const id = options.id ?? `alert-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+        setTailAlerts(current => {
+            const existingIndex = current.findIndex(entry => entry.id === id);
+            const nextAlert = {
+                id,
+                alert,
+                fullScale: options.fullScale ?? false,
+                closeLabel: options.closeLabel ?? 'Cerrar alerta',
+            };
+
+            if (existingIndex === -1) return [...current, nextAlert];
+
+            return current.map((entry, index) => index === existingIndex
+                ? { ...entry, ...nextAlert }
+                : entry
+            );
+        });
+
+        return id;
+    }, []);
+
+    // LIFO: sin argumentos siempre retira exclusivamente la alerta superior.
+    // expectedId permite que una tarea asincrona cierre su propia alerta solo
+    // cuando esta sigue siendo la que esta en primer plano.
+    const popOutAlert = useCallback((expectedId) => {
+        setTailAlerts(current => {
+            if (current.length === 0) return current;
+
+            const topAlert = current[current.length - 1];
+            if (expectedId != null && topAlert.id !== expectedId) return current;
+
+            return current.slice(0, -1);
+        });
+    }, []);
+
+    const removeAlert = useCallback((id) => {
+        if (id == null) return;
+        setTailAlerts(current => current.filter(entry => entry.id !== id));
+    }, []);
+
+    const replaceTopAlert = useCallback((alert, options = {}) => {
+        setTailAlerts(current => {
+            if (current.length === 0) return current;
+
+            const topIndex = current.length - 1;
+            return current.map((entry, index) => index === topIndex
+                ? {
+                    ...entry,
+                    alert,
+                    fullScale: options.fullScale ?? entry.fullScale,
+                    closeLabel: options.closeLabel ?? entry.closeLabel,
                 }
-            });
-            setTailAlerts(C);
-        }else{
-        setOpenAlert(false)
-        setTailAlerts([])
-        }
-    }
+                : entry
+            );
+        });
+    }, []);
 
-    const value = {
+    const updateAlert = useCallback((id, alert, options = {}) => {
+        setTailAlerts(current => current.map(entry => entry.id === id
+            ? {
+                ...entry,
+                alert,
+                fullScale: options.fullScale ?? entry.fullScale,
+                closeLabel: options.closeLabel ?? entry.closeLabel,
+            }
+            : entry
+        ));
+    }, []);
+
+    const clearAlerts = useCallback(() => setTailAlerts([]), []);
+    const openAlert = tailAlerts.length > 0;
+
+    // Adaptador temporal para consumidores antiguos del contexto.
+    const setOpenAlert = useCallback((isOpen) => {
+        if (typeof isOpen === 'function') {
+            setTailAlerts(current => isOpen(current.length > 0) ? current : []);
+            return;
+        }
+        if (!isOpen) clearAlerts();
+    }, [clearAlerts]);
+
+    const value = useMemo(() => ({
         openAlert,
         setOpenAlert,
         tailAlerts,
         setTailAlerts,
         popInAlert,
-        popOutAlert
-    };
-
-    useEffect(()=>{
-        if(openAlert == false){
-            setTailAlerts([])
-        }
-    },[openAlert])
+        popOutAlert,
+        removeAlert,
+        replaceTopAlert,
+        updateAlert,
+        clearAlerts,
+    }), [openAlert, tailAlerts, popInAlert, popOutAlert, removeAlert, replaceTopAlert, updateAlert, clearAlerts, setOpenAlert]);
 
     return (
         <AppAlerts.Provider value={value}>
@@ -216,6 +275,7 @@ export function PreviewProvider({children}){
 
 export function AppInfoProvider({children}){
     const [appInfo,setAppInfo] = useState({});
+    const [appTaxConfig,setAppTaxConfig] = useState({});
     const [appConfig,setAppConfig] = useState({});
     const [darkMode,setDarkMode] = useState(false);
     const [userInfo,setUserInfo] = useState({});
@@ -234,46 +294,46 @@ export function AppInfoProvider({children}){
     }
 
     const optionsMenu = [
-        {text:'Inicio',path:'',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914614/LogoInicio1_nsuzaj.png' />,action:handleNavigate},
+        {text:'Inicio',path:'',icon:<img src='https://cdnmain.sga360.co/static/LogoInicio1_nsuzaj.webp' />,action:handleNavigate},
         ...(userConfig.access != undefined && userConfig.access.sections.new.overAll ? [{text:'Crear',path:'new',icon:<i className="fa-solid fa-plus"/>,action:handleNavigate}]:[]),
-        //{text:'Mensajes',path:'messages',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913446/MensajesLogo2_y4fjoa.png'/>,action:handleNavigate},
-        ...(appConfig.access != undefined && appConfig.access.services.e_facturation.use ? [{text:'Documentos electronicos',path:'edocuments',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1776911074/Gemini_Generated_Image_hqrv0mhqrv0mhqrv-2_lne97l.png'/>,action:handleNavigate}]:[]),
-        {text:'Acciones rapidas',path:'quickActions',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1772629039/unnamed-2_rg2vg1.png'/>,action:handleNavigate},
-        {text:'Terceros',path:'thirdparties',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
-        ...(userConfig.access != undefined && userConfig.access.sections.cashBoxes.overAll ? [{text:'Cajas POS',path:'cashBoxes',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1769618368/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.png'/>,action:handleNavigate}]:[]),
-        ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Usuarios',path:'users',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png'/>,action:handleNavigate}]:[]),
-        {text:'Informes',path:'reports',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
-        {text:'Estadisticas',path:'analytics',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579216/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.png'/>,action:handleNavigate},
-        //{text:'Calendario',path:'calendar',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913184/LogoCalendario1_ig0avt.png'/>,action:handleNavigate},
+        //{text:'Mensajes',path:'messages',icon:<img src='https://cdnmain.sga360.co/static/MensajesLogo2_y4fjoa.webp'/>,action:handleNavigate},
+        ...(appConfig.access != undefined && appConfig.access.services.e_facturation.use ? [{text:'Documentos electronicos',path:'edocuments',icon:<img src='https://cdnmain.sga360.co/static/Gemini_Generated_Image_hqrv0mhqrv0mhqrv-2_lne97l.webp'/>,action:handleNavigate}]:[]),
+        {text:'Acciones rapidas',path:'quickActions',icon:<img src='https://cdnmain.sga360.co/static/unnamed-2_rg2vg1.webp'/>,action:handleNavigate},
+        {text:'Terceros',path:'thirdparties',icon:<img src='https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.webp'/>,action:handleNavigate},
+        ...(userConfig.access != undefined && userConfig.access.sections.cashBoxes.overAll ? [{text:'Cajas POS',path:'cashBoxes',icon:<img src='https://cdnmain.sga360.co/static/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.webp'/>,action:handleNavigate}]:[]),
+        ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Usuarios',path:'users',icon:<img src='https://cdnmain.sga360.co/static/CuentaLogo1_aqqot5.webp'/>,action:handleNavigate}]:[]),
+        {text:'Informes',path:'reports',icon:<img src='https://cdnmain.sga360.co/static/InformesLogo1_iisxav.webp'/>,action:handleNavigate},
+        {text:'Estadisticas',path:'analytics',icon:<img src='https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.webp'/>,action:handleNavigate},
+        //{text:'Calendario',path:'calendar',icon:<img src='https://cdnmain.sga360.co/static/LogoCalendario1_ig0avt.webp'/>,action:handleNavigate},
     ]
 
     const secondOptionsMenu = [
-        {text:'Configuración',path:'settings',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579057/ChatGPT_Image_27_oct_2025_10_28_59_1_vfix8g.png'/>,action:handleNavigate},
-        {text:'Tutoriales',path:'tutorials',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515342/Grupo5logos_4_rhapbp.png'/>,action:handleNavigate},
-        {text:'Ayuda',path:'help',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760911291/AyudaLogo1_v362of.png'/>,action:handleNavigate},
-        {text:'Cerrar Sesión',path:'logOut',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760911296/CerrarSesionLogo1_moghr7.png'/>,action:handleNavigate},
+        {text:'Configuración',path:'settings',icon:<img src='https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_1_vfix8g.webp'/>,action:handleNavigate},
+        {text:'Tutoriales',path:'tutorials',icon:<img src='https://cdnmain.sga360.co/static/Grupo5logos_4_rhapbp.webp'/>,action:handleNavigate},
+        {text:'Ayuda',path:'help',icon:<img src='https://cdnmain.sga360.co/static/AyudaLogo1_v362of.webp'/>,action:handleNavigate},
+        {text:'Cerrar Sesión',path:'logOut',icon:<img src='https://cdnmain.sga360.co/static/CerrarSesionLogo1_moghr7.webp'/>,action:handleNavigate},
         //{text:'Registro',path:'../../signUp',icon:<i className="fa-solid fa-user-plus"/>},
     ]
 
     const routesApp = [
-        {text:'Inicio',path:'',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914614/LogoInicio1_nsuzaj.png' />,action:handleNavigate},
-        ...(userConfig.access != undefined && userConfig.access.sections.cashBoxes.overAll ? [{text:'Cajas POS',path:'cashBoxes',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1769618368/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.png'/>,action:handleNavigate}]:[]),
-        ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Usuarios',path:'users',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png'/>,action:handleNavigate}]:[]),
-        ...(appConfig.access != undefined && appConfig.access.services.e_facturation.use ? [{text:'Documentos electronicos',path:'edocuments',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1776911074/Gemini_Generated_Image_hqrv0mhqrv0mhqrv-2_lne97l.png'/>,action:handleNavigate}]:[]),
-        {text:'Estadisticas',path:'analytics',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579216/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.png'/>,action:handleNavigate},
-        {text:'Acciones rapidas',path:'quickActions',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1772629039/unnamed-2_rg2vg1.png'/>,action:handleNavigate},
-        {text:'Terceros',path:'users',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
-        {text:'Informes',path:'reports',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
-            {text:'Informe Ordenes de Cliente',path:'reports/OCS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
-            {text:'Informe Ordenes de Producción',path:'reports/OPS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
-            {text:'Informe Documentos de Compra',path:'reports/DCS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
-            {text:'Informe Facturas de Venta',path:'reports/FVS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
-            {text:'Informe Consumos de Inventario',path:'reports/CIS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
-            {text:'Informe Transacciónes',path:'reports/TRS',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'/>,action:handleNavigate},
-        //{text:'Calendario',path:'calendar',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760913184/LogoCalendario1_ig0avt.png'/>,action:handleNavigate},
-        //{text:'Conceptos e impuestos',path:'concepts',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914608/LogoConceptosImpuestos_w0klzj.png'/>,action:handleNavigate},
-        {text:'Configuración',path:'settings',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579057/ChatGPT_Image_27_oct_2025_10_28_59_1_vfix8g.png'/>,action:handleNavigate},
-        {text:'Dispositivos',path:'settings/devices',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1773773820/Gemini_Generated_Image_nw3p98nw3p98nw3p_2_bxd2n2.png'/>,action:handleNavigate},
+        {text:'Inicio',path:'',icon:<img src='https://cdnmain.sga360.co/static/LogoInicio1_nsuzaj.webp' />,action:handleNavigate},
+        ...(userConfig.access != undefined && userConfig.access.sections.cashBoxes.overAll ? [{text:'Cajas POS',path:'cashBoxes',icon:<img src='https://cdnmain.sga360.co/static/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.webp'/>,action:handleNavigate}]:[]),
+        ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Usuarios',path:'users',icon:<img src='https://cdnmain.sga360.co/static/CuentaLogo1_aqqot5.webp'/>,action:handleNavigate}]:[]),
+        ...(appConfig.access != undefined && appConfig.access.services.e_facturation.use ? [{text:'Documentos electronicos',path:'edocuments',icon:<img src='https://cdnmain.sga360.co/static/Gemini_Generated_Image_hqrv0mhqrv0mhqrv-2_lne97l.webp'/>,action:handleNavigate}]:[]),
+        {text:'Estadisticas',path:'analytics',icon:<img src='https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.webp'/>,action:handleNavigate},
+        {text:'Acciones rapidas',path:'quickActions',icon:<img src='https://cdnmain.sga360.co/static/unnamed-2_rg2vg1.webp'/>,action:handleNavigate},
+        {text:'Terceros',path:'users',icon:<img src='https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.webp'/>,action:handleNavigate},
+        {text:'Informes',path:'reports',icon:<img src='https://cdnmain.sga360.co/static/InformesLogo1_iisxav.webp'/>,action:handleNavigate},
+            {text:'Informe Ordenes de Cliente',path:'reports/OCS',icon:<img src='https://cdnmain.sga360.co/static/InformesLogo1_iisxav.webp'/>,action:handleNavigate},
+            {text:'Informe Ordenes de Producción',path:'reports/OPS',icon:<img src='https://cdnmain.sga360.co/static/InformesLogo1_iisxav.webp'/>,action:handleNavigate},
+            {text:'Informe Documentos de Compra',path:'reports/DCS',icon:<img src='https://cdnmain.sga360.co/static/InformesLogo1_iisxav.webp'/>,action:handleNavigate},
+            {text:'Informe Facturas de Venta',path:'reports/FVS',icon:<img src='https://cdnmain.sga360.co/static/InformesLogo1_iisxav.webp'/>,action:handleNavigate},
+            {text:'Informe Consumos de Inventario',path:'reports/CIS',icon:<img src='https://cdnmain.sga360.co/static/InformesLogo1_iisxav.webp'/>,action:handleNavigate},
+            {text:'Informe Transacciónes',path:'reports/TRS',icon:<img src='https://cdnmain.sga360.co/static/InformesLogo1_iisxav.webp'/>,action:handleNavigate},
+        //{text:'Calendario',path:'calendar',icon:<img src='https://cdnmain.sga360.co/static/LogoCalendario1_ig0avt.webp'/>,action:handleNavigate},
+        //{text:'Conceptos e impuestos',path:'concepts',icon:<img src='https://cdnmain.sga360.co/static/LogoConceptosImpuestos_w0klzj.webp'/>,action:handleNavigate},
+        {text:'Configuración',path:'settings',icon:<img src='https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_1_vfix8g.webp'/>,action:handleNavigate},
+        {text:'Dispositivos',path:'settings/devices',icon:<img src='https://cdnmain.sga360.co/static/Gemini_Generated_Image_nw3p98nw3p98nw3p_2_bxd2n2.webp'/>,action:handleNavigate},
     ]
 
 
@@ -284,6 +344,7 @@ export function AppInfoProvider({children}){
         if(appI[0]){
             setAppInfo(appI[1][0]);
             setAppConfig(appI[1][0].config);
+            console.log('YYYYYYYYYYYYY: ',appI)
         }else{
             console.log('No se encontro info compa')
             handleRedirect();
@@ -325,6 +386,7 @@ export function AppInfoProvider({children}){
         const value = {
         appInfo,
         appConfig,
+        appTaxConfig,
         setAppInfo,
         userInfo,
         userConfig,

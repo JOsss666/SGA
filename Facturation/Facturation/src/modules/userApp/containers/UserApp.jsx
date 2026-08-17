@@ -51,6 +51,7 @@ import { ProcessInstanceAnalytics } from './Analytics/ProcessInstanceAnalycs';
 import { Analytics2 } from './Analytics2';
 import { QuickActions } from './QuickActions';
 import { ElectronicDocuments } from './ElectronicDocuments';
+import { SearchResultsPannel } from './Alerts/SearchResultsPannel';
 
 export function UserApp(){
 
@@ -58,7 +59,7 @@ export function UserApp(){
     const {appInfo,userInfo,loadingAppData,darkMode,getAppData,optionsMenu,secondOptionsMenu,routesApp,userConfig} = useAppInfo();
     const {openPreview,setOpenPreview} = usePreview();
     const {addNotification} = useNotifications();
-    const {openAlert,popInAlert,popOutAlert} = useAlert();
+    const {openAlert,popInAlert,removeAlert} = useAlert();
     const {visibleChatAi,setVisibleChatAi} = useAiAssistant();
     const [statusPage,setStatusPage] = useState('loading');
 
@@ -89,16 +90,16 @@ export function UserApp(){
         console.log(loadingAppData);
     },[loadingAppData])
 
-    window.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
-            if(openAlert){
-                popOutAlert();
-            }
-            if(openPreview){
+    useEffect(() => {
+        const handlePreviewEscape = (event) => {
+            if (event.key === 'Escape' && !openAlert && openPreview) {
                 setOpenPreview(false);
             }
-        }
-    });
+        };
+
+        window.addEventListener('keydown', handlePreviewEscape);
+        return () => window.removeEventListener('keydown', handlePreviewEscape);
+    }, [openAlert, openPreview, setOpenPreview]);
         
     const filterOptions = (value) => {
         if (!quickSearch) return true; 
@@ -112,10 +113,19 @@ export function UserApp(){
     }, [darkMode]);
 
     useEffect(()=>{
-        if(quickSearch != ""){
-            setVisibleResultsSearch(true)
-        }
-    },[quickSearch])
+        if(quickSearch == "") return;
+
+        const initialSearchValue = quickSearch;
+        popInAlert(
+            <SearchResultsPannel searchValue={initialSearchValue}/>,
+            { id: 'quick-search', closeLabel: 'Cerrar búsqueda' }
+        );
+        setQuickSearch("");
+    },[quickSearch, popInAlert])
+
+    useEffect(() => () => {
+        removeAlert('quick-search');
+    }, [removeAlert]);
 
     useEffect(() => {
         if (visibleChatAi) {
@@ -165,7 +175,7 @@ export function UserApp(){
             {!loadingAppData && statusPage=='page' &&(
                 <>
                     <header className='headApp'>
-                    <SearchBar placeholder={`Buscar en ${appInfo.legal_name} - Ventas`} action={setQuickSearch}/>
+                    <SearchBar placeholder={`Buscar en ${appInfo.legal_name} - Ventas`} value={quickSearch} action={setQuickSearch}/>
                     {visibleResultsSearch && (
                         <div className="resultsQuickSerch">
                             {quickSearch != "" && routesApp.map((element,index)=>(
@@ -216,7 +226,7 @@ export function UserApp(){
                             }}>
                             <i className="fa-solid fa-xmark"/>
                         </div>
-                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1772826198/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.png'} visbleInfo={visibleMenu} title={'Ventas'} desc={'SGA - Desarrollos'} />
+                        <ServiceSgaCard imgRef={'https://cdnmain.sga360.co/static/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.webp'} visbleInfo={visibleMenu} title={'Ventas'} desc={'SGA - Desarrollos'} />
                         <MenuApp setVisibleMenu={setVisibleMenu} visibleMenu={visibleMenu} title={'General'} options={optionsMenu}/>
                         <MenuApp setVisibleMenu={setVisibleMenu} visibleMenu={visibleMenu} title={'Ajustes'} options={secondOptionsMenu}/>
                     </div>
@@ -229,7 +239,7 @@ export function UserApp(){
                             <Route path='/edocuments/:e_doc_id' element={<NoAccess 
                                 title={'Seccion en construcción'}
                                 description={`Estamos trabajando para ofrecer esta seccion lo mas pronto posible :)`}
-                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1776911074/Gemini_Generated_Image_hqrv0mhqrv0mhqrv-2_lne97l.png'}
+                                img={'https://cdnmain.sga360.co/static/Gemini_Generated_Image_hqrv0mhqrv0mhqrv-2_lne97l.webp'}
                                 noExit={true}
                                 />} />
                             <Route path='quickActions' element={<QuickActions/>} />
@@ -263,13 +273,13 @@ export function UserApp(){
                             <Route path='/tutorials' element={<NoAccess 
                                 title={'Seccion no disponible'}
                                 description={`Estamos trabajando para ofrecer esta seccion lo mas pronto posible :)`}
-                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1761515342/Grupo5logos_4_rhapbp.png'}
+                                img={'https://cdnmain.sga360.co/static/Grupo5logos_4_rhapbp.webp'}
                                 noExit={true}
                                 />} />
                             <Route path='/help' element={<NoAccess 
                                 title={'Seccion no disponible'}
                                 description={`Estamos trabajando para ofrecer esta seccion lo mas pronto posible :)`}
-                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1760911291/AyudaLogo1_v362of.png'}
+                                img={'https://cdnmain.sga360.co/static/AyudaLogo1_v362of.webp'}
                                 noExit={true}
                                 />} />
                             <Route path='/logOut' element={<LogOut/>} />

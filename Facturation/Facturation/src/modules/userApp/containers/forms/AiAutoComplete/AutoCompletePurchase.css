@@ -1,0 +1,35 @@
+
+
+.AutoCompletePurchase{
+    display: flex;
+    width: 40vw;
+    flex-direction: column;
+    height: fit-content;
+    position: relative;
+    margin: auto auto;
+    margin-top: 10vh;
+    padding: 2vh;
+    gap: 2vw;
+}
+
+.AutoCompletePurchase .head{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.AutoCompletePurchase .optionsControl{
+    display: flex;
+    align-items: center;
+    gap:10%;
+    width:100%;
+    margin: 1vh auto;
+}
+
+.AutoCompletePurchase .optionsControl .FormButton{
+    width: 42%;
+}
+
+.AutoCompletePurchase .optionsControl .CapsuleButtonAi{
+    width: 42%;
+}

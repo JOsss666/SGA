@@ -18,12 +18,18 @@ import { TreeOrganizer } from "./TreeOrganizer";
 import { FormNewCategoryTaxes } from "./forms/FormNewCategoryTaxes";
 import { SwitchOption } from "../components/SwitchOption";
 
+const getDisplayName = (name) => {
+    if (typeof name !== 'string') return 'Sin nombre';
+
+    const trimmedName = name.trim();
+    return trimmedName || 'Sin nombre';
+};
+
 export function ConceptsPlan(){
 
     // Control
     const [displayGird,setDisplayGrid] = useState('tree')
     const [loading,setLoading] = useState(true);
-    const [disabled,setDisabled] = useState(false);
 
     // Prev info
     const [categories,setCategories] = useState([]);
@@ -44,6 +50,7 @@ export function ConceptsPlan(){
         id: `category-${category.id}`,
         original_id: category.id,
         parent_id: Number(category.parent_id) === 0 ? null : `category-${category.parent_id}`,
+        name: getDisplayName(category.name),
         node_type: 'category',
     });
 
@@ -52,9 +59,12 @@ export function ConceptsPlan(){
         id: `tax-${tax.tax_id}`,
         original_id: tax.tax_id,
         parent_id: Number(tax.parent_id) === 0 ? null : `category-${tax.parent_id}`,
-        name: tax.name,
+        name: getDisplayName(tax.name),
         node_type: 'tax',
-        value: tax,
+        value: {
+            ...tax,
+            name: getDisplayName(tax.name),
+        },
     });
 
     const getConcepts = async()=>{
@@ -64,21 +74,23 @@ export function ConceptsPlan(){
         })
         console.log(res);
         if(res[0]){
-            setConcepts(res[1])
+            const receivedConcepts = Array.isArray(res[1]) ? res[1] : [];
+            setConcepts(receivedConcepts.map((concept) => ({
+                ...concept,
+                name: getDisplayName(concept.name),
+            })))
         }
     }
 
     const getCategories = async()=>{
         setLoading(true);
-        setDisabled(true);
         let res = await postInfo('/getTaxCategories',{
             company_id:appInfo.company_id
         })
         if(res[0]){
-            setCategories(res[1])
+            setCategories(Array.isArray(res[1]) ? res[1] : [])
         }
         setLoading(false);
-        setDisabled(false);
     }
 
     const getTaxes = async()=>{
@@ -87,17 +99,19 @@ export function ConceptsPlan(){
         })
         console.log(res);
         if(res[0]){
-            let C = []
-            setNoOrganizedTaxes(res[1]);
-            res[1].forEach(element => {
-                element.text = element.name,
-                element.value = element.tax_id
-                C.push({
-                    text:element.name,
-                    value:element
-                })
-            });
-            setTaxes(C);
+            const receivedTaxes = Array.isArray(res[1]) ? res[1] : [];
+            const normalizedTaxes = receivedTaxes.map((tax) => ({
+                ...tax,
+                name: getDisplayName(tax.name),
+                text: getDisplayName(tax.name),
+                value: tax.tax_id,
+            }));
+
+            setNoOrganizedTaxes(normalizedTaxes);
+            setTaxes(normalizedTaxes.map((tax) => ({
+                text: tax.name,
+                value: tax,
+            })));
         }
     }
 
@@ -123,15 +137,15 @@ export function ConceptsPlan(){
     const handleSearchConcept = (element) =>{
         return searchValConLowerCase === '' 
             ? true 
-            : JSON.stringify(element.id).includes(searchValConLowerCase) ||   
-            element.name.toLowerCase().includes(searchValConLowerCase);
+            : String(element.id ?? '').includes(searchValConLowerCase) ||
+            getDisplayName(element.name).toLowerCase().includes(searchValConLowerCase);
     }
 
     const handleSearchTax = (element) =>{
         return searchValTaxLowerCase === '' 
             ? true 
-            : JSON.stringify(element.id).includes(searchValTaxLowerCase) ||   
-            element.name.toLowerCase().includes(searchValTaxLowerCase);
+            : String(element.id ?? '').includes(searchValTaxLowerCase) ||
+            getDisplayName(element.name).toLowerCase().includes(searchValTaxLowerCase);
     }
 
     const createNewConcept = ()=>{

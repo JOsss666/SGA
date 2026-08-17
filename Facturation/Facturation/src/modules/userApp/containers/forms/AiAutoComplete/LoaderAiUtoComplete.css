@@ -1,0 +1,118 @@
+.LoaderAiUtoComplete{
+    position: relative;
+    width: 93dvw;
+    height: 100%;
+    min-height: 65vh;
+    overflow: hidden;
+    background-color: var(--bg);
+}
+
+:root.dark .LoaderAiUtoComplete{
+    background-color:var(--menuAside);
+}
+
+.LoaderAiUtoComplete .loaderContent{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    margin-top: 10vh;
+}
+
+.LoaderAiUtoComplete .MainTitleAi{
+    margin: 25% auto 1vh;
+    font-weight: 400;
+    letter-spacing: -.1vh;
+}
+
+.LoaderAiUtoComplete .DescriptionSpan{
+    max-width: 30vw;
+    margin: 1vh auto;
+    text-align: center;
+    font-weight: 400;
+}
+
+.LoaderAiUtoComplete .loaderStatusContainer{
+    width: min(36vw, 620px);
+    padding: 1vh 2vh;
+    margin: 2vh auto auto;
+    border-radius: 1vh;
+}
+
+.LoaderAiUtoComplete .completedSteps{
+    display: flex;
+    flex-direction: column;
+    gap: .8vh;
+    padding-left: 2.5vw;
+    margin-bottom: 1.5vh;
+}
+
+.LoaderAiUtoComplete .completedStep{
+    display: flex;
+    align-items: center;
+    gap: .7vw;
+    color: var(--descriptionText);
+    font-size: clamp(11px, 2vh, 20px);
+    animation: loaderCompletedStepEntry .3s ease both;
+}
+
+.LoaderAiUtoComplete .completedStep svg{
+    width: 2vh;
+    height: 2vh;
+    flex: 0 0 auto;
+    color: var(--mainText);
+}
+
+.LoaderAiUtoComplete .activeLoadingMessage{
+    display: flex;
+    align-items: center;
+    gap: 1vw;
+    font-size: 2vh;
+}
+
+.LoaderAiUtoComplete .loadingMessage{
+    color: var(--descriptionText);
+    font-size: clamp(2px, 2vh, 20px);
+    background-image: linear-gradient(105deg, var(--descriptionText) 0%, var(--descriptionText) 38%, var(--sectionTitle) 48%, var(--mainText) 52%, var(--sectionTitle) 56%, var(--descriptionText) 66%, var(--descriptionText) 100%);
+    background-size: 250% 100%;
+    background-position: 200% center;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: loaderMessageShimmer 2.4s linear infinite;
+}
+
+.LoaderAiUtoComplete .activeLoadingMessage svg{
+    width: 3vh;
+    height: 3vh;
+    color: #FE9A37;
+    animation: loaderIconPulse 1s ease infinite both;
+}
+
+@keyframes loaderCompletedStepEntry{
+    from{ opacity: 0; transform: translateY(.5vh); }
+    to{ opacity: 1; transform: translateY(0); }
+}
+
+@keyframes loaderMessageShimmer{
+    from{ background-position: 200% center; }
+    to{ background-position: -50% center; }
+}
+
+@keyframes loaderIconPulse{
+    0%, 100%{ transform: scale(.8); }
+    50%{ transform: scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .LoaderAiUtoComplete .completedStep,
+    .LoaderAiUtoComplete .activeLoadingMessage svg{
+        animation: none;
+    }
+
+    .LoaderAiUtoComplete .loadingMessage{
+        animation: none;
+        background: none;
+        -webkit-text-fill-color: var(--descriptionText);
+    }
+}

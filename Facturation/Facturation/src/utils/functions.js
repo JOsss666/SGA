@@ -10,6 +10,17 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { useNotifications } from "../context/context";
 
+export const transactionTypeDictionary = {
+    serviceMovement: 'Servicio',
+    inventoryMovement: 'Inventario',
+    tax: 'Impuesto',
+    payment: 'Pago'
+};
+
+export function translateTransactionType(type) {
+    return transactionTypeDictionary[type] ?? type ?? '--';
+}
+
 export async function postInfo(route,informacion){
     console.log('Funcion post');
     return new Promise((resolve, reject) => {
@@ -578,8 +589,11 @@ export function moneyFormat(value){
     }
 
     // Usamos Intl.NumberFormat para máxima eficiencia
-    // 'de-DE' usa el punto como separador de miles
-    return new Intl.NumberFormat('de-DE').format(value);
+    // 'de-DE' usa el punto como separador de miles y la coma como decimal
+    return new Intl.NumberFormat('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(value);
 
 }
 
@@ -994,7 +1008,7 @@ export async function printCashRecipt(info,appInfo,barCode){
                             gap:4mm;
                         ">
                             <img 
-                                src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                                src="https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.webp"
                                 style="
                                     width:100%;
                                     height:25mm;
@@ -1224,7 +1238,7 @@ export async function printClientOrder(info,appInfo,barCode){
                             gap:4mm;
                         ">
                             <img 
-                                src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                                src="https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.webp"
                                 style="
                                     width:100%;
                                     height:25mm;
@@ -1757,7 +1771,7 @@ export async function printSellInvoice(info,appInfo,barCode){
                             gap:4mm;
                         ">
                             <img 
-                                src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                                src="https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.webp"
                                 style="
                                     width:100%;
                                     height:25mm;
@@ -1807,3 +1821,281 @@ export async function scanDevices() {
         console.error("Error al escanear:", error);
     }
 }
+
+
+
+
+// Control Functions for withHoldingsControl
+
+    // Purchase
+
+    const colobiaPurchaseRetentionsLogic =  `
+        / Parametrización del arbol de decision retenciones colombia compra
+        // Para la lista de retenciones, nombre, base, tasa, id, total.
+        /*
+            0. Verificacion condiciones
+                0.1 Verificar que la compra es del company_id propietario por NIT
+            // PRIMER PASO TRABAJAR RENTA
+            1. Verificar si yo soy retenedor de renta (rent.rentTaxResponsable = true o sino break decision 1.)
+                1.1 Verificar si es exento por condiciones especiales (rent.forceExeption = true)/ --> Si break, si no continuar.
+                1.2 Verificar si el thirdParty tiene regimen simple (rent.regime = 'Regimen simple'). -> Si break, si no conrinuar
+                1.3 Verificar si el thirdParty es autoretenedor a titulo de renta (rent.rentWithholdingAgent = true). --> Si break, si no continuar
+                    // Verificar indfividualmente por cadan retencion
+                    1.4 Verificar si se respeta base minima (rent.aceptMinimumBase = true y que sea mayor o igual a la base)-->  Si cumple continuar, si no break
+                    1.5 Aplicar las retencion
+            // SEGUNDO PASO TRABAJAR IVA
+            2. Verificar si yo soy retenedor de IVA (iva.rentTaxResponsable = true o sino break decision 1.)
+                2.0 Verificar si es exento por condiciones especiales (rent.forceExeption = true)/ --> Si break, si no continuar.
+                2.1 Verficiar si algun impuesto de la categoria asociada (IVA/Impuesto) existe
+                   -- "Procedemiento" Si existe almenos un impuesto calcular la base (sumatoria de todos los disponbles).
+                2.2 Verificar pesos (Calidad mia vs Provedor 
+
+                    3 pts Entidad Estatal --> iva.stateEntity = true;
+                    2 pts Gran contribuyente DIAN --> iva.DIANMajorTaxpayer = true;
+                    1 pts Responsable de IVA --> iva.ivaTaxResponsable = true;
+
+                    (Si soy responsableCi aplicar a solo los de 1 pts);
+                    (Si no, entonces solo aplicar a los menores que yo);
+                )
+                2.3 Verificar si se respeta la base (iva.aceptMinimumBase = true, Si si validar valor minimo, sino continuar)  --> Si continua, no break
+                    // Verificar indfividualmente por cadan retencion
+                    2.4 Verificar si se respeta base minima (rent.aceptMinimumBase = true y que sea mayor o igual a la base)-->  Si cumple continuar, si no break
+                    2.5 Aplicar las retencion
+
+            // TERCER PASO TRABAJAR IMPUESTO TERRITORIAL (ICA)
+            --> Pedir en Impuesto territorial el codigo del municipio.
+             3.0 Verificar si es exento por condiciones especiales (rent.forceExeption = true)/ --> Si break, si no continuar.
+             
+             //// SELECCIONAR O REVISAR MUNICIO DE LA TRANSACCCIÓN (revision usuario).
+             3.1 Identificar region o municipio 
+             3.2 Verificar si yo soy retenedor de ICA en ese municpio (territorialTaxes.regions[id].isTaxRetainer = true o sino break decision 1.)
+             3.3 Verificar si el proveedor es autoretenedor de ICA en ese municpio (territorialTaxes.regions[id].isSelfTaxRetainer )
+             3.4 Verificar pesos (Calidad mia vs Provedor 
+
+                3 pts Gran Contribuyente --> iva.stateEntity = true;
+                2 pts Regimen Comun --> iva.DIANMajorTaxpayer = true;
+                1 pts Regimen Especial --> iva.ivaTaxResponsable = true;
+
+                (Aplicar a los menores que yo);
+            )
+                // Verificar indfividualmente por cadan retencion
+                3.5 Verificar si se respeta base minima (rent.aceptMinimumBase = true y que sea mayor o igual a la base)-->  Si cumple continuar, si no break
+                3.6 Aplicar la retencion con la 
+
+            // CUARTO PASO TRABAJAR TIMBRE
+            4.0 Verificar si es exento por condiciones especiales (rent.forceExeption = true)/ --> Si break, si no continuar.
+            4. Verificar si yo soy retenedor de timbre (rent.rentTaxResponsable = true o sino break decision 1.)
+                4.2 Verificar si el thirdParty es autoretenedor a titulo de timbre (rent.rentWithholdingAgent = true). --> Si break, si no continuar
+                    // Verificar indfividualmente por cadan retencion
+                    1.4 Verificar si se respeta base minima (rent.aceptMinimumBase = true y que sea mayor o igual a la base)-->  Si cumple continuar, si no break
+                    1.5 Aplicar las retencion
+
+            // QUINTO PASO TRABAJAR CONSUMO 
+            5.0 Verificar si es exento por condiciones especiales (rent.forceExeption = true)/ --> Si break, si no continuar.
+            5. Verificar si yo soy retenedor de timbre (rent.rentTaxResponsable = true o sino break decision 1.)
+                5.2 Verificar si el thirdParty es autoretenedor a titulo de timbre (rent.rentWithholdingAgent = true). --> Si break, si no continuar
+                    // Verificar indfividualmente por cadan retencion
+                    1.4 Verificar si se respeta base minima (rent.aceptMinimumBase = true y que sea mayor o igual a la base)-->  Si cumple continuar, si no break
+                    1.5 Aplicar las retencion
+        */
+    `;
+
+    /**
+     * Motor de decisión de retenciones en la COMPRA (Colombia).
+     *
+     * Compara la calidad fiscal del comprador (mi empresa, `appInfo`) contra la
+     * del proveedor (`thirdPartyInfo`) — ambos comparten la misma estructura
+     * `taxConfig` — y decide, familia por familia (RENTA, IVA, ICA, TIMBRE,
+     * CONSUMO), qué retenciones de `retentionList` deben aplicarse.
+     *
+     * @param {object} thirdPartyInfo  taxConfig del proveedor (vendedor).
+     * @param {object} appInfo         taxConfig de mi empresa (comprador / retenedor).
+     * @param {Array<{name:string,rate:number,base:number,total:number,type:string}>} retentionList
+     *        Retenciones candidatas. `type` indica la familia: 'rent' | 'iva' | 'ica' | 'ring' | 'consumption'.
+     * @param {object} [params]                 Parámetros de la transacción.
+     * @param {number} [params.minimumBase=0]   Umbral mínimo (en pesos) para la regla de base mínima.
+     *        Temporal: valor fijo mientras se implementan las variables globales (UVT) del ERP.
+     * @param {string} [params.municipalityCode] Código del municipio de la transacción (necesario para ICA).
+     * @returns {Array<object>} Retenciones aplicables, ya normalizadas: [{...item, base, rate, total}].
+     */
+    export function colombiaPurchaseRetentionHandler(thirdPartyInfo, appInfo, retentionList = [], params = {}) {
+
+        // Valores de `type` esperados en cada item de `retentionList` (la categoría a la
+        // que pertenece la retención). Se centralizan aquí para ajustarlos fácilmente.
+        const TYPE = { RENT: 'rent', IVA: 'iva', ICA: 'ica', RING: 'ring', CONSUMPTION: 'consumption' };
+
+        const { minimumBase = 0, municipalityCode = null } = params;
+
+        // ── Helpers compartidos ──────────────────────────────────────────────
+
+        // Retenciones candidatas que pertenecen a una familia.
+        const retentionsOf = (type) => retentionList.filter((r) => r?.type === type);
+
+        // Regla de base mínima: si el retenedor exige respetarla (`aceptMinimumBase`),
+        // se descarta la retención cuando su base es inferior al umbral. Si no la exige,
+        // la base nunca bloquea la aplicación.
+        const passesMinimumBase = (item, aceptMinimumBase) =>
+            !aceptMinimumBase || Number(item?.base || 0) >= minimumBase;
+
+        // Normaliza una retención aprobada al shape de salida y recalcula el total.
+        const buildResult = (item) => {
+            const base = Number(item?.base || 0);
+            const rate = Number(item?.rate || 0);
+            return { ...item, base, rate, total: Math.round(base * (rate / 100)) };
+        };
+
+        // Peso / jerarquía fiscal para IVA (calidad del sujeto frente al impuesto).
+        const ivaWeight = (cfg = {}) => {
+            if (cfg.stateEntity) return 3;        // Entidad estatal
+            if (cfg.DIANMajorTaxpayer) return 2;  // Gran contribuyente DIAN
+            if (cfg.ivaTaxResponsable) return 1;  // Responsable de IVA
+            return 0;
+        };
+
+        // Peso / jerarquía fiscal para ICA (por región / municipio).
+        const icaWeight = (region = {}) => {
+            if (region.grandTaxPayer) return 3;   // Gran contribuyente
+            if (region.comonRegime) return 2;     // Régimen común
+            if (region.specialRegime) return 1;   // Régimen especial
+            return 0;
+        };
+
+        // ── 1. RENTA ─────────────────────────────────────────────────────────
+        function rentPurchaseHandlerTreee() {
+            const me = appInfo?.rent || {};
+            const tp = thirdPartyInfo?.rent || {};
+
+            // 1.   Solo aplica si YO soy retenedor de renta.
+            if (!me.rentTaxResponsable) return [];
+            // 1.1  El proveedor está exento por condiciones especiales.
+            if (tp.forceExeption) return [];
+            // 1.2  El proveedor pertenece al Régimen Simple (no sujeto a retefuente de renta).
+            if (tp.regime === 'Regimen simple') return [];
+            // 1.3  El proveedor es autorretenedor de renta (se retiene él mismo).
+            if (tp.rentSelfWithholdingAgent) return [];
+
+            // 1.4 / 1.5  Por cada retención de renta: validar base mínima y aplicar.
+            return retentionsOf(TYPE.RENT)
+                .filter((item) => passesMinimumBase(item, me.aceptMinimumBase))
+                .map(buildResult);
+        }
+
+        // ── 2. IVA ───────────────────────────────────────────────────────────
+        function ivaPurchaseHandlerTreee() {
+            const me = appInfo?.iva || {};
+            const tp = thirdPartyInfo?.iva || {};
+
+            // 2.   Solo aplica si YO soy agente retenedor de IVA.
+            if (!me.ivaWithholdingAgent) return [];
+            // 2.0  El proveedor está exento por condiciones especiales.
+            if (tp.forceExeption) return [];
+
+            // 2.1  Debe existir al menos un IVA candidato; su base es la del propio IVA
+            //      (se asume ya consolidada como `item.base` por quien arma la lista).
+            const ivaRetentions = retentionsOf(TYPE.IVA);
+            if (ivaRetentions.length === 0) return [];
+
+            // 2.2  Regla de pesos: solo retengo a proveedores de jerarquía ESTRICTAMENTE menor.
+            //      Excepción por ventas CI: se retiene únicamente a los de 1 punto.
+            const myWeight = ivaWeight(me);
+            const tpWeight = ivaWeight(tp);
+            const applies = me.ivaWithholdingAgentByCI ? tpWeight === 1 : tpWeight < myWeight;
+            if (!applies) return [];
+
+            // 2.3 / 2.4 / 2.5  Validar base mínima por retención y aplicar.
+            return ivaRetentions
+                .filter((item) => passesMinimumBase(item, me.aceptMinimumBase))
+                .map(buildResult);
+        }
+
+        // ── 3. ICA (impuesto territorial) ────────────────────────────────────
+        function icaPurchaseHandlerTreee() {
+            // 3.1  Identificar la región / municipio de la transacción en MI configuración.
+            const myIca = (appInfo?.territorialTaxes || []).find((t) => t.code === '05' || t.name === 'ICA');
+            const myRegion = myIca?.regions?.find((r) => r.code === municipalityCode);
+            if (!myRegion) return [];
+
+            // Región equivalente del proveedor (para exención, autorretención y pesos).
+            const tpIca = (thirdPartyInfo?.territorialTaxes || []).find((t) => t.code === '05' || t.name === 'ICA');
+            const tpRegion = tpIca?.regions?.find((r) => r.code === municipalityCode) || {};
+
+            // 3.0  El proveedor está exento por condiciones especiales en el municipio.
+            if (tpRegion.forceExeption) return [];
+            // 3.2  Solo aplica si YO soy retenedor de ICA en ese municipio.
+            if (!myRegion.isTaxRetainer) return [];
+            // 3.3  El proveedor es autorretenedor de ICA en ese municipio.
+            if (tpRegion.isSelfTaxRetainer) return [];
+
+            // 3.4  Regla de pesos: solo retengo a proveedores de jerarquía ESTRICTAMENTE menor.
+            if (!(icaWeight(tpRegion) < icaWeight(myRegion))) return [];
+
+            // 3.5 / 3.6  Validar base mínima y aplicar (la tarifa por actividad económica
+            //            ya viene resuelta en `item.rate`; `myIca.aceptMinimumBase` rige el umbral).
+            return retentionsOf(TYPE.ICA)
+                .filter((item) => passesMinimumBase(item, myIca?.aceptMinimumBase))
+                .map(buildResult);
+        }
+
+        // ── 4. TIMBRE ────────────────────────────────────────────────────────
+        function ringPurchaseHandlerTreee() {
+            const me = appInfo?.ring || {};
+            const tp = thirdPartyInfo?.ring || {};
+
+            // 4.0  El proveedor está exento por condiciones especiales.
+            if (tp.forceExeption) return [];
+            // 4.   Solo aplica si YO soy agente retenedor de timbre.
+            if (!me.ringWithholdingAgent) return [];
+            // 4.2  El proveedor es autorretenedor de timbre.
+            if (tp.ringSelfWithholdingAgent) return [];
+
+            return retentionsOf(TYPE.RING)
+                .filter((item) => passesMinimumBase(item, me.aceptMinimumBase))
+                .map(buildResult);
+        }
+
+        // ── 5. CONSUMO ───────────────────────────────────────────────────────
+        function consumePurchaseHandlerTreee() {
+            const me = appInfo?.consumption || {};
+            const tp = thirdPartyInfo?.consumption || {};
+
+            // 5.0  El proveedor está exento por condiciones especiales.
+            if (tp.forceExeption) return [];
+            // 5.   Solo aplica si YO soy agente retenedor de consumo.
+            if (!me.consumptionWithholdingAgent) return [];
+            // 5.2  El proveedor es autorretenedor de consumo.
+            if (tp.consumptionSelfWithholdingAgent) return [];
+
+            return retentionsOf(TYPE.CONSUMPTION)
+                .filter((item) => passesMinimumBase(item, me.aceptMinimumBase))
+                .map(buildResult);
+        }
+
+        // Ejecutar el árbol completo y consolidar las retenciones aplicables.
+        return [
+            ...rentPurchaseHandlerTreee(),
+            ...ivaPurchaseHandlerTreee(),
+            ...icaPurchaseHandlerTreee(),
+            ...ringPurchaseHandlerTreee(),
+            ...consumePurchaseHandlerTreee(),
+        ];
+    }
+
+    // Sell
+
+    export function colombiaSellRetentionHandler(thirdPartyInfo,appInfo,itemInfo){
+        // Parametrización del arbol de decision retenciones colombia ventas
+        return({})
+    }
+
+
+
+
+
+    // Test clone Company:
+    export async function cloneCompany(){
+        let res = await postInfo('/companies/clone-configuration', {
+            source_company_id: 5,
+            target_company_id: 6,
+        });
+        console.log('|||||||||||||||||||||||| REspuesta clonación: ',res);
+    }

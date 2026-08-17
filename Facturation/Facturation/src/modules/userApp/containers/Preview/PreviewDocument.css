@@ -1,11 +1,13 @@
 
 .PreviewDocument{
-    height: 100%;
-    width: 93dvw;
+    height: 100dvh;
+    overflow-y: auto;
+    width: 60dvw;
     background-color: var(--bg);
     padding: 2vh 4vh;
     display: flex;
     flex-direction:column;
+    margin: auto;
 }
 
 .PreviewDocument .DescriptionSpan{
@@ -17,7 +19,7 @@
     margin: 1vh 0;
     padding: 0 1vh;
     margin-top: 3vh;
-    margin-bottom: 2vh;
+    margin-bottom: 4vh;
 }
 
 .PreviewDocument .titleDocContainer .BoldTitle{
@@ -158,6 +160,7 @@
 .PreviewDocument .attachedDocuments .attachedDocumentsGrid{
     display: flex;
     flex-direction: column;
+    margin-top: 1vh;
 }
 
 .PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard{
@@ -254,6 +257,33 @@
 
 .PreviewDocument .attachedDocuments .attachedDocumentsGrid .attDocCard:hover strong{
     color: var(--mainText);
+}
+
+.PreviewDocument .electronicInvoiceCard{
+    display: flex;
+    align-items: center;
+    padding: 1vh 2vh;
+    cursor: pointer;
+    border-radius: 2vh;
+    border: dashed .1vh var(--inputsBorder);
+}
+
+.PreviewDocument .electronicInvoiceCard:hover{
+    background-color: var(--cardHover);
+}
+
+.PreviewDocument .electronicInvoiceCard .iconSellInvoice{
+    font-size: clamp(3px,3vh,30px);
+    color: #FB2C36;
+}
+
+.PreviewDocument .electronicInvoiceCard h6{
+    color: var(--mainText);
+}
+
+.PreviewDocument .electronicInvoiceCard .MoreOptions{
+    margin: auto;
+    margin-right: 2vh;
 }
 
 

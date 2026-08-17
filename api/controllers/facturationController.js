@@ -1,4 +1,5 @@
 import { useDataBase } from "../app.js";
+import { appendBusinessDateRange, companyTimeZoneSql } from "../services/businessTimeZoneService.js";
 import processController from "./processController.js";
 import sellInvoiceService from "../services/sellInvoiceService.js";
 import cashReceiptService from "../services/cashReceiptService.js";
@@ -602,15 +603,16 @@ facturationController.getSettlementReportByPeriod = (req, res) => {
             whereClauses.push(`"Facturation".shift_settlement_details.company_id = $${values.length + 1}`);
             values.push(info.company_id);
 
-            if (info.start_date != undefined) {
-                whereClauses.push(`"Facturation".shift_settlement_details.crated_at >= $${values.length + 1}`);
-                values.push(info.start_date);
-            }
-
-            if (info.end_date != undefined) {
-                whereClauses.push(`"Facturation".shift_settlement_details.crated_at <= $${values.length + 1}`);
-                values.push(info.end_date);
-            }
+            appendBusinessDateRange({
+                whereClauses,
+                values,
+                // Columna legacy `timestamp without time zone`: sus valores fueron
+                // generados con CURRENT_TIMESTAMP bajo una sesión PostgreSQL UTC.
+                column: '("Facturation".shift_settlement_details.crated_at AT TIME ZONE \'UTC\')',
+                start: info.start_date,
+                end: info.end_date,
+                companyPlaceholder: '$1'
+            });
 
             if (info.cash_box_id != undefined) {
                 whereClauses.push(`"Facturation".shift_settlement_details."cashBox_id" = $${values.length + 1}`);
@@ -630,6 +632,11 @@ facturationController.getSettlementReportByPeriod = (req, res) => {
                 SELECT
                     "Facturation".shift_settlement_details.id AS shift_settlement_id,
                     "Facturation".shift_settlement_details.crated_at AS settlement_date,
+                    ("Facturation".shift_settlement_details.crated_at AT TIME ZONE 'UTC')
+                        AT TIME ZONE (${companyTimeZoneSql('$1')}) AS settlement_date_local,
+                    (("Facturation".shift_settlement_details.crated_at AT TIME ZONE 'UTC')
+                        AT TIME ZONE (${companyTimeZoneSql('$1')}))::date AS business_date,
+                    ${companyTimeZoneSql('$1')} AS business_time_zone,
                     "Facturation".shift_settlement_details."cashBox_id",
                     "Ecosystem".transaction_detail.*,
                     "Ecosystem".concepts.name AS concept_name,

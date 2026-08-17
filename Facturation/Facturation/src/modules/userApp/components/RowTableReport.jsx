@@ -24,12 +24,14 @@ export function RowTableReport({columns,info,hidden,navigation}){
         "ID":<span className="Redirect idHolder rowSpan" onClick={()=>{
             info.type = 'Document'
             setPreviewInfo(info);
-            setOpenPreview(true)
+            //setOpenPreview(true)
+            popInAlert(<DocumentPreview data={info}/>)
         }} >{info.docType}# {info.ownSerial != undefined? info.ownSerial:info.id}</span>,
         "Transacción":<span className="Redirect rowSpan" onClick={()=>{
             info.type = 'Document'
-            setPreviewInfo(info);
-            setOpenPreview(true)
+            //setPreviewInfo(info);
+            //setOpenPreview(true)
+            popInAlert(<DocumentPreview data={info}/>)
         }} >{info.docType}TR# {info.transaction_id}</span>,
         "OP":<span className="Redirect idHolder rowSpan" onClick={()=>{
             setPreviewInfo({
@@ -74,8 +76,22 @@ export function RowTableReport({columns,info,hidden,navigation}){
         'Fecha creación':<span className="rowSpan ">{info.created_at != undefined? (info.created_at).substring(0,10):''}</span>,
         'Tipo Doc':<span className="rowSpan">{info.doc_type}</span>,
         'Documento':<span className="rowSpan Redirect" onClick={()=>{
-            window.open(`https://facturation.sga360.co/preview/Document/${params.company_key}/${info.doc_id}`,'_blank','noopener,noreferrer')
+            //window.open(`https://facturation.sga360.co/preview/Document/${params.company_key}/${info.doc_id}`,'_blank','noopener,noreferrer')
+            popInAlert(<DocumentPreview data={info}/>)
         }}>{`${info.doc_type}#${info.ownSerial}`}</span>,
+        'Factura electrónica':info.electronic_invoice_number
+            ? <span
+                className={`rowSpan ${info.electronic_invoice_url ? 'Redirect' : ''}`}
+                title={info.electronic_invoice_number}
+                onClick={()=>{
+                    if(info.electronic_invoice_url){
+                        window.open(info.electronic_invoice_url, '_blank', 'noopener,noreferrer')
+                    }
+                }}
+            >
+                <i className="fa-solid fa-file-invoice"/> {info.electronic_invoice_number}
+            </span>
+            : <span className="rowSpan">--</span>,
         'Naturaleza':<span className="rowSpan idHolder centerAl">{info.nature}</span>,
         'Debito':<span className="rowSpan">{info.total_debit != undefined? moneyFormat(info.total_debit):0}</span>,
         'Crédito':<span className="rowSpan">{info.total_credit != undefined? moneyFormat(info.total_credit):0}</span>,

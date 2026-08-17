@@ -1,40 +1,120 @@
 @import './UserApp.css';
 
 .AlertsHolder{
-    position: absolute;
+    position: fixed;
+    inset: 0;
+    width: 100vw;
     height: 100dvh;
-    box-shadow: -.5vh 0 2vh #0002;
     z-index: 31;
-    top: 0;
-    right: 0;
-    animation-name: AlertsHolder;
-    animation-duration: .4s;
-    animation-fill-mode: both;
-    animation-timing-function: ease;
-    display: grid;
-    place-items: start;
+    padding: 0;
     overflow: hidden;
-    background-color: var(--bg);
+    background: transparent;
+    isolation: isolate;
+    pointer-events: none;
 }
 
 :root.dark .AlertsHolder{
-    background-color: var(--menuAside);
+    background: transparent;
 }
 
-.AlertsHolder .AlertContainer{
+.AlertLayer{
+    position: absolute;
+    inset: 0;
+    z-index: var(--alert-layer);
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: safe center;
+    overflow: auto;
+    overscroll-behavior: contain;
+    background-color: var(--translucidMenu);
+    -webkit-backdrop-filter: blur(12px) saturate(.8);
+    backdrop-filter: blur(12px) saturate(.8);
+    animation: AlertLayerAppear .22s ease-out both;
+    pointer-events: none;
+}
+
+.AlertLayer.active{
+    pointer-events: auto;
+}
+
+.AlertLayer > .AlertContainer{
     grid-area: 1 / 1;
 }
 
-.AlertsHolder .AlertContainer:nth-child(1){
-    animation-delay: .5s;
+.alertStackIndicator{
+    position: fixed;
+    right: 72px;
+    bottom: 18px;
+    z-index: 35;
+    min-height: 28px;
+    padding: 5px 10px;
+    border: 1px solid color-mix(in srgb, var(--mainText) 12%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    box-shadow: 0 8px 24px #0002;
+    color: var(--mainText);
+    font-size: .75rem;
+    line-height: 1.4;
+    pointer-events: none;
+    backdrop-filter: blur(12px);
 }
 
-@keyframes AlertsHolder {
+.fallbackAlertMessage{
+    display: flex;
+    gap: 16px;
+    width: min(480px, calc(100vw - 32px));
+    margin: 72px 24px 24px;
+    padding: 20px;
+    border: 1px solid color-mix(in srgb, var(--mainText) 12%, transparent);
+    border-radius: 16px;
+    color: var(--mainText);
+    background: color-mix(in srgb, var(--bg) 94%, var(--mainText));
+}
+
+.fallbackAlertMessage > i{
+    margin-top: 3px;
+    color: var(--principalColor, #376cfb);
+    font-size: 1.35rem;
+}
+
+.fallbackAlertMessage h2,
+.fallbackAlertMessage p{
+    margin: 0;
+}
+
+.fallbackAlertMessage h2{
+    margin-bottom: 6px;
+    font-size: 1rem;
+}
+
+.fallbackAlertMessage p{
+    line-height: 1.5;
+}
+
+.fallbackAlertMessage.error > i{
+    color: var(--error, #c93636);
+}
+
+@keyframes AlertLayerAppear {
     0%{
-        right: -120%;
+        opacity: 0;
     }
 
     100%{
-        right: 0;
+        opacity: 1;
+    }
+}
+
+@media (max-width: 700px) {
+    .alertStackIndicator{
+        right: 64px;
+        bottom: max(12px, env(safe-area-inset-bottom));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .AlertLayer{
+        animation-duration: .01ms;
     }
 }

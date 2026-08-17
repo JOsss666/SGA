@@ -237,6 +237,24 @@ processController.getDocuments = (req,res)=>{
             `);
         }
 
+        if(info.type == 'Sell Invoice'){
+            variableColumns.push('electronic_document.number AS electronic_invoice_number')
+            variableColumns.push('electronic_document.url AS electronic_invoice_url')
+            variableJoins.push(`
+                LEFT JOIN LATERAL (
+                    SELECT
+                        electronic_invoice.number,
+                        electronic_invoice.url
+                    FROM "ElectronicFacturation".documents electronic_invoice
+                    WHERE electronic_invoice.doc_id = "Ecosystem".documents.id
+                        AND electronic_invoice.company_id = "Ecosystem".documents.company_id
+                        AND electronic_invoice.type = 'electronic invoice'
+                    ORDER BY electronic_invoice.id DESC
+                    LIMIT 1
+                ) electronic_document ON TRUE
+            `);
+        }
+
         whereClauses.push(`"Ecosystem".documents.company_id = $${values.length +1}`)
         values.push(info.company_id);
 
@@ -324,20 +342,59 @@ processController.getOpAttached = (req,res)=>{
     req.on('end',async()=>{
         let info = JSON.parse(data);
         console.log(info)
+        const documentId = info.id ?? info.op_id;
+
+        if(documentId == null){
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify([false,['Se requiere el id del documento']]))
+            return;
+        }
+
+        const values = [documentId];
+        const companyFilter = info.company_id != null
+            ? `AND "Ecosystem".documents.company_id = $2`
+            : '';
+        if(info.company_id != null) values.push(info.company_id);
+
         let sentence = `
+            WITH target_group AS (
+                SELECT COALESCE(
+                    (
+                        SELECT main_doc_id
+                        FROM "Ecosystem".documents_group
+                        WHERE doc_id = $1
+                        LIMIT 1
+                    ),
+                    $1::integer
+                ) AS main_doc_id
+            )
             SELECT
-                "Ecosystem".documents_group.id,
+                "Ecosystem".documents.*
+            FROM
+                "Ecosystem".documents
+            CROSS JOIN target_group
+            WHERE
+                "Ecosystem".documents.id = target_group.main_doc_id
+                ${companyFilter}
+
+            UNION
+
+            SELECT
                 "Ecosystem".documents.*
             FROM
                 "Ecosystem".documents_group
-            LEFT JOIN
+            INNER JOIN
                 "Ecosystem".documents
             ON
                 "Ecosystem".documents_group.doc_id = "Ecosystem".documents.id
+            CROSS JOIN target_group
             WHERE
-                "Ecosystem".documents_group.main_doc_id = $1 ;
+                "Ecosystem".documents_group.main_doc_id = target_group.main_doc_id
+                ${companyFilter}
+
+            ORDER BY id DESC;
         `
-        let consulta = await useDataBase(sentence,[info.id],1);
+        let consulta = await useDataBase(sentence,values,1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })

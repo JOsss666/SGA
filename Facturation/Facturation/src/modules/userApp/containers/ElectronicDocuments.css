@@ -62,12 +62,12 @@
     gap: 1vw;
 }
 
-.ElectronicDocuments .settingsReport .rangeInput .FormInput{
+.ElectronicDocuments .settingsReport .rangeInput .FacturationFormInput{
     width: fit-content;
     min-width: 0;
 }
 
-.ElectronicDocuments .settingsReport .rangeInput .FormInput label{
+.ElectronicDocuments .settingsReport .rangeInput .FacturationFormInput label{
     display: none;
 }
 

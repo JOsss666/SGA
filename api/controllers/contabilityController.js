@@ -2,6 +2,7 @@ import { calcWeightedAverage, encrypt, isRelevanPrompt, useDataBase, actualDate 
 import fs from "fs";
 import path from "path";
 import { send_API_AI } from "../ApiFunctions.js";
+import { companyTimeZoneSql } from "../services/businessTimeZoneService.js";
 const contabiltyController = {};
 
 contabiltyController.getBalance = (req,res)=>{
@@ -22,6 +23,13 @@ contabiltyController.getBalance = (req,res)=>{
         let tableAcc = info.typePlanAccount == 'PUC'? 'account_templates_PUC':'contable_accounts';
         let sentence;
         if(tableAcc == 'account_templates_PUC'){
+            const companyTimeZone = companyTimeZoneSql('$1');
+            const periodStart = `($2::date::timestamp AT TIME ZONE (${companyTimeZone}))`;
+            const periodEnd = `COALESCE(
+                ((($3::date + 1)::timestamp) AT TIME ZONE (${companyTimeZone})),
+                CURRENT_TIMESTAMP
+            )`;
+
             sentence = `
                 WITH movements_by_account AS (
                     SELECT
@@ -30,7 +38,7 @@ contabiltyController.getBalance = (req,res)=>{
                         /* SALDO INICIAL */
                         SUM(
                             CASE
-                                WHEN t.created_at < $2 THEN
+                                WHEN t.created_at < ${periodStart} THEN
                                     CASE
                                         WHEN t.nature = 'DB' THEN t.total
                                         WHEN t.nature = 'CR' THEN -t.total
@@ -43,7 +51,8 @@ contabiltyController.getBalance = (req,res)=>{
                         /* DÉBITOS DEL PERIODO */
                         SUM(
                             CASE
-                                WHEN t.created_at BETWEEN $2 AND $3
+                                WHEN t.created_at >= ${periodStart}
+                                    AND t.created_at < ${periodEnd}
                                     AND t.nature = 'DB'
                                 THEN t.total
                                 ELSE 0
@@ -53,7 +62,8 @@ contabiltyController.getBalance = (req,res)=>{
                         /* CRÉDITOS DEL PERIODO */
                         SUM(
                             CASE
-                                WHEN t.created_at BETWEEN $2 AND $3
+                                WHEN t.created_at >= ${periodStart}
+                                    AND t.created_at < ${periodEnd}
                                     AND t.nature = 'CR'
                                 THEN t.total
                                 ELSE 0
@@ -146,13 +156,8 @@ contabiltyController.getBalance = (req,res)=>{
             ORDER BY a.code;
             `;
         }
-        const startDate = info.start_date !== undefined
-        ? new Date(info.start_date)
-        : new Date('1900-01-01');
-
-        const endDate = info.end_date !== undefined
-        ? new Date(info.end_date)
-        : new Date();
+        const startDate = info.start_date || '1900-01-01';
+        const endDate = info.end_date || null;
 
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -372,4 +377,3 @@ contabiltyController.deleteContableAccount = (req, res) => {
     });
 };
 export default contabiltyController;
-

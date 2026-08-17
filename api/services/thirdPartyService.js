@@ -33,18 +33,26 @@ const auditEvent = async ({ companyId, eventType, entityTable, entityId, payload
 
 // Garantiza la relación tercero↔compañía en el modelo nuevo y devuelve sus ids.
 // Si no se conoce company_id, la resuelve desde el propio tercero legacy.
-const ensureRelations = async (thirdPartyId, companyId = null, { status, municipalityExtCode } = {}) => {
+const ensureRelations = async (thirdPartyId, companyId = null, { status, municipalityExtCode, localityId } = {}) => {
     await useDataBase(`
         INSERT INTO "Fiscal".third_party_company_relations
-            (third_party_id, company_id, status, jurisdiction_id, notes)
+            (third_party_id, company_id, status, jurisdiction_id, locality_id, notes)
         SELECT t.id, t.company_id, COALESCE($2, 'active'),
                (SELECT j.id FROM "Fiscal".jurisdictions j
                  WHERE j.level = 'municipality' AND j.external_code = COALESCE(NULLIF(TRIM($3), ''), '164')),
+               (SELECT l.id
+                  FROM "Fiscal".localities l
+                  JOIN "Fiscal".jurisdictions j ON j.id = l.municipality_id
+                 WHERE j.level = 'municipality'
+                   AND j.external_code = COALESCE(NULLIF(TRIM($3), ''), '164')
+                   AND ($4::bigint IS NULL OR l.id = $4)
+                 ORDER BY (l.id = $4::bigint) DESC, l.is_municipal_seat DESC
+                 LIMIT 1),
                'Creado por doble escritura (Etapa 5)'
         FROM "Ecosystem".thirdparties t
         WHERE t.id = $1
         ON CONFLICT ON CONSTRAINT uq_tp_company_relation DO NOTHING;
-    `, [thirdPartyId, status ?? null, municipalityExtCode ?? null], 2);
+    `, [thirdPartyId, status ?? null, municipalityExtCode ?? null, localityId ?? null], 2);
 
     const [ok, rows] = await useDataBase(`
         SELECT id, company_id
@@ -123,12 +131,18 @@ const attachRutIfPresent = async (relationId, attachedRut, performedBy) => {
     const inserted = await useDataBase(`
         INSERT INTO "Fiscal".third_party_documents
             (relation_id, document_type_id, file_url, status, uploaded_by)
-        SELECT $1, dt.id, $2, 'valid', $3
+        SELECT
+            $1::bigint,
+            dt.id,
+            $2::varchar(2000),
+            'valid'::varchar(20),
+            $3::varchar(200)
         FROM "Fiscal".document_types dt
         WHERE dt.code = 'RUT'
           AND NOT EXISTS (
               SELECT 1 FROM "Fiscal".third_party_documents e
-              WHERE e.relation_id = $1 AND e.file_url = $2
+              WHERE e.relation_id = $1::bigint
+                AND e.file_url = $2::varchar(2000)
           )
         RETURNING id;
     `, [relationId, url, performedBy ?? 'api'], 3);
@@ -172,7 +186,8 @@ const setRelationStatus = async (relationIds, status) => {
 const syncFiscalCreate = async (thirdPartyId, info, performedBy) => {
     const relations = await ensureRelations(thirdPartyId, info.company_id, {
         status: info.comercial_state,
-        municipalityExtCode: info.mucipality_id ?? info.municipality_id // typo legacy respetado
+        municipalityExtCode: info.mucipality_id ?? info.municipality_id, // typo legacy respetado
+        localityId: info.locality_id
     });
     if (!relations.length) throw new Error(`Sin relación Fiscal para tercero ${thirdPartyId}`);
 
@@ -212,6 +227,10 @@ const performedByFrom = (info) => info.user ?? info.userName ?? info.performed_b
 
 // Crea el tercero: legacy (3 INSERTs, ahora atómicos) + sync Fiscal no bloqueante.
 thirdPartyService.register = async (info) => {
+    const taxConfig = typeof info.taxConfig === 'string'
+        ? info.taxConfig
+        : JSON.stringify(info.taxConfig ?? {});
+
     const idNewThirdParty = await withTransaction(async (client) => {
         const tpResult = await client.query(`
             INSERT INTO "Ecosystem".thirdparties(
@@ -241,11 +260,13 @@ thirdPartyService.register = async (info) => {
         await client.query(`
             INSERT INTO "Ecosystem"."thirdPartyTaxInfo"(
                 "thirdParty_id", company_id, regime, "IVA_responsability", retention_type,
-                economic_activity, "attachedRut", municipality_id, nature, "identidicationType_id")
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);
+                economic_activity, "attachedRut", municipality_id, nature, "identidicationType_id",
+                "taxConfig")
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb);
         `, [newId, info.company_id, info.regime, info.IVA_responsability, info.retention_type,
             info.economic_activity, info.attachedRut ?? '',
-            info.mucipality_id ?? info.municipality_id, info.typePerson, info.identidicationType_id]);
+            info.mucipality_id ?? info.municipality_id, info.typePerson, info.identidicationType_id,
+            taxConfig]);
 
         return newId;
     });
@@ -461,44 +482,100 @@ thirdPartyService.unblock = async (info) => {
     return [true, { released_blocks: released }];
 };
 
-// Borrado: snapshot de auditoría ANTES de borrar; el CASCADE limpia el modelo Fiscal.
-// Corrige además el bug legacy de placeholders (el delete múltiple estaba roto).
+// Borrado físico seguro: solo se permite cuando el tercero no tiene actividad
+// transaccional. La configuración comercial/fiscal se limpia por CASCADE.
 thirdPartyService.remove = async (info) => {
-    const ids = (info.suppliers ?? []).map(Number).filter(Number.isFinite);
-    if (!ids.length) return [false, 'Sin ids para borrar'];
+    const thirdPartyId = Number(info.thirdParty_id ?? info.suppliers?.[0]);
+    const companyId = Number(info.company_id);
 
-    // Snapshot de lo que se va a borrar (perfil + fiscal vigente) → auditoría.
-    try {
-        const [ok, rows] = await useDataBase(`
-            SELECT p.third_party_id, p.company_id,
-                   to_jsonb(p) AS profile, to_jsonb(x) AS tax_info
-            FROM "Fiscal".v_third_party_current_profile p
-            LEFT JOIN "Fiscal".v_third_party_current_tax_info x
-                   ON x."thirdParty_id" = p.third_party_id AND x.company_id = p.company_id
-            WHERE p.third_party_id = ANY($1::bigint[]);
-        `, [ids], 1);
-
-        if (ok) {
-            for (const row of rows) {
-                await auditEvent({
-                    companyId: row.company_id,
-                    eventType: 'third_party.deleted',
-                    entityTable: 'thirdparties',
-                    entityId: row.third_party_id,
-                    payload: { profile: row.profile, tax_info: row.tax_info },
-                    performedBy: performedByFrom(info)
-                });
-            }
-        }
-    } catch (err) {
-        console.error('⚠️ [Fiscal] No se pudo auditar el borrado (se procede igual):', err);
+    if (!Number.isInteger(thirdPartyId) || thirdPartyId <= 0) {
+        const error = new Error('thirdParty_id es requerido');
+        error.statusCode = 400;
+        throw error;
     }
 
-    const placeholders = ids.map((_, i) => `$${i + 1}`).join(',');
-    return await useDataBase(`
-        DELETE FROM "Ecosystem".thirdparties
-        WHERE id IN (${placeholders});
-    `, ids, 2);
+    if (!Number.isInteger(companyId) || companyId <= 0) {
+        const error = new Error('company_id es requerido');
+        error.statusCode = 400;
+        throw error;
+    }
+
+    return withTransaction(async (client) => {
+        const thirdPartyResult = await client.query(`
+            SELECT t.*,
+                   to_jsonb(ci) AS commercial_info,
+                   to_jsonb(ti) AS tax_info
+            FROM "Ecosystem".thirdparties t
+            LEFT JOIN "Ecosystem"."thirdPartyComercialInfo" ci
+                   ON ci."thirdParty_id" = t.id AND ci.company_id = t.company_id
+            LEFT JOIN "Ecosystem"."thirdPartyTaxInfo" ti
+                   ON ti."thirdParty_id" = t.id AND ti.company_id = t.company_id
+            WHERE t.id = $1 AND t.company_id = $2
+            FOR UPDATE OF t;
+        `, [thirdPartyId, companyId]);
+
+        if (thirdPartyResult.rowCount === 0) {
+            const error = new Error('El tercero no existe o no pertenece a la compañía');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const movementsResult = await client.query(`
+            SELECT
+                (SELECT COUNT(*) FROM "Ecosystem".documents
+                  WHERE "thirdParty_id" = $1 AND company_id = $2) AS documents,
+                (SELECT COUNT(*) FROM "Ecosystem".transactions
+                  WHERE "thirdParty_id" = $1 AND company_id = $2) AS transactions,
+                (SELECT COUNT(*) FROM "Ecosystem".transaction_detail
+                  WHERE "thirdParty_id" = $1 AND company_id = $2) AS transaction_details,
+                (SELECT COUNT(*) FROM "Inventory"."inventoryMovements"
+                  WHERE "thirdParty_id" = $1 AND company_id = $2) AS inventory_movements,
+                (SELECT COUNT(*) FROM "Inventory".services_movement
+                  WHERE "thirdParty_id" = $1 AND company_id = $2) AS service_movements,
+                (SELECT COUNT(*) FROM "Process".process_instance
+                  WHERE "thirdParty_id" = $1 AND company_id = $2) AS process_instances,
+                (SELECT COUNT(*) FROM "Treasury".accounts_receivable
+                  WHERE "thirdParty_id" = $1 AND company_id = $2) AS accounts_receivable,
+                (SELECT COUNT(*) FROM "Treasury".portfolio_payments
+                  WHERE "thirdParty_id" = $1 AND company_id = $2) AS portfolio_payments,
+                (SELECT COUNT(*) FROM "Treasury".accounts_payable
+                  WHERE "thirdParty_id" = $1 AND company_id = $2) AS accounts_payable;
+        `, [thirdPartyId, companyId]);
+
+        const dependencies = Object.fromEntries(
+            Object.entries(movementsResult.rows[0] ?? {})
+                .map(([name, total]) => [name, Number(total)])
+                .filter(([, total]) => total > 0)
+        );
+
+        if (Object.keys(dependencies).length > 0) {
+            const error = new Error(
+                'No se puede eliminar el tercero porque tiene movimientos o documentos asociados. Puedes bloquearlo para impedir nuevas operaciones.'
+            );
+            error.statusCode = 409;
+            error.code = 'THIRD_PARTY_HAS_MOVEMENTS';
+            error.dependencies = dependencies;
+            throw error;
+        }
+
+        const snapshot = thirdPartyResult.rows[0];
+        await client.query(`
+            INSERT INTO "Fiscal".audit_events
+                (company_id, event_type, entity_schema, entity_table, entity_id, payload, performed_by)
+            VALUES ($1, 'third_party.deleted', 'Ecosystem', 'thirdparties', $2, $3::jsonb, $4);
+        `, [companyId, thirdPartyId, JSON.stringify(snapshot), performedByFrom(info)]);
+
+        const deleteResult = await client.query(`
+            DELETE FROM "Ecosystem".thirdparties
+            WHERE id = $1 AND company_id = $2
+            RETURNING id;
+        `, [thirdPartyId, companyId]);
+
+        return [true, {
+            id: deleteResult.rows[0].id,
+            message: 'Tercero eliminado correctamente.'
+        }];
+    });
 };
 
 export default thirdPartyService;

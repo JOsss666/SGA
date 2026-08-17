@@ -16,6 +16,10 @@ import AnalyticController from '../controllers/AnalyticsController.js';
 import electronicFacturationController from '../controllers/electronicFacturationController.js';
 import electronicProviderCredentialsController from '../controllers/electronicProviderCredentialsController.js';
 import treasuryController from '../controllers/TreasuryController.js';
+import geographyController from '../controllers/geographyController.js';
+import companyConfigurationController from '../controllers/companyConfigurationController.js';
+import searchController from '../controllers/searchController.js';
+import companyTimeZoneController from '../controllers/companyTimeZoneController.js';
 import integrationRouter from './integration.routes.js';
 
 const router = express.Router();
@@ -37,6 +41,7 @@ router.use('/api/integrations/v1', integrationRouter);
     router.post("/merge-chunks", controller.mergeChunks);
 
     router.post('/processAiRequest',controller.processAiRequest);
+    router.post('/processCustomAiRequest', controller.processCustomAiRequest);
 
     router.post('/getAttachedFiles',controller.getAttachedFiles);
 
@@ -53,6 +58,12 @@ router.use('/api/integrations/v1', integrationRouter);
     router.post('/getDocuments',controller.getDocuments);
 
 router.post('/getCompanyInfo',controller.getCompanyInfo);
+
+router.post('/companies/clone-configuration', express.json(), companyConfigurationController.clone);
+router.post('/companies/time-zone', express.json(), companyTimeZoneController.get);
+router.post('/companies/time-zone/update', express.json(), companyTimeZoneController.update);
+
+router.post('/search', express.json(), searchController.search);
 
 router.post('/getUserInfo',controller.getUserInfo);
 
@@ -78,6 +89,11 @@ router.post('/unblockThirdParty',controller.unblockThirdParty);
 router.post('/deleteThirdParty',controller.deleteThirdParty);
 
 router.post('/getThirdPartyDetails',controller.getThirdPartyDetails);
+
+router.get('/geography/countries', geographyController.getCountries);
+router.get('/geography/departments', geographyController.getDepartments);
+router.get('/geography/municipalities', geographyController.getMunicipalities);
+router.get('/geography/localities', geographyController.getLocalities);
 
 router.post('/getStores',controller.getStores);
 
@@ -109,11 +125,15 @@ router.post('/deleteTax',controller.deleteTax);
 
 router.post('/getTaxes',controller.getTaxes);
 
+router.get('/taxes/withholdings',controller.getWithholdings);
+
 router.post('/getConceptTaxes',controller.getConceptTaxes);
 
 router.post('/createTaxCategory',controller.createTaxCategory);
 
 router.post('/getTaxCategories',controller.getTaxCategory);
+
+router.post('/getFiscalTaxTypes',controller.getFiscalTaxTypes);
 
 router.post('/createConcept',controller.createConcept);
 

@@ -56,7 +56,7 @@
     padding: 1.5vh 0;
 }
 
-.ProductLinkFiscalConditionsCard .productFiscalBody .SearchinList{
+.ProductLinkFiscalConditionsCard .productFiscalBody .FacturationSearchinList{
     width: 100%;
     margin: 0;
 }
@@ -133,6 +133,31 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1vh;
+}
+
+.ProductLinkFiscalConditionsCard .thirdPartyProductReference{
+    display: flex;
+    flex-direction: column;
+    gap: .6vh;
+    margin: 1vh 0;
+    color: var(--mainText);
+    font-size: clamp(9px,1.6vh,14px);
+    width: 100%;
+    padding: 1vh;
+}
+
+.ProductLinkFiscalConditionsCard .thirdPartyProductReference .FacturationFormInput{
+    width: 100%;
+}
+
+.ProductLinkFiscalConditionsCard .thirdPartyProductReference input{
+    width: 100%;
+    box-sizing: border-box;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: .6vh;
+    padding: 1vh;
+    color: var(--mainText);
+    background-color: var(--inputsBg);
 }
 
 .ProductLinkFiscalConditionsCard .operationBlock{

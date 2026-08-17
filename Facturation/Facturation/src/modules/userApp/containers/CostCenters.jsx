@@ -101,7 +101,7 @@ export function CostCenters(){
                                     }}title={element.name}
                                     onlyTitle={true} 
                                     key={index}
-                                    img={'https://res.cloudinary.com/djjxugmni/image/upload/v1763930815/3d-business-wallet-finance-illustration-free-png_vr9tvx.png'}/>
+                                    img={'https://cdnmain.sga360.co/static/3d-business-wallet-finance-illustration-free-png_vr9tvx.webp'}/>
                                 )}
                             </>
                         ))}

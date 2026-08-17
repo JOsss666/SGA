@@ -195,7 +195,7 @@ export function FormNewBudget({info,update,updateInfo = {},reloadFun}){
                 ]}/>
                 <FormInput action={setDocumentDate} title={'Fecha del documento'} type={'date'} disabled={disabled}/>
                 <FormInput action={setValidUntil} title={'Valido hasta'} type={'date'} disabled={disabled}/>
-                <FileInput action={setAttached} disabled={disabled}/>
+                <FileInput category="files" action={setAttached} disabled={disabled}/>
                 <FormButton text={update? 'Actualizar':'Crear presupuesto'}/>
             </form>
         </div>

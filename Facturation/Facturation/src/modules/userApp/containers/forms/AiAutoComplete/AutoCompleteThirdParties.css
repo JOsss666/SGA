@@ -1,0 +1,43 @@
+
+.AutoCompleteThirdParties{
+    max-width: 40vw;
+    margin: 0 auto;
+    padding: 2vh;
+    padding-top: 6vh;
+}
+
+.AutoCompleteThirdParties .head{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    margin-bottom: 4vh;
+}
+
+.AutoCompleteThirdParties .FileInput{
+    height: 30vh;
+    width: 100%;
+    margin: 2vh 0;
+}
+
+.AutoCompleteThirdParties .optionsControl{
+    display: flex;
+    gap: 5%;
+    margin-top: 2vh;
+}
+
+.AutoCompleteThirdParties .optionsControl .FormButton,
+.AutoCompleteThirdParties .optionsControl .CapsuleButtonAi{
+    width: 45%;
+    margin: auto;
+}
+
+.AutoCompleteThirdParties .optionsControl .FormButton{
+    border-radius: 3vh;
+}
+
+.AutoCompleteThirdParties .aiAutoCompleteError{
+    display: block;
+    margin: 1vh 0;
+    color: #e5484d;
+    font-size: 1.7vh;
+}

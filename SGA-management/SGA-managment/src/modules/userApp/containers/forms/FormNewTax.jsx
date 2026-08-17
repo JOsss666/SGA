@@ -18,6 +18,8 @@ export function FormNewTax({reloadInfo,info}){
     const {popOutAlert} = useAlert();
     const [accounts, setAccounts] = useState([]);
     const [categories,setCategories] = useState([]);
+    const [fiscalTypes,setFiscalTypes] = useState([]);
+    const [fiscalTaxId,setFiscalTaxId] = useState();
     const [isRetention,setIsRetention] = useState(false);
 
     // Control
@@ -43,7 +45,8 @@ export function FormNewTax({reloadInfo,info}){
         company_id:appInfo.company_id,
         path:path,
         isRetention,
-        type
+        type,
+        fiscal_tax_id:fiscalTaxId
     };
 
     const getAccounts = async () => {
@@ -84,6 +87,24 @@ export function FormNewTax({reloadInfo,info}){
         }
         setLoading(false);
         setDisabled(false);
+    }
+
+    // Trae las familias/tipos fiscales estándar según el país (por ahora fijo Colombia).
+    const getFiscalTypes = async()=>{
+        let res = await postInfo('/getFiscalTaxTypes',{
+            country:'Colombia'
+        })
+        console.log('res habilitados: ',res)
+        if(res[0]){
+            let C = [];
+            res[1].forEach(element => {
+                C.push({
+                    text:`${element.code} - ${element.name}`,
+                    value:element.id
+                })
+            });
+            setFiscalTypes(C);
+        }
     }
 
     const setIdentationAndId = (text)=>{
@@ -131,6 +152,7 @@ export function FormNewTax({reloadInfo,info}){
     useEffect(() => {
         getAccounts();
         getCategories();
+        getFiscalTypes();
     }, []);
 
     return(
@@ -179,15 +201,21 @@ export function FormNewTax({reloadInfo,info}){
                         <NewElementSelect title={'Crear nueva cuenta'}/>
                     }
                 />
-                <SearchinList 
-                    title={'Tipo de impuesto'} 
-                    placeHolder={'Seleccione El tipo de impuesto'} 
+                <SearchinList
+                    title={'Tipo'}
+                    placeHolder={'Seleccione el tipo'}
+                    disabled={disabled}
+                    action={setFiscalTaxId}
+                    list={fiscalTypes}/>
+                <SearchinList
+                    title={'Habilitado para'}
+                    placeHolder={'Seleccione donde quiere que aparezca'} 
                     disabled={disabled} 
                     action={setType}
                     list={[
-                        {text:'Para venta',value:'sell'},
-                        {text:'Para compra',value:'purchase'},
-                        {text:'Para ambas',value:'both'}
+                        {text:'Ventas',value:'sell'},
+                        {text:'Compras',value:'purchase'},
+                        {text:'Ambas',value:'both'}
                 ]}/>
                 <div className="FlexOption">
                     <h6>Es retención</h6>

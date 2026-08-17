@@ -62,12 +62,8 @@
     margin: auto 1vh;
 }
 
-.ChatSpace .spaceChatText .ChatMessage{
-    margin-top: 5.5vh;
-}
-
-.ChatSpace .spaceChatText .OwnMessage{
-    margin-top: 2.5vh;
+.ChatSpace .spaceChatText .ChatMessage:first-of-type{
+    margin-top: 0;
 }
 
 .ChatSpace .logoContainer i{
@@ -89,12 +85,6 @@
     width: 100%;
 }
 
-.ChatSpace .inputChat .InputBarChat{
+.ChatSpace .inputChat .ChatInputBar{
     width: 100%;
-    padding: 0;
-    overflow: hidden;
-}
-
-.ChatSpace .inputChat .InputBarChat input{
-    padding-left: 4vh;
 }

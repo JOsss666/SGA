@@ -146,6 +146,8 @@ export function ThirdParties() {
                                             key={thirdParty.id}
                                             info={thirdParty}
                                             onCardClick={handleCardClick}
+                                            onEdit={handleCardClick}
+                                            reloadFun={fetchThirdParties}
                                         />
                                     ))}
                                     {filteredThirdParties.length == 0 && (

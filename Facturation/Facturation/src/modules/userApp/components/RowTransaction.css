@@ -91,14 +91,14 @@
     padding: 0;
 }
 
-.RowTransaction .productHolder .SearchinList{
+.RowTransaction .productHolder .FacturationSearchinList{
     height: 100%;
     padding: 0;
     width: 100%;
     z-index: 5;
 }
 
-.RowTransaction .productHolder .SearchinList input{
+.RowTransaction .productHolder .FacturationSearchinList input{
     box-shadow: none;
     outline: none;
     height: 5.7vh;
@@ -110,18 +110,18 @@
     overflow: hidden;
 }
 
-.RowTransaction .inCTrans .FormInput{
+.RowTransaction .inCTrans .FacturationFormInput{
     padding: 0;
     margin: 0;
     height: 100%;
     width: 100%;
 }
 
-.RowTransaction .inCTrans .FormInput label{
+.RowTransaction .inCTrans .FacturationFormInput label{
     margin: 0;
 }
 
-.RowTransaction .inCTrans .FormInput input{
+.RowTransaction .inCTrans .FacturationFormInput input{
     margin: 0;
     width:  99%;
     height: 5.5vh;

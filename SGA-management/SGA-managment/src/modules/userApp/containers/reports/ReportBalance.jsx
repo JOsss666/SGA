@@ -16,7 +16,7 @@ import { AiButton } from "../../components/ChatAiComponents/AiButton";
 import { LabelValue } from "../../components/LabelValue";
 import { FilterReports } from "./FilterReports";
 
-export function ReportBalance({}) {
+export function ReportBalance() {
 
     // Prev Info
     const [info, setInfo] = useState([]);
@@ -123,9 +123,9 @@ export function ReportBalance({}) {
         <div className="settingsReport">
             <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
             <div className="rangeInput">
-            <FormInput type={"date"} title={"Fecha Inicial"} action={setStart_date} />
+            <FormInput type={"date"} title={"Fecha Inicial"} action={setStart_date} max={end_date} />
             <span>-</span>
-            <FormInput type={"date"} title={"Fecha Final"} action={setEnd_date} />
+            <FormInput type={"date"} title={"Fecha Final"} action={setEnd_date} min={start_date} />
             </div>
             <SelectOptions
             options={[

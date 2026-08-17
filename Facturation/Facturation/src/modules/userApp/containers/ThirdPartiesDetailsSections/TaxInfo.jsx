@@ -116,7 +116,7 @@ export function TaxInfo({info}){
                                         </div>
                                     )}
                                 </div>
-                                <FileInput placeholder={'Seleccionar nuevo RUT'}/>
+                                <FileInput category="thirdPartiesDocs" placeholder={'Seleccionar nuevo RUT'}/>
                             </div>
                         </div>
                     </div>

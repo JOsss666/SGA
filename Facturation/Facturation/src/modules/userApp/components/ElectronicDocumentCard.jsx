@@ -9,6 +9,100 @@ import { useNavigate, useParams } from "react-router-dom";
 import { urlSer } from "../../../App";
 import { downloadPdfFromResponse, downloadXmlFromResponse } from "../../../utils/functions";
 
+export function getElectronicDocumentOptions(info, addNotification){
+    const notifyDownloadError = (message)=>{
+        addNotification({
+            type:'error',
+            title:`No se pudo descargar ${info.number}`,
+            description:message ?? `No se pudo descargar "${info.number}", intentelo nuevamente`
+        })
+    }
+
+    const downloadPDF = async()=>{
+        try {
+            let res = await postInfo('/electronicFacturation/downloadBill',{
+                bill_numer:info.number,
+                company_id:info.company_id
+            })
+            if(res.status == 'OK'){
+                let download = await downloadPdfFromResponse(res);
+                if(download.status == 'OK'){
+                    addNotification({
+                        type:'aproved',
+                        title:`${download.file_name} descargado correctamente.`,
+                        description:`El documento "${download.file_name}" fue descargado correctamente.`
+                    })
+                }else{
+                    notifyDownloadError()
+                }
+            }else{
+                notifyDownloadError(res.message)
+            }
+        } catch (error) {
+            notifyDownloadError(error?.message)
+        }
+    }
+
+    const downloadXML = async()=>{
+        try {
+            let res = await postInfo('/electronicFacturation/downloadBillXML',{
+                bill_numer:info.number,
+                company_id:info.company_id
+            })
+            if(res.status == 'OK'){
+                let download = await downloadXmlFromResponse(res);
+                if(download.status == 'OK'){
+                    addNotification({
+                        type:'aproved',
+                        title:`${download.file_name} descargado correctamente.`,
+                        description:`El documento "${download.file_name}" fue descargado correctamente.`
+                    })
+                }else{
+                    notifyDownloadError()
+                }
+            }else{
+                notifyDownloadError(res.message)
+            }
+        } catch (error) {
+            notifyDownloadError(error?.message)
+        }
+    }
+
+    return [
+        {
+            text:'Previsualizar',
+            title:'Previsualizar',
+            icon:<i className="fa-regular fa-eye"/>,
+            action:()=>window.open(`${info.url}`,'_blank','noopener,noreferrer')
+        },
+        {
+            text:'Copiar CUFE',
+            title:'Copiar CUFE',
+            icon:<i className="fa-regular fa-copy"/>,
+            action:()=>{
+                copyToClipBoard(info.code)
+                addNotification({
+                    type:'info',
+                    title:'Copiado en el portapapeles',
+                    description:`Se copio "${info.code}" en el portapapeles.`
+                })
+            }
+        },
+        {
+            text:'Descargar PDF',
+            title:'Descargar PDF',
+            icon:<i className="fa-regular fa-file-pdf"/>,
+            action:downloadPDF
+        },
+        {
+            text:'Descargar XML',
+            title:'Descargar XML',
+            icon:<i className="fa-regular fa-file-code"/>,
+            action:downloadXML
+        }
+    ];
+}
+
 export function ElectronicDocumentCard({info}){
 
     const {addNotification} = useNotifications(); 
@@ -19,70 +113,7 @@ export function ElectronicDocumentCard({info}){
          navigate(`/SGA_management/${params.company_key}/${params.user_key}/edocuments/${info.id}`);
     }
 
-    const downloadPDF = async()=>{
-        let res = await postInfo('/electronicFacturation/downloadBill',{
-            bill_numer:info.number
-        })
-        if(res.status == 'OK'){
-            let download = await downloadPdfFromResponse(res);
-            if(download.status == 'OK'){
-                addNotification({
-                    type:'aproved',
-                    title:`${download.file_name} descargado correctamente.`,
-                    description:`El documento "${download.file_name}" fue descargado correctamente.`
-                })
-            }else{
-                addNotification({
-                    type:'error',
-                    title:`Error al descargar ${info.number}`,
-                    description:`No se pudo descargar "${info.number}", intentelo nuevamente`
-                })
-            }
-        }else{
-            addNotification({
-                type:'error',
-                title:`No se pudo descargar ${info.number}`,
-                description:res.message
-            })
-        }
-    }
-
-    const downloadXML = async()=>{
-        let res = await postInfo('/electronicFacturation/downloadBillXML',{
-            bill_numer:info.number
-        })
-        console.log(res)
-        if(res.status == 'OK'){
-            let download = await downloadXmlFromResponse(res);
-            if(download.status == 'OK'){
-                addNotification({
-                    type:'aproved',
-                    title:`${download.file_name} descargado correctamente.`,
-                    description:`El documento "${download.file_name}" fue descargado correctamente.`
-                })
-            }else{
-                addNotification({
-                    type:'error',
-                    title:`Error al descargar ${info.number}`,
-                    description:`No se pudo descargar "${info.number}", intentelo nuevamente`
-                })
-            }
-        }else{
-            addNotification({
-                type:'error',
-                title:`No se pudo descargar ${info.number}`,
-                description:res.message
-            })
-        }
-    }
-
-    
-
-    const getDocFullInfo = async()=>{
-        let res = await postInfo('/electronicFacturationController.getDocumentFullInfo',{
-            bill_numer:info.number
-        })
-    }
+    const documentOptions = getElectronicDocumentOptions(info, addNotification);
     
     return(
         <div className="ElectronicDocumentCard">
@@ -117,24 +148,15 @@ export function ElectronicDocumentCard({info}){
                     <BoldTitle text={`$ ${moneyFormat(info.doc_total?? 0)}`}/>
                 </div>
                 <div className="quickOptions">
-                    <ButtonMenu noRotate={true} title={'Previsualizar'} children={<i className="fa-regular fa-eye"/>} onClick={()=>{
-                        window.open(`${info.url}`,'_blank','noopener,noreferrer')
-                    }}/>
-                    <ButtonMenu noRotate={true} title={'Copiar CUFE'} children={<i className="fa-regular fa-copy"/>} onClick={()=>{
-                        copyToClipBoard(info.code)
-                        addNotification({
-                            type:'info',
-                            title:'Copiado en el portapapeles',
-                            description:`Se copio "${info.code}" en el portapapeles.`
-                        })
-                    }}/>
-                    <ButtonMenu noRotate={true} title={'Descargar PDF'} children={<i className="fa-regular fa-file-pdf"/>} onClick={()=>{
-                        downloadPDF()
-                    }}/>
-                    <ButtonMenu noRotate={true} title={'Descargar XML'} children={<i className="fa-regular fa-file-code"/>} onClick={()=>{
-                        downloadXML();
-                    }}/>
-                    
+                    {documentOptions.map((option)=>(
+                        <ButtonMenu
+                            key={option.text}
+                            noRotate={true}
+                            title={option.title}
+                            children={option.icon}
+                            onClick={option.action}
+                        />
+                    ))}
                 </div>
             </div>
         </div>

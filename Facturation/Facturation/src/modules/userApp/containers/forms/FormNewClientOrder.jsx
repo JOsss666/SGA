@@ -434,7 +434,7 @@ export function FormNewClientOrder({params,reloadFun,canRepeatServices}){
                             </div>
                         )}
                         <FormInput title={'Descripción'} textArea={true} disabled={disabled} action={setDescription} placeholder={'Referencia de la orden'}/>
-                        <FileInput placeholder={'Adjuntar archivo'} action={setAttached} multiple={true}/>
+                        <FileInput category="files" placeholder={'Adjuntar archivo'} action={setAttached} multiple={true}/>
                         <SearchinList title={'Estado'} action={setStatus} list={[
                             {text:'active'},
                             {text:'disabled'},
