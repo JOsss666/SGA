@@ -7,19 +7,21 @@ const getProcessProcessInstancesTool = Object.freeze({
         type: 'function',
         function: {
             name: 'get_process_process_instances',
-            description: 'Obtiene instancias de procesos reales de la compañía activa en SGA360.',
+            description: 'Obtiene instancias de procesos reales de la compañía activa en SGA360, by_id busca una factura por su ownSerial interno..',
             parameters: {
                 type: 'object',
                 additionalProperties: false,
                 properties: {
-                    id: { type: 'integer', minimum: 1, description: 'ID opcional de la instancia.' },
+                    ownSerial: {
+                        type: 'integer',
+                        minimum: 1,
+                        description: 'ID interno de la factura. Úsalo exclusivamente con operation="by_id" y solo cuando el usuario indique un ID concreto.'
+                    },
                     process_id: { type: 'integer', minimum: 1, description: 'ID opcional del proceso.' },
                     status: {
-                        type: 'array',
-                        minItems: 1,
-                        maxItems: 10,
-                        items: { type: 'string', minLength: 1, maxLength: 50 },
-                        description: 'Estados a consultar; ["all"] no aplica filtro.'
+                        type: 'string',
+                        enum: ['all', 'active', 'disabled', 'blocked', 'reported'],
+                        description: 'Estado del documento. Usa "all" para no filtrar por estado.'
                     },
                     limit: { type: 'integer', minimum: 1, maximum: 100, default: 25 }
                 }

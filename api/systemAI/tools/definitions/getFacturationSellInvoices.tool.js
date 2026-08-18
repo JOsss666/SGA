@@ -19,10 +19,10 @@ const getFacturationSellInvoicesTool = Object.freeze({
                             list devuelve facturas,
                             latest devuelve la última factura,
                             summary devuelve cantidades y totales agregados,
-                            by_id busca una factura por su ID interno.
+                            by_id busca una factura por su ownSerial interno.
                         `
                     },
-                    id: {
+                    ownSerial: {
                         type: 'integer',
                         minimum: 1,
                         description: 'ID interno de la factura. Úsalo exclusivamente con operation="by_id" y solo cuando el usuario indique un ID concreto.'

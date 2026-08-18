@@ -24,8 +24,8 @@ const generalAssistantAgent = Object.freeze({
         'get-facturation-purchases',
     ],
     limits: Object.freeze({
-        maxOutputTokens: 1200,
-        maxSteps: 4
+        maxOutputTokens: 12000,
+        maxSteps: 10
     })
 });
 

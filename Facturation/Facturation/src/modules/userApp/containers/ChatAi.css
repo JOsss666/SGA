@@ -107,7 +107,8 @@
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    padding: 3vh 1vh;
+    gap: 2vh;
+    padding: 3vh 10vh;
     margin-top: 1vh;
     height: 65vh;
     width: 80%;
@@ -138,10 +139,9 @@
     width: fit-content;
     margin: 0 auto;
     margin-right: 0;
-    max-width: 60%;
+    max-width: 80%;
     padding-left: 2vh;
     background-color: var(--cardHover);
-    outline: solid .1vh var(--inputsBorder);
 }
 
 .ChatAi .spaceChatAi .OwnMessage .messageContent span{

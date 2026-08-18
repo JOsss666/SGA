@@ -95,3 +95,28 @@ test('ejecuta una tool autorizada y devuelve su resultado al modelo', async () =
     assert.equal(result.output, 'Hay 3 registros.');
     assert.equal(providerCalls, 2);
 });
+
+test('propaga incrementalmente los fragmentos del proveedor', async () => {
+    const registry = new AgentRegistry([{
+        id: 'stream-agent', name: 'Agente streaming', description: 'Prueba streaming.',
+        version: '1.0.0', enabled: true, model: 'test/model', instructions: 'Responde.',
+        skills: [], tools: [], limits: { maxOutputTokens: 100, maxSteps: 1 }
+    }]);
+    const provider = {
+        async generateStream({ onDelta }) {
+            await onDelta('Hola');
+            await onDelta(' mundo');
+            return { output: 'Hola mundo', toolCalls: [], model: 'test/model', provider: 'fake', usage: {} };
+        }
+    };
+    const received = [];
+    const runner = new AgentRunner({ agentRegistry: registry, provider, tools: { resolve: () => [] } });
+    const result = await runner.runStream({
+        agentId: 'stream-agent', input: 'Hola',
+        context: { companyId: 1, userId: 2, permissions: [], requestId: 'stream-1' },
+        onDelta: chunk => received.push(chunk)
+    });
+
+    assert.deepEqual(received, ['Hola', ' mundo']);
+    assert.equal(result.output, 'Hola mundo');
+});

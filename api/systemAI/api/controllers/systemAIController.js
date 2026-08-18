@@ -38,6 +38,38 @@ systemAIController.runAgent = async (req, res, next) => {
     }
 };
 
+const writeStreamEvent = (res, event, data) => {
+    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+};
+
+systemAIController.streamAgent = async (req, res, next) => {
+    res.status(200);
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders?.();
+
+    try {
+        const result = await systemAIService.streamAgent(req.systemAI, text => {
+            if (!res.writableEnded) writeStreamEvent(res, 'delta', { text });
+        });
+        if (!res.writableEnded) {
+            writeStreamEvent(res, 'done', { data: result });
+            res.end();
+        }
+    } catch (error) {
+        if (!res.headersSent) return next(error);
+        if (!res.writableEnded) {
+            writeStreamEvent(res, 'error', {
+                code: error.code || 'AI_STREAM_FAILED',
+                message: error.message || 'No fue posible completar la respuesta.'
+            });
+            res.end();
+        }
+    }
+};
+
 systemAIController.readDocument = async (req, res, next) => {
     try {
         if (!req.file) {

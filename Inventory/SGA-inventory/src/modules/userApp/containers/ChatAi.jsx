@@ -6,7 +6,7 @@ import './ChatAi.css'
 import { DespleList } from '../components/DespleList';
 import { CardTitleLogo } from '../components/CardTitleLogo';
 import {getAttached} from '../../../utils/functions'
-import { AI_AGENTS, AI_DESTINATIONS, sendPrompt } from '../../../services/aiPromptService';
+import { AI_AGENTS, streamAgentPrompt } from '../../../services/aiPromptService';
 import { useAiAssistant, useAppInfo, useNotifications } from '../../../context/context';
 import { ChatMessage } from '../components/ChatMessage';
 import { BoldTitle } from '../components/BoldTitle';
@@ -17,10 +17,11 @@ import { OptionsChatAi } from '../components/ChatAiComponents/OptionsChatAi';
 
 
 export function ChatAi({visible}){
-    const {chat,addMessage} = useAiAssistant();
+    const {chat,addMessage,setChat} = useAiAssistant();
     const {addNotification} = useNotifications();
     const {userInfo,appInfo} = useAppInfo();
     const fileInput = useRef();
+    const chatScrollRef = useRef();
     const [visibleAddOptions,setVisibleAddOptions] = useState(false);
     const [disabled,setDisable] = useState(false);
     const {loading,setLoading} = useAiAssistant();
@@ -51,22 +52,24 @@ export function ChatAi({visible}){
         })
         setAttached([]);
         setSearchVal('');
+        const responseMessageId = `ai-${Date.now()}-${Math.random()}`;
+        addMessage({ message_id: responseMessageId, text: '', user_id: 0, user_name: 'Asistente AI', streaming: true });
 
         try {
             const context = attached.length > 0 ? `\n\nContexto adjunto por el usuario:\n${JSON.stringify(attached)}` : '';
-            const result = await sendPrompt({
-                destination: AI_DESTINATIONS.AGENT,
+            await streamAgentPrompt({
                 target: AI_AGENTS.GENERAL_ASSISTANT,
                 content: `${prompt}${context}`,
-                companyId: appInfo.company_id
+                companyId: appInfo.company_id,
+                onDelta: chunk => setChat(previous => previous.map(message =>
+                    message.message_id === responseMessageId ? { ...message, text: `${message.text || ''}${chunk}` } : message
+                ))
             });
-            addMessage({ text: result.output, user_id: 0, user_name: 'Asistente AI' });
+            setChat(previous => previous.map(message => message.message_id === responseMessageId ? { ...message, streaming: false } : message));
         } catch (error) {
-            addMessage({
-                text: `❌ ${error.message || 'No fue posible procesar tu solicitud.'}`,
-                user_id:0,
-                user_name:'Asistente AI'
-            });
+            setChat(previous => previous.map(message => message.message_id === responseMessageId
+                ? { ...message, text: message.text || `❌ ${error.message || 'No fue posible procesar tu solicitud.'}`, streaming: false }
+                : message));
             addNotification?.({ type: 'error', text: error.message || 'Error al consultar el agente de IA.' });
         } finally {
             setLoading(false);
@@ -116,6 +119,13 @@ export function ChatAi({visible}){
         console.log(attached)
     },[attached])
 
+    useEffect(() => {
+        const frame = requestAnimationFrame(() => {
+            chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: 'smooth' });
+        });
+        return () => cancelAnimationFrame(frame);
+    }, [chat]);
+
     return(
         <div className={`ChatAi ${visible? 'appearChatAi':'desapearChatAi'}`}>
             <div className="headChat">
@@ -127,9 +137,9 @@ export function ChatAi({visible}){
                 <ButtonMenu title={'Como usar Asistente AI'}><i className="fa-solid fa-question"/></ButtonMenu>
             </div>
             {chat.length >0 && (
-                <div className={`spaceChatAi ${attached.length >0? 'activeAttachedSpace':''}`}>
+                <div ref={chatScrollRef} className={`spaceChatAi ${attached.length >0? 'activeAttachedSpace':''}`}>
                     {chat.map((element,index)=>(
-                        <ChatMessage info={element} key={index}/>
+                        <ChatMessage info={element} key={element.message_id || index}/>
                     ))}
                 </div>
             )}

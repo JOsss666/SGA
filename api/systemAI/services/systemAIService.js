@@ -25,6 +25,14 @@ const systemAIService = {
             provider: getModelProvider()
         });
         return runner.run(data);
+    },
+
+    async streamAgent(data, onDelta) {
+        const runner = new AgentRunner({
+            agentRegistry,
+            provider: getModelProvider()
+        });
+        return runner.runStream({ ...data, onDelta });
     }
 };
 

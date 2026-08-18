@@ -19,6 +19,7 @@ systemAIRouter.get('/health', systemAIController.health);
 systemAIRouter.use(requireTrustedOrigin, authenticateSession, requireCompanyAccess, systemAIRateLimit);
 systemAIRouter.get('/agents', systemAIController.getAgents);
 systemAIRouter.post('/agents/run', validateAgentRunRequest, systemAIController.runAgent);
+systemAIRouter.post('/agents/stream', validateAgentRunRequest, systemAIController.streamAgent);
 systemAIRouter.post('/documents/read', documentUpload.single('document'), systemAIController.readDocument);
 systemAIRouter.use(systemAIErrorHandler);
 
