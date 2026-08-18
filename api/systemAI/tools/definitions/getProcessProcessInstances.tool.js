@@ -23,7 +23,15 @@ const getProcessProcessInstancesTool = Object.freeze({
                         enum: ['all', 'active', 'disabled', 'blocked', 'reported'],
                         description: 'Estado del documento. Usa "all" para no filtrar por estado.'
                     },
-                    limit: { type: 'integer', minimum: 1, maximum: 100, default: 25 }
+                    limit: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
+                    initial_date: {
+                        type: 'string',
+                        format: 'date'
+                    },
+                    final_date: {
+                        type: 'string',
+                        format: 'date'
+                    },
                 }
             }
         }

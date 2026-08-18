@@ -12,11 +12,23 @@ const getFacturationPurchasesTool = Object.freeze({
                 type: 'object',
                 additionalProperties: false,
                 properties: {
-                    id: { type: 'integer', minimum: 1, description: 'ID interno opcional del documento.' },
+                    ownSerial: {
+                        type: 'integer',
+                        minimum: 1,
+                        description: 'ID interno de la factura. Úsalo exclusivamente con operation="by_id" y solo cuando el usuario indique un ID concreto.'
+                    },
                     status: {
                         type: 'string',
                         enum: ['all', 'active', 'disabled', 'blocked', 'reported'],
                         description: 'Estado del documento. Usa "all" para no filtrar por estado.'
+                    },
+                    initial_date: {
+                        type: 'string',
+                        format: 'date'
+                    },
+                    final_date: {
+                        type: 'string',
+                        format: 'date'
                     },
                     limit: { type: 'integer', minimum: 1, maximum: 100, default: 25 }
                 }
