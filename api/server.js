@@ -9,6 +9,10 @@ const app = express();
 const asignedPort  = process.env.PORT || 3000;
 const server = http.createServer(app);
 
+// Render y los despliegues equivalentes operan detrás de un proxy.
+// Esto permite que req.ip sea confiable para auditoría y rate limiting.
+app.set('trust proxy', 1);
+
 export const allowedOrigins = [
         "http://localhost:5173", // Developer
         "http://localhost:5174", // Developer

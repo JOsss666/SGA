@@ -20,6 +20,7 @@ import geographyController from '../controllers/geographyController.js';
 import companyConfigurationController from '../controllers/companyConfigurationController.js';
 import searchController from '../controllers/searchController.js';
 import companyTimeZoneController from '../controllers/companyTimeZoneController.js';
+import integrationRouter from './integration.routes.js';
 
 const router = express.Router();
 
@@ -27,6 +28,8 @@ const router = express.Router();
 const CHUNKS_DIR = path.join(process.cwd(), "chunks");
 const upload = multer({ dest: CHUNKS_DIR });
 
+// API máquina-a-máquina para integraciones empresariales.
+router.use('/api/integrations/v1', integrationRouter);
 
 // SGA General
 
