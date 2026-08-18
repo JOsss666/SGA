@@ -124,8 +124,11 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
 
     const {addNotification} = useNotifications();
     const {popOutAlert, popInAlert} = useAlert();
-    const {appInfo} = useAppInfo();
+    const {appInfo,userConfig} = useAppInfo();
     // control
+    const canUseAi = userConfig.access.services.sga["AI"].use == true;
+    const canCreateWithAi = userConfig.access.services.sga["AI"].documents.purchase.overAll == true;
+    const aiPermission = canUseAi && canCreateWithAi;
     const formContainerRef = useRef();
     const [stage,setStage] = useState(0);
     const [error,setError] = useState('');
@@ -777,20 +780,22 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                             />
                     ) }
                 </div>
-                <div className="AIads">
-                    <CapsuleButtonAi title={'Autocompleta este formulario con IA'} onClick={()=>{
-                        popInAlert(
-                            <AutoCompleteThirdParties
-                                updateFunction={applyAiThirdPartyData}
-                            />
-                        )
-                    }} >
-                        <span>
-                            Completar con IA
-                            <i className="fa-solid fa-flask"/>
-                        </span>
-                    </CapsuleButtonAi>
-                </div>
+                {aiPermission && (
+                    <div className="AIads">
+                        <CapsuleButtonAi title={'Autocompleta este formulario con IA'} onClick={()=>{
+                            popInAlert(
+                                <AutoCompleteThirdParties
+                                    updateFunction={applyAiThirdPartyData}
+                                />
+                            )
+                        }} >
+                            <span>
+                                Completar con IA
+                                <i className="fa-solid fa-flask"/>
+                            </span>
+                        </CapsuleButtonAi>
+                    </div>
+                )}
             </div>
 
             {stage === 0 &&(

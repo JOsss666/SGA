@@ -65,6 +65,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
     const [disabled,setDisabled] = useState();
     const [disabledToSubmit,setDisabledToSubmit] = useState(false);
     const [disabledByValue,setDisabledByValue] = useState(false);
+    
 
     // form info — JSON prefabricado; solo se editan sus valores.
     const [formData,setFormData] = useState(() => ({
@@ -988,6 +989,13 @@ export function FormNewPurchase({InfoParams,reloadFun}){
         console.log('Resultado árbol de retenciones (Colombia compra): ', result);
     },[aviableRetentions,thirdPartyInfo])
 
+
+    console.log("Userconfig: ",userConfig);
+
+    const canUseAi = userConfig.access.services.sga["AI"].use == true;
+    const canCreateWithAi = userConfig.access.services.sga["AI"].documents.purchase.overAll == true;
+    const aiPermission = canUseAi && canCreateWithAi;
+
     const hasSingleEnabledStore = userConfig.access?.stores?.overAll === false
         && userConfig.access.stores.enabled?.length === 1;
     const hasSingleEnabledBussines = userConfig.access?.bussines?.overAll === false
@@ -1026,6 +1034,7 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                 <i className="fa-solid fa-xmark closeFormBtn" onClick={()=>{
                     popOutAlert();
                 }}/>
+                {aiPermission && (
                 <CapsuleButtonAi onClick={()=>{
                     popInAlert(
                         <AutoCompletePurchase
@@ -1033,12 +1042,12 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                             onComplete={handleAutoCompletePurchase}
                         />
                     )
-                }}>
+                    }}>
                     <span>
                         Registrar con IA
                         <i className="fa-solid fa-flask"/>
                     </span>
-                </CapsuleButtonAi>
+                </CapsuleButtonAi>)}
             </div>
             {!loading && (
                 <form action="" disabled={disabledToSubmit? true:disabled} onSubmit={(e)=>{
