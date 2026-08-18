@@ -226,7 +226,29 @@ let userConfig = {
                 "AI":{
                     "use":true,
                     "instance":"full",
-                    "expires":"never"
+                    "expires":"never",
+                    "thirdParties":{
+                        "overAll":false,
+                        "read":false,
+                        "create":false
+                    },
+                    "documents":{
+                        "sellinvoice":{
+                            "overAll":false,
+                            "read":false,
+                            "create":false
+                        },
+                        "purchase":{
+                            "overAll":false,
+                            "read":false,
+                            "create":false
+                        },
+                        "clientorder":{
+                            "overAll":false,
+                            "read":false,
+                            "create":false
+                        },
+                    }
                 },
                 "mail":{
                     "use":true,

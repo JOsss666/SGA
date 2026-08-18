@@ -21,6 +21,7 @@ import companyConfigurationController from '../controllers/companyConfigurationC
 import searchController from '../controllers/searchController.js';
 import companyTimeZoneController from '../controllers/companyTimeZoneController.js';
 import integrationRouter from './integration.routes.js';
+import { systemAIRouter } from '../systemAI/index.js';
 import sessionRouter from './session.routes.js';
 import sessionAuthController from '../controllers/sessionAuthController.js';
 import { authenticateSession } from '../middleware/authenticateSession.js';
@@ -36,6 +37,7 @@ const upload = multer({ dest: CHUNKS_DIR });
 
 // API máquina-a-máquina para integraciones empresariales.
 router.use('/api/integrations/v1', integrationRouter);
+router.use('/api/system-ai/v1', systemAIRouter);
 router.use('/api/auth/v1', sessionRouter);
 
 // SGA General
