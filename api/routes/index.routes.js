@@ -21,6 +21,12 @@ import companyConfigurationController from '../controllers/companyConfigurationC
 import searchController from '../controllers/searchController.js';
 import companyTimeZoneController from '../controllers/companyTimeZoneController.js';
 import integrationRouter from './integration.routes.js';
+import sessionRouter from './session.routes.js';
+import sessionAuthController from '../controllers/sessionAuthController.js';
+import { authenticateSession } from '../middleware/authenticateSession.js';
+import { sessionErrorHandler } from '../middleware/sessionErrorHandler.js';
+import { requireTrustedOrigin } from '../middleware/requireTrustedOrigin.js';
+import { requireCompanyAccess } from '../middleware/requireCompanyAccess.js';
 
 const router = express.Router();
 
@@ -30,6 +36,7 @@ const upload = multer({ dest: CHUNKS_DIR });
 
 // API máquina-a-máquina para integraciones empresariales.
 router.use('/api/integrations/v1', integrationRouter);
+router.use('/api/auth/v1', sessionRouter);
 
 // SGA General
 
@@ -45,9 +52,9 @@ router.use('/api/integrations/v1', integrationRouter);
 
     router.post('/getAttachedFiles',controller.getAttachedFiles);
 
-    router.post('/logIn',controller.logIn);
+    router.post('/logIn', express.json({ limit: '16kb', strict: true }), sessionAuthController.login, sessionErrorHandler);
 
-    router.post('/logOut',controller.logOut);
+    router.post('/logOut', express.json({ limit: '16kb', strict: true }), requireTrustedOrigin, sessionAuthController.logout, sessionErrorHandler);
 
     router.post('/signUp',controller.signUp);
 
@@ -173,7 +180,15 @@ router.post('/inventory/getSubCategories',inventoryController.getSubCategories);
 
 router.post('/inventory/createSubCategory',inventoryController.createCatetory);
 
-router.post('/inventory/getProducts',inventoryController.getProducts);
+router.post(
+    '/inventory/getProducts',
+    express.json({ limit: '32kb', strict: true }),
+    requireTrustedOrigin,
+    authenticateSession,
+    requireCompanyAccess,
+    inventoryController.getProducts,
+    sessionErrorHandler
+);
 
 router.post(`/inventory/getComercialProducts`,inventoryController.getComercialProducts);
 

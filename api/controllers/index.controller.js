@@ -797,7 +797,14 @@ controller.signUp = (req,res)=>{
                 INSERT INTO "Ecosystem".users_config(
                     user_id, company_id, role)
                 VALUES ($1, $2, $3);`,[consulta.user_id,info.company_id, info.userRol],2)
-            if(posCon && insertRole){
+            let insertMembership = await useDataBase(`
+                INSERT INTO "Ecosystem".user_company_memberships(
+                    user_id, company_id, role_id, status)
+                VALUES ($1, $2, $3, 'active')
+                ON CONFLICT (user_id, company_id)
+                DO UPDATE SET role_id = EXCLUDED.role_id, status = 'active', updated_at = NOW();
+            `,[consulta.user_id, info.company_id, info.userRol],2)
+            if(posCon && insertRole && insertMembership){
                 res.writeHead(200,{'Content-Type':'text/plain'})
                 res.end(JSON.stringify(true));
             }else{
