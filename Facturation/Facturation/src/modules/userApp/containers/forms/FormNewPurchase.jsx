@@ -989,9 +989,6 @@ export function FormNewPurchase({InfoParams,reloadFun}){
         console.log('Resultado árbol de retenciones (Colombia compra): ', result);
     },[aviableRetentions,thirdPartyInfo])
 
-
-    console.log("Userconfig: ",userConfig);
-
     const canUseAi = userConfig.access.services.sga["AI"].use == true;
     const canCreateWithAi = userConfig.access.services.sga["AI"].documents.purchase.overAll == true;
     const aiPermission = canUseAi && canCreateWithAi;
