@@ -3,6 +3,7 @@ import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { copyToClipBoard } from '../../../../utils/functions';
 import { stripAgentDebugMarker } from './agentText';
+import { ChartMessage } from './ChartMessage';
 import './MarkdownMessage.css';
 
 function CodeBlock({ inline, className, children }) {
@@ -15,6 +16,19 @@ function CodeBlock({ inline, className, children }) {
     // El agente pide una gráfica emitiendo un bloque ```chart con su spec.
     // Mientras el stream no ha cerrado el JSON, parsear falla: se muestra un
     // marcador en lugar del JSON a medio escribir.
+    // El agente pide una gráfica emitiendo un bloque ```chart con su spec.
+    // Mientras el stream no ha cerrado el JSON, parsear falla: se muestra un
+    // marcador en lugar del JSON a medio escribir.
+    if (language === 'chart') {
+        let spec = null;
+        try { spec = JSON.parse(code); } catch { spec = null; }
+        if (spec) return <ChartMessage spec={spec}/>;
+        return (
+            <div className="chartPending">
+                <i className="fa-solid fa-spinner"/>Preparando gráfica…
+            </div>
+        );
+    }
 
     return (
         <div className="mdCodeBlock">
