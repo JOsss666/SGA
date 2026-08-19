@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { copyToClipBoard } from '../../../../utils/functions';
-import { stripAgentDebugMarker } from './agentText';
+import { stripAgentDebugMarker, normalizeAgentBlocks } from './agentText';
 import { ChartMessage } from './ChartMessage';
 import { ComponentMessage } from './ComponentMessage';
 import './MarkdownMessage.css';
@@ -69,7 +69,7 @@ const components = {
 };
 
 export function MarkdownMessage({ text, streaming }) {
-    const clean = useMemo(() => stripAgentDebugMarker(text) || '', [text]);
+    const clean = useMemo(() => normalizeAgentBlocks(stripAgentDebugMarker(text)) || '', [text]);
 
     return (
         <div className={`MarkdownMessage ${streaming ? 'mdStreaming' : ''}`}>

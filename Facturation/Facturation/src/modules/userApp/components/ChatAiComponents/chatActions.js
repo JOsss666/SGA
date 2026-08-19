@@ -52,6 +52,15 @@ export const CHAT_ACTIONS = Object.freeze({
         // escritura: no ejecuta nada por su cuenta, lo envía el usuario.
         label: () => 'Continuar con esta pregunta',
         run: ({ prompt }, context) => context.fillPrompt(prompt)
+    },
+    openForm:{
+        icon: 'wand-magic-sparkles',
+        params: { prompt: text },
+        required: ['prompt'],
+        // Aquí el texto sí viene del modelo, pero solo rellena el campo de
+        // escritura: no ejecuta nada por su cuenta, lo envía el usuario.
+        label: () => 'Generar nueva compra',
+        run: ({ prompt }, context) => context.fillPrompt(prompt)
     }
 });
 
