@@ -8,3 +8,10 @@
     display: flex;
     flex-direction: column;
 }
+
+/* Los saltos de línea del mensaje se respetan: el stream del agente y los
+   mensajes multilínea de las personas llegan con \n reales. */
+.TextMessage > span{
+    white-space: pre-wrap;
+    word-break: break-word;
+}

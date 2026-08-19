@@ -150,3 +150,41 @@
         top: 100%;
     }
 }
+
+/* Estado de una respuesta del agente detenida o fallida */
+.ChatMessage .messageState{
+    display: flex;
+    align-items: center;
+    gap: 1.2vh;
+    margin-top: 1vh;
+    font-size: clamp(1.9px,1.9vh,19px);
+    color: var(--descriptionText);
+}
+
+.ChatMessage .messageState span{
+    display: inline-flex;
+    align-items: center;
+    gap: .6vh;
+}
+
+.ChatMessage .messageState button{
+    display: inline-flex;
+    align-items: center;
+    gap: .6vh;
+    padding: .4vh 1.2vh;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 3vh;
+    background-color: var(--cardHover);
+    color: var(--mainText);
+    font: inherit;
+    font-size: inherit;
+    cursor: pointer;
+}
+
+.ChatMessage .messageState button:hover{
+    background-color: var(--iconHover);
+}
+
+.ChatMessage.ErrorMessage .messageState span{
+    color: #E7000B;
+}

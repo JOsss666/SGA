@@ -12,13 +12,14 @@
     border-top-left-radius: 2vh;
     border-bottom-left-radius: 2vh;
     overflow: hidden;
-    padding-bottom: 10vh;
-  
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 2vh;
 }
 
 .ChatAi .headChat{
     width: 100%;
-    position: sticky;
+    flex: 0 0 auto;
     display: flex;
     padding: 1vh;
     background-color: var(--menuAside);
@@ -60,7 +61,8 @@
 
 
 .ChatAi .noChatIMg{
-    height: 50%;
+    flex: 1 1 auto;
+    min-height: 0;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -103,21 +105,55 @@
     color: #838383;
 }
 
+.ChatAi .chatScrollArea{
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    width: 100%;
+}
+
 .ChatAi .spaceChatAi{
-    margin: 0 auto;
+    margin: 1vh auto 0;
     display: flex;
     flex-direction: column;
     gap: 2vh;
     padding: 3vh 10vh;
-    margin-top: 1vh;
-    height: 65vh;
-    width: 80%;
+    height: 100%;
+    width: 100%;
     overflow-y: auto;
     scroll-behavior: smooth;
+    overscroll-behavior: contain;
 }
 
-.ChatAi .activeAttachedSpace{
-    height: 48vh;
+.ChatAi .spaceChatAi .agentActivity{
+    display: flex;
+    flex-direction: column;
+    gap: .6vh;
+    padding-left: 4vh;
+}
+
+.ChatAi .scrollDownChat{
+    position: absolute;
+    bottom: 2vh;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 4.6vh;
+    width: 4.6vh;
+    border-radius: 100%;
+    border: solid .1vh var(--inputsBorder);
+    background-color: var(--menuAside);
+    color: var(--mainText);
+    box-shadow: 0 .4vh 1.6vh #00000030;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(1.9px,1.9vh,19px);
+}
+
+.ChatAi .scrollDownChat:hover{
+    background-color: var(--iconHover);
 }
 
 .ChatAi .spaceChatAi .ChatMessage{
@@ -154,7 +190,8 @@
 }
 
 .ChatAi .chatAiInput{
-    margin: 0 auto;
+    flex: 0 0 auto;
+    margin: 1vh auto 0;
     border-radius: 2vh;
     display: flex;
     flex-direction: column;
@@ -197,17 +234,46 @@
 }
 
 
-.ChatAi .chatAiInput .FacturationFormInput label{
-    display: none;
+.ChatAi .headChat .tokensAi{
+    display: flex;
+    align-items: center;
+    gap: .6vh;
+    margin: auto 1vh;
+    margin-left: 0;
+    color: var(--descriptionText);
+    font-size: clamp(1.9px,1.9vh,19px);
 }
 
-.ChatAi .chatAiInput .FacturationFormInput input{
-    border: none;
-    outline: none;
-    box-shadow: none;
-    border-radius: 2vh;
-    padding: 2vh;
-    background-color:var(--menuAside);
+.ChatAi .mainChatWelcome .chatSuggestions{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1vh;
+    margin-top: 2.5vh;
+}
+
+.ChatAi .mainChatWelcome .chatSuggestions button{
+    display: inline-flex;
+    align-items: center;
+    gap: 1vh;
+    padding: 1vh 1.8vh;
+    border-radius: 3vh;
+    border: solid .1vh var(--inputsBorder);
+    background-color: var(--menuAside);
+    color: var(--descriptionText);
+    font: inherit;
+    font-size: clamp(2px,2vh,20px);
+    cursor: pointer;
+    text-align: left;
+}
+
+.ChatAi .mainChatWelcome .chatSuggestions button:hover{
+    background-color: var(--iconHover);
+    border-color: var(--chatAccent);
+    color: var(--mainText);
+}
+
+.ChatAi .mainChatWelcome .chatSuggestions button i{
+    color: var(--chatAccent);
 }
 
 
@@ -301,10 +367,10 @@
 }
 
 .ChatAi .attachedHolder{
-    bottom: 8.9vh;
     width: 100%;
-    right: 1.2%;
     padding: 1vh;
+    flex-wrap: wrap;
+    gap: 1vh;
     border-radius: 3vh;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
@@ -429,8 +495,8 @@
         padding-bottom: 4vh;
     }
 
-    .ChatAi .noChatIMg{
-        margin-bottom: 25vh;
+    .ChatAi .mainChatWelcome .chatSuggestions button{
+        width: 100%;
     }
 
     .ChatAi .chatAiInput .OptionsChatAi .selectedOption span{
@@ -440,7 +506,7 @@
     .ChatAi .spaceChatAi{
         padding: 3vh 2vh;
         margin-top: 1vh;
-        height: 65vh;
+        height: 100%;
         width: 100%;
     }
 }

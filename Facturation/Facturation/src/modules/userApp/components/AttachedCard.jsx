@@ -14,6 +14,11 @@ export function AttachedCard({info,deleteAct,hideOptions}){
                     </div>
                 </div>
             )}
+            {info.loading && (
+                <div className="loadingAttached">
+                    <i className="fa-solid fa-spinner"/>
+                </div>
+            )}
             <strong>{info.name}</strong>
         </div>
     )

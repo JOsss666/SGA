@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useAppInfo, useNotifications } from '../../../context/context'
 import { copyToClipBoard } from '../../../utils/functions';
 import { TextMessage } from './ChatBubbleTypes/TextMessage';
@@ -6,7 +6,7 @@ import { VoiceMessage } from './ChatBubbleTypes/VoiceMessage';
 import { LinkPreviewMessage } from './ChatBubbleTypes/LinkPreviewMessage';
 import './ChatMessage.css'
 
-export function ChatMessage({info}){
+export function ChatMessage({info,onRetry}){
 
     const {userInfo} = useAppInfo();
     const {addNotification} = useNotifications();
@@ -14,20 +14,11 @@ export function ChatMessage({info}){
     const messageBox = useRef()
     const isOwn = userInfo.user_id == info.user_id;
 
-    useEffect(()=>{
-        if(messageBox.current != undefined){
-            messageBox.current.addEventListener("mousedown", () => {
-                setVisibleOptions(true);
-            });
-
-            messageBox.current.addEventListener("mouseleave", () => {
-                setVisibleOptions(false)
-            });
-        }
-    },[messageBox.current])
-
     return(
-        <div ref={messageBox} className={`ChatMessage ${isOwn? 'OwnMessage':''}`}>
+        <div
+            ref={messageBox}
+            className={`ChatMessage ${isOwn? 'OwnMessage':''} ${info.error? 'ErrorMessage':''}`}
+        >
             {!isOwn && (
                 <strong>{info.user_name}</strong>
             )}
@@ -39,9 +30,27 @@ export function ChatMessage({info}){
                     <LinkPreviewMessage icon={info.link?.icon} title={info.link?.title} subtitle={info.link?.subtitle}/>
                 )}
                 {(info.kind == undefined || info.kind == 'text') && (
-                    <TextMessage text={info.text} children={info.children}/>
+                    <TextMessage
+                        text={info.text}
+                        children={info.children}
+                        markdown={info.markdown}
+                        streaming={info.streaming}
+                    />
                 )}
             </div>
+            {(info.aborted || info.error) && (
+                <div className="messageState">
+                    <span>
+                        <i className={`fa-solid ${info.error? 'fa-circle-exclamation':'fa-circle-stop'}`}/>
+                        {info.error? 'No se pudo completar la respuesta':'Respuesta detenida'}
+                    </span>
+                    {onRetry != undefined && (
+                        <button type="button" onClick={onRetry}>
+                            <i className="fa-solid fa-rotate-right"/>Reintentar
+                        </button>
+                    )}
+                </div>
+            )}
             {info.timestamp != undefined && (
                 <div className="messageFooter">
                     <span className="timestamp">{info.timestamp}</span>
