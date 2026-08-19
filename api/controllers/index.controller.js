@@ -2065,8 +2065,29 @@ controller.getDocuments = (req,res)=>{
         let info = JSON.parse(data);
         let values = [];
         let whereClauses = [];
+        const startDate = info.start_date ?? info.initialDate ?? null;
+        const endDate = info.end_date ?? info.finalDate ?? null;
+        const isValidDate = value => {
+            if (value == null || value === '') return true;
+            if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+            const parsed = new Date(`${value}T00:00:00.000Z`);
+            return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+        };
 
-        console.log(info)
+        if (!isValidDate(startDate) || !isValidDate(endDate)) {
+            res.writeHead(400, {'Content-Type':'application/json'});
+            res.end(JSON.stringify({
+                error: 'Las fechas deben tener formato YYYY-MM-DD y ser fechas válidas.'
+            }));
+            return;
+        }
+        if (startDate && endDate && startDate > endDate) {
+            res.writeHead(400, {'Content-Type':'application/json'});
+            res.end(JSON.stringify({
+                error: 'La fecha inicial no puede ser posterior a la fecha final.'
+            }));
+            return;
+        }
 
         whereClauses.push(`"Ecosystem".documents.company_id = $1`);
         values.push(info.company_id)
@@ -2091,6 +2112,15 @@ controller.getDocuments = (req,res)=>{
             values.push(info.thirdParty_id)
         }
 
+        appendBusinessDateRange({
+            whereClauses,
+            values,
+            column: '"Ecosystem".documents.created_at',
+            start: startDate,
+            end: endDate,
+            companyPlaceholder: '$1'
+        });
+
         const whereQuery = whereClauses.length > 0
             ? `WHERE ${whereClauses.join(" AND ")}`
             : "";
@@ -2098,6 +2128,9 @@ controller.getDocuments = (req,res)=>{
         let sentence = `
             SELECT 
                 "Ecosystem".documents.*,
+                "Ecosystem".documents.created_at AT TIME ZONE (${companyTimeZoneSql('$1')}) AS created_at_local,
+                ("Ecosystem".documents.created_at AT TIME ZONE (${companyTimeZoneSql('$1')}))::date AS business_date,
+                ${companyTimeZoneSql('$1')} AS business_time_zone,
                 "Ecosystem".docs_instances.instance_id,
                 "Process".process_instance."ownSerial" as "instanceOwnSerial"
             FROM
