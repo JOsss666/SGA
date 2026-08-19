@@ -1,4 +1,4 @@
-const getFacturationSellInvoicesTool = Object.freeze({
+    const getFacturationSellInvoicesTool = Object.freeze({
     id: 'get-facturation-sellInvoices',
     operation: 'read',
     permissions: Object.freeze([]),
@@ -14,15 +14,16 @@ const getFacturationSellInvoicesTool = Object.freeze({
                 properties: {
                     operation: {
                         type: 'string',
-                        enum: ['list', 'latest', 'summary', 'by_id'],
+                        enum: ['list', 'latest', 'summary', 'details', 'by_id'],
                         description: `
                             list devuelve facturas,
                             latest devuelve la última factura,
                             summary devuelve cantidades y totales agregados,
-                            by_id busca una factura por su ownSerial interno.
+                            details premite leer los detalles al completo de una o mas facturas,
+                            by_id busca una factura por su id interno.
                         `
                     },
-                    ownSerial: {
+                    id: {
                         type: 'integer',
                         minimum: 1,
                         description: 'ID interno de la factura. Úsalo exclusivamente con operation="by_id" y solo cuando el usuario indique un ID concreto.'
