@@ -14,7 +14,7 @@ const documentUpload = multer({
     limits: { files: 1, fileSize: 10 * 1024 * 1024 }
 });
 
-systemAIRouter.use(express.json({ limit: '32kb', strict: true }));
+systemAIRouter.use(express.json({ limit: '256kb', strict: true }));
 systemAIRouter.get('/health', systemAIController.health);
 systemAIRouter.use(requireTrustedOrigin, authenticateSession, requireCompanyAccess, systemAIRateLimit);
 systemAIRouter.get('/agents', systemAIController.getAgents);

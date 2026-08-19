@@ -27,12 +27,12 @@ const systemAIService = {
         return runner.run(data);
     },
 
-    async streamAgent(data, onDelta) {
+    async streamAgent(data, handlers = {}) {
         const runner = new AgentRunner({
             agentRegistry,
             provider: getModelProvider()
         });
-        return runner.runStream({ ...data, onDelta });
+        return runner.runStream({ ...data, ...handlers });
     }
 };
 
