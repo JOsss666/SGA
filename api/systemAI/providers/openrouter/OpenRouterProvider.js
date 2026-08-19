@@ -1,6 +1,19 @@
 import ModelProvider from '../../core/contracts/ModelProvider.js';
 import SystemAIError from '../../core/errors/SystemAIError.js';
 
+// El proveedor tiene su propio timeout, pero el cliente también puede cortar
+// (botón Detener del chat). Se combinan para no seguir generando tokens.
+const combineSignals = (timeoutSignal, externalSignal) => (
+    externalSignal ? AbortSignal.any([timeoutSignal, externalSignal]) : timeoutSignal
+);
+
+const abortError = externalSignal => (externalSignal?.aborted
+    ? new SystemAIError('La solicitud fue cancelada por el cliente.', {
+        statusCode: 499,
+        code: 'AI_REQUEST_ABORTED'
+    })
+    : null);
+
 class OpenRouterProvider extends ModelProvider {
     constructor({ apiKey, baseUrl, appUrl, appName, timeoutMs }) {
         super();
@@ -11,7 +24,7 @@ class OpenRouterProvider extends ModelProvider {
         this.timeoutMs = timeoutMs;
     }
 
-    async generate({ model, instructions, input, messages, tools = [], outputSchema, documentProcessing, maxOutputTokens, metadata = {} }) {
+    async generate({ model, instructions, input, messages, tools = [], outputSchema, documentProcessing, maxOutputTokens, metadata = {}, signal }) {
         if (!this.apiKey) {
             throw new SystemAIError('OpenRouter no está configurado.', {
                 statusCode: 503,
@@ -25,7 +38,7 @@ class OpenRouterProvider extends ModelProvider {
         try {
             const response = await fetch(`${this.baseUrl}/chat/completions`, {
                 method: 'POST',
-                signal: controller.signal,
+                signal: combineSignals(controller.signal, signal),
                 headers: {
                     Authorization: `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json',
@@ -101,6 +114,8 @@ class OpenRouterProvider extends ModelProvider {
         } catch (error) {
             if (error instanceof SystemAIError) throw error;
             if (error?.name === 'AbortError') {
+                const aborted = abortError(signal);
+                if (aborted) throw aborted;
                 throw new SystemAIError('La solicitud al proveedor de IA excedió el tiempo límite.', {
                     statusCode: 504,
                     code: 'AI_PROVIDER_TIMEOUT'
@@ -115,7 +130,7 @@ class OpenRouterProvider extends ModelProvider {
         }
     }
 
-    async generateStream({ model, instructions, input, messages, tools = [], maxOutputTokens, metadata = {}, onDelta = () => {} }) {
+    async generateStream({ model, instructions, input, messages, tools = [], maxOutputTokens, metadata = {}, signal, onDelta = () => {} }) {
         if (!this.apiKey) {
             throw new SystemAIError('OpenRouter no está configurado.', {
                 statusCode: 503,
@@ -128,7 +143,7 @@ class OpenRouterProvider extends ModelProvider {
         try {
             const response = await fetch(`${this.baseUrl}/chat/completions`, {
                 method: 'POST',
-                signal: controller.signal,
+                signal: combineSignals(controller.signal, signal),
                 headers: {
                     Authorization: `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json',
@@ -144,6 +159,7 @@ class OpenRouterProvider extends ModelProvider {
                     max_tokens: maxOutputTokens,
                     stream: true,
                     stream_options: { include_usage: true },
+                    usage: { include: true },
                     ...(tools.length ? { tools, tool_choice: 'auto' } : {}),
                     user: metadata.userId ? String(metadata.userId) : undefined
                 })
@@ -228,6 +244,8 @@ class OpenRouterProvider extends ModelProvider {
         } catch (error) {
             if (error instanceof SystemAIError) throw error;
             if (error?.name === 'AbortError') {
+                const aborted = abortError(signal);
+                if (aborted) throw aborted;
                 throw new SystemAIError('La respuesta del proveedor excedió el tiempo límite.', {
                     statusCode: 504,
                     code: 'AI_PROVIDER_TIMEOUT'

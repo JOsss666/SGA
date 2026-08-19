@@ -38,6 +38,8 @@ systemAIController.runAgent = async (req, res, next) => {
     }
 };
 
+const STREAM_HEARTBEAT_MS = 15000;
+
 const writeStreamEvent = (res, event, data) => {
     res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
 };
@@ -50,10 +52,43 @@ systemAIController.streamAgent = async (req, res, next) => {
     res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders?.();
 
+    // Cuando el usuario pulsa Detener el navegador cierra la conexión; abortar
+    // la llamada al proveedor evita seguir consumiendo tokens de una respuesta
+    // que ya nadie va a leer.
+    const abortController = new AbortController();
+    const handleClose = () => abortController.abort();
+    res.on('close', handleClose);
+
+    // Una tool lenta puede dejar el stream sin tráfico el tiempo suficiente
+    // para que un proxy lo corte. El comentario SSE mantiene la conexión viva
+    // sin ensuciar los eventos que consume el cliente.
+    const heartbeat = setInterval(() => {
+        if (!res.writableEnded) res.write(': ping\n\n');
+    }, STREAM_HEARTBEAT_MS);
+
+    const emit = (event, data) => {
+        if (!res.writableEnded) writeStreamEvent(res, event, data);
+    };
+
     try {
-        const result = await systemAIService.streamAgent(req.systemAI, text => {
-            if (!res.writableEnded) writeStreamEvent(res, 'delta', { text });
-        });
+        const result = await systemAIService.streamAgent(
+            { ...req.systemAI, signal: abortController.signal },
+            {
+                onDelta: text => emit('delta', { text }),
+                onToolCall: ({ name, arguments: toolArguments }) => emit('tool', {
+                    name,
+                    arguments: toolArguments
+                }),
+                // Solo se anuncia el tamaño del resultado: las filas pueden ser
+                // enormes y el modelo ya las recibió por su propio canal.
+                onToolResult: ({ name, result: toolResult }) => emit('tool_result', {
+                    name,
+                    ok: true,
+                    total_count: toolResult?.total_count ?? null,
+                    returned_count: toolResult?.returned_count ?? null
+                })
+            }
+        );
         if (!res.writableEnded) {
             writeStreamEvent(res, 'done', { data: result });
             res.end();
@@ -67,6 +102,9 @@ systemAIController.streamAgent = async (req, res, next) => {
             });
             res.end();
         }
+    } finally {
+        clearInterval(heartbeat);
+        res.off('close', handleClose);
     }
 };
 
