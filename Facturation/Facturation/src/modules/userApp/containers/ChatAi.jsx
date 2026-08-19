@@ -15,6 +15,7 @@ import { OptionsChatAi } from '../components/ChatAiComponents/OptionsChatAi';
 import { ChatComposer } from '../components/ChatAiComponents/ChatComposer';
 import { ToolActivity, TypingIndicator } from '../components/ChatAiComponents/ToolActivity';
 import { stripAgentDebugMarker } from '../components/ChatAiComponents/agentText';
+import { ChatActionsContext } from '../components/ChatAiComponents/chatActionsContext';
 
 // Debe coincidir con systemAIConfig.maxInputCharacters del backend.
 const MAX_PROMPT_CHARACTERS = 12000;
@@ -306,6 +307,10 @@ export function ChatAi({visible}){
             {chat.length >0 && (
                 <div className="chatScrollArea">
                     <div ref={chatScrollRef} onScroll={handleScroll} className="spaceChatAi">
+                    <ChatActionsContext.Provider value={{ fillPrompt: value => {
+                        setSearchVal(value);
+                        composerRef.current?.focus();
+                    } }}>
                         {chat.map((element,index)=>(
                             <ChatMessage
                                 info={element}
@@ -319,6 +324,7 @@ export function ChatAi({visible}){
                                 {waitingFirstToken && <TypingIndicator/>}
                             </div>
                         )}
+                    </ChatActionsContext.Provider>
                     </div>
                     {showScrollDown && (
                         <button type="button" className="scrollDownChat" onClick={()=>scrollToBottom()} title="Ir al final">

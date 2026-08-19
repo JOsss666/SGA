@@ -3,6 +3,8 @@ import { TagIndicator } from '../TagIndicator';
 import { ProgressBar } from '../ProgressBar';
 import { OutstandingAnalyticCard } from '../OutstandingAnalyticCard';
 import { NormalCard } from '../NormalCard';
+import { ActionButton } from './ActionButton';
+import { CapsuleButtonAi } from './CapsuleButtonAi';
 
 /**
  * Catálogo de componentes que el agente puede pedir que se rendericen.
@@ -43,6 +45,13 @@ const matches = (pattern, value) => typeof value === 'string' && pattern.test(va
 // El color entra a un style inline: solo se acepta un hex de 6 dígitos.
 const hexColor = value => (matches(/^#[0-9a-fA-F]{6}$/, value) ? value : undefined);
 
+// El id de la acción y sus params los valida el catálogo de acciones al
+// renderizar: aquí solo se comprueba la forma.
+const actionId = value => (typeof value === 'string' ? value : undefined);
+const plainObject = value => (
+    value && typeof value === 'object' && !Array.isArray(value) ? value : undefined
+);
+
 // El modelo manda el nombre del icono, nunca JSX ni una clase completa.
 // Se valida aquí y ComponentMessage lo convierte en elemento al renderizar.
 const iconName = value => (matches(/^[a-z0-9-]{1,40}$/, value) ? value : undefined);
@@ -67,6 +76,12 @@ export const CHAT_COMPONENTS = Object.freeze({
         component: ProgressBar,
         props: { progress: number({ min: 0, max: 100 }) }
     },
+    Button:{
+        component:CapsuleButtonAi,
+        props:{ onClick: ()=>{
+            alert('Doc type y ownSerial')
+        } }
+    },
     OutstandingAnalyticCard: {
         component: OutstandingAnalyticCard,
         props: {
@@ -80,6 +95,10 @@ export const CHAT_COMPONENTS = Object.freeze({
     NormalCard: {
         component: NormalCard,
         props: { title: label, description: label, onlyTitle: oneOf([true, false]) }
+    },
+    ActionButton: {
+        component: ActionButton,
+        props: { action: actionId, params: plainObject }
     }
 });
 
