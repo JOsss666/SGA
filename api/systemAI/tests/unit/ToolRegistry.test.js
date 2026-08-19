@@ -15,3 +15,19 @@ test('rechaza ids de tools que no estén registrados', () => {
     const registry = new ToolRegistry();
     assert.throws(() => registry.get('unknown-tool'), error => error.code === 'TOOL_NOT_FOUND');
 });
+
+test('rechaza un tipo JSON Schema inválido antes de llamar al proveedor', () => {
+    const registry = new ToolRegistry();
+    assert.throws(() => registry.register({
+        id: 'invalid-schema',
+        definition: {
+            function: {
+                name: 'invalid_schema',
+                parameters: {
+                    type: 'object',
+                    properties: { types: { type: 'aray' } }
+                }
+            }
+        }
+    }, async () => {}), error => error.code === 'INVALID_TOOL_DEFINITION');
+});

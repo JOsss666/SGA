@@ -1,5 +1,3 @@
-import { useDataBase } from '../app.js';
-
 // Compatibilidad para las compañías existentes. La migración 0021 materializa
 // este mismo valor en company_settings; las compañías nuevas deben configurarlo.
 export const LEGACY_DEFAULT_TIME_ZONE = 'America/Bogota';
@@ -46,6 +44,7 @@ export const appendBusinessDateRange = ({
 };
 
 export const getCompanyTimeZone = async (companyId) => {
+    const { useDataBase } = await import('../app.js');
     const result = await useDataBase(
         `SELECT ${companyTimeZoneSql('$1')} AS time_zone`,
         [companyId],
@@ -55,6 +54,7 @@ export const getCompanyTimeZone = async (companyId) => {
 };
 
 export const setCompanyTimeZone = async (companyId, timeZone) => {
+    const { useDataBase } = await import('../app.js');
     const validation = await useDataBase(
         `SELECT EXISTS (
             SELECT 1 FROM pg_timezone_names WHERE name = $1
@@ -82,4 +82,3 @@ export const setCompanyTimeZone = async (companyId, timeZone) => {
 
     return { company_id: companyId, time_zone: timeZone };
 };
-

@@ -1,10 +1,52 @@
 import SystemAIError from '../core/errors/SystemAIError.js';
+import getAccountabilityTool from './definitions/getAccountability.tool.js';
+
+// Tools
 import sellInvoicesTool from './definitions/getFacturationSellInvoices.tool.js';
 import purchasesTool from './definitions/getFacturationPurchases.tool.js';
 import processInstancesTool from './definitions/getProcessProcessInstances.tool.js';
+import getDocumentsTool from './definitions/getDocumentsTool.js';
+
+// Executors
 import executeSellInvoices from './executors/getFacturationSellInvoices.executor.js';
 import executePurchases from './executors/getFacturationPurchases.executor.js';
 import executeProcessInstances from './executors/getProcessProcessInstances.executor.js';
+import executeGetAccountability from './executors/getAccountability.executor.js';
+import executeGetDocuments from './executors/getDocuments.tool.js';
+
+const JSON_SCHEMA_TYPES = new Set(['object', 'array', 'string', 'integer', 'number', 'boolean', 'null']);
+
+const validateJsonSchema = (schema, path = 'parameters') => {
+    if (!schema || typeof schema !== 'object' || !JSON_SCHEMA_TYPES.has(schema.type)) {
+        throw new SystemAIError(`JSON Schema inválido en ${path}.`, {
+            statusCode: 500,
+            code: 'INVALID_TOOL_DEFINITION'
+        });
+    }
+    if (schema.type === 'array') {
+        if (!schema.items) {
+            throw new SystemAIError(`El arreglo ${path} requiere items.`, {
+                statusCode: 500,
+                code: 'INVALID_TOOL_DEFINITION'
+            });
+        }
+        validateJsonSchema(schema.items, `${path}.items`);
+    }
+    if (schema.type === 'object') {
+        const properties = schema.properties || {};
+        for (const [name, propertySchema] of Object.entries(properties)) {
+            validateJsonSchema(propertySchema, `${path}.properties.${name}`);
+        }
+        const unknownRequired = (schema.required || []).filter(name => !Object.hasOwn(properties, name));
+        if (unknownRequired.length) {
+            throw new SystemAIError(`Campos required inexistentes en ${path}.`, {
+                statusCode: 500,
+                code: 'INVALID_TOOL_DEFINITION',
+                details: { unknownRequired }
+            });
+        }
+    }
+};
 
 const validateTool = (tool, execute) => {
     if (!tool?.id || !tool?.definition?.function?.name || typeof execute !== 'function') {
@@ -13,6 +55,7 @@ const validateTool = (tool, execute) => {
             code: 'INVALID_TOOL_DEFINITION'
         });
     }
+    validateJsonSchema(tool.definition.function.parameters);
 };
 
 class ToolRegistry {
@@ -55,7 +98,9 @@ class ToolRegistry {
 const toolRegistry = new ToolRegistry([
     { tool: sellInvoicesTool, execute: executeSellInvoices },
     { tool: purchasesTool, execute: executePurchases },
-    { tool: processInstancesTool, execute: executeProcessInstances }
+    { tool: processInstancesTool, execute: executeProcessInstances },
+    {tool:getAccountabilityTool,execute:executeGetAccountability},
+    {tool:getDocumentsTool,execute:executeGetDocuments}
 ]);
 
 export { ToolRegistry };
