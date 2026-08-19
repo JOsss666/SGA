@@ -106,7 +106,71 @@ export async function sendPrompt({ destination, target, content, companyId }) {
     });
 }
 
-export async function streamAgentPrompt({ target, content, companyId, onDelta = () => {} }) {
+export async function listAgents({ companyId } = {}) {
+    const response = await fetch(`${urlSer}/api/system-ai/v1/agents`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Accept': 'application/json',
+            ...(companyId != null ? { 'X-SGA-Company-Id': String(companyId) } : {})
+        }
+    });
+    const data = await parseResponse(response);
+    return Array.isArray(data?.data) ? data.data : [];
+}
+
+export const DOCUMENT_MAX_BYTES = 10 * 1024 * 1024;
+export const DOCUMENT_ACCEPTED_EXTENSIONS = Object.freeze(['pdf', 'jpg', 'jpeg', 'png', 'csv', 'md']);
+
+/**
+ * Sube un archivo al agente document-reader y devuelve su extracción
+ * estructurada, lista para adjuntarse como contexto de una pregunta.
+ */
+export async function readDocument({ file, companyId, signal }) {
+    if (!file) {
+        throw new AiRequestError('Debes seleccionar un archivo.', { code: 'DOCUMENT_REQUIRED' });
+    }
+    const extension = file.name?.split('.').pop()?.toLowerCase();
+    if (!DOCUMENT_ACCEPTED_EXTENSIONS.includes(extension)) {
+        throw new AiRequestError(
+            `Solo se admiten archivos ${DOCUMENT_ACCEPTED_EXTENSIONS.join(', ')}.`,
+            { code: 'UNSUPPORTED_DOCUMENT_TYPE' }
+        );
+    }
+    if (file.size > DOCUMENT_MAX_BYTES) {
+        throw new AiRequestError('El archivo supera los 10 MB permitidos.', { code: 'DOCUMENT_TOO_LARGE' });
+    }
+
+    const body = new FormData();
+    body.append('document', file);
+
+    const response = await fetch(`${urlSer}/api/system-ai/v1/documents/read`, {
+        method: 'POST',
+        credentials: 'include',
+        signal,
+        headers: {
+            'Accept': 'application/json',
+            ...(companyId != null ? { 'X-SGA-Company-Id': String(companyId) } : {})
+        },
+        body
+    });
+
+    const data = await parseResponse(response);
+    return data?.data ?? null;
+}
+
+export async function streamAgentPrompt({
+    target,
+    content,
+    history = [],
+    tier,
+    mode,
+    companyId,
+    signal,
+    onDelta = () => {},
+    onTool = () => {},
+    onToolResult = () => {}
+}) {
     if (typeof target !== 'string' || !target.trim()) {
         throw new AiRequestError('Debes indicar el id del agente.', { code: 'INVALID_AGENT_ID' });
     }
@@ -117,12 +181,19 @@ export async function streamAgentPrompt({ target, content, companyId, onDelta = 
     const response = await fetch(`${urlSer}/api/system-ai/v1/agents/stream`, {
         method: 'POST',
         credentials: 'include',
+        signal,
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'text/event-stream',
             ...(companyId != null ? { 'X-SGA-Company-Id': String(companyId) } : {})
         },
-        body: JSON.stringify({ agent_id: target, input: content.trim() })
+        body: JSON.stringify({
+            agent_id: target,
+            input: content.trim(),
+            ...(history.length ? { messages: history } : {}),
+            ...(tier ? { tier } : {}),
+            ...(mode ? { mode } : {})
+        })
     });
     if (!response.ok || !response.body) {
         const details = await response.json().catch(() => null);
@@ -142,12 +213,17 @@ export async function streamAgentPrompt({ target, content, companyId, onDelta = 
         let event = 'message';
         const dataLines = [];
         for (const line of block.split(/\r?\n/)) {
+            // Los ": ping" del heartbeat no son eventos: solo mantienen viva
+            // la conexión mientras una tool tarda en responder.
+            if (line.startsWith(':')) continue;
             if (line.startsWith('event:')) event = line.slice(6).trim();
             if (line.startsWith('data:')) dataLines.push(line.slice(5).trim());
         }
         if (!dataLines.length) return;
         const payload = JSON.parse(dataLines.join('\n'));
         if (event === 'delta' && payload.text) onDelta(payload.text);
+        if (event === 'tool') onTool(payload);
+        if (event === 'tool_result') onToolResult(payload);
         if (event === 'done') completedData = payload.data;
         if (event === 'error') {
             throw new AiRequestError(payload.message || 'El streaming de IA fue interrumpido.', {
@@ -157,15 +233,28 @@ export async function streamAgentPrompt({ target, content, companyId, onDelta = 
         }
     };
 
-    while (true) {
-        const { value, done } = await reader.read();
-        buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
-        const blocks = buffer.split(/\r?\n\r?\n/);
-        buffer = blocks.pop() || '';
-        for (const block of blocks) consumeEvent(block);
-        if (done) break;
+    try {
+        while (true) {
+            const { value, done } = await reader.read();
+            buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+            const blocks = buffer.split(/\r?\n\r?\n/);
+            buffer = blocks.pop() || '';
+            for (const block of blocks) consumeEvent(block);
+            if (done) break;
+        }
+        if (buffer.trim()) consumeEvent(buffer);
+    } catch (error) {
+        // Detener es una acción del usuario, no un fallo: se conserva lo que
+        // ya se había recibido en lugar de propagar un error.
+        if (error?.name === 'AbortError' || signal?.aborted) {
+            return { aborted: true };
+        }
+        throw error;
     }
-    if (buffer.trim()) consumeEvent(buffer);
-    if (!completedData) throw new AiRequestError('El stream terminó sin confirmación.', { code: 'INCOMPLETE_AI_STREAM' });
+
+    if (!completedData) {
+        if (signal?.aborted) return { aborted: true };
+        throw new AiRequestError('El stream terminó sin confirmación.', { code: 'INCOMPLETE_AI_STREAM' });
+    }
     return completedData;
 }
