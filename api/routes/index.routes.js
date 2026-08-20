@@ -374,6 +374,10 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     
     router.get('/electronicFacturation/getNumberingRanges', electronicFacturationController.getNumberingRanges);
 
+    router.post('/electronicFacturation/setNumberingRangeCurrent', electronicFacturationController.setNumberingRangeCurrent);
+
+    router.post('/electronicFacturation/deletePendingBill', electronicFacturationController.deletePendingBill);
+
     router.get('/electronicFacturation/showActualToken', electronicFacturationController.showActualToken);
 
     router.post('/electronicFacturation/providerCredentials', electronicProviderCredentialsController.upsert);

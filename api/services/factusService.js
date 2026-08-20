@@ -435,4 +435,94 @@ factusService.validateCreditNote = ({ company_id, environment, payload }) => (
     })
 );
 
+// Asigna manualmente el consecutivo actual de un rango de numeración en Factus:
+// PATCH /v1/numbering-ranges/:numbering_range_id/current  body: { current: <número> }
+factusService.setNumberingRangeCurrent = async ({
+    company_id,
+    environment = DEFAULT_ENVIRONMENT,
+    numbering_range_id,
+    current
+} = {}) => {
+    const rangeId = parseInt(numbering_range_id);
+    if (!Number.isInteger(rangeId) || rangeId <= 0) {
+        throw new Error('numbering_range_id es requerido y debe ser un entero válido.');
+    }
+
+    const currentValue = parseInt(current);
+    if (!Number.isInteger(currentValue) || currentValue < 0) {
+        throw new Error('current es requerido y debe ser un entero mayor o igual a 0.');
+    }
+
+    const response = await factusService.request({
+        company_id,
+        environment,
+        path: `/v1/numbering-ranges/${rangeId}/current`,
+        method: 'PATCH',
+        body: { current: currentValue }
+    });
+
+    if (!response.ok) {
+        throw new Error(response.data?.message || `Error al asignar el consecutivo en Factus (${response.status}).`);
+    }
+
+    // El cambio invalida el current_number cacheado; se refresca desde Factus.
+    await factusService.getNumberingRanges({ company_id, environment, bypassCache: true });
+
+    return response.data;
+};
+
+// Elimina una factura PENDIENTE (aún no validada por la DIAN) en Factus.
+// Recibe el número de la factura (ZJ1..., INT...) y resuelve su reference_code
+// consultando la factura EN FACTUS (no en la base local); luego la elimina con
+// DELETE /v1/bills/destroy/reference/:reference. También acepta reference directo.
+factusService.deletePendingBill = async ({
+    company_id,
+    environment = DEFAULT_ENVIRONMENT,
+    reference,
+    number
+} = {}) => {
+    let referenceValue = `${reference ?? ''}`.trim();
+
+    // Sin reference => se resuelve consultando la factura en Factus por su número.
+    if (!referenceValue) {
+        const billNumber = `${number ?? ''}`.trim();
+        if (!billNumber) {
+            throw new Error('Debes enviar el number o el reference de la factura.');
+        }
+
+        const lookup = await factusService.request({
+            company_id,
+            environment,
+            path: `/v1/bills?filter[number]=${encodeURIComponent(billNumber)}`
+        });
+
+        if (!lookup.ok) {
+            throw new Error(lookup.data?.message || `No se pudo consultar la factura ${billNumber} en Factus (${lookup.status}).`);
+        }
+
+        const bills = lookup.data?.data?.data ?? lookup.data?.data ?? [];
+        const bill = Array.isArray(bills)
+            ? bills.find((b) => String(b.number) === billNumber)
+            : null;
+
+        referenceValue = `${bill?.reference_code ?? ''}`.trim();
+        if (!referenceValue) {
+            throw new Error(`No se encontró la factura ${billNumber} en Factus (o no tiene reference_code).`);
+        }
+    }
+
+    const response = await factusService.request({
+        company_id,
+        environment,
+        path: `/v1/bills/destroy/reference/${encodeURIComponent(referenceValue)}`,
+        method: 'DELETE'
+    });
+
+    if (!response.ok) {
+        throw new Error(response.data?.message || `Error al eliminar la factura pendiente en Factus (${response.status}).`);
+    }
+
+    return response.data;
+};
+
 export default factusService;

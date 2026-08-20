@@ -698,19 +698,15 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
     }
 
     const getProductsAndServices = async()=>{
-        let allowedStores = undefined;
-        let allowedCellars = undefined;
-        let allowedItems = undefined;
-        console.log('XXXXX ',userConfig)
-        if(userConfig.access.stores.enabled.length > 1){
-            allowedStores = userConfig.access.stores.enabled;
-        }
-        if(userConfig.access.cellars.enabled.length > 1){
-            allowedCellars = userConfig.access.cellars.enabled;
-        }
-        if(userConfig.access.sections.products.enabled.length >= 1){
-            allowedItems = userConfig?.access?.sections?.products?.enabled;
-        }
+        const stores = userConfig?.access?.stores?.enabled;
+        const cellars = userConfig?.access?.cellars?.enabled;
+        const products = userConfig?.access?.sections?.products?.enabled;
+
+        const allowedStores = Array.isArray(stores) && stores.length > 1 ? stores : undefined;
+        const allowedCellars = Array.isArray(cellars) && cellars.length > 1 ? cellars : undefined;
+        const allowedItems = Array.isArray(products) && products.length >= 1 ? products : undefined;
+        
+        console.log('XXXX -- Ejecutando GET Productos...')
         let res = await postInfo('/inventory/getComercialProducts',{
             company_id:appInfo.company_id,
             allowedStores,
@@ -718,7 +714,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             allowedItems,
             type:'service'
         })
-        console.log('Servicios disponibles: ',res)
+        console.log('XXX -- Servicios disponibles: ',res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {

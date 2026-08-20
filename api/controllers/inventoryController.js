@@ -157,8 +157,8 @@ inventoryController.getComercialProducts = (req,res)=>{
         data += chunk;
     })
     req.on('end',async()=>{
-        console.log('Recibido')
         let info = JSON.parse(data);
+        console.log('Recibido: PPPPP : ',info)
         let values = [info.company_id];
         let whereClauses = [`ps.company_id = $1`];
 
@@ -170,6 +170,11 @@ inventoryController.getComercialProducts = (req,res)=>{
         if(info.id != undefined){
             values.push(info.id);
             whereClauses.push(`ps.id = ${values.length}`);
+        }
+
+        if(info.allowedItems != undefined){
+            values.push(info.allowedItems);
+            whereClauses.push(`ps.id = ANY($${values.length})`);
         }
 
         // Filter by control valid date in pricesListitems

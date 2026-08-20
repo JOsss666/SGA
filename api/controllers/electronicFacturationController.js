@@ -178,6 +178,70 @@ electronicFacturationController.getNumberingRanges = async (req, res) => {
     }   
 };
 
+// Asigna manualmente el consecutivo actual de un rango de numeración en Factus.
+// Body esperado: { numbering_range_id, current, company_id?, environment? }
+electronicFacturationController.setNumberingRangeCurrent = (req, res) => {
+    let bodyData = '';
+    req.on('data', chunk => {
+        bodyData += chunk;
+    });
+    req.on('end', async () => {
+        try {
+            const info = bodyData ? JSON.parse(bodyData) : {};
+            const environment = await resolveEnvironmentFromInfo(info);
+            const data = await factusService.setNumberingRangeCurrent({
+                company_id: getCompanyIdFromInfo(info),
+                environment,
+                numbering_range_id: info.numbering_range_id ?? info.id,
+                current: info.current
+            });
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'OK', data }));
+        } catch (error) {
+            console.error('Error al asignar el consecutivo del rango:', error.message);
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'Error', message: error.message }));
+        }
+    });
+    req.on('error', (err) => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'Error', message: err.message }));
+    });
+};
+
+// Elimina una factura PENDIENTE de la DIAN en Factus. Recibe el número de la
+// factura (ZJ1..., INT..., etc.); el reference_code se resuelve consultando
+// Factus (no la base local). También acepta reference directo.
+// Body esperado: { number | bill_numer (o reference | reference_code), company_id, environment? }
+electronicFacturationController.deletePendingBill = (req, res) => {
+    let bodyData = '';
+    req.on('data', chunk => {
+        bodyData += chunk;
+    });
+    req.on('end', async () => {
+        try {
+            const info = bodyData ? JSON.parse(bodyData) : {};
+            const environment = await resolveEnvironmentFromInfo(info);
+            const data = await factusService.deletePendingBill({
+                company_id: getCompanyIdFromInfo(info),
+                environment,
+                number: info.number ?? info.bill_numer,
+                reference: info.reference ?? info.reference_code
+            });
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'OK', data }));
+        } catch (error) {
+            console.error('Error al eliminar la factura pendiente:', error.message);
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'Error', message: error.message }));
+        }
+    });
+    req.on('error', (err) => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'Error', message: err.message }));
+    });
+};
+
 electronicFacturationController.getTaxes = async (req, res) => {
     try {
         const info = {

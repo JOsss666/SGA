@@ -35,12 +35,14 @@ import { FormNewENote } from "./forms/FormNewENote";
 import { NoAccess } from "./NoAccess";
 import { SellInvoiceDesign } from "./Alerts/SellInvoiceDesing";
 import { FormInvoice } from "./forms/FormInvoce";
+import { postInfo } from "../../../utils/functions";
 
 export function New(){
     const {userConfig,appInfo,userInfo, appConfig} = useAppInfo();
     const {popInAlert,popOutAlert} = useAlert();
     const [disabled,setDisabled] = useState(false);
     const [messgeDisabled,setMessageDisabled] = useState('')
+    const [numberingRangesStatus, setNumberingRangesStatus] = useState('idle');
 
     useEffect(() => {
         if (!appConfig?.access) return;
@@ -79,8 +81,8 @@ export function New(){
         {text:'Compra',children:<FormNewPurchase/>,icon:<i className="fa-solid fa-cart-shopping"/>},
 
         {text:'Nota débito o crédito',children:<FormNewENote/>,icon:<i className="fa-solid fa-note-sticky"/>},
-        
-        ...(userConfig?.access?.sections?.users?.overAll ? 
+
+        ...(userConfig?.access?.sections?.users?.overAll ?
             [{ text: 'Crear usuario', children: <FormNewUser />, icon: <i className="fa-solid fa-person-circle-plus" /> }] : []),
         
         { text: 'Crear tercero', children: <FormNewThirdParties quickCreation={!userConfig?.access?.sections?.thirdparties?.can_create} />, icon: <i className="fa-regular fa-user" /> },
@@ -153,6 +155,44 @@ export function New(){
     return(
         <div className="New">
             <BoldTitle text={'Crear nuevo'}/>
+            <span onClick={async () => {
+                if (numberingRangesStatus === 'loading') return;
+
+                try {
+                    setNumberingRangesStatus('loading');
+                    const ranges = await getNumberingRangesElectronicInvoices(appInfo?.company_id);
+                    console.log('Rangos de numeración actuales:', ranges);
+                    setNumberingRangesStatus(ranges.length > 0 ? 'success' : 'empty');
+                } catch (error) {
+                    console.error('No fue posible consultar los rangos de numeración:', error);
+                    setNumberingRangesStatus('error');
+                }
+            }}>
+                {numberingRangesStatus === 'loading' && 'Consultando rangos...'}
+                {numberingRangesStatus === 'success' && 'Rangos consultados correctamente'}
+                {numberingRangesStatus === 'empty' && 'No hay rangos de numeración disponibles'}
+                {numberingRangesStatus === 'error' && 'Error al consultar los rangos. Reintentar'}
+                {numberingRangesStatus === 'idle' && 'Consultar rangos de numeración'}
+            </span>
+            <span onClick={async()=>{
+                const res = await postInfo('/electronicFacturation/setNumberingRangeCurrent', {
+                    numbering_range_id: 2497,   // el provider_range_id de Factus
+                    current: 2354,               // el consecutivo a asignar
+                    company_id: appInfo.company_id
+                    // environment: 'production' // opcional; si no, se resuelve por defecto
+                });
+                console.log('Rspuesta range: ',res)
+                // res => { status: "OK", data: {...respuesta de Factus...} }
+            }}>
+                Click aca
+            </span>
+            <span onClick={async()=>{
+                const res = await postInfo('/electronicFacturation/deletePendingBill', {
+                    number: 'INT2353',        // el número de la factura (ZJ1... / INT...)
+                    company_id: appInfo.company_id  // opcional; si no, se deduce del número
+                });
+                // res => { status: "OK", data: {...respuesta de Factus...} }
+            }}>Eliminar factura</span>
             <DescriptionSpan text={'Crea todo lo que necesites en un solo click'}/>
             {!disabled && (
                 <div className="gridOptions">

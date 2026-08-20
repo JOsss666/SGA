@@ -9,7 +9,7 @@
 
 /* Las tarjetas del catálogo se estiran para llenar la fila sin desbordarla */
 .ComponentMessage > *{
-    flex: 1 1 22vh;
+    width: fit-content;
     min-width: 0;
     max-width: 100%;
 }

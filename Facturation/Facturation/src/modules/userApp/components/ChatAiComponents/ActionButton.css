@@ -12,13 +12,11 @@
     font: inherit;
     font-size: clamp(2px,2vh,20px);
     cursor: pointer;
-    /* Objetivo táctil cómodo: la guía pide no depender de aciertos milimétricos */
     min-height: 4.4vh;
 }
 
 .ActionButton:hover{
-    background-color: var(--iconHover);
-    border-color: var(--chatAccent);
+    background-color: var(--cardHover);
 }
 
 .ActionButton i{
