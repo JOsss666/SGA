@@ -9,7 +9,7 @@ import './FormNewCashRecipt.css'
 import './FormNewInvoice.css'
 import { FileInput } from "../../components/FileInput";
 import { LoadingSpace } from "../LoadingSpace";
-import { moneyFormat, newElectronicInvoide, postInfo, printCashRecipt, printSellInvoice } from "../../../../utils/functions";
+import { getNumberingRangesElectronicInvoices, moneyFormat, newElectronicInvoide, postInfo, printCashRecipt, printSellInvoice } from "../../../../utils/functions";
 import { NewElementSelect } from "../../components/NewElementSelect";
 import { FormNewThirdParties } from "./FormNewThirdParties";
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
@@ -82,6 +82,10 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const [concept_id,setConcept_id] = useState();
     const [conceptAccount_id,setConcept_account_id] = useState();
     const [cashBox_id,setCashBox_id] = useState();
+    // Rangos de numeración de factura electrónica permitidos para el rol
+    const [numberingRanges,setNumberingRanges] = useState([]);
+    const [numberingRange_id,setNumberingRange_id] = useState();
+    const [numberingRangesBlocked,setNumberingRangesBlocked] = useState(false);
     const [shift_id,setShift_id] = useState();
     const [status,setStatus] = useState('active');
 
@@ -214,8 +218,11 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 await getInstances()
             }
 
+            // Rangos de numeración de factura electrónica permitidos para el rol
+            await getInvoiceNumberingRanges();
+
         }
-        
+
         if(temInfo != {}){
             setInfo(temInfo);
         }
@@ -466,6 +473,68 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
         }
     }
 
+    const handleNumberingRangeChange = (element) => {
+        if(element){
+            setNumberingRange_id(element.id ?? element.provider_range_id);
+        }
+    }
+
+    // Busca el nodo electronicFacturation.numberingRanges sin depender de una
+    // ruta fija (el config guardado puede anidarlo distinto al prototipo).
+    const findNumberingPolicy = (obj) => {
+        if(!obj || typeof obj !== 'object') return undefined;
+        if(obj.electronicFacturation?.numberingRanges) return obj.electronicFacturation.numberingRanges;
+        for(const key of Object.keys(obj)){
+            const found = findNumberingPolicy(obj[key]);
+            if(found) return found;
+        }
+        return undefined;
+    }
+
+    // Carga los rangos de numeración de factura permitidos según el rol.
+    const getInvoiceNumberingRanges = async () => {
+        const policy = userConfig?.services?.sga?.electronicFacturation?.numberingRanges
+            ?? findNumberingPolicy(userConfig);
+        console.log('Numbering policy resuelta:', policy);
+        const enabled = Array.isArray(policy?.enabled) ? policy.enabled.map((v)=>`${v}`) : [];
+
+        let ranges = [];
+        try{
+            ranges = await getNumberingRangesElectronicInvoices(appInfo?.company_id);
+        }catch(error){
+            console.error('No fue posible consultar los rangos de numeración:',error);
+            return;
+        }
+
+        const invoiceRanges = (ranges || []).filter(
+            (r)=> r.document === 'Factura de Venta' || r.document_name === 'Factura de Venta'
+        );
+
+        // La lista `enabled` es autoritativa: si tiene elementos, solo esos rangos
+        // aplican. Sin lista blanca, `overAll` decide (true/sin config => todos).
+        let allowed;
+        if(enabled.length > 0){
+            allowed = invoiceRanges.filter((r)=> enabled.includes(`${r.id ?? r.provider_range_id}`));
+        }else if(!policy || policy.overAll === true){
+            allowed = invoiceRanges;
+        }else{
+            allowed = [];
+        }
+
+        const options = allowed.map((r)=>({
+            text: `${r.document ?? 'Factura de Venta'}${r.prefix ? ` (${r.prefix})` : ''}`,
+            value: r
+        }));
+
+        setNumberingRanges(options);
+        setNumberingRangesBlocked(allowed.length === 0);
+
+        // Un solo rango permitido => se asume seleccionado y no se muestra el selector.
+        if(allowed.length === 1){
+            setNumberingRange_id(allowed[0].id ?? allowed[0].provider_range_id);
+        }
+    }
+
     const getStores = async(allowedStores)=>{
         let res = await postInfo('/getStores',{
             company_id:appInfo.company_id,
@@ -623,7 +692,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
     const getBriefcasesBills = async()=>{
         let res = await postInfo('/facturation/getBriefcaseBills',{
             company_id:appInfo.company_id,
-            thirdParty_id
+            thirdParty_id,
         })
         setBriefCaseBills(res[1]);
     }
@@ -631,16 +700,22 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
     const getProductsAndServices = async()=>{
         let allowedStores = undefined;
         let allowedCellars = undefined;
+        let allowedItems = undefined;
+        console.log('XXXXX ',userConfig)
         if(userConfig.access.stores.enabled.length > 1){
             allowedStores = userConfig.access.stores.enabled;
         }
         if(userConfig.access.cellars.enabled.length > 1){
-            allowedCellars = userConfig.access.cellars.enabled.length;
+            allowedCellars = userConfig.access.cellars.enabled;
+        }
+        if(userConfig.access.sections.products.enabled.length >= 1){
+            allowedItems = userConfig?.access?.sections?.products?.enabled;
         }
         let res = await postInfo('/inventory/getComercialProducts',{
             company_id:appInfo.company_id,
             allowedStores,
             allowedCellars,
+            allowedItems,
             type:'service'
         })
         console.log('Servicios disponibles: ',res)
@@ -911,6 +986,18 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             // Creation and controll of electronic invoice
             let e_info = electronicInfo;
             if(e_invoice){
+                if(numberingRangesBlocked){
+                    alert('Tu usuario no tiene un rango de numeración de factura electrónica autorizado. Contacta al administrador.');
+                    setLoading(false);
+                    setDisabled(false);
+                    return;
+                }
+                if(numberingRanges.length > 1 && numberingRange_id == undefined){
+                    alert('Selecciona el rango de numeración antes de emitir la factura electrónica.');
+                    setLoading(false);
+                    setDisabled(false);
+                    return;
+                }
                 e_info = await handleCreationOfEinvoice(res.id);
                 console.log("Electronic Factuation validation: ",e_info)
                 if(e_info.id == undefined){
@@ -1036,6 +1123,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             user_id:userInfo.user_id,
             document:FormInfo,
             items:itemsToFac,
+            numbering_range_id:numberingRange_id,
             doc_id
         });
         console.log('RES Factus: --> ',res)
@@ -1265,6 +1353,9 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                     )}
                     {info.cashBox_id == undefined && (
                         <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja'} list={cashBoxes} disabled={disabled}/>
+                    )}
+                    {e_invoice && numberingRanges.length > 1 && (
+                        <SearchinList action={handleNumberingRangeChange} title={'Rango de numeración'} placeHolder={'Seleccione el rango de numeración'} list={numberingRanges} disabled={disabled}/>
                     )}
                     <div className="gridItemsContainer">
                         {itemBlocks?.map((element,index_block)=>(
