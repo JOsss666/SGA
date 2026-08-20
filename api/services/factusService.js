@@ -372,19 +372,46 @@ factusService.getNumberingRanges = async ({ company_id, environment = DEFAULT_EN
     return ranges;
 };
 
-factusService.getNumberingRangeId = async ({ company_id, environment = DEFAULT_ENVIRONMENT, type } = {}) => {
+factusService.getNumberingRangeId = async ({
+    company_id,
+    environment = DEFAULT_ENVIRONMENT,
+    type,
+    preferredRangeId = null,
+    allowedRangeIds = null
+} = {}) => {
     const documentName = DOCUMENT_RANGE_NAMES[type];
     if (!documentName) {
         throw new Error(`Tipo de rango Factus inválido: ${type}.`);
     }
 
-    const ranges = await factusService.getNumberingRanges({ company_id, environment });
-    const range = ranges.find((item) => item.document === documentName || item.document_name === documentName);
+    const rangeIdOf = (item) => `${item.id ?? item.provider_range_id}`;
 
-    if (!range) {
+    const ranges = await factusService.getNumberingRanges({ company_id, environment });
+    let ofType = ranges.filter((item) => item.document === documentName || item.document_name === documentName);
+
+    if (ofType.length === 0) {
         throw new Error(`No se encontró rango de numeración para ${documentName}.`);
     }
 
+    // Restricción por rol: solo los rangos incluidos en la lista blanca.
+    if (Array.isArray(allowedRangeIds)) {
+        const allowed = new Set(allowedRangeIds.map((value) => `${value}`));
+        ofType = ofType.filter((item) => allowed.has(rangeIdOf(item)));
+        if (ofType.length === 0) {
+            throw new Error(`El rol no tiene rangos de numeración autorizados para ${documentName}.`);
+        }
+    }
+
+    // Rango elegido en el formulario: debe estar dentro de los permitidos.
+    if (preferredRangeId != null && `${preferredRangeId}`.trim() !== '') {
+        const chosen = ofType.find((item) => rangeIdOf(item) === `${preferredRangeId}`);
+        if (!chosen) {
+            throw new Error(`El rango de numeración ${preferredRangeId} no está autorizado para ${documentName}.`);
+        }
+        return chosen.id ?? chosen.provider_range_id;
+    }
+
+    const range = ofType[0];
     return range.id ?? range.provider_range_id;
 };
 

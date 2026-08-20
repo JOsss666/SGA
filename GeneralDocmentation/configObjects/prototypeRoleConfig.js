@@ -223,6 +223,14 @@ let userConfig = {
                     "instance":"full",
                     "expires":"never"
                 },
+                "electronicFacturation":{
+                    "enabled":true,
+                    "status":'active',
+                    "numberingRanges":{
+                        "overAll":false,
+                        "enabled":[]
+                    }
+                },
                 "AI":{
                     "use":true,
                     "instance":"full",
