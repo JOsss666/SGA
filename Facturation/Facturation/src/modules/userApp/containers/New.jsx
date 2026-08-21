@@ -155,45 +155,6 @@ export function New(){
     return(
         <div className="New">
             <BoldTitle text={'Crear nuevo'}/>
-            <span onClick={async () => {
-                if (numberingRangesStatus === 'loading') return;
-
-                try {
-                    setNumberingRangesStatus('loading');
-                    const ranges = await getNumberingRangesElectronicInvoices(appInfo?.company_id);
-                    console.log('Rangos de numeración actuales:', ranges);
-                    setNumberingRangesStatus(ranges.length > 0 ? 'success' : 'empty');
-                } catch (error) {
-                    console.error('No fue posible consultar los rangos de numeración:', error);
-                    setNumberingRangesStatus('error');
-                }
-            }}>
-                {numberingRangesStatus === 'loading' && 'Consultando rangos...'}
-                {numberingRangesStatus === 'success' && 'Rangos consultados correctamente'}
-                {numberingRangesStatus === 'empty' && 'No hay rangos de numeración disponibles'}
-                {numberingRangesStatus === 'error' && 'Error al consultar los rangos. Reintentar'}
-                {numberingRangesStatus === 'idle' && 'Consultar rangos de numeración'}
-            </span>
-            <span onClick={async()=>{
-                const res = await postInfo('/electronicFacturation/setNumberingRangeCurrent', {
-                    numbering_range_id: 2497,   // el provider_range_id de Factus
-                    current: 2354,               // el consecutivo a asignar
-                    company_id: appInfo.company_id
-                    // environment: 'production' // opcional; si no, se resuelve por defecto
-                });
-                console.log('Rspuesta range: ',res)
-                // res => { status: "OK", data: {...respuesta de Factus...} }
-            }}>
-                Ajustar actual rango
-            </span>
-            <span onClick={async()=>{
-                const res = await postInfo('/electronicFacturation/deletePendingBill', {
-                    number: 'INT2353',        // el número de la factura (ZJ1... / INT...)
-                    company_id: appInfo.company_id  // opcional; si no, se deduce del número
-                });
-                console.log('Resultado de eliminar factura: ',res);
-                // res => { status: "OK", data: {...respuesta de Factus...} }
-            }}>Eliminar factura</span>
             <DescriptionSpan text={'Crea todo lo que necesites en un solo click'}/>
             {!disabled && (
                 <div className="gridOptions">

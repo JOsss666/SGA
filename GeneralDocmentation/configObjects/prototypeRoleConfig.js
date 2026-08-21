@@ -226,6 +226,13 @@ let userConfig = {
                 "electronicFacturation":{
                     "enabled":true,
                     "status":'active',
+                    "config":{
+                        sectionAccess:false,
+                        overAll:false,
+                        adjustCurrent:false,
+                        viewNumberingRanges:false,
+                        delteInvoice:false,
+                    },
                     "numberingRanges":{
                         "overAll":false,
                         "enabled":[]
