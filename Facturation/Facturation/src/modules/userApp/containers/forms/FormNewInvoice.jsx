@@ -179,18 +179,12 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 await getBussines();
             }
 
-            if(userConfig.access.sections.cashBoxes.overAll){
-                if(userConfig.access.bussines.enabled.length > 1){
-                    //getCashBoxes con filtro
-                    await getCashBoxes(userConfig.access.sections.cashBoxes.enabled)
-                }else{
-                    temInfo.cashBox_id = userConfig.access.sections.cashBoxes.enabled[0]
-                    setBussines_id(userConfig.access.sections.cashBoxes.enabled[0])
-                    getCashBoxes(userConfig.access.sections.cashBoxes.enabled)
-                }
-            }else{
-                await getCashBoxes();
-            }
+            // overAll → sin filtro (todas las cajas); si no → solo las habilitadas ([] = ninguna)
+            await getCashBoxes(
+                userConfig.access.sections.cashBoxes.overAll
+                    ? undefined
+                    : (userConfig?.access?.sections?.cashBoxes?.enabled ?? [])
+            );
 
             // Filtro para busqueda de Centros de costo
             if(!userConfig.access.costCenters.overAll){
@@ -454,8 +448,9 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
 
     const getCashBoxes = async(allowedCashBoxes)=>{
         let res = await postInfo('/facturation/getCashBoxes',{
-            company_id:appInfo.company_id
+            company_id:appInfo.company_id,
             //user_id:userInfo.user_id
+            allowedCashBoxes:allowedCashBoxes
         })
         if(res[0]){
             let C = [];
@@ -466,6 +461,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                     allowedCashBoxes:allowedCashBoxes
                 })
             });
+            console.log('Cajas disponibles: ',res);
             if(C.length == 1){
                 handleCashBoxChange(C[0].value);
             }
@@ -1347,7 +1343,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                     {info.concept_id == undefined && (
                         <SearchinList action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
                     )}
-                    {info.cashBox_id == undefined && (
+                    {info.cashBox_id == undefined && cashBoxes.length != 0 && (
                         <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja'} list={cashBoxes} disabled={disabled}/>
                     )}
                     {e_invoice && numberingRanges.length > 1 && (

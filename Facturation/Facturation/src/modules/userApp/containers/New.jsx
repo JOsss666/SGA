@@ -184,13 +184,14 @@ export function New(){
                 console.log('Rspuesta range: ',res)
                 // res => { status: "OK", data: {...respuesta de Factus...} }
             }}>
-                Click aca
+                Ajustar actual rango
             </span>
             <span onClick={async()=>{
                 const res = await postInfo('/electronicFacturation/deletePendingBill', {
                     number: 'INT2353',        // el número de la factura (ZJ1... / INT...)
                     company_id: appInfo.company_id  // opcional; si no, se deduce del número
                 });
+                console.log('Resultado de eliminar factura: ',res);
                 // res => { status: "OK", data: {...respuesta de Factus...} }
             }}>Eliminar factura</span>
             <DescriptionSpan text={'Crea todo lo que necesites en un solo click'}/>

@@ -188,6 +188,7 @@ electronicFacturationController.setNumberingRangeCurrent = (req, res) => {
     req.on('end', async () => {
         try {
             const info = bodyData ? JSON.parse(bodyData) : {};
+            console.log('Información actual: ',info)
             const environment = await resolveEnvironmentFromInfo(info);
             const data = await factusService.setNumberingRangeCurrent({
                 company_id: getCompanyIdFromInfo(info),
@@ -198,6 +199,7 @@ electronicFacturationController.setNumberingRangeCurrent = (req, res) => {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ status: 'OK', data }));
         } catch (error) {
+            console.log('ERRR: ',error);
             console.error('Error al asignar el consecutivo del rango:', error.message);
             res.writeHead(400, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ status: 'Error', message: error.message }));
