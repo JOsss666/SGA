@@ -196,6 +196,18 @@ const withTransaction = async (callback) => {
     }
 };
 
+const queryDataBase = async (sentence, values = []) => {
+    try {
+        return await pool.query(sentence, values);
+    } catch (error) {
+        if (isTransientConnError(error)) {
+            console.warn('🔁 Conexión caída, reintentando query segura una vez...');
+            return pool.query(sentence, values);
+        }
+        throw error;
+    }
+};
+
 
 export async function sendMailF(infoR, mailsSend) { // FUNCION PARA ENVIAR CORREO ELECTRONICO
     console.log('Enviando Mail');
@@ -369,6 +381,6 @@ async function createTax(rows){
 export{
     encrypt,
     useDataBase,
-    withTransaction
+    withTransaction,
+    queryDataBase
 }
-

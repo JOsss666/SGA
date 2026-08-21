@@ -68,7 +68,7 @@ export function Settings(){
                         <Route path="Billing" element={<BillingSettings/>} />
                         <Route path="Security" element={<SecuritySettings/>} />
                         <Route path="Devices" element={<DevicesSettings/>} />
-                        <Route path="System" element={<SystemSettings/>} />
+                        <Route path="System/*" element={<SystemSettings/>} />
                     </Routes>
                 </div>
             </div>

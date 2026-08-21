@@ -151,18 +151,12 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 await getBussines();
             }
 
-            if(userConfig.access.sections.cashBoxes.overAll){
-                if(userConfig.access.bussines.enabled.length > 1){
-                    //getCashBoxes con filtro
-                    await getCashBoxes(userConfig.access.sections.cashBoxes.enabled)
-                }else{
-                    temInfo.cashBox_id = userConfig.access.sections.cashBoxes.enabled[0]
-                    setBussines_id(userConfig.access.sections.cashBoxes.enabled[0])
-                    getCashBoxes(userConfig.access.sections.cashBoxes.enabled)
-                }
-            }else{
-                await getCashBoxes();
-            }
+            // overAll → sin filtro (todas las cajas); si no → solo las habilitadas ([] = ninguna)
+            await getCashBoxes(
+                userConfig.access.sections.cashBoxes.overAll
+                    ? undefined
+                    : (userConfig?.access?.sections?.cashBoxes?.enabled ?? [])
+            );
 
             // Filtro para busqueda de Centros de costo
             if(!userConfig.access.costCenters.overAll){

@@ -190,11 +190,12 @@ export function FormNewPurchase({InfoParams,reloadFun}){
             }
 
             // Filtro para busqueda de cajas
-            if(!userConfig.access.sections.cashBoxes.overAll){
-                await getCashBoxes(userConfig.access.sections.cashBoxes.enabled)
-            }else{
-                await getCashBoxes();
-            }
+            // overAll → sin filtro (todas las cajas); si no → solo las habilitadas ([] = ninguna)
+            await getCashBoxes(
+                userConfig.access.sections.cashBoxes.overAll
+                    ? undefined
+                    : (userConfig?.access?.sections?.cashBoxes?.enabled ?? [])
+            );
 
             // Filtro para busqueda de Centros de costo
             if(!userConfig.access.costCenters.overAll){

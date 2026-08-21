@@ -73,19 +73,14 @@ inventoryController.createCatetory = (req,res)=>{
 
 
 
-inventoryController.getProducts = (req, res) => {
-    let data = '';
-    req.on('data', chunk => {
-        data += chunk;
-    });
-
-    req.on('end', async () => {
-        const info = JSON.parse(data);
+inventoryController.getProducts = async (req, res, next) => {
+    try {
+        const info = req.body || {};
         const values = [];
         let whereClauses = [];
 
         whereClauses.push(`ps.company_id = $1`);
-        values.push(info.company_id)
+        values.push(req.auth.companyId)
 
         if (info.category_id != null) {
             whereClauses.push(`c.id = $${values.length +1}`);
@@ -149,13 +144,10 @@ inventoryController.getProducts = (req, res) => {
         `;
 
         const consulta = await useDataBase(sentence, values, 1);
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(consulta));
-    });
-    req.on('error',(err)=>{
-        res.writeHead(500,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(err));
-    })
+        return res.status(200).json(consulta);
+    } catch (error) {
+        next(error);
+    }
 };
 
 
@@ -165,8 +157,8 @@ inventoryController.getComercialProducts = (req,res)=>{
         data += chunk;
     })
     req.on('end',async()=>{
-        console.log('Recibido')
         let info = JSON.parse(data);
+        console.log('Recibido: PPPPP : ',info)
         let values = [info.company_id];
         let whereClauses = [`ps.company_id = $1`];
 
@@ -178,6 +170,11 @@ inventoryController.getComercialProducts = (req,res)=>{
         if(info.id != undefined){
             values.push(info.id);
             whereClauses.push(`ps.id = ${values.length}`);
+        }
+
+        if(info.allowedItems != undefined){
+            values.push(info.allowedItems);
+            whereClauses.push(`ps.id = ANY($${values.length})`);
         }
 
         // Filter by control valid date in pricesListitems

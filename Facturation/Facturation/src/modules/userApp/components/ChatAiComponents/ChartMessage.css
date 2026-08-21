@@ -1,0 +1,266 @@
+@import '../../containers/UserApp.css';
+
+/* Paleta categórica de 8 ranuras, validada con el verificador de la guía de
+   visualización contra las superficies reales de SGA (#ffffff / #09090B).
+   El orden de las ranuras ES el mecanismo de seguridad para daltonismo: no
+   reordenar ni añadir un noveno color. */
+:root{
+    --chartSurface: #ffffff;
+    --chartSeries1: #2a78d6;
+    --chartSeries2: #eb6834;
+    --chartSeries3: #1baf7a;
+    --chartSeries4: #eda100;
+    --chartSeries5: #e87ba4;
+    --chartSeries6: #008300;
+    --chartSeries7: #4a3aa7;
+    --chartSeries8: #e34948;
+    --chartGrid: #e1e0d9;
+    --chartAxis: #c3c2b7;
+    --chartInk: #0b0b0b;
+    --chartInkMuted: #898781;
+    --chartHover: #0b0b0b0d;
+    --chartGood: #006300;
+    --chartBad: #d03b3b;
+}
+
+/* Los mismos ocho tonos re-escalonados para la superficie oscura: no es un
+   volteo automático, es la columna oscura de la paleta. */
+:root.dark{
+    --chartSurface: #09090B;
+    --chartSeries1: #3987e5;
+    --chartSeries2: #d95926;
+    --chartSeries3: #199e70;
+    --chartSeries4: #c98500;
+    --chartSeries5: #d55181;
+    --chartSeries6: #008300;
+    --chartSeries7: #9085e9;
+    --chartSeries8: #e66767;
+    --chartGrid: #2c2c2a;
+    --chartAxis: #383835;
+    --chartInk: #ffffff;
+    --chartInkMuted: #898781;
+    --chartHover: #ffffff14;
+    --chartGood: #0ca30c;
+    --chartBad: #d03b3b;
+}
+
+.ChartMessage{
+    margin: 1.6vh 0;
+    padding: 1.6vh;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 1.2vh;
+    background-color: var(--chartSurface);
+    display: flex;
+    flex-direction: column;
+}
+
+.ChartMessage figcaption{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5vh;
+    margin-bottom: 1.4vh;
+    color: var(--chartInk);
+    font-size: clamp(2.1px,2.1vh,21px);
+    font-weight: 500;
+}
+
+.ChartMessage figcaption button{
+    display: inline-flex;
+    align-items: center;
+    gap: .6vh;
+    flex: 0 0 auto;
+    padding: .5vh 1.2vh;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 3vh;
+    background-color: var(--cardHover);
+    color: var(--descriptionText);
+    font: inherit;
+    font-size: clamp(1.8px,1.8vh,18px);
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.ChartMessage figcaption button:hover{
+    background-color: var(--iconHover);
+    color: var(--mainText);
+}
+
+.ChartMessage .chartCanvas{
+    width: 100%;
+    /* Alto fijo para el trazado MÁS la banda del eje X, para que las etiquetas
+       no queden fuera y aparezca un scroll interno. */
+    height: 34vh;
+    min-height: 220px;
+}
+
+/* --- Leyenda --- */
+
+.ChartMessage .chartLegend{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.6vh;
+    margin-top: 1.2vh;
+    padding: 0;
+    list-style: none;
+}
+
+.ChartMessage .chartLegend li{
+    display: inline-flex;
+    align-items: center;
+    gap: .7vh;
+    color: var(--chartInkMuted);
+    font-size: clamp(1.8px,1.8vh,18px);
+}
+
+.ChartMessage .chartLegend i{
+    width: 1.2vh;
+    height: 1.2vh;
+    border-radius: .3vh;
+    flex: 0 0 auto;
+}
+
+/* --- Tooltip --- */
+
+.chartTooltip{
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+    padding: 1vh 1.3vh;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 1vh;
+    background-color: var(--menuAside);
+    box-shadow: 0 .4vh 1.6vh #00000026;
+    font-size: clamp(1.8px,1.8vh,18px);
+}
+
+.chartTooltip strong{
+    color: var(--mainText);
+    font-weight: 500;
+}
+
+.chartTooltip span{
+    display: flex;
+    align-items: center;
+    gap: .7vh;
+}
+
+.chartTooltip i{
+    width: 1.1vh;
+    height: 1.1vh;
+    border-radius: .3vh;
+    flex: 0 0 auto;
+}
+
+.chartTooltip em{
+    font-style: normal;
+    color: var(--descriptionText);
+}
+
+.chartTooltip b{
+    margin-left: auto;
+    color: var(--mainText);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Vista de datos --- */
+
+.ChartMessage .chartTableWrap{
+    width: 100%;
+    overflow-x: auto;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 1vh;
+}
+
+.ChartMessage .chartTableWrap table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: clamp(1.9px,1.9vh,19px);
+}
+
+.ChartMessage .chartTableWrap th,
+.ChartMessage .chartTableWrap td{
+    padding: .9vh 1.3vh;
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: solid .1vh var(--inputsBorder);
+    color: var(--descriptionText);
+}
+
+.ChartMessage .chartTableWrap td{
+    font-variant-numeric: tabular-nums;
+}
+
+.ChartMessage .chartTableWrap th{
+    background-color: var(--cardHover);
+    color: var(--mainText);
+    font-weight: 500;
+}
+
+.ChartMessage .chartTableWrap tbody tr:last-child td{
+    border-bottom: none;
+}
+
+/* --- Número destacado --- */
+
+.ChartMessage.statTile{
+    gap: .4vh;
+}
+
+.ChartMessage.statTile figcaption{
+    margin-bottom: .4vh;
+    color: var(--descriptionText);
+    font-weight: 400;
+    font-size: clamp(2px,2vh,20px);
+}
+
+.ChartMessage.statTile strong{
+    color: var(--chartInk);
+    font-size: clamp(3.8px,3.8vh,38px);
+    font-weight: 600;
+    line-height: 1.15;
+    /* Cifras proporcionales: tabular-nums deja sueltos los números grandes. */
+    font-variant-numeric: proportional-nums;
+}
+
+.ChartMessage.statTile .statDelta{
+    display: inline-flex;
+    align-items: center;
+    gap: .6vh;
+    margin-top: .6vh;
+    font-size: clamp(1.9px,1.9vh,19px);
+}
+
+.ChartMessage.statTile .statUp{ color: var(--chartGood); }
+.ChartMessage.statTile .statDown{ color: var(--chartBad); }
+
+.ChartMessage.statTile .statDelta em{
+    font-style: normal;
+    color: var(--chartInkMuted);
+}
+
+/* Marcador de posición mientras el JSON del bloque ```chart aún llega */
+.chartPending{
+    display: flex;
+    align-items: center;
+    gap: 1vh;
+    margin: 1.6vh 0;
+    padding: 2vh;
+    border: dashed .1vh var(--inputsBorder);
+    border-radius: 1.2vh;
+    color: var(--descriptionText);
+    font-size: clamp(1.9px,1.9vh,19px);
+}
+
+.chartPending i{
+    animation: chartPendingSpin 1s linear infinite;
+}
+
+@keyframes chartPendingSpin{
+    to{ transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .chartPending i{ animation: none; }
+}

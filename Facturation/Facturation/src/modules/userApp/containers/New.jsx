@@ -35,12 +35,14 @@ import { FormNewENote } from "./forms/FormNewENote";
 import { NoAccess } from "./NoAccess";
 import { SellInvoiceDesign } from "./Alerts/SellInvoiceDesing";
 import { FormInvoice } from "./forms/FormInvoce";
+import { postInfo } from "../../../utils/functions";
 
 export function New(){
     const {userConfig,appInfo,userInfo, appConfig} = useAppInfo();
     const {popInAlert,popOutAlert} = useAlert();
     const [disabled,setDisabled] = useState(false);
     const [messgeDisabled,setMessageDisabled] = useState('')
+    const [numberingRangesStatus, setNumberingRangesStatus] = useState('idle');
 
     useEffect(() => {
         if (!appConfig?.access) return;
@@ -79,8 +81,8 @@ export function New(){
         {text:'Compra',children:<FormNewPurchase/>,icon:<i className="fa-solid fa-cart-shopping"/>},
 
         {text:'Nota débito o crédito',children:<FormNewENote/>,icon:<i className="fa-solid fa-note-sticky"/>},
-        
-        ...(userConfig?.access?.sections?.users?.overAll ? 
+
+        ...(userConfig?.access?.sections?.users?.overAll ?
             [{ text: 'Crear usuario', children: <FormNewUser />, icon: <i className="fa-solid fa-person-circle-plus" /> }] : []),
         
         { text: 'Crear tercero', children: <FormNewThirdParties quickCreation={!userConfig?.access?.sections?.thirdparties?.can_create} />, icon: <i className="fa-regular fa-user" /> },

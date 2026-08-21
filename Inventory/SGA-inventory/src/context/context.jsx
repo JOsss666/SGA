@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { postInfo } from '../utils/functions';
+import { AI_DESTINATIONS, sendPrompt as sendAiRequest } from '../services/aiPromptService';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 const AppInfo = createContext();
@@ -87,11 +88,12 @@ export function AiAssistanProvider({children}){
                     user_id:userInfo.user_id,
                     user_name:userInfo.user_name
                 })
-                let res = await postInfo('/processAiRequest',{
-                    text:text,
-                    attached,
-                    userInfo
-                })
+                let res = (await sendAiRequest({
+                    destination: AI_DESTINATIONS.CONTROLLER,
+                    target: '/processAiRequest',
+                    content: { text, attached, userInfo },
+                    companyId: userInfo.company_id
+                })).data
                 if(res.AI_response[0]){
                     addMessage({
                         children:JSON.parse(res.AI_response[1]),
@@ -105,11 +107,12 @@ export function AiAssistanProvider({children}){
                         })
                 }
         }else{
-            let res = await postInfo('/processAiRequest',{
-                text:text,
-                attached,
-                userInfo
-            })
+            let res = (await sendAiRequest({
+                destination: AI_DESTINATIONS.CONTROLLER,
+                target: '/processAiRequest',
+                content: { text, attached, userInfo },
+                companyId: userInfo.company_id
+            })).data
             console.log(res.AI_response)
             if(res.AI_response[0]){
                 return([true,JSON.parse(res.AI_response[1])])
@@ -333,4 +336,3 @@ export function AppInfoProvider({children}){
         </AppInfo.Provider>
     )
 }
-

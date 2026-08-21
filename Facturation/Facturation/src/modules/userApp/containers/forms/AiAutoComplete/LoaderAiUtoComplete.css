@@ -1,8 +1,7 @@
 .LoaderAiUtoComplete{
     position: relative;
-    width: 93dvw;
-    height: 100%;
-    min-height: 65vh;
+    width: 60dvw;
+    height: fit-content;
     overflow: hidden;
     background-color: var(--bg);
 }
@@ -12,15 +11,13 @@
 }
 
 .LoaderAiUtoComplete .loaderContent{
-    position: absolute;
-    inset: 0;
+    margin: auto;
     display: flex;
     flex-direction: column;
-    margin-top: 10vh;
 }
 
 .LoaderAiUtoComplete .MainTitleAi{
-    margin: 25% auto 1vh;
+    margin: 2vh auto;
     font-weight: 400;
     letter-spacing: -.1vh;
 }

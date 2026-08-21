@@ -25,9 +25,16 @@ export async function postInfo(route,informacion){
     console.log('Funcion post');
     return new Promise((resolve, reject) => {
         console.log(urlSer + route);
+        const companyId = informacion && typeof informacion === 'object'
+            ? informacion.company_id
+            : undefined;
         fetch(urlSer + route ,{
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(companyId != null ? {'X-SGA-Company-Id': String(companyId)} : {})
+            },
             body: JSON.stringify(informacion)
         })
         .then(response =>{
@@ -44,16 +51,28 @@ export async function postInfo(route,informacion){
     })
 }
 
-export async function getInfo(route) {
+export async function getInfo(route, { companyId, params = {} } = {}) {
     console.log('Funcion get');
     return new Promise((resolve, reject) => {
-        console.log(urlSer + route);
+        const query = new URLSearchParams(params);
+
+        // Compatibilidad con el controller actual, que obtiene company_id
+        // desde req.query. El header es el contexto seguro usado por
+        // requireCompanyAccess cuando la ruta tiene middleware de sesión.
+        if (companyId != null && !query.has('company_id')) {
+            query.set('company_id', String(companyId));
+        }
+
+        const requestUrl = `${urlSer}${route}${query.size ? `?${query.toString()}` : ''}`;
+        console.log(requestUrl);
         
-        fetch(urlSer + route, {
+        fetch(requestUrl, {
             method: 'GET',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                ...(companyId != null ? {'X-SGA-Company-Id': String(companyId)} : {})
             }
         })
         .then(response => {
@@ -710,6 +729,10 @@ export const uploadFiles = async (files,info) => {
     try {
         const respuesta = await fetch(urlSer + "/uploadFiles", {
             method: "POST",
+            credentials: 'include',
+            headers: info?.company_id != null
+                ? {'X-SGA-Company-Id': String(info.company_id)}
+                : {},
             body: formData,
         });
 
@@ -778,9 +801,26 @@ export async function newElectronicNote(info){
     return(res)
 }
 
-export async function getNumberingRangesElectronicInvoices() {
-    let res = await getInfo('/electronicFacturation/getNumberingRanges');
-    console.log(res);
+export async function getNumberingRangesElectronicInvoices(companyId, environment) {
+    if (companyId == null) {
+        throw new Error('No se encontró la compañía activa para consultar los rangos de numeración.');
+    }
+
+    const response = await getInfo(
+        '/electronicFacturation/getNumberingRanges',
+        {
+            companyId,
+            params: environment ? { environment } : {}
+        }
+    );
+
+    // El controller actual responde [hasRanges, ranges]. Se conserva también
+    // compatibilidad con la futura respuesta { success, data }.
+    if (Array.isArray(response)) {
+        return Array.isArray(response[1]) ? response[1] : [];
+    }
+
+    return Array.isArray(response?.data) ? response.data : [];
 }
 
 export async function showActualToken() {

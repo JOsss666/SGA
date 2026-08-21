@@ -40,3 +40,23 @@
     font-weight: 500;
     color: var(--mainText);
 }
+/* Extracción del documento en curso */
+.AttachedCard .loadingAttached{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bgOpacity);
+    border-radius: inherit;
+}
+
+.AttachedCard .loadingAttached i{
+    font-size: clamp(2.4px,2.4vh,24px);
+    color: var(--chatAccent);
+    animation: attachedSpin 1s linear infinite;
+}
+
+@keyframes attachedSpin{
+    to{ transform: rotate(360deg); }
+}
