@@ -462,8 +462,12 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                 })
             });
             console.log('Cajas disponibles: ',res);
+            // Si solo hay una caja disponible, se auto-selecciona y se fija
+            // info.cashBox_id para ocultar el input y reducir pasos al usuario.
             if(C.length == 1){
-                handleCashBoxChange(C[0].value);
+                //handleCashBoxChange(C[0].value);
+                //setInfo(prev => ({...prev, cashBox_id: C[0].value.id}));
+                console.warn('Temporal disabled autoSelection of cashBox')
             }
             setCashBoxes(C);
         }
@@ -596,8 +600,14 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                     text:`SGA#${element.id} ${element.name}`,
                     value:element
                 })
-                setConcepts(C)
             });
+            // Si solo hay un concepto disponible, se auto-selecciona y se fija
+            // info.concept_id para ocultar el input y reducir pasos al usuario.
+            if(C.length == 1){
+                handleConceptChange(C[0].value);
+                setInfo(prev => ({...prev, concept_id: C[0].value.id}));
+            }
+            setConcepts(C)
         }else{
             setConcepts([])
         }
