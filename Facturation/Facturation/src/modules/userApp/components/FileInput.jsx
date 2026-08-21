@@ -82,7 +82,7 @@ export function FileInput({
                     <ul className="gridUrl">
                         {urls.map((element,index)=>(
                             <li key={index}>
-                                <a href={element} target="NBLANK">{element.url}</a>
+                                <a href={element.url} target="NBLANK">{element.url}</a>
                             </li>
                         ))}
                     </ul>
