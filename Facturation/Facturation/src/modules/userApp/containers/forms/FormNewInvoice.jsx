@@ -461,7 +461,6 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                     allowedCashBoxes:allowedCashBoxes
                 })
             });
-            console.log('Cajas disponibles: ',res);
             // Si solo hay una caja disponible, se auto-selecciona y se fija
             // info.cashBox_id para ocultar el input y reducir pasos al usuario.
             if(C.length == 1){
@@ -495,7 +494,6 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
     const getInvoiceNumberingRanges = async () => {
         const policy = userConfig?.services?.sga?.electronicFacturation?.numberingRanges
             ?? findNumberingPolicy(userConfig);
-        console.log('Numbering policy resuelta:', policy);
         const enabled = Array.isArray(policy?.enabled) ? policy.enabled.map((v)=>`${v}`) : [];
 
         let ranges = [];
@@ -712,7 +710,6 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
         const allowedCellars = Array.isArray(cellars) && cellars.length > 1 ? cellars : undefined;
         const allowedItems = Array.isArray(products) && products.length >= 1 ? products : undefined;
         
-        console.log('XXXX -- Ejecutando GET Productos...')
         let res = await postInfo('/inventory/getComercialProducts',{
             company_id:appInfo.company_id,
             allowedStores,
@@ -720,7 +717,6 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             allowedItems,
             type:'service'
         })
-        console.log('XXX -- Servicios disponibles: ',res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -962,7 +958,6 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
         setLoading(true)
         const sellInvoicePayload = buildSellInvoicePayload();
         let res = await postInfo('/facturation/newSellInvoice',sellInvoicePayload);
-        console.log('Creation of Sell Invoice: ',res)
         if(res.status !== "OK" || !Number.isFinite(Number(res.id))){
             addNotification({
                 type:'error',
@@ -979,7 +974,6 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                 title:`Factura de venta #${res.ownSerial} creada correctamente`,
                 description:`La factura de venta #${res.ownSerial} fue creada correctamente`
             })
-            console.log(res);
             FormInfo["ownSerial"] = res.ownSerial
             sellInvoicePayload["doc_id"] = res.id
             sellInvoicePayload['instance_id'] = instance_id[0] ?? undefined ;
@@ -1001,7 +995,6 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                     return;
                 }
                 e_info = await handleCreationOfEinvoice(res.id);
-                console.log("Electronic Factuation validation: ",e_info)
                 if(e_info.id == undefined){
                     const errorDetails = formatElectronicInvoiceErrors(e_info.errors);
                     alert([
@@ -1128,7 +1121,6 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             numbering_range_id:numberingRange_id,
             doc_id
         });
-        console.log('RES Factus: --> ',res)
         if(res.status == 'Created'){
             addNotification({
                 type:'aproved',
