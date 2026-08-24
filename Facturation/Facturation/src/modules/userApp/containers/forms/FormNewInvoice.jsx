@@ -213,7 +213,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             }
 
             // Rangos de numeración de factura electrónica permitidos para el rol
-            await getInvoiceNumberingRanges();
+            getInvoiceNumberingRanges();
 
         }
 
@@ -492,6 +492,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
 
     // Carga los rangos de numeración de factura permitidos según el rol.
     const getInvoiceNumberingRanges = async () => {
+        setDisabled(true)
         const policy = userConfig?.services?.sga?.electronicFacturation?.numberingRanges
             ?? findNumberingPolicy(userConfig);
         const enabled = Array.isArray(policy?.enabled) ? policy.enabled.map((v)=>`${v}`) : [];
@@ -531,6 +532,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
         if(allowed.length === 1){
             setNumberingRange_id(allowed[0].id ?? allowed[0].provider_range_id);
         }
+        setDisabled(false);
     }
 
     const getStores = async(allowedStores)=>{
