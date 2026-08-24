@@ -32,20 +32,19 @@ sellInvoiceService.register = async (info) => {
 
         console.log('Fase 2 Control Cartera: ', portfolioResult)
 
-        
+        /*
         // Temportal accounting disabled
         const accountResult = {
             status: "skipped",
             description: "El documento no trae detalles contables."
         }
+        */
         
 
-        /*
         const accountResult = await utilsController.accountDocument(
             documentInfo,
             { client }
         );
-        */
 
         
 
