@@ -316,6 +316,8 @@ router.post('/facturation/newCashRecipt',facturationController.newCashRecipt);
 
 router.post('/facturation/newSellInvoice',facturationController.newSellInvoice);
 
+router.post('/facturation/deleteSellInvoice',facturationController.deleteInvoice);
+
 router.post('/facturation/newPurchase',facturationController.newPurchase);
 
 router.post('/facturation/newNote',facturationController.newNote);

@@ -1271,6 +1271,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
 
     useEffect(()=>{
         if(thirdParty_id != undefined){
+            console.log(thirdPartyInfo);
             getDocuments();
             getInstances();
         }
@@ -1321,7 +1322,6 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             {!loading && (
                 <form action="" disabled={disabledToSubmit? true:disabled} onSubmit={(e)=>{
                     e.preventDefault();
-                    //createSellInvoice();
                     validateDocument();
                 }}>
                     {info.store_id == undefined && (

@@ -41,6 +41,23 @@ export function ElectronicFacturationSettingsControl(){
         setloading(false);
     }
 
+    const setCurrentInRange = async(range_id,current)=>{
+        const res = await postInfo('/electronicFacturation/setNumberingRangeCurrent', {
+            numbering_range_id: range_id,
+            current: current,            
+            company_id: appInfo.company_id
+        });
+        console.log('Rspuesta range: ',res)
+    }
+
+    const deleteElectronicInvoice = async(number)=>{
+        const res = await postInfo('/electronicFacturation/deletePendingBill', {
+            number: number,        
+            company_id: appInfo.company_id
+        });
+        console.log('Resultado de eliminar factura: ',res);
+    }
+
     useEffect(()=>{
         getNumberingRanges();
     },[])
