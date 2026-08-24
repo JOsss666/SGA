@@ -218,7 +218,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
 
         if(temInfo != {}){
-            setInfo(temInfo);
+            setInfo(prev => ({ ...prev, ...temInfo }));
         }
         setLoading(false);
         setDisabled(false);
@@ -464,9 +464,8 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             // Si solo hay una caja disponible, se auto-selecciona y se fija
             // info.cashBox_id para ocultar el input y reducir pasos al usuario.
             if(C.length == 1){
-                //handleCashBoxChange(C[0].value);
-                //setInfo(prev => ({...prev, cashBox_id: C[0].value.id}));
-                console.warn('Temporal disabled autoSelection of cashBox')
+                handleCashBoxChange(C[0].value);
+                setInfo(prev => ({...prev, cashBox_id: C[0].value.id}));
             }
             setCashBoxes(C);
         }

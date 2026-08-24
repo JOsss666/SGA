@@ -303,7 +303,10 @@ export function AppInfoProvider({children}){
         ...(appConfig.access != undefined && appConfig.access.services.e_facturation.use ? [{text:'Documentos electronicos',path:'edocuments',icon:<img src='https://cdnmain.sga360.co/static/Gemini_Generated_Image_hqrv0mhqrv0mhqrv-2_lne97l.webp'/>,action:handleNavigate}]:[]),
         {text:'Acciones rapidas',path:'quickActions',icon:<img src='https://cdnmain.sga360.co/static/unnamed-2_rg2vg1.webp'/>,action:handleNavigate},
         {text:'Terceros',path:'thirdparties',icon:<img src='https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.webp'/>,action:handleNavigate},
-        ...(userConfig.access != undefined && userConfig.access.sections.cashBoxes.overAll ? [{text:'Cajas POS',path:'cashBoxes',icon:<img src='https://cdnmain.sga360.co/static/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.webp'/>,action:handleNavigate}]:[]),
+        ...(userConfig.access != undefined && (
+            userConfig.access.sections?.cashBoxes?.overAll === true
+            || (userConfig.access.sections?.cashBoxes?.enabled?.length ?? 0) > 0
+        ) ? [{text:'Cajas POS',path:'cashBoxes',icon:<img src='https://cdnmain.sga360.co/static/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.webp'/>,action:handleNavigate}]:[]),
         ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Usuarios',path:'users',icon:<img src='https://cdnmain.sga360.co/static/CuentaLogo1_aqqot5.webp'/>,action:handleNavigate}]:[]),
         {text:'Informes',path:'reports',icon:<img src='https://cdnmain.sga360.co/static/InformesLogo1_iisxav.webp'/>,action:handleNavigate},
         {text:'Estadisticas',path:'analytics',icon:<img src='https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.webp'/>,action:handleNavigate},
@@ -320,7 +323,10 @@ export function AppInfoProvider({children}){
 
     const routesApp = [
         {text:'Inicio',path:'',icon:<img src='https://cdnmain.sga360.co/static/LogoInicio1_nsuzaj.webp' />,action:handleNavigate},
-        ...(userConfig.access != undefined && userConfig.access.sections.cashBoxes.overAll ? [{text:'Cajas POS',path:'cashBoxes',icon:<img src='https://cdnmain.sga360.co/static/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.webp'/>,action:handleNavigate}]:[]),
+        ...(userConfig.access != undefined && (
+            userConfig.access.sections?.cashBoxes?.overAll === true
+            || (userConfig.access.sections?.cashBoxes?.enabled?.length ?? 0) > 0
+        ) ? [{text:'Cajas POS',path:'cashBoxes',icon:<img src='https://cdnmain.sga360.co/static/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.webp'/>,action:handleNavigate}]:[]),
         ...(userConfig.access != undefined && userConfig.access.sections.users.overAll ? [{text:'Usuarios',path:'users',icon:<img src='https://cdnmain.sga360.co/static/CuentaLogo1_aqqot5.webp'/>,action:handleNavigate}]:[]),
         ...(appConfig.access != undefined && appConfig.access.services.e_facturation.use ? [{text:'Documentos electronicos',path:'edocuments',icon:<img src='https://cdnmain.sga360.co/static/Gemini_Generated_Image_hqrv0mhqrv0mhqrv-2_lne97l.webp'/>,action:handleNavigate}]:[]),
         {text:'Estadisticas',path:'analytics',icon:<img src='https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.webp'/>,action:handleNavigate},
