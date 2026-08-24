@@ -1,0 +1,202 @@
+@import '../../containers/UserApp.css';
+
+.MarkdownMessage{
+    color: var(--descriptionText);
+    font-size: clamp(2.2px,2.2vh,22px);
+    line-height: 1.6;
+    word-break: break-word;
+}
+
+.MarkdownMessage > *:first-child{
+    margin-top: 0;
+}
+
+.MarkdownMessage > *:last-child{
+    margin-bottom: 0;
+}
+
+.MarkdownMessage p{
+    margin: .8vh 0;
+    white-space: pre-wrap;
+}
+
+.MarkdownMessage h1,
+.MarkdownMessage h2,
+.MarkdownMessage h3,
+.MarkdownMessage h4{
+    color: var(--sectionTitle);
+    font-weight: 500;
+    margin: 2vh 0 .8vh;
+    line-height: 1.3;
+}
+
+.MarkdownMessage h1{ font-size: clamp(2.9px,2.9vh,29px); }
+.MarkdownMessage h2{ font-size: clamp(2.6px,2.6vh,26px); }
+.MarkdownMessage h3{ font-size: clamp(2.4px,2.4vh,24px); }
+.MarkdownMessage h4{ font-size: clamp(2.2px,2.2vh,22px); }
+
+.MarkdownMessage strong{
+    color: var(--mainText);
+    font-weight: 600;
+}
+
+.MarkdownMessage ul,
+.MarkdownMessage ol{
+    margin: .8vh 0;
+    padding-left: 3vh;
+    display: flex;
+    flex-direction: column;
+    gap: .4vh;
+}
+
+.MarkdownMessage li{
+    list-style: inherit;
+}
+
+.MarkdownMessage ul{ list-style: disc; }
+.MarkdownMessage ol{ list-style: decimal; }
+
+.MarkdownMessage a{
+    color: var(--chatAccent);
+    text-decoration: underline;
+    text-underline-offset: .3vh;
+}
+
+.MarkdownMessage blockquote{
+    margin: 1vh 0;
+    padding: .6vh 0 .6vh 2vh;
+    border-left: solid .3vh var(--chatAccent);
+    color: var(--descriptionText);
+    background-color: var(--cardHover);
+    border-radius: 0 1vh 1vh 0;
+}
+
+.MarkdownMessage hr{
+    border: none;
+    border-top: solid .1vh var(--inputsBorder);
+    margin: 2vh 0;
+}
+
+/* --- Tablas --- */
+
+.MarkdownMessage .mdTableWrap{
+    width: 100%;
+    overflow-x: auto;
+    margin: 1.2vh 0;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 1vh;
+}
+
+.MarkdownMessage table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: clamp(2px,2vh,20px);
+}
+
+.MarkdownMessage th,
+.MarkdownMessage td{
+    padding: 1vh 1.4vh;
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: solid .1vh var(--inputsBorder);
+}
+
+.MarkdownMessage th{
+    background-color: var(--cardHover);
+    color: var(--mainText);
+    font-weight: 500;
+}
+
+.MarkdownMessage tbody tr:last-child td{
+    border-bottom: none;
+}
+
+.MarkdownMessage tbody tr:hover{
+    background-color: var(--lightSelected);
+}
+
+/* --- Código --- */
+
+.MarkdownMessage .mdInlineCode{
+    background-color: var(--cardHover);
+    border: solid .1vh var(--inputsBorder);
+    border-radius: .6vh;
+    padding: .1vh .6vh;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .92em;
+    color: var(--mainText);
+}
+
+.MarkdownMessage .mdCodeBlock{
+    margin: 1.2vh 0;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 1vh;
+    overflow: hidden;
+    background-color: var(--cardHover);
+}
+
+.MarkdownMessage .mdCodeHead{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .6vh 1.2vh;
+    background-color: var(--menuAside);
+    border-bottom: solid .1vh var(--inputsBorder);
+    font-size: clamp(1.8px,1.8vh,18px);
+    color: var(--descriptionText);
+}
+
+.MarkdownMessage .mdCodeHead button{
+    display: flex;
+    align-items: center;
+    gap: .6vh;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--descriptionText);
+    font: inherit;
+    padding: .3vh .8vh;
+    border-radius: .6vh;
+}
+
+.MarkdownMessage .mdCodeHead button:hover{
+    background-color: var(--iconHover);
+    color: var(--mainText);
+}
+
+.MarkdownMessage .mdCodeBlock pre{
+    margin: 0;
+    padding: 1.2vh;
+    overflow-x: auto;
+}
+
+.MarkdownMessage .mdCodeBlock code{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: clamp(1.9px,1.9vh,19px);
+    color: var(--mainText);
+    white-space: pre;
+}
+
+/* --- Cursor de streaming --- */
+
+.MarkdownMessage .mdCaret{
+    display: inline-block;
+    width: .9vh;
+    height: 1.9vh;
+    margin-left: .3vh;
+    vertical-align: text-bottom;
+    background-color: var(--chatAccent);
+    border-radius: .2vh;
+    animation: mdCaretBlink 1s steps(2, start) infinite;
+}
+
+@keyframes mdCaretBlink{
+    0%, 100%{ opacity: 1; }
+    50%{ opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .MarkdownMessage .mdCaret{
+        animation: none;
+    }
+}

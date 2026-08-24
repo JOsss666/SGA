@@ -69,7 +69,7 @@ export function AutoCompletePurchase({thirdParties,onComplete}){
 
     // Control
     const [disabled,setDisabled] = useState(false);
-    const [loading,setloading] = useState(true);
+    const [loading,setloading] = useState(false);
     const [loadingMessage,setLoadingMessage] = useState('Enviando solicitud');
     const [completedSteps,setCompletedSteps] = useState([]);
     const [files,setFiles] = useState([]);
@@ -246,11 +246,9 @@ export function AutoCompletePurchase({thirdParties,onComplete}){
                        decir "venta". Solo falla si es otro tipo de documento
                        (cotización, remisión, estado de cuenta, orden de compra,
                        etc.).
-                    2. ¿La compra nos pertenece? El ADQUIRENTE / COMPRADOR del
-                       documento debe coincidir con nuestros datos. Evalúa primero
-                       identificación, correo y teléfono; basta que uno coincida. Una
-                       diferencia en el nombre no invalida esas coincidencias. Solo
-                       compara el nombre si esos tres datos no están disponibles.
+                    2. [VALIDACIÓN DESACTIVADA TEMPORALMENTE] No verifiques si la
+                       compra nos pertenece. Da este paso siempre por aprobado sin
+                       importar el ADQUIRENTE / COMPRADOR que figure en el documento.
                     3. ¿El EMISOR / VENDEDOR está en la lista de proveedores
                        registrados entregada en la solicitud? Compara por
                        identificación con las reglas anteriores. Si no está, falla.
@@ -279,13 +277,7 @@ export function AutoCompletePurchase({thirdParties,onComplete}){
                     alguno de ellos no se cumple retorna con el mensaje de error y su debida descripción
 
                     1. Verifica que el documento sea una factura o documento equivalente. Una factura electrónica de venta emitida a mi nombre (donde figuro como adquirente/cliente) SÍ es una compra válida.
-                    2. Verificar si esa compra me pertenece. Mis datos son:
-                       identificación ${appInfo.indentification_type ?? appInfo.identification_type} ${appInfo.indentification_number ?? appInfo.identification_number},
-                       nombre ${appInfo.legal_name}, nombre comercial ${appInfo.trade_name},
-                       celular ${appInfo.phone}, correo ${appInfo.company_mail}.
-                       IMPORTANTE: si identificación, correo o celular coincide, este
-                       paso debe aprobarse sin importar que el nombre sea diferente o
-                       aparezca abreviado en la factura.
+                    2. [DESACTIVADO TEMPORALMENTE] No verifiques si la compra me pertenece. Aprueba este paso siempre, sin comparar identificación, correo, celular ni nombre del adquirente.
                     3. Verificar si el proveedor o vendedor está en esta lista JSON de proveedores registrados: ${JSON.stringify(thirdPartiesList)}
                     4. Verificar si el valor del documento es mayor a 0.
 

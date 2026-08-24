@@ -4,6 +4,7 @@ import routes from './routes/index.routes.js'
 import http from 'http';
 import { setupRealtime } from './realTimeConnection.js';
 import electronicFacturationController from './controllers/electronicFacturationController.js';
+import { allowedOrigins } from './config/corsConfig.js';
 
 const app = express();
 const asignedPort  = process.env.PORT || 3000;
@@ -12,22 +13,6 @@ const server = http.createServer(app);
 // Render y los despliegues equivalentes operan detrás de un proxy.
 // Esto permite que req.ip sea confiable para auditoría y rate limiting.
 app.set('trust proxy', 1);
-
-export const allowedOrigins = [
-        "http://localhost:5173", // Developer
-        "http://localhost:5174", // Developer
-        "http://localhost:5175", // Developer
-        "http://localhost:3000", // localHost
-        "https://sga-1-wv7x.onrender.com", // Tesoreria
-        "https://facturation.sga360.co", // Facturación
-        "https://www.inventory.sga360.co", // Inventario
-        "https://inventory.sga360.co", // Inventario
-        "https://www.management.sga360.co", // Administración
-        "https://management.sga360.co", // Administración
-        "https://www.process.sga360.co", // Procesos
-        "https://process.sga360.co", // Procesos
-        "https://treasury.sga360.co", // Tesorería
-    ]
 
 app.use(express.urlencoded({ extended: true }))
 

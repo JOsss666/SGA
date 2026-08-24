@@ -223,10 +223,47 @@ let userConfig = {
                     "instance":"full",
                     "expires":"never"
                 },
+                "electronicFacturation":{
+                    "enabled":true,
+                    "status":'active',
+                    "config":{
+                        sectionAccess:false,
+                        overAll:false,
+                        adjustCurrent:false,
+                        viewNumberingRanges:false,
+                        delteInvoice:false,
+                    },
+                    "numberingRanges":{
+                        "overAll":false,
+                        "enabled":[]
+                    }
+                },
                 "AI":{
                     "use":true,
                     "instance":"full",
-                    "expires":"never"
+                    "expires":"never",
+                    "thirdParties":{
+                        "overAll":false,
+                        "read":false,
+                        "create":false
+                    },
+                    "documents":{
+                        "sellinvoice":{
+                            "overAll":false,
+                            "read":false,
+                            "create":false
+                        },
+                        "purchase":{
+                            "overAll":false,
+                            "read":false,
+                            "create":false
+                        },
+                        "clientorder":{
+                            "overAll":false,
+                            "read":false,
+                            "create":false
+                        },
+                    }
                 },
                 "mail":{
                     "use":true,

@@ -2,6 +2,7 @@ import { useDataBase } from '../app.js';
 import dotenv from 'dotenv';
 import factusService from '../services/factusService.js';
 import electronicProviderCredentialsService from '../services/electronicProviderCredentialsService.js';
+import sessionRepository from '../repositories/sessionRepository.js';
 
 dotenv.config();
 
@@ -35,10 +36,58 @@ const resolveEnvironmentFromInfo = async (info = {}) => (
     ?? DEFAULT_FACTUS_ENVIRONMENT
 );
 
+const parseRoleConfig = (roleConfig) => {
+    if (!roleConfig) return null;
+    try {
+        return typeof roleConfig === 'string' ? JSON.parse(roleConfig) : roleConfig;
+    } catch {
+        return null;
+    }
+};
+
+// Busca electronicFacturation.numberingRanges sin depender de una ruta fija.
+const findNumberingPolicy = (obj) => {
+    if (!obj || typeof obj !== 'object') return undefined;
+    if (obj.electronicFacturation?.numberingRanges) return obj.electronicFacturation.numberingRanges;
+    for (const key of Object.keys(obj)) {
+        const found = findNumberingPolicy(obj[key]);
+        if (found) return found;
+    }
+    return undefined;
+};
+
+// Devuelve la lista blanca de rangos de numeración de facturas autorizados para
+// el rol del usuario. `null` = sin restricción (rol con overAll o sin config).
+const resolveInvoiceNumberingPolicy = async (info = {}) => {
+    const userId = parseInt(info.user_id);
+    const companyId = parseInt(getCompanyIdFromInfo(info));
+    if (!Number.isInteger(userId) || userId <= 0) return { allowedRangeIds: null };
+    if (!Number.isInteger(companyId) || companyId <= 0) return { allowedRangeIds: null };
+
+    const membership = await sessionRepository.findMembership(userId, companyId);
+    const config = parseRoleConfig(membership?.role_config);
+    const numberingRanges = config?.services?.sga?.electronicFacturation?.numberingRanges
+        ?? findNumberingPolicy(config);
+    const enabled = Array.isArray(numberingRanges?.enabled) ? numberingRanges.enabled : [];
+
+    // La lista `enabled` es autoritativa: si tiene elementos, solo esos rangos aplican.
+    if (enabled.length > 0) {
+        return { allowedRangeIds: enabled };
+    }
+
+    // Sin lista blanca: overAll o ausencia de config => sin restricción.
+    if (!numberingRanges || numberingRanges.overAll === true) {
+        return { allowedRangeIds: null };
+    }
+
+    // overAll:false y enabled vacío => ningún rango autorizado.
+    return { allowedRangeIds: [] };
+};
+
 const resolveElectronicDocumentContext = async (info = {}) => {
-    const billNumber = `${info.bill_numer ?? ''}`.trim();
+    const billNumber = `${info.bill_numer ?? info.bill_number ?? info.number ?? ''}`.trim();
     if (!billNumber) {
-        throw new Error('bill_numer es requerido.');
+        throw new Error('El número de la factura es requerido.');
     }
 
     let companyId = parseInt(getCompanyIdFromInfo(info));
@@ -112,6 +161,7 @@ electronicFacturationController.getNumberingRanges = async (req, res) => {
             ...req.query,
             ...(req.body ?? {})
         };
+        console.log('Params numbering ranges: ',info);
         const environment = await resolveEnvironmentFromInfo(info);
         const ranges = await factusService.getNumberingRanges({
             company_id: getCompanyIdFromInfo(info),
@@ -126,6 +176,72 @@ electronicFacturationController.getNumberingRanges = async (req, res) => {
             res.end(JSON.stringify({ status: 'Error', message: error.message }));
         }
     }   
+};
+
+// Asigna manualmente el consecutivo actual de un rango de numeración en Factus.
+// Body esperado: { numbering_range_id, current, company_id?, environment? }
+electronicFacturationController.setNumberingRangeCurrent = (req, res) => {
+    let bodyData = '';
+    req.on('data', chunk => {
+        bodyData += chunk;
+    });
+    req.on('end', async () => {
+        try {
+            const info = bodyData ? JSON.parse(bodyData) : {};
+            console.log('Información actual: ',info)
+            const environment = await resolveEnvironmentFromInfo(info);
+            const data = await factusService.setNumberingRangeCurrent({
+                company_id: getCompanyIdFromInfo(info),
+                environment,
+                numbering_range_id: info.numbering_range_id ?? info.id,
+                current: info.current
+            });
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'OK', data }));
+        } catch (error) {
+            console.log('ERRR: ',error);
+            console.error('Error al asignar el consecutivo del rango:', error.message);
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'Error', message: error.message }));
+        }
+    });
+    req.on('error', (err) => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'Error', message: err.message }));
+    });
+};
+
+// Elimina una factura PENDIENTE de la DIAN en Factus. Recibe el número de la
+// factura (ZJ1..., INT..., etc.); el reference_code se resuelve consultando
+// Factus (no la base local). También acepta reference directo.
+// Body esperado: { number | bill_numer (o reference | reference_code), company_id, environment? }
+electronicFacturationController.deletePendingBill = (req, res) => {
+    let bodyData = '';
+    req.on('data', chunk => {
+        bodyData += chunk;
+    });
+    req.on('end', async () => {
+        try {
+            const info = bodyData ? JSON.parse(bodyData) : {};
+            const environment = await resolveEnvironmentFromInfo(info);
+            const data = await factusService.deletePendingBill({
+                company_id: getCompanyIdFromInfo(info),
+                environment,
+                number: info.number ?? info.bill_numer,
+                reference: info.reference ?? info.reference_code
+            });
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'OK', data }));
+        } catch (error) {
+            console.error('Error al eliminar la factura pendiente:', error.message);
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'Error', message: error.message }));
+        }
+    });
+    req.on('error', (err) => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'Error', message: err.message }));
+    });
 };
 
 electronicFacturationController.getTaxes = async (req, res) => {
@@ -216,12 +332,15 @@ electronicFacturationController.newInvoice = (req,res)=>{
         const companyId = getCompanyIdFromInfo(info);
         const environment = await resolveEnvironmentFromInfo(info);
         console.log('Ambiente Factus para factura:', environment);
+        const numberingPolicy = await resolveInvoiceNumberingPolicy(info);
 	    let params = {
 	        "document": "01",
 	        "numbering_range_id": await factusService.getNumberingRangeId({
                 company_id: companyId,
                 environment,
-                type: 'invoice'
+                type: 'invoice',
+                preferredRangeId: info.numbering_range_id ?? info.document?.numbering_range_id ?? null,
+                allowedRangeIds: numberingPolicy.allowedRangeIds
             }),
         "reference_code": `FVE_${info.document.ownSerial}`,
         "observation": "",
@@ -570,19 +689,23 @@ electronicFacturationController.getDocumentFullInfo = (req,res)=>{
         data += chunk;
     })
 	req.on('end',async()=>{
-		    let info = JSON.parse(data);
-        const companyId = getCompanyIdFromInfo(info);
-        const environment = await resolveEnvironmentFromInfo(info);
-	    console.log('bill_number: ',info.bill_numer);
-	    const response = await factusService.request({
-            company_id: companyId,
-            environment,
-            path: `/v1/bills/show/${info.bill_numer}`
-        });
-	    const resInvoice = response.data;
-        console.log(resInvoice)
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(resInvoice));
+		try {
+		    const info = JSON.parse(data);
+            const context = await resolveElectronicDocumentContext(info);
+	        console.log(`Consultando factura ${context.billNumber} para company_id ${context.companyId} (${context.environment})`);
+	        const response = await factusService.request({
+                company_id: context.companyId,
+                environment: context.environment,
+                path: `/v1/bills/show/${encodeURIComponent(context.billNumber)}`
+            });
+
+            res.writeHead(response.status || 502, {'Content-Type':'application/json'});
+            res.end(JSON.stringify(response.data));
+        } catch (error) {
+            console.error('Error consultando factura en Factus:', error.message);
+            res.writeHead(400, {'Content-Type':'application/json'});
+            res.end(JSON.stringify({ status: 'Error', message: error.message }));
+        }
     })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})

@@ -1,0 +1,20 @@
+@import '../../containers/UserApp.css';
+
+.ComponentMessage{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.4vh;
+    margin: 1.6vh 0;
+}
+
+/* Las tarjetas del catálogo se estiran para llenar la fila sin desbordarla */
+.ComponentMessage > *{
+    width: fit-content;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.ComponentMessage .ProgressBar,
+.ComponentMessage .LabelValue{
+    flex-basis: 100%;
+}

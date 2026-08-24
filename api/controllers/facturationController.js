@@ -129,6 +129,26 @@ facturationController.newSellInvoice = (req,res)=>{
         });
 }
 
+facturationController.deleteInvoice = (req, res) => {
+    utilsController.readJsonBody(req)
+        .then(async (info) => {
+            const response = await sellInvoiceService.delete(info);
+            console.log(`Resultado de eliminar factura ${info.document_id ?? info.doc_id ?? info.id}:`, response);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(response));
+        })
+        .catch((error) => {
+            const statusCode = Number.isInteger(error.statusCode) ? error.statusCode : 500;
+            console.error("Error al eliminar factura de venta:", error);
+            res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                status: "Error",
+                code: error.code ?? "SELL_INVOICE_DELETE_FAILED",
+                message: error.message
+            }));
+        });
+}
+
 facturationController.newPurchase = (req,res)=>{
     utilsController.readJsonBody(req)
         .then(async(info)=>{

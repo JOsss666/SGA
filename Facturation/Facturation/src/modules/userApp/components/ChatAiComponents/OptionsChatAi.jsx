@@ -7,7 +7,7 @@ export function OptionsChatAi({options,action,children}){
     const [selectedOption,setSelectedOption] = useState(options? options[0]:undefined)
 
     useEffect(()=>{
-        action?.(selectedOption.value);
+        action?.(selectedOption?.value);
     },[selectedOption])
 
     return(
@@ -18,6 +18,7 @@ export function OptionsChatAi({options,action,children}){
                 setVisisbleOptions(!visibleOptions)
             }}
             >
+            {selectedOption && (
             <strong className="selectedOptionHolder">
                 {children && (
                     <div className="childrenIndicator">
@@ -31,6 +32,7 @@ export function OptionsChatAi({options,action,children}){
                     </div>
                 </strong>
             </strong>
+            )}
             {visibleOptions &&  options.length > 1 && (
                 <ul className="listOptions">
                     {options.map((element,index)=>(

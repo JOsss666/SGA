@@ -200,7 +200,7 @@ processController.getOp = (req,res)=>{
             ${whereQuery}
             ORDER BY d.id DESC
             ${ info.limint ? `LIMIT ${info.limint}` : "" }; `
-        let consulta = await useDataBase(sentence,[info.company_id],1);
+        let consulta = await useDataBase(sentence,values,1);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })

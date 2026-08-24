@@ -9,9 +9,16 @@ export async function postInfo(route,informacion){
     console.log('Funcion post');
     return new Promise((resolve, reject) => {
         console.log(urlSer+route)
+        const companyId = informacion && typeof informacion === 'object'
+            ? informacion.company_id
+            : undefined;
         fetch(urlSer + route ,{
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(companyId != null ? {'X-SGA-Company-Id': String(companyId)} : {})
+            },
             body: JSON.stringify(informacion)
         })
         .then(response =>{
@@ -300,6 +307,10 @@ export const uploadFiles = async (files,info) => {
     try {
         const respuesta = await fetch(urlSer + "/uploadFiles", {
             method: "POST",
+            credentials: 'include',
+            headers: info?.company_id != null
+                ? {'X-SGA-Company-Id': String(info.company_id)}
+                : {},
             body: formData,
         });
 
@@ -375,4 +386,3 @@ export function printCashRecipt(info){
         alert("Esta función solo está disponible en la App de Escritorio.");
     }
 }
-

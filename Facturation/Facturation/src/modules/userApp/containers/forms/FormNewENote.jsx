@@ -7,6 +7,8 @@ import { moneyFormat, newElectronicNote, postInfo, printCashRecipt } from "../..
 import { FormButton } from "../../components/FormButton";
 import { FormInput } from "../../components/FormInput";
 import { isElectron } from "../../../../App";
+import { NoResults } from "../NoResults";
+import { LoadingSpace } from "../LoadingSpace";
 
 export function FormNewENote({InfoParams,reloadFun}){
 
@@ -21,7 +23,9 @@ export function FormNewENote({InfoParams,reloadFun}){
     const [step,setStep] = useState(0);
     const [disabled,setDisabled] = useState(false);
     const [loading,setLoading] = useState(false);
+    const [loadingInvoice,setLoadingInvoice] = useState(false);
     const [thirdparties,setThirdParties] = useState([]);
+    const [loadingMessage,setLoadingMessage] = useState('Cargando información');    
     const [invoices,setInvoices] = useState([]);
     const [bussines,setBussines] = useState([]);
     const [costCenters,setCostCenters] = useState([]);
@@ -40,6 +44,18 @@ export function FormNewENote({InfoParams,reloadFun}){
     const [items,setItems] = useState([]);
     const [store_id,setStore_id] = useState();
     const [total,setTotal] = useState();
+
+    const parseItemNumber = (value) => {
+        const parsedValue = Number.parseFloat(value);
+        return Number.isFinite(parsedValue) ? parsedValue : 0;
+    };
+
+    const calculateItemTotal = (item) => {
+        const quantity = Math.max(0, parseItemNumber(item.quantity));
+        const price = Math.max(0, parseItemNumber(item.price));
+        const discountRate = Math.min(100, Math.max(0, parseItemNumber(item.discount_rate)));
+        return Number((quantity * price * (1 - (discountRate / 100))).toFixed(2));
+    };
 
     const FormInfo = {
         company_info:appInfo,
@@ -105,6 +121,8 @@ export function FormNewENote({InfoParams,reloadFun}){
     }
 
     const getInvoiceInfo = async(bill_number,thirdParty_id)=>{
+        setDisabled(true);
+        setLoadingInvoice(true);
         let res = await postInfo('/electronicFacturationController.getDocumentFullInfo',{
             bill_numer:bill_number
         });
@@ -120,6 +138,8 @@ export function FormNewENote({InfoParams,reloadFun}){
             })
             setItems(res.data.items);
         };
+        setLoadingInvoice(false);
+        setDisabled(false);
     }
 
     const getStores = async(allowedStores)=>{
@@ -235,20 +255,23 @@ export function FormNewENote({InfoParams,reloadFun}){
     const handleCreationOfNote = async(doc_id)=>{
         let itemsToFac = [];
         items.forEach(item => {
+            const quantity = Math.max(0, parseItemNumber(item.quantity));
+            const price = Math.max(0, parseItemNumber(item.price));
+            const discountRate = Math.min(100, Math.max(0, parseItemNumber(item.discount_rate)));
             itemsToFac.push(
                 {
                     "code_reference": item.code_reference? item.code_reference:'-',
                     "name": item.name? item.name:item.service_name,
-                    "quantity": parseFloat(item.quantity),
-                    "discount": 0,
-                    "discount_rate": 0,
-                    "price": parseFloat(item.price),
-                    "tax_rate": "19.00",
-                    "unit_measure_id": 70,
-                    "standard_code_id": 1,
-                    "is_excluded": 0,
-                    "tribute_id": 1,
-                    "withholding_taxes": []
+                    "quantity": quantity,
+                    "discount": Number((quantity * price * (discountRate / 100)).toFixed(2)),
+                    "discount_rate": discountRate,
+                    "price": price,
+                    "tax_rate": `${parseItemNumber(item.tax_rate).toFixed(2)}`,
+                    "unit_measure_id": item.unit_measure_id ?? 70,
+                    "standard_code_id": item.standard_code_id ?? 1,
+                    "is_excluded": item.is_excluded ?? 0,
+                    "tribute_id": item.tribute_id ?? 1,
+                    "withholding_taxes": item.withholding_taxes ?? []
                 }
             )
         });
@@ -275,6 +298,7 @@ export function FormNewENote({InfoParams,reloadFun}){
     }
 
     const createNote = async()=>{
+        setLoadingMessage('Creando nota');
         setDisabled(true)
         setLoading(true)
         let res = await postInfo('/facturation/newNote',FormInfo.document);
@@ -352,17 +376,19 @@ export function FormNewENote({InfoParams,reloadFun}){
 
         // Values change Handle events
         
-        const updateItemValue = (itemIndex, value,units) => {
-            items.forEach((element,index) => {
-            });
-            setItems(prev => 
-                prev.map((item,index) => 
-                    itemIndex === index
-                        ? { ...item, ['total']: (parseFloat(value) * parseFloat(units))} 
-                        : item
-                    )
-                );
-            };
+        const updateItemValue = (itemIndex, field, value) => {
+            setItems(prev =>
+                prev.map((item,index) => {
+                    if (itemIndex !== index) return item;
+
+                    const updatedItem = { ...item, [field]: value };
+                    return {
+                        ...updatedItem,
+                        total: calculateItemTotal(updatedItem)
+                    };
+                })
+            );
+        };
 
     // EventsListeners
 
@@ -370,6 +396,7 @@ export function FormNewENote({InfoParams,reloadFun}){
         if(mode == undefined || mode == null)return;
         getInvoices(); 
         handleUserConfig();
+        setStep(1);
     },[mode]);
 
     useEffect(()=>{
@@ -398,7 +425,7 @@ export function FormNewENote({InfoParams,reloadFun}){
                 />
             </div>
             {step == 0 && (
-                <form className="step1Form" action="" onSubmit={(e)=>{
+                <form className="step1Form initialSelection" action="" onSubmit={(e)=>{
                     e.preventDefault();
                     setStep(1);
                 }}>
@@ -406,13 +433,12 @@ export function FormNewENote({InfoParams,reloadFun}){
                         {text:'Asociada a una factura registrada en SGA',value:'1'},  
                         {text:'Asociada a un tercero',value:'2'}
                     ]}/>
-                    <FormButton disabled={mode == undefined? true:disabled} text={'Continuar'}/>
-                    <FormButton negative={true} text={'Cancelar'} onClick={()=>{
-                        popOutAlert();
-                    }}/>
                 </form>
             )}
-            {step == 1 && (
+            {loading && (
+                <LoadingSpace title={loadingMessage} description={'Esto no debe tardar mucho...'}/>
+            )}
+            {!loading &&  step == 1 && (
                 <form className="step2Form" action="" onSubmit={(e)=>{
                     e.preventDefault();
                     createNote();
@@ -430,7 +456,13 @@ export function FormNewENote({InfoParams,reloadFun}){
                     {mode == 2 && (
                         <SearchinList title={'Terceros'} list={thirdparties} placeHolder={'Seleccione el tercero'} disabled={disabled}/>
                     )}
-                    {invoiceInfo.bill != undefined && (
+                    {loadingInvoice && (
+                        <LoadingSpace title={'Cargando informacion de la factura'} description={'Esto no debe tardar mucho'}/>
+                    )}
+                    {!loadingInvoice && invoiceInfo.bill == undefined && (
+                        <NoResults title={'Selecciona una factura para generar la nota'} img={'https://cdn-icons-png.flaticon.com/512/2432/2432926.png'} />
+                    )}
+                    {!loadingInvoice && invoiceInfo.bill != undefined && (
                         <div className="invoiceInfoContainer">
                             <div className="invoiceHead">
                                 <FormInput title={'Tercero'} value={invoiceInfo.customer.names} disabled={true}/>
@@ -452,25 +484,27 @@ export function FormNewENote({InfoParams,reloadFun}){
                                     <FormInput 
                                         title={'Unidades'}
                                         type={'number'}
-                                        action={(value)=>{
-                                            updateItemValue(index,element.price,value);
-                                        }}
-                                        value={parseFloat(element.quantity)?.toFixed(2)}
+                                        min={0}
+                                        step={0.01}
+                                        action={(value)=>updateItemValue(index,'quantity',value)}
+                                        value={element.quantity}
                                         disabled={disabled}/>
                                     <FormInput 
                                         title={'Precio'}
                                         type={'number'}
+                                        min={0}
+                                        step={0.01}
                                         value={element.price}
-                                        action={(value)=>{
-                                            updateItemValue(index,value,element.quantity);
-                                        }}
+                                        action={(value)=>updateItemValue(index,'price',value)}
                                         disabled={disabled}/>
                                     <FormInput 
                                         title={'Descuento %'}
-                                        value={element.discount_rate}
+                                        value={element.discount_rate ?? 0}
                                         min={0}
+                                        max={100}
                                         step={0.01}
                                         type={'number'}
+                                        action={(value)=>updateItemValue(index,'discount_rate',value)}
                                         disabled={disabled}/>
                                     <FormInput 
                                         title={'Retenciones %'}
