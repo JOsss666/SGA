@@ -7,6 +7,8 @@ import { moneyFormat, newElectronicNote, postInfo, printCashRecipt } from "../..
 import { FormButton } from "../../components/FormButton";
 import { FormInput } from "../../components/FormInput";
 import { isElectron } from "../../../../App";
+import { NoResults } from "../NoResults";
+import { LoadingSpace } from "../LoadingSpace";
 
 export function FormNewENote({InfoParams,reloadFun}){
 
@@ -21,6 +23,7 @@ export function FormNewENote({InfoParams,reloadFun}){
     const [step,setStep] = useState(0);
     const [disabled,setDisabled] = useState(false);
     const [loading,setLoading] = useState(false);
+    const [loadingInvoice,setLoadingInvoice] = useState(false);
     const [thirdparties,setThirdParties] = useState([]);
     const [invoices,setInvoices] = useState([]);
     const [bussines,setBussines] = useState([]);
@@ -105,6 +108,8 @@ export function FormNewENote({InfoParams,reloadFun}){
     }
 
     const getInvoiceInfo = async(bill_number,thirdParty_id)=>{
+        setDisabled(true);
+        setLoadingInvoice(true);
         let res = await postInfo('/electronicFacturationController.getDocumentFullInfo',{
             bill_numer:bill_number
         });
@@ -120,6 +125,8 @@ export function FormNewENote({InfoParams,reloadFun}){
             })
             setItems(res.data.items);
         };
+        setLoadingInvoice(false);
+        setDisabled(false);
     }
 
     const getStores = async(allowedStores)=>{
@@ -370,6 +377,7 @@ export function FormNewENote({InfoParams,reloadFun}){
         if(mode == undefined || mode == null)return;
         getInvoices(); 
         handleUserConfig();
+        setStep(1);
     },[mode]);
 
     useEffect(()=>{
@@ -398,7 +406,7 @@ export function FormNewENote({InfoParams,reloadFun}){
                 />
             </div>
             {step == 0 && (
-                <form className="step1Form" action="" onSubmit={(e)=>{
+                <form className="step1Form initialSelection" action="" onSubmit={(e)=>{
                     e.preventDefault();
                     setStep(1);
                 }}>
@@ -406,10 +414,6 @@ export function FormNewENote({InfoParams,reloadFun}){
                         {text:'Asociada a una factura registrada en SGA',value:'1'},  
                         {text:'Asociada a un tercero',value:'2'}
                     ]}/>
-                    <FormButton disabled={mode == undefined? true:disabled} text={'Continuar'}/>
-                    <FormButton negative={true} text={'Cancelar'} onClick={()=>{
-                        popOutAlert();
-                    }}/>
                 </form>
             )}
             {step == 1 && (
@@ -430,7 +434,13 @@ export function FormNewENote({InfoParams,reloadFun}){
                     {mode == 2 && (
                         <SearchinList title={'Terceros'} list={thirdparties} placeHolder={'Seleccione el tercero'} disabled={disabled}/>
                     )}
-                    {invoiceInfo.bill != undefined && (
+                    {loadingInvoice && (
+                        <LoadingSpace title={'Cargando informacion de la factura'} description={'Esto no debe tardar mucho'}/>
+                    )}
+                    {!loadingInvoice && invoiceInfo.bill == undefined && (
+                        <NoResults title={'Selecciona una factura para generar la nota'} img={'https://cdn-icons-png.flaticon.com/512/2432/2432926.png'} />
+                    )}
+                    {!loadingInvoice && invoiceInfo.bill != undefined && (
                         <div className="invoiceInfoContainer">
                             <div className="invoiceHead">
                                 <FormInput title={'Tercero'} value={invoiceInfo.customer.names} disabled={true}/>
@@ -455,19 +465,19 @@ export function FormNewENote({InfoParams,reloadFun}){
                                         action={(value)=>{
                                             updateItemValue(index,element.price,value);
                                         }}
-                                        value={parseFloat(element.quantity)?.toFixed(2)}
+                                        defaultValue={parseFloat(element.quantity)?.toFixed(2)}
                                         disabled={disabled}/>
                                     <FormInput 
                                         title={'Precio'}
                                         type={'number'}
-                                        value={element.price}
+                                        defaultValue={element.price}
                                         action={(value)=>{
                                             updateItemValue(index,value,element.quantity);
                                         }}
                                         disabled={disabled}/>
                                     <FormInput 
                                         title={'Descuento %'}
-                                        value={element.discount_rate}
+                                        defaultValue={element.discount_rate}
                                         min={0}
                                         step={0.01}
                                         type={'number'}
