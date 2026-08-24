@@ -85,9 +85,9 @@ const resolveInvoiceNumberingPolicy = async (info = {}) => {
 };
 
 const resolveElectronicDocumentContext = async (info = {}) => {
-    const billNumber = `${info.bill_numer ?? ''}`.trim();
+    const billNumber = `${info.bill_numer ?? info.bill_number ?? info.number ?? ''}`.trim();
     if (!billNumber) {
-        throw new Error('bill_numer es requerido.');
+        throw new Error('El número de la factura es requerido.');
     }
 
     let companyId = parseInt(getCompanyIdFromInfo(info));
@@ -689,19 +689,23 @@ electronicFacturationController.getDocumentFullInfo = (req,res)=>{
         data += chunk;
     })
 	req.on('end',async()=>{
-		    let info = JSON.parse(data);
-        const companyId = getCompanyIdFromInfo(info);
-        const environment = await resolveEnvironmentFromInfo(info);
-	    console.log('bill_number: ',info.bill_numer);
-	    const response = await factusService.request({
-            company_id: companyId,
-            environment,
-            path: `/v1/bills/show/${info.bill_numer}`
-        });
-	    const resInvoice = response.data;
-        console.log(resInvoice)
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(resInvoice));
+		try {
+		    const info = JSON.parse(data);
+            const context = await resolveElectronicDocumentContext(info);
+	        console.log(`Consultando factura ${context.billNumber} para company_id ${context.companyId} (${context.environment})`);
+	        const response = await factusService.request({
+                company_id: context.companyId,
+                environment: context.environment,
+                path: `/v1/bills/show/${encodeURIComponent(context.billNumber)}`
+            });
+
+            res.writeHead(response.status || 502, {'Content-Type':'application/json'});
+            res.end(JSON.stringify(response.data));
+        } catch (error) {
+            console.error('Error consultando factura en Factus:', error.message);
+            res.writeHead(400, {'Content-Type':'application/json'});
+            res.end(JSON.stringify({ status: 'Error', message: error.message }));
+        }
     })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
