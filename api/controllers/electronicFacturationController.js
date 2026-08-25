@@ -343,14 +343,14 @@ electronicFacturationController.newInvoice = (req,res)=>{
                 allowedRangeIds: numberingPolicy.allowedRangeIds
             }),
         "reference_code": `FVE_${info.document.ownSerial}`,
-        "observation": "",
+        "observation":info.document.e_invoiceDescription,
         "payment_method_code": info.document.paymentMethod_code,
         "customer": {
             "identification": info.customer.indentification_number,
             "dv": `${info.customer.dv}` ?? "3",
             "company": `${info.customer.names} ${info.customer.lastNames}`,
             "trade_name": info.customer.names,
-            "names": info.customer.names,
+            "names":info.customer.corporative_name != '' && info.customer.corporative_name != undefined ? info.customer.corporative_name:info.customer.names,
             "address": info.customer.address,
             //"email": info.customer.mail,
             "email": info.customer.mail,
