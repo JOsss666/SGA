@@ -73,6 +73,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         // Valor indicativo d a pagar
         const [totalToPay,setTotalToPay] = useState(0);
     const [description,setDescription] = useState();
+    const [e_invoiceDescription,set_eInvoiceDescription] = useState('');
     const [attached,setAttached] = useState('-');
         // Instances control
         const [instance_id,setInstance_id] = useState([]);
@@ -102,6 +103,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         store_id,
         costCenter_id,
         description,
+        e_invoiceDescription,
         concept_id,
         company_id:appInfo.company_id,
         created_by:userInfo.user_id,
@@ -351,10 +353,10 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
 
                 if (iIdx !== itemIndex) return item;
 
-                let updatedValue =
-                    key === 'description'
-                        ? value
-                        : Number(value);
+                const textFields = ['description', 'sell_desc'];
+                const updatedValue = textFields.includes(key)
+                    ? value
+                    : Number(value);
 
                 let updatedItem = {
                     ...item,
@@ -492,6 +494,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
     // Carga los rangos de numeración de factura permitidos según el rol.
     const getInvoiceNumberingRanges = async () => {
         setDisabled(true)
+        console.log('---N ',userConfig)
         const policy = userConfig?.services?.sga?.electronicFacturation?.numberingRanges
             ?? findNumberingPolicy(userConfig);
         const enabled = Array.isArray(policy?.enabled) ? policy.enabled.map((v)=>`${v}`) : [];
@@ -524,6 +527,10 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             value: r
         }));
 
+        console.log('Rangos: ',ranges)
+        console.log('Rangos Facturas: ',invoiceRanges)
+        console.log('Opciones facturacion electornica: ',options)
+        console.log('Opciones facturacion allowed: ',allowed)
         setNumberingRanges(options);
         setNumberingRangesBlocked(allowed.length === 0);
 
@@ -1094,10 +1101,13 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
         let itemsToFac = [];
         itemBlocks.forEach(element => {
             element.items.forEach(item => {
+                const itemName = `${item.name ?? item.service_name ?? ''}`.trim();
+                const sellDescription = `${item.sell_desc ?? ''}`.trim();
+
                 itemsToFac.push(
                     {
                         "code_reference": item.code? item.code:item.service_id,
-                        "name": item.name? item.name:item.service_name,
+                        "name": sellDescription ? `${itemName} + ${sellDescription}` : itemName,
                         "quantity": parseFloat(item.units),
                         "discount": 0,
                         "discount_rate": 0,
@@ -1383,6 +1393,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                                                     title={'unidades'}
                                                     type={'number'}
                                                     min={0}
+                                                    placeholder={0}
                                                     required={true}
                                                     value={element.units || ''}
                                                     action={(value) => {
@@ -1399,10 +1410,23 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                                                     min={0}
                                                     required={false}
                                                     defaultValue={element.unit_value}
-                                                    placeholder={element.unit_value} 
+                                                    placeholder={element.unit_value ?? 0} 
                                                     disabled={disabled}
                                                     action={(value) => {
                                                         handleEditItemDetail(index_block, index, 'unit_value', value);
+                                                    }}
+                                                />
+                                            </strong>
+                                                                                        <strong className="valueItemRow rowInputItem">
+                                                <FormInput 
+                                                    title={'Desc facturación'}
+                                                    type={'text'}
+                                                    required={false}
+                                                    defaultValue={element.sell_desc ?? ''}
+                                                    placeholder={'Cod #...'} 
+                                                    disabled={disabled}
+                                                    action={(value) => {
+                                                        handleEditItemDetail(index_block, index, 'sell_desc', value);
                                                     }}
                                                 />
                                             </strong>
@@ -1472,7 +1496,8 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                             </div>
                         </div>
                     )}
-                    <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
+                    <FormInput title={'Descripción (Interna)'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
+                    <FormInput title={'Descripción (Factura electrónica)'} textArea={true} placeholder={'Anotación o descripción de la factura de venta electronica'} action={set_eInvoiceDescription} disabled={disabled}/>
                     <FileInput category="files" action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
                     <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor ingresado no es valido':'Crear factura de venta'} disabled={disabledToSubmit? true:disabled} loading={loading}/>
                 </form>
