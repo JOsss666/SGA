@@ -73,7 +73,8 @@ export function New(){
         { text: 'Crear nueva orden de cliente', children: <FormNewClientOrder canRepeatServices={true} />, icon: <i className="fa-regular fa-file" /> },
         
         // Simplificado con optional chaining
-        ...(userConfig?.access?.sections?.cashBoxes?.overAll ? 
+        ...(userConfig?.access?.sections?.cashBoxes?.overAll ||
+            userConfig?.access?.sections?.cashBoxes?.enabled?.length > 0 ?
             [{ text: 'Crear recibo de caja', children: <FormNewCashRecipt />, icon: <i className="fa-solid fa-receipt" /> }] : []),
         
         {text:'Factura de venta',children:<FormNewInvoice/>,icon:<i className="fa-solid fa-file-invoice"/>},
