@@ -719,7 +719,7 @@ zjService.createProcessInstance = async ({
                 responsable
             )
             VALUES ($1, $2, $3, 'active', NULL, NULL, $4, $5, $6, $7)
-            RETURNING id;
+            RETURNING id, created_at;
         `, [
             normalizedCompanyId,
             processId,
@@ -731,6 +731,26 @@ zjService.createProcessInstance = async ({
         ]);
 
         const instanceId = Number(instanceResult.rows[0].id);
+        await client.query(`
+            INSERT INTO "Process".process_historial(
+                company_id,
+                instance_id,
+                previous_step,
+                next_step,
+                user_id,
+                created_at,
+                description
+            )
+            VALUES ($1, $2, $3, $3, $4, $5, $6);
+        `, [
+            normalizedCompanyId,
+            instanceId,
+            process.first_step_id,
+            normalizedServiceUserId,
+            instanceResult.rows[0].created_at,
+            'Creación de instancia de proceso'
+        ]);
+
         await client.query(`
             INSERT INTO "Integration".process_instance_requests(
                 integration_id,
