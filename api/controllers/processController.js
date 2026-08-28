@@ -1,5 +1,6 @@
 
-import { useDataBase } from "../app.js";
+import { useDataBase, withTransaction } from "../app.js";
+import { companyTimeZoneSql } from "../services/businessTimeZoneService.js";
 const processController = {};
 
 processController.createDocument = async(info,ownSerial)=>{
@@ -775,37 +776,68 @@ processController.createProcessInstace = (req,res)=>{
         data += chunk;
     })
     req.on('end',async()=>{
-        let info = JSON.parse(data);
-        let sentence = `
-            INSERT INTO "Process".process_instance(
-                company_id, 
-                process_id, 
-                step_id,
-                status, 
-                parent_id, 
-                parent_step, 
-                start_date, 
-                "delivery_date",
-                "thirdParty_id",
-                responsable
-                )
-	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;
-        `;
+        try {
+            const info = JSON.parse(data);
+            const instance = await withTransaction(async (client) => {
+                const instanceResult = await client.query(`
+                    INSERT INTO "Process".process_instance(
+                        company_id,
+                        process_id,
+                        step_id,
+                        status,
+                        parent_id,
+                        parent_step,
+                        start_date,
+                        "delivery_date",
+                        "thirdParty_id",
+                        responsable
+                    )
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                    RETURNING id, created_at;
+                `, [
+                    info.company_id,
+                    info.process_id,
+                    info.step_id,
+                    info.status,
+                    info.parent_id,
+                    info.parent_step,
+                    info.start_date,
+                    info.delivery_date,
+                    info.thirdParty_id,
+                    info.user_id
+                ]);
 
-        let consulta = await useDataBase(sentence,[
-            info.company_id,
-            info.process_id,
-            info.step_id,
-            info.status,
-            info.parent_id,
-            info.parent_step,
-            info.start_date,
-            info.delivery_date,
-            info.thirdParty_id,
-            info.user_id
-        ],3);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
+                const createdInstance = instanceResult.rows[0];
+                await client.query(`
+                    INSERT INTO "Process".process_historial(
+                        company_id,
+                        instance_id,
+                        previous_step,
+                        next_step,
+                        user_id,
+                        created_at,
+                        description
+                    )
+                    VALUES ($1, $2, $3, $3, $4, $5, $6);
+                `, [
+                    info.company_id,
+                    createdInstance.id,
+                    info.step_id,
+                    info.user_id,
+                    createdInstance.created_at,
+                    'Creación de instancia de proceso'
+                ]);
+
+                return createdInstance;
+            });
+
+            res.writeHead(200,{'Content-Type':'application/json'});
+            res.end(JSON.stringify(instance));
+        } catch (error) {
+            console.error('Error creando instancia de proceso:', error);
+            res.writeHead(500,{'Content-Type':'application/json'});
+            res.end(JSON.stringify({ error: error.message }));
+        }
     })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
@@ -1015,6 +1047,48 @@ processController.getProcessState = (req,res)=>{
                         'order', ps."order",
                         'required_roll', ps.required_roll,
                         'subprocess_id', ps.id,
+                        'advancement', COALESCE(
+                            (
+                                SELECT JSON_BUILD_OBJECT(
+                                    'user_id', history.user_id,
+                                    'user_name', history_user.user_name,
+                                    -- Columna legacy sin zona: sus valores representan UTC.
+                                    'created_at', history.created_at AT TIME ZONE 'UTC',
+                                    'created_at_local', (history.created_at AT TIME ZONE 'UTC') AT TIME ZONE (${companyTimeZoneSql('$1')}),
+                                    'business_date', ((history.created_at AT TIME ZONE 'UTC') AT TIME ZONE (${companyTimeZoneSql('$1')}))::date,
+                                    'business_time_zone', ${companyTimeZoneSql('$1')}
+                                )
+                                FROM "Process".process_historial history
+                                LEFT JOIN "Ecosystem".users history_user
+                                    ON history.user_id = history_user.user_id
+                                    AND history.company_id = history_user.company_id
+                                WHERE history.company_id = pi.company_id
+                                    AND history.instance_id = pi.id
+                                    AND history.next_step = ps.id
+                                ORDER BY history.created_at DESC, history.id DESC
+                                LIMIT 1
+                            ),
+                            (
+                                SELECT JSON_BUILD_OBJECT(
+                                    'user_id', pi.responsable,
+                                    'user_name', creator.user_name,
+                                    'created_at', pi.created_at AT TIME ZONE 'UTC',
+                                    'created_at_local', (pi.created_at AT TIME ZONE 'UTC') AT TIME ZONE (${companyTimeZoneSql('$1')}),
+                                    'business_date', ((pi.created_at AT TIME ZONE 'UTC') AT TIME ZONE (${companyTimeZoneSql('$1')}))::date,
+                                    'business_time_zone', ${companyTimeZoneSql('$1')}
+                                )
+                                FROM "Ecosystem".users creator
+                                WHERE creator.user_id = pi.responsable
+                                    AND creator.company_id = pi.company_id
+                                    AND ps.id = pi.step_id
+                                    AND ps."order" = (
+                                        SELECT MIN(initial_step."order")
+                                        FROM "Process".process_steps initial_step
+                                        WHERE initial_step.process_id = pi.process_id
+                                    )
+                                LIMIT 1
+                            )
+                        ),
                         -- Aquí integramos los documentos requeridos para este paso
                         'required_docs', COALESCE(docs.list, '[]'::json)
                     ) ORDER BY ps."order" ASC
