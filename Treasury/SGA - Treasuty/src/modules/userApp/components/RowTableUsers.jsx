@@ -1,4 +1,4 @@
-import { useNotifications } from '../../../context/context'
+import { useAppInfo, useNotifications } from '../../../context/context'
 import { postInfo } from '../../../utils/functions'
 import { CheckSquare } from './CheckSquare'
 import { MoreOptions } from './MoreOptions'
@@ -9,7 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 export function RowTableUsers({info,onClick,reloadFun}){
 
-    console.log(info)
+    const {userConfig} = useAppInfo();
 
     const {addNotification} = useNotifications();
     const navigate = useNavigate();
@@ -41,6 +41,15 @@ export function RowTableUsers({info,onClick,reloadFun}){
             })
         }
     }
+
+    
+    let optionsUser = [
+        ...(userConfig.access.sections.users.can_edit ? [{ text: 'Editar', icon: <i className="fa-solid fa-pencil" /> }] : []),
+        ...(userConfig.access.sections.users.can_delete ? [{ text: 'Eliminar', icon: <i className="fa-solid fa-trash" />, action: deleteUser }] : []),
+        { text: 'Ver detalles', icon: <i className="fa-solid fa-circle-info" />, action: handlenavigate },
+        { text: 'Compartir', icon: <i className="fa-solid fa-share-nodes" /> },
+        { text: 'Ver actividad', icon: <i className="fa-solid fa-eye" /> }
+    ].filter(Boolean); // Seguridad extra para eliminar cualquier nulo/falso
     
     return(
         <div className="RowTableUsers">
@@ -52,13 +61,7 @@ export function RowTableUsers({info,onClick,reloadFun}){
             <span className='atributeRow'>Tienda {info.company_id}</span>
             <span className='atributeRow'>{(info.created_at).substring(0,10)}</span>
             <span className='atributeRow'>{info.updated_at != null?(info.updated_at).substring(0,10):''}</span>
-            <span className='atributeRow redirectSpan' onClick={onClick}><MoreOptions options={[
-                {text:'Editar',icon:<i className="fa-solid fa-pencil"/>},
-                {text:'Eliminar',icon:<i className="fa-solid fa-trash"/>,action:deleteUser},
-                {text:'Ver detalles',icon:<i className="fa-solid fa-circle-info"/>,action:handlenavigate},
-                {text:'Compartir',icon:<i className="fa-solid fa-share-nodes"/>},
-                {text:'Ver actividad',icon:<i className="fa-solid fa-eye"/>}
-            ]}/></span>
+            <span className='atributeRow redirectSpan' onClick={onClick}><MoreOptions options={optionsUser}/></span>
         </div>
     )
 }

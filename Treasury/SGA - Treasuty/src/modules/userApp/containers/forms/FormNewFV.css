@@ -19,7 +19,7 @@
     flex-direction: column;
 }
 
-.FormNewFV form .FormInput, .FormNewDC form .SearchinList{
+.FormNewFV form .FacturationFormInput, .FormNewDC form .FacturationSearchinList{
     margin: 1vh auto;
     width: 100%;
 }

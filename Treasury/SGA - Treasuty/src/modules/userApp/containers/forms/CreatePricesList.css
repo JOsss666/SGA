@@ -15,7 +15,7 @@
     padding: 1vh;
 }
 
-.CreatePricesList form .FormInput, .CreatePricesList .SearchinList{
+.CreatePricesList form .FacturationFormInput, .CreatePricesList .FacturationSearchinList{
     margin: 1vh auto;
     width: 100%;
 }

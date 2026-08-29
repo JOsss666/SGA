@@ -189,7 +189,7 @@ export function ConceptsPlan(){
                     </div>
                     <div className="taxesC">
                         {!loading && displayGird == 'grid' && taxes.map((element,index)=>(
-                            <TaxCard hidden={!handleSearchTax(element.value)} info={element.value} key={index} reloadFun={getTaxes} />
+                            <TaxCard hidden={!handleSearchTax(element)} info={element.value} key={index} reloadFun={getTaxes} />
                         ))}
                         {!loading && displayGird == 'tree' && organizedTaxes.map((element,index)=>(
                             <TreeOrganizer allOpen={openTree} list={[element]} key={index} popNewOption={()=>{

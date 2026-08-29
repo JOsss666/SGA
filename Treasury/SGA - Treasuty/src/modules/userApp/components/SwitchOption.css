@@ -39,3 +39,10 @@
     width: 50%;
     z-index: 4;
 }
+
+@media (max-width:500px) {
+    .SwitchOption{
+        height: 4vh;
+        width: 18vw;
+    }
+}

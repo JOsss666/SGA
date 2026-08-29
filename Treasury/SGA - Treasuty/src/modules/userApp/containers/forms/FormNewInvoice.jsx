@@ -9,7 +9,7 @@ import './FormNewCashRecipt.css'
 import './FormNewInvoice.css'
 import { FileInput } from "../../components/FileInput";
 import { LoadingSpace } from "../LoadingSpace";
-import { moneyFormat, newElectronicInvoide, postInfo, printCashRecipt, printSellInvoice } from "../../../../utils/functions";
+import { getNumberingRangesElectronicInvoices, moneyFormat, newElectronicInvoide, postInfo, printCashRecipt, printSellInvoice } from "../../../../utils/functions";
 import { NewElementSelect } from "../../components/NewElementSelect";
 import { FormNewThirdParties } from "./FormNewThirdParties";
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
@@ -73,6 +73,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         // Valor indicativo d a pagar
         const [totalToPay,setTotalToPay] = useState(0);
     const [description,setDescription] = useState();
+    const [e_invoiceDescription,set_eInvoiceDescription] = useState('');
     const [attached,setAttached] = useState('-');
         // Instances control
         const [instance_id,setInstance_id] = useState([]);
@@ -82,6 +83,10 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const [concept_id,setConcept_id] = useState();
     const [conceptAccount_id,setConcept_account_id] = useState();
     const [cashBox_id,setCashBox_id] = useState();
+    // Rangos de numeración de factura electrónica permitidos para el rol
+    const [numberingRanges,setNumberingRanges] = useState([]);
+    const [numberingRange_id,setNumberingRange_id] = useState();
+    const [numberingRangesBlocked,setNumberingRangesBlocked] = useState(false);
     const [shift_id,setShift_id] = useState();
     const [status,setStatus] = useState('active');
 
@@ -98,6 +103,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         store_id,
         costCenter_id,
         description,
+        e_invoiceDescription,
         concept_id,
         company_id:appInfo.company_id,
         created_by:userInfo.user_id,
@@ -115,7 +121,13 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         payedBills:briefCaseBills,
         cashBox_id,
         instances: selectedInstances,
-        paymentMethod_code
+        paymentMethod_code,
+        payment_form:paymentMethod[0]?.for_wallet === true ? '2':'1',
+        payment_due_date:addDaysToCurrentDate(
+            paymentMethod[0]?.for_wallet === true
+                ? thirdPartyInfo.credit_term ?? 0
+                : 0
+        )
     }
 
     // PreProcess functions
@@ -132,23 +144,22 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         return `--/--/--`
     }
 
-    const addDaysToCurrentDate = (days) => {
+    function addDaysToCurrentDate(days) {
         const date = new Date(); // Obtiene la fecha y hora actual del sistema  
+        const parsedDays = Number.parseInt(days,10);
         // Sumamos los días usando setDate y getDate para manejar cambios de mes/año automáticamente
-        date.setDate(date.getDate() + parseInt(days)); 
+        date.setDate(date.getDate() + (Number.isInteger(parsedDays) ? Math.max(0,parsedDays):0));
         // Retornamos en formato ISO (YYYY-MM-DD) 
         return date.toISOString().split('T')[0];
-    };
+    }
 
     const handleUserConfig = async()=>{
-        console.log(appConfig.access)
         setDisabled(true)
         setLoading(true)
         await getThirdParties();
         await getConcepts();
         let temInfo = {}
         if(userConfig.access != undefined){
-            console.log(userConfig.access)
             // Filtro para busqueda de tiendas
             if(!userConfig.access.stores.overAll){
                 if(userConfig.access.stores.enabled.length > 1){
@@ -177,18 +188,12 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 await getBussines();
             }
 
-            if(userConfig.access.sections.cashBoxes.overAll){
-                if(userConfig.access.bussines.enabled.length > 1){
-                    //getCashBoxes con filtro
-                    await getCashBoxes(userConfig.access.sections.cashBoxes.enabled)
-                }else{
-                    temInfo.cashBox_id = userConfig.access.sections.cashBoxes.enabled[0]
-                    setBussines_id(userConfig.access.sections.cashBoxes.enabled[0])
-                    getCashBoxes(userConfig.access.sections.cashBoxes.enabled)
-                }
-            }else{
-                await getCashBoxes();
-            }
+            // overAll → sin filtro (todas las cajas); si no → solo las habilitadas ([] = ninguna)
+            await getCashBoxes(
+                userConfig.access.sections.cashBoxes.overAll
+                    ? undefined
+                    : (userConfig?.access?.sections?.cashBoxes?.enabled ?? [])
+            );
 
             // Filtro para busqueda de Centros de costo
             if(!userConfig.access.costCenters.overAll){
@@ -216,11 +221,13 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 await getInstances()
             }
 
+            // Rangos de numeración de factura electrónica permitidos para el rol
+            getInvoiceNumberingRanges();
+
         }
-        
+
         if(temInfo != {}){
-            console.log(temInfo);
-            setInfo(temInfo);
+            setInfo(prev => ({ ...prev, ...temInfo }));
         }
         setLoading(false);
         setDisabled(false);
@@ -232,7 +239,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             if (selectedInstances.some(item => item.id === element.id)) return;
             setSelectedInstances(prev => [...prev, { 
                 id: element.id, 
-                step_id: element.step_id 
+                step_id: element.step_id,
+                ownSerial: element.ownSerial,
             }]);
         };
         
@@ -259,15 +267,12 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     }
 
     const handleThirdPartyChange = (element)=>{
-        console.log(element);
         setThirdParty_id(element.id);
         setThirdPartyInfo(element);
     }
 
     const handleCashBoxChange = (element)=>{
-        console.log('zzzzz ',element)
         if(element.id != undefined){
-            console.log('Elemento actualizado correctamente')
             setCashBox_id(element.id)
             setShift_id(element.shift_id)
         }
@@ -312,7 +317,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     index === 0
                         ? { 
                             ...block, 
-                            items: [...block.items, element] // Copia los items actuales y añade el nuevo
+                            items: [...block.items, { ...element, manualPrice: false }] // Copia los items actuales y añade el nuevo
                         }
                         : block // Mantiene los demás bloques sin cambios
                 )
@@ -345,26 +350,53 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             });
         };
 
-        const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
-            setItemBlocks(prev =>
-                prev.map((block, bIdx) => {
-                    if (bIdx !== blockIndex) return block;
+const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
+    setItemBlocks(prev =>
+        prev.map((block, bIdx) => {
 
-                    const updatedItems = block.items.map((item, iIdx) => {
-                        if (iIdx !== itemIndex) return item;
-                        let updatedItem = { ...item, [key]: value };
-                        if (key === 'units') {
-                            const newPrice = getEffectivePrice(item, value);
-                            updatedItem.unit_value = newPrice;
-                        }
-                        console.log(updatedItem)
-                        return updatedItem;
-                    });
+            if (bIdx !== blockIndex) return block;
 
-                    return { ...block, items: updatedItems };
-                })
-            );
-        };
+            const updatedItems = block.items.map((item, iIdx) => {
+
+                if (iIdx !== itemIndex) return item;
+
+                const textFields = ['description', 'sell_desc'];
+                const updatedValue = textFields.includes(key)
+                    ? value
+                    : Number(value);
+
+                let updatedItem = {
+                    ...item,
+                    [key]: updatedValue
+                };
+
+                // marcar precio manual
+                if (key === 'unit_value') {
+                    updatedItem.manualPrice = true;
+                }
+
+                if (
+                    key === 'units' &&
+                    !updatedItem.manualPrice
+                ) {
+                    const newPrice = getEffectivePrice(
+                        item,
+                        updatedValue
+                    );
+
+                    updatedItem.unit_value = newPrice;
+                }
+
+                return updatedItem;
+            });
+
+            return {
+                ...block,
+                items: updatedItems
+            };
+        })
+    );
+};
 
     const handleDeleteItem = (blockIndex, itemIndex) => {
         setItemBlocks(prev =>
@@ -411,7 +443,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             status:['active'],
             thirdParty_id
         })
-        console.log(res);
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
@@ -426,26 +457,95 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     const getCashBoxes = async(allowedCashBoxes)=>{
         let res = await postInfo('/facturation/getCashBoxes',{
-            company_id:appInfo.company_id
+            company_id:appInfo.company_id,
             //user_id:userInfo.user_id
+            allowedCashBoxes:allowedCashBoxes
         })
-        console.log(res);
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
-                console.log(element);
                 C.push({
                     text:element.name,
                     value:element,
                     allowedCashBoxes:allowedCashBoxes
                 })
             });
-            console.log(C)
+            // Si solo hay una caja disponible, se auto-selecciona y se fija
+            // info.cashBox_id para ocultar el input y reducir pasos al usuario.
             if(C.length == 1){
                 handleCashBoxChange(C[0].value);
+                setInfo(prev => ({...prev, cashBox_id: C[0].value.id}));
             }
             setCashBoxes(C);
         }
+    }
+
+    const handleNumberingRangeChange = (element) => {
+        if(element){
+            setNumberingRange_id(element.id ?? element.provider_range_id);
+        }
+    }
+
+    // Busca el nodo electronicFacturation.numberingRanges sin depender de una
+    // ruta fija (el config guardado puede anidarlo distinto al prototipo).
+    const findNumberingPolicy = (obj) => {
+        if(!obj || typeof obj !== 'object') return undefined;
+        if(obj.electronicFacturation?.numberingRanges) return obj.electronicFacturation.numberingRanges;
+        for(const key of Object.keys(obj)){
+            const found = findNumberingPolicy(obj[key]);
+            if(found) return found;
+        }
+        return undefined;
+    }
+
+    // Carga los rangos de numeración de factura permitidos según el rol.
+    const getInvoiceNumberingRanges = async () => {
+        setDisabled(true)
+        console.log('---N ',userConfig)
+        const policy = userConfig?.services?.sga?.electronicFacturation?.numberingRanges
+            ?? findNumberingPolicy(userConfig);
+        const enabled = Array.isArray(policy?.enabled) ? policy.enabled.map((v)=>`${v}`) : [];
+
+        let ranges = [];
+        try{
+            ranges = await getNumberingRangesElectronicInvoices(appInfo?.company_id);
+        }catch(error){
+            console.error('No fue posible consultar los rangos de numeración:',error);
+            return;
+        }
+
+        const invoiceRanges = (ranges || []).filter(
+            (r)=> r.document === 'Factura de Venta' || r.document_name === 'Factura de Venta'
+        );
+
+        // La lista `enabled` es autoritativa: si tiene elementos, solo esos rangos
+        // aplican. Sin lista blanca, `overAll` decide (true/sin config => todos).
+        let allowed;
+        if(enabled.length > 0){
+            allowed = invoiceRanges.filter((r)=> enabled.includes(`${r.id ?? r.provider_range_id}`));
+        }else if(!policy || policy.overAll === true){
+            allowed = invoiceRanges;
+        }else{
+            allowed = [];
+        }
+
+        const options = allowed.map((r)=>({
+            text: `${r.document ?? 'Factura de Venta'}${r.prefix ? ` (${r.prefix})` : ''}`,
+            value: r
+        }));
+
+        console.log('Rangos: ',ranges)
+        console.log('Rangos Facturas: ',invoiceRanges)
+        console.log('Opciones facturacion electornica: ',options)
+        console.log('Opciones facturacion allowed: ',allowed)
+        setNumberingRanges(options);
+        setNumberingRangesBlocked(allowed.length === 0);
+
+        // Un solo rango permitido => se asume seleccionado y no se muestra el selector.
+        if(allowed.length === 1){
+            setNumberingRange_id(allowed[0].id ?? allowed[0].provider_range_id);
+        }
+        setDisabled(false);
     }
 
     const getStores = async(allowedStores)=>{
@@ -506,7 +606,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             typePlanAccount:appInfo.accountPlanType,
             allowedConcepts:userConfig.access.sections.concepts.overAll ? undefined:userConfig.access.sections.concepts.enabled
         })
-        console.log(res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -514,8 +613,14 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     text:`SGA#${element.id} ${element.name}`,
                     value:element
                 })
-                setConcepts(C)
             });
+            // Si solo hay un concepto disponible, se auto-selecciona y se fija
+            // info.concept_id para ocultar el input y reducir pasos al usuario.
+            if(C.length == 1){
+                handleConceptChange(C[0].value);
+                setInfo(prev => ({...prev, concept_id: C[0].value.id}));
+            }
+            setConcepts(C)
         }else{
             setConcepts([])
         }
@@ -528,7 +633,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             allowedPaymentMethods,
             for_wallet:ableCredit ? undefined:false
         })
-        console.log(res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -560,7 +664,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             // Arreglo temporal de tipo de documentos
             allowedTypes:['Client Order']
         })
-        console.log(res)
         if(res[0]){
             if(instance_id == undefined){
                 let C = []
@@ -573,7 +676,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 setDocuments(C);
             }else{
                 for (const element of res[1]) {
-                console.log('Procesando elemento:', element.id);
                     let attachedItems = await getAttachedServices(element.id);
                     handleAddBlock({
                         docInfo: element,
@@ -591,7 +693,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             id:id,
             limit:limit
         });
-        console.log('Ter ',res)
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
@@ -610,28 +711,27 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const getBriefcasesBills = async()=>{
         let res = await postInfo('/facturation/getBriefcaseBills',{
             company_id:appInfo.company_id,
-            thirdParty_id
+            thirdParty_id,
         })
-        console.log(res);
         setBriefCaseBills(res[1]);
     }
 
     const getProductsAndServices = async()=>{
-        let allowedStores = undefined;
-        let allowedCellars = undefined;
-        if(userConfig.access.stores.enabled.length > 1){
-            allowedStores = userConfig.access.stores.enabled;
-        }
-        if(userConfig.access.cellars.enabled.length > 1){
-            allowedCellars = userConfig.access.cellars.enabled.length;
-        }
+        const stores = userConfig?.access?.stores?.enabled;
+        const cellars = userConfig?.access?.cellars?.enabled;
+        const products = userConfig?.access?.sections?.products?.enabled;
+
+        const allowedStores = Array.isArray(stores) && stores.length > 1 ? stores : undefined;
+        const allowedCellars = Array.isArray(cellars) && cellars.length > 1 ? cellars : undefined;
+        const allowedItems = Array.isArray(products) && products.length >= 1 ? products : undefined;
+        
         let res = await postInfo('/inventory/getComercialProducts',{
             company_id:appInfo.company_id,
             allowedStores,
             allowedCellars,
+            allowedItems,
             type:'service'
         })
-        console.log('=======> ',res);
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -648,20 +748,19 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
 
     // Control functions
-
     const handleTaxes = (items) => {
         const groupedTaxes = items.reduce((acc, item) => {
             if (!item.tax_id) return acc;
-            let itemTotal = parseFloat(item.unit_value) * parseInt(item.units);
-            console.log('OOOOOOOOOOOOOOOO ',itemTotal)
-            console.log('IIIIIIIIIIIIIIII ',item)
-            const taxTotal = (itemTotal * item.tax_rate) / 100;
+            const itemTotal = parseFloat(item.unit_value) * parseFloat(item.units)
+            const itemBase = (itemTotal/(1 + (item.tax_rate/100)))
+            const taxTotal = itemBase * (item.tax_rate/100);
             if (!acc[item.tax_id]) {
                 acc[item.tax_id] = {
                     id: item.tax_id,
                     rate: item.tax_rate,
                     name: item.tax_name,
-                    total: taxTotal
+                    total: taxTotal,
+                    account:item.tax_account
                 };
             } else {
                 acc[item.tax_id].total += taxTotal;
@@ -702,7 +801,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             setDisabledByValue(true)
             return;
         }
-        console.log(paymentMethod)
         setPaymentMethod_code(paymentMethod[0].facturation_code);
         paymentMethod.forEach(element => {
             if(element.value != "" && element.value != undefined){
@@ -733,11 +831,8 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     // function for update paid ammount
     const updatePaidAmount = async()=>{
         for(let doc of itemBlocks){
-            console.log(itemBlocks)
             if(doc.docInfo != undefined){
-                console.log(doc.docInfo)
                 let res = await postInfo('/facturation/updatePaymentDocument',doc.docInfo);
-                console.log(res);
             }
         }
     }
@@ -767,7 +862,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 }
             };
         }); 
-        console.log(updatedDocuments)
         // 5. Actualizamos el estado de React
         setItemBlocks(updatedDocuments);
     };
@@ -792,88 +886,150 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         )
     }
 
+    const buildTransactionDetails = () => {
+        const transactionDetails = [];
+
+        itemBlocks.forEach(element => {
+            element.items.forEach(item => {
+                const subtotal = parseFloat(item.units) * parseFloat(item.unit_value) / (1 + (parseFloat(item.tax_rate ?? 0) / 100));
+
+                transactionDetails.push({
+                    account_id:item.exit_account,
+                    subtotal,
+                    total:subtotal,
+                    type:item.type == 'service'? 'serviceMovement':'inventoryMovement',
+                    nature: documentNature == 'DB'? 'CR':'DB'
+                });
+            });
+        });
+
+        taxes.forEach(tax => {
+            transactionDetails.push({
+                account_id:tax.account,
+                subtotal:tax.total,
+                total:tax.total,
+                type:'tax',
+                nature: documentNature == 'DB'? 'CR':'DB',
+                cashBox_id,
+                shift_id,
+            });
+        });
+
+        paymentMethod.forEach(element => {
+            transactionDetails.push({
+                account_id:element.account_id,
+                subtotal:element.value,
+                total:element.value,
+                type:'payment',
+                paymentMethod_id:element.id,
+                nature: documentNature,
+                due_date:addDaysToCurrentDate(thirdPartyInfo.credit_term != undefined? thirdPartyInfo.credit_term:0),
+                for_wallet:element.for_wallet,
+                voucher:element.voucher,
+                cashBox_id,
+                shift_id,
+            });
+        });
+
+        return transactionDetails;
+    };
+
+    const buildSellInvoicePayload = () => ({
+        ...FormInfo,
+        user_id:userInfo.user_id,
+        transactionDetails:buildTransactionDetails()
+    });
+
+    const printPhisicalInvoice = async(docResult, electronInfo)=>{
+        let infoToPrtint = {
+            docInfo:{
+                doc_id:docResult.id,
+                doc_type:FormInfo.doc_type,
+                instance_id:selectedInstances[0] ?? undefined,
+                description:FormInfo.description,
+                ownSerial: docResult.ownSerial,
+                total,
+                paymentMethod,
+                instanceOwnSerial:selectedInstances[0]?.ownSerial ?? undefined 
+            },
+            thirdPartyInfo:{
+                thirdParty_name:thirdPartyInfo.names
+            },
+            total,
+            paymentMethods:paymentMethod,
+            electronInfo,
+            totalTaxes,
+            taxes,
+            attachedItems
+        }
+        await printSellInvoice(infoToPrtint,appInfo,true);
+        await printSellInvoice(infoToPrtint,appInfo,false);
+    }
+
     // Creation Function
 
     const createSellInvoice = async()=>{
         setDisabled(true)
         setLoading(true)
-        let res = await postInfo('/facturation/newSellInvoice',FormInfo);
-        console.log(res);
-        if(res.status === "OK" && Number.isFinite(Number(res.id))){
+        const sellInvoicePayload = buildSellInvoicePayload();
+        let res = await postInfo('/facturation/newSellInvoice',sellInvoicePayload);
+        if(res.status !== "OK" || !Number.isFinite(Number(res.id))){
+            addNotification({
+                type:'error',
+                title:`Error al crear Factura de venta`,
+                description:res.message ?? `Error al crear Factura de venta`
+            });
+            setLoading(false);
+            setDisabled(false);
+            return;
+        }
+        if(res.status === "OK"){
             addNotification({
                 type:'aproved',
                 title:`Factura de venta #${res.ownSerial} creada correctamente`,
                 description:`La factura de venta #${res.ownSerial} fue creada correctamente`
             })
-            FormInfo["doc_id"] = res.id
-            FormInfo['instance_id'] = instance_id[0] ?? undefined ;
-            FormInfo["ownSerial"] = res.ownSerial;
+            FormInfo["ownSerial"] = res.ownSerial
+            sellInvoicePayload["doc_id"] = res.id
+            sellInvoicePayload['instance_id'] = instance_id[0] ?? undefined ;
+            sellInvoicePayload["ownSerial"] = res.ownSerial;
+
+            // Creation and controll of electronic invoice
             let e_info = electronicInfo;
             if(e_invoice){
-                e_info = await handleCreationOfEinvoice(res.id);
-            }
-            if(isElectron){
-                let infoToPrtint = {
-                    docInfo:{
-                        doc_id:res.id,
-                        doc_type:FormInfo.doc_type,
-                        instance_id:instance_id[0] ?? undefined,
-                        description:FormInfo.description,
-                        ownSerial: res.ownSerial,
-                        total,
-                        paymentMethod,
-                        instanceOwnSerial:instance_id[0]?.ownSerial ?? undefined 
-                    },
-                    thirdPartyInfo:{
-                        thirdParty_name:thirdPartyInfo.names
-                    },
-                    total,
-                    paymentMethods:paymentMethod,
-                    electronInfo:e_info,
-                    totalTaxes,
-                    taxes,
-                    attachedItems
+                if(numberingRangesBlocked){
+                    alert('Tu usuario no tiene un rango de numeración de factura electrónica autorizado. Contacta al administrador.');
+                    setLoading(false);
+                    setDisabled(false);
+                    return;
                 }
-                await printSellInvoice(infoToPrtint,appInfo,true);
-                await printSellInvoice(infoToPrtint,appInfo,false);
+                if(numberingRanges.length > 1 && numberingRange_id == undefined){
+                    alert('Selecciona el rango de numeración antes de emitir la factura electrónica.');
+                    setLoading(false);
+                    setDisabled(false);
+                    return;
+                }
+                e_info = await handleCreationOfEinvoice(res.id);
+                if(e_info.id == undefined){
+                    const errorDetails = formatElectronicInvoiceErrors(e_info.errors);
+                    alert([
+                        'Error al emitir factura electronica:',
+                        e_info.message,
+                        errorDetails
+                    ].filter(Boolean).join('\n\n'));
+                    setLoading(false);
+                    setDisabled(false);
+                    return;
+                }
+                
             }
-            FormInfo["user_id"] = userInfo.user_id,
-            FormInfo['transactionDetails'] = []
-            itemBlocks.forEach(element => {
-                console.log(element)
-                element.items.forEach(item => {
-                    console.log('EL> ',item)
-                    FormInfo.transactionDetails.push({
-                        account_id:item.exit_account,
-                        subtotal:parseFloat(item.units)*parseFloat(item.unit_value),
-                        total:parseFloat(item.units)*parseFloat(item.unit_value),
-                        type:item.type == 'service'? 'serviceMovement':'inventoryMovement',
-                        nature: documentNature == 'DB'? 'CR':'DB'
-                    })
-                });
-            });
-            paymentMethod.forEach(element => {
-                FormInfo.transactionDetails.push({
-                    account_id:element.account_id,
-                    subtotal:element.value,
-                    total:element.value,
-                    type:'payment',
-                    paymentMethod_id:element.id,
-                    nature: documentNature,
-                    due_date:addDaysToCurrentDate(thirdPartyInfo.credit_term != undefined? thirdPartyInfo.credit_term:0),
-                    for_wallet:element.for_wallet,
-                    voucher:element.voucher,
-                    cashBox_id,
-                    shift_id,
-                })
-            });
-            /*FormInfo.transactionDetails.push({
-                account_id:conceptAccount_id,
-                subtotal:total,
-                total:total,
-                type:'operation',
-                nature: documentNatu˜re == 'DB'? 'CR':'DB'
-            })*/
+
+            // Printintg Document Control
+            if(isElectron){
+                await printPhisicalInvoice(res, e_info);
+            }
+
+
             await updatePaidAmount();
         }else{
             addNotification({
@@ -892,7 +1048,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     }
 
     const toAccount = async()=>{
-        console.log(FormInfo)
         let res = await postInfo('/createTransaction',FormInfo);
         const insertId = parseInt(res[0]);
         if(typeof(insertId) == 'number' && insertId != NaN && insertId != undefined){
@@ -926,15 +1081,40 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
     }
 
+    const formatElectronicInvoiceErrors = (errors) => {
+        if (!errors) return '';
+
+        if (Array.isArray(errors)) {
+            return errors
+                .map(error => typeof error === 'string' ? error : JSON.stringify(error))
+                .join('\n');
+        }
+
+        if (typeof errors === 'object') {
+            return Object.entries(errors)
+                .flatMap(([field, fieldErrors]) => {
+                    const messages = Array.isArray(fieldErrors) ? fieldErrors : [fieldErrors];
+
+                    return messages.map(message => `${field}: ${message}`);
+                })
+                .join('\n');
+        }
+
+        return String(errors);
+    }
+
 
     const handleCreationOfEinvoice = async(doc_id)=>{
         let itemsToFac = [];
         itemBlocks.forEach(element => {
             element.items.forEach(item => {
+                const itemName = `${item.name ?? item.service_name ?? ''}`.trim();
+                const sellDescription = `${item.sell_desc ?? ''}`.trim();
+
                 itemsToFac.push(
                     {
                         "code_reference": item.code? item.code:item.service_id,
-                        "name": item.name? item.name:item.service_name,
+                        "name": sellDescription ? `${itemName} + ${sellDescription}` : itemName,
                         "quantity": parseFloat(item.units),
                         "discount": 0,
                         "discount_rate": 0,
@@ -956,9 +1136,9 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             user_id:userInfo.user_id,
             document:FormInfo,
             items:itemsToFac,
+            numbering_range_id:numberingRange_id,
             doc_id
         });
-        console.log(res)
         if(res.status == 'Created'){
             addNotification({
                 type:'aproved',
@@ -969,9 +1149,19 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     //window.open(`${res.data.bill.public_url}`,'_blank','noopener,noreferrer')
                 }
             })
+        }else{
+            setLoading(false);
+            setDisabled(false);
+            return({
+                id:undefined,
+                code:undefined,
+                url:undefined,
+                errors:res.data.errors,
+                message:res.message
+            })
         }
         return({
-            id: res.sga_id,
+            id: res.sga_id.id,
             code:res.data.bill.cufe,
             url: res.data.bill.public_url
         })
@@ -999,7 +1189,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         setVisibleError(false);
         for (const rule of docRules) {
             const res = await executeDocumentAction(rule.action, FormInfo);
-            console.log(res);
 
             if (res.isValid === false) {
             setError(`Error de validación: ${res.message}`);
@@ -1014,7 +1203,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     // Event listeners
     
     useEffect(()=>{
-        console.log(thirdPartyInfo)
         if(thirdPartyInfo.id != undefined){
             // Update of crefit conditions of thirdParty
             setAbleCredit(thirdPartyInfo.credit != undefined ? thirdPartyInfo.credit:0);
@@ -1026,7 +1214,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     useEffect(()=>{
         if(thirdPartyInfo.id != undefined){
-            console.log('Obteniedo metodos de pago')
             getPaymentMethods();
         }
     },[aviableCredit,ableCredit])
@@ -1037,15 +1224,10 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         }
     },[instance_id])
 
-    useEffect(()=>{
-        calcTotalFromPayments();
-    },[paymentMethod])
 
     useEffect(()=>{
-        console.log(documents)
         if(documents.length > 0){
             let newTotalToPay = 0;
-            console.log('XXX',itemBlocks)
             itemBlocks.forEach(element => {
                 if(element.docInfo == undefined){
                     let tempTtl = 0;
@@ -1066,9 +1248,14 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             });
             setTotalToPay(newTotalToPay)
         }
-        calcTotalFromPayments();
+
     },[documents,briefCaseBills,itemBlocks])
 
+    useEffect(()=>{
+        calcTotalFromPayments();
+    },[paymentMethod,totalToPay]
+    )
+    
     useEffect(()=>{
         if(itemBlocks.length == 0) return;
         let C = [];
@@ -1102,13 +1289,13 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
 
     useEffect(()=>{
         if(thirdParty_id != undefined){
+            console.log(thirdPartyInfo);
             getDocuments();
             getInstances();
         }
     },[thirdParty_id])
 
     useEffect(()=>{
-        console.log('---> ',disabled)
     },[disabled])
 
      useEffect(()=>{
@@ -1153,7 +1340,6 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             {!loading && (
                 <form action="" disabled={disabledToSubmit? true:disabled} onSubmit={(e)=>{
                     e.preventDefault();
-                    //createSellInvoice();
                     validateDocument();
                 }}>
                     {info.store_id == undefined && (
@@ -1177,8 +1363,11 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                     {info.concept_id == undefined && (
                         <SearchinList action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
                     )}
-                    {info.cashBox_id == undefined && (
+                    {info.cashBox_id == undefined && cashBoxes.length != 0 && (
                         <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja'} list={cashBoxes} disabled={disabled}/>
+                    )}
+                    {e_invoice && numberingRanges.length > 1 && (
+                        <SearchinList action={handleNumberingRangeChange} title={'Rango de numeración'} placeHolder={'Seleccione el rango de numeración'} list={numberingRanges} disabled={disabled}/>
                     )}
                     <div className="gridItemsContainer">
                         {itemBlocks?.map((element,index_block)=>(
@@ -1211,6 +1400,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                                                     title={'unidades'}
                                                     type={'number'}
                                                     min={0}
+                                                    placeholder={0}
                                                     required={true}
                                                     value={element.units || ''}
                                                     action={(value) => {
@@ -1227,10 +1417,23 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                                                     min={0}
                                                     required={false}
                                                     defaultValue={element.unit_value}
-                                                    placeholder={element.unit_value} 
+                                                    placeholder={element.unit_value ?? 0} 
                                                     disabled={disabled}
                                                     action={(value) => {
                                                         handleEditItemDetail(index_block, index, 'unit_value', value);
+                                                    }}
+                                                />
+                                            </strong>
+                                                                                        <strong className="valueItemRow rowInputItem">
+                                                <FormInput 
+                                                    title={'Desc facturación'}
+                                                    type={'text'}
+                                                    required={false}
+                                                    defaultValue={element.sell_desc ?? ''}
+                                                    placeholder={'Cod #...'} 
+                                                    disabled={disabled}
+                                                    action={(value) => {
+                                                        handleEditItemDetail(index_block, index, 'sell_desc', value);
                                                     }}
                                                 />
                                             </strong>
@@ -1300,8 +1503,9 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                             </div>
                         </div>
                     )}
-                    <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
-                    <FileInput action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
+                    <FormInput title={'Descripción (Interna)'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
+                    <FormInput title={'Descripción (Factura electrónica)'} textArea={true} placeholder={'Anotación o descripción de la factura de venta electronica'} action={set_eInvoiceDescription} disabled={disabled}/>
+                    <FileInput category="files" action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
                     <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor ingresado no es valido':'Crear factura de venta'} disabled={disabledToSubmit? true:disabled} loading={loading}/>
                 </form>
             )}

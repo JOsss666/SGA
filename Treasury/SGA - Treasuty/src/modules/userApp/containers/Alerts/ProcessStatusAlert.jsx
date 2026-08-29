@@ -37,6 +37,20 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
     const sortedSteps = [...(processInfo.steps || [])].sort((a, b) => a.order - b.order);
     const progressPercentage = ((currentOrder+ .5) / (sortedSteps.length)) * 100;
 
+    const formatAdvancementDate = (advancement) => {
+        if (!advancement?.created_at) return null;
+
+        try {
+            return new Intl.DateTimeFormat('es-CO', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+                timeZone: advancement.business_time_zone
+            }).format(new Date(advancement.created_at));
+        } catch {
+            return advancement.created_at_local || advancement.created_at;
+        }
+    };
+
 
     // Getters of info
     const getInstanceInfo = async()=>{
@@ -263,10 +277,27 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                         <div className={`steepIndicator ${element.isCompleted? 'completedStep':''}`}>
                                             {element.isCompleted && <i className="fa-solid fa-check" />}
                                         </div>
-                                        <span className="stepName"s>
+                                        <span className="stepName">
                                             {element.name}
                                         </span>
                                         <div className="attachedDocsC">
+                                            {(element.isCompleted || element.isActual) && element.advancement && (
+                                                <div className="responsableInfo">
+                                                    <i className="fa-solid fa-angles-right" aria-hidden="true"/>
+                                                    <span className="responsableName">
+                                                        {element.advancement.user_name || `Usuario #${element.advancement.user_id}`}
+                                                    </span>
+                                                    <time
+                                                        dateTime={element.advancement.created_at}
+                                                        title={`Zona horaria: ${element.advancement.business_time_zone}`}
+                                                    >
+                                                        {formatAdvancementDate(element.advancement)}
+                                                    </time>
+                                                </div>
+                                            )}
+                                            {(element.isCompleted || element.isActual) && !element.advancement && (
+                                                <span className="noAdvancementInfo">Sin registro de avance</span>
+                                            )}
                                             {element.order <= currentOrder && !element.checkDocs &&
                                                 element.required_docs?.map((req, i) => (
                                                     <span key={i}className="requiredDocAlert" onClick={()=>{

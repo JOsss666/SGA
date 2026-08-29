@@ -12,27 +12,27 @@ export function ServicesGrid(){
     let services = [
         ...(userConfig.access.modules.management.use == true ? [{
             text:'Administración',
-            img:'https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png',
+            img:'https://cdnmain.sga360.co/static/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.webp',
             path:`https://management.sga360.co/SGA_management/${params.company_key}/${params.user_key}/`
         }] : []),
         ...(userConfig.access.modules.inventory.use == true ? [{
             text:'Inventarios',
-            img:'https://res.cloudinary.com/djjxugmni/image/upload/v1761582991/ChatGPT_Image_29_sept_2025_16_39_52_dozlku.png',
+            img:'https://cdnmain.sga360.co/static/ChatGPT_Image_29_sept_2025_16_39_52_dozlku.webp',
             path:`https://inventory.sga360.co/SGA_INVENTORY/${params.company_key}/${params.user_key}/`
         }] : []),
         ...(userConfig.access.modules.process.use == true ? [{
             text:'Procesos',
-            img:'https://res.cloudinary.com/djjxugmni/image/upload/v1761582957/ChatGPT_Image_7_sept_2025_13_29_09_gkktlq.png',
+            img:'https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_13_29_09_gkktlq.webp',
             path:`https://process.sga360.co/SGA_process/${params.company_key}/${params.user_key}/`
         }] : []),
         ...(userConfig.access.modules["sga-home"].use == true ? [{
             text:'SGA',
-            img:'https://res.cloudinary.com/djjxugmni/image/upload/v1761514001/ChatGPT_Image_26_oct_2025_16_24_57_hgpkmn.png',
+            img:'https://cdnmain.sga360.co/static/ChatGPT_Image_26_oct_2025_16_24_57_hgpkmn.webp',
             path:`https://process.sga360.co/SGA_process/${params.company_key}/${params.user_key}/`
         }] : []),
         ...(userConfig.access.modules.facturation.use == true ? [{
             text:'Facturación',
-            img:'https://res.cloudinary.com/djjxugmni/image/upload/v1761582962/ChatGPT_Image_7_sept_2025_16_22_25_vtvxph.png',
+            img:'https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_22_25_vtvxph.webp',
             path:`https://facturation.sga360.co/SGA_management/${params.company_key}/${params.user_key}/`
         }] : []),
         ...(userConfig.access.modules.contability.use == true ? [{
@@ -47,12 +47,12 @@ export function ServicesGrid(){
         }] : []),
         ...(userConfig.access.modules.ctools.use == true ? [{
             text:'Ctools',
-            img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044183/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.png',
+            img:'https://cdnmain.sga360.co/static/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.webp',
             path:`https://process.sga360.co/SGA_process/${params.company_key}/${params.user_key}/`
         },] : []),
         ...(userConfig.access.modules.certicloud.use == true ? [{
             text:'CertiCloud',
-            img:'https://res.cloudinary.com/djjxugmni/image/upload/v1759160717/logo_certicloud-_perfil_azul_2_ljka0q.png',
+            img:'https://cdnmain.sga360.co/static/logo_certicloud-_perfil_azul_2_ljka0q.webp',
             path:`https://process.sga360.co/SGA_process/${params.company_key}/${params.user_key}/`
         }] : []),
     ].filter(Boolean); // Seguridad extra para eliminar cualquier nulo/falso

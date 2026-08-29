@@ -7,7 +7,7 @@
     width: 16vh;
     padding: 1vh 2vh;
     border-radius: 2vh;
-    background-color: #404040;
+    background-color:var(--inputsBorder);
 }
 
 .AttachedCard .optionsAttached{
@@ -20,7 +20,7 @@
 .AttachedCard .optionsAttached .inconH{
     height: 4vh;
     width: 4vh;
-    background-color: #fff;
+    background-color: var(--cardHover);
     border-radius: 100%;
     display: flex;
     cursor: pointer;
@@ -28,7 +28,7 @@
 
 .AttachedCard .optionsAttached .inconH i{
     margin: auto;
-    color: #404040;
+    color: var(--mainText);
     font-size: clamp(2.2px,2.2vh,22px);
 }
 
@@ -38,4 +38,25 @@
     margin-bottom: 1vh;
     font-size: clamp(2.2px,2.2vh,22px);
     font-weight: 500;
+    color: var(--mainText);
+}
+/* Extracción del documento en curso */
+.AttachedCard .loadingAttached{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bgOpacity);
+    border-radius: inherit;
+}
+
+.AttachedCard .loadingAttached i{
+    font-size: clamp(2.4px,2.4vh,24px);
+    color: var(--chatAccent);
+    animation: attachedSpin 1s linear infinite;
+}
+
+@keyframes attachedSpin{
+    to{ transform: rotate(360deg); }
 }

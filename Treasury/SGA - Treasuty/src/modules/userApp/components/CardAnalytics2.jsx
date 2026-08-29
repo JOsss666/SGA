@@ -43,7 +43,7 @@ export const reportTypeConfig = {
     }
 };
 
-export function CardAnalytics2({ title, description, reportsCount = 0, onClick, type = "documentos", loading = false }) {
+export function CardAnalytics2({ title, description, reportsCount, onClick, type, loading = false }) {
     const normalizedType = type.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const { icon, bgColor, iconColor } = reportTypeConfig[normalizedType] || reportTypeConfig.documentos;
 
@@ -53,7 +53,7 @@ export function CardAnalytics2({ title, description, reportsCount = 0, onClick, 
     };
 
     return (
-        <div className="CardAnalytics2">
+        <div className="CardAnalytics2" onClick={onClick}>
             <div className="card-header">
                 <div className="card-icon" style={{ backgroundColor: bgColor }}>
                     <i className={icon} style={{ color: iconColor }}></i>
@@ -65,7 +65,7 @@ export function CardAnalytics2({ title, description, reportsCount = 0, onClick, 
                 <span className="reports-count">
                     {loading ? "Cargando..." : formatReports(reportsCount)}
                 </span>
-                <button className="go-button" onClick={onClick}>
+                <button className="go-button">
                     Ir ahora <i className="fa-solid fa-arrow-right"></i>
                 </button>
             </div>

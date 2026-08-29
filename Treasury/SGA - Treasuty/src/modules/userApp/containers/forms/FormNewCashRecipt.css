@@ -3,7 +3,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    width: 50vw;
+    width: 60vw;
     position: relative;
     overflow-x: hidden;
 }
@@ -12,22 +12,21 @@
     position: fixed;
     z-index: 30;
     top: 0;
+    left:0;
     gap: .5vh;
-    padding: 2vh;
+    padding: 2vh 3vw;
     background-color: var(--bg);
-    width: inherit;
+    width: 100%;
     box-shadow: 0 .5vh 1vh var(--menuAside);
     display: flex;
     border-bottom: solid .1vh var(--inputsBorder);
     flex-direction: column;
-    border-bottom-left-radius: 1vh;
-    border-bottom-right-radius: 1vh;
+    border-radius: 1vh;
 }
 
 .FormNewCashRecipt .headForm .valuesCashRecipt{
     display: flex;
-    flex-direction: column;
-    gap: .5vh;
+    gap: 2vw;
 }
 
 .FormNewCashRecipt .headForm .valueCashRecipt{
@@ -50,11 +49,11 @@
     margin: 1vh auto;
     width: 100%;
     display: flex;
-    flex-direction: column;
-    gap: 2vh;
-    padding: 2vh 3vh;
+    flex-wrap: wrap;
+    gap: 3vh;
+    padding: 2vh 1vh;
     padding-bottom: 5vh;
-    margin-top: 14vh;
+    margin-top: 10vh;
 }
 
 .FormNewCashRecipt .LoadingSpace{
@@ -66,6 +65,8 @@
     display: flex;
     flex-direction: column;
     gap: 2vh;
+    width: 100%;
+    padding: 0 1vh;
 }
 
 .FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods{
@@ -79,7 +80,7 @@
     flex-direction: column;
     width: 100%;
     gap: 1vh;
-    padding-bottom: 2vh;
+    padding-bottom: 1vh;
     border-bottom: dashed .3vh var(--inputsBorder);
 }
 
@@ -89,6 +90,45 @@
     display: flex;
     gap: 1vw;
     padding: 1vh;
+}
+
+.FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .PaymentMethodCard .payMC strong{
+    color: var(--mainText);
+}
+
+.FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .PaymentMethodCard .voucherC{
+    margin:0 2vw;
+    border-left: dashed .2vh var(--mainText);
+    border-bottom: dashed .2vh var(--mainText);
+    border-bottom-left-radius: 2vh;
+    padding-bottom: 2vh;
+    margin-bottom: 1vh;
+}
+
+.FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .PaymentMethodCard .voucherC strong{
+    display: flex;
+    gap: 1vh;
+    align-items: center;
+    padding-left: 2vh;
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 400;
+}
+
+.FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .PaymentMethodCard .voucherC input{
+    background-color: var(--inputsBg);
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 1vh;
+    padding: .8vh 2vh;
+    font-size: clamp(2px,2vh,20px);
+    width: 26.25%;
+    transition: .3s;
+    color: var(--descriptionText);
+}
+
+.FormNewCashRecipt form .paymentMehtodsContainer .gridPaymentMethods .PaymentMethodCard .voucherC input:focus{
+    outline: solid .2vh #007AFF;
+    color: var(--mainText);
 }
 
 .FormNewCashRecipt form .gridPaymentMethods .PaymentMethodCard:hover > .addVoucherToPayment{
@@ -134,8 +174,8 @@
     font-size: clamp(2.2px,2.2vh,22px);
     border-radius: 1vh;
     height: 100%;
-    width: 35%;
-    padding: .5vh 1vh;
+    width: 25%;
+    padding: .8vh 2vh;
     padding-left: 2vh;
     color: var(--descriptionText);
     background-color: var(--inputsBg);
@@ -177,9 +217,11 @@
     color: #C11007;
 }
 
+
 .FormNewCashRecipt form .aviableBriefCaseContainer{
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .FormNewCashRecipt form .aviableBriefCaseContainer h6{

@@ -2,14 +2,14 @@ import { useState } from 'react';
 import './ButtonDownload.css';
 import { componentToPdf, parseToCsv, parseToXlsx,ScreenShotElement } from '../../../utils/functions';
 
-export function ButtonDownload({info,columns,formats,title,component}) {
+export function ButtonDownload({info,columns,formats,title,component,xlsxOptions, text, onDownload}) {
     const [status, setStatus] = useState("default");
     const [showMenu, setShowMenu] = useState(false);
 
     const states = [
         {
             key: "default",
-            text: "Descargar",
+            text: text? text:'Descargar',
             icon: <i className="fa-solid fa-arrow-down" />,
             className: "buttonDownloadDefault",
         },
@@ -29,6 +29,22 @@ export function ButtonDownload({info,columns,formats,title,component}) {
 
     const current = states.find((s) => s.key === status);
 
+    // Descarga con acción personalizada (ej. informe consolidado por periodo).
+    const handleCustomDownload = async () => {
+        setStatus("loading");
+        try {
+            await onDownload();
+            setStatus("success");
+        } catch (e) {
+            console.error("Error en la descarga:", e);
+            setStatus("default");
+            return;
+        }
+        setTimeout(() => {
+            setStatus("default");
+        }, 2000);
+    };
+
     const handleFormatClick = async(format) => {
         if(info != undefined){
             setStatus("loading");
@@ -36,7 +52,7 @@ export function ButtonDownload({info,columns,formats,title,component}) {
             console.log(`Descargando archivo en formato: ${format}`);
             switch (format){
                 case "csv": await parseToCsv(info,true,title); break;
-                case "xlsx": await parseToXlsx(info,true,null,title);break;
+                case "xlsx": await parseToXlsx(info,true,columns,title, typeof xlsxOptions === "function" ? xlsxOptions() : xlsxOptions);break;
                 case "pdf": await componentToPdf(component,true,{},title);break;
                 case "jpg": await ScreenShotElement(component,title);
             }
@@ -49,14 +65,16 @@ export function ButtonDownload({info,columns,formats,title,component}) {
 
     return (
         <div className="ButtonDownload">
-            <button onClick={() => setShowMenu(!showMenu)} disabled={status === "loading"} className={current.className}> {current.text} {current.icon} </button>
+            <button
+                onClick={() => onDownload ? handleCustomDownload() : setShowMenu(!showMenu)}
+                disabled={status === "loading"}
+                className={current.className}
+            > {current.text} {current.icon} </button>
 
-            {showMenu && status === "default" && (
+            {!onDownload && showMenu && status === "default" && (
                 <div className="downloadMenu">
-                    <button className='xlsxFormat' onClick={() => handleFormatClick("xlsx")}><i className="fa-regular fa-file-excel"/> XLSX</button>
-                    <button className="csvFormat" onClick={() => handleFormatClick("csv")}><i className="fa-solid fa-file-csv"/> CSV</button>
-                    <button className="pdfFormat" onClick={() => handleFormatClick("pdf")}><i className="fa-regular fa-file-pdf"/> PDF</button>
-                    <button className="jpgFormat" onClick={() => handleFormatClick("jpg")}><i className="fa-solid fa-image"/>JPG</button>
+                    <button className='optionListFormat' onClick={()=>handleFormatClick('xlsx')}><i className="fa-regular fa-file-excel"/> XLSX</button>
+                    <button className="optionListFormat" onClick={() => handleFormatClick("csv")}><i className="fa-solid fa-file-csv"/> CSV</button>
                 </div>
             )}
         </div>

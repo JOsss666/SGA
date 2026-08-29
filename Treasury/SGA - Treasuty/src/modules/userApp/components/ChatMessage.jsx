@@ -1,57 +1,66 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useAppInfo, useNotifications } from '../../../context/context'
 import { copyToClipBoard } from '../../../utils/functions';
+import { TextMessage } from './ChatBubbleTypes/TextMessage';
+import { VoiceMessage } from './ChatBubbleTypes/VoiceMessage';
+import { LinkPreviewMessage } from './ChatBubbleTypes/LinkPreviewMessage';
 import './ChatMessage.css'
-import { MainTitleAi } from './ChatAiComponents/MainTitleAi';
-import { TextPlainAi } from './ChatAiComponents/TextPlainAi';
-import { SubTitleAi } from './ChatAiComponents/SubTitleAi';
 
-export function ChatMessage({info}){
+export function ChatMessage({info,onRetry}){
 
     const {userInfo} = useAppInfo();
     const {addNotification} = useNotifications();
     const [visibleOptions,setVisibleOptions] = useState(false);
     const messageBox = useRef()
-
-    function renderChildren(childrenStructure){
-        return childrenStructure.map((block,index)=>{
-            console.log(block)
-            switch(block.type){
-                case "MainTitle":
-                    return <MainTitleAi key={index} text={block.content} />
-                case "TextPlain":
-                    return <TextPlainAi key={index} text={block.content} children={block.children}/>
-                case "SubTitle":
-                    return <SubTitleAi key={index} text={block.content}/>
-            }
-        })
-    }
-
-    useEffect(()=>{
-        if(messageBox.current != undefined){
-            messageBox.current.addEventListener("mousedown", () => {
-                setVisibleOptions(true);
-            });
-
-            messageBox.current.addEventListener("mouseleave", () => {
-                setVisibleOptions(false)
-            });
-        }
-    },[messageBox.current])
+    const isOwn = userInfo.user_id == info.user_id;
 
     return(
-        <div ref={messageBox} className={`ChatMessage ${userInfo.user_id == info.user_id? 'OwnMessage':''}`}>
-            {info.user_id != userInfo.user_id && (
+        <div
+            ref={messageBox}
+            className={`ChatMessage ${isOwn? 'OwnMessage':''} ${info.error? 'ErrorMessage':''}`}
+        >
+            {!isOwn && (
                 <strong>{info.user_name}</strong>
             )}
             <div className="messageContent">
-                <span>{info.text}</span>
-                {info.children != undefined && (
-                    <div className="childrenMess">
-                        {renderChildren(info.children)}
-                    </div>
+                {info.kind == 'voice' && (
+                    <VoiceMessage duration={info.voice?.duration}/>
+                )}
+                {info.kind == 'link' && (
+                    <LinkPreviewMessage icon={info.link?.icon} title={info.link?.title} subtitle={info.link?.subtitle}/>
+                )}
+                {(info.kind == undefined || info.kind == 'text') && (
+                    <TextMessage
+                        text={info.text}
+                        children={info.children}
+                        markdown={info.markdown}
+                        streaming={info.streaming}
+                    />
                 )}
             </div>
+            {(info.aborted || info.error) && (
+                <div className="messageState">
+                    <span>
+                        <i className={`fa-solid ${info.error? 'fa-circle-exclamation':'fa-circle-stop'}`}/>
+                        {info.error? 'No se pudo completar la respuesta':'Respuesta detenida'}
+                    </span>
+                    {onRetry != undefined && (
+                        <button type="button" onClick={onRetry}>
+                            <i className="fa-solid fa-rotate-right"/>Reintentar
+                        </button>
+                    )}
+                </div>
+            )}
+            {info.timestamp != undefined && (
+                <div className="messageFooter">
+                    <span className="timestamp">{info.timestamp}</span>
+                </div>
+            )}
+            {info.reaction != undefined && (
+                <div className="reactionBadge">
+                    <span>{info.reaction}</span>
+                </div>
+            )}
             {visibleOptions &&(
                 <div className="optionsMessage">
                     <ul>
@@ -64,7 +73,7 @@ export function ChatMessage({info}){
                             })
                         }}><span>Copiar</span> <i className="fa-regular fa-copy"/></li>
                         <li><span>Responder</span> <i className="fa-solid fa-reply"/></li>
-                        {info.user_id == userInfo.user_id && (
+                        {isOwn && (
                             <>
                                 <li><span>Eliminar</span> <i className="fa-regular fa-trash-can"/></li>
                                 <li><span>Editar</span> <i className="fa-solid fa-pen"/></li>

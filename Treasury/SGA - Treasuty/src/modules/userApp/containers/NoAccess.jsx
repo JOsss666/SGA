@@ -11,16 +11,16 @@ export function NoAccess({title,description,img,noExit,noRedirect}){
     const params = useParams();
 
     const handleRedirect = ()=>{
-        navigate(`/SGA_treasury/login`)
+        navigate(`/SGA_management/login`)
     }
 
     const handleGoHome = ()=>{
-        navigate(`/SGA_treasury/${params.company_key}/${params.user_key}`)
+        navigate(`/SGA_management/${params.company_key}/${params.user_key}`)
     }
 
     return(
         <div className="NoAccess">
-            <img src={img? img:"https://res.cloudinary.com/djjxugmni/image/upload/v1772826198/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.png"}/>
+            <img src={img? img:"https://cdnmain.sga360.co/static/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.webp"}/>
             <div className="descriptionMessage">
                 <BoldTitle text={title? title:'No tiene acceso a este modulo'}/>
                 <DescriptionSpan text={description? description:`${appInfo.legal_name} ha limitado su acceso al modulo de Facturación`}/>

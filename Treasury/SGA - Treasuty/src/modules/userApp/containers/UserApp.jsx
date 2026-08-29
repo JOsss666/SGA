@@ -4,7 +4,7 @@ import { SearchBar } from '../components/SearchBar';
 import { ButtonMenu } from '../components/ButtonMenu';
 import { UserCard } from '../components/UserCard';
 import { MenuApp } from './MenuApp';
-import { useAiAssistant, useAlert, useAppInfo, usePreview } from '../../../context/context';
+import { useAiAssistant, useAlert, useAppInfo, useNotifications, usePreview } from '../../../context/context';
 import { useEffect, useRef, useState } from 'react';
 import { ServiceSgaCard } from '../components/ServiceSgaCard';
 import { LoadingAppDataPage } from './LoadingAppDataPage';
@@ -40,28 +40,26 @@ import { Bussines } from './Bussines';
 import { New } from './New';
 import { Messages } from './Messages';
 import { Calendar } from './Calendar';
-import { Treasury } from './Treasury';
-import { Banks } from './Banks';
-import { BanksDetails } from './BanksDetails';
-import { Payments } from './Payments';
-import { Collections } from './Collections';
-import {NoAccess} from './NoAccess'
+import { CellarDetail } from './CellarDetail';
+import {NoAccess} from './NoAccess';
 import {SuspendedAccount} from './SuspendedAcount'
-import { Movements } from './Movements'; 
-import { MovementsRecord } from './MovementsRecord'; 
-import { CashHistory } from './CashHistory';
-import { Transactions } from './Transactions';
-import { Analytics2 } from './Analytics2';
-import { ControlPanel } from './ControlPanel';
 import { CashBoxes } from './CashBoxes';
 import { CashBoxesDeetail } from './CashBoxesDetail';
+import { useRealtime } from '../../../utils/useRealTime';
+import { ProcessStatusAlert } from './Alerts/ProcessStatusAlert';
+import { ProcessInstanceAnalytics } from './Analytics/ProcessInstanceAnalycs';
+import { Analytics2 } from './Analytics2';
+import { QuickActions } from './QuickActions';
+import { ElectronicDocuments } from './ElectronicDocuments';
+import { SearchResultsPannel } from './Alerts/SearchResultsPannel';
 
 export function UserApp(){
 
     // Context Info
-    const {appInfo,userInfo,loadingAppData,darkMode,getAppData,optionsMenu,secondOptionsMenu,toolsMenu,routesApp, userConfig} = useAppInfo();
+    const {appInfo,userInfo,loadingAppData,darkMode,getAppData,optionsMenu,secondOptionsMenu,routesApp,userConfig} = useAppInfo();
     const {openPreview,setOpenPreview} = usePreview();
-    const {openAlert,popOutAlert} = useAlert();
+    const {addNotification} = useNotifications();
+    const {openAlert,popInAlert,removeAlert} = useAlert();
     const {visibleChatAi,setVisibleChatAi} = useAiAssistant();
     const [statusPage,setStatusPage] = useState('loading');
 
@@ -92,17 +90,16 @@ export function UserApp(){
         console.log(loadingAppData);
     },[loadingAppData])
 
-    window.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
-            if(openAlert){
-                popOutAlert();
-            }
-            if(openPreview){
+    useEffect(() => {
+        const handlePreviewEscape = (event) => {
+            if (event.key === 'Escape' && !openAlert && openPreview) {
                 setOpenPreview(false);
             }
-        }
-    });
+        };
 
+        window.addEventListener('keydown', handlePreviewEscape);
+        return () => window.removeEventListener('keydown', handlePreviewEscape);
+    }, [openAlert, openPreview, setOpenPreview]);
         
     const filterOptions = (value) => {
         if (!quickSearch) return true; 
@@ -116,10 +113,19 @@ export function UserApp(){
     }, [darkMode]);
 
     useEffect(()=>{
-        if(quickSearch != ""){
-            setVisibleResultsSearch(true)
-        }
-    },[quickSearch])
+        if(quickSearch == "") return;
+
+        const initialSearchValue = quickSearch;
+        popInAlert(
+            <SearchResultsPannel searchValue={initialSearchValue}/>,
+            { id: 'quick-search', closeLabel: 'Cerrar búsqueda' }
+        );
+        setQuickSearch("");
+    },[quickSearch, popInAlert])
+
+    useEffect(() => () => {
+        removeAlert('quick-search');
+    }, [removeAlert]);
 
     useEffect(() => {
         if (visibleChatAi) {
@@ -136,7 +142,8 @@ export function UserApp(){
     useEffect(()=>{
         if(userConfig.access != undefined){
             if(!userConfig.access.suspended){
-                if(userConfig.access.modules.treasury.use == true){
+                if(userConfig.access.modules.
+                    facturation.use == true){
                     setStatusPage('page')
                 }else{
                     setStatusPage('noAccess');
@@ -147,13 +154,28 @@ export function UserApp(){
         }
     },[userConfig])
 
+    useRealtime(appInfo.company_id, (payload) => {
+        const infoPayload = typeof payload === 'string' ? JSON.parse(payload) : payload;
+        console.log("Payload procesado:", infoPayload);
+        if (infoPayload.table === 'process_instance') {
+            let handleOpenProcess = ()=>{
+                popInAlert(<ProcessStatusAlert instance_id={infoPayload.data.id}/>)
+            }
+            addNotification({
+                type: 'info',
+                title: `Actualización en proceso #${infoPayload.data.ownSerial}`,
+                description: `Instancia #${infoPayload.data.ownSerial} actualizada.`,
+                onClick:handleOpenProcess
+            });
+        }
+    });
 
     return(
         <div className={`UserApp`}>
-            {!loadingAppData  && statusPage=='page' &&  (
+            {!loadingAppData && statusPage=='page' &&(
                 <>
                     <header className='headApp'>
-                    <SearchBar placeholder={`Buscar en ${appInfo.legal_name} - Tesoreria`} action={setQuickSearch}/>
+                    <SearchBar placeholder={`Buscar en ${appInfo.legal_name} - Ventas`} value={quickSearch} action={setQuickSearch}/>
                     {visibleResultsSearch && (
                         <div className="resultsQuickSerch">
                             {quickSearch != "" && routesApp.map((element,index)=>(
@@ -191,54 +213,73 @@ export function UserApp(){
                     <SwitchColorMode/>
                 </header>
                 <aside ref={asideMenuC}  className='asideMenuApp'>
-                    <div className={`menusHolder ${visibleMenu? 'activeMenusHolder':''}`}>
-                        <ServiceSgaCard imgRef={'https://res.cloudinary.com/djjxugmni/image/upload/v1772826198/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.png'} visbleInfo={visibleMenu} title={'Tesorería'} desc={'SGA - Desarrollos'} />
-                        <MenuApp visibleMenu={visibleMenu} title={'General'} options={optionsMenu}/>
-                        <MenuApp visibleMenu={visibleMenu} title={'Herramientas'} options={toolsMenu}/>
-                        <MenuApp visibleMenu={visibleMenu} title={'Ajustes'} options={secondOptionsMenu}/>
+                    <div className={`menusHolder ${visibleMenu? 'activeMenusHolder':'hiddenAsideMenu'}`}>
+                        {!visibleMenu && (
+                            <div className='openMenuMobileIcon' onClick={()=>{
+                                    setVisibleMenu(true)
+                                }}>
+                                <i className="fa-solid fa-bars"/>
+                            </div>
+                        )}
+                        <div className='closeMenuMobileIcon' onClick={()=>{
+                                setVisibleMenu(false)
+                            }}>
+                            <i className="fa-solid fa-xmark"/>
+                        </div>
+                        <ServiceSgaCard imgRef={'https://cdnmain.sga360.co/static/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.webp'} visbleInfo={visibleMenu} title={'Ventas'} desc={'SGA - Desarrollos'} />
+                        <MenuApp setVisibleMenu={setVisibleMenu} visibleMenu={visibleMenu} title={'General'} options={optionsMenu}/>
+                        <MenuApp setVisibleMenu={setVisibleMenu} visibleMenu={visibleMenu} title={'Ajustes'} options={secondOptionsMenu}/>
                     </div>
                 </aside>
                 <main className='bodyApp'>
                     <Routes>
                             <Route path='/' element={<HomeProcess/>} />
                             <Route path='/new' element={<New></New>} />
+                            <Route path='/edocuments' element={<ElectronicDocuments/>} />
+                            <Route path='/edocuments/:e_doc_id' element={<NoAccess 
+                                title={'Seccion en construcción'}
+                                description={`Estamos trabajando para ofrecer esta seccion lo mas pronto posible :)`}
+                                img={'https://cdnmain.sga360.co/static/Gemini_Generated_Image_hqrv0mhqrv0mhqrv-2_lne97l.webp'}
+                                noExit={true}
+                                />} />
+                            <Route path='quickActions' element={<QuickActions/>} />
+                            <Route path='/myBussines/' element={<MyBussines/>}/>
+                            <Route path='/myBussines/costCenters' element={<CostCenters/>}/>
+                            <Route path='/myBussines/Bussines' element={<Bussines/>}/>
+                            <Route path='/myBussines/Bussines/:bussines_id' element={<PathLocation/>}/>
+                            <Route path='/myBussines/Units' element={<MyBussinesUnits/>}/>
+                            <Route path='/myBussines/Units/:store_id' element={<StoreDetail/>}/>
+                            <Route path='/myBussines/Units/:store_id/:cellar_id' element={<CellarDetail/>}/>
+                            <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
+                            <Route path='/modules/*' element={<Modules/>}/>
+                            <Route path='/services' element={<Services/>}/>
+                            <Route path='/cashBoxes' element={<CashBoxes/>}/>
+                                <Route path='/cashBoxes/:cashBox_id' element={<CashBoxesDeetail/>}/>
+                            <Route path='/services/:serviceRequierd' element={<PathLocation/>}/>
+                            <Route path='/billing' element={<span>Facturación</span>}/>
+                            <Route path='/messages/*' element={<Messages/>} />
                             <Route path='/thirdparties/*' element={<ThirdParties/>} />
                             <Route path='/thirdparties/:thirdparty_id' element={<ThirdPartyDetail/>} />
-
-                            <Route path='/movements'>
-                                <Route index element={<Movements/>} />
-                                <Route path='details' element={<MovementsRecord/>} /> 
-                            </Route>
-
-                            <Route path='/mainPanel/*' element={<ControlPanel/>}/>
-                            <Route path='/CashBoxes' element={<CashBoxes/>}/>
-                            <Route path='/CashBoxes/:cashBox_id' element={<CashBoxesDeetail/>}/>
-                            <Route path='/treasury' element={<Treasury/>}/>
-                            <Route path='/banks' element={<Banks/>}/>
-                                <Route path='/banks/:bank_id' element={<BanksDetails/>}/>
-                            <Route path='/transfers' element={<span><Transactions/></span>}/>
-                            <Route path='/cashBoxes/historial' element={<span><CashHistory/></span>}/>
-                            <Route path='/payments' element={<span><Payments/></span>}/>
-                            <Route path='/collections' element={<span><Collections/></span>}/>
-                            <Route path='/minorExpenses' element={<span></span>}/>
-
-                            <Route path='/messages/*' element={<Messages/>} />
-                            <Route path='/calendar' element={<Calendar/>} />
+                            {userConfig.access != undefined && userConfig.access.sections.users.overAll && (
+                                <Route path='/users/' element={<Users/>} />
+                            )}
+                            <Route path='/users/:user_id' element={<DetailsUser/>} />
                             <Route path='/reports/*' element={<Reports/>} />
-                            <Route path='/analytics' element={<Analytics2/>} />
-                            <Route path='/analytics/*' element={<AnalyticDocDetail/>} />
-
-                            <Route path='/settings/*' element={<Settings/>} />                            
+                            <Route path='/analytics/*' element={<Analytics2/>} />
+                            <Route path='/calendar' element={<Calendar/>} />
+                            <Route path='/concepts' element={<ConceptsPlan/>} />
+                            <Route path='/accounts' element={!appInfo.accountPlanId != null? <AcountsPlan/>:<TutorialAccountsPlan/>} />
+                            <Route path='/settings/*' element={<Settings/>} />
                             <Route path='/tutorials' element={<NoAccess 
                                 title={'Seccion no disponible'}
                                 description={`Estamos trabajando para ofrecer esta seccion lo mas pronto posible :)`}
-                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1761515342/Grupo5logos_4_rhapbp.png'}
+                                img={'https://cdnmain.sga360.co/static/Grupo5logos_4_rhapbp.webp'}
                                 noExit={true}
                                 />} />
                             <Route path='/help' element={<NoAccess 
                                 title={'Seccion no disponible'}
                                 description={`Estamos trabajando para ofrecer esta seccion lo mas pronto posible :)`}
-                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1760911291/AyudaLogo1_v362of.png'}
+                                img={'https://cdnmain.sga360.co/static/AyudaLogo1_v362of.webp'}
                                 noExit={true}
                                 />} />
                             <Route path='/logOut' element={<LogOut/>} />

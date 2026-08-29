@@ -224,13 +224,13 @@
     font-weight: 600;
     color: #122;
 }
-.TutorialAccountsPlan .step3Tutorial .FormInput{
+.TutorialAccountsPlan .step3Tutorial .FacturationFormInput{
     width: 40vw;
     margin: 2vh auto;
     margin-bottom: 4vh;
 }
 
-.TutorialAccountsPlan .step3Tutorial .FormInput input{
+.TutorialAccountsPlan .step3Tutorial .FacturationFormInput input{
     height: 6vh;
     border-radius: 3vh;
     padding-left: 6vh;

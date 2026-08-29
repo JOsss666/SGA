@@ -7,6 +7,8 @@ import { moneyFormat, newElectronicNote, postInfo, printCashRecipt } from "../..
 import { FormButton } from "../../components/FormButton";
 import { FormInput } from "../../components/FormInput";
 import { isElectron } from "../../../../App";
+import { NoResults } from "../NoResults";
+import { LoadingSpace } from "../LoadingSpace";
 
 export function FormNewENote({InfoParams,reloadFun}){
 
@@ -21,7 +23,9 @@ export function FormNewENote({InfoParams,reloadFun}){
     const [step,setStep] = useState(0);
     const [disabled,setDisabled] = useState(false);
     const [loading,setLoading] = useState(false);
+    const [loadingInvoice,setLoadingInvoice] = useState(false);
     const [thirdparties,setThirdParties] = useState([]);
+    const [loadingMessage,setLoadingMessage] = useState('Cargando información');    
     const [invoices,setInvoices] = useState([]);
     const [bussines,setBussines] = useState([]);
     const [costCenters,setCostCenters] = useState([]);
@@ -40,6 +44,18 @@ export function FormNewENote({InfoParams,reloadFun}){
     const [items,setItems] = useState([]);
     const [store_id,setStore_id] = useState();
     const [total,setTotal] = useState();
+
+    const parseItemNumber = (value) => {
+        const parsedValue = Number.parseFloat(value);
+        return Number.isFinite(parsedValue) ? parsedValue : 0;
+    };
+
+    const calculateItemTotal = (item) => {
+        const quantity = Math.max(0, parseItemNumber(item.quantity));
+        const price = Math.max(0, parseItemNumber(item.price));
+        const discountRate = Math.min(100, Math.max(0, parseItemNumber(item.discount_rate)));
+        return Number((quantity * price * (1 - (discountRate / 100))).toFixed(2));
+    };
 
     const FormInfo = {
         company_info:appInfo,
@@ -88,11 +104,12 @@ export function FormNewENote({InfoParams,reloadFun}){
     }
 
     const getInvoices = async()=>{
+        console.log('Cargando facturas... ')
         let res = await postInfo('/electronicFacturation/getDocuments',{
             company_id:appInfo.company_id,
             type:'electronic invoice'
         })
-        console.log(res);
+        console.log('Facturas dispo: ',res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -106,15 +123,54 @@ export function FormNewENote({InfoParams,reloadFun}){
     }
 
     const getInvoiceInfo = async(bill_number,thirdParty_id)=>{
+        setDisabled(true);
+        setLoadingInvoice(true);
         let res = await postInfo('/electronicFacturationController.getDocumentFullInfo',{
             bill_numer:bill_number
         });
-        console.log(res);
+        console.log('/// Res: ',res)
         if(res.status == 'OK'){
+            const thirdPartyResponse = await postInfo('/getThirdParties', {
+                company_id:appInfo.company_id,
+                identificationNumber:res.data.customer.identification,
+                comercialInfo:true,
+                limit:1
+            });
+            const localThirdParty = thirdPartyResponse?.[0]
+                ? thirdPartyResponse[1]?.[0]
+                : undefined;
+            const identificationTypeCodes = {
+                CC:3,
+                NIT:6,
+                PAS:41,
+                PASAPORTE:41,
+                RC:11,
+                TI:12,
+                TE:21,
+                CE:22
+            };
+            const localIdentificationType = localThirdParty?.indentification_type
+                ?.trim()
+                .toUpperCase();
+            const identificationDocumentId = identificationTypeCodes[localIdentificationType];
+
+            if(!localThirdParty || identificationDocumentId == undefined){
+                addNotification({
+                    type:'error',
+                    title:'Tipo de identificación no configurado',
+                    description:`No se encontró un tipo de identificación válido para el cliente ${res.data.customer.identification}.`
+                });
+                setLoadingInvoice(false);
+                setDisabled(false);
+                return;
+            }
+
             setInvoiceInfo(res.data)
             setThirdPartyInfo({
-                id:thirdParty_id,
+                ...localThirdParty,
+                id:localThirdParty.id ?? thirdParty_id,
                 indentification_number:res.data.customer.identification,
+                identidicationType_id:identificationDocumentId,
                 names:res.data.customer.names,
                 address:res.data.customer.address,
                 phone:res.data.customer.phone,
@@ -122,6 +178,8 @@ export function FormNewENote({InfoParams,reloadFun}){
             })
             setItems(res.data.items);
         };
+        setLoadingInvoice(false);
+        setDisabled(false);
     }
 
     const getStores = async(allowedStores)=>{
@@ -179,13 +237,11 @@ export function FormNewENote({InfoParams,reloadFun}){
     // Creation Functions
 
         const handleUserConfig = async()=>{
-        console.log(appConfig.access)
         setDisabled(true)
         setLoading(true)
         await getThirdParties();
         let temInfo = {}
         if(userConfig.access != undefined){
-            console.log(userConfig.access)
             // Filtro para busqueda de tiendas
             if(!userConfig.access.stores.overAll){
                 if(userConfig.access.stores.enabled.length > 1){
@@ -230,7 +286,6 @@ export function FormNewENote({InfoParams,reloadFun}){
         }
         
         if(temInfo != {}){
-            console.log(temInfo);
             setInfo(temInfo);
         }
         setLoading(false);
@@ -240,21 +295,23 @@ export function FormNewENote({InfoParams,reloadFun}){
     const handleCreationOfNote = async(doc_id)=>{
         let itemsToFac = [];
         items.forEach(item => {
-            console.log('??? ',item)
+            const quantity = Math.max(0, parseItemNumber(item.quantity));
+            const price = Math.max(0, parseItemNumber(item.price));
+            const discountRate = Math.min(100, Math.max(0, parseItemNumber(item.discount_rate)));
             itemsToFac.push(
                 {
                     "code_reference": item.code_reference? item.code_reference:'-',
                     "name": item.name? item.name:item.service_name,
-                    "quantity": parseFloat(item.quantity),
-                    "discount": 0,
-                    "discount_rate": 0,
-                    "price": parseFloat(item.price),
-                    "tax_rate": "19.00",
-                    "unit_measure_id": 70,
-                    "standard_code_id": 1,
-                    "is_excluded": 0,
-                    "tribute_id": 1,
-                    "withholding_taxes": []
+                    "quantity": quantity,
+                    "discount": Number((quantity * price * (discountRate / 100)).toFixed(2)),
+                    "discount_rate": discountRate,
+                    "price": price,
+                    "tax_rate": `${parseItemNumber(item.tax_rate).toFixed(2)}`,
+                    "unit_measure_id": item.unit_measure_id ?? 70,
+                    "standard_code_id": item.standard_code_id ?? 1,
+                    "is_excluded": item.is_excluded ?? 0,
+                    "tribute_id": item.tribute_id ?? 1,
+                    "withholding_taxes": item.withholding_taxes ?? []
                 }
             )
         });
@@ -268,24 +325,26 @@ export function FormNewENote({InfoParams,reloadFun}){
             doc_id,
             type
         });
-        console.log(res)
         if(res.status == 'Created'){
+            console.log('Res creacion E note: ',res.data)
+            const typeNote = res.data.credit_note != undefined ? 'credit_note':'debit_note'
             addNotification({
                 type:'aproved',
-                title:`Factura Electronica #${res.data.bill.number} creada exitosamente`,
-                description:'Para consultar y previsualizar la factura haga click en esta notificación.',
+                title:`Factura Electronica #${res.data[typeNote].number} creada exitosamente`,
+                description:`Se hizo la nota ${typeNote == 'credit_note' ? 'credito':'debito'} a la factura ${res.data[typeNote].number_bill} ,para consultar y previsualizar la factura haga click en esta notificación.`,
                 onClick:()=>{
-                    window.open(`${res.data.bill.public_url}`,'_blank','noopener,noreferrer')
+                    window.open(`${res.data[typeNote].public_url}`,'_blank','noopener,noreferrer')
                 }
             })
         }
+        popOutAlert();
     }
 
     const createNote = async()=>{
+        setLoadingMessage('Creando nota');
         setDisabled(true)
         setLoading(true)
         let res = await postInfo('/facturation/newNote',FormInfo.document);
-        console.log(res);
         if(typeof(parseInt(res.id)) == 'number'){
             addNotification({
                 type:'aproved',
@@ -312,12 +371,12 @@ export function FormNewENote({InfoParams,reloadFun}){
                     due_date:0,
                     for_wallet:element.for_wallet,
                     voucher:element.voucher,
-                    cashBox_id,
-                    shift_id,
+                    //cashBox_id,
+                    //shift_id,
                 })
             });
             // Pendiente definir como se contabiliza la nota debito o credito
-            await toAccount();
+            //await toAccount();
         }else{
             addNotification({
                 type:'error',
@@ -332,7 +391,6 @@ export function FormNewENote({InfoParams,reloadFun}){
     }
 
      const toAccount = async()=>{
-        console.log(FormInfo)
         let res = await postInfo('/createTransaction',FormInfo);
         const insertId = parseInt(res[0]);
         if(typeof(insertId) == 'number' && insertId != NaN && insertId != undefined){
@@ -341,7 +399,7 @@ export function FormNewENote({InfoParams,reloadFun}){
                 title:`Movimiento contabilizado correctamente`,
                 description:`La transacción ${insertId} fue contabilizada correctamente.`
             })
-            updateTransactions(insertId);
+            //updateTransactions(insertId);
         }else{
             addNotification({
                 type:'error',
@@ -356,24 +414,24 @@ export function FormNewENote({InfoParams,reloadFun}){
     
     const handleSelectInvoice = async(element)=>{
         if(element.id == undefined) return;
-        await getInvoiceInfo(element.number);
+        await getInvoiceInfo(element.number, element.thirdParty_id);
     }
 
         // Values change Handle events
         
-        const updateItemValue = (itemIndex, value,units) => {
-            items.forEach((element,index) => {
-                console.log(index,itemIndex)
-                console.log(element);
-            });
-            setItems(prev => 
-                prev.map((item,index) => 
-                    itemIndex === index
-                        ? { ...item, ['total']: (parseFloat(value) * parseFloat(units))} 
-                        : item
-                    )
-                );
-            };
+        const updateItemValue = (itemIndex, field, value) => {
+            setItems(prev =>
+                prev.map((item,index) => {
+                    if (itemIndex !== index) return item;
+
+                    const updatedItem = { ...item, [field]: value };
+                    return {
+                        ...updatedItem,
+                        total: calculateItemTotal(updatedItem)
+                    };
+                })
+            );
+        };
 
     // EventsListeners
 
@@ -381,28 +439,22 @@ export function FormNewENote({InfoParams,reloadFun}){
         if(mode == undefined || mode == null)return;
         getInvoices(); 
         handleUserConfig();
+        setStep(1);
     },[mode]);
 
     useEffect(()=>{
-        console.log(thirdParyInfo)
     },[thirdParyInfo])
 
     useEffect(() => {
-        console.log('Mod Items')
         const s = items.reduce((acc, item) => acc + (parseFloat(item.total) || 0), 0);
         setTotal(s);
     }, [items]);
 
     useEffect(() => {
-        console.log('Act total',total)
         if(invoiceInfo.bill == undefined) return;
-        console.log('Ttl Actual',total);
-        console.log('Ttt Original ',invoiceInfo.bill.total);
         if(total > parseFloat(invoiceInfo.bill.total)){
-            console.log('Es debito')
             setType('Debit Note');
         }else{
-            console.log('Es crédito')
             setType('Credit Note');
         }
     }, [total,invoiceInfo]);
@@ -416,7 +468,7 @@ export function FormNewENote({InfoParams,reloadFun}){
                 />
             </div>
             {step == 0 && (
-                <form className="step1Form" action="" onSubmit={(e)=>{
+                <form className="step1Form initialSelection" action="" onSubmit={(e)=>{
                     e.preventDefault();
                     setStep(1);
                 }}>
@@ -424,13 +476,12 @@ export function FormNewENote({InfoParams,reloadFun}){
                         {text:'Asociada a una factura registrada en SGA',value:'1'},  
                         {text:'Asociada a un tercero',value:'2'}
                     ]}/>
-                    <FormButton disabled={mode == undefined? true:disabled} text={'Continuar'}/>
-                    <FormButton negative={true} text={'Cancelar'} onClick={()=>{
-                        popOutAlert();
-                    }}/>
                 </form>
             )}
-            {step == 1 && (
+            {loading && (
+                <LoadingSpace title={loadingMessage} description={'Esto no debe tardar mucho...'}/>
+            )}
+            {!loading &&  step == 1 && (
                 <form className="step2Form" action="" onSubmit={(e)=>{
                     e.preventDefault();
                     createNote();
@@ -448,7 +499,13 @@ export function FormNewENote({InfoParams,reloadFun}){
                     {mode == 2 && (
                         <SearchinList title={'Terceros'} list={thirdparties} placeHolder={'Seleccione el tercero'} disabled={disabled}/>
                     )}
-                    {invoiceInfo.bill != undefined && (
+                    {loadingInvoice && (
+                        <LoadingSpace title={'Cargando informacion de la factura'} description={'Esto no debe tardar mucho'}/>
+                    )}
+                    {!loadingInvoice && invoiceInfo.bill == undefined && (
+                        <NoResults title={'Selecciona una factura para generar la nota'} img={'https://cdn-icons-png.flaticon.com/512/2432/2432926.png'} />
+                    )}
+                    {!loadingInvoice && invoiceInfo.bill != undefined && (
                         <div className="invoiceInfoContainer">
                             <div className="invoiceHead">
                                 <FormInput title={'Tercero'} value={invoiceInfo.customer.names} disabled={true}/>
@@ -470,26 +527,27 @@ export function FormNewENote({InfoParams,reloadFun}){
                                     <FormInput 
                                         title={'Unidades'}
                                         type={'number'}
-                                        action={(value)=>{
-                                            updateItemValue(index,element.price,value);
-                                        }}
-                                        value={parseFloat(element.quantity)?.toFixed(2)}
+                                        min={0}
+                                        step={0.01}
+                                        action={(value)=>updateItemValue(index,'quantity',value)}
+                                        value={element.quantity}
                                         disabled={disabled}/>
                                     <FormInput 
                                         title={'Precio'}
                                         type={'number'}
+                                        min={0}
+                                        step={0.01}
                                         value={element.price}
-                                        action={(value)=>{
-                                            console.log(value)
-                                            updateItemValue(index,value,element.quantity);
-                                        }}
+                                        action={(value)=>updateItemValue(index,'price',value)}
                                         disabled={disabled}/>
                                     <FormInput 
                                         title={'Descuento %'}
-                                        value={element.discount_rate}
+                                        value={element.discount_rate ?? 0}
                                         min={0}
+                                        max={100}
                                         step={0.01}
                                         type={'number'}
+                                        action={(value)=>updateItemValue(index,'discount_rate',value)}
                                         disabled={disabled}/>
                                     <FormInput 
                                         title={'Retenciones %'}

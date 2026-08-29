@@ -76,7 +76,6 @@ export function FormNewDC({info,reloadFun}){
             company_id:appInfo.company_id,
             typePlanAccount:appInfo.accountPlanType
         })
-        console.log(res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -93,7 +92,6 @@ export function FormNewDC({info,reloadFun}){
 
     const getThirdParties = async()=>{
         let res = await postInfo('/getThirdParties',{company_id:appInfo.company_id});
-        console.log(thirdParties)
         if(res[0]){
             let C = [];
             res[1].forEach(element => {
@@ -160,7 +158,6 @@ export function FormNewDC({info,reloadFun}){
         setDisabled(true);
         setLoading(true);
         let res = await postInfo('/process/createDC',formInfo);
-        console.log(res);
         if(typeof res === 'number'){
             addNotification({
                 title:`DC#${res} creado`,
@@ -194,7 +191,6 @@ export function FormNewDC({info,reloadFun}){
             company_id:appInfo.company_id,
             typePlanAccount:appInfo.accountPlanType
         })
-        console.log(res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {

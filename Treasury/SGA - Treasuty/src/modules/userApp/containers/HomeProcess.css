@@ -7,7 +7,6 @@
     background-size: 100% 100%;
     transition: .3s;
     background-image: var(--bgImage);
-    background-position: 90deg;
     position: absolute;
     top: 0;
     left: 0;
@@ -99,4 +98,20 @@
 .HomeProcess .HomeSearch{
     position: absolute;
     left: 32.5%;
+}
+
+@media (max-width:500px) {
+
+    .HomeProcess{
+        background-image: var(--mobileBgImage);
+    }
+
+    .HomeProcess .AiResume{
+        display: none;
+    }
+
+    .HomeProcess .HomeSearch{
+        width:90dvw;
+        left: 5dvw;
+    }
 }

@@ -9,7 +9,7 @@ export function NotificationsApp(){
     return(
         <div className="NotificationsApp">
             {notifications.length >0 && notifications.map((element,index)=>(
-                <NotificationCard key={`noti_${index}`} type={element.type} title={element.title} description={element.description} index={index} fixed={element.fixed} />
+                <NotificationCard key={`noti_${index}`} type={element.type} title={element.title} description={element.description} index={index} fixed={element.fixed} onClick={element.onClick}/>
             ))}
         </div>
     )

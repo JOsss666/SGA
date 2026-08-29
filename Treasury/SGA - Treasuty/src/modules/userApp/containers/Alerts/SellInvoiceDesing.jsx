@@ -11,7 +11,7 @@ import { printCashRecipt } from '../../../../utils/functions';
 import JsBarcode from 'jsbarcode';
 import { useRef } from 'react';
 
-export function SellInvoiceDesign(){
+export function SellInvoiceDesign({id,noShare}){
 
     // requirements
     const {appInfo} = useAppInfo();
@@ -22,6 +22,7 @@ export function SellInvoiceDesign(){
     const [docInfo,setDocInfo] = useState({});
     const [paymentMethods,setPaymentMethods] = useState([]);
     const [electronInfo,setElectronInfo] = useState({});
+    const [baseValue,setBaseValue] = useState(0);
     const total = useMemo(() => {
         console.log('///////// ',paymentMethods);
         if(paymentMethods.length == 0) return docInfo.total;
@@ -31,7 +32,7 @@ export function SellInvoiceDesign(){
 
     // Control
     const barcodeRef = useRef();
-    const [stage,setStage] = useState(0);
+    const [stage,setStage] = useState(id != undefined ? 1:0);
     const [loading,setLoading] = useState(false);
     const [disabled,setDisabled] = useState(false);
     const [barcodeBase64, setBarcodeBase64] = useState(null);
@@ -44,11 +45,23 @@ export function SellInvoiceDesign(){
 
 
     // utils
+    const handleBase = (items)=>{
+        let s = 0;
+        items.forEach(item => {
+            if(item.tax_rate != undefined){
+                s += (item.total/(
+                    1 + (item.tax_rate/100)
+                ))
+            }
+        });
+        setBaseValue(s);
+    }
 
     const handleTaxes = (items) => {
         const groupedTaxes = items.reduce((acc, item) => {
             if (!item.tax_id) return acc;
-            const taxTotal = (item.total * item.tax_rate) / 100;
+            const itemBase = (item.total/(1 + (item.tax_rate/100)))
+            const taxTotal = itemBase * (item.tax_rate/100);
             if (!acc[item.tax_id]) {
                 acc[item.tax_id] = {
                     id: item.tax_id,
@@ -89,6 +102,7 @@ export function SellInvoiceDesign(){
         let res = await postInfo('/getDocuments',{
             company_id:appInfo.company_id,
             allowedTypes:['Sell Invoice'],
+            id,
             instance_id
         })
         console.log(res)
@@ -101,7 +115,8 @@ export function SellInvoiceDesign(){
                 })
             });
             if(C.length == 1){
-                handleSelectDoc(C[0])
+                console.log('Auto select de ',C[0])
+                handleSelectDoc(C[0].value)
             }
             setCashRecipts(C)
         }else(
@@ -203,6 +218,7 @@ export function SellInvoiceDesign(){
         setDocInfo(element);
         setInstaceId(element.instance_id)
         setInstanceOwnSerial(element.instanceOwnSerial)
+        console.log('Cambiando a stage 1')
         setStage(1);
     }
 
@@ -217,12 +233,17 @@ export function SellInvoiceDesign(){
     },[instance_id])
 
     useEffect(()=>{
-        getInstances();
-        getAttachedDocuments();
+        if(id == undefined){
+            getInstances();
+            getAttachedDocuments();
+        }else{
+            console.log('Cargando factrura directamente')
+            getAttachedDocuments();
+        }
     },[])
 
     useEffect(()=>{
-        console.log(attachedItems)
+        handleBase(attachedItems)
         handleTaxes(attachedItems);
     },[attachedItems])
 
@@ -279,62 +300,66 @@ export function SellInvoiceDesign(){
             setStage(0);
             setInstaceId();
         }}><i className="fa-solid fa-arrow-left"/>Volver</span>
-        <div className="CashReciptDesign_suitElectronOptions">
-            {isElectron && (
-                <ButtonMenu title={"Imprimir"} noRotate={true} onClick={async()=>{
-                    await printSellInvoice({
-                        // FormInfo
-                        docInfo:{
-                            doc_id:docInfo.id,
-                            doc_type:docInfo.document_type,
-                            instance_id,
-                            thirdParty_name:thirdPartyInfo.names,
-                            description:docInfo.description,
-                            ownSerial:docInfo.ownSerial,
-                            total:docInfo.total,
-                            paymentMethod:paymentMethods,
-                            instanceOwnSerial
-                        },
-                        electronInfo,
-                        thirdPartyInfo:thirdPartyInfo,
-                        total,
-                        totalTaxes,
-                        taxes,
-                        attachedItems,
-                        paymentMethods
-                    },appInfo,true)
-                    await printSellInvoice({
-                        // FormInfo
-                        docInfo:{
-                            doc_id:docInfo.id,
-                            doc_type:docInfo.document_type,
-                            instance_id,
-                            thirdParty_name:thirdPartyInfo.names,
-                            description:docInfo.description,
-                            ownSerial:docInfo.ownSerial,
-                            total:docInfo.total,
-                            paymentMethod:paymentMethods,
-                            instanceOwnSerial
-                        },
-                        electronInfo,
-                        thirdPartyInfo:thirdPartyInfo,
-                        total,
-                        totalTaxes,
-                        taxes,
-                        attachedItems,
-                        paymentMethods
-                    },appInfo,false)
-                }} children={
-                    <i className="fa-solid fa-print"/>
+        {!noShare && (
+            <div className="CashReciptDesign_suitElectronOptions">
+                {isElectron && (
+                    <ButtonMenu title={"Imprimir"} noRotate={true} onClick={async()=>{
+                        await printSellInvoice({
+                            // FormInfo
+                            docInfo:{
+                                doc_id:docInfo.id,
+                                doc_type:docInfo.document_type,
+                                instance_id,
+                                thirdParty_name:thirdPartyInfo.names,
+                                description:docInfo.description,
+                                ownSerial:docInfo.ownSerial,
+                                total:docInfo.total,
+                                paymentMethod:paymentMethods,
+                                instanceOwnSerial
+                            },
+                            electronInfo,
+                            thirdPartyInfo:thirdPartyInfo,
+                            total,
+                            baseValue,
+                            totalTaxes,
+                            taxes,
+                            attachedItems,
+                            paymentMethods
+                        },appInfo,true)
+                        await printSellInvoice({
+                            // FormInfo
+                            docInfo:{
+                                doc_id:docInfo.id,
+                                doc_type:docInfo.document_type,
+                                instance_id,
+                                thirdParty_name:thirdPartyInfo.names,
+                                description:docInfo.description,
+                                ownSerial:docInfo.ownSerial,
+                                total:docInfo.total,
+                                paymentMethod:paymentMethods,
+                                instanceOwnSerial
+                            },
+                            electronInfo,
+                            thirdPartyInfo:thirdPartyInfo,
+                            total,
+                            baseValue,
+                            totalTaxes,
+                            taxes,
+                            attachedItems,
+                            paymentMethods
+                        },appInfo,false)
+                    }} children={
+                        <i className="fa-solid fa-print"/>
+                    }/>
+                )}
+                <ButtonMenu title={"Compartir"} noRotate={true} children={
+                    <i className="fa-solid fa-arrow-up-from-bracket"/>
                 }/>
-            )}
-            <ButtonMenu title={"Compartir"} noRotate={true} children={
-                <i className="fa-solid fa-arrow-up-from-bracket"/>
-            }/>
-            <ButtonMenu title={"Descargar"} noRotate={true} children={
-                <i className="fa-solid fa-download"/>
-            }/>
-        </div>
+                <ButtonMenu title={"Descargar"} noRotate={true} children={
+                    <i className="fa-solid fa-download"/>
+                }/>
+            </div>
+        )}
         <div className="CashReciptDesign" style={{
             width:"72mm",
             display:"flex",
@@ -481,12 +506,16 @@ export function SellInvoiceDesign(){
             </tbody>
         </table>
         </div>
+        <div style={{display:"flex",fontSize:"12px", width:'100%',borderTop:"dashed .5mm #000",padding:'2mm 0'}}>
+            <span style={{margin:'auto 0',fontSize:"12px"}}>Total venta: </span>
+            <strong style={{margin:"auto",marginRight:"0",textAlign:'right'}}>{moneyFormat(docInfo.total)}</strong>
+        </div>
         <span style={{margin:"2mm 0",width:"100%",borderBottom:"dashed .5mm #000"}}></span>
             <div style={{display:"flex",fontSize:"12px"}}>
                 <div style={{display:'flex',flexDirection:'column',gap:'10px 0',width:'100%'}}>
                     <div style={{display:"flex",fontSize:"12px", width:'100%'}}>
                         <span style={{margin:'auto 0',fontSize:"12px"}}>Base impuestos: </span>
-                        <strong style={{margin:"auto",marginRight:"0",textAlign:'right'}}>{moneyFormat(docInfo.total-totalTaxes)}</strong>
+                        <strong style={{margin:"auto",marginRight:"0",textAlign:'right'}}>{moneyFormat(baseValue)}</strong>
                     </div>
                     {taxes.map((element,index)=>(
                         <div key={index} style={{display:"flex",fontSize:"12px"}}>
@@ -576,6 +605,21 @@ export function SellInvoiceDesign(){
                         CUFE: {electronInfo.code}
                     </h3>
 
+                    <h3 style={{
+                        fontSize:"10px",
+                        fontFamily:"monospace",
+                        textAlign:"center",
+                        marginTop:"4mm",
+                        marginBottom:"4mm",
+                        width:"100%",
+                        wordBreak:"break-all",
+                        overflowWrap:"break-word",
+                        whiteSpace:"normal",
+                        lineHeight:"1.3"
+                    }}>
+                        Este documento no reemplaza la factura electrónica, es solo un comprobante de pago. Consulta tu factura electrónica con el codigo QR o el CUFE en el portal de la DIAN.
+                    </h3>
+
                 </div>
             )}
             <div style={{ margin: "0 auto", textAlign: "center" }}>
@@ -605,7 +649,7 @@ export function SellInvoiceDesign(){
                     }}
                 >
                     <img
-                    src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                    src="https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.webp"
                     alt="SGA"
                     style={{
                         width: "100%",

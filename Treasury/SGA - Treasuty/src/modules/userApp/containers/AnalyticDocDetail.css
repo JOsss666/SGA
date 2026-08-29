@@ -95,15 +95,15 @@
     margin-top: 3vh;
 }
 
-.AnalyticDocDetail .Search .FormInput{
+.AnalyticDocDetail .Search .FacturationFormInput{
     min-width: 1vh;
 }
 
-.AnalyticDocDetail .FormInput label{
+.AnalyticDocDetail .FacturationFormInput label{
     margin: 0;
 }
 
-.AnalyticDocDetail .FormInput .inputContainer{
+.AnalyticDocDetail .FacturationFormInput .inputContainer{
     margin-top: .5vh;
 }
     

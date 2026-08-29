@@ -53,11 +53,9 @@
     margin-bottom: 1vh;
 }
 
-
 .MenuApp .listOptions li img{
     height: 3.5vh;
     width: 3.5vh;
-    object-fit: cover;
 }
 
 .MenuApp .listOptions li:hover{
@@ -73,11 +71,7 @@
 .MenuApp .listOptions li i{
     margin-right: 1.5vw;
     font-size: clamp(2px,3vh,30px);
-    color: var(--descriptionText);
-}
-
-.MenuApp .listOptions li:hover i{
-    color: var(--mainText);
+    color: var(--sectionTitle);
 }
 
 .MenuApp .listOptions li span{

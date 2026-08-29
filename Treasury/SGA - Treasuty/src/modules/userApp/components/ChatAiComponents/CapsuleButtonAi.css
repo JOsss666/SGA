@@ -1,0 +1,104 @@
+.CapsuleButtonAi {
+    position: relative;
+    isolation: isolate;
+    min-height: 6.2vh;
+    padding: 1vh 2vh;
+    border: 0.16vh solid transparent;
+    border-radius: 4vh;
+    color: #fff;
+    background:
+        linear-gradient(145deg, #161c2c 0%, #070910 48%, #111425 100%) padding-box,
+        linear-gradient(115deg, #6ddcff 0%, #a7a4ff 45%, #fa70de 100%) border-box;
+    box-shadow:
+        inset 0 0.24vh 0.35vh #ffffff45,
+        inset 0 -0.45vh 0.8vh #000000cc,
+        inset 1.1vh 0 1.7vh #44c9ff1f,
+        inset -1.1vh 0 1.7vh #f25ad62b,
+        0 0.5vh 0 #292b50,
+        0 1.35vh 1.8vh #02030a8f,
+        0 0 1.5vh #8d83ff4d;
+    font: inherit;
+    font-size: 2.1vh;
+    font-weight: 400;
+    letter-spacing: 0.035vh;
+    cursor: pointer;
+    transform: translateY(0);
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        filter 0.18s ease;
+}
+
+.CapsuleButtonAi::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0.45vh;
+    border-radius: inherit;
+    border: 0.1vh solid #ffffff26;
+    background:
+        linear-gradient(180deg, #ffffff12 0%, transparent 42%),
+        radial-gradient(circle at 12% 100%, #58d7ff33, transparent 35%),
+        radial-gradient(circle at 88% 100%, #f55bdb30, transparent 35%);
+    pointer-events: none;
+}
+
+.CapsuleButtonAi::after {
+    content: '';
+    position: absolute;
+    z-index: -2;
+    right: 7%;
+    bottom: -1.25vh;
+    left: 7%;
+    height: 1.5vh;
+    border-radius: 50%;
+    background: linear-gradient(90deg, #4ad9ff80, #725cff66, #f45bd794);
+    filter: blur(1.1vh);
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+.CapsuleButtonAiContent {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1vh;
+    min-width: 7vh;
+    text-shadow: 0 0.2vh 0.5vh #000;
+}
+
+.CapsuleButtonAi:hover:not(:disabled) {
+    filter: brightness(1.14);
+    transform: translateY(-0.25vh);
+    box-shadow:
+        inset 0 0.24vh 0.35vh #ffffff55,
+        inset 0 -0.45vh 0.8vh #000000cc,
+        inset 1.1vh 0 1.7vh #44c9ff30,
+        inset -1.1vh 0 1.7vh #f25ad63d,
+        0 0.65vh 0 #292b50,
+        0 1.65vh 2.1vh #02030aa3,
+        0 0 2vh #9d87ff70;
+}
+
+.CapsuleButtonAi:active:not(:disabled) {
+    transform: translateY(0.45vh);
+    box-shadow:
+        inset 0 0.2vh 0.5vh #000000aa,
+        inset 0 -0.15vh 0.5vh #ffffff20,
+        0 0.15vh 0 #292b50,
+        0 0.6vh 1vh #02030a80,
+        0 0 1vh #8d83ff45;
+}
+
+.CapsuleButtonAi:focus-visible {
+    outline: 0.22vh solid #b6eaff;
+    outline-offset: 0.45vh;
+}
+
+.CapsuleButtonAi:disabled {
+    cursor: not-allowed;
+    filter: grayscale(0.65);
+    opacity: 0.55;
+}

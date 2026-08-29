@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { postInfo } from '../utils/functions';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { BankIcon } from '../assets/BankIcon';
@@ -161,44 +161,99 @@ export function AiAssistanProvider({children}){
 }
 
 export function AlertProvider({ children }) {
-    const [openAlert, setOpenAlert] = useState(false);
     const [tailAlerts, setTailAlerts] = useState([]);
-    
-    const popInAlert = (child) => {
-        console.log('Abriendo alerta')
-        setTailAlerts(prev => [...prev, {alert:child}]);
-        setOpenAlert(true);
-    }
 
-    const popOutAlert = () => {
-        if(tailAlerts.length >1){
-            let C = []
-            tailAlerts.map((element,index)=>{
-                if(index != tailAlerts.length -1){
-                    C.push(element);
+    const popInAlert = useCallback((alert, options = {}) => {
+        const id = options.id ?? `alert-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+        setTailAlerts(current => {
+            const existingIndex = current.findIndex(entry => entry.id === id);
+            const nextAlert = {
+                id,
+                alert,
+                fullScale: options.fullScale ?? false,
+                closeLabel: options.closeLabel ?? 'Cerrar alerta',
+            };
+
+            if (existingIndex === -1) return [...current, nextAlert];
+
+            return current.map((entry, index) => index === existingIndex
+                ? { ...entry, ...nextAlert }
+                : entry
+            );
+        });
+
+        return id;
+    }, []);
+
+    const popOutAlert = useCallback((expectedId) => {
+        setTailAlerts(current => {
+            if (current.length === 0) return current;
+
+            const topAlert = current[current.length - 1];
+            if (expectedId != null && topAlert.id !== expectedId) return current;
+
+            return current.slice(0, -1);
+        });
+    }, []);
+
+    const removeAlert = useCallback((id) => {
+        if (id == null) return;
+        setTailAlerts(current => current.filter(entry => entry.id !== id));
+    }, []);
+
+    const replaceTopAlert = useCallback((alert, options = {}) => {
+        setTailAlerts(current => {
+            if (current.length === 0) return current;
+
+            const topIndex = current.length - 1;
+            return current.map((entry, index) => index === topIndex
+                ? {
+                    ...entry,
+                    alert,
+                    fullScale: options.fullScale ?? entry.fullScale,
+                    closeLabel: options.closeLabel ?? entry.closeLabel,
                 }
-            });
-            setTailAlerts(C);
-        }else{
-        setOpenAlert(false)
-        setTailAlerts([])
-        }
-    }
+                : entry
+            );
+        });
+    }, []);
 
-    const value = {
+    const updateAlert = useCallback((id, alert, options = {}) => {
+        setTailAlerts(current => current.map(entry => entry.id === id
+            ? {
+                ...entry,
+                alert,
+                fullScale: options.fullScale ?? entry.fullScale,
+                closeLabel: options.closeLabel ?? entry.closeLabel,
+            }
+            : entry
+        ));
+    }, []);
+
+    const clearAlerts = useCallback(() => setTailAlerts([]), []);
+    const openAlert = tailAlerts.length > 0;
+
+    const setOpenAlert = useCallback((isOpen) => {
+        if (typeof isOpen === 'function') {
+            setTailAlerts(current => isOpen(current.length > 0) ? current : []);
+            return;
+        }
+        if (!isOpen) clearAlerts();
+    }, [clearAlerts]);
+
+    const value = useMemo(() => ({
         openAlert,
         setOpenAlert,
         tailAlerts,
         setTailAlerts,
         popInAlert,
-        popOutAlert
-    };
-
-    useEffect(()=>{
-        if(openAlert == false){
-            setTailAlerts([])
-        }
-    },[openAlert])
+        popOutAlert,
+        removeAlert,
+        replaceTopAlert,
+        updateAlert,
+        clearAlerts,
+    }), [openAlert, tailAlerts, popInAlert, popOutAlert, removeAlert, replaceTopAlert, updateAlert, clearAlerts, setOpenAlert]);
 
     return (
         <AppAlerts.Provider value={value}>
@@ -247,17 +302,17 @@ export function AppInfoProvider({children}){
     }
 
     const optionsMenu = [
-        {text:'Inicio',path:'',icon:<HomeIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914614/LogoInicio1_nsuzaj.png' />,action:handleNavigate},
-        {text:'Crear',path:'new',icon:<i className="fa-solid fa-plus"/>,action:handleNavigate},
-        {text:'Terceros',path:'thirdparties',icon:<ThirdPartiesIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Inicio',path:'',icon:<i className="bi bi-house"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914614/LogoInicio1_nsuzaj.png' />,action:handleNavigate},
+        {text:'Crear',path:'new',icon:<i className="ti ti-sparkle-2"/>,action:handleNavigate},
+        {text:'Terceros',path:'thirdparties',icon:<i className="fa-regular fa-user"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
         // Default tools
         {text:'Panel Principal',path:'mainPanel',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515340/Grupo5logos_3_qp85tn.png'/>,action:handleNavigate},
-        {text:'Bancos',path:'banks',icon:<BankIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
-        {text:'Cartera',path:'briefcases',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
-        {text:'Cajas POS',path:'CashBoxes',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
-        {text:'Compras - Gastos',path:'transfers',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
-        {text:'Administración Cuentas',path:'transfers',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
-        {text:'Movimientos',path:'movements',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Bancos',path:'banks',icon:<i className="bi bi-bank"/>,action:handleNavigate},
+        {text:'Cartera',path:'briefcases',icon:<i className="bi bi-wallet2"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Cajas POS',path:'CashBoxes',icon:<i className="ti ti-cash-register"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Compras - Gastos',path:'transfers',icon:<i className="bi bi-bag"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Administración Cuentas',path:'transfers',icon:<i className="fa-solid fa-book-bookmark"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Movimientos',path:'movements',icon:<i className="ti ti-arrows-double-sw-ne"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
 
 
         //{text:'Movimientos',path:'movements',icon:<MovementIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},

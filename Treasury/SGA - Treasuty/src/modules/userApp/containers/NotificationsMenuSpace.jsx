@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNotifications } from "../../../context/context"
+import { useAppInfo, useNotifications } from "../../../context/context"
 import { BoldTitle } from "../components/BoldTitle";
 import { NotificationCard } from "../components/NotificationCard";
 import { TagIndicator } from "../components/TagIndicator";
 import './NotificationsMenuSpace.css'
 import { ButtonMenu } from "../components/ButtonMenu";
+import {useRealtime} from '../../../utils/useRealTime.js'
 
 export function NotificationsMenuSpace({visible}){
-
+    const {appInfo} = useAppInfo();
     const {notifications,addNotification,clearNotifications} = useNotifications();
     const [notiList,setNotiList] = useState([]);
     const [actualType,setActualType] = useState(0);
@@ -34,6 +35,10 @@ export function NotificationsMenuSpace({visible}){
             setNotiList(notis)
         }
     }
+
+    useRealtime(appInfo.company_id, (payload)=>{
+        console.log(`Cambio en la base de datos --> ${payload}`)
+    });
 
     useEffect(()=>{
         filterNoti()
@@ -74,7 +79,7 @@ export function NotificationsMenuSpace({visible}){
             </div>
             <div className="notiResGrid">
                 {notiList.map((element,index)=>(
-                    <NotificationCard key={index} title={element.title} type={element.type} description={element.description} fixed={true}/>
+                    <NotificationCard key={index} title={element.title} type={element.type} description={element.description} fixed={true} onClick={element.onClick}/>
                 ))}
             </div>
         </div>

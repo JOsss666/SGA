@@ -68,39 +68,9 @@
     flex-shrink: 0;
 }
 
-.ThirdpartyCard .btn-edit,
-.ThirdpartyCard .btn-delete {
-    width: clamp(1.8rem, 2.8dvh, 2.4rem);
-    height: clamp(1.8rem, 2.8dvh, 2.4rem);
-    border: none;
-    border-radius: 0.4rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: clamp(0.7rem, 1.2dvh, 0.9rem);
-    flex-shrink: 0;
-}
-
-.ThirdpartyCard .btn-edit {
-    background-color: #3498db;
-    color: white;
-}
-
-.ThirdpartyCard .btn-edit:hover {
-    background-color: #2980b9;
-    transform: scale(1.05);
-}
-
-.ThirdpartyCard .btn-delete {
-    background-color: #e74c3c;
-    color: white;
-}
-
-.ThirdpartyCard .btn-delete:hover {
-    background-color: #c0392b;
-    transform: scale(1.05);
+.ThirdpartyCard .CardActions .MoreOptions .options {
+    width: max-content;
+    min-width: 12vw;
 }
 
 .ThirdpartyCard .ContactInfo {
@@ -148,12 +118,6 @@
         font-size: clamp(0.7rem, 1.2dvh, 0.9rem);
     }
     
-    .ThirdpartyCard .btn-edit,
-    .ThirdpartyCard .btn-delete {
-        width: clamp(1.6rem, 2.5dvh, 2rem);
-        height: clamp(1.6rem, 2.5dvh, 2rem);
-    }
-    
     .ThirdpartyCard .NameSection .fa-user,
     .ThirdpartyCard .ContactItem i {
         font-size: clamp(0.7rem, 1.2dvh, 0.9rem);
@@ -183,6 +147,11 @@
     justify-content: center;
     border: 0dvh dashed var(--descriptionText);
     margin-bottom: 1vh;
+    background-color: var(--cardHover);
+}
+
+.ThirdpartyCard .ImageSection img{
+    object-fit: contain;
 }
 
 .ThirdpartyCard .ImagePlaceholder {

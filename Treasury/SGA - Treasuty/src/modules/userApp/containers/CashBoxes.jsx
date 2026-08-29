@@ -41,7 +41,7 @@ export function CashBoxes(){
     }
 
     const handleNavigate = (path)=>{
-        navigate(`/SGA_treasury/${params.company_key}/${params.user_key}/cashBoxes/${path}`);
+        navigate(`/SGA_management/${params.company_key}/${params.user_key}/cashBoxes/${path}`);
     }
 
     useEffect(()=>{
@@ -69,7 +69,7 @@ export function CashBoxes(){
                             <NormalCard 
                                 title={element.name}
                                 key={index}
-                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1769618368/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.png'}
+                                img={'https://cdnmain.sga360.co/static/Gemini_Generated_Image_s5u7cls5u7cls5u7-2_zsw5jo.webp'}
                                 onlyTitle={true}
                                 onClick={()=>{
                                     handleNavigate(element.id)

@@ -8,14 +8,33 @@ import QRCode from 'qrcode';
 import JsBarcode from 'jsbarcode';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import { useNotifications } from "../context/context";
+
+export const transactionTypeDictionary = {
+    serviceMovement: 'Servicio',
+    inventoryMovement: 'Inventario',
+    tax: 'Impuesto',
+    payment: 'Pago'
+};
+
+export function translateTransactionType(type) {
+    return transactionTypeDictionary[type] ?? type ?? '--';
+}
 
 export async function postInfo(route,informacion){
     console.log('Funcion post');
     return new Promise((resolve, reject) => {
-        console.log(urlSer+route)
+        console.log(urlSer + route);
+        const companyId = informacion && typeof informacion === 'object'
+            ? informacion.company_id
+            : undefined;
         fetch(urlSer + route ,{
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(companyId != null ? {'X-SGA-Company-Id': String(companyId)} : {})
+            },
             body: JSON.stringify(informacion)
         })
         .then(response =>{
@@ -32,16 +51,28 @@ export async function postInfo(route,informacion){
     })
 }
 
-export async function getInfo(route) {
+export async function getInfo(route, { companyId, params = {} } = {}) {
     console.log('Funcion get');
     return new Promise((resolve, reject) => {
-        console.log(urlSer + route);
+        const query = new URLSearchParams(params);
+
+        // Compatibilidad con el controller actual, que obtiene company_id
+        // desde req.query. El header es el contexto seguro usado por
+        // requireCompanyAccess cuando la ruta tiene middleware de sesión.
+        if (companyId != null && !query.has('company_id')) {
+            query.set('company_id', String(companyId));
+        }
+
+        const requestUrl = `${urlSer}${route}${query.size ? `?${query.toString()}` : ''}`;
+        console.log(requestUrl);
         
-        fetch(urlSer + route, {
+        fetch(requestUrl, {
             method: 'GET',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                ...(companyId != null ? {'X-SGA-Company-Id': String(companyId)} : {})
             }
         })
         .then(response => {
@@ -232,6 +263,157 @@ export async function parseCashBoxeToXlsx(data,title) {
     saveAs(blob, `${name}_${new Date().getTime()}.xlsx`);
 }
 
+// Descarga el informe de liquidaciones de caja por periodo (ej. mensual).
+// Recibe las filas planas que devuelve /facturation/getSettlementReportByPeriod
+// y las agrupa/anida por método de pago aquí en el frontend (por eficiencia).
+export async function parseSettlementReportByPeriodToXlsx(rows = [], options = {}) {
+    const title = options.title || "Informe de liquidaciones de caja";
+    const period = options.period || "";
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Liquidaciones de caja');
+
+    const headers = [
+        'Instancia',
+        'Documento',
+        'Concepto',
+        'Cuenta',
+        'Tercero',
+        'Naturaleza',
+        'Sub-total',
+        'Total',
+        'Responsable de cierre',
+        'Fecha',
+        'Doc. electrónico'
+    ];
+    const columnCount = headers.length;
+    const lastCol = String.fromCharCode(64 + columnCount); // "K"
+
+    // Naturaleza CR resta en caja; aplicamos el signo para que cuadre.
+    const signed = (value, nature) => {
+        const n = Number(value) || 0;
+        return nature === 'CR' ? -n : n;
+    };
+
+    // 1. Encabezado general
+    worksheet.mergeCells(`A1:${lastCol}1`);
+    const mainTitle = worksheet.getCell('A1');
+    mainTitle.value = options.companyName ? `${options.companyName} - ${title}` : title;
+    mainTitle.font = { size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
+    mainTitle.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '262626' } };
+    mainTitle.alignment = { horizontal: 'center' };
+
+    worksheet.getCell('A2').value = `Generado el: ${new Date().toLocaleString()}`;
+    worksheet.getCell('A3').value = period ? `Periodo: ${period}` : "";
+    worksheet.getCell('A4').value = `Total de movimientos: ${rows.length}`;
+
+    // 2. Agrupar por método de pago (anidación en el frontend)
+    const groupsMap = new Map();
+    rows.forEach((row) => {
+        const key = row.paymentMethod_code ?? 'SIN_CODIGO';
+        if (!groupsMap.has(key)) {
+            groupsMap.set(key, {
+                code: row.paymentMethod_code ?? '---',
+                name: row.payment_name ?? 'Sin método de pago',
+                transactions: []
+            });
+        }
+        groupsMap.get(key).transactions.push(row);
+    });
+
+    const groups = Array.from(groupsMap.values())
+        .sort((a, b) => String(a.code).localeCompare(String(b.code)));
+
+    let currentRow = 6;
+    let grandTotal = 0;
+
+    // 3. Una sección por método de pago
+    groups.forEach((group) => {
+        // Título de la sección (código + nombre del método)
+        worksheet.mergeCells(`A${currentRow}:${lastCol}${currentRow}`);
+        const methodCell = worksheet.getCell(`A${currentRow}`);
+        methodCell.value = `${group.code} — ${String(group.name).toUpperCase()}`;
+        methodCell.font = { bold: true, size: 12 };
+        methodCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'E5E5E5' } };
+        currentRow++;
+
+        // Encabezados de la tabla
+        const headerRow = worksheet.getRow(currentRow);
+        headerRow.values = headers;
+        headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        headerRow.eachCell((cell) => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '262626' } };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        });
+        currentRow++;
+
+        let groupTotal = 0;
+
+        // Transacciones del método
+        group.transactions.forEach((trans) => {
+            const subTotalSigned = signed(trans.subTotal, trans.nature);
+            const totalSigned = signed(trans.total, trans.nature);
+            groupTotal += totalSigned;
+
+            const fecha = trans.settlement_date || trans.created_at || '---';
+            const row = worksheet.addRow([
+                trans.instance_serial ? `${trans.process_code}#${trans.instance_serial}` : '---',
+                trans.ownSerial ? `${trans.doc_type}#${trans.ownSerial}` : (trans.doc_type || '---'),
+                trans.concept_name || '---',
+                trans.account_code || '---',
+                trans.thirdparty_name || '---',
+                trans.nature || '---',
+                subTotalSigned,
+                totalSigned,
+                trans.settlement_responsible || '---',
+                typeof fecha === 'string' ? fecha.replace('T', ' ').substring(0, 19) : fecha,
+                trans.e_doc_number || '---'
+            ]);
+            row.getCell(7).numFmt = '"$"#,##0';
+            row.getCell(8).numFmt = '"$"#,##0';
+        });
+
+        // Subtotal por método
+        const totalRow = worksheet.getRow(currentRow + group.transactions.length);
+        totalRow.getCell(7).value = `Total ${group.name}:`;
+        totalRow.getCell(7).font = { bold: true };
+        totalRow.getCell(8).value = groupTotal;
+        totalRow.getCell(8).font = { bold: true };
+        totalRow.getCell(8).numFmt = '"$"#,##0';
+
+        grandTotal += groupTotal;
+        currentRow += group.transactions.length + 2; // fila subtotal + espacio
+    });
+
+    // 4. Total general
+    const grandRow = worksheet.getRow(currentRow);
+    grandRow.getCell(7).value = 'TOTAL GENERAL:';
+    grandRow.getCell(7).font = { bold: true, size: 12 };
+    grandRow.getCell(8).value = grandTotal;
+    grandRow.getCell(8).font = { bold: true, size: 12 };
+    grandRow.getCell(8).numFmt = '"$"#,##0';
+
+    // 5. Anchos de columna
+    worksheet.columns = [
+        { width: 16 }, // Instancia
+        { width: 18 }, // Documento
+        { width: 30 }, // Concepto
+        { width: 14 }, // Cuenta
+        { width: 26 }, // Tercero
+        { width: 12 }, // Naturaleza
+        { width: 15 }, // Sub-total
+        { width: 15 }, // Total
+        { width: 22 }, // Responsable de cierre
+        { width: 20 }, // Fecha
+        { width: 18 }  // Doc. electrónico
+    ];
+
+    // 6. Descarga
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    saveAs(blob, `${title}${period ? ' - ' + period : ''}.xlsx`);
+}
+
 export  async function parseToCsv(info,download,name){
     const newCsv = Papa.unparse(info);
     const blob = new Blob([newCsv],{type:"text/csv;charset=utf-8;"})
@@ -245,6 +427,95 @@ export  async function parseToCsv(info,download,name){
         return newLinkDownload;
     }
 }
+
+export const downloadPdfFromResponse = (response) => {
+
+    if (response?.status !== "OK" || !response?.data?.pdf_base_64_encoded) {
+        console.error("Error: La respuesta no contiene un PDF válido", response);
+        return;
+    }
+
+    const { file_name, pdf_base_64_encoded } = response.data;
+
+    try {
+        const byteCharacters = atob(pdf_base_64_encoded);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+        const blobUrl = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        
+        const finalFileName = (`SGA_${file_name}` ?? 'SGA_download').endsWith(".pdf") ? `SGA_${file_name}` : `SGA_${file_name}.pdf`;
+        link.download = finalFileName;
+        
+        document.body.appendChild(link);
+        link.click();
+        
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+
+        return {
+            status:'OK',
+            file_name
+        }
+
+    } catch (error) {
+        console.error("Error al intentar procesar y descargar el PDF:", error);
+    }
+};
+
+export const downloadXmlFromResponse = (response) => {
+
+    // 1. Validamos buscando la propiedad específica del XML
+    if (response?.status !== "OK" || !response?.data?.xml_base_64_encoded) {
+        console.error("Error: La respuesta no contiene un XML válido", response);
+        return;
+    }
+
+    const { file_name, xml_base_64_encoded } = response.data;
+
+    try {
+        const byteCharacters = atob(xml_base_64_encoded);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        
+        // 2. Cambiamos el tipo MIME a application/xml
+        const blob = new Blob([byteArray], { type: "application/xml" });
+        const blobUrl = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        
+        // 3. Aseguramos que la extensión final sea .xml
+        const finalFileName = (`SGA_${file_name}` ?? 'SGA_download').endsWith(".xml") 
+            ? `SGA_${file_name}` 
+            : `SGA_${file_name}.xml`;
+            
+        link.download = finalFileName;
+        
+        document.body.appendChild(link);
+        link.click();
+        
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+
+        return {
+            status: 'OK',
+            file_name
+        }
+
+    } catch (error) {
+        console.error("Error al intentar procesar y descargar el XML:", error);
+    }
+};
 
 export async function componentToPdf(component,download = true,options = {},name = "SGA-descarga.pdf") {
     const { title = "", scale = 2 } = options;
@@ -337,8 +608,11 @@ export function moneyFormat(value){
     }
 
     // Usamos Intl.NumberFormat para máxima eficiencia
-    // 'de-DE' usa el punto como separador de miles
-    return new Intl.NumberFormat('de-DE').format(value);
+    // 'de-DE' usa el punto como separador de miles y la coma como decimal
+    return new Intl.NumberFormat('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(value);
 
 }
 
@@ -455,6 +729,10 @@ export const uploadFiles = async (files,info) => {
     try {
         const respuesta = await fetch(urlSer + "/uploadFiles", {
             method: "POST",
+            credentials: 'include',
+            headers: info?.company_id != null
+                ? {'X-SGA-Company-Id': String(info.company_id)}
+                : {},
             body: formData,
         });
 
@@ -523,9 +801,26 @@ export async function newElectronicNote(info){
     return(res)
 }
 
-export async function getNumberingRangesElectronicInvoices() {
-    let res = await getInfo('/electronicFacturation/getNumberingRanges');
-    console.log(res);
+export async function getNumberingRangesElectronicInvoices(companyId, environment) {
+    if (companyId == null) {
+        throw new Error('No se encontró la compañía activa para consultar los rangos de numeración.');
+    }
+
+    const response = await getInfo(
+        '/electronicFacturation/getNumberingRanges',
+        {
+            companyId,
+            params: environment ? { environment } : {}
+        }
+    );
+
+    // El controller actual responde [hasRanges, ranges]. Se conserva también
+    // compatibilidad con la futura respuesta { success, data }.
+    if (Array.isArray(response)) {
+        return Array.isArray(response[1]) ? response[1] : [];
+    }
+
+    return Array.isArray(response?.data) ? response.data : [];
 }
 
 export async function showActualToken() {
@@ -538,6 +833,13 @@ export async function showAPITaxes() {
     console.log(res);
 }
 
+
+export function getTextFromValue(value,list) {
+    console.log('Val: ',value);
+    console.log('LIST: ',list)
+    const result = list.find(element => element.value == value);
+    return result ? result.text : undefined;
+}
 
 
 
@@ -746,7 +1048,7 @@ export async function printCashRecipt(info,appInfo,barCode){
                             gap:4mm;
                         ">
                             <img 
-                                src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                                src="https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.webp"
                                 style="
                                     width:100%;
                                     height:25mm;
@@ -881,7 +1183,7 @@ export async function printClientOrder(info,appInfo,barCode){
                             <span style="width: 50%; line-height: 1.2;">${element.name}</span>
                             <span style="width: 20%; text-align: center;">${element.units}</span>
                             <strong style="width: 30%; text-align: right;">
-                                ${moneyFormat(parseFloat(element.value))}
+                                ${moneyFormat(parseFloat(element.value ?? element.total))}
                             </strong>
                         </div>
                     `;
@@ -889,8 +1191,8 @@ export async function printClientOrder(info,appInfo,barCode){
             </div>
 
             <div style="display:flex;fontSize:10px;marginTop:2mm;">
-                <span>TOTAL:</span>
-                <strong style="margin-left:auto;">${Number(info.total).toLocaleString()}</strong>
+                <span style="fontSize:10px;">TOTAL:</span>
+                <strong style="margin-left:auto;fontSize:10px;">${Number(info.total).toLocaleString()}</strong>
             </div>
 
             <span style="
@@ -976,7 +1278,7 @@ export async function printClientOrder(info,appInfo,barCode){
                             gap:4mm;
                         ">
                             <img 
-                                src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                                src="https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.webp"
                                 style="
                                     width:100%;
                                     height:25mm;
@@ -1082,7 +1384,7 @@ export async function printSellInvoice(info,appInfo,barCode){
                 font-family:monospace;
                 margin:0;
             ">
-                ${info.docInfo.doc_type}#${info.docInfo.ownSerial}
+                Comprobante de pago #${info.docInfo.ownSerial}
             </h3>
 
             <span style="font-size:12px;">
@@ -1090,7 +1392,7 @@ export async function printSellInvoice(info,appInfo,barCode){
             </span>
 
             <span style="font-size:12px;">
-                Tercero: ${info.thirdPartyInfo.thirdParty_name}
+                Tercero: ${info.thirdPartyInfo.names}
             </span>
 
             <span style="font-size:12px;">
@@ -1227,6 +1529,32 @@ export async function printSellInvoice(info,appInfo,barCode){
                 border-bottom:dashed .5mm #000;
                 display:block;
             "></span>
+            <div style="
+                display:flex;
+                font-size:12px;
+                width:100%;
+            ">
+                <span style="
+                    margin:auto 0;
+                    font-size:12px;
+                ">
+                    Valor venta:
+                </span>
+                <strong style="
+                    margin:auto;
+                    margin-right:0;
+                    text-align:right;
+                ">
+                    ${moneyFormat(info.docInfo.total)}
+                </strong>
+
+            </div>
+            <span style="
+                margin:2mm 0;
+                width:100%;
+                border-bottom:dashed .5mm #000;
+                display:block;
+            "></span>
              <div style="
                 display:flex;
                 font-size:12px;
@@ -1246,7 +1574,7 @@ export async function printSellInvoice(info,appInfo,barCode){
                     margin-right:0;
                     text-align:right;
                 ">
-                    ${moneyFormat(info.docInfo.total - info.totalTaxes)}
+                    ${moneyFormat((info.baseValue??0).toFixed(0))}
                 </strong>
 
             </div>
@@ -1280,7 +1608,7 @@ export async function printSellInvoice(info,appInfo,barCode){
                             margin:auto;
                             margin-right:0;
                         ">
-                            ${moneyFormat(element.total)}
+                            ${moneyFormat(element.total.toFixed(0))}
                         </strong>
 
                     </div>
@@ -1432,6 +1760,21 @@ export async function printSellInvoice(info,appInfo,barCode){
                         CUFE: ${info.electronInfo.code}
                     </h3>
 
+                    <h3 style="
+                        font-size:10px;
+                        font-family:monospace;
+                        text-align:center;
+                        margin-top:4mm;
+                        margin-bottom:4mm;
+                        width:90%;
+                        word-break:break-all;
+                        overflow-wrap:break-word;
+                        white-space:normal;
+                        line-height:1.3;
+                    ">
+                        Este documento no reemplaza la factura electrónica, es solo un comprobante de pago. Consulta tu factura electrónica con el codigo QR o el CUFE en el portal de la DIAN.
+                    </h3>
+
                 </div>
 
             ` : ''}
@@ -1468,7 +1811,7 @@ export async function printSellInvoice(info,appInfo,barCode){
                             gap:4mm;
                         ">
                             <img 
-                                src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                                src="https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.webp"
                                 style="
                                     width:100%;
                                     height:25mm;
@@ -1518,3 +1861,281 @@ export async function scanDevices() {
         console.error("Error al escanear:", error);
     }
 }
+
+
+
+
+// Control Functions for withHoldingsControl
+
+    // Purchase
+
+    const colobiaPurchaseRetentionsLogic =  `
+        / Parametrización del arbol de decision retenciones colombia compra
+        // Para la lista de retenciones, nombre, base, tasa, id, total.
+        /*
+            0. Verificacion condiciones
+                0.1 Verificar que la compra es del company_id propietario por NIT
+            // PRIMER PASO TRABAJAR RENTA
+            1. Verificar si yo soy retenedor de renta (rent.rentTaxResponsable = true o sino break decision 1.)
+                1.1 Verificar si es exento por condiciones especiales (rent.forceExeption = true)/ --> Si break, si no continuar.
+                1.2 Verificar si el thirdParty tiene regimen simple (rent.regime = 'Regimen simple'). -> Si break, si no conrinuar
+                1.3 Verificar si el thirdParty es autoretenedor a titulo de renta (rent.rentWithholdingAgent = true). --> Si break, si no continuar
+                    // Verificar indfividualmente por cadan retencion
+                    1.4 Verificar si se respeta base minima (rent.aceptMinimumBase = true y que sea mayor o igual a la base)-->  Si cumple continuar, si no break
+                    1.5 Aplicar las retencion
+            // SEGUNDO PASO TRABAJAR IVA
+            2. Verificar si yo soy retenedor de IVA (iva.rentTaxResponsable = true o sino break decision 1.)
+                2.0 Verificar si es exento por condiciones especiales (rent.forceExeption = true)/ --> Si break, si no continuar.
+                2.1 Verficiar si algun impuesto de la categoria asociada (IVA/Impuesto) existe
+                   -- "Procedemiento" Si existe almenos un impuesto calcular la base (sumatoria de todos los disponbles).
+                2.2 Verificar pesos (Calidad mia vs Provedor 
+
+                    3 pts Entidad Estatal --> iva.stateEntity = true;
+                    2 pts Gran contribuyente DIAN --> iva.DIANMajorTaxpayer = true;
+                    1 pts Responsable de IVA --> iva.ivaTaxResponsable = true;
+
+                    (Si soy responsableCi aplicar a solo los de 1 pts);
+                    (Si no, entonces solo aplicar a los menores que yo);
+                )
+                2.3 Verificar si se respeta la base (iva.aceptMinimumBase = true, Si si validar valor minimo, sino continuar)  --> Si continua, no break
+                    // Verificar indfividualmente por cadan retencion
+                    2.4 Verificar si se respeta base minima (rent.aceptMinimumBase = true y que sea mayor o igual a la base)-->  Si cumple continuar, si no break
+                    2.5 Aplicar las retencion
+
+            // TERCER PASO TRABAJAR IMPUESTO TERRITORIAL (ICA)
+            --> Pedir en Impuesto territorial el codigo del municipio.
+             3.0 Verificar si es exento por condiciones especiales (rent.forceExeption = true)/ --> Si break, si no continuar.
+             
+             //// SELECCIONAR O REVISAR MUNICIO DE LA TRANSACCCIÓN (revision usuario).
+             3.1 Identificar region o municipio 
+             3.2 Verificar si yo soy retenedor de ICA en ese municpio (territorialTaxes.regions[id].isTaxRetainer = true o sino break decision 1.)
+             3.3 Verificar si el proveedor es autoretenedor de ICA en ese municpio (territorialTaxes.regions[id].isSelfTaxRetainer )
+             3.4 Verificar pesos (Calidad mia vs Provedor 
+
+                3 pts Gran Contribuyente --> iva.stateEntity = true;
+                2 pts Regimen Comun --> iva.DIANMajorTaxpayer = true;
+                1 pts Regimen Especial --> iva.ivaTaxResponsable = true;
+
+                (Aplicar a los menores que yo);
+            )
+                // Verificar indfividualmente por cadan retencion
+                3.5 Verificar si se respeta base minima (rent.aceptMinimumBase = true y que sea mayor o igual a la base)-->  Si cumple continuar, si no break
+                3.6 Aplicar la retencion con la 
+
+            // CUARTO PASO TRABAJAR TIMBRE
+            4.0 Verificar si es exento por condiciones especiales (rent.forceExeption = true)/ --> Si break, si no continuar.
+            4. Verificar si yo soy retenedor de timbre (rent.rentTaxResponsable = true o sino break decision 1.)
+                4.2 Verificar si el thirdParty es autoretenedor a titulo de timbre (rent.rentWithholdingAgent = true). --> Si break, si no continuar
+                    // Verificar indfividualmente por cadan retencion
+                    1.4 Verificar si se respeta base minima (rent.aceptMinimumBase = true y que sea mayor o igual a la base)-->  Si cumple continuar, si no break
+                    1.5 Aplicar las retencion
+
+            // QUINTO PASO TRABAJAR CONSUMO 
+            5.0 Verificar si es exento por condiciones especiales (rent.forceExeption = true)/ --> Si break, si no continuar.
+            5. Verificar si yo soy retenedor de timbre (rent.rentTaxResponsable = true o sino break decision 1.)
+                5.2 Verificar si el thirdParty es autoretenedor a titulo de timbre (rent.rentWithholdingAgent = true). --> Si break, si no continuar
+                    // Verificar indfividualmente por cadan retencion
+                    1.4 Verificar si se respeta base minima (rent.aceptMinimumBase = true y que sea mayor o igual a la base)-->  Si cumple continuar, si no break
+                    1.5 Aplicar las retencion
+        */
+    `;
+
+    /**
+     * Motor de decisión de retenciones en la COMPRA (Colombia).
+     *
+     * Compara la calidad fiscal del comprador (mi empresa, `appInfo`) contra la
+     * del proveedor (`thirdPartyInfo`) — ambos comparten la misma estructura
+     * `taxConfig` — y decide, familia por familia (RENTA, IVA, ICA, TIMBRE,
+     * CONSUMO), qué retenciones de `retentionList` deben aplicarse.
+     *
+     * @param {object} thirdPartyInfo  taxConfig del proveedor (vendedor).
+     * @param {object} appInfo         taxConfig de mi empresa (comprador / retenedor).
+     * @param {Array<{name:string,rate:number,base:number,total:number,type:string}>} retentionList
+     *        Retenciones candidatas. `type` indica la familia: 'rent' | 'iva' | 'ica' | 'ring' | 'consumption'.
+     * @param {object} [params]                 Parámetros de la transacción.
+     * @param {number} [params.minimumBase=0]   Umbral mínimo (en pesos) para la regla de base mínima.
+     *        Temporal: valor fijo mientras se implementan las variables globales (UVT) del ERP.
+     * @param {string} [params.municipalityCode] Código del municipio de la transacción (necesario para ICA).
+     * @returns {Array<object>} Retenciones aplicables, ya normalizadas: [{...item, base, rate, total}].
+     */
+    export function colombiaPurchaseRetentionHandler(thirdPartyInfo, appInfo, retentionList = [], params = {}) {
+
+        // Valores de `type` esperados en cada item de `retentionList` (la categoría a la
+        // que pertenece la retención). Se centralizan aquí para ajustarlos fácilmente.
+        const TYPE = { RENT: 'rent', IVA: 'iva', ICA: 'ica', RING: 'ring', CONSUMPTION: 'consumption' };
+
+        const { minimumBase = 0, municipalityCode = null } = params;
+
+        // ── Helpers compartidos ──────────────────────────────────────────────
+
+        // Retenciones candidatas que pertenecen a una familia.
+        const retentionsOf = (type) => retentionList.filter((r) => r?.type === type);
+
+        // Regla de base mínima: si el retenedor exige respetarla (`aceptMinimumBase`),
+        // se descarta la retención cuando su base es inferior al umbral. Si no la exige,
+        // la base nunca bloquea la aplicación.
+        const passesMinimumBase = (item, aceptMinimumBase) =>
+            !aceptMinimumBase || Number(item?.base || 0) >= minimumBase;
+
+        // Normaliza una retención aprobada al shape de salida y recalcula el total.
+        const buildResult = (item) => {
+            const base = Number(item?.base || 0);
+            const rate = Number(item?.rate || 0);
+            return { ...item, base, rate, total: Math.round(base * (rate / 100)) };
+        };
+
+        // Peso / jerarquía fiscal para IVA (calidad del sujeto frente al impuesto).
+        const ivaWeight = (cfg = {}) => {
+            if (cfg.stateEntity) return 3;        // Entidad estatal
+            if (cfg.DIANMajorTaxpayer) return 2;  // Gran contribuyente DIAN
+            if (cfg.ivaTaxResponsable) return 1;  // Responsable de IVA
+            return 0;
+        };
+
+        // Peso / jerarquía fiscal para ICA (por región / municipio).
+        const icaWeight = (region = {}) => {
+            if (region.grandTaxPayer) return 3;   // Gran contribuyente
+            if (region.comonRegime) return 2;     // Régimen común
+            if (region.specialRegime) return 1;   // Régimen especial
+            return 0;
+        };
+
+        // ── 1. RENTA ─────────────────────────────────────────────────────────
+        function rentPurchaseHandlerTreee() {
+            const me = appInfo?.rent || {};
+            const tp = thirdPartyInfo?.rent || {};
+
+            // 1.   Solo aplica si YO soy retenedor de renta.
+            if (!me.rentTaxResponsable) return [];
+            // 1.1  El proveedor está exento por condiciones especiales.
+            if (tp.forceExeption) return [];
+            // 1.2  El proveedor pertenece al Régimen Simple (no sujeto a retefuente de renta).
+            if (tp.regime === 'Regimen simple') return [];
+            // 1.3  El proveedor es autorretenedor de renta (se retiene él mismo).
+            if (tp.rentSelfWithholdingAgent) return [];
+
+            // 1.4 / 1.5  Por cada retención de renta: validar base mínima y aplicar.
+            return retentionsOf(TYPE.RENT)
+                .filter((item) => passesMinimumBase(item, me.aceptMinimumBase))
+                .map(buildResult);
+        }
+
+        // ── 2. IVA ───────────────────────────────────────────────────────────
+        function ivaPurchaseHandlerTreee() {
+            const me = appInfo?.iva || {};
+            const tp = thirdPartyInfo?.iva || {};
+
+            // 2.   Solo aplica si YO soy agente retenedor de IVA.
+            if (!me.ivaWithholdingAgent) return [];
+            // 2.0  El proveedor está exento por condiciones especiales.
+            if (tp.forceExeption) return [];
+
+            // 2.1  Debe existir al menos un IVA candidato; su base es la del propio IVA
+            //      (se asume ya consolidada como `item.base` por quien arma la lista).
+            const ivaRetentions = retentionsOf(TYPE.IVA);
+            if (ivaRetentions.length === 0) return [];
+
+            // 2.2  Regla de pesos: solo retengo a proveedores de jerarquía ESTRICTAMENTE menor.
+            //      Excepción por ventas CI: se retiene únicamente a los de 1 punto.
+            const myWeight = ivaWeight(me);
+            const tpWeight = ivaWeight(tp);
+            const applies = me.ivaWithholdingAgentByCI ? tpWeight === 1 : tpWeight < myWeight;
+            if (!applies) return [];
+
+            // 2.3 / 2.4 / 2.5  Validar base mínima por retención y aplicar.
+            return ivaRetentions
+                .filter((item) => passesMinimumBase(item, me.aceptMinimumBase))
+                .map(buildResult);
+        }
+
+        // ── 3. ICA (impuesto territorial) ────────────────────────────────────
+        function icaPurchaseHandlerTreee() {
+            // 3.1  Identificar la región / municipio de la transacción en MI configuración.
+            const myIca = (appInfo?.territorialTaxes || []).find((t) => t.code === '05' || t.name === 'ICA');
+            const myRegion = myIca?.regions?.find((r) => r.code === municipalityCode);
+            if (!myRegion) return [];
+
+            // Región equivalente del proveedor (para exención, autorretención y pesos).
+            const tpIca = (thirdPartyInfo?.territorialTaxes || []).find((t) => t.code === '05' || t.name === 'ICA');
+            const tpRegion = tpIca?.regions?.find((r) => r.code === municipalityCode) || {};
+
+            // 3.0  El proveedor está exento por condiciones especiales en el municipio.
+            if (tpRegion.forceExeption) return [];
+            // 3.2  Solo aplica si YO soy retenedor de ICA en ese municipio.
+            if (!myRegion.isTaxRetainer) return [];
+            // 3.3  El proveedor es autorretenedor de ICA en ese municipio.
+            if (tpRegion.isSelfTaxRetainer) return [];
+
+            // 3.4  Regla de pesos: solo retengo a proveedores de jerarquía ESTRICTAMENTE menor.
+            if (!(icaWeight(tpRegion) < icaWeight(myRegion))) return [];
+
+            // 3.5 / 3.6  Validar base mínima y aplicar (la tarifa por actividad económica
+            //            ya viene resuelta en `item.rate`; `myIca.aceptMinimumBase` rige el umbral).
+            return retentionsOf(TYPE.ICA)
+                .filter((item) => passesMinimumBase(item, myIca?.aceptMinimumBase))
+                .map(buildResult);
+        }
+
+        // ── 4. TIMBRE ────────────────────────────────────────────────────────
+        function ringPurchaseHandlerTreee() {
+            const me = appInfo?.ring || {};
+            const tp = thirdPartyInfo?.ring || {};
+
+            // 4.0  El proveedor está exento por condiciones especiales.
+            if (tp.forceExeption) return [];
+            // 4.   Solo aplica si YO soy agente retenedor de timbre.
+            if (!me.ringWithholdingAgent) return [];
+            // 4.2  El proveedor es autorretenedor de timbre.
+            if (tp.ringSelfWithholdingAgent) return [];
+
+            return retentionsOf(TYPE.RING)
+                .filter((item) => passesMinimumBase(item, me.aceptMinimumBase))
+                .map(buildResult);
+        }
+
+        // ── 5. CONSUMO ───────────────────────────────────────────────────────
+        function consumePurchaseHandlerTreee() {
+            const me = appInfo?.consumption || {};
+            const tp = thirdPartyInfo?.consumption || {};
+
+            // 5.0  El proveedor está exento por condiciones especiales.
+            if (tp.forceExeption) return [];
+            // 5.   Solo aplica si YO soy agente retenedor de consumo.
+            if (!me.consumptionWithholdingAgent) return [];
+            // 5.2  El proveedor es autorretenedor de consumo.
+            if (tp.consumptionSelfWithholdingAgent) return [];
+
+            return retentionsOf(TYPE.CONSUMPTION)
+                .filter((item) => passesMinimumBase(item, me.aceptMinimumBase))
+                .map(buildResult);
+        }
+
+        // Ejecutar el árbol completo y consolidar las retenciones aplicables.
+        return [
+            ...rentPurchaseHandlerTreee(),
+            ...ivaPurchaseHandlerTreee(),
+            ...icaPurchaseHandlerTreee(),
+            ...ringPurchaseHandlerTreee(),
+            ...consumePurchaseHandlerTreee(),
+        ];
+    }
+
+    // Sell
+
+    export function colombiaSellRetentionHandler(thirdPartyInfo,appInfo,itemInfo){
+        // Parametrización del arbol de decision retenciones colombia ventas
+        return({})
+    }
+
+
+
+
+
+    // Test clone Company:
+    export async function cloneCompany(){
+        let res = await postInfo('/companies/clone-configuration', {
+            source_company_id: 5,
+            target_company_id: 6,
+        });
+        console.log('|||||||||||||||||||||||| REspuesta clonación: ',res);
+    }

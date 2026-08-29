@@ -3,13 +3,13 @@
 
 .PercentTimeIndicator{
     display: flex;
-    flex-direction: column;
     padding: 1vh;
+    gap: 1vh;
 }
 
 .PercentTimeIndicator strong{
     font-size: clamp(2.2px,2.2vh,22px);
-    font-weight: 700;
+    font-weight: 500;
 }
 
 .PercentTimeIndicator .positive {
@@ -23,4 +23,5 @@
 .PercentTimeIndicator span{
     font-size: clamp(2px,2vh,20px);
     color: var(--descriptionText);
+    font-weight: 400;
 }

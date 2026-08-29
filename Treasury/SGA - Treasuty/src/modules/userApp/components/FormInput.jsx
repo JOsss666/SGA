@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import './FormInput.css'
 import { moneyFormat } from '../../../utils/functions';
 
@@ -7,27 +7,19 @@ export function FormInput({action,title,defaultValue,placeholder,children,type,d
     const inRef = useRef();
     const moneyFspan = useRef();
 
-    useEffect(()=>{
-        if(inRef.current != undefined){
-            if(value != undefined){
-                inRef.current.value = value;
-                if(action != undefined){
-                    action(value);
-                }
-            }
-        }
-    },[inRef])
-
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' && onSubmit != undefined) {
             if (required && !inRef.current.value) return;
             onSubmit?.(inRef.current.value);
-            inRef.current.value = ""
+            if(value === undefined){
+                inRef.current.value = "";
+            }
+            action?.('');
         }
     };
 
     return(
-        <div className="FormInput">
+        <div className="FacturationFormInput">
             <label htmlFor="">{title}</label>
             <div className="inputContainer">
                 {moneyF && (
@@ -36,18 +28,30 @@ export function FormInput({action,title,defaultValue,placeholder,children,type,d
                     }} ref={moneyFspan} className='moneFHolder'>$ {moneyFormat(JSON.parse(inRef.current!= undefined? inRef.current.value != ""?inRef.current.value:0:0))}</span>
                 )}
                 {!textArea && (
-                    <input required={required != undefined? required:true} step={step} min={min} max={max} ref={inRef} onChange={()=>{
-                        if(action != null){
-                            action(inRef.current.value)
-                        }
-                    }} disabled={disabled} onKeyDown={handleKeyDown} type={type} placeholder={placeholder}/>
+                    <input
+                        required={required != undefined? required:true}
+                        step={step}
+                        min={min}
+                        max={max}
+                        ref={inRef}
+                        value={value !== undefined ? value : undefined}
+                        defaultValue={value === undefined ? defaultValue : undefined}
+                        onChange={(event)=>action?.(event.target.value)}
+                        disabled={disabled}
+                        onKeyDown={handleKeyDown}
+                        type={type}
+                        placeholder={placeholder}
+                    />
                 )}
                 {textArea && (
-                    <textarea onChange={()=>{
-                        if(action != null){
-                            action(inRef.current.value)
-                        }
-                    }} ref={inRef} placeholder={placeholder} disabled={disabled}></textarea>
+                    <textarea
+                        value={value !== undefined ? value : undefined}
+                        defaultValue={value === undefined ? defaultValue : undefined}
+                        onChange={(event)=>action?.(event.target.value)}
+                        ref={inRef}
+                        placeholder={placeholder}
+                        disabled={disabled}
+                    />
                 )}
                 {children}
             </div>

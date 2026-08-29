@@ -21,12 +21,17 @@
     --bgImage: url('https://i.pinimg.com/1200x/23/5f/8d/235f8df39cf98153029b9cc09495f390.jpg');
     --mobileBgImage: url('https://i.pinimg.com/1200x/8a/5a/4a/8a5a4adbb2a79bd9d715a0396fc34811.jpg');
     --settingsHover:#f5f5f5;
-    --lightSelected:#F3F4F6
+    --lightSelected:#F3F4F6;
+    --chatOwnBubble:#E7F0FF;
+    --chatReceivedBubble:#ffffff;
+    --chatBubbleShadow:0 .3vh 1.4vh #0000000f;
+    --chatAccent:#3C83F7;
+    --chatBubbleBorder:#EEF1F5
 }
 
 :root.dark {
-    --bg: #000000;
-    --menuAside:#18181B;
+    --bg: #09090B;
+    --menuAside:#121212;
     --lightGradient1: #0C0A09;
     --lightGradient2: #121212;
     --lightGradient3: #1E1E1E;
@@ -36,15 +41,20 @@
     --sectionTitle:#E1E1E1;
     --descriptionText:#bbb;
     --iconHover:#303030;
-    --inputsBg:#303030;
-    --inputsBorder:#5a5a5a;
+    --inputsBg:#19181D;
+    --inputsBorder:#2c2c2c;
     --translucidMenu:#00000090;
-    --cardHover:#222;
+    --cardHover:#191919;
     --bgOpacity:#00000050;
     --settingsHover:#111;
     --bgImage: url('https://i.pinimg.com/1200x/80/d1/bd/80d1bd8f8c9777a8ff1a8b4ed534418e.jpg');
     --mobileBgImage: url('https://i.pinimg.com/1200x/74/cd/9b/74cd9bfd5eae92db44061a3664145b4b.jpg');
-    --lightSelected:#18181B
+    --lightSelected:#18181B;
+    --chatOwnBubble:#1E3A63;
+    --chatReceivedBubble:#1C1C1F;
+    --chatBubbleShadow:0 .3vh 1.4vh #00000040;
+    --chatAccent:#5B9CFF;
+    --chatBubbleBorder:#2A2A2E
 }
 
 .UserApp{
