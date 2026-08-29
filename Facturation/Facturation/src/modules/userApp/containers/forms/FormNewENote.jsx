@@ -104,10 +104,12 @@ export function FormNewENote({InfoParams,reloadFun}){
     }
 
     const getInvoices = async()=>{
+        console.log('Cargando facturas... ')
         let res = await postInfo('/electronicFacturation/getDocuments',{
             company_id:appInfo.company_id,
             type:'electronic invoice'
         })
+        console.log('Facturas dispo: ',res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -126,11 +128,49 @@ export function FormNewENote({InfoParams,reloadFun}){
         let res = await postInfo('/electronicFacturationController.getDocumentFullInfo',{
             bill_numer:bill_number
         });
+        console.log('/// Res: ',res)
         if(res.status == 'OK'){
+            const thirdPartyResponse = await postInfo('/getThirdParties', {
+                company_id:appInfo.company_id,
+                identificationNumber:res.data.customer.identification,
+                comercialInfo:true,
+                limit:1
+            });
+            const localThirdParty = thirdPartyResponse?.[0]
+                ? thirdPartyResponse[1]?.[0]
+                : undefined;
+            const identificationTypeCodes = {
+                CC:3,
+                NIT:6,
+                PAS:41,
+                PASAPORTE:41,
+                RC:11,
+                TI:12,
+                TE:21,
+                CE:22
+            };
+            const localIdentificationType = localThirdParty?.indentification_type
+                ?.trim()
+                .toUpperCase();
+            const identificationDocumentId = identificationTypeCodes[localIdentificationType];
+
+            if(!localThirdParty || identificationDocumentId == undefined){
+                addNotification({
+                    type:'error',
+                    title:'Tipo de identificación no configurado',
+                    description:`No se encontró un tipo de identificación válido para el cliente ${res.data.customer.identification}.`
+                });
+                setLoadingInvoice(false);
+                setDisabled(false);
+                return;
+            }
+
             setInvoiceInfo(res.data)
             setThirdPartyInfo({
-                id:thirdParty_id,
+                ...localThirdParty,
+                id:localThirdParty.id ?? thirdParty_id,
                 indentification_number:res.data.customer.identification,
+                identidicationType_id:identificationDocumentId,
                 names:res.data.customer.names,
                 address:res.data.customer.address,
                 phone:res.data.customer.phone,
@@ -286,15 +326,18 @@ export function FormNewENote({InfoParams,reloadFun}){
             type
         });
         if(res.status == 'Created'){
+            console.log('Res creacion E note: ',res.data)
+            const typeNote = res.data.credit_note != undefined ? 'credit_note':'debit_note'
             addNotification({
                 type:'aproved',
-                title:`Factura Electronica #${res.data.bill.number} creada exitosamente`,
-                description:'Para consultar y previsualizar la factura haga click en esta notificación.',
+                title:`Factura Electronica #${res.data[typeNote].number} creada exitosamente`,
+                description:`Se hizo la nota ${typeNote == 'credit_note' ? 'credito':'debito'} a la factura ${res.data[typeNote].number_bill} ,para consultar y previsualizar la factura haga click en esta notificación.`,
                 onClick:()=>{
-                    window.open(`${res.data.bill.public_url}`,'_blank','noopener,noreferrer')
+                    window.open(`${res.data[typeNote].public_url}`,'_blank','noopener,noreferrer')
                 }
             })
         }
+        popOutAlert();
     }
 
     const createNote = async()=>{
@@ -328,12 +371,12 @@ export function FormNewENote({InfoParams,reloadFun}){
                     due_date:0,
                     for_wallet:element.for_wallet,
                     voucher:element.voucher,
-                    cashBox_id,
-                    shift_id,
+                    //cashBox_id,
+                    //shift_id,
                 })
             });
             // Pendiente definir como se contabiliza la nota debito o credito
-            await toAccount();
+            //await toAccount();
         }else{
             addNotification({
                 type:'error',
@@ -356,7 +399,7 @@ export function FormNewENote({InfoParams,reloadFun}){
                 title:`Movimiento contabilizado correctamente`,
                 description:`La transacción ${insertId} fue contabilizada correctamente.`
             })
-            updateTransactions(insertId);
+            //updateTransactions(insertId);
         }else{
             addNotification({
                 type:'error',
@@ -371,7 +414,7 @@ export function FormNewENote({InfoParams,reloadFun}){
     
     const handleSelectInvoice = async(element)=>{
         if(element.id == undefined) return;
-        await getInvoiceInfo(element.number);
+        await getInvoiceInfo(element.number, element.thirdParty_id);
     }
 
         // Values change Handle events
