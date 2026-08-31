@@ -1,0 +1,193 @@
+.AiPet{
+    --aiPetControlSize: 4.4vh;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 30;
+}
+
+.AiPet .actualTaskContainer{
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    bottom: 105%;
+    right: 0;
+    background-color: var(--cardHover);
+    border: solid .1vh var(--inputsBorder);
+    padding: 1vh 2vh;
+    border-radius: 2vh;
+    width: clamp(12rem, 19vw, 22rem);
+    min-width: 0;
+    box-shadow: 0 .4vh 1.2vh var(--shadowColor, transparent);
+}
+
+.AiPet .actualTaskContainer strong,
+.AiPet .actualTaskContainer span{
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.AiPet .actualTaskContainer strong{
+    font-size: clamp(.85rem, 1.8vh, 1.1rem);
+    color: var(--mainText);
+    font-weight: 500;
+    margin-bottom: .25vh;
+}
+
+.AiPet .actualTaskContainer span{
+    font-size: clamp(.75rem, 1.5vh, .95rem);
+    color: var(--descriptionText);
+    font-weight: 400;
+}
+
+.AiPet .petContainer{
+    height: 12vh;
+    width: 14vh;
+    min-height: 5.5rem;
+    min-width: 6.5rem;
+    margin: 0 auto;
+}
+
+.AiPet .petInteraction{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 2vh;
+    background: transparent;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 120ms ease, background-color 120ms ease;
+}
+
+.AiPet .petInteraction:active,
+.AiPet .petInteraction[aria-pressed="true"]{
+    transform: scale(.96);
+    background-color: var(--cardHover);
+}
+
+.AiPet .petInteraction:focus-visible,
+.AiPet .optionsPet button:focus-visible,
+.AiPet .showPetButton:focus-visible{
+    outline: .25vh solid var(--mainText);
+    outline-offset: .3vh;
+}
+
+.AiPet .petContainer img{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    animation: aiPetFrameEntry 160ms ease-out;
+}
+
+.AiPet .optionsPet{
+    display: flex;
+    width: fit-content;
+    margin: 1vh auto 0;
+    padding: .5vh;
+    gap: .8rem;
+}
+
+.AiPet .optionsPet button,
+.AiPet .showPetButton{
+    border: solid .1vh var(--inputsBorder);
+    background-color: var(--inputsBg);
+    color: var(--mainText);
+    min-width: var(--aiPetControlSize);
+    min-height: var(--aiPetControlSize);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background-color 120ms ease, transform 120ms ease;
+}
+
+.AiPet .optionsPet button:hover,
+.AiPet .showPetButton:hover{
+    background-color: var(--cardHover);
+}
+
+.AiPet .optionsPet button:active,
+.AiPet .showPetButton:active{
+    transform: scale(.94);
+}
+
+.AiPet .optionsPet button i{
+    margin: auto;
+    font-size: 2vh;
+    color: currentColor;
+}
+
+.AiPet.AiPetHidden .showPetButton{
+    position: relative;
+    width: 6vh;
+    height: 6vh;
+    padding: .3vh;
+}
+
+.AiPet.AiPetHidden .showPetButton img{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.AiPet.AiPetHidden .showPetButton i{
+    position: absolute;
+    right: -.4vh;
+    top: -.4vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2vh;
+    height: 2.2vh;
+    border-radius: 50%;
+    background-color: var(--inputsBg);
+    border: solid .1vh var(--inputsBorder);
+}
+
+@keyframes aiPetFrameEntry{
+    from{
+        opacity: .75;
+        transform: scale(.97);
+    }
+    to{
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 768px){
+    .AiPet{
+        --aiPetControlSize: 44px;
+    }
+
+    .AiPet .actualTaskContainer{
+        width: min(18rem, calc(100vw - 2rem));
+    }
+
+    .AiPet .petContainer{
+        width: 6.5rem;
+        height: 5.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .AiPet .petContainer img,
+    .AiPet .petInteraction,
+    .AiPet .optionsPet button,
+    .AiPet .showPetButton{
+        animation: none;
+        transition: none;
+    }
+}
