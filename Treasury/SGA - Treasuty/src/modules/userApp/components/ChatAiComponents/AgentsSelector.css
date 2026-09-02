@@ -1,0 +1,112 @@
+@import '../../containers/UserApp.css';
+
+.AgentsSelector{ position: relative; display: flex; }
+
+.AgentsSelector.agentsSelectorPopup{
+    position: absolute;
+    width: 100%;
+    left: 0;
+    bottom: calc(100% + 1.2vh);
+    z-index: 45;
+}
+
+.AgentsSelector .agentsSelectorTrigger{
+    min-height: 4.6vh;
+    display: flex;
+    align-items: center;
+    gap: 1vh;
+    padding: .8vh 1.4vh;
+    border: solid .1vh transparent;
+    border-radius: 3vh;
+    background: transparent;
+    color: var(--mainText);
+    font: inherit;
+    font-size: clamp(.88rem, 1.8vh, 1.05rem);
+    cursor: pointer;
+}
+
+.AgentsSelector .agentsSelectorTrigger:hover,
+.AgentsSelector .agentsSelectorTrigger:focus-visible{
+    border-color: var(--inputsBorder);
+    background-color: var(--cardHover);
+    outline: none;
+}
+
+.AgentsSelector .agentsSelectorTrigger:disabled{ cursor: not-allowed; opacity: .55; }
+
+.AgentsSelector .agentsSelectorIcon{
+    width: 3vh;
+    height: 3vh;
+    flex: 0 0 3vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.AgentsSelector .agentsSelectorIcon img{
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.AgentsSelector .agentsSelectorList{
+    position: absolute;
+    bottom: calc(100% + 1vh);
+    left: 0;
+    min-width: min(28rem, 75vw);
+    max-height: min(42vh, 26rem);
+    display: flex;
+    flex-direction: column;
+    padding: .8vh;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 1.8vh;
+    background-color: var(--inputsBg);
+    overflow-y: auto;
+    z-index: 45;
+}
+
+.AgentsSelector.agentsSelectorPopup .agentsSelectorList{
+    position: relative;
+    bottom: auto;
+    width: 100%;
+    min-width: 0;
+}
+
+.AgentsSelector .agentsSelectorList > button{
+    width: 100%;
+    min-height: 5.2vh;
+    display: flex;
+    align-items: center;
+    gap: 1vh;
+    padding: .9vh 1.2vh;
+    border: 0;
+    border-radius: 1.2vh;
+    background: transparent;
+    color: var(--mainText);
+    font: inherit;
+    font-size: clamp(.85rem, 1.7vh, 1rem);
+    text-align: left;
+    cursor: pointer;
+}
+
+.AgentsSelector .agentsSelectorList > button:hover,
+.AgentsSelector .agentsSelectorList > button:focus-visible,
+.AgentsSelector .agentsSelectorList .agentsSelectorOptionSelected{
+    background-color: var(--cardHover);
+    outline: none;
+}
+
+.AgentsSelector .agentsSelectorList > button > span:nth-child(2){ flex: 1 1 auto; }
+.AgentsSelector .agentsSelectorList > button > .fa-check{ color: var(--chatAccent); }
+
+.AgentsSelector .agentsSelectorEmpty{
+    padding: 2.4vh 1.4vh;
+    color: var(--descriptionText);
+    text-align: center;
+}
+
+@media (max-width:500px){
+    .AgentsSelector .agentsSelectorTrigger > span:not(.agentsSelectorIcon){ display: none; }
+    .AgentsSelector .agentsSelectorList{ min-width: min(22rem, 88vw); }
+}

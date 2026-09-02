@@ -278,108 +278,6 @@
 }
 
 
-.ChatAi .addOptions{
-    position: absolute;
-    width: 100%;
-    max-height: min(58vh, 34rem);
-    background-color: var(--inputsBg);
-    bottom: calc(100% + 1.2vh);
-    left: 0;
-    border-radius: 2.4vh;
-    padding: 1.2vh;
-    outline: solid .1vh var(--inputsBorder);
-    border: solid .1vh var(--inputsBorder);
-    animation-name: appearAddOptions;
-    animation-duration: .18s;
-    animation-fill-mode: both;
-    z-index: 40;
-    overflow: hidden;
-}
-
-.ChatAi .addOptionsContent{
-    max-height: min(58vh, 34rem);
-    padding: .8vh .2vh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-}
-
-.ChatAi .addOptionsGroup{
-    display: flex;
-    flex-direction: column;
-    padding: .6vh 0;
-}
-
-.ChatAi .addOptionsGroup h3{
-    margin: .8vh 1.2vh .5vh;
-    color: var(--descriptionText);
-    font-size: clamp(.75rem, 1.5vh, .9rem);
-    font-weight: 500;
-}
-
-.ChatAi .addOptionRow{
-    width: 100%;
-    min-height: 5.8vh;
-    display: flex;
-    align-items: center;
-    gap: 1.4vh;
-    padding: 1vh 1.3vh;
-    border: 0;
-    border-radius: 1.4vh;
-    background: transparent;
-    color: var(--mainText);
-    text-align: left;
-    cursor: pointer;
-}
-
-.ChatAi .addOptionRow:hover,
-.ChatAi .addOptionRow:focus-visible{
-    background-color: var(--cardHover);
-    outline: none;
-}
-
-.ChatAi .addOptionRow > i{
-    width: 3vh;
-    flex: 0 0 3vh;
-    color: var(--descriptionText);
-    text-align: center;
-    font-size: clamp(1rem, 2vh, 1.25rem);
-}
-
-.ChatAi .addOptionRow > span{
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: .2vh;
-}
-
-.ChatAi .addOptionRow strong{
-    color: var(--mainText);
-    font-size: clamp(.88rem, 1.75vh, 1rem);
-    font-weight: 500;
-}
-
-.ChatAi .addOptionRow small{
-    color: var(--descriptionText);
-    font-size: clamp(.75rem, 1.45vh, .88rem);
-}
-
-.ChatAi .addOptionRow:disabled{
-    cursor: not-allowed;
-    opacity: .48;
-}
-
-.ChatAi .addOptionsEmpty{
-    min-height: 14vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1vh;
-    padding: 2vh;
-    color: var(--descriptionText);
-    text-align: center;
-}
-
 .ChatAi .spaceChatAi .MainTitleAi{
     margin-bottom: 2vh;
 }
@@ -468,17 +366,6 @@
     }
 }
 
-@keyframes appearAddOptions {
-    from{
-        opacity: 0;
-        transform: translateY(1.2vh) scale(.985);
-    }
-    to{
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
 @media (max-width:500px) {
     .ChatAi{
         width: 100%;
@@ -507,11 +394,5 @@
         margin-top: 1vh;
         height: 100%;
         width: 100%;
-    }
-}
-
-@media (prefers-reduced-motion: reduce){
-    .ChatAi .addOptions{
-        animation: none;
     }
 }

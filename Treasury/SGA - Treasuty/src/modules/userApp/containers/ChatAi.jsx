@@ -10,6 +10,8 @@ import { BoldTitle } from '../components/BoldTitle';
 import { MainTitleAi } from '../components/ChatAiComponents/MainTitleAi';
 import { OptionsChatAi } from '../components/ChatAiComponents/OptionsChatAi';
 import { ChatComposer } from '../components/ChatAiComponents/ChatComposer';
+import { AiAddHandler } from '../components/ChatAiComponents/AiAddHandler';
+import { AgentsSelector } from '../components/ChatAiComponents/AgentsSelector';
 import { ToolActivity, TypingIndicator } from '../components/ChatAiComponents/ToolActivity';
 import { stripAgentDebugMarker } from '../components/ChatAiComponents/agentText';
 import { ChatActionsContext } from '../components/ChatAiComponents/chatActionsContext';
@@ -20,12 +22,8 @@ const MAX_PROMPT_CHARACTERS = 12000;
 // ancho de banda en turnos que se van a descartar.
 const MAX_HISTORY_MESSAGES = 12;
 const SCROLL_BOTTOM_THRESHOLD = 120;
-const normalizeSearchText = value => value
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLocaleLowerCase('es');
-const getMentionQuery = value => value.match(/(?:^|\s)@([^\s@]*)$/)?.[1] ?? null;
-const removeActiveMention = value => value.replace(/(?:^|\s)@[^\s@]*$/, match => (
+const getCommandQuery = (value, command) => value.match(new RegExp(`(?:^|\\s)\\${command}([^\\s@/]*)$`))?.[1] ?? null;
+const removeActiveCommand = (value, command) => value.replace(new RegExp(`(?:^|\\s)\\${command}[^\\s@/]*$`), match => (
     match.startsWith(' ') ? ' ' : ''
 ));
 
@@ -68,6 +66,7 @@ export function ChatAi({visible}){
     const imagePreviewUrlsRef = useRef(new Set());
     const stickToBottomRef = useRef(true);
     const [visibleAddOptions,setVisibleAddOptions] = useState(false);
+    const [visibleAgentOptions,setVisibleAgentOptions] = useState(false);
     const [disabled,setDisable] = useState(false);
     const [attached,setAttached] = useState([]);
     const [toolActivities,setToolActivities] = useState([]);
@@ -91,15 +90,21 @@ export function ChatAi({visible}){
     }, []);
 
     useEffect(() => {
-        if (!visibleAddOptions) return undefined;
+        if (!visibleAddOptions && !visibleAgentOptions) return undefined;
 
         const closeOnOutsideClick = event => {
-            if (!addOptionsRef.current?.contains(event.target) && !event.target.closest?.('.ChatComposer')) {
+            const insideOpenPanel = addOptionsRef.current?.contains(event.target)
+                || event.target.closest?.('.AgentsSelector');
+            if (!insideOpenPanel && !event.target.closest?.('.ChatComposer')) {
                 setVisibleAddOptions(false);
+                setVisibleAgentOptions(false);
             }
         };
         const closeOnEscape = event => {
-            if (event.key === 'Escape') setVisibleAddOptions(false);
+            if (event.key === 'Escape') {
+                setVisibleAddOptions(false);
+                setVisibleAgentOptions(false);
+            }
         };
 
         document.addEventListener('pointerdown', closeOnOutsideClick);
@@ -108,7 +113,7 @@ export function ChatAi({visible}){
             document.removeEventListener('pointerdown', closeOnOutsideClick);
             window.removeEventListener('keydown', closeOnEscape);
         };
-    }, [visibleAddOptions]);
+    }, [visibleAddOptions, visibleAgentOptions]);
 
     useEffect(() => {
         if (appInfo.company_id == null) return undefined;
@@ -470,40 +475,51 @@ export function ChatAi({visible}){
         }
     ];
 
-    const mentionQuery = getMentionQuery(searchVal) ?? '';
-    const normalizedAddOptionsSearch = normalizeSearchText(mentionQuery.trim());
-    const filteredAddOptionGroups = addOptionGroups
-        .map(group => ({
-            ...group,
-            options:group.options.filter(option => (
-                normalizeSearchText(`${option.title} ${option.description}`)
-                    .includes(normalizedAddOptionsSearch)
-            ))
-        }))
-        .filter(group => group.options.length > 0);
+    const addQuery = getCommandQuery(searchVal, '/') ?? '';
+    const agentQuery = getCommandQuery(searchVal, '@') ?? '';
+    const filteredAddOptionGroups = AiAddHandler.filterGroups(addOptionGroups, addQuery);
+    const filteredAgentOptions = AgentsSelector.filterOptions(agentOptions, agentQuery);
 
     const selectAddOption = option => {
         if (!option.action) return;
         setVisibleAddOptions(false);
-        setSearchVal(previous => removeActiveMention(previous));
+        setSearchVal(previous => removeActiveCommand(previous, '/'));
         option.action(option);
         requestAnimationFrame(() => composerRef.current?.focus());
     };
 
     const handleComposerChange = value => {
         setSearchVal(value);
-        setVisibleAddOptions(getMentionQuery(value) != null);
+        setVisibleAddOptions(getCommandQuery(value, '/') != null);
+        setVisibleAgentOptions(getCommandQuery(value, '@') != null);
+    };
+
+    const selectMentionedAgent = option => {
+        setSelectedAgentId(option.value);
+        setVisibleAgentOptions(false);
+        setSearchVal(previous => removeActiveCommand(previous, '@'));
+        requestAnimationFrame(() => composerRef.current?.focus());
     };
 
     const handleComposerKeyDown = event => {
-        if (!visibleAddOptions) return false;
+        if (!visibleAddOptions && !visibleAgentOptions) return false;
         if (event.key === 'Escape') {
             event.preventDefault();
             setVisibleAddOptions(false);
-            setSearchVal(previous => removeActiveMention(previous));
+            setVisibleAgentOptions(false);
+            setSearchVal(previous => visibleAgentOptions
+                ? removeActiveCommand(previous, '@')
+                : removeActiveCommand(previous, '/')
+            );
             return true;
         }
         if (event.key === 'Enter' && !event.shiftKey) {
+            if (visibleAgentOptions) {
+                const firstAgent = filteredAgentOptions[0];
+                if (firstAgent) selectMentionedAgent(firstAgent);
+                event.preventDefault();
+                return true;
+            }
             const firstOption = filteredAddOptionGroups
                 .flatMap(group => group.options)
                 .find(option => option.action);
@@ -518,11 +534,12 @@ export function ChatAi({visible}){
     const openAddOptions = () => {
         if (visibleAddOptions) {
             setVisibleAddOptions(false);
-            setSearchVal(previous => removeActiveMention(previous));
+            setSearchVal(previous => removeActiveCommand(previous, '/'));
             return;
         }
-        setSearchVal(previous => `${previous}${previous && !/\s$/.test(previous) ? ' ' : ''}@`);
+        setSearchVal(previous => `${previous}${previous && !/\s$/.test(previous) ? ' ' : ''}/`);
         setVisibleAddOptions(true);
+        setVisibleAgentOptions(false);
         requestAnimationFrame(() => composerRef.current?.focus());
     };
 
@@ -610,36 +627,21 @@ export function ChatAi({visible}){
 
             <div className={`chatAiInput ${chat.length >0 ? 'fullWidthChat':''}`}>
                 {visibleAddOptions && (
-                    <div ref={addOptionsRef} className="addOptions" role="dialog" aria-label="Agregar contexto al chat">
-                        <div className="addOptionsContent">
-                            {filteredAddOptionGroups.map(group=>(
-                                <section className="addOptionsGroup" key={group.title}>
-                                    <h3>{group.title}</h3>
-                                    {group.options.map(option=>(
-                                        <button
-                                            type="button"
-                                            className="addOptionRow"
-                                            key={option.title}
-                                            disabled={!option.action}
-                                            onClick={()=>selectAddOption(option)}
-                                        >
-                                            <i className={`fa-solid ${option.icon}`} aria-hidden="true"/>
-                                            <span>
-                                                <strong>{option.title}</strong>
-                                                <small>{option.description}</small>
-                                            </span>
-                                        </button>
-                                    ))}
-                                </section>
-                            ))}
-                            {filteredAddOptionGroups.length === 0 && (
-                                <div className="addOptionsEmpty" role="status">
-                                    <i className="fa-solid fa-magnifying-glass" aria-hidden="true"/>
-                                    <span>No encontramos opciones para “{mentionQuery}”.</span>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    <AiAddHandler
+                        ref={addOptionsRef}
+                        groups={addOptionGroups}
+                        query={addQuery}
+                        onSelect={selectAddOption}
+                    />
+                )}
+                {visibleAgentOptions && (
+                    <AgentsSelector
+                        popup
+                        options={agentOptions}
+                        value={selectedAgentId}
+                        query={agentQuery}
+                        onSelect={selectMentionedAgent}
+                    />
                 )}
                 <ChatComposer
                     inputRef={composerRef}
@@ -655,10 +657,11 @@ export function ChatAi({visible}){
                 />
                 <div className="toolsOptions">
                     <ButtonMenu onClick={openAddOptions} noRotate={true} title={'Agregar'}><i className="fa-solid fa-plus"/></ButtonMenu>
-                    <OptionsChatAi
-                        action={setSelectedAgentId}
+                    <AgentsSelector
+                        onChange={setSelectedAgentId}
                         options={agentOptions}
-                        children={<i className="bi bi-sliders"/>}
+                        value={selectedAgentId}
+                        disabled={loading}
                     />
                     <div className="rightAlOptions">
                         <OptionsChatAi action={setTier} options={[
