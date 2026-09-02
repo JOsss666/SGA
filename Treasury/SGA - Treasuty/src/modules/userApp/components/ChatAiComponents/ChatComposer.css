@@ -3,14 +3,32 @@
 .ChatComposer{
     position: relative;
     display: flex;
-    align-items: center;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
     gap: .7vh;
     width: 100%;
     min-height: 6.2vh;
     padding: 1vh 1.3vh;
     border-radius: 2vh;
     background-color: var(--menuAside);
+}
+
+.ChatComposer .composerImages{
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1vh;
+    padding: .3vh .7vh .7vh;
+}
+
+.ChatComposer .composerInputRow{
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .7vh;
 }
 
 .ChatComposer textarea{
@@ -58,7 +76,7 @@
     opacity: .7;
 }
 
-.ChatComposer .AttachedCard{
+.ChatComposer .composerImages .AttachedCard{
     flex: 0 0 10vh;
 }
 

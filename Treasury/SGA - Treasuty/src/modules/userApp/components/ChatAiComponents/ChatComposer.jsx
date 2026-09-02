@@ -53,34 +53,45 @@ export function ChatComposer({
 
     const remaining = maxLength != null ? maxLength - value.length : null;
     const showCounter = remaining != null && remaining <= maxLength * 0.1;
+    const imageAttachments = attachments.filter(attachment => attachment.type === 'image');
+    const inlineAttachments = attachments.filter(attachment => attachment.type !== 'image');
 
     return (
         <div className="ChatComposer">
-            {attachments.map(attachment => (
-                attachment.type === 'image'
-                    ? <AttachedCard info={attachment} deleteAct={onRemoveAttachment} key={attachment.name}/>
-                    : (
-                        <span
-                            className={`composerAttachment ${attachment.loading ? 'composerAttachmentLoading' : ''}`}
+            {imageAttachments.length > 0 && (
+                <div className="composerImages" aria-label="Imágenes adjuntas">
+                    {imageAttachments.map(attachment => (
+                        <AttachedCard
+                            info={attachment}
+                            deleteAct={onRemoveAttachment}
                             key={attachment.name}
-                            title={attachment.label || attachment.name}
-                        >
-                            <i className={`fa-solid ${attachment.icon || 'fa-paperclip'}`} aria-hidden="true"/>
-                            <span>{attachment.label || attachment.name}</span>
-                            {attachment.loading && <i className="fa-solid fa-spinner fa-spin" aria-hidden="true"/>}
-                        </span>
-                    )
-            ))}
-            <textarea
-                ref={textAreaRef}
-                rows={1}
-                value={value}
-                disabled={disabled}
-                maxLength={maxLength}
-                placeholder={attachments.length > 0 ? '' : placeholder}
-                onChange={event => onChange?.(event.target.value)}
-                onKeyDown={handleKeyDown}
-            />
+                        />
+                    ))}
+                </div>
+            )}
+            <div className="composerInputRow">
+                {inlineAttachments.map(attachment => (
+                    <span
+                        className={`composerAttachment ${attachment.loading ? 'composerAttachmentLoading' : ''}`}
+                        key={attachment.name}
+                        title={attachment.label || attachment.name}
+                    >
+                        <i className={`fa-solid ${attachment.icon || 'fa-paperclip'}`} aria-hidden="true"/>
+                        <span>{attachment.label || attachment.name}</span>
+                        {attachment.loading && <i className="fa-solid fa-spinner fa-spin" aria-hidden="true"/>}
+                    </span>
+                ))}
+                <textarea
+                    ref={textAreaRef}
+                    rows={1}
+                    value={value}
+                    disabled={disabled}
+                    maxLength={maxLength}
+                    placeholder={placeholder}
+                    onChange={event => onChange?.(event.target.value)}
+                    onKeyDown={handleKeyDown}
+                />
+            </div>
             {showCounter && (
                 <span className={`composerCounter ${remaining <= 0 ? 'composerCounterFull' : ''}`}>
                     {remaining.toLocaleString('es-CO')}
