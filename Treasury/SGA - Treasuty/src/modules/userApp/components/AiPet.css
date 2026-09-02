@@ -17,9 +17,9 @@
     border: solid .1vh var(--inputsBorder);
     padding: 1vh 2vh;
     border-radius: 2vh;
-    width: clamp(12rem, 19vw, 22rem);
+    width: fit-content;
+    max-width: 18vh;
     min-width: 0;
-    box-shadow: 0 .4vh 1.2vh var(--shadowColor, transparent);
 }
 
 .AiPet .actualTaskContainer strong,

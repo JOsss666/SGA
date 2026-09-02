@@ -52,6 +52,8 @@ import { Analytics2 } from './Analytics2';
 import { QuickActions } from './QuickActions';
 import { ElectronicDocuments } from './ElectronicDocuments';
 import { SearchResultsPannel } from './Alerts/SearchResultsPannel';
+import { AiPet } from '../components/AiPet';
+import { Banks } from '../pages/Banks';
 
 export function UserApp(){
 
@@ -70,6 +72,7 @@ export function UserApp(){
     const [quickSearch,setQuickSearch] = useState("");
     const [visibleNotifications,setVisibleNotifications] = useState(false)
     const [visibleResultsSearch,setVisibleResultsSearch] = useState(false);
+    const [showAiPet,setShowAiPet] = useState(true);
 
     useEffect(()=>{
         getAppData();
@@ -131,6 +134,19 @@ export function UserApp(){
         if (visibleChatAi) {
             setVisibleNotifications(false);
         }
+    }, [visibleChatAi]);
+
+    useEffect(() => {
+        if (visibleChatAi) {
+            setShowAiPet(false);
+            return undefined;
+        }
+
+        const showPetTimer = window.setTimeout(() => {
+            setShowAiPet(true);
+        }, 500);
+
+        return () => window.clearTimeout(showPetTimer);
     }, [visibleChatAi]);
 
     useEffect(() => {
@@ -252,6 +268,7 @@ export function UserApp(){
                             <Route path='/myBussines/Units/:store_id/:cellar_id' element={<CellarDetail/>}/>
                             <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
                             <Route path='/modules/*' element={<Modules/>}/>
+                            <Route path='/banks/*' element={<Banks/>}/>
                             <Route path='/services' element={<Services/>}/>
                             <Route path='/cashBoxes' element={<CashBoxes/>}/>
                                 <Route path='/cashBoxes/:cashBox_id' element={<CashBoxesDeetail/>}/>
@@ -293,6 +310,7 @@ export function UserApp(){
                     <AlertsHolder/>
                 )}
                 <ChatAi visible={visibleChatAi}/>
+                {!visibleChatAi && showAiPet && <AiPet/>}
                 </>
             )}
             {loadingAppData && (
