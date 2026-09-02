@@ -2,14 +2,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ButtonMenu } from '../components/ButtonMenu'
 import './ChatAi.css'
-import { DespleList } from '../components/DespleList';
-import { CardTitleLogo } from '../components/CardTitleLogo';
 import {getAttached} from '../../../utils/functions'
 import { AI_AGENTS, listAgents, streamAgentPrompt, readDocument } from '../../../services/aiPromptService';
 import { useAiAssistant, useAppInfo, useNotifications } from '../../../context/context';
 import { ChatMessage } from '../components/ChatMessage';
 import { BoldTitle } from '../components/BoldTitle';
-import { AttachedCard } from '../components/AttachedCard';
 import { MainTitleAi } from '../components/ChatAiComponents/MainTitleAi';
 import { OptionsChatAi } from '../components/ChatAiComponents/OptionsChatAi';
 import { ChatComposer } from '../components/ChatAiComponents/ChatComposer';
@@ -23,6 +20,14 @@ const MAX_PROMPT_CHARACTERS = 12000;
 // ancho de banda en turnos que se van a descartar.
 const MAX_HISTORY_MESSAGES = 12;
 const SCROLL_BOTTOM_THRESHOLD = 120;
+const normalizeSearchText = value => value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLocaleLowerCase('es');
+const getMentionQuery = value => value.match(/(?:^|\s)@([^\s@]*)$/)?.[1] ?? null;
+const removeActiveMention = value => value.replace(/(?:^|\s)@[^\s@]*$/, match => (
+    match.startsWith(' ') ? ' ' : ''
+));
 
 const SUGGESTIONS = [
     { text: '¿Cuántas facturas de venta van este mes?', icon: 'fa-file-invoice-dollar' },
@@ -53,12 +58,14 @@ export function ChatAi({visible}){
         cancelAiTask
     } = useAiAssistant();
     const {addNotification} = useNotifications();
-    const {userInfo,appInfo} = useAppInfo();
+    const {userInfo,appInfo,appConfig} = useAppInfo();
     const fileInput = useRef();
     const chatScrollRef = useRef();
     const composerRef = useRef();
     const abortRef = useRef();
     const addNotificationRef = useRef(addNotification);
+    const addOptionsRef = useRef();
+    const imagePreviewUrlsRef = useRef(new Set());
     const stickToBottomRef = useRef(true);
     const [visibleAddOptions,setVisibleAddOptions] = useState(false);
     const [disabled,setDisable] = useState(false);
@@ -77,6 +84,31 @@ export function ChatAi({visible}){
     useEffect(() => {
         addNotificationRef.current = addNotification;
     }, [addNotification]);
+
+    useEffect(() => () => {
+        imagePreviewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+        imagePreviewUrlsRef.current.clear();
+    }, []);
+
+    useEffect(() => {
+        if (!visibleAddOptions) return undefined;
+
+        const closeOnOutsideClick = event => {
+            if (!addOptionsRef.current?.contains(event.target) && !event.target.closest?.('.ChatComposer')) {
+                setVisibleAddOptions(false);
+            }
+        };
+        const closeOnEscape = event => {
+            if (event.key === 'Escape') setVisibleAddOptions(false);
+        };
+
+        document.addEventListener('pointerdown', closeOnOutsideClick);
+        window.addEventListener('keydown', closeOnEscape);
+        return () => {
+            document.removeEventListener('pointerdown', closeOnOutsideClick);
+            window.removeEventListener('keydown', closeOnEscape);
+        };
+    }, [visibleAddOptions]);
 
     useEffect(() => {
         if (appInfo.company_id == null) return undefined;
@@ -265,6 +297,12 @@ export function ChatAi({visible}){
             text: prompt,
             user_id: userInfo.user_id,
         });
+        attached.forEach(element => {
+            if (element.preview) {
+                URL.revokeObjectURL(element.preview);
+                imagePreviewUrlsRef.current.delete(element.preview);
+            }
+        });
         setAttached([]);
         setSearchVal('');
         scrollToBottom();
@@ -293,14 +331,28 @@ export function ChatAi({visible}){
 
         for (const file of files) {
             if (attached.some(element => element.name === file.name)) continue;
-            const placeholder = { name: file.name, type: 'document', loading: true };
+            const isImage = file.type.startsWith('image/');
+            const preview = isImage ? URL.createObjectURL(file) : undefined;
+            if (preview) imagePreviewUrlsRef.current.add(preview);
+            const placeholder = {
+                name:file.name,
+                label:file.name,
+                icon:isImage ? 'fa-image' : 'fa-file',
+                type:isImage ? 'image' : 'document',
+                preview,
+                loading:true
+            };
             setAttached(previous => [...previous, placeholder]);
             try {
                 const extraction = await readDocument({ file, companyId: appInfo.company_id });
                 setAttached(previous => previous.map(element => element.name === file.name
-                    ? { name: file.name, type: 'document', content: extraction?.output ?? null }
+                    ? { ...placeholder, loading:false, content:extraction?.output ?? null }
                     : element));
             } catch (error) {
+                if (preview) {
+                    URL.revokeObjectURL(preview);
+                    imagePreviewUrlsRef.current.delete(preview);
+                }
                 setAttached(previous => previous.filter(element => element.name !== file.name));
                 addNotification?.({
                     title: 'No se pudo leer el archivo',
@@ -318,31 +370,161 @@ export function ChatAi({visible}){
         'reportDCS':'report',
         'reportFVS':'report',
         'reportCIS':'report',
+        'reportTRS':'report',
+        'reportBalance':'report',
+        'reportKardex':'report',
+        'reportProcesses':'report',
+        'reportEficiency':'report',
+        'reportBriefCases':'report',
+        'reportCashBoxesClose':'report',
+        'reportProcessInstanceHistorial':'report',
+        'reportZjClicks':'report',
+        'reportZjServices':'report',
+        'reportZjClicksAudit':'report'
     }
 
     let chatAppInfo = {
         company_id:appInfo.company_id,
         user_id:appInfo.user_id,
-        user_name:appInfo.user_name
+        user_name:appInfo.user_name,
+        typePlanAccount:appInfo.accountPlanType
     }
 
-    const handleAddAttahced = async(path)=>{
+    const handleAddAttahced = async(path, option)=>{
         setVisibleAddOptions(false);
-        setDisable(true)
-        const exists = attached.some(el => el.name === path);
-        if (!exists) {
-            let newAttachedElement = await getAttached(dictinaryPathType[path], path, chatAppInfo);
-            setAttached(prev => [
-                ...prev,
-                { name: path, type: dictinaryPathType[path], content: newAttachedElement }
-            ]);
+        const exists = attached.some(element => element.name === path);
+        if (exists) return;
+        const attachmentInfo = {
+            name:path,
+            label:option?.title || path,
+            icon:option?.icon,
+            type:dictinaryPathType[path]
+        };
+        setAttached(previous => [...previous, { ...attachmentInfo, loading:true }]);
+        try {
+            const newAttachedElement = await getAttached(dictinaryPathType[path], path, chatAppInfo);
+            setAttached(previous => previous.map(element => element.name === path
+                ? { ...attachmentInfo, content:newAttachedElement }
+                : element
+            ));
+        } catch (error) {
+            setAttached(previous => previous.filter(element => element.name !== path));
+            addNotification?.({
+                title:'No se pudo adjuntar el informe',
+                type:'error',
+                description:error.message || 'Inténtalo nuevamente.'
+            });
         }
-        setDisable(false)
     }
 
     const deleteAttached = (nameDelete)=>{
-        setAttached(previous => previous.filter(element => element.name !== nameDelete));
+        setAttached(previous => {
+            const deleted = previous.find(element => element.name === nameDelete);
+            if (deleted?.preview) {
+                URL.revokeObjectURL(deleted.preview);
+                imagePreviewUrlsRef.current.delete(deleted.preview);
+            }
+            return previous.filter(element => element.name !== nameDelete);
+        });
     }
+
+    const addOptionGroups = [
+        {
+            title:'Archivos',
+            options:[
+                {title:'Imagen', description:'Adjunta una imagen PNG o JPG', icon:'fa-image', action:()=>loadFiles(false,'image/png,image/jpeg')},
+                {title:'Archivo', description:'Adjunta un documento PDF, CSV o Markdown', icon:'fa-paperclip', action:()=>loadFiles(false,'.pdf,.csv,.md')},
+                {title:'Carpeta', description:'Adjunta archivos desde una carpeta', icon:'fa-folder-open'}
+            ]
+        },
+        {
+            title:'Informes',
+            options:[
+                {title:'Órdenes de cliente (OC)', description:'Agrega el informe de órdenes de cliente', icon:'fa-file-contract', action:option=>handleAddAttahced('reportOCS', option)},
+                {title:'Órdenes de producción (OP)', description:'Agrega el informe de órdenes de producción', icon:'fa-file-lines', action:option=>handleAddAttahced('reportOPS', option)},
+                {title:'Documentos de compra (DC)', description:'Agrega el informe de documentos de compra', icon:'fa-file-lines', action:option=>handleAddAttahced('reportDCS', option)},
+                {title:'Consumos de inventario (CI)', description:'Agrega el informe de consumos de inventario', icon:'fa-boxes-stacked', action:option=>handleAddAttahced('reportCIS', option)},
+                {title:'Facturas de venta (FV)', description:'Agrega el informe de facturas de venta', icon:'fa-file-invoice-dollar', action:option=>handleAddAttahced('reportFVS', option)},
+                {title:'Transacciones (TR)', description:'Agrega el informe de transacciones', icon:'fa-magnifying-glass-chart', action:option=>handleAddAttahced('reportTRS', option)},
+                {title:'Balance de prueba', description:'Agrega el balance contable', icon:'fa-scale-balanced', action:option=>handleAddAttahced('reportBalance', option)},
+                {title:'Estado de existencias y movimientos (Kardex)', description:'Agrega el informe Kardex', icon:'fa-boxes-packing', action:option=>handleAddAttahced('reportKardex', option)},
+                {title:'Informe de procesos', description:'Agrega las instancias activas y pendientes', icon:'fa-diagram-project', action:option=>handleAddAttahced('reportProcesses', option)},
+                {title:'Eficiencia de usuarios', description:'Agrega los indicadores de eficiencia', icon:'fa-gauge-high', action:option=>handleAddAttahced('reportEficiency', option)},
+                {title:'Informe de cartera', description:'Agrega el estado de cartera por tercero', icon:'fa-wallet', action:option=>handleAddAttahced('reportBriefCases', option)},
+                {title:'Informe de cierres de caja', description:'Agrega los cierres de caja', icon:'fa-cash-register', action:option=>handleAddAttahced('reportCashBoxesClose', option)},
+                {title:'Historial de procesos', description:'Agrega el historial de acciones', icon:'fa-clock-rotate-left', action:option=>handleAddAttahced('reportProcessInstanceHistorial', option)},
+                ...(appConfig?.access?.services?.personalized?.['custom-modules']?.['z&j_clicksControl']?.access ? [
+                    {title:'Informe de clicks', description:'Agrega el historial de clicks', icon:'fa-computer-mouse', action:option=>handleAddAttahced('reportZjClicks', option)},
+                    {title:'Informe de servicios', description:'Agrega los movimientos de servicios', icon:'fa-screwdriver-wrench', action:option=>handleAddAttahced('reportZjServices', option)},
+                    {title:'Auditoría de clicks', description:'Agrega la auditoría de clicks', icon:'fa-clipboard-check', action:option=>handleAddAttahced('reportZjClicksAudit', option)}
+                ] : [])
+            ]
+        },
+        {
+            title:'Estadísticas',
+            options:[
+                {title:'Productividad de la empresa', description:'Indicadores generales de productividad', icon:'fa-chart-simple'},
+                {title:'Eficiencia de procesos', description:'Indicadores de eficiencia operacional', icon:'fa-gauge-high'},
+                {title:'Estadísticas de usuarios', description:'Indicadores de actividad por usuario', icon:'fa-users'}
+            ]
+        }
+    ];
+
+    const mentionQuery = getMentionQuery(searchVal) ?? '';
+    const normalizedAddOptionsSearch = normalizeSearchText(mentionQuery.trim());
+    const filteredAddOptionGroups = addOptionGroups
+        .map(group => ({
+            ...group,
+            options:group.options.filter(option => (
+                normalizeSearchText(`${option.title} ${option.description}`)
+                    .includes(normalizedAddOptionsSearch)
+            ))
+        }))
+        .filter(group => group.options.length > 0);
+
+    const selectAddOption = option => {
+        if (!option.action) return;
+        setVisibleAddOptions(false);
+        setSearchVal(previous => removeActiveMention(previous));
+        option.action(option);
+        requestAnimationFrame(() => composerRef.current?.focus());
+    };
+
+    const handleComposerChange = value => {
+        setSearchVal(value);
+        setVisibleAddOptions(getMentionQuery(value) != null);
+    };
+
+    const handleComposerKeyDown = event => {
+        if (!visibleAddOptions) return false;
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            setVisibleAddOptions(false);
+            setSearchVal(previous => removeActiveMention(previous));
+            return true;
+        }
+        if (event.key === 'Enter' && !event.shiftKey) {
+            const firstOption = filteredAddOptionGroups
+                .flatMap(group => group.options)
+                .find(option => option.action);
+            if (!firstOption) return true;
+            event.preventDefault();
+            selectAddOption(firstOption);
+            return true;
+        }
+        return false;
+    };
+
+    const openAddOptions = () => {
+        if (visibleAddOptions) {
+            setVisibleAddOptions(false);
+            setSearchVal(previous => removeActiveMention(previous));
+            return;
+        }
+        setSearchVal(previous => `${previous}${previous && !/\s$/.test(previous) ? ' ' : ''}@`);
+        setVisibleAddOptions(true);
+        requestAnimationFrame(() => composerRef.current?.focus());
+    };
 
     useEffect(() => {
         if (!stickToBottomRef.current) return;
@@ -427,24 +609,52 @@ export function ChatAi({visible}){
             )}
 
             <div className={`chatAiInput ${chat.length >0 ? 'fullWidthChat':''}`}>
-                {attached.length >0 && (
-                    <div className="attachedHolder">
-                        {attached.map((element,index)=>(
-                            <AttachedCard info={element} key={index} deleteAct={deleteAttached}/>
-                        ))}
+                {visibleAddOptions && (
+                    <div ref={addOptionsRef} className="addOptions" role="dialog" aria-label="Agregar contexto al chat">
+                        <div className="addOptionsContent">
+                            {filteredAddOptionGroups.map(group=>(
+                                <section className="addOptionsGroup" key={group.title}>
+                                    <h3>{group.title}</h3>
+                                    {group.options.map(option=>(
+                                        <button
+                                            type="button"
+                                            className="addOptionRow"
+                                            key={option.title}
+                                            disabled={!option.action}
+                                            onClick={()=>selectAddOption(option)}
+                                        >
+                                            <i className={`fa-solid ${option.icon}`} aria-hidden="true"/>
+                                            <span>
+                                                <strong>{option.title}</strong>
+                                                <small>{option.description}</small>
+                                            </span>
+                                        </button>
+                                    ))}
+                                </section>
+                            ))}
+                            {filteredAddOptionGroups.length === 0 && (
+                                <div className="addOptionsEmpty" role="status">
+                                    <i className="fa-solid fa-magnifying-glass" aria-hidden="true"/>
+                                    <span>No encontramos opciones para “{mentionQuery}”.</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
                 <ChatComposer
                     inputRef={composerRef}
                     value={searchVal}
-                    onChange={setSearchVal}
+                    onChange={handleComposerChange}
+                    onKeyDown={handleComposerKeyDown}
                     onSubmit={sendAiPrompt}
                     disabled={disabled}
                     maxLength={MAX_PROMPT_CHARACTERS}
                     placeholder={'Pregunta lo que necesites'}
+                    attachments={attached}
+                    onRemoveAttachment={deleteAttached}
                 />
                 <div className="toolsOptions">
-                    <ButtonMenu onClick={()=>{setVisibleAddOptions(!visibleAddOptions)}} noRotate={true} title={'Agregar'}><i className="fa-solid fa-plus"/></ButtonMenu>
+                    <ButtonMenu onClick={openAddOptions} noRotate={true} title={'Agregar'}><i className="fa-solid fa-plus"/></ButtonMenu>
                     <OptionsChatAi
                         action={setSelectedAgentId}
                         options={agentOptions}
@@ -464,36 +674,6 @@ export function ChatAi({visible}){
                     </div>
                 </div>
             </div>
-            {visibleAddOptions && (
-                <div className="addOptions">
-                    <div onClick={()=>{setVisibleAddOptions(false)}} className="closeAddOp">
-                        <i className="fa-solid fa-xmark"/>
-                    </div>
-                    <ul>
-                        <CardTitleLogo onClick={()=>{loadFiles(false,"image/png,image/jpeg")}} title={'Imágen'}><i className="fa-solid fa-image"/></CardTitleLogo>
-                        <CardTitleLogo onClick={()=>{loadFiles(false,".pdf,.csv,.md")}} title={'Archivo'}><i className="fa-solid fa-file"/></CardTitleLogo>
-                        <CardTitleLogo title={'Carpeta'}><i className="fa-solid fa-folder-open"/></CardTitleLogo>
-                        <DespleList children={<i className="fa-solid fa-book"/>} father={{
-                            title:'Informes'
-                            }} options={[
-                                {title:'Documentos reportados',children:<i className="fa-solid fa-book"/>},
-                                {title:'Ordenes de producción',children:<i className="fa-solid fa-file-lines"/>,action:handleAddAttahced,path:'reportOPS'},
-                                {title:'Ordenes de cliente',children:<i className="fa-solid fa-file-lines"/>,action:handleAddAttahced,path:'reportOCS'},
-                                {title:'Documentos de compra',children:<i className="fa-solid fa-file-lines"/>,action:handleAddAttahced,path:'reportDCS'},
-                                {title:'Facturas de venta',children:<i className="fa-solid fa-file-lines"/>,action:handleAddAttahced,path:'reportFVS'},
-                                {title:'Consumos de inventario',children:<i className="fa-solid fa-file-lines"/>,action:handleAddAttahced,path:'reportCIS'},
-                                {title:'Volumen ordenes de clientes',children:<i className="fa-solid fa-file-lines"/>},
-                        ]}/>
-                        <DespleList children={<i className="fa-solid fa-chart-pie"></i>} father={{
-                            title:'Estadisticas'
-                            }} options={[
-                                {title:'Productividad Empresa',children:<i className="fa-solid fa-chart-simple"/>},
-                                {title:'Eficiencia Procesos',children:<i className="fa-regular fa-chart-bar"/>},
-                                {title:'Estadisticas usuarios',children:<i className="fa-regular fa-chart-bar"/>},
-                        ]}/>
-                    </ul>
-                </div>
-            )}
             {/* Fuera del panel desplegable: si se desmonta antes de que el
                 usuario elija el archivo, el evento change nunca llega. */}
             <input type="file" hidden ref={fileInput} onChange={handleFilesSelected}/>

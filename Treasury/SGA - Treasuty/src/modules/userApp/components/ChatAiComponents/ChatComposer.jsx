@@ -1,4 +1,5 @@
 import { useEffect, useImperativeHandle, useRef } from 'react';
+import { AttachedCard } from '../AttachedCard';
 import './ChatComposer.css';
 
 const MAX_HEIGHT_VH = 18;
@@ -15,7 +16,10 @@ export function ChatComposer({
     disabled,
     placeholder,
     maxLength,
-    inputRef
+    inputRef,
+    attachments = [],
+    onRemoveAttachment,
+    onKeyDown
 }) {
     const textAreaRef = useRef();
 
@@ -35,6 +39,12 @@ export function ChatComposer({
     }, [value]);
 
     const handleKeyDown = event => {
+        if (onKeyDown?.(event)) return;
+        if (event.key === 'Backspace' && !value && attachments.length > 0) {
+            event.preventDefault();
+            onRemoveAttachment?.(attachments[attachments.length - 1].name);
+            return;
+        }
         if (event.key !== 'Enter' || event.shiftKey) return;
         event.preventDefault();
         if (disabled || !value.trim()) return;
@@ -46,12 +56,28 @@ export function ChatComposer({
 
     return (
         <div className="ChatComposer">
+            {attachments.map(attachment => (
+                attachment.type === 'image'
+                    ? <AttachedCard info={attachment} deleteAct={onRemoveAttachment} key={attachment.name}/>
+                    : (
+                        <span
+                            className={`composerAttachment ${attachment.loading ? 'composerAttachmentLoading' : ''}`}
+                            key={attachment.name}
+                            title={attachment.label || attachment.name}
+                        >
+                            <i className={`fa-solid ${attachment.icon || 'fa-paperclip'}`} aria-hidden="true"/>
+                            <span>{attachment.label || attachment.name}</span>
+                            {attachment.loading && <i className="fa-solid fa-spinner fa-spin" aria-hidden="true"/>}
+                        </span>
+                    )
+            ))}
             <textarea
                 ref={textAreaRef}
                 rows={1}
                 value={value}
+                disabled={disabled}
                 maxLength={maxLength}
-                placeholder={placeholder}
+                placeholder={attachments.length > 0 ? '' : placeholder}
                 onChange={event => onChange?.(event.target.value)}
                 onKeyDown={handleKeyDown}
             />

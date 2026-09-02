@@ -668,33 +668,39 @@ export async function uploadFileInChunks(file,setAdvancePercent){
 
 export async function getAttached(type,attached,paramsDB) {
 
-    const dictionatyRoutes = {
-        'reportOPS':'/process/getOp',
-        'reportOCS':'/process/getDocuments',
-        'reportDCS':'/process/getDocuments',
-        'reportFVS':'/process/getDocuments',
-        'reportCIS':'/process/getDocuments'
-    }
-    
-    async function getFromDataBase(){
-        let typeDoc = (attached.split('report')[1]).substring(0,2);
-        paramsDB.type = typeDoc
-        let res = await postInfo(dictionatyRoutes[attached],paramsDB);
-        if(res[0]){
-            return({
-                [attached]:res[1]
-            })
-        }
+    const reportSources = {
+        reportOPS:{path:'/process/getOp', params:{type:'OP'}},
+        reportOCS:{path:'/process/getDocuments', params:{type:'OC'}},
+        reportDCS:{path:'/process/getDocuments', params:{type:'DC'}},
+        reportFVS:{path:'/process/getDocuments', params:{type:'FV'}},
+        reportCIS:{path:'/process/getDocuments', params:{type:'CI'}},
+        reportTRS:{path:'/process/getDocuments', params:{type:'TR'}},
+        reportBalance:{path:'/contability/contabiltyController', params:{allAccounts:true}},
+        reportKardex:{path:'/inventory/getKardex'},
+        reportProcesses:{path:'/process/getProcessInstances', params:{status:['active','pending']}},
+        reportEficiency:{path:'/process/getEficincyUsers'},
+        reportBriefCases:{path:'/getThirdParties', params:{comercialInfo:true}},
+        reportCashBoxesClose:{path:'/facturation/getRegisterShift'},
+        reportProcessInstanceHistorial:{path:'/process/getInstanceHistorial'},
+        reportZjClicks:{path:'/zj852/getHistorialClicksControl'},
+        reportZjServices:{path:'/zj852/getServiceMovements'},
+        reportZjClicksAudit:{path:'/zj852/getAuditClicksReport'}
+    };
+
+    if (type !== 'report' && type !== 'analytics') return undefined;
+
+    const source = reportSources[attached];
+    if (!source) throw new Error('El informe seleccionado no está disponible para adjuntar.');
+
+    const response = await postInfo(source.path, {
+        ...paramsDB,
+        ...source.params
+    });
+    if (!response?.[0]) {
+        throw new Error('No se pudo cargar el informe seleccionado.');
     }
 
-    switch (type){
-        case 'report':
-            return(await getFromDataBase())
-        case 'analytics':
-            return(await getFromDataBase())
-        case 'report':
-            return(await getFromDataBase())
-    }
+    return {[attached]:response[1]};
 
 }
 

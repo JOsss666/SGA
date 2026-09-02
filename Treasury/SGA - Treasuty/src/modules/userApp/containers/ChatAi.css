@@ -191,6 +191,7 @@
 
 .ChatAi .chatAiInput{
     flex: 0 0 auto;
+    position: relative;
     margin: 1vh auto 0;
     border-radius: 2vh;
     display: flex;
@@ -279,108 +280,104 @@
 
 .ChatAi .addOptions{
     position: absolute;
-    min-height: 30%;
     width: 100%;
-    background-color: #303030;
-    bottom: 0;
+    max-height: min(58vh, 34rem);
+    background-color: var(--inputsBg);
+    bottom: calc(100% + 1.2vh);
     left: 0;
-    border-top-left-radius:3vh;
-    border-top-right-radius: 3vh;
-    padding: 2vh 1vh;
-    box-shadow: 0 -.4vh 1vh #0005;
+    border-radius: 2.4vh;
+    padding: 1.2vh;
+    outline: solid .1vh var(--inputsBorder);
+    border: solid .1vh var(--inputsBorder);
     animation-name: appearAddOptions;
-    animation-duration: .5s;
+    animation-duration: .18s;
     animation-fill-mode: both;
-    z-index: 20;
+    z-index: 40;
+    overflow: hidden;
 }
 
-.ChatAi .addOptions .closeAddOp{
-    position: absolute;
-    top: 2vh;
-    right: 2vh;
-    background-color: #838383;
-    height: 3.5vh;
-    width: 3.5vh;
-    display: flex;
-    border-radius: 100%;
+.ChatAi .addOptionsContent{
+    max-height: min(58vh, 34rem);
+    padding: .8vh .2vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
-.ChatAi .addOptions .closeAddOp i{
-    margin: auto;
-    font-size: clamp(2.5px,2.5vh,25px);
-    cursor: pointer;
-}
-
-.ChatAi .addOptions ul{
+.ChatAi .addOptionsGroup{
     display: flex;
     flex-direction: column;
+    padding: .6vh 0;
 }
 
-.ChatAi .addOptions .DespleList{
-    background-color: #303030;
-    outline: none;
-    color: #fff;
+.ChatAi .addOptionsGroup h3{
+    margin: .8vh 1.2vh .5vh;
+    color: var(--descriptionText);
+    font-size: clamp(.75rem, 1.5vh, .9rem);
+    font-weight: 500;
+}
+
+.ChatAi .addOptionRow{
     width: 100%;
-    padding: 1vh 0;
-    padding-bottom: 0;
-}
-.ChatAi .addOptions .DespleList:hover{
-    background-color: #444;
-}
-
-.ChatAi .addOptions .DespleList h6{
-    font-weight: 400;
-    font-size: clamp(2.5px,2.5vh,25px);
-    color: #fff !important;
-}
-
-.ChatAi .addOptions .DespleList h6 i{
-    margin-right: 3vh;
-}
-
-.ChatAi .addOptions .DespleList span{
-    font-size: clamp(2.5px,2.5vh,25px);
-    margin-top: .5vh;
-    color: #ddd !important;
-}
-
-.ChatAi .addOptions .DespleList span:hover{
-    background-color: #DFF2FE;
-    color: #21BCFF !important;
-}
-
-.ChatAi .CardTitleLogo{
-    padding: 1vh;
-    padding-left: 7vh;
-    cursor: pointer;
-    color: #fff;
-    border-radius: 1vh;
-}
-
-.ChatAi .CardTitleLogo:hover{
-    background-color: #444;
-}
-
-.ChatAi .CardTitleLogo i{
-    position: absolute;
-    left: 2.5vh;
-}
-
-.ChatAi .attachedHolder{
-    width: 100%;
-    padding: 1vh;
-    flex-wrap: wrap;
-    gap: 1vh;
-    border-radius: 3vh;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    color: #fff;
+    min-height: 5.8vh;
     display: flex;
+    align-items: center;
+    gap: 1.4vh;
+    padding: 1vh 1.3vh;
+    border: 0;
+    border-radius: 1.4vh;
+    background: transparent;
+    color: var(--mainText);
+    text-align: left;
+    cursor: pointer;
 }
 
-.ChatAi .attachedHolder .AttachedCard{
-    margin: auto 0;
-    margin-right: 1vh;
+.ChatAi .addOptionRow:hover,
+.ChatAi .addOptionRow:focus-visible{
+    background-color: var(--cardHover);
+    outline: none;
+}
+
+.ChatAi .addOptionRow > i{
+    width: 3vh;
+    flex: 0 0 3vh;
+    color: var(--descriptionText);
+    text-align: center;
+    font-size: clamp(1rem, 2vh, 1.25rem);
+}
+
+.ChatAi .addOptionRow > span{
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .2vh;
+}
+
+.ChatAi .addOptionRow strong{
+    color: var(--mainText);
+    font-size: clamp(.88rem, 1.75vh, 1rem);
+    font-weight: 500;
+}
+
+.ChatAi .addOptionRow small{
+    color: var(--descriptionText);
+    font-size: clamp(.75rem, 1.45vh, .88rem);
+}
+
+.ChatAi .addOptionRow:disabled{
+    cursor: not-allowed;
+    opacity: .48;
+}
+
+.ChatAi .addOptionsEmpty{
+    min-height: 14vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1vh;
+    padding: 2vh;
+    color: var(--descriptionText);
+    text-align: center;
 }
 
 .ChatAi .spaceChatAi .MainTitleAi{
@@ -472,11 +469,13 @@
 }
 
 @keyframes appearAddOptions {
-    0%{
-        bottom: -50%;
+    from{
+        opacity: 0;
+        transform: translateY(1.2vh) scale(.985);
     }
-    100%{
-        bottom: 0%;
+    to{
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -508,5 +507,11 @@
         margin-top: 1vh;
         height: 100%;
         width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .ChatAi .addOptions{
+        animation: none;
     }
 }
