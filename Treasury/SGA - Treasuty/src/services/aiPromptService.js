@@ -97,10 +97,11 @@ export async function sendPrompt({ destination, target, content, companyId }) {
     });
 }
 
-export async function listAgents({ companyId } = {}) {
+export async function listAgents({ companyId, signal } = {}) {
     const response = await fetch(`${urlSer}/api/system-ai/v1/agents`, {
         method: 'GET',
         credentials: 'include',
+        signal,
         headers: {
             Accept: 'application/json',
             ...(companyId != null ? { 'X-SGA-Company-Id': String(companyId) } : {})
