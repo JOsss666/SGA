@@ -1,5 +1,5 @@
 .CardAnalytics2 {
-    background-color: var(--menuAside);
+    background-color: var(--bg);
     border: 0.1vh solid var(--inputsBorder);
     border-radius: 3vh;
     padding: 2.5vh;

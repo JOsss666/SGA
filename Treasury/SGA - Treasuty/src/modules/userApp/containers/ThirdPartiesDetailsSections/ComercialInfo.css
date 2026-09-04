@@ -15,7 +15,7 @@
     gap: 4vh;
 }
 
-.ComercialInfo form .FormInput, .ComercialInfo form .SelOp , .ComercialInfo form .FormButton{
+.ComercialInfo form .FacturationFormInput, .ComercialInfo form .SelOp , .ComercialInfo form .FormButton{
     width: 20vw;
     margin: auto 0;
     margin-right: 2vh;

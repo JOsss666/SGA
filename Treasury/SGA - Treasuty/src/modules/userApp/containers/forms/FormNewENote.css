@@ -6,13 +6,17 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 70vh;
     overflow-y: auto;
-    width: 93vw;
-
+    width: 80vw;
 }
 
 .FormNewENote .headForm{
     margin: 0 auto;
+}
+
+.FormNewENote .initialSelection{
+    margin: auto;
 }
 
 .FormNewENote .step1Form{
@@ -35,6 +39,11 @@
     gap: 2vw;
 }
 
+.FormNewENote .step2Form .NoResults,
+.FormNewENote .step2Form .LoadingSpace{
+    height: 40vh;
+}
+
 .FormNewENote .step2Form .invoiceInfoContainer{
     padding: 2vh;
     display: flex;
@@ -49,8 +58,8 @@
     gap: 2vw;
 }
 
-.FormNewENote .step2Form .invoiceInfoContainer .invoiceHead .FormInput{
-    width: 25vw;
+.FormNewENote .step2Form .invoiceInfoContainer .invoiceHead .FacturationFormInput{
+    width: 20vw;
 }
 
 .FormNewENote .step2Form .resumeInvoice{
@@ -66,8 +75,8 @@
     width: 100%;
 }
 
-.FormNewENote .step2Form .resumeInvoice .itemRow .FormInput{
-    width: 12vw;
+.FormNewENote .step2Form .resumeInvoice .itemRow .FacturationFormInput{
+    width: 10vw;
     min-width: 0;
     margin: auto 0;
 }
@@ -110,7 +119,7 @@
 .FormNewENote .step2Form .sumaryContainer .sumary span{
     font-size: clamp(2px,2.2vh,22px);
     text-align: right;
-    font-weight: 500;
+    font-weight: 400;
     color: var(--descriptionText);
 }
 
@@ -118,4 +127,5 @@
     font-size: clamp(2.4px,2.4vh,24px);
     color: var(--mainText);
     margin-left: 2vw;
+    font-weight: 500;
 }

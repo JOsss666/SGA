@@ -32,7 +32,7 @@ const scopes = String(args.scopes || '')
     .filter(Boolean);
 const clientId = String(args['client-id'] || '').trim().toLowerCase();
 const name = String(args.name || '').trim();
-const ttl = args.ttl ? Number(args.ttl) : 900;
+const ttl = args.ttl ? Number(args.ttl) : 10800;
 
 if (!Number.isInteger(companyId) || companyId <= 0) {
     fail('--company debe ser un entero positivo.');
@@ -44,8 +44,8 @@ if (!Number.isInteger(companyId) || companyId <= 0) {
     fail('--name es requerido.');
 } else if (scopes.length === 0) {
     fail('--scopes debe incluir al menos un permiso.');
-} else if (!Number.isInteger(ttl) || ttl < 60 || ttl > 3600) {
-    fail('--ttl debe estar entre 60 y 3600 segundos.');
+} else if (!Number.isInteger(ttl) || ttl < 60 || ttl > 10800) {
+    fail('--ttl debe estar entre 60 y 10800 segundos.');
 } else {
     const requiredDbValues = [
         process.env.MYSQL_HOST,

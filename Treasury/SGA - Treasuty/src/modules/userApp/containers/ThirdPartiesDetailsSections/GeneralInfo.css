@@ -12,7 +12,7 @@
     margin-top: 1vh;
 }
 
-.GeneralInfo form .FormInput, .GeneralInfo form .SelOp, .GeneralInfo form .FormButton{
+.GeneralInfo form .FacturationFormInput, .GeneralInfo form .SelOp, .GeneralInfo form .FormButton{
     width: 20vw;
     margin: auto 0;
     margin-right: 4vh;

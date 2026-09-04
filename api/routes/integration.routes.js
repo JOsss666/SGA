@@ -122,6 +122,13 @@ integrationRouter.get(
 );
 
 integrationRouter.get(
+    '/third-parties/search',
+    authenticateIntegration,
+    requireScope('third-parties:read'),
+    zjIntegrationController.searchThirdParties
+);
+
+integrationRouter.get(
     '/third-parties/:id',
     authenticateIntegration,
     requireScope('third-parties:read'),

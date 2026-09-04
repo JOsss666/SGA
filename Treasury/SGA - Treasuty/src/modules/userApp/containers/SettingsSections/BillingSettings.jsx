@@ -9,7 +9,7 @@ export function BillingSettings(){
     const sec1 = [
         {text:'Metodos de pago',path:'cloudStorage',value:'',type:'functionality',icon:<i className="fa-regular fa-credit-card"/>},
         {text:'Información de facturación',path:'style',value:'',type:'functionality',icon:<i className="fa-solid fa-file-invoice-dollar"/>},
-        {text:'Servicios',path:'style',value:'',type:'device',icon:<img src="https://res.cloudinary.com/djjxugmni/image/upload/v1761514001/ChatGPT_Image_26_oct_2025_16_24_57_hgpkmn.png"/>}
+        {text:'Servicios',path:'style',value:'',type:'device',icon:<img src="https://cdnmain.sga360.co/static/ChatGPT_Image_26_oct_2025_16_24_57_hgpkmn.webp"/>}
     ]
 
     const sec2 = [

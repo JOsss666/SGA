@@ -76,7 +76,6 @@ export function FormInvoice({info,update}){
         }
         for (const rule of docRules){
             let res = await executeDocumentAction(rule.action,formInfo)
-            console.log(res)
             if(res.isValid == false){
                 setError(`Error de validación: ${res.message}`)
                 setVisibleError(true);

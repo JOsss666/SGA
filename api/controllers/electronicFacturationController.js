@@ -522,8 +522,13 @@ electronicFacturationController.newNote = (req,res)=>{
 	  req.on('end',async()=>{
         try {
 	    let info = JSON.parse(bodyData);
+        console.dir(info, { depth: null, colors: true });
         const companyId = getCompanyIdFromInfo(info);
         const environment = await resolveEnvironmentFromInfo(info);
+        const identificationDocumentId = Number(info.customer?.identidicationType_id);
+        if (!Number.isInteger(identificationDocumentId)) {
+            throw new Error('El cliente no tiene un tipo de identificación válido para Factus.');
+        }
         console.log('Ambiente Factus para nota:', environment);
 	    let params = {
 	        "numbering_range_id": await factusService.getNumberingRangeId({
@@ -535,7 +540,7 @@ electronicFacturationController.newNote = (req,res)=>{
         // System use 22 when the note dont have an asociated bill. --> bill_id becomes optional
         "customization_id": info.bill_id != undefined? 20:22,
         "bill_id": info.bill_id,
-        "reference_code": "5",
+        "reference_code":`${info.type}_${info.doc_id}`,
         "observation": "",
         "payment_method_code": "10",
         "customer": {
@@ -549,19 +554,26 @@ electronicFacturationController.newNote = (req,res)=>{
             "phone": info.customer.phone,
             "legal_organization_id": info.customer.thirdParty_nature,
             "tribute_id": info.customer.IVA_responsability ?? '18',
-            "identification_document_id": info.customer.identidicationType_id,
+            "identification_document_id": identificationDocumentId,
             "municipality_id": info.customer.municipality_id?? 149
         },
         "items":info.items
 	    }
-	    console.log(params)
+	    console.dir(params, { depth: null, colors: true });
 	    const response = await factusService.validateCreditNote({
             company_id: companyId,
             environment,
             payload: params
         });
 	    const resInvoice = response.data;
-    console.log(resInvoice)
+        if (resInvoice?.status !== 'Created') {
+            console.error(
+                'Factus rechazó la nota electrónica:\n',
+                JSON.stringify(resInvoice, null, 2)
+            );
+        } else {
+            console.dir(resInvoice, { depth: null, colors: true });
+        }
     if(resInvoice.status == 'Created'){
         let data = resInvoice.data
         let insertRes = await electronicFacturationController.registerEFactDocument({
@@ -604,6 +616,7 @@ electronicFacturationController.getDocuments = (req,res)=>{
         data += chunk;
     })
     req.on('end',async()=>{
+        console.log('Buscando documentos .....')
         let info = JSON.parse(data);
         let values = [];
         let whereClauses = [];
@@ -674,6 +687,7 @@ electronicFacturationController.getDocuments = (req,res)=>{
             ORDER BY id DESC ;
         `;
         let consulta = await useDataBase(sentence,values,1);
+        console.log('Enviando documentos... ')
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
     })

@@ -11,19 +11,20 @@ import { postInfo } from '../../../utils/functions'
 import { useAlert, useAppInfo } from '../../../context/context'
 import { CheckSquare } from '../components/CheckSquare'
 import { FormNewUser } from './forms/FormNewUser'
+import { NoResults } from './NoResults'
 
 export function Users(){
-
     const {popInAlert} = useAlert();
     const [users,setUsers] = useState([]);
     const [loading,setLoading]= useState(false);
-    const {appInfo} = useAppInfo();
+    const {appInfo, userConfig} = useAppInfo();
 
     const getUsers = async()=>{
         setLoading(true)
         let res = await 
         postInfo('/getUsers',{
-            company_id:appInfo.company_id
+            company_id:appInfo.company_id,
+            status:'active'
         });
         console.log(res)
         if(res[0]){
@@ -36,6 +37,7 @@ export function Users(){
         getUsers();
     },[])
 
+    console.log(userConfig.access.sections.users.can_create)
 
     return(
         <div className="Users">
@@ -49,9 +51,11 @@ export function Users(){
                     <SearchBar placeholder={'Buscar'}/>
                     <SelectOptions title={'Filtro'} options={['ninguno']}/>
                     <SelectOptions title={'Orden'} options={['Alfabetico','Fecha de Creación','Rol']}/>
-                    <FormButton onClick={()=>{
-                        popInAlert(<FormNewUser reloadFun={getUsers}/>)
-                    }} text={'Crear usuario'} children={<i className="fa-solid fa-plus"/>}/>
+                    {userConfig.access.sections.users.can_create && (
+                        <FormButton onClick={()=>{
+                            popInAlert(<FormNewUser reloadFun={getUsers}/>)
+                        }} text={'Crear usuario'} children={<i className="fa-solid fa-plus"/>}/>
+                    )}
                 </div>
             </div>
             <div className="tableUsers">
@@ -74,7 +78,9 @@ export function Users(){
                             }}/>
                         ))}
                         {users.length == 0 && (
-                            <span>No hay usuarios disponibles</span>
+                            <NoResults title={'No hay usuarios disponibles'} newOption={'Crear nuevo usuario'}>
+                                <FormNewUser/>
+                            </NoResults>
                         )}
                     </div>
                 )}

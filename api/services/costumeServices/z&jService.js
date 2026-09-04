@@ -276,6 +276,133 @@ zjService.getThirdParties = async ({
     };
 };
 
+/**
+ * Busca terceros activos mediante filtros explícitos. `corporative_name` se
+ * consulta sobre `names`, que es donde el modelo legacy almacena la razón
+ * social de las personas jurídicas.
+ */
+zjService.searchThirdParties = async ({
+    companyId,
+    names,
+    lastNames,
+    corporativeName,
+    email,
+    nit,
+    type,
+    page = 1,
+    limit = 50
+}) => {
+    const normalizedCompanyId = normalizePositiveInteger(companyId, null);
+    if (!normalizedCompanyId) throw new Error('companyId autenticado es requerido.');
+
+    const filters = {
+        names: typeof names === 'string' ? names.trim() : '',
+        lastNames: typeof lastNames === 'string' ? lastNames.trim() : '',
+        corporativeName: typeof corporativeName === 'string' ? corporativeName.trim() : '',
+        email: typeof email === 'string' ? email.trim() : '',
+        nit: typeof nit === 'string' ? nit.trim() : ''
+    };
+    if (!Object.values(filters).some(Boolean)) {
+        throw createRequestError(
+            'Debe enviar al menos uno de estos filtros: names, lastNames, corporative_name, email o nit.',
+            400,
+            'MISSING_THIRD_PARTY_SEARCH_FILTER'
+        );
+    }
+    if (Object.values(filters).some(value => value.length > 200)) {
+        throw createRequestError(
+            'Los filtros de búsqueda no pueden superar 200 caracteres.',
+            400,
+            'INVALID_THIRD_PARTY_SEARCH_FILTER'
+        );
+    }
+
+    const normalizedPage = normalizePositiveInteger(page, 1);
+    const normalizedLimit = normalizePositiveInteger(limit, 50, 100);
+    const types = normalizeTypes(type);
+    const values = [normalizedCompanyId, types];
+    const whereClauses = [
+        'tp.company_id = $1',
+        'tp.type::text = ANY($2::text[])',
+        `EXISTS (
+            SELECT 1
+            FROM "Ecosystem"."thirdPartyComercialInfo" commercial
+            WHERE commercial."thirdParty_id" = tp.id
+              AND commercial.company_id = tp.company_id
+              AND commercial.comercial_state = 'active'
+        )`
+    ];
+
+    const addPartialFilter = (column, value) => {
+        if (!value) return;
+        values.push(`%${escapeLikePattern(value)}%`);
+        whereClauses.push(`${column} ILIKE $${values.length} ESCAPE '\\'`);
+    };
+    addPartialFilter('tp.names', filters.names);
+    addPartialFilter('tp."lastNames"', filters.lastNames);
+    addPartialFilter('tp.names', filters.corporativeName);
+
+    if (filters.email) {
+        values.push(filters.email.toLowerCase());
+        whereClauses.push(`LOWER(TRIM(tp.mail)) = $${values.length}`);
+    }
+    if (filters.nit) {
+        const normalizedNit = filters.nit.replace(/[^0-9a-z]/gi, '').toLowerCase();
+        if (!normalizedNit) {
+            throw createRequestError(
+                'El filtro nit no es válido.',
+                400,
+                'INVALID_THIRD_PARTY_SEARCH_FILTER'
+            );
+        }
+        values.push(normalizedNit);
+        whereClauses.push(`LOWER(REGEXP_REPLACE(tp.indentification_number, '[^0-9a-z]', '', 'g')) = $${values.length}`);
+    }
+
+    values.push(normalizedLimit);
+    const limitParameter = `$${values.length}`;
+    values.push((normalizedPage - 1) * normalizedLimit);
+    const offsetParameter = `$${values.length}`;
+
+    const result = await useDataBase(`
+        SELECT
+            tp.id,
+            tp.names,
+            tp."lastNames",
+            CASE
+                WHEN COALESCE(tp."lastNames", '') = '' THEN tp.names
+                ELSE NULL
+            END AS corporative_name,
+            CONCAT_WS(' ', tp.names, tp."lastNames") AS full_name,
+            tp.indentification_type,
+            tp.indentification_number,
+            tp.mail,
+            tp.phone,
+            tp.country,
+            tp.city,
+            tp.address,
+            tp.type,
+            COUNT(*) OVER()::integer AS total_count
+        FROM "Ecosystem".thirdparties tp
+        WHERE ${whereClauses.join(' AND ')}
+        ORDER BY tp.names ASC, tp."lastNames" ASC, tp.id ASC
+        LIMIT ${limitParameter}
+        OFFSET ${offsetParameter};
+    `, values, 1);
+
+    const rows = ensureDatabaseResult(result);
+    const total = rows[0]?.total_count ?? 0;
+    return {
+        data: rows.map(({ total_count, ...thirdParty }) => thirdParty),
+        pagination: {
+            page: normalizedPage,
+            limit: normalizedLimit,
+            total,
+            total_pages: total === 0 ? 0 : Math.ceil(total / normalizedLimit)
+        }
+    };
+};
+
 zjService.getThirdPartyById = async ({ companyId, thirdPartyId }) => {
     const normalizedCompanyId = normalizePositiveInteger(companyId, null);
     const normalizedThirdPartyId = normalizePositiveInteger(thirdPartyId, null);

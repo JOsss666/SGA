@@ -52,6 +52,11 @@ export function ReportDocuments({ type }) {
         "Descripción","Valor","Fecha creación","Estado",
     ];
 
+    const columnsSellInvoice = [
+        "ID","OP","Tienda","Creada por","Cliente",
+        "Descripción","Valor","Factura electrónica","Fecha creación","Estado",
+    ];
+
     const columsTr = [
         "ID","Fecha Documento","Tipo Doc","Concepto",
         "Subtotal","Valor","Tienda","Tercero",
@@ -68,7 +73,7 @@ export function ReportDocuments({ type }) {
         'Production Order': columnsOp,
         'Client Order': columnsOc,
         'Purchase Document': columnsDc,
-        'Sell Invoice': columnsDc,
+        'Sell Invoice': columnsSellInvoice,
         'Inventory Consume': columnsDc,
         TR: columsTr,
         TR_details: columsTr_details,
@@ -130,6 +135,7 @@ export function ReportDocuments({ type }) {
         "Negocio": "bussines_name",
         "Centro de costo": "costcenter_name",
         "Estado": "status",
+        "Factura electrónica": "electronic_invoice_number",
         "Creada por": "user_name",
         "Fecha creación": "created_at",
         "Ver Detalles": "id"

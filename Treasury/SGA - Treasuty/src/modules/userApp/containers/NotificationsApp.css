@@ -16,3 +16,11 @@
     margin-bottom: 2vh;
     margin-left: 2vh;
 }
+
+@media (max-width:500px) {
+    .NotificationsApp{
+        right: 0;
+        padding-right: 2vh;
+        top: 8vh;
+    }
+}

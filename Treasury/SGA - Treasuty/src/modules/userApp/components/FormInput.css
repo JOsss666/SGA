@@ -1,58 +1,61 @@
 
 @import '../containers/UserApp.css';
 
-.FormInput{
+.FacturationFormInput{
     display: flex;
     flex-direction: column;
     width: 100%;
     min-width: 20vw;
 }
 
-.FormInput label{
-    margin-bottom: 1.5vh;
-    font-weight: 400 !important;
+.FacturationFormInput label{
+    margin-bottom: 2vh;
+    padding-left: 2vh;
+    font-weight: 400;
     font-size: clamp(2.5px,2.5vh,25px);
-    color: var(--descriptionText);
+    color: var(--mainText);
 }
 
-.FormInput .inputContainer{
+.FacturationFormInput .inputContainer{
     display: flex;
     width: 100%;
     position: relative;
 }
 
-.FormInput .inputContainer input{
+.FacturationFormInput .inputContainer input{
     font-size: clamp(2.2px,2vh,22px) !important;
     color: var(--descriptionText);
 }
 
-.FormInput .inputContainer .moneFHolder{
+.FacturationFormInput .inputContainer .moneFHolder{
     position: absolute;
     height: 100%;
     width: 100%;
     padding: 1vh 2vh;
     color: var(--descriptionText);
     background-color: var(--inputsBg);
-    border-radius: .5vh;
+    border-radius: 1vh;
     font-size: clamp(2.5px,2.5vh,25px);
 }
 
-.FormInput .inputContainer input, .FormInput .inputContainer textarea{
+.FacturationFormInput .inputContainer input, .FacturationFormInput .inputContainer textarea{
     width:100%;
     padding: 1vh 2vh;
-    border-radius: .5vh;
+    border-radius: 1vh;
     border: hidden;
     outline: solid .1vh var(--inputsBorder);
     box-shadow: 0 .4vh 1vh var(--translucidMenu);
     background-color: var(--inputsBg);
     color: var(--descriptionText);
+    transition: .3s;
 }
 
-.FormInput .inputContainer textarea{
+.FacturationFormInput .inputContainer textarea{
     height: 15vh;
     font-size: clamp(2.2px,2.2vh,22px);
 }
 
-.FormInput .inputContainer input:focus, .FormInput .inputContainer textarea:focus{
+.FacturationFormInput .inputContainer input:focus, .FacturationFormInput .inputContainer textarea:focus{
     color: var(--mainText);
+    outline: solid .2vh #155DFC;
 }

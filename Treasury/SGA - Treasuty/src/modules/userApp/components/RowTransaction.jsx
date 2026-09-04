@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { moneyFormat } from "../../../utils/functions";
 import { FormInput } from "./FormInput";
 import { SearchinList } from "./SearchInList";
@@ -19,9 +19,10 @@ export const RowTransaction = memo(function RowTransaction({
   // Estado SOLO para inputs controlados
   const [units, setUnits] = useState("");
   const [cost, setCost] = useState("");
+  const availableStock = Number(info.stock) || 0;
 
   /* =========================
-     Handlers (memoizados)
+      Handlers (memoizados)
   ========================== */
 
   const handleUnitsChange = useCallback((value) => {
@@ -30,6 +31,7 @@ export const RowTransaction = memo(function RowTransaction({
       movementsUnits: Number(value) || 0
     });
   }, [info?.id, onChangeRow]);
+
 
   const handleCostChange = useCallback((value) => {
     setCost(value);
@@ -43,23 +45,28 @@ export const RowTransaction = memo(function RowTransaction({
   }, [disabled, delP, info]);
 
   /* =========================
-     Valores derivados
-     (NO estado)
+      Valores derivados
+      (NO estado)
   ========================== */
 
-  const totalValue = useMemo(() => {
-    const u = Number(units) || 0;
-    if (!info) return 0;
+ const totalValue = useMemo(() => {
+  const u = Number(units) || 0;
+  if (!info) return 0;
 
-    if (type === "Inventory Entry") return u * (Number(cost) || 0);
-    if (type === "consuption") return u * info.unit_cost;
-    return u * info.unit_value;
-  }, [units, cost, info, type]);
+  if (type === "Inventory Entry") {
+    return u * (Number(cost) || 0);
+  }
 
-  if (hidden) return null;
+  if (type === "Inventory Out" || type === "consuption") {
+    return u * Number(info.avg_cost || 0);
+  }
+
+  return u * Number(info.unit_value || 0);
+}, [units, cost, info, type]);
+
 
   /* =========================
-     Render
+      Render
   ========================== */
 
   return (
@@ -102,25 +109,25 @@ export const RowTransaction = memo(function RowTransaction({
               action={handleUnitsChange}
               placeholder={
                 type !== "Inventory Entry"
-                  ? `${info.storeStock} unidades disponibles`
+                  ? `${availableStock} unidades disponibles`
                   : "0"
               }
               min={0}
-              max={info.storeStock}
+              max={availableStock}
               type="number"
             />
           </span>
 
           {(type === "Inventory Out" || type === "Inventory transfer") && (
             <>
-              <span>$ {moneyFormat(info.unit_value)}</span>
+              <span>$ {parseFloat(info.avg_cost).toFixed(2)}</span>
               <span>$ {moneyFormat(totalValue)}</span>
             </>
           )}
 
           {type === "consuption" && (
             <>
-              <span>$ {moneyFormat(info.unit_cost)}</span>
+              <span>$ {moneyFormat(parseFloat(info.avg_cost).toFixed(2))}</span>
               <span>$ {moneyFormat(totalValue)}</span>
             </>
           )}

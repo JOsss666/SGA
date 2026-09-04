@@ -1,0 +1,39 @@
+.ChatInputBar{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border-radius: 4vh;
+    outline: solid .1vh var(--inputsBorder);
+    background-color: var(--inputsBg);
+    padding: 0 .6vh;
+}
+
+.ChatInputBar input{
+    flex: 1;
+    height: 7vh;
+    border: hidden;
+    background-color: transparent;
+    outline: none;
+    padding: 0 .6vh;
+    color: var(--descriptionText);
+    font-size: clamp(2px,1.8vh,18px);
+}
+
+.ChatInputBar input:focus{
+    color: var(--mainText);
+}
+
+.ChatInputBar .ButtonMenu{
+    min-width: 5vh;
+    height: 5vh;
+    width: 5vh;
+    margin: auto 0 !important;
+}
+
+.ChatInputBar .ButtonMenu:hover{
+    background-color: var(--cardHover);
+}
+
+.ChatInputBar .ButtonMenu i{
+    font-size: clamp(2.2px,2.1vh,21px);
+}

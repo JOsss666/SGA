@@ -1,0 +1,75 @@
+@import '../../containers/UserApp.css';
+
+.ToolActivity{
+    display: flex;
+    flex-wrap: wrap;
+    gap: .8vh;
+    margin-bottom: 1vh;
+}
+
+.ToolActivity .toolChip{
+    display: inline-flex;
+    align-items: center;
+    gap: .8vh;
+    padding: .6vh 1.4vh;
+    border-radius: 3vh;
+    border: solid .1vh var(--inputsBorder);
+    background-color: var(--cardHover);
+    color: var(--descriptionText);
+    font-size: clamp(1.9px,1.9vh,19px);
+    white-space: nowrap;
+}
+
+.ToolActivity .toolChip i{
+    font-size: .9em;
+}
+
+.ToolActivity .toolChipRunning{
+    color: var(--chatAccent);
+    border-color: var(--chatAccent);
+}
+
+.ToolActivity .toolChipRunning i{
+    animation: toolChipPulse 1.2s ease-in-out infinite;
+}
+
+.ToolActivity .toolChipDone i{
+    color: #00A63E;
+}
+
+@keyframes toolChipPulse{
+    0%, 100%{ opacity: .35; }
+    50%{ opacity: 1; }
+}
+
+/* --- Indicador de escritura --- */
+
+.TypingIndicator{
+    display: inline-flex;
+    align-items: center;
+    gap: .6vh;
+    padding: .4vh 0;
+}
+
+.TypingIndicator span{
+    width: .9vh;
+    height: .9vh;
+    border-radius: 100%;
+    background-color: var(--descriptionText);
+    animation: typingBounce 1.4s ease-in-out infinite;
+}
+
+.TypingIndicator span:nth-child(2){ animation-delay: .2s; }
+.TypingIndicator span:nth-child(3){ animation-delay: .4s; }
+
+@keyframes typingBounce{
+    0%, 60%, 100%{ opacity: .3; transform: translateY(0); }
+    30%{ opacity: 1; transform: translateY(-.5vh); }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .ToolActivity .toolChipRunning i,
+    .TypingIndicator span{
+        animation: none;
+    }
+}

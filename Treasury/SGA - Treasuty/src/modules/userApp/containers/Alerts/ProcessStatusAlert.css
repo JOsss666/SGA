@@ -4,6 +4,7 @@
     padding: 2vh;
     width: 30vw;
     background-color: var(--bg);
+    border-radius: 2vh;
 }
 
 .ProcessStatusAlert .headProcess{
@@ -107,6 +108,36 @@
     padding: 1vh 2vh;
 }
 
+.ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .responsableInfo{
+    display: flex;
+    gap: 1vh;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .responsableInfo i{
+    color: #FB2C36;
+}
+
+.ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .responsableInfo span{
+    color: var(--mainText);
+    font-size: clamp(2px,2vh,20px);
+}
+
+.ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .responsableInfo time{
+    color: var(--descriptionText);
+    font-size: clamp(1.6px,1.6vh,16px);
+    font-weight: 500;
+}
+
+.ProcessStatusAlert .gridStepsProces .step_item .attachedDocsC .noAdvancementInfo{
+    color: var(--descriptionText);
+    font-size: clamp(1.6px,1.6vh,16px);
+    font-weight: 400;
+    font-style: italic;
+}
+
+
 .ProcessStatusAlert .gridStepsProces .leftBarProgress{
     width: .25vw;
     background-color: #007AFF;
@@ -122,7 +153,7 @@
 
 .ProcessStatusAlert .gridStepsProces .ActualStep .steepIndicator{
     background-color: #007AFF;
-    outline: solid .6vh #8EC5FF;
+    outline: solid .6vh #8EC5FF90;
 }
 
 .ProcessStatusAlert .gridStepsProces .PendingStep{

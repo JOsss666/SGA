@@ -153,12 +153,10 @@ export function FormNewMovement({info}){
     }
 
     const getProducts = async()=>{
-        console.log('Cargando productos')
         let res = await postInfo('/inventory/getProducts',{
             company_id:appInfo.company_id,
             store_id
         })
-        console.log(res);
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -172,13 +170,11 @@ export function FormNewMovement({info}){
     }
 
     const getProductsStock = async()=>{
-        console.log('Cargando stock')
         let res = await postInfo('/inventory/getStocks',{
             company_id:appInfo.company_id,
             store_id,
             cellar_id
         })
-        console.log(res)
         if(res[0]){
             let C = []
             res[1].forEach(element => {
@@ -399,7 +395,6 @@ export function FormNewMovement({info}){
 
     useEffect(() => {
         if (cellar_id == null || movement_type == null) return;
-        console.log(movement_type)
         switch (movement_type) {
             case 'Inventory Entry':
             getProducts();
@@ -439,7 +434,6 @@ export function FormNewMovement({info}){
             {!loading && (
                 <form onSubmit={(e)=>{
                         e.preventDefault();
-                        console.log(formInfo)
                         createMovement();
                     }}>
                         {stage == 0 && (
@@ -536,7 +530,7 @@ export function FormNewMovement({info}){
                         {stage == 2 && (
                             <>
                                 <FormInput textArea={true} title={'Descripción'} disabled={disabled} action={setDescription} placeholder={'Nota del movimiento'}/>
-                                <FileInput action={setAttached_document} disabled={disabled} placeholder={'Adjuntar comprobante'}/>
+                                <FileInput category="files" action={setAttached_document} disabled={disabled} placeholder={'Adjuntar comprobante'}/>
                             </>
                         )}
                         <div className="buttonsC">

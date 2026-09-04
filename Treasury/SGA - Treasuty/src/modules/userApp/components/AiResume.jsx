@@ -19,7 +19,7 @@ export function AiResume(){
         if(res[0]){
             setContentResume(res[1]);
             addNotification({
-                type:'info',
+                type:'AI',
                 title:'Resumen IA diario listo',
                 description:'Tu resumen díario generado por la IA esta listo'
             })

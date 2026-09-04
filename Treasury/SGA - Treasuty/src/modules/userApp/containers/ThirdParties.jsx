@@ -48,7 +48,7 @@ export function ThirdParties() {
     };
 
     const handleCardClick = (thirdPartyId) => {
-        navigate(`/SGA_treasury/${params.company_key}/${params.user_key}/thirdParties/${thirdPartyId}`);
+        navigate(`/SGA_management/${params.company_key}/${params.user_key}/thirdParties/${thirdPartyId}`);
     };
 
     const handleRetry = () => {
@@ -146,6 +146,8 @@ export function ThirdParties() {
                                             key={thirdParty.id}
                                             info={thirdParty}
                                             onCardClick={handleCardClick}
+                                            onEdit={handleCardClick}
+                                            reloadFun={fetchThirdParties}
                                         />
                                     ))}
                                     {filteredThirdParties.length == 0 && (

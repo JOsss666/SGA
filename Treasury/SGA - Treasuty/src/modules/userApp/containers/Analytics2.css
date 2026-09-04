@@ -3,6 +3,7 @@
     flex-direction: column;
     padding: 2vh;
     position: relative;
+    overflow-y: auto;
 }
 
 .Analytics2 .headSection {
@@ -16,7 +17,6 @@
 }
 
 .Analytics2 .headSection .DescriptionSpan {
-    font-size: 3vh;
     color: var(--descriptionText);
 }
 
@@ -122,23 +122,26 @@
     transition: all 0.2s;
 }
 
-.Analytics2 .galleryAnalytics.grid {
+.Analytics2 .gallAn_grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(28vh, 1fr));
     gap: 3vh;
 }
 
-.Analytics2 .galleryAnalytics.list {
+.Analytics2 .gallAn_list {
     display: flex;
     flex-direction: column;
     gap: 2vh;
 }
 
 /* Estilos para vista de lista (ajustes sobre las tarjetas) */
-.Analytics2 .galleryAnalytics.list .CardAnalytics2 {
+.Analytics2 .gallAn_list  .CardAnalytics2 {
     flex-direction: row;
     align-items: center;
     padding: 2vh;
+    gap: 2vw;
+    height: fit-content;
+    min-height: fit-content;
 }
 
 .Analytics2 .galleryAnalytics.list .CardAnalytics2 .card-title {
@@ -160,9 +163,10 @@
 .Analytics2 .recent-section {
     margin-top: 2vh;
     padding: 2vh;
-    background-color: var(--menuAside);
+    background-color: var(--bg);
     border-radius: 2vh;
     box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.05);
+    outline: solid .1vh var(--inputsBorder);
 }
 
 .Analytics2 .recent-header {
@@ -212,7 +216,7 @@
 }
 
 .Analytics2 .recent-card {
-    background-color: var(--inputsBg);
+    background-color: var(--bg);
     border: 0.1vh solid var(--inputsBorder);
     border-radius: 2vh;
     padding: 1.5vh;
@@ -260,4 +264,25 @@
 .Analytics2 .recent-item-time {
     font-size: 1.4vh;
     color: var(--descriptionText);
+}
+
+@media (max-width:500px) {
+
+    .Analytics2 .headSection .DescriptionSpan {
+        width: 25vw !important;
+    }
+
+    .Analytics2 .menuBar {
+        display: flex;
+        padding: 4vh 1vh !important;
+        width: 90dvw;
+        overflow-x: auto;
+        overflow-y: hidden;
+        margin: 1vh 0;
+    }
+
+    .Analytics2 .recent-cards .recent-card{
+        width: 100%;
+    }
+    
 }

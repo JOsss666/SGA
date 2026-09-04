@@ -1,0 +1,58 @@
+
+.RetentionCard{
+    display: flex;
+    width: 100%;
+    padding: 1vh 2vh;
+    border-radius: 1vh;
+    align-items: center;
+    transition: .3s;
+}
+
+.RetentionCard h6{
+    font-size: clamp(2.5px,2.5vh,22px);
+    font-weight: 400;
+    color: var(--mainText);
+}
+
+.RetentionCard h6 .checkBox{
+    height: 2vh;
+    width: 2vh;
+    margin-right: 2vh;
+    cursor: pointer;
+}
+
+.RetentionCard .rateIndicator{
+    display: flex;
+    gap: 1vw;
+    margin: auto;
+    margin-right: 2vw;
+    align-items: center;
+}
+
+.RetentionCard .rateIndicator span{
+    color: var(--descriptionText);
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 400;
+}
+
+.RetentionCard .value{
+    width: 20%;
+    text-align: right;
+    color: var(--mainText);
+    font-size: clamp(2.5px,2.5vh,25px);
+    margin: auto 0;
+    margin-right: 2vw;
+}
+
+.RetentionCard:hover{
+    background-color: var(--cardHover);
+}
+
+/* Retención desmarcada: se atenúa y se tacha el valor para indicar que no se aplica. */
+.RetentionCard.notApplied{
+    opacity: .45;
+}
+
+.RetentionCard.notApplied .value{
+    text-decoration: line-through;
+}

@@ -105,7 +105,6 @@ export function FormNewCostCenter({reloadFun,info}){
             <BoldTitle text={'Nuevo centro de costo'} />
             <form action="" onSubmit={(e)=>{
                 e.preventDefault();
-                console.log(formInfo);
                 createCostCenter();
             }}>
                 <FormInput title={'Nombre'} action={setName} placeholder={'Nombre de tu centro de costo'} disabled={disabled}/>

@@ -24,6 +24,9 @@ export function ElectronicFacturationSettingsControl(){
         {text:'Ver rangos de numeración',path:'ranges',value:loading? 'cargando...': numberingRanges.length > 0 ? `Ver ${numberingRanges.length} rangos`:'No hay rangos disponibles',type:'general',icon:<i className="fa-solid fa-circle-info"/>},
         {text:'Definir consecutivo actual rango numeración',path:'setCurrentRange',value:'ver más',type:'functionality',icon:<i className="fa-solid fa-screwdriver"/>},
         {text:'Eliminar factura electronica',path:'deleteInvoice',value:'Ver más',type:'accesibility',icon:<i className="fa-regular fa-trash-can"/>},
+        {text:'Volver a emitir factura electronica',path:'deleteInvoice',value:'Ver más',type:'functionality',icon:<i className="fa-solid fa-print"/>},
+        {text:'Eliminar Nota crédito',path:'deleteCrNote',value:'Ver más',type:'accesibility',icon:<i className="fa-regular fa-trash-can"/>},
+        {text:'Eliminar Nota Debito',path:'deleteDbNote',value:'Ver más',type:'accesibility',icon:<i className="fa-regular fa-trash-can"/>},
     ]
 
 

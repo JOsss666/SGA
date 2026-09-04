@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { postInfo } from '../utils/functions';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { BankIcon } from '../assets/BankIcon';
@@ -85,19 +85,127 @@ export function NotificationsProvider({children}){
 
 export function AiAssistanProvider({children}){
     const [visibleChatAi,setVisibleChatAi] = useState(false);
-    const [loading,setLoading] = useState();
+    const [aiStatus,setAiStatus] = useState({
+        active:false,
+        loading:false,
+        task:null,
+        process:null,
+        completed:false,
+        success:null,
+        result:null,
+        error:null,
+        startedAt:null,
+        finishedAt:null
+    });
     const [usedTokens,setUsedTokens] = useState(0);
     const {userInfo} = useAppInfo();
     const [chat,setChat] = useState([]);
+
+    const startAiTask = useCallback(({task = null, process = null} = {}) => {
+        setAiStatus({
+            active:true,
+            loading:true,
+            task,
+            process,
+            completed:false,
+            success:null,
+            result:null,
+            error:null,
+            startedAt:new Date().toISOString(),
+            finishedAt:null
+        });
+    }, []);
+
+    const completeAiTask = useCallback((result = null) => {
+        setAiStatus(current => ({
+            ...current,
+            active:false,
+            loading:false,
+            completed:true,
+            success:true,
+            result,
+            error:null,
+            finishedAt:new Date().toISOString()
+        }));
+    }, []);
+
+    const updateAiTask = useCallback((changes) => {
+        setAiStatus(current => ({
+            ...current,
+            ...changes
+        }));
+    }, []);
+
+    const failAiTask = useCallback((error) => {
+        setAiStatus(current => ({
+            ...current,
+            active:false,
+            loading:false,
+            completed:true,
+            success:false,
+            result:null,
+            error:error?.message ?? String(error ?? 'La tarea de IA falló.'),
+            finishedAt:new Date().toISOString()
+        }));
+    }, []);
+
+    const cancelAiTask = useCallback(() => {
+        setAiStatus(current => ({
+            ...current,
+            active:false,
+            loading:false,
+            completed:true,
+            success:false,
+            result:null,
+            error:'La tarea fue cancelada.',
+            finishedAt:new Date().toISOString()
+        }));
+    }, []);
+
+    const resetAiTask = useCallback(() => {
+        setAiStatus({
+            active:false,
+            loading:false,
+            task:null,
+            process:null,
+            completed:false,
+            success:null,
+            result:null,
+            error:null,
+            startedAt:null,
+            finishedAt:null
+        });
+    }, []);
+
+    // Compatibilidad con los consumidores existentes que controlan `loading`.
+    const setLoading = useCallback((value) => {
+        setAiStatus(current => {
+            const nextLoading = typeof value === 'function' ? value(current.loading) : value;
+            return {
+                ...current,
+                loading:Boolean(nextLoading),
+                active:Boolean(nextLoading),
+                ...(nextLoading ? {
+                    completed:false,
+                    success:null,
+                    result:null,
+                    error:null,
+                    startedAt:current.startedAt ?? new Date().toISOString(),
+                    finishedAt:null
+                } : {})
+            };
+        });
+    }, []);
 
     const addMessage = (newMessage) => {
         setChat(prev => [...prev, newMessage]);
     };
 
     const sendPrompt = async(text,attached,onlyResponse)=>{
-        setLoading(true)
-        if(!onlyResponse){
-            setVisibleChatAi(true);
+        startAiTask({task:text, process:'processAiRequest'});
+        try {
+            if(!onlyResponse){
+                setVisibleChatAi(true);
                 addMessage({
                     text:text,
                     user_id:userInfo.user_id,
@@ -109,31 +217,41 @@ export function AiAssistanProvider({children}){
                     userInfo
                 })
                 if(res.AI_response[0]){
+                    const result = JSON.parse(res.AI_response[1]);
                     addMessage({
-                        children:JSON.parse(res.AI_response[1]),
+                        children:result,
                         user_id:0
                         })
-                    }else{
-                        addMessage({
-                            text:`❌ Error, hubo un problema al intentar procesar tu solicitud, intentalo de nuevo.`,
-                            user_id:0,
-                            user_name:'Asistente AI'
-                        })
+                    completeAiTask(result);
+                }else{
+                    const error = new Error('No fue posible procesar la solicitud de IA.');
+                    addMessage({
+                        text:`❌ Error, hubo un problema al intentar procesar tu solicitud, intentalo de nuevo.`,
+                        user_id:0,
+                        user_name:'Asistente AI'
+                    });
+                    failAiTask(error);
                 }
-        }else{
-            let res = await postInfo('/processAiRequest',{
-                text:text,
-                attached,
-                userInfo
-            })
-            console.log(res.AI_response)
-            if(res.AI_response[0]){
-                return([true,JSON.parse(res.AI_response[1])])
             }else{
-                return([false,[]])
+                let res = await postInfo('/processAiRequest',{
+                    text:text,
+                    attached,
+                    userInfo
+                })
+                console.log(res.AI_response)
+                if(res.AI_response[0]){
+                    const result = JSON.parse(res.AI_response[1]);
+                    completeAiTask(result);
+                    return([true,result])
+                }else{
+                    failAiTask(new Error('No fue posible procesar la solicitud de IA.'));
+                    return([false,[]])
+                }
             }
+        } catch (error) {
+            failAiTask(error);
+            throw error;
         }
-        setLoading(false)
     }
 
     const value = {
@@ -145,8 +263,22 @@ export function AiAssistanProvider({children}){
         sendPrompt,
         visibleChatAi,
         setVisibleChatAi,
-        loading,
-        setLoading
+        aiStatus,
+        active:aiStatus.active,
+        task:aiStatus.task,
+        process:aiStatus.process,
+        completed:aiStatus.completed,
+        success:aiStatus.success,
+        result:aiStatus.result,
+        error:aiStatus.error,
+        loading:aiStatus.loading,
+        setLoading,
+        startAiTask,
+        updateAiTask,
+        completeAiTask,
+        failAiTask,
+        cancelAiTask,
+        resetAiTask
     }
 
     useEffect(()=>{
@@ -161,44 +293,99 @@ export function AiAssistanProvider({children}){
 }
 
 export function AlertProvider({ children }) {
-    const [openAlert, setOpenAlert] = useState(false);
     const [tailAlerts, setTailAlerts] = useState([]);
-    
-    const popInAlert = (child) => {
-        console.log('Abriendo alerta')
-        setTailAlerts(prev => [...prev, {alert:child}]);
-        setOpenAlert(true);
-    }
 
-    const popOutAlert = () => {
-        if(tailAlerts.length >1){
-            let C = []
-            tailAlerts.map((element,index)=>{
-                if(index != tailAlerts.length -1){
-                    C.push(element);
+    const popInAlert = useCallback((alert, options = {}) => {
+        const id = options.id ?? `alert-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+        setTailAlerts(current => {
+            const existingIndex = current.findIndex(entry => entry.id === id);
+            const nextAlert = {
+                id,
+                alert,
+                fullScale: options.fullScale ?? false,
+                closeLabel: options.closeLabel ?? 'Cerrar alerta',
+            };
+
+            if (existingIndex === -1) return [...current, nextAlert];
+
+            return current.map((entry, index) => index === existingIndex
+                ? { ...entry, ...nextAlert }
+                : entry
+            );
+        });
+
+        return id;
+    }, []);
+
+    const popOutAlert = useCallback((expectedId) => {
+        setTailAlerts(current => {
+            if (current.length === 0) return current;
+
+            const topAlert = current[current.length - 1];
+            if (expectedId != null && topAlert.id !== expectedId) return current;
+
+            return current.slice(0, -1);
+        });
+    }, []);
+
+    const removeAlert = useCallback((id) => {
+        if (id == null) return;
+        setTailAlerts(current => current.filter(entry => entry.id !== id));
+    }, []);
+
+    const replaceTopAlert = useCallback((alert, options = {}) => {
+        setTailAlerts(current => {
+            if (current.length === 0) return current;
+
+            const topIndex = current.length - 1;
+            return current.map((entry, index) => index === topIndex
+                ? {
+                    ...entry,
+                    alert,
+                    fullScale: options.fullScale ?? entry.fullScale,
+                    closeLabel: options.closeLabel ?? entry.closeLabel,
                 }
-            });
-            setTailAlerts(C);
-        }else{
-        setOpenAlert(false)
-        setTailAlerts([])
-        }
-    }
+                : entry
+            );
+        });
+    }, []);
 
-    const value = {
+    const updateAlert = useCallback((id, alert, options = {}) => {
+        setTailAlerts(current => current.map(entry => entry.id === id
+            ? {
+                ...entry,
+                alert,
+                fullScale: options.fullScale ?? entry.fullScale,
+                closeLabel: options.closeLabel ?? entry.closeLabel,
+            }
+            : entry
+        ));
+    }, []);
+
+    const clearAlerts = useCallback(() => setTailAlerts([]), []);
+    const openAlert = tailAlerts.length > 0;
+
+    const setOpenAlert = useCallback((isOpen) => {
+        if (typeof isOpen === 'function') {
+            setTailAlerts(current => isOpen(current.length > 0) ? current : []);
+            return;
+        }
+        if (!isOpen) clearAlerts();
+    }, [clearAlerts]);
+
+    const value = useMemo(() => ({
         openAlert,
         setOpenAlert,
         tailAlerts,
         setTailAlerts,
         popInAlert,
-        popOutAlert
-    };
-
-    useEffect(()=>{
-        if(openAlert == false){
-            setTailAlerts([])
-        }
-    },[openAlert])
+        popOutAlert,
+        removeAlert,
+        replaceTopAlert,
+        updateAlert,
+        clearAlerts,
+    }), [openAlert, tailAlerts, popInAlert, popOutAlert, removeAlert, replaceTopAlert, updateAlert, clearAlerts, setOpenAlert]);
 
     return (
         <AppAlerts.Provider value={value}>
@@ -247,17 +434,17 @@ export function AppInfoProvider({children}){
     }
 
     const optionsMenu = [
-        {text:'Inicio',path:'',icon:<HomeIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914614/LogoInicio1_nsuzaj.png' />,action:handleNavigate},
-        {text:'Crear',path:'new',icon:<i className="fa-solid fa-plus"/>,action:handleNavigate},
-        {text:'Terceros',path:'thirdparties',icon:<ThirdPartiesIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Inicio',path:'',icon:<i className="bi bi-house"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760914614/LogoInicio1_nsuzaj.png' />,action:handleNavigate},
+        {text:'Crear',path:'new',icon:<i className="ti ti-sparkle-2"/>,action:handleNavigate},
+        {text:'Terceros',path:'thirdparties',icon:<i className="fa-regular fa-user"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
         // Default tools
         {text:'Panel Principal',path:'mainPanel',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515340/Grupo5logos_3_qp85tn.png'/>,action:handleNavigate},
-        {text:'Bancos',path:'banks',icon:<BankIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
-        {text:'Cartera',path:'briefcases',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
-        {text:'Cajas POS',path:'CashBoxes',icon:<PaymentsIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
-        {text:'Compras - Gastos',path:'transfers',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
-        {text:'Administración Cuentas',path:'transfers',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
-        {text:'Movimientos',path:'movements',icon:<MoneyIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Bancos',path:'banks',icon:<i className="bi bi-bank"/>,action:handleNavigate},
+        {text:'Cartera',path:'briefcases',icon:<i className="bi bi-wallet2"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Cajas POS',path:'CashBoxes',icon:<i className="ti ti-cash-register"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Compras - Gastos',path:'transfers',icon:<i className="bi bi-bag"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Administración Cuentas',path:'transfers',icon:<i className="fa-solid fa-book-bookmark"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Movimientos',path:'movements',icon:<i className="ti ti-arrows-double-sw-ne"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
 
 
         //{text:'Movimientos',path:'movements',icon:<MovementIcon/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png'/>,action:handleNavigate},

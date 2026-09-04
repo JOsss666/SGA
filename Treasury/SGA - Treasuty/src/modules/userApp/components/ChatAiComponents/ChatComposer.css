@@ -1,0 +1,121 @@
+@import '../../containers/UserApp.css';
+
+.ChatComposer{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .7vh;
+    width: 100%;
+    min-height: 6.2vh;
+    padding: 1vh 1.3vh;
+    border-radius: 2vh;
+    background-color: var(--menuAside);
+}
+
+.ChatComposer .composerImages{
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1vh;
+    padding: .3vh .7vh .7vh;
+}
+
+.ChatComposer .composerInputRow{
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .7vh;
+}
+
+.ChatComposer textarea{
+    flex: 1 1 14rem;
+    min-width: 8rem;
+    resize: none;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: .6vh .7vh;
+    background-color: transparent;
+    color: var(--mainText);
+    font: inherit;
+    font-size: clamp(2.2px,2.2vh,22px);
+    line-height: 1.5;
+    max-height: 18vh;
+    overflow-y: hidden;
+}
+
+.ChatComposer .composerAttachment{
+    display: inline-flex;
+    align-items: center;
+    gap: .65vh;
+    max-width: min(100%, 28rem);
+    padding: .55vh .9vh;
+    border: 1px solid var(--inputsBorder);
+    border-radius: 1vh;
+    color: var(--mainText);
+    background-color: var(--inputs);
+    font-size: clamp(1.8px,1.8vh,18px);
+    white-space: nowrap;
+}
+
+.ChatComposer .composerAttachment > span{
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ChatComposer .composerAttachment > i:first-child{
+    color: var(--primaryColor);
+}
+
+.ChatComposer .composerAttachmentLoading{
+    opacity: .7;
+}
+
+.ChatComposer .composerImages .AttachedCard{
+    flex: 0 0 10vh;
+}
+
+.ChatComposer textarea::placeholder{
+    color: var(--descriptionText);
+}
+
+.ChatComposer textarea:disabled{
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.ChatComposer .composerCounter{
+    position: absolute;
+    right: 1.4vh;
+    bottom: .6vh;
+    font-size: clamp(1.6px,1.6vh,16px);
+    color: var(--descriptionText);
+    background-color: transparent;
+    padding: 0 .5vh;
+    border-radius: .6vh;
+    pointer-events: none;
+}
+
+.ChatComposer .composerCounterFull{
+    color: #E7000B;
+    font-weight: 500;
+}
+
+/* Barra de scroll interna cuando el texto supera el alto máximo */
+.ChatComposer textarea::-webkit-scrollbar{
+    width: .8vh;
+}
+
+.ChatComposer textarea::-webkit-scrollbar-thumb{
+    background: var(--inputsBorder);
+    border-radius: 1vh;
+}
+
+.ChatComposer textarea::-webkit-scrollbar-track{
+    background: transparent;
+}

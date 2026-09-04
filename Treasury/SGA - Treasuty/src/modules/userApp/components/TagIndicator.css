@@ -15,7 +15,11 @@
 }
 
 .active_color{
-    background-color: #B4F9DF;
+    background-color: #CBFBF1;
+}
+
+.active_color h5{
+    color: #1F7A55;
 }
 
 .disabled_color{
@@ -27,7 +31,11 @@
 }
 
 .indicator_color{
-    background-color: #B2D4FC;
+    background-color: #DBEAFE;
+}
+
+.indicator_color h5{
+    color: #155DFC;
 }
 
 

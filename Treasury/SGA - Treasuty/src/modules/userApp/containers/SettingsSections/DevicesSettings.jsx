@@ -39,7 +39,7 @@ export function DevicesSettings(){
                             <div className="gridDevices">
                                 {printerList.map((printer,index)=>(
                                     <div className={`deviceCard ${printer.status_label}_cardState`} key={index}>
-                                        <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1773773820/Gemini_Generated_Image_nw3p98nw3p98nw3p_2_bxd2n2.png" alt={printer.name} />
+                                        <img src="https://cdnmain.sga360.co/static/Gemini_Generated_Image_nw3p98nw3p98nw3p_2_bxd2n2.webp" alt={printer.name} />
                                         <div className="infoDevice">
                                             <strong>{printer.name}</strong>
                                             <span>{printer.description? printer.description : 'Sin descripción'}</span>

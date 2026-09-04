@@ -79,7 +79,7 @@ export function Bussines(){
                         key={index} 
                         title={element.name}
                         onlyTitle={true}
-                        img={element.img != undefined? element.img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765903321/ChatGPT_Image_16_dic_2025_11_41_43_zhakuf.png'}
+                        img={element.img != undefined? element.img:'https://cdnmain.sga360.co/static/ChatGPT_Image_16_dic_2025_11_41_43_zhakuf.webp'}
                         onClick={()=>{
                             handleNavigate(element.id)
                         }}

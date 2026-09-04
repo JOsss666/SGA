@@ -1,7 +1,9 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import "./SearchBar.css";
 
-export function SearchBar({ placeholder, action, value, searchAction }) {
+export function SearchBar({ placeholder, action, value, searchAction, autoFocus }) {
+
+    const inputRef = useRef();
 
     const handleKeyDown = (event) => {
         if (event.key === "Enter" && searchAction) {
@@ -9,9 +11,18 @@ export function SearchBar({ placeholder, action, value, searchAction }) {
         }
     };
 
+    useEffect(()=>{
+        if(autoFocus && inputRef.current){
+            inputRef.current.focus();
+            const cursorPos = inputRef.current.value.length;
+            inputRef.current.setSelectionRange(cursorPos,cursorPos);
+        }
+    },[autoFocus])
+
     return (
         <div className="SearchBar">
             <input
+                ref={inputRef}
                 type="text"
                 value={value}
                 placeholder={placeholder}

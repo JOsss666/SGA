@@ -23,9 +23,9 @@ jwtService.signAccessToken = ({
     serviceUserId,
     scopes,
     tokenVersion,
-    expiresIn = 900
+    expiresIn = 10800
 }) => {
-    const ttl = Math.min(Math.max(Number(expiresIn) || 900, 60), 3600);
+    const ttl = Math.min(Math.max(Number(expiresIn) || 10800, 60), 10800);
     const customClaims = {
         integration_id: Number(integrationId),
         company_id: Number(companyId),

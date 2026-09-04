@@ -17,7 +17,7 @@
     flex-direction: column;
 }
 
-.FormNewOc form .FormInput{
+.FormNewOc form .FacturationFormInput{
     margin: 2vh auto;
     width: 100%;
 }
@@ -25,14 +25,4 @@
 .FormNewOc form .FormButton{
     margin: 1vh;
     margin-bottom: 2vh;
-}
-
-.FormNewOc form .SearchinList{
-    margin: 2vh auto;
-    width: 100%;
-}
-
-.FormNewOc form .SearchinList label{
-    font-weight: 400;
-    color: var(--descriptionText);
 }

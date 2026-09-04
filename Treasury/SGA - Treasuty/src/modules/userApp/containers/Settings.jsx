@@ -40,9 +40,9 @@ export function Settings(){
     ]
 
     const handleNavigate = (path)=>{
-        console.log(path)
         navigate(`/SGA_treasury/${params.company_key}/${params.user_key}/settings/${path}`)
     }
+
 
     return(
         <div className="Settings">
@@ -68,7 +68,7 @@ export function Settings(){
                         <Route path="Billing" element={<BillingSettings/>} />
                         <Route path="Security" element={<SecuritySettings/>} />
                         <Route path="Devices" element={<DevicesSettings/>} />
-                        <Route path="System" element={<SystemSettings/>} />
+                        <Route path="System/*" element={<SystemSettings/>} />
                     </Routes>
                 </div>
             </div>

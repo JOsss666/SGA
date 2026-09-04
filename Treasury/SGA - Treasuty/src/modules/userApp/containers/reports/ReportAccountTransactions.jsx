@@ -23,7 +23,7 @@ export function ReportAccountTransactions(){
     const [info, setInfo] = useState([]);
     const [account_info,setAccount_info] = useState({});
     const { appInfo } = useAppInfo();
-    const [searchValue,setSearchValue] = useState();
+    const [searchValue,setSearchValue] = useState('');
 
     // Control
     const [loadingAccInfo, setLoadingAccInfo] = useState(false);
@@ -44,6 +44,18 @@ export function ReportAccountTransactions(){
         "Naturaleza",
         "Valor ",
         "Estado"
+    ];
+
+    const downloadColumns = [
+        { header: "ID", key: "ID", width: 14 },
+        { header: "Transacción", key: "Transacción", width: 18 },
+        { header: "Fecha Documento", key: "Fecha Documento", width: 20 },
+        { header: "Documento", key: "Documento", width: 22 },
+        { header: "Cuenta", key: "Cuenta", width: 18 },
+        { header: "Concepto", key: "Concepto", width: 36 },
+        { header: "Naturaleza", key: "Naturaleza", width: 16 },
+        { header: "Valor", key: "Valor", type: "number", numFmt: "#,##0.00", width: 18 },
+        { header: "Estado", key: "Estado", width: 16 }
     ];
 
     const filters = {
@@ -107,7 +119,6 @@ export function ReportAccountTransactions(){
     const getAccountInfo = async()=>{
         setLoadingAccInfo(true)
         let res = await postInfo('/getAccounts',settingsAccount);
-        console.log(res)
         if(res[0]){
             setAccount_info(res[1][0])
         }
@@ -124,6 +135,38 @@ export function ReportAccountTransactions(){
             GetTransactionDetails();
         }
     }, [account_info,start_date,end_date]);
+
+    const visibleInfo = Array.isArray(info)
+        ? info.filter((row)=>
+            Object.values(row)
+                .join(" ")
+                .toLowerCase()
+                .includes(searchValue.toLowerCase())
+        )
+        : [];
+
+    const infoForDownload = visibleInfo.map((row)=>({
+        "ID": row.id ?? "",
+        "Transacción": row.transaction_id != null ? `TR#${row.transaction_id}` : "",
+        "Fecha Documento": row.created_at?.substring(0, 10) ?? "",
+        "Documento": row.doc_type
+            ? `${row.doc_type}#${row.ownSerial ?? row.doc_id ?? ""}`
+            : "",
+        "Cuenta": row.account_code ?? "",
+        "Concepto": row.type === 'payment'
+            ? `Pago ${row.payment_name ?? ''}`.trim()
+            : row.concept_name ?? "",
+        "Naturaleza": row.nature ?? "",
+        "Valor": Number(row.total ?? 0),
+        "Estado": row.status ?? ""
+    }));
+
+    const getDownloadOptions = ()=>({
+        companyName: appInfo.legal_name || appInfo.trade_name || appInfo.company_name || "Compañía",
+        reportName: `Detalle de la cuenta ${account_info.code ?? ''}`.trim(),
+        period: `${start_date || 'Inicio'} a ${end_date || 'Actualidad'}`,
+        startRow: 4
+    });
 
     if(!loadingAccInfo){
         return (
@@ -163,16 +206,17 @@ export function ReportAccountTransactions(){
                     {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Balance - Cuentas contables - Saldo`}
                 ]}/>
                 <ButtonDownload
-                    info={info}
-                    columns={columns}
+                    info={infoForDownload}
+                    columns={downloadColumns}
                     title={`Balance_${account_info.code}`}
                     component={"bodyreport"}
+                    xlsxOptions={getDownloadOptions}
                 />
                 <FilterReports hidden={visibleSettings} columns={columns} filters={filters}/>
             </div>
             <div className="SpaceReport">
                 {!loading && (
-                    <TableReport columns={settingsReport.columns} info={info} type={''} searchValue={searchValue}/>
+                    <TableReport columns={settingsReport.columns} info={visibleInfo} type={''} searchValue={''}/>
                 )}
                 {loading && (
                 <LoadingSpace title={"Cargando transacciónes"} description={"Esto no debe tardar mucho..."} />

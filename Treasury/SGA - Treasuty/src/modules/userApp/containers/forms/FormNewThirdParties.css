@@ -3,32 +3,52 @@
     display: flex;
     flex-direction: column;
     padding: 2vh;
-    min-width: 40vw;
-    width: 100%;
+    width: 50vw;
     margin: 0 auto;
     background-color: var(--menuAside);
+    position: relative;
+    box-sizing: border-box;
 }
 
-.FormNewThirdParties .BoldTitle{
-    margin: 1vh auto;
+.FormNewThirdParties .headtThirdPartyForm{
+    display: flex;
+    border-radius: 2vh;
 }
 
-.FormNewThirdParties .stageProcess{
-    padding: 1vh;
-    width: 100%;
-    margin: 1vh auto;
+.FormNewThirdParties .headtThirdPartyForm .CapsuleButtonAi{
+    position: absolute;
+    top: 4vh;
+    right: 2vh;
 }
 
+.FormNewThirdParties .headtThirdPartyForm .CapsuleButtonAi span{
+    font-size: clamp(2px,2vh,20px);
+    color: #fff;
+    display: flex;
+    align-items: center;
+}
 
-.FormNewThirdParties .userPhoto{ 
-    margin: 1vh auto;
+.FormNewThirdParties .headtThirdPartyForm .CapsuleButtonAi span i{
+    margin-left: 1vh;
+}
+
+.FormNewThirdParties .headtThirdPartyForm .mainHeadInfo{
+    margin: auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.FormNewThirdParties .headtThirdPartyForm  .userPhoto{ 
+    margin: 1vh;
+    margin-right: 2vw;
     height: 20vh;
-    width: 50%;
+    width: 30%;
     padding: 1vh;
     cursor: pointer;
 }
 
-.FormNewThirdParties .actualPhoto{
+.FormNewThirdParties .headtThirdPartyForm .actualPhoto{
     height: 100%;
     width: 100%;
     border-radius: 2vh;
@@ -37,24 +57,92 @@
     outline: dashed .2vh var(--inputsBorder);
 }
 
-.FormNewThirdParties .actualPhoto img{
+.FormNewThirdParties .headtThirdPartyForm .actualPhoto img{
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
 }
 
-.FormNewThirdParties .userPhoto .FileInput{
+.FormNewThirdParties .headtThirdPartyForm .userPhoto .FileInput{
     display: none;
 }
 
-.FormNewThirdParties .userPhoto:hover .actualPhoto{
+.FormNewThirdParties .headtThirdPartyForm .userPhoto:hover .actualPhoto{
     display: none;
 }
 
 
-.FormNewThirdParties .userPhoto:hover .FileInput{
+.FormNewThirdParties .headtThirdPartyForm .userPhoto:hover .FileInput{
     display: block;
 }
+
+
+.FormNewThirdParties section{
+    display: flex;
+    flex-direction: column;
+}
+
+.FormNewThirdParties section .tagSection{
+    margin: 1vh auto;
+}
+
+.FormNewThirdParties .errorContainer{
+    position: absolute;
+    width:90%;
+    top: 8vh;
+    right: 5%;
+    background-color: #FEF2F2;
+    border-radius: 1vh;
+    padding: 2vh;
+    padding-right: 4vh;
+    border: solid .2vh #FF6467;
+    z-index: 40;
+}
+
+.FormNewThirdParties .errorContainer .closeErrorBtn{
+    cursor: pointer;
+    position: absolute;
+    top: 1.5vh;
+    right: 2vh;
+    font-size: clamp(3px,3vh,30px);
+    color: #FF6467;   
+}
+
+.FormNewThirdParties .errorContainer span{
+    color: #FF6467;   
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+}
+
+.FormNewThirdParties .stageProcess{
+    padding: 1vh;
+    width: 100%;
+    margin: 1vh auto;
+}
+
+.FormNewThirdParties .stageLabels{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1vh;
+    margin-bottom: 1.5vh;
+}
+
+.FormNewThirdParties .stageLabels button{
+    border: none;
+    border-radius: .6vh;
+    padding: 1vh;
+    cursor: pointer;
+    background-color: var(--inputsBg);
+    color: var(--descriptionText);
+    font-size: clamp(10px,1.7vh,15px);
+    overflow-wrap: anywhere;
+}
+
+.FormNewThirdParties .stageLabels button.activeStageLabel{
+    background-color: #007AFF;
+    color: white;
+}
+
 
 .FormNewThirdParties .stageProcess .progresBar{
     height: 1vh;
@@ -72,12 +160,29 @@
     box-shadow: 0 .1vh 1vh var(--inputsBorder);
 }
 
-.FormNewThirdParties form{
+.FormNewThirdParties section form{
     padding: 1vh;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 2vh;
+    flex-wrap: wrap;
 }
+
+.FormNewThirdParties section form .FacturationFormInput{
+    width: 20vw;
+    margin: 1vh auto;
+}
+
+.FormNewThirdParties section form .FacturationSearchinList{
+    width: 20vw;
+    margin: 1vh auto;
+}
+
+.FormNewThirdParties section form .ProductLinkFiscalConditionsCard .FacturationSearchinList{
+    width: 100%;
+    margin: 0;
+}
+
 
 .FormNewThirdParties form .BoldTitle{
     font-size: clamp(2.5px,3vh,30px);
@@ -127,11 +232,12 @@
 
 .FormNewThirdParties .accessSwitch{
     display: flex;
-    width: 100%;
+    width: 20vw;
     margin: 2vh auto;
 }
 
 .FormNewThirdParties .accessSwitch h6{
+    margin: auto 0;
     font-size: clamp(2.2px,2.2vh,22px);
     font-weight: 400;
     color: var(--descriptionText);
@@ -142,6 +248,125 @@
     margin-right: 2vh;
 }
 
+.FormNewThirdParties .retentionsList{
+    display: grid;
+    grid-template-columns: minmax(240px, .8fr) minmax(320px, 1.2fr);
+    gap: 2vh;
+    padding: 1vh;
+}
+
+.FormNewThirdParties .retentionsList > .FacturationSearchinList{
+    width: 100%;
+    margin: 0;
+}
+
+.FormNewThirdParties .aplyRetentionsContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    min-height: 12vh;
+    padding: 1.5vh;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 1vh;
+    background-color: var(--inputsBg);
+}
+
+.FormNewThirdParties .selectedRetentionsHeader{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--mainText);
+}
+
+.FormNewThirdParties .selectedRetentionsHeader span{
+    min-width: 3vh;
+    padding: .3vh .8vh;
+    border-radius: 2vh;
+    background-color: #007AFF;
+    color: white;
+    text-align: center;
+}
+
+.FormNewThirdParties .selectedRetention{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 1.5vh;
+    padding: 1.2vh;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: .8vh;
+    background-color: var(--bg);
+}
+
+.FormNewThirdParties .selectedRetentionInfo,
+.FormNewThirdParties .selectedRetentionValues{
+    display: flex;
+    flex-direction: column;
+    gap: .3vh;
+    min-width: 0;
+}
+
+.FormNewThirdParties .selectedRetentionInfo strong{
+    overflow: hidden;
+    color: var(--mainText);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.FormNewThirdParties .selectedRetentionInfo span,
+.FormNewThirdParties .selectedRetentionValues small{
+    color: var(--descriptionText);
+}
+
+.FormNewThirdParties .selectedRetentionValues{
+    text-align: right;
+    color: var(--mainText);
+}
+
+.FormNewThirdParties .selectedRetention button{
+    width: 4vh;
+    height: 4vh;
+    border: none;
+    border-radius: .7vh;
+    cursor: pointer;
+    background-color: #FEF2F2;
+    color: #FF6467;
+}
+
+.FormNewThirdParties .selectedRetention button:disabled{
+    cursor: not-allowed;
+    opacity: .5;
+}
+
+.FormNewThirdParties .retentionsSection .taxRentSection{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    width: 100%;
+}
+
+.FormNewThirdParties .retentionsSection .taxRentSection .labelSwitch{
+    display: flex;
+    width: 100%;
+    align-items: center;
+    padding: 1vh 2vh;
+}
+
+.FormNewThirdParties .retentionsSection .taxRentSection .labelSwitch .SwitchOption{
+    margin: auto;
+    margin-right: 2vh;
+}
+
+.FormNewThirdParties .retentionsSection .taxRentSection .labelSwitch span{
+    color: var(--mainText);
+    font-weight: 400;
+    font-size: clamp(2.2px,2.2vh,22px);
+}
+
+.FormNewThirdParties .retentionsSection .taxRentSection .SelectOptions{
+    margin: 0 1vh;
+}
+
 @media (max-width:500px) {
     .FormNewThirdParties{
         width: 100dvw;
@@ -149,5 +374,13 @@
 
     .FormNewThirdParties form .BoldTitle{
         display: none;
+    }
+
+    .FormNewThirdParties .stageLabels{
+        grid-template-columns: 1fr;
+    }
+
+    .FormNewThirdParties .retentionsList{
+        grid-template-columns: 1fr;
     }
 }

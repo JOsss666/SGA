@@ -15,13 +15,13 @@ export function Services(){
     }
 
     const [services,setServices] = useState([
-        {title:'Almacenamiento en la nube',className:'CloudingStorage',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044183/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.png'},
-        {title:'Mensajeria',className:'Messages',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044345/mensajes_eygd9a.png'},
-        {title:'Estadisticas',className:'Analitycs',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044500/Estadisticas_phv9hy.png'},
-        {title:'Publicidad',className:'Advertising',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044183/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.png'},
-        {title:'Personalizados',className:'OwnServices',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044183/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.png'},
-        {title:'Inteligencía Artificial',className:'Ai',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044183/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.png'},
-        {title:'Correo profesional',className:'ProfesionalMail',img:'https://res.cloudinary.com/djjxugmni/image/upload/v1765044183/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.png'},
+        {title:'Almacenamiento en la nube',className:'CloudingStorage',img:'https://cdnmain.sga360.co/static/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.webp'},
+        {title:'Mensajeria',className:'Messages',img:'https://cdnmain.sga360.co/static/mensajes_eygd9a.webp'},
+        {title:'Estadisticas',className:'Analitycs',img:'https://cdnmain.sga360.co/static/Estadisticas_phv9hy.webp'},
+        {title:'Publicidad',className:'Advertising',img:'https://cdnmain.sga360.co/static/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.webp'},
+        {title:'Personalizados',className:'OwnServices',img:'https://cdnmain.sga360.co/static/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.webp'},
+        {title:'Inteligencía Artificial',className:'Ai',img:'https://cdnmain.sga360.co/static/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.webp'},
+        {title:'Correo profesional',className:'ProfesionalMail',img:'https://cdnmain.sga360.co/static/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.webp'},
     ]);
 
     return(

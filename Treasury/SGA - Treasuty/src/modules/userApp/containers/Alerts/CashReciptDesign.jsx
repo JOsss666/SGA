@@ -330,7 +330,7 @@ export function CashReciptDesign(){
                     }}
                 >
                     <img
-                    src="https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png"
+                    src="https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.webp"
                     alt="SGA"
                     style={{
                         width: "100%",
