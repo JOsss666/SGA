@@ -57,6 +57,29 @@ zjIntegrationController.getThirdParties = async (req, res, next) => {
     }
 };
 
+zjIntegrationController.searchThirdParties = async (req, res, next) => {
+    try {
+        const result = await zjService.searchThirdParties({
+            companyId: req.integration.companyId,
+            names: req.query.names,
+            lastNames: req.query.lastNames,
+            corporativeName: req.query.corporative_name,
+            email: req.query.email,
+            nit: req.query.nit,
+            type: req.query.type,
+            page: req.query.page,
+            limit: req.query.limit
+        });
+
+        res.status(200).json({
+            success: true,
+            ...result
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 zjIntegrationController.getThirdPartyById = async (req, res, next) => {
     try {
         const thirdParty = await zjService.getThirdPartyById({

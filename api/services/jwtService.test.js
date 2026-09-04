@@ -39,3 +39,23 @@ test('rechaza un JWT manipulado', () => {
         error => error.code === 'INVALID_ACCESS_TOKEN'
     );
 });
+
+test('permite tokens de integración con vigencia de 3 horas', () => {
+    const signed = jwtService.signAccessToken({
+        ...tokenInput,
+        expiresIn: 10800
+    });
+
+    assert.equal(signed.expiresIn, 10800);
+    assert.equal(signed.payload.exp - signed.payload.iat, 10800);
+});
+
+test('limita la vigencia máxima del token a 3 horas', () => {
+    const signed = jwtService.signAccessToken({
+        ...tokenInput,
+        expiresIn: 86400
+    });
+
+    assert.equal(signed.expiresIn, 10800);
+    assert.equal(signed.payload.exp - signed.payload.iat, 10800);
+});

@@ -2,9 +2,9 @@
   "openapi": "3.1.0",
   "info": {
     "title": "SGA360 - API de integración Z&J",
-    "version": "1.0.0",
-    "summary": "Integración empresarial para pedidos, procesos y órdenes de cliente.",
-    "description": "API máquina-a-máquina para los desarrollos externos de Z&J. El cliente obtiene un JWT temporal, verifica disponibilidad mediante el handshake, consulta catálogos internos y crea instancias y órdenes de cliente de forma idempotente.\n\n## Flujo recomendado\n\n1. Obtener un JWT en `POST /auth/token`.\n2. Ejecutar `GET /handshake`.\n3. Consultar terceros, servicios y procesos.\n4. Crear una instancia de proceso.\n5. Crear la orden de cliente asociada.\n\nEl `company_id` y el usuario técnico provienen siempre del JWT. Nunca deben enviarse en el body.",
+    "version": "1.1.0",
+    "summary": "Integración empresarial para consultar terceros, procesos y órdenes de cliente.",
+    "description": "API máquina-a-máquina para los desarrollos externos de Z&J. El cliente obtiene un JWT con vigencia de 3 horas, verifica disponibilidad mediante el handshake, consulta catálogos internos y crea instancias y órdenes de cliente de forma idempotente.\n\n## Flujo recomendado\n\n1. Obtener un JWT en `POST /auth/token`.\n2. Ejecutar `GET /handshake`.\n3. Consultar o buscar terceros, servicios y procesos.\n4. Crear una instancia de proceso.\n5. Crear la orden de cliente asociada.\n\nEl `company_id` y el usuario técnico provienen siempre del JWT. Nunca deben enviarse en el body, query string ni parámetros de ruta.",
     "contact": {
       "name": "SGA360"
     }
@@ -46,7 +46,7 @@
       "post": {
         "tags": ["Autenticación"],
         "summary": "Obtener token de acceso",
-        "description": "Intercambia `client_id` y `client_secret` por un JWT con duración predeterminada de 15 minutos. El secreto solamente debe enviarse a este endpoint.",
+        "description": "Intercambia `client_id` y `client_secret` por un JWT con duración de 3 horas. El secreto solamente debe enviarse a este endpoint.",
         "operationId": "issueIntegrationToken",
         "security": [],
         "requestBody": {
@@ -173,6 +173,108 @@
           "403": {
             "$ref": "#/components/responses/Forbidden"
           }
+        }
+      }
+    },
+    "/third-parties/search": {
+      "get": {
+        "tags": ["Terceros"],
+        "summary": "Buscar terceros",
+        "description": "Busca clientes activos de la compañía autenticada.\n\n## Cómo usar los parámetros\n\nTodos los parámetros son opcionales individualmente, pero la petición debe conservar **al menos uno** de estos filtros: `names`, `lastNames`, `corporative_name`, `email` o `nit`. Para cambiar la búsqueda, agregue o quite parámetros del query string. Si envía varios filtros, el tercero debe cumplirlos todos.\n\n- `names`, `lastNames` y `corporative_name`: coincidencia parcial, sin distinguir mayúsculas.\n- `email`: coincidencia exacta, sin distinguir mayúsculas.\n- `nit`: coincidencia exacta; puede enviarse con o sin puntos y guiones.\n- `type`, `page` y `limit`: parámetros adicionales opcionales.\n\n### Ejemplos rápidos\n\nSolo razón social: `?corporative_name=Z%26J`\n\nSolo NIT: `?nit=900.123.456-7`\n\nNombre y apellido: `?names=Juan&lastNames=Pérez`\n\nNombre con opciones: `?names=Juan&type=client,both&page=1&limit=20`\n\nPara personas jurídicas, `corporative_name` consulta el campo interno `names`. Una petición sin ninguno de los cinco filtros de identidad responde con HTTP `400`.",
+        "operationId": "searchThirdParties",
+        "x-codeSamples": [
+          {
+            "lang": "Shell",
+            "label": "Solo razón social",
+            "source": "curl --get \\\n  'http://localhost:3000/api/integrations/v1/third-parties/search' \\\n  --header 'Authorization: Bearer <jwt>' \\\n  --data-urlencode 'corporative_name=Z&J'"
+          },
+          {
+            "lang": "Shell",
+            "label": "Solo correo",
+            "source": "curl --get \\\n  'http://localhost:3000/api/integrations/v1/third-parties/search' \\\n  --header 'Authorization: Bearer <jwt>' \\\n  --data-urlencode 'email=cliente@empresa.com'"
+          },
+          {
+            "lang": "Shell",
+            "label": "Solo NIT",
+            "source": "curl --get \\\n  'http://localhost:3000/api/integrations/v1/third-parties/search' \\\n  --header 'Authorization: Bearer <jwt>' \\\n  --data-urlencode 'nit=900.123.456-7'"
+          },
+          {
+            "lang": "Shell",
+            "label": "Combinar y quitar parámetros",
+            "source": "curl --get \\\n  'http://localhost:3000/api/integrations/v1/third-parties/search' \\\n  --header 'Authorization: Bearer <jwt>' \\\n  --data-urlencode 'names=Juan' \\\n  --data-urlencode 'lastNames=Pérez' \\\n  --data-urlencode 'type=client,both' \\\n  --data-urlencode 'page=1' \\\n  --data-urlencode 'limit=20'\n\n# Para ampliar la búsqueda, quite por ejemplo esta línea:\n#   --data-urlencode 'lastNames=Pérez'\n# Debe dejar al menos names, lastNames, corporative_name, email o nit."
+          }
+        ],
+        "parameters": [
+          {
+            "name": "names",
+            "in": "query",
+            "description": "Nombre o fragmento del nombre.",
+            "schema": { "type": "string", "maxLength": 200 },
+            "example": "Juan"
+          },
+          {
+            "name": "lastNames",
+            "in": "query",
+            "description": "Apellido o fragmento del apellido.",
+            "schema": { "type": "string", "maxLength": 200 },
+            "example": "Pérez"
+          },
+          {
+            "name": "corporative_name",
+            "in": "query",
+            "description": "Razón social o fragmento de ella.",
+            "schema": { "type": "string", "maxLength": 200 },
+            "example": "Z&J"
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "description": "Correo electrónico exacto, sin distinguir mayúsculas.",
+            "schema": { "type": "string", "format": "email", "maxLength": 200 },
+            "example": "cliente@empresa.com"
+          },
+          {
+            "name": "nit",
+            "in": "query",
+            "description": "NIT o número de identificación exacto. Se ignoran separadores como puntos y guiones.",
+            "schema": { "type": "string", "maxLength": 200 },
+            "example": "900.123.456-7"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Uno o varios tipos separados por coma. Por defecto: client,both.",
+            "schema": { "type": "string", "example": "client,both" }
+          },
+          { "$ref": "#/components/parameters/Page" },
+          { "$ref": "#/components/parameters/Limit" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Coincidencias paginadas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/ThirdParty" }
+                        },
+                        "pagination": { "$ref": "#/components/schemas/Pagination" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
         }
       }
     },
@@ -741,7 +843,7 @@
           },
           "expires_in": {
             "type": "integer",
-            "example": 900
+            "example": 10800
           },
           "scope": {
             "type": "string"
@@ -837,6 +939,10 @@
           },
           "lastNames": {
             "type": "string"
+          },
+          "corporative_name": {
+            "type": ["string", "null"],
+            "description": "Razón social cuando el registro representa una persona jurídica."
           },
           "full_name": {
             "type": "string"

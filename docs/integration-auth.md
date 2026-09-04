@@ -20,7 +20,9 @@ El secreto de firma puede generarse con:
 node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 ```
 
-Después se debe aplicar `db/migrations/0017_create_integration_auth.sql`.
+Se deben aplicar las migraciones de integración, incluida
+`db/migrations/0022_extend_integration_token_ttl.sql`, para habilitar la
+vigencia máxima de 3 horas.
 
 ## Crear una credencial
 
@@ -33,13 +35,26 @@ npm run integration:create-client -- \
   --client-id zj-orders-production \
   --name "Pedidos WhatsApp Z&J" \
   --user 81 \
-  --scopes catalogs:read,customer-orders:create,processes:read
+  --scopes third-parties:read,services:read,customer-orders:create,processes:read,processes:create \
+  --ttl 10800
 ```
 
 La herramienta muestra el `client_secret` una única vez. Debe almacenarse
 inmediatamente en el gestor de secretos del sistema consumidor.
 
 ## Obtener un token
+
+```bash
+curl --request POST \
+  'http://localhost:3000/api/integrations/v1/auth/token' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "client_id": "zj-orders-production",
+    "client_secret": "<secreto entregado una sola vez>"
+  }'
+```
+
+Petición HTTP equivalente:
 
 ```http
 POST /api/integrations/v1/auth/token
@@ -57,8 +72,8 @@ Respuesta:
 {
   "access_token": "<jwt>",
   "token_type": "Bearer",
-  "expires_in": 900,
-  "scope": "catalogs:read customer-orders:create processes:read"
+  "expires_in": 10800,
+  "scope": "third-parties:read services:read customer-orders:create processes:read processes:create"
 }
 ```
 
@@ -67,6 +82,46 @@ Los endpoints protegidos deben incluir:
 ```http
 Authorization: Bearer <jwt>
 ```
+
+El token tiene una vigencia de 10.800 segundos (3 horas).
+
+## Buscar terceros
+
+El endpoint `GET /api/integrations/v1/third-parties/search` requiere el scope
+`third-parties:read` y al menos uno de estos filtros:
+
+- `names`: nombre parcial.
+- `lastNames`: apellido parcial.
+- `corporative_name`: razón social parcial; internamente corresponde a
+  `names` para personas jurídicas.
+- `email`: correo exacto, sin distinguir mayúsculas.
+- `nit`: identificación exacta; ignora puntos, guiones y otros separadores.
+
+También admite `type`, `page` y `limit`. Cuando se envían varios filtros, deben
+cumplirse todos. Por defecto solamente consulta terceros activos de tipo
+`client` y `both` pertenecientes a la compañía contenida en el JWT.
+
+Ejemplo por razón social:
+
+```bash
+curl --get \
+  'http://localhost:3000/api/integrations/v1/third-parties/search' \
+  --header 'Authorization: Bearer <jwt>' \
+  --data-urlencode 'corporative_name=Z&J'
+```
+
+Ejemplo por NIT:
+
+```bash
+curl --get \
+  'http://localhost:3000/api/integrations/v1/third-parties/search' \
+  --header 'Authorization: Bearer <jwt>' \
+  --data-urlencode 'nit=900.123.456-7'
+```
+
+La respuesta contiene `data` y `pagination`. Si no hay coincidencias, `data`
+es un arreglo vacío; la ausencia total de filtros responde con HTTP `400` y el
+código `MISSING_THIRD_PARTY_SEARCH_FILTER`.
 
 ## Contexto confiable
 
@@ -90,10 +145,10 @@ query string o parámetros de URL.
 
 ```js
 router.get(
-  '/third-parties',
+  '/third-parties/search',
   authenticateIntegration,
-  requireScope('catalogs:read'),
-  controller.getThirdParties
+  requireScope('third-parties:read'),
+  controller.searchThirdParties
 );
 ```
 

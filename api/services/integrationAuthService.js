@@ -159,7 +159,7 @@ integrationAuthService.createClientCredentials = async ({
     clientId,
     name,
     scopes = [],
-    accessTokenTtl = 900,
+    accessTokenTtl = 10800,
     metadata = {}
 }) => {
     const secret = clientSecretService.generate();
