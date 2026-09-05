@@ -54,6 +54,7 @@ import { ElectronicDocuments } from './ElectronicDocuments';
 import { SearchResultsPannel } from './Alerts/SearchResultsPannel';
 import { AiPet } from '../components/AiPet';
 import { Banks } from '../pages/Banks';
+import { BriefCases } from '../pages/BriefCases';
 
 export function UserApp(){
 
@@ -269,6 +270,7 @@ export function UserApp(){
                             <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
                             <Route path='/modules/*' element={<Modules/>}/>
                             <Route path='/banks/*' element={<Banks/>}/>
+                            <Route path='/briefcases' element={<BriefCases/>}/>
                             <Route path='/services' element={<Services/>}/>
                             <Route path='/cashBoxes' element={<CashBoxes/>}/>
                                 <Route path='/cashBoxes/:cashBox_id' element={<CashBoxesDeetail/>}/>
