@@ -47,7 +47,7 @@ export function UniversalTable({
     disabled = false,
     Row = UniversalRow,
     rowHeight = 56,
-    height = 500,
+    height,
     selectedRows = [],
     getRowKey,
     rowProps = {},
@@ -232,6 +232,7 @@ export function UniversalTable({
         <section
             className={`universalTable${disabled ? ' disabled' : ''}`}
             ref={tableRef}
+            style={height === undefined ? undefined : { height }}
             role="table"
             aria-busy={loading}
             aria-disabled={disabled}
@@ -271,7 +272,7 @@ export function UniversalTable({
                                     <i
                                         className={`${isSorted? 'sortedColumIcon':''} ${isSorted
                                             ? `fa-solid fa-arrow-${sortConfig.order === 'ASC' ? 'down' : 'up'}-short-wide`
-                                            : 'fa-solid fa-sort'}`}
+                                            : 'bi bi-caret-down'}`}
                                         aria-hidden="true"
                                     />
                                 </button>
@@ -359,7 +360,6 @@ export function UniversalTable({
                 className="universalTableBody"
                 ref={bodyRef}
                 role="rowgroup"
-                style={{ height }}
                 onScroll={syncHeaderScroll}
             >
                 <div className="universalTableBodyContent" style={{ minWidth: `${minimumTableWidth}px` }}>

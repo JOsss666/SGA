@@ -1,8 +1,8 @@
 @import '../containers/UserApp.css';
 
 
-.BoldTitle{
-    font-weight: 500;
+.sgaTreasury .BoldTitle{
+    font-weight: 400;
     font-size: clamp(4px,4vh,40px);
     color:var(--mainText) ;
     transition: .3s;

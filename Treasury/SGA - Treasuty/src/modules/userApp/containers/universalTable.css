@@ -2,11 +2,13 @@
     position: relative;
     display: flex;
     width: 100%;
+    height: 500px;
     min-width: 0;
+    min-height: 0;
     flex-direction: column;
     overflow: visible;
     border: .1vh solid var(--inputsBorder);
-    border-radius: 2vh;
+    border-radius: 1vh;
     background: var(--inputsBg);
     box-shadow: var(--chatBubbleShadow);
 }
@@ -17,9 +19,10 @@
 
 .sgaTreasury .universalTable .universalTableHeaderViewport {
     width: 100%;
+    flex: 0 0 auto;
     overflow: hidden;
     border-bottom: .1vh solid var(--inputsBorder);
-    border-radius: 2vh 2vh 0 0;
+    border-radius: 1vh 1vh 0 0;
     background: var(--menuAside);
 }
 
@@ -258,7 +261,8 @@
 .sgaTreasury .universalTable .universalTableBody {
     width: 100%;
     max-width: 100%;
-    min-height: 18vh;
+    min-height: 0;
+    flex: 1 1 auto;
     overflow: auto;
 }
 
@@ -295,6 +299,7 @@
 }
 
 .sgaTreasury .universalTable .universalTableFooter {
+    flex: 0 0 auto;
     padding: .8vh 1.3vh;
     border-top: .1vh solid var(--inputsBorder);
     color: var(--descriptionText);

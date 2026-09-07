@@ -12,7 +12,7 @@ export const isElectron = navigator.userAgent.toLowerCase().includes('electron')
 function App() {
   return (
     <NotificationsProvider>
-        <div className="appSpace">
+        <div className="appSpace sgaTreasury">
           <Router>
                 <Routes>
                     <Route path="" element={

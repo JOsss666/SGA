@@ -6,6 +6,10 @@ import { UniversalTable } from '../containers/universalTable';
 import { useAppInfo } from '../../../context/context';
 import { moneyFormat, postInfo } from '../../../utils/functions';
 import './briefCases.css';
+import { NormalCard } from '../components/NormalCard';
+import { RangeDate } from '../components/RangeDate';
+import { ButtonDownload } from '../components/ButtonDownload';
+import { SumaryCard } from '../components/ SumaryCard';
 
 const portfolioColumns = [
     { key: 'names', label: 'Tercero', minWidth: '13rem', flex: '1.6 1 13rem', order: 'ASC' },
@@ -104,25 +108,22 @@ export function BriefCases() {
         <section className="briefCases">
             <header className="briefCasesHeader">
                 <div>
-                    <BoldTitle text="Cartera" />
+                    <BoldTitle text="Movimientos de Cartera" />
                     <DescriptionSpan text="Consulta los saldos de cartera y la disponibilidad de crédito por tercero." />
                 </div>
-                <span className="briefCasesSampleBadge">Nueva tabla universal</span>
             </header>
 
             <div className="briefCasesSummary" aria-label="Resumen de cartera">
-                <article>
-                    <span>Cartera total</span>
-                    <strong>{formatCurrency(summary.total)}</strong>
-                </article>
-                <article>
-                    <span>Saldo corriente</span>
-                    <strong>{formatCurrency(summary.current)}</strong>
-                </article>
-                <article>
-                    <span>Saldo vencido</span>
-                    <strong>{formatCurrency(summary.overdue)}</strong>
-                </article>
+                {/* Total cuentas por cobrar */}
+                <SumaryCard title={'Cuentas por cobrar'} desc={'Valor total cuentas por cobrar'} value={moneyFormat(1000000)} percent={2} currency={'COP'}/>
+                {/* Total cuentas por pagar */}
+                <SumaryCard title={'Cuentas por pagar'} desc={'Valor total cuentas por pagar'} value={moneyFormat(1000000)} percent={2} currency={'COP'}/>
+                {/* Cartera vencida por cobrar */}
+                <SumaryCard title={'Cobros Vencidos'} desc={'Valor total cartera por cobrar vencida'} value={moneyFormat(1000000)} percent={2} currency={'COP'}/>
+                {/* Cartera vencida por pagar */}
+                <SumaryCard title={'Pagos Vencidos'} desc={'Valor total cartera por pagar vencida'} value={moneyFormat(1000000)} percent={2} currency={'COP'}/>
+                {/* Cartera vencida por pagar */}
+                <SumaryCard title={'Pagos Vencidos'} desc={'Valor total cartera por pagar vencida'} value={moneyFormat(1000000)} percent={2} currency={'COP'}/>
             </div>
 
             <div className="briefCasesToolbar">
@@ -131,6 +132,10 @@ export function BriefCases() {
                     value={searchValue}
                     action={setSearchValue}
                 />
+                <RangeDate/>
+                <div className="rightOptions">
+                    <ButtonDownload title={'Descargar'}/>
+                </div>
             </div>
 
             {error && (
@@ -147,7 +152,6 @@ export function BriefCases() {
                     searchValue={searchValue}
                     loading={loading}
                     disabled={loading}
-                    height="48vh"
                     getRowKey={(row, index) => row.id ?? row.thirdParty_id ?? `${row.names}-${index}`}
                     rowProps={{ renderers: portfolioRenderers }}
                     emptyMessage="No hay terceros que coincidan con la búsqueda"

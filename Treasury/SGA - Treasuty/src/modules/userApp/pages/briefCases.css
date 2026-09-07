@@ -39,7 +39,8 @@
 .sgaTreasury .briefCases .briefCasesSummary {
     display: flex;
     width: 100%;
-    gap: 1.2vh;
+    gap: 2vw;
+    margin: 1vh 0;
 }
 
 .sgaTreasury .briefCases .briefCasesSummary article {
@@ -72,8 +73,33 @@
 
 .sgaTreasury .briefCases .briefCasesToolbar {
     display: flex;
-    width: min(100%, 32rem);
+    width: 100%;
+    gap: 2vw;
 }
+
+.sgaTreasury .briefCases .briefCasesToolbar .SearchBar{
+    width: fit-content;
+}
+
+.sgaTreasury .briefCases .briefCasesToolbar .SearchBar input{
+    width: 15vw;
+    transition: .3s ease-out;
+}
+
+.sgaTreasury .briefCases .briefCasesTable .universalTable {
+    height: 48vh;
+}
+
+.sgaTreasury .briefCases .briefCasesToolbar .SearchBar input:focus{
+    width: 30vw;
+}
+
+.sgaTreasury .briefCases .briefCasesToolbar .rightOptions{
+    margin: auto;
+    margin-right: 0;
+}
+
+
 
 .sgaTreasury .briefCases .briefCasesError {
     display: flex;
