@@ -14,17 +14,17 @@ export function HomeProcess(){
         <div className="HomeProcess">
             <div className="bottomBarC">
                 <div className="appsBar">
-                    <AppIcon title={'Documentos'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760913629/DocumentosLogo_fuofdc.png'}/>
-                    <AppIcon title={'Archivos'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760911292/CarpetaLogo1_zzjnut.png'}/>
-                    <AppIcon title={'Informes'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'}/>
-                    <AppIcon title={'Estadisticas'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png'}/>
-                    <AppIcon onClick={()=>{setVisibleSearch(!visibleSearch)}} title={'Buscar'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760909160/BuscarLogo1_jf8ij8.png'}/>
-                    <AppIcon title={'Cuenta'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png'}/>
-                    <AppIcon title={'Mensajes'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760910097/MensajesLogo1_rhku5p.png'}/>
-                    <AppIcon title={'Asistente IA'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760911291/AiLogo1_qg2zvm.png'}/>
-                    <AppIcon title={'Calendario'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760913184/LogoCalendario1_ig0avt.png'}/>
-                    <AppIcon title={'Ajustes'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760908821/AjustesLogo1_zfyoil.png'}/>
-                    <AppIcon title={'Ayuda'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760911291/AyudaLogo1_v362of.png'}/>
+                    <AppIcon title={'Documentos'} imgUrl={'https://cdnmain.sga360.co/static/DocumentosLogo_fuofdc.webp'}/>
+                    <AppIcon title={'Archivos'} imgUrl={'https://cdnmain.sga360.co/static/CarpetaLogo1_zzjnut.webp'}/>
+                    <AppIcon title={'Informes'} imgUrl={'https://cdnmain.sga360.co/static/InformesLogo1_iisxav.webp'}/>
+                    <AppIcon title={'Estadisticas'} imgUrl={'https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.webp'}/>
+                    <AppIcon onClick={()=>{setVisibleSearch(!visibleSearch)}} title={'Buscar'} imgUrl={'https://cdnmain.sga360.co/static/BuscarLogo1_jf8ij8.webp'}/>
+                    <AppIcon title={'Cuenta'} imgUrl={'https://cdnmain.sga360.co/static/CuentaLogo1_aqqot5.webp'}/>
+                    <AppIcon title={'Mensajes'} imgUrl={'https://cdnmain.sga360.co/static/MensajesLogo2_y4fjoa.webp'}/>
+                    <AppIcon title={'Asistente IA'} imgUrl={'https://cdnmain.sga360.co/static/ChatGPT_Image_29_sept_2025_16_21_31_shjyfv.webp'}/>
+                    <AppIcon title={'Calendario'} imgUrl={'https://cdnmain.sga360.co/static/LogoCalendario1_ig0avt.webp'}/>
+                    <AppIcon title={'Ajustes'} imgUrl={'https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_1_vfix8g.webp'}/>
+                    <AppIcon title={'Ayuda'} imgUrl={'https://cdnmain.sga360.co/static/AyudaLogo1_v362of.webp'}/>
                 </div>
             </div>
             {visibleSearch && (

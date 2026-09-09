@@ -1,0 +1,398 @@
+{
+  "description": "Menu and module bubble assets in Administration, Inventory and Process. Semantic substitutes replace originals unavailable in R2 and inaccessible from Cloudinary. Facturation and Treasury excluded.",
+  "assets": [
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760914614/LogoInicio1_nsuzaj.png",
+      "newUrl": "https://cdnmain.sga360.co/static/LogoInicio1_nsuzaj.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/context/context.jsx",
+        "Inventory/SGA-inventory/src/context/context.jsx",
+        "SGA-management/SGA-managment/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760914611/LogoCrearDoc_vqirqo.png",
+      "newUrl": "https://cdnmain.sga360.co/static/DocumentosLogo_fuofdc.webp",
+      "match": "semantic-substitute",
+      "files": [
+        "Process/SGA-process/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760909160/BuscarLogo1_jf8ij8.png",
+      "newUrl": "https://cdnmain.sga360.co/static/BuscarLogo1_jf8ij8.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/context/context.jsx",
+        "Process/SGA-process/src/modules/userApp/containers/HomeProcess.jsx",
+        "Inventory/SGA-inventory/src/context/context.jsx",
+        "Inventory/SGA-inventory/src/modules/userApp/containers/HomeProcess.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/HomeProcess.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png",
+      "newUrl": "https://cdnmain.sga360.co/static/InformesLogo1_iisxav.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/context/context.jsx",
+        "Process/SGA-process/src/modules/userApp/containers/HomeProcess.jsx",
+        "Inventory/SGA-inventory/src/context/context.jsx",
+        "Inventory/SGA-inventory/src/modules/userApp/containers/HomeProcess.jsx",
+        "SGA-management/SGA-managment/src/context/context.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/HomeProcess.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760908554/EstadisticasLogo1_bjc8fv.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.webp",
+      "match": "semantic-substitute",
+      "files": [
+        "Process/SGA-process/src/context/context.jsx",
+        "Process/SGA-process/src/modules/userApp/containers/HomeProcess.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/HomeProcess.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760914608/LogoConceptosImpuestos_w0klzj.png",
+      "newUrl": "https://cdnmain.sga360.co/static/LogoConceptosImpuestos_w0klzj.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/context/context.jsx",
+        "SGA-management/SGA-managment/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png",
+      "newUrl": "https://cdnmain.sga360.co/static/CuentaLogo1_aqqot5.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/context/context.jsx",
+        "Process/SGA-process/src/modules/userApp/containers/HomeProcess.jsx",
+        "Inventory/SGA-inventory/src/context/context.jsx",
+        "Inventory/SGA-inventory/src/modules/userApp/containers/HomeProcess.jsx",
+        "SGA-management/SGA-managment/src/context/context.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/HomeProcess.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760911291/AyudaLogo1_v362of.png",
+      "newUrl": "https://cdnmain.sga360.co/static/AyudaLogo1_v362of.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/context/context.jsx",
+        "Process/SGA-process/src/modules/userApp/containers/HomeProcess.jsx",
+        "Inventory/SGA-inventory/src/context/context.jsx",
+        "SGA-management/SGA-managment/src/context/context.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/HomeProcess.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760908821/AjustesLogo1_zfyoil.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_1_vfix8g.webp",
+      "match": "semantic-substitute",
+      "files": [
+        "Process/SGA-process/src/context/context.jsx",
+        "Process/SGA-process/src/modules/userApp/containers/HomeProcess.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/HomeProcess.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760911296/CerrarSesionLogo1_moghr7.png",
+      "newUrl": "https://cdnmain.sga360.co/static/CerrarSesionLogo1_moghr7.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/context/context.jsx",
+        "Inventory/SGA-inventory/src/context/context.jsx",
+        "SGA-management/SGA-managment/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1759181339/ChatGPT_Image_7_sept_2025_13_29_09_v2xl9a.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_13_29_09_v2xl9a.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/modules/userApp/containers/UserApp.jsx",
+        "Inventory/SGA-inventory/src/modules/userApp/containers/Modules.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/Modules.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760913629/DocumentosLogo_fuofdc.png",
+      "newUrl": "https://cdnmain.sga360.co/static/DocumentosLogo_fuofdc.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/modules/userApp/containers/HomeProcess.jsx",
+        "Inventory/SGA-inventory/src/context/context.jsx",
+        "Inventory/SGA-inventory/src/modules/userApp/containers/HomeProcess.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/HomeProcess.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760911292/CarpetaLogo1_zzjnut.png",
+      "newUrl": "https://cdnmain.sga360.co/static/CarpetaLogo1_zzjnut.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/modules/userApp/containers/HomeProcess.jsx",
+        "Inventory/SGA-inventory/src/modules/userApp/containers/HomeProcess.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/HomeProcess.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760910097/MensajesLogo1_rhku5p.png",
+      "newUrl": "https://cdnmain.sga360.co/static/MensajesLogo2_y4fjoa.webp",
+      "match": "semantic-substitute",
+      "files": [
+        "Process/SGA-process/src/modules/userApp/containers/HomeProcess.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/HomeProcess.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760911291/AiLogo1_qg2zvm.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_29_sept_2025_16_21_31_shjyfv.webp",
+      "match": "semantic-substitute",
+      "files": [
+        "Process/SGA-process/src/modules/userApp/containers/HomeProcess.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/HomeProcess.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760913184/LogoCalendario1_ig0avt.png",
+      "newUrl": "https://cdnmain.sga360.co/static/LogoCalendario1_ig0avt.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/modules/userApp/containers/HomeProcess.jsx",
+        "Inventory/SGA-inventory/src/context/context.jsx",
+        "SGA-management/SGA-managment/src/context/context.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/HomeProcess.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1761512639/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/modules/userApp/containers/ServicesGrid.jsx",
+        "Inventory/SGA-inventory/src/modules/userApp/containers/ServicesGrid.jsx",
+        "Inventory/SGA-inventory/src/modules/userApp/containers/Modules.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/ServicesGrid.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/Modules.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1761582991/ChatGPT_Image_29_sept_2025_16_39_52_dozlku.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_29_sept_2025_16_39_52_dozlku.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/modules/userApp/containers/ServicesGrid.jsx",
+        "Inventory/SGA-inventory/src/modules/userApp/containers/ServicesGrid.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/ServicesGrid.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1761582957/ChatGPT_Image_7_sept_2025_13_29_09_gkktlq.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_13_29_09_gkktlq.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/modules/userApp/containers/ServicesGrid.jsx",
+        "Inventory/SGA-inventory/src/modules/userApp/containers/ServicesGrid.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/ServicesGrid.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1761514001/ChatGPT_Image_26_oct_2025_16_24_57_hgpkmn.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_26_oct_2025_16_24_57_hgpkmn.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/modules/userApp/containers/ServicesGrid.jsx",
+        "Inventory/SGA-inventory/src/modules/userApp/containers/ServicesGrid.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/UserApp.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/ServicesGrid.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1761582962/ChatGPT_Image_7_sept_2025_16_22_25_vtvxph.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_22_25_vtvxph.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/modules/userApp/containers/ServicesGrid.jsx",
+        "Inventory/SGA-inventory/src/modules/userApp/containers/ServicesGrid.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/ServicesGrid.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1765044183/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/modules/userApp/containers/ServicesGrid.jsx",
+        "Inventory/SGA-inventory/src/modules/userApp/containers/ServicesGrid.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/ServicesGrid.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1759160717/logo_certicloud-_perfil_azul_2_ljka0q.png",
+      "newUrl": "https://cdnmain.sga360.co/static/logo_certicloud-_perfil_azul_2_ljka0q.webp",
+      "match": "same-asset",
+      "files": [
+        "Process/SGA-process/src/modules/userApp/containers/ServicesGrid.jsx",
+        "Inventory/SGA-inventory/src/modules/userApp/containers/ServicesGrid.jsx",
+        "Inventory/SGA-inventory/src/modules/userApp/containers/Modules.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/ServicesGrid.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/Modules.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1764436577/ChatGPT_Image_29_nov_2025_12_15_47_kxqs81.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_29_nov_2025_12_15_47_kxqs81.webp",
+      "match": "same-asset",
+      "files": [
+        "Inventory/SGA-inventory/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1764620093/ChatGPT_Image_1_dic_2025_15_04_38_3_hcdqxl.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_1_dic_2025_15_04_38_3_hcdqxl.webp",
+      "match": "same-asset",
+      "files": [
+        "Inventory/SGA-inventory/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1764619633/ChatGPT_Image_1_dic_2025_15_04_38_2_hwmmk5.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_1_dic_2025_15_04_38_2_hwmmk5.webp",
+      "match": "same-asset",
+      "files": [
+        "Inventory/SGA-inventory/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1764363272/ChatGPT_Image_28_nov_2025_15_54_16_tl5bv3.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_28_nov_2025_15_54_16_tl5bv3.webp",
+      "match": "same-asset",
+      "files": [
+        "Inventory/SGA-inventory/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1761579216/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.webp",
+      "match": "same-asset",
+      "files": [
+        "Inventory/SGA-inventory/src/context/context.jsx",
+        "SGA-management/SGA-managment/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760913446/MensajesLogo2_y4fjoa.png",
+      "newUrl": "https://cdnmain.sga360.co/static/MensajesLogo2_y4fjoa.webp",
+      "match": "same-asset",
+      "files": [
+        "Inventory/SGA-inventory/src/context/context.jsx",
+        "SGA-management/SGA-managment/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1761579057/ChatGPT_Image_27_oct_2025_10_28_59_1_vfix8g.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_1_vfix8g.webp",
+      "match": "same-asset",
+      "files": [
+        "Inventory/SGA-inventory/src/context/context.jsx",
+        "SGA-management/SGA-managment/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1761515342/Grupo5logos_4_rhapbp.png",
+      "newUrl": "https://cdnmain.sga360.co/static/Grupo5logos_4_rhapbp.webp",
+      "match": "same-asset",
+      "files": [
+        "Inventory/SGA-inventory/src/context/context.jsx",
+        "SGA-management/SGA-managment/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.webp",
+      "match": "same-asset",
+      "files": [
+        "Inventory/SGA-inventory/src/context/context.jsx",
+        "SGA-management/SGA-managment/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1772826198/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.png",
+      "newUrl": "https://cdnmain.sga360.co/static/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.webp",
+      "match": "same-asset",
+      "files": [
+        "Inventory/SGA-inventory/src/modules/userApp/containers/UserApp.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1759181476/ChatGPT_Image_25_ago_2025_15_43_35_s9jwrf.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_25_ago_2025_15_43_35_s9jwrf.webp",
+      "match": "same-asset",
+      "files": [
+        "Inventory/SGA-inventory/src/modules/userApp/containers/Modules.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/Modules.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1761582964/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_39_37_pc79hk.webp",
+      "match": "same-asset",
+      "files": [
+        "Inventory/SGA-inventory/src/modules/userApp/containers/Modules.jsx",
+        "SGA-management/SGA-managment/src/modules/userApp/containers/Modules.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1761515331/Grupo5logos_1_ypuddp.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_26_oct_2025_16_03_39_d7hmbb.webp",
+      "match": "semantic-substitute",
+      "files": [
+        "SGA-management/SGA-managment/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1761515365/Grupo5logos_2_kjgapy.png",
+      "newUrl": "https://cdnmain.sga360.co/static/InformesLogo1_iisxav.webp",
+      "match": "semantic-substitute",
+      "files": [
+        "SGA-management/SGA-managment/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1761515340/Grupo5logos_3_qp85tn.png",
+      "newUrl": "https://cdnmain.sga360.co/static/CarpetaLogo1_zzjnut.webp",
+      "match": "semantic-substitute",
+      "files": [
+        "SGA-management/SGA-managment/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1761514434/descarga_1_ih8bdx.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_6_dic_2025_13_01_36_1_adicoi.webp",
+      "match": "semantic-substitute",
+      "files": [
+        "SGA-management/SGA-managment/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1761514282/descarga_dot8uw.png",
+      "newUrl": "https://cdnmain.sga360.co/static/ChatGPT_Image_7_sept_2025_16_22_25_vtvxph.webp",
+      "match": "semantic-substitute",
+      "files": [
+        "SGA-management/SGA-managment/src/context/context.jsx"
+      ]
+    },
+    {
+      "oldUrl": "https://res.cloudinary.com/djjxugmni/image/upload/v1760914607/LogoBuscarDOc_bpleiw.png",
+      "newUrl": "https://cdnmain.sga360.co/static/3d-business-wallet-finance-illustration-free-png_vr9tvx.webp",
+      "match": "semantic-substitute",
+      "files": [
+        "SGA-management/SGA-managment/src/context/context.jsx"
+      ]
+    }
+  ]
+}

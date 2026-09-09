@@ -18,11 +18,11 @@ export function HomeProcess(){
             </div>
             <div className="bottomBarC">
                 <div className="appsBar">
-                    <AppIcon title={'Documentos'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760913629/DocumentosLogo_fuofdc.png'}/>
-                    <AppIcon title={'Archivos'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760911292/CarpetaLogo1_zzjnut.png'}/>
-                    <AppIcon title={'Informes'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760908279/InformesLogo1_iisxav.png'}/>
-                    <AppIcon onClick={()=>{setVisibleSearch(!visibleSearch)}} title={'Buscar'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760909160/BuscarLogo1_jf8ij8.png'}/>
-                    <AppIcon title={'Cuenta'} imgUrl={'https://res.cloudinary.com/djjxugmni/image/upload/v1760910902/CuentaLogo1_aqqot5.png'}/>
+                    <AppIcon title={'Documentos'} imgUrl={'https://cdnmain.sga360.co/static/DocumentosLogo_fuofdc.webp'}/>
+                    <AppIcon title={'Archivos'} imgUrl={'https://cdnmain.sga360.co/static/CarpetaLogo1_zzjnut.webp'}/>
+                    <AppIcon title={'Informes'} imgUrl={'https://cdnmain.sga360.co/static/InformesLogo1_iisxav.webp'}/>
+                    <AppIcon onClick={()=>{setVisibleSearch(!visibleSearch)}} title={'Buscar'} imgUrl={'https://cdnmain.sga360.co/static/BuscarLogo1_jf8ij8.webp'}/>
+                    <AppIcon title={'Cuenta'} imgUrl={'https://cdnmain.sga360.co/static/CuentaLogo1_aqqot5.webp'}/>
                 </div>
             </div>
             {visibleSearch && (
