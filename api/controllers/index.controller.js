@@ -2184,6 +2184,11 @@ controller.getThirdParties = (req,res)=>{
             values.push(info.id)
         }
 
+        if(info.identificationNumber != undefined){
+            whereClauses.push(`"Ecosystem".thirdparties.indentification_number = $${values.length + 1}`)
+            values.push(`${info.identificationNumber}`.trim())
+        }
+
         const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
         
         // 1. Columnas básicas
@@ -2213,6 +2218,7 @@ controller.getThirdParties = (req,res)=>{
                 tti.nature AS "thirdParty_nature",
                 tti."identidicationType_id",
                 tti.regime,
+                tpl."priceList_id" AS "thirdPartyPricesList_id",
                 tti.retention_type,
                 tti.economic_activity,
                 tti."attachedRut",
@@ -2228,6 +2234,8 @@ controller.getThirdParties = (req,res)=>{
             joinClause = `
                 LEFT JOIN "Ecosystem"."thirdPartyComercialInfo" ci
                     ON "Ecosystem".thirdparties.id = ci."thirdParty_id"
+                LEFT JOIN "Inventory"."thirdparties_pricesList" tpl
+                    ON "Ecosystem".thirdparties.id = tpl."thirdParty_id" 
                 LEFT JOIN "Ecosystem".mv_thirdparty_account_balances b
                     ON "Ecosystem".thirdparties.id = b."thirdParty_id"
                     AND "Ecosystem".thirdparties.company_id = b.company_id
