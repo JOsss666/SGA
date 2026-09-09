@@ -730,7 +730,8 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             allowedStores,
             allowedCellars,
             allowedItems,
-            type:'service'
+            type:'service',
+            list_id:thirdPartyInfo.thirdPartyPricesList_id ?? undefined
         })
         if(res[0]){
             let C = []
@@ -1205,6 +1206,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
     useEffect(()=>{
         if(thirdPartyInfo.id != undefined){
             // Update of crefit conditions of thirdParty
+            getProductsAndServices();
             setAbleCredit(thirdPartyInfo.credit != undefined ? thirdPartyInfo.credit:0);
             setAviableCredit(thirdPartyInfo.aviable_credit != undefined? thirdPartyInfo.aviableCredit:0);
             
@@ -1284,7 +1286,6 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
     useEffect(()=>{
         getDocumentRules();
         handleUserConfig();
-        getProductsAndServices();
     },[])
 
     useEffect(()=>{
