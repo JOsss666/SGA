@@ -185,11 +185,13 @@ router.post('/inventory/createSubCategory',inventoryController.createCatetory);
 router.post(
     '/inventory/getProducts',
     express.json({ limit: '32kb', strict: true }),
-    requireTrustedOrigin,
-    authenticateSession,
-    requireCompanyAccess,
-    inventoryController.getProducts,
-    sessionErrorHandler
+    inventoryController.getProducts
+);
+
+router.post(
+    '/inventory/getPS',
+    express.json({ limit: '32kb', strict: true }),
+    inventoryController.getProducts
 );
 
 router.post(`/inventory/getComercialProducts`,inventoryController.getComercialProducts);

@@ -76,11 +76,18 @@ inventoryController.createCatetory = (req,res)=>{
 inventoryController.getProducts = async (req, res, next) => {
     try {
         const info = req.body || {};
+        const companyId = Number(info.company_id);
+        if (!Number.isSafeInteger(companyId) || companyId <= 0) {
+            return res.status(400).json([
+                false,
+                { message: 'Se requiere un company_id válido.' }
+            ]);
+        }
         const values = [];
         let whereClauses = [];
 
         whereClauses.push(`ps.company_id = $1`);
-        values.push(req.auth.companyId)
+        values.push(companyId);
 
         if (info.category_id != null) {
             whereClauses.push(`c.id = $${values.length +1}`);
