@@ -1,41 +1,23 @@
 import { useAlert, useAppInfo } from "../../../context/context"
 import { BoldTitle } from "../components/BoldTitle";
 import { DescriptionSpan } from "../components/DescriptionSpan";
-import { FormNewBussines } from "./forms/FormNewBussines";
-import { FormNewCellar } from "./forms/FormNewCellar";
-import { FormNewConcept } from "./forms/FormNewConcept";
-import { FormNewCostCenter } from "./forms/FormNewCostCenter";
-import { FormNewStore } from "./forms/FormNewStore";
-import { FormNewTax } from "./forms/FormNewTax";
 import { FormNewThirdParties } from "./forms/FormNewThirdParties";
 import { FormNewUser } from "./forms/FormNewUser";
-import { SelectTpeNewDoc } from "./forms/SelectTypeNewDoc";
-import { CreatePricesList } from "./forms/CreatePricesList";
-import { FormNewProduct } from "./forms/FormNewProduct";
-import { FormNewPaymentMethod } from "./forms/FormNewPaymentMethod";
-import './New.css'
-import { FormNewDC } from "./forms/FormNewDC";
 import { FormNewCashRecipt } from "./forms/FormNewCashRecipt";
-import { ProcessStatusAlert } from "./Alerts/ProcessStatusAlert";
 import { FormSelectNewProcess } from "./forms/FormSelectNewProcess";
 import { FormNewClientOrder } from "./forms/FormNewClientOrder";
-import { getNumberingRangesElectronicInvoices, newElectronicInvoide, printCashRecipt, scanDevices, showActualToken, showAPITaxes } from "../../../utils/functions";
 import { CashReciptDesign } from "./Alerts/CashReciptDesign";
 import {FormClicksControl} from '../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormClicksControl'
 import {FormSelectMachine} from '../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormSelectMachine'
-import { isElectron } from "../../../App";
 import { useEffect, useState } from "react";
 import { verifiClicksControl } from "../../../../../../costume-modules/zjSAS.S/utils/functions";
 import { NoResults } from "./NoResults";
 import { ClientOrderPreview } from "./Alerts/ClientOrderPreview";
-import { FormButton } from "../components/FormButton";
 import { FormNewInvoice } from "./forms/FormNewInvoice";
 import { FormNewPurchase } from "./forms/FormNewPurchase";
 import { FormNewENote } from "./forms/FormNewENote";
-import { NoAccess } from "./NoAccess";
 import { SellInvoiceDesign } from "./Alerts/SellInvoiceDesing";
-import { FormInvoice } from "./forms/FormInvoce";
-import { postInfo } from "../../../utils/functions";
+import './New.css'
 
 export function New(){
     const {userConfig,appInfo,userInfo, appConfig} = useAppInfo();
