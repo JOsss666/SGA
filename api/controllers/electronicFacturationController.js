@@ -244,6 +244,30 @@ electronicFacturationController.deletePendingBill = (req, res) => {
     });
 };
 
+// Elimina una nota crédito en Factus sin exponer el access_token al frontend.
+// Body esperado: { reference | reference_code | number, company_id, environment? }
+electronicFacturationController.deleteCreditNote = async (req, res) => {
+    try {
+        const info = req.body ?? {};
+        const companyId = req.auth?.companyId ?? getCompanyIdFromInfo(info);
+        const environment = await resolveEnvironmentFromInfo({
+            ...info,
+            company_id: companyId
+        });
+        const reference = info.reference ?? info.reference_code ?? info.number;
+        const data = await factusService.deleteCreditNote({
+            company_id: companyId,
+            environment,
+            reference
+        });
+
+        res.status(200).json({ status: 'OK', data });
+    } catch (error) {
+        console.error('Error al eliminar la nota crédito:', error.message);
+        res.status(400).json({ status: 'Error', message: error.message });
+    }
+};
+
 electronicFacturationController.getTaxes = async (req, res) => {
     try {
         const info = {

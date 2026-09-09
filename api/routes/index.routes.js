@@ -382,6 +382,16 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
 
     router.post('/electronicFacturation/deletePendingBill', electronicFacturationController.deletePendingBill);
 
+    router.post(
+        '/electronicFacturation/deleteCreditNote',
+        express.json({ limit: '16kb', strict: true }),
+        requireTrustedOrigin,
+        authenticateSession,
+        requireCompanyAccess,
+        electronicFacturationController.deleteCreditNote,
+        sessionErrorHandler
+    );
+
     router.get('/electronicFacturation/showActualToken', electronicFacturationController.showActualToken);
 
     router.post('/electronicFacturation/providerCredentials', electronicProviderCredentialsController.upsert);

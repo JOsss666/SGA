@@ -525,4 +525,33 @@ factusService.deletePendingBill = async ({
     return response.data;
 };
 
+// Elimina una nota crédito en Factus por su referencia (por ejemplo, NCF2).
+// El token se resuelve internamente con las credenciales de la compañía.
+factusService.deleteCreditNote = async ({
+    company_id,
+    environment = DEFAULT_ENVIRONMENT,
+    reference
+} = {}) => {
+    const referenceValue = `${reference ?? ''}`.trim();
+    if (!referenceValue) {
+        throw new Error('La referencia de la nota crédito es requerida.');
+    }
+
+    const response = await factusService.request({
+        company_id,
+        environment,
+        path: `/v1/credit-notes/reference/${encodeURIComponent(referenceValue)}`,
+        method: 'DELETE'
+    });
+
+    if (!response.ok) {
+        throw new Error(
+            response.data?.message
+            || `Error al eliminar la nota crédito ${referenceValue} en Factus (${response.status}).`
+        );
+    }
+
+    return response.data;
+};
+
 export default factusService;
