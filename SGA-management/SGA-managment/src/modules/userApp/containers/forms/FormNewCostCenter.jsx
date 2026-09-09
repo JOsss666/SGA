@@ -16,7 +16,7 @@ export function FormNewCostCenter({reloadFun,info}){
     const {appInfo} = useAppInfo();
     const [disabled,setDisabled] = useState(false);
     const [loading,setLoading] = useState(false)
-    const [costCenters,setCostCenters] = useState('');
+    const [costCenters,setCostCenters] = useState([]);
     // Cost Center Info
     const [name,setName] = useState('');
     const [code,setCode] = useState('');
