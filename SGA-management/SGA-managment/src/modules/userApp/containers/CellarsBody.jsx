@@ -39,7 +39,7 @@ export function CellarsBody({cellars,storeInfo,reloadFun,onClick}){
                     <div className="CellarsGird">
                         {cellars != undefined && cellars.map((element,index)=>(
                             <NormalCard onlyTitle={true} title={element.name} key={index} onClick={()=>{onClick?.(element.id)}}
-                                img={'https://res.cloudinary.com/djjxugmni/image/upload/v1764620093/ChatGPT_Image_1_dic_2025_15_04_38_3_hcdqxl.png'}
+                                img={'https://cdnmain.sga360.co/static/ChatGPT_Image_1_dic_2025_15_04_38_3_hcdqxl.webp'}
                             />
                         ))}
                     </div>
