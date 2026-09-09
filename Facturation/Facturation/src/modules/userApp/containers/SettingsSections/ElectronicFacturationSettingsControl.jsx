@@ -6,8 +6,21 @@ import './ElectronicFacturationSettingsControl.css'
 import { useEffect, useState } from "react";
 import { LoadingSpace } from "../LoadingSpace";
 import { formatDate, getNumberingRangesElectronicInvoices } from "../../../../utils/functions";
-import { useAppInfo } from '../../../../context/context';
+import { useAlert, useAppInfo } from '../../../../context/context';
 import { NoAccess } from '../NoAccess';
+import { FormEmitElectronicSellInvoice } from '../forms/FormEmitElectronicSellInvoice';
+
+function EmitElectronicSellInvoiceRoute(){
+    const {popInAlert} = useAlert();
+
+    useEffect(()=>{
+        popInAlert(<FormEmitElectronicSellInvoice/>, {
+            id: 'emit-electronic-sell-invoice'
+        });
+    },[popInAlert])
+
+    return null;
+}
 
 export function ElectronicFacturationSettingsControl(){
 
@@ -24,7 +37,7 @@ export function ElectronicFacturationSettingsControl(){
         {text:'Ver rangos de numeración',path:'ranges',value:loading? 'cargando...': numberingRanges.length > 0 ? `Ver ${numberingRanges.length} rangos`:'No hay rangos disponibles',type:'general',icon:<i className="fa-solid fa-circle-info"/>},
         {text:'Definir consecutivo actual rango numeración',path:'setCurrentRange',value:'ver más',type:'functionality',icon:<i className="fa-solid fa-screwdriver"/>},
         {text:'Eliminar factura electronica',path:'deleteInvoice',value:'Ver más',type:'accesibility',icon:<i className="fa-regular fa-trash-can"/>},
-        {text:'Volver a emitir factura electronica',path:'deleteInvoice',value:'Ver más',type:'functionality',icon:<i className="fa-solid fa-print"/>},
+        {text:'Volver a emitir factura electronica',path:'emitElectornicSellInvoice',value:'Ver más',type:'functionality',icon:<i className="fa-solid fa-print"/>},
         {text:'Eliminar Nota crédito',path:'deleteCrNote',value:'Ver más',type:'accesibility',icon:<i className="fa-regular fa-trash-can"/>},
         {text:'Eliminar Nota Debito',path:'deleteDbNote',value:'Ver más',type:'accesibility',icon:<i className="fa-regular fa-trash-can"/>},
     ]
@@ -33,7 +46,14 @@ export function ElectronicFacturationSettingsControl(){
     // getters and actions
 
     const handleNavigate = (path)=>{
-        navigate(`/SGA_management/${params.company_key}/${params.user_key}/settings/System/e_fact/${path}`)
+        if(path != 'emitElectornicSellInvoice'){
+            navigate(`/SGA_management/${params.company_key}/${params.user_key}/settings/System/e_fact/${path}`)
+        }else{
+            navigate(`/SGA_management/${params.company_key}/${params.user_key}/settings/System/e_fact/${path}`)
+            setTimeout(()=>{
+                navigate(`/SGA_management/${params.company_key}/${params.user_key}/settings/System/e_fact/`)
+            },100)
+        }
     }
 
     const getNumberingRanges = async()=>{
@@ -96,6 +116,9 @@ export function ElectronicFacturationSettingsControl(){
                                 </div>
                             ))}
                         </div>
+                    }/>
+                    <Route path='emitElectornicSellInvoice' element={
+                        <EmitElectronicSellInvoiceRoute/>
                     }/>
                     <Route path='setCurrentRange' element={
                         <NoAccess title={'Seccion aún no disponible'} description={'Pronto habilitaremos esta nueva sección'} noExit={true} />
