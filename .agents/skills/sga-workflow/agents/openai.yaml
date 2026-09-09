@@ -1,0 +1,4 @@
+interface:
+  display_name: "SGA Frontend UI"
+  short_description: "Construye y mejora interfaces React de SGA"
+  default_prompt: "Usa $sga-workflow para implementar esta interfaz en SGA respetando su arquitectura, CSS aislado, temas y alcance."
