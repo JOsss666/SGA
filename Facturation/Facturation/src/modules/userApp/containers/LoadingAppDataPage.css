@@ -112,3 +112,9 @@
         height: 20vh;
     }
 }
+
+@media (prefers-reduced-motion: reduce) {
+    .LoadingAppDataPage .loadingDotsA .loadingDot{
+        animation: none;
+    }
+}

@@ -1,14 +1,21 @@
 
+import { useEffect } from 'react';
 import './LoadingAppDataPage.css'
+import { useAppInfo } from '../../../context/context';
 
-export function LoadingAppDataPage(){
+export function LoadingAppDataPage({title}){
+    const {darkMode} = useAppInfo();
+
+    useEffect(() => {
+        const root = document.documentElement;
+        if (darkMode) root.classList.add('dark');
+        else root.classList.remove('dark');
+    }, [darkMode]);
+
     return(
-        <div className="LoadingAppDataPage">
-            <img src="https://res.cloudinary.com/djjxugmni/image/upload/v1759181339/ChatGPT_Image_7_sept_2025_13_29_09_v2xl9a.png" />
-            <div className="searchServiceAnimal">
-                <span>Orquidea Morada <i className="fa-solid fa-share-from-square"/></span>
-            </div>
-            <div className="loadingDotsA">
+        <div className="LoadingAppDataPage" role="status" aria-live="polite" aria-busy="true">
+            <img src="https://cdnmain.sga360.co/static/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.webp" alt="SGA360" />
+            <div className="loadingDotsA" aria-hidden="true">
                 <div className="loadingDot"></div>
                 <div className="loadingDot"></div>
                 <div className="loadingDot"></div>
@@ -18,8 +25,8 @@ export function LoadingAppDataPage(){
                 <div className="loadingDot"></div>
                 <div className="loadingDot"></div>
             </div>
-            <h6>Cargando el contenido de su aplicación...</h6>
-            <strong>SGA - Procesos</strong>
+            <h6>{title? title:'Cargando el contenido de su aplicación...'}</h6>
+            <strong>SGA - Inventarios</strong>
         </div>
     )
 }
