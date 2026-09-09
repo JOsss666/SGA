@@ -121,7 +121,13 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         payedBills:briefCaseBills,
         cashBox_id,
         instances: selectedInstances,
-        paymentMethod_code
+        paymentMethod_code,
+        payment_form:paymentMethod[0]?.for_wallet === true ? '2':'1',
+        payment_due_date:addDaysToCurrentDate(
+            paymentMethod[0]?.for_wallet === true
+                ? thirdPartyInfo.credit_term ?? 0
+                : 0
+        )
     }
 
     // PreProcess functions
@@ -138,13 +144,14 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         return `--/--/--`
     }
 
-    const addDaysToCurrentDate = (days) => {
+    function addDaysToCurrentDate(days) {
         const date = new Date(); // Obtiene la fecha y hora actual del sistema  
+        const parsedDays = Number.parseInt(days,10);
         // Sumamos los días usando setDate y getDate para manejar cambios de mes/año automáticamente
-        date.setDate(date.getDate() + parseInt(days)); 
+        date.setDate(date.getDate() + (Number.isInteger(parsedDays) ? Math.max(0,parsedDays):0));
         // Retornamos en formato ISO (YYYY-MM-DD) 
         return date.toISOString().split('T')[0];
-    };
+    }
 
     const handleUserConfig = async()=>{
         setDisabled(true)

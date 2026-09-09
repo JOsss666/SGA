@@ -333,6 +333,10 @@ electronicFacturationController.newInvoice = (req,res)=>{
         const environment = await resolveEnvironmentFromInfo(info);
         console.log('Ambiente Factus para factura:', environment);
         const numberingPolicy = await resolveInvoiceNumberingPolicy(info);
+	    const paymentDueDate = `${info.document?.payment_due_date ?? ''}`.trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(paymentDueDate)) {
+            throw new Error('La fecha límite de pago debe tener formato YYYY-MM-DD.');
+        }
 	    let params = {
 	        "document": "01",
 	        "numbering_range_id": await factusService.getNumberingRangeId({
@@ -345,6 +349,8 @@ electronicFacturationController.newInvoice = (req,res)=>{
         "reference_code": `FVE_${info.document.ownSerial}`,
         "observation":info.document.e_invoiceDescription,
         "payment_method_code": info.document.paymentMethod_code,
+        "payment_form": info.document.payment_form === '2' ? '2':'1',
+        "payment_due_date": paymentDueDate,
         "customer": {
             "identification": info.customer.indentification_number,
             "dv": `${info.customer.dv}` ?? "3",
