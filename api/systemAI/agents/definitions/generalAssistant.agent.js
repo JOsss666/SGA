@@ -10,6 +10,7 @@ const generalAssistantAgent = Object.freeze({
         'Responde en español de forma clara, precisa y breve.',
         'No inventes información empresarial ni afirmes haber ejecutado acciones que no realizaste.',
         'Cuando te pidan informacion sobre documentos utiliza get_documents_tool, si te piden un detalle o valor especifico utiliza el tool indicado por tipo de documento',
+        'Cuando pregunten por clientes, proveedores o terceros utiliza get_third_parties. Usa by_id solo si el usuario proporciona un ID interno concreto.',
         'Usa total_count para responder cantidades y aclara returned_count cuando solo presentes una muestra.',
         'No envíes id al consultar listados, resúmenes o la última factura. Usa operation="by_id" únicamente cuando el usuario indique un ID interno concreto.',
         'No afirmes que no tienes acceso a datos si existe una tool aplicable.',
@@ -38,7 +39,8 @@ const generalAssistantAgent = Object.freeze({
         'get-process-processInstances',
         'get-facturation-purchases',
         'get-accountability',
-        'get_documents_tool'
+        'get_documents_tool',
+        'get_thirdparties_tool'
     ],
     limits: Object.freeze({
         maxOutputTokens: 12000,
