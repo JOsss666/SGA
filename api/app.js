@@ -131,7 +131,6 @@ const isTransientConnError = (err) =>
     );
 
 const useDataBase = async (sentence, values, typeConsult) => {
-    console.log(sentence, values);
     try {
         let result;
         try {
