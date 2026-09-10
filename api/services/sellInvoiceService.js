@@ -40,7 +40,6 @@ sellInvoiceService.register = async (info) => {
         }
         */
         
-
         const accountResult = await utilsController.accountDocument(
             documentInfo,
             { client }
