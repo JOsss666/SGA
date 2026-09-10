@@ -110,7 +110,7 @@ export function FormNewENote({InfoParams,reloadFun}){
             type:'electronic invoice'
         })
         console.log('Facturas dispo: ',res)
-        if(res[0]){
+        if(res[0]){n
             let C = []
             res[1].forEach(element => {
                 C.push({
