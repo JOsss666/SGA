@@ -1,0 +1,177 @@
+.clientOrderDelegationCard{
+    display: flex;
+    margin: 2vh auto;
+    flex-direction: column;
+    padding-top: 0;
+    border-radius: 2vh;
+    border: dashed .15vh var(--inputsBorder);
+}
+
+.clientOrderDelegationCard .headOrderBlock{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1vh;
+    padding: 1vh 4vh;
+    align-items: center;
+    background-color: var(--cardHover);
+    border-top-left-radius: 2vh;
+    border-top-right-radius: 2vh;
+}
+
+.clientOrderDelegationCard .bodyOrderBlock{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding: 1vh 2vh;
+}
+
+.clientOrderDelegationCard .headOrderBlock i{
+    color: var(--mainText);
+    font-size: clamp(2.5px,2.5vh,25px)
+}
+
+.clientOrderDelegationCard .headOrderBlock h3{
+    color: var(--mainText);
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 400;
+}
+
+.clientOrderDelegationCard .headOrderBlock span{
+    color: var(--descriptionText);
+    font-size: clamp(1.8px,1.8vh,18px);
+    margin: auto 0;
+}
+
+.clientOrderDelegationCard .headOrderBlock .statusLight{
+    margin: auto;
+    margin-right: 0;
+    font-size: clamp(2px,2vh,20px);
+}
+
+.clientOrderDelegationCard .headOrderBlock .statusLight.isAssigned{
+    color: var(--statusSuccess);
+}
+
+.clientOrderDelegationCard .headOrderBlock .statusLight.isUnassigned{
+    color: var(--statusError);
+}
+
+.clientOrderDelegationCard .headOrderBlock .asignedIndicator{
+    display: flex;
+    min-width: 0;
+    flex: 1 1 12rem;
+    margin: auto 0;
+    align-items: center;
+    gap: 1vh ;
+}
+
+.clientOrderDelegationCard .headOrderBlock .asignedIndicator span{
+    overflow-wrap: anywhere;
+}
+
+.clientOrderDelegationCard .itemsList{
+    margin-top: 1vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    list-style: decimal;
+    border-left: solid .2vh var(--inputsBorder);
+    margin-left: 2vh;
+}
+
+.clientOrderDelegationCard .itemsList li{
+    padding: 1vh;
+    border-radius: .5vh;
+    display: flex;
+    align-items: center;
+    gap: 1vh;
+}
+
+.clientOrderDelegationCard .itemsList li .itemData{
+    display: flex;
+    flex-direction: column;
+    gap: .25vh;
+    width: 25vh;
+}
+
+.clientOrderDelegationCard .itemsList li .itemData strong{
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+    margin-bottom: .5vh;
+}
+
+.clientOrderDelegationCard .itemsList li .itemData .units{
+    display: flex;
+    gap: 1vh;
+    color: var(--mainText);
+    font-size: clamp(1.8px,1.8vh,18px);
+}
+
+.clientOrderDelegationCard .itemsList li .borderCurve{
+    height: 70%;
+    border-left: solid .2vh var(--inputsBorder);
+    border-bottom: solid .2vh var(--inputsBorder);
+    width: 2vh;
+    border-bottom-left-radius: 2vh;
+    margin-left: -.8vh;
+}
+
+.clientOrderDelegationCard .itemsList li .itemData .itemDesc{
+    color: var(--descriptionText);
+    font-size: clamp(1.8px,1.8vh,18px);
+}
+
+.clientOrderDelegationCard .itemsList li img{
+    height: 4vh;
+    width: 4vh;
+    margin-right: 1vh;
+}
+
+.clientOrderDelegationCard .footerData{
+    margin-top: 2vh;
+    padding-left: 1vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.clientOrderDelegationCard .footerData span{
+    color: var(--descriptionText);
+}
+
+
+.clientOrderDelegationCard .attachedContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.clientOrderDelegationCard .attachedContainer h6{
+    font-size: clamp(2px,2vh,20px);
+    color: var(--mainText);
+    font-weight: 500;
+}
+
+.clientOrderDelegationCard .attachedContainer .attachedCard{
+    display: flex;
+    padding: 1vh;
+    border-radius: 1vh;
+    gap: 1vh;
+    background-color:var(--iconHover);
+    cursor: pointer;
+}
+
+.clientOrderDelegationCard .attachedContainer .attachedCard i{
+    color: var(--chatAccent);
+    font-size: clamp(2px,2vh,20px);
+}
+
+.clientOrderDelegationCard .attachedContainer .attachedCard span{
+    max-width: 15vw;
+    min-width: 0;
+    font-size: clamp(2px,2vh,20px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--chatAccent);
+}

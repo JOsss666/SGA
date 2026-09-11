@@ -1526,6 +1526,7 @@ inventoryController.getServicesMovements = (req,res)=>{
 
                 ps.name AS service_name,
                 ps.img AS service_img,
+                ps.units AS service_units,
                 ps.type,
 
                 ps.tax_id,

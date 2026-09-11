@@ -1,17 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BoldTitle } from "../../components/BoldTitle";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
 import { FormInput } from "../../components/FormInput";
 import { SearchinList } from "../../components/SearchInList";
-import { useAppInfo } from "../../../../context/context";
+import { useAlert, useAppInfo } from "../../../../context/context";
 import { postInfo } from "../../../../utils/functions";
 import { LoadingSpace } from "../LoadingSpace";
-
+import './FormNewThirdPartyDelegation.css'
+import { ClientOrderDelegationCard } from "../../components/clientOrderDelegationCard";
+import { PreviewFile } from "../Preview/PreviewFile";
 
 export function FormNewThirdPartyDelegation({forUpdate,instnacePreInfo}){
 
     // Requirements
     const {appInfo} = useAppInfo();
+    const {popInAlert} = useAlert();
 
     // Control
     const [data,setData] = useState(instnacePreInfo ?? {});
@@ -28,10 +31,21 @@ export function FormNewThirdPartyDelegation({forUpdate,instnacePreInfo}){
     const [instnaceInfo,setInstanceInfo] = useState({});
     const [orderRelations,setOrderRelations] = useState([]);
 
+    const relationsByDocument = useMemo(()=>{
+        const grouped = new Map();
+        for(const relation of orderRelations){
+            const documentId = String(relation.doc_id);
+            if(!grouped.has(documentId)) grouped.set(documentId, new Map());
+            grouped.get(documentId).set(String(relation.item_id), relation);
+        }
+        return grouped;
+    },[orderRelations]);
+
     const FormInfo = {
         thirdParty_id:thirdPartyInfo.id,
         instance_id:instnaceInfo.id,
-        instance_step:instnaceInfo.step_id,        
+        instance_step:instnaceInfo.step_id,
+        relations:orderRelations,
     };
 
     // Info getters
@@ -55,7 +69,7 @@ export function FormNewThirdPartyDelegation({forUpdate,instnacePreInfo}){
     const getProcessInstance =async()=>{
         let res = await postInfo('/process/getProcessInstances',{
             company_id:appInfo.company_id,
-            status:['active'],
+            //status:['active'],
             id:instnaceInfo.id
         })
         console.log(res);
@@ -80,6 +94,38 @@ export function FormNewThirdPartyDelegation({forUpdate,instnacePreInfo}){
 
     // Handlers
 
+    const handleRelationChange = (index, field, value)=>{
+        const allowedFields = ['doc_id', 'item_id', 'thirdParty_id', 'thirdParty_name', 'disabled', 'asigned', 'asignationNote'];
+        if(!Number.isInteger(index) || !allowedFields.includes(field)) return;
+
+        setOrderRelations(previousRelations => {
+            if(index < 0 || index >= previousRelations.length) return previousRelations;
+            return previousRelations.map((relation, relationIndex) => (
+                relationIndex === index ? {...relation, [field]:value} : relation
+            ));
+        });
+    };
+
+    const handleSupplierChange = (documentId, itemId, supplier)=>{
+        const supplierId = supplier?.id ?? null;
+        const asigned = supplierId !== null && supplierId !== '';
+        setOrderRelations(previousRelations => previousRelations.map(relation => {
+            if(disabled || relation.disabled || String(relation.doc_id) !== String(documentId) || String(relation.item_id) !== String(itemId)){
+                return relation;
+            }
+            return {
+                ...relation,
+                thirdParty_id:asigned ? supplierId : null,
+                thirdParty_name:asigned ? supplier?.names ?? '' : '',
+                asigned
+            };
+        }));
+    };
+
+    const handlePreviewAttachment = (attachmentId)=>{
+        popInAlert(<PreviewFile id={attachmentId}/>);
+    };
+
     const handleGetInitialInfo = async()=>{
         setDisabled(true);
         setLoading(true);
@@ -95,6 +141,7 @@ export function FormNewThirdPartyDelegation({forUpdate,instnacePreInfo}){
     useEffect(()=>{
         let cancelled = false;
         setClientOrders([]);
+        setOrderRelations([]);
         setOrdersError('');
         setLoadingOrders(false);
         if(instnaceInfo.id == undefined || appInfo.company_id == undefined) return;
@@ -133,6 +180,17 @@ export function FormNewThirdPartyDelegation({forUpdate,instnacePreInfo}){
                     ...order,
                     items:itemsByDocument.get(String(order.id)) ?? []
                 })));
+                setOrderRelations(orders.flatMap(order => (
+                    (itemsByDocument.get(String(order.id)) ?? []).map(item => ({
+                        doc_id:order.id,
+                        item_id:item.id,
+                        thirdParty_id:null,
+                        thirdParty_name:'',
+                        disabled:false,
+                        asigned:false,
+                        asignationNote:''
+                    }))
+                )));
             } catch(error) {
                 if(!cancelled) setOrdersError(error.message || 'No se pudieron cargar las órdenes y sus ítems.');
             } finally {
@@ -156,7 +214,7 @@ export function FormNewThirdPartyDelegation({forUpdate,instnacePreInfo}){
     return(
         <div className="FormNewThirdPartyDelegation">
             <BoldTitle text={forUpdate ? 'Editar asignación a proveedor':'Asiganción a proveedor'}/>
-            <DescriptionSpan text={'Administre y asigne ordenes de cliente a proveedores'}/>
+            <DescriptionSpan text={'Administre y asigne los ítems de las órdenes de cliente a proveedores'}/>
             {!loading && (
                 <form action="" onSubmit={(e)=>{
                     e.preventDefault();
@@ -171,25 +229,18 @@ export function FormNewThirdPartyDelegation({forUpdate,instnacePreInfo}){
                             <p>No hay órdenes de cliente para este proceso.</p>
                         )}
                         {clientOrders.map((order)=>(
-                            <div className="orderBlock" key={order.id}>
-                                <div className="headOrderBlock">
-                                    <h3>{`${order.document_type}#${order.ownSerial}`}</h3>
-                                </div>
-                                {order.items.length > 0 ? (
-                                    <ul aria-label={`Ítems de la orden ${order.ownSerial}`}>
-                                        {order.items.map(item => (
-                                            <li key={item.id}>
-                                                <span>{item.service_name || item.description || `Servicio #${item.service_id}`}</span>
-                                                {' — Cantidad: '}{item.units}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p>Esta orden no tiene ítems adjuntos.</p>
-                                )}
-                            </div>
+                            <ClientOrderDelegationCard
+                                key={order.id}
+                                order={order}
+                                relationsByItem={relationsByDocument.get(String(order.id))}
+                                thirdparties={thirdparties}
+                                disabled={disabled}
+                                onSupplierChange={(itemId, supplier) => handleSupplierChange(order.id, itemId, supplier)}
+                                onPreviewAttachment={handlePreviewAttachment}
+                            />
                         ))}
                     </div>
+
                 </form>
             )}
             {loading && (
