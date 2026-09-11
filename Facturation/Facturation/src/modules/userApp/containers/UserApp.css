@@ -2,6 +2,8 @@
 /*  VARIABLES LIGHT AND DARKMODE */
 
 :root {
+    --statusSuccess: #31C950;
+    --statusError: #dc2626;
     --bg: #ffffff;
     --menuAside:#FAFAFA;
     --lightGradient1: #EEF2FF;
@@ -30,6 +32,8 @@
 }
 
 :root.dark {
+    --statusSuccess: #4ade80;
+    --statusError: #f87171;
     --bg: #09090B;
     --menuAside:#121212;
     --lightGradient1: #0C0A09;
