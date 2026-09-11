@@ -303,7 +303,8 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                                     <span key={i}className="requiredDocAlert" onClick={()=>{
                                                         console.log(`Abriendo formulario para: ${req.docType}`)
                                                         popInAlert(<SelectTpeNewDoc docType={req.docType} info={{
-                                                            instance_id:info.id
+                                                            instance_id:info.id,
+                                                            step_id: element.id
                                                         }}/>)
                                                     }}>
                                                         <i className="fa-solid fa-triangle-exclamation"/>
