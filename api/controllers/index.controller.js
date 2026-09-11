@@ -2189,6 +2189,11 @@ controller.getThirdParties = (req,res)=>{
             values.push(`${info.identificationNumber}`.trim())
         }
 
+        if(info.type != undefined){
+            values.push(`${info.type}`)
+            whereClauses.push(`"Ecosystem".thirdparties.type = ${values.length}"`)
+        }
+
         const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
         
         // 1. Columnas básicas
