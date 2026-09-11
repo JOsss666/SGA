@@ -1501,6 +1501,16 @@ inventoryController.getServicesMovements = (req,res)=>{
             values.push(info.doc_id);
         }
 
+        if(info.doc_ids !== undefined){
+            if(!Array.isArray(info.doc_ids) || info.doc_ids.some(id => !/^[0-9]+$/.test(String(id)))){
+                res.writeHead(400, {'Content-Type':'application/json'});
+                res.end(JSON.stringify({error:'doc_ids debe ser una lista de IDs de documentos'}));
+                return;
+            }
+            whereClauses.push(`sm.doc_id = ANY($${values.length + 1}::bigint[])`);
+            values.push([...new Set(info.doc_ids.map(String))]);
+        }
+
         if(info.instance_id != undefined){
             whereClauses.push(`sm.instance_id = $${values.length + 1}`);
             values.push(info.instance_id);
