@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { postInfo } from '../../../../utils/functions';
+import { useEffect, useRef, useState } from 'react';
+import { urlSer } from '../../../../App';
+import { downloadAttachment, getAttachmentUrl, printAttachment, shareAttachment } from '../../../../utils/attachmentActions';
 import './PreviewFile.css'
 import { useAlert, useAppInfo } from '../../../../context/context';
 import { LoadingSpace } from '../LoadingSpace';
-import { ButtonMenu } from '../../components/ButtonMenu';
 import { MoreOptions } from '../../components/MoreOptions';
 
 export function PreviewFile({id}){
@@ -13,9 +13,12 @@ export function PreviewFile({id}){
     const {popOutAlert} = useAlert();
 
     // Control
-    const [info,setInfo] = useState([]);
-    const [loading,setLoading] = useState(false);
-    const [disabled,setDisabled] = useState(false);
+    const [info,setInfo] = useState(null);
+    const [loading,setLoading] = useState(true);
+    const [busy,setBusy] = useState(false);
+    const [error,setError] = useState('');
+    const [message,setMessage] = useState('');
+    const actionInProgress = useRef(null);
 
     // utils
 
@@ -27,7 +30,7 @@ export function PreviewFile({id}){
         "image/svg+xml": <i className="fa-solid fa-file-image fileIcon"/>,
         "application/pdf": <i className="fa-solid fa-file-pdf fileIcon"/>,
         "application/msword": <i className="fa-regular fa-file-word fileIcon"/>,
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": <i className="fa-regular fa-file-excel fileIcon"/>,
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": <i className="fa-regular fa-file-word fileIcon"/>,
         "application/vnd.ms-excel": <i className="fa-regular fa-file-excel fileIcon"/>,
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": <i className="fa-regular fa-file-excel fileIcon"/>,
         "application/vnd.ms-powerpoint": <i className="fa-solid fa-file-powerpoint fileIcon"/>,
@@ -48,21 +51,36 @@ export function PreviewFile({id}){
 
     // Functions
     
-    const getFileInfo = async(attArray)=>{
-        setDisabled(true);
-        setLoading(true);
-        let res = await postInfo('/getAttachedFiles',{
-            company_id:appInfo.company_id,
-            allowedDocs:attArray,
-            id:id
-        })
-        console.log(res);
-        if(res[0]){
-            setInfo(res[1][0]);
+    const handleAction = async(action)=>{
+        if(!info?.url || actionInProgress.current) return;
+        const actionToken = Symbol('attachmentAction');
+        actionInProgress.current = actionToken;
+        setBusy(true);
+        setError('');
+        setMessage('');
+        try {
+            const result = await action(info);
+            if(actionInProgress.current === actionToken) setMessage(result);
+        } catch(actionError) {
+            if(actionInProgress.current === actionToken) {
+                setError(actionError instanceof TypeError
+                    ? 'No se pudo acceder al archivo. Revisa tu conexión o ábrelo en una nueva pestaña.'
+                    : actionError.message || 'No se pudo completar la acción.');
+            }
+        } finally {
+            if(actionInProgress.current === actionToken) {
+                actionInProgress.current = null;
+                setBusy(false);
+            }
         }
-        setLoading(false);
-        setDisabled(false);
-    }
+    };
+
+    const canPrint = info?.type === 'application/pdf' || info?.type?.startsWith('image/');
+    const actions = [
+        {text:'Descargar', icon:<i className="fa-solid fa-cloud-arrow-down"/>, action:()=>handleAction(downloadAttachment)},
+        ...(canPrint ? [{text:'Imprimir', icon:<i className="fa-solid fa-print"/>, action:()=>handleAction(printAttachment)}] : []),
+        {text:'Compartir', icon:<i className="fa-solid fa-arrow-up-from-bracket"/>, action:()=>handleAction(shareAttachment)}
+    ];
 
     const renderContent = () => {
         if (!info?.url) return <div className="no-file">No se pudo cargar el recurso</div>;
@@ -70,7 +88,7 @@ export function PreviewFile({id}){
         const type = info.type;
 
         // Si es imagen, usamos <img> para mejor escalado
-        if (type?.includes('image')) {
+        if (type?.startsWith('image/')) {
             return (
                 <div className="img-container">
                     <img src={info.url} alt={info.name} className="img-preview" />
@@ -106,12 +124,41 @@ export function PreviewFile({id}){
     // Events triggers
 
     useEffect(()=>{
-        getFileInfo([id]);
-    },[])
-
-    useEffect(()=>{
-        console.log(info);
-    },[info])
+        const controller = new AbortController();
+        actionInProgress.current = null;
+        setInfo(null);
+        setLoading(true);
+        setError('');
+        setMessage('');
+        setBusy(false);
+        const loadFile = async()=>{
+            try {
+                const response = await fetch(`${urlSer}/getAttachedFiles`, {
+                    method:'POST',
+                    credentials:'include',
+                    headers:{'Content-Type':'application/json', 'X-SGA-Company-Id':String(appInfo.company_id)},
+                    body:JSON.stringify({company_id:appInfo.company_id, allowedDocs:[id]}),
+                    signal:controller.signal
+                });
+                if(!response.ok) throw new Error('No se pudo cargar el archivo.');
+                const result = await response.json();
+                const file = result[0] === true && result[1]?.find(item => String(item.id) === String(id));
+                if(!file?.url) throw new Error('No se encontró el archivo adjunto.');
+                const url = getAttachmentUrl(file);
+                if(!controller.signal.aborted) setInfo({...file, url});
+            } catch(loadError) {
+                if(!controller.signal.aborted) setError(loadError.message || 'No se pudo cargar el archivo.');
+            } finally {
+                if(!controller.signal.aborted) setLoading(false);
+            }
+        };
+        if(id != null && appInfo.company_id != null) loadFile();
+        else setLoading(false);
+        return ()=>{
+            controller.abort();
+            actionInProgress.current = null;
+        };
+    },[id, appInfo.company_id]);
 
 
     return(
@@ -120,27 +167,29 @@ export function PreviewFile({id}){
                 <>
                     <div className="headPreview">
                         <div className="nameIconContainer">
-                            {iconDocsContainer[`${info.type}`]}
-                            <strong>{info.name}</strong>
+                            {iconDocsContainer[info?.type] || <i className="fa-solid fa-file fileIcon"/>}
+                            <strong>{info?.name || 'Archivo adjunto'}</strong>
                         </div>
                         <div className="optionsDoc">
-                            <ButtonMenu title={'Descargar'} children={<i className="fa-solid fa-cloud-arrow-down"/>} noRotate={true} />
-                            <ButtonMenu title={'Imprimir'} children={<i className="fa-solid fa-print"/>} noRotate={true} />
-                            <ButtonMenu title={'Compartir'} children={<i className="fa-solid fa-arrow-up-from-bracket"/>} noRotate={true}/>
-                            <div className="moreOptC">
-                                <MoreOptions options={[
-                                    {text:'Descargar',icon:<i className="fa-solid fa-cloud-arrow-down"/>},
-                                    {text:'Imprimir',icon:<i className="fa-solid fa-print"/>},
-                                    {text:'Compartir',icon:<i className="fa-solid fa-arrow-up-from-bracket"/>}
-                                ]}/>
-                            </div>
+                            {actions.map(action => (
+                                <button key={action.text} type="button" className="previewAction" title={action.text} aria-label={action.text} disabled={busy || !info?.url} onClick={action.action}>
+                                    {action.icon}
+                                </button>
+                            ))}
+                            {info?.url && !busy && (
+                                <div className="moreOptC"><MoreOptions options={actions}/></div>
+                            )}
                         </div>
-                        <i className="fa-solid fa-xmark closePreview" title='Cerrar previsualización de archivo' onClick={()=>{
-                            popOutAlert();
-                        }}/>
+                        <button type="button" className="previewAction" title="Cerrar previsualización" aria-label="Cerrar previsualización" onClick={popOutAlert}>
+                            <i className="fa-solid fa-xmark"/>
+                        </button>
                     </div>
                     <div className="contentContainer">
                         <div className="fileC">
+                            {busy && <p role="status">Preparando archivo…</p>}
+                            {error && <p role="alert">{error}</p>}
+                            {message && <p role="status">{message}</p>}
+                            {info?.url && <a href={info.url} target="_blank" rel="noopener noreferrer">Abrir archivo en nueva pestaña</a>}
                             {renderContent()}
                         </div>
                     </div>

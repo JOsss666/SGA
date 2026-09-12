@@ -7,6 +7,24 @@
     border: dashed .15vh var(--inputsBorder);
 }
 
+.clientOrderDelegationCard .delegationNote{
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+    margin-top: 1vh;
+    color: var(--descriptionText);
+}
+
+.clientOrderDelegationCard .delegationNote textarea{
+    min-height: 5vh;
+    resize: vertical;
+    border: 1px solid var(--inputsBorder);
+    border-radius: .5vh;
+    padding: .5vh;
+    background: var(--inputsBg);
+    color: var(--mainText);
+}
+
 .clientOrderDelegationCard .headOrderBlock{
     display: flex;
     flex-wrap: wrap;
@@ -23,6 +41,12 @@
     flex-direction: column;
     gap: 1vh;
     padding: 1vh 2vh;
+}
+
+.clientOrderDelegationCard .bodyOrderBlock .descriptionOrder{
+    padding-left: 1vh;
+    color: var(--descriptionText);
+    font-size: clamp(1.8px,1.8vh,18px);
 }
 
 .clientOrderDelegationCard .headOrderBlock i{
@@ -65,6 +89,19 @@
     gap: 1vh ;
 }
 
+.clientOrderDelegationCard .headOrderBlock .postionHandler{
+    display: flex;
+    height: 3vh;
+    width: 3vh;
+    border-radius: 100%;
+    background-color: var(--bg);
+    outline: solid .1vh var(--inputsBorder);
+}
+
+.clientOrderDelegationCard .headOrderBlock .postionHandler i{
+    margin: auto;
+}
+
 .clientOrderDelegationCard .headOrderBlock .asignedIndicator span{
     overflow-wrap: anywhere;
 }
@@ -83,8 +120,14 @@
     padding: 1vh;
     border-radius: .5vh;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 1vh;
+}
+
+.clientOrderDelegationCard .itemsList li .itemInfoLine{
+    display: flex;
+    gap: 1vh;
+    align-items: center;
 }
 
 .clientOrderDelegationCard .itemsList li .itemData{

@@ -1,6 +1,9 @@
 import { SearchinList } from './SearchInList';
 import { formatDate, moneyFormat } from '../../../utils/functions';
 import './clientOrderDelegationCard.css';
+import { useState } from 'react';
+import { FormButton } from './FormButton';
+import { FormInput } from './FormInput';
 
 export function ClientOrderDelegationCard({
     order,
@@ -8,8 +11,12 @@ export function ClientOrderDelegationCard({
     thirdparties = [],
     disabled = false,
     onSupplierChange,
-    onPreviewAttachment
+    onPreviewAttachment,
+    onNoteChange
 }){
+    // Control
+    const [open,setOpen] = useState(true);
+
     const selectedSuppliers = new Map();
     let assignedCount = 0;
     for(const item of order.items){
@@ -40,63 +47,74 @@ export function ClientOrderDelegationCard({
                     aria-label={assignmentStatus}
                     title={assignmentStatus}
                 />
-            </div>
-            <div className="bodyOrderBlock">
-                {order.items.length > 0 ? (
-                    <ul className="itemsList" aria-label={`Ítems de la orden ${order.ownSerial}`}>
-                        {order.items.map(item => {
-                            const relation = relationsByItem.get(String(item.id));
-                            return (
-                            <li key={item.id}>
-                                <div className="borderCurve"/>
-                                <img src={item.service_img} alt="" />
-                                <div className="itemData">
-                                    <strong>{item.service_name}</strong>
-                                    <div className="units">
-                                        <span>{`${item.units} ${item.service_units}`}</span>
-                                        <span>${moneyFormat(parseFloat(item.units)*parseFloat(item.unit_value))}</span>
-                                    </div>
-                                    {item.description && (
-                                        <span className='itemDesc'>Nota: {item.description}</span>
-                                    )}
-                                </div>
-                                <div className="selectThirdPartyCotnainer">
-                                    <SearchinList
-                                        title={'Proveedor asignado'}
-                                        placeHolder={'Seleccione un proveedor'}
-                                        list={thirdparties}
-                                        disabled={disabled || !relation || relation.disabled}
-                                        value={relation?.thirdParty_id ?? null}
-                                        canClear
-                                        action={supplier => onSupplierChange(item.id, supplier)}
-                                    />
-                                </div>
-                            </li>
-                            );
-                        })}
-                    </ul>
-                ) : (
-                    <p>Esta orden no tiene ítems adjuntos.</p>
-                )}
-                <div className="footerData">
-                    {order.description != '' && order.description != undefined && (
-                        <span>Descripción: {order.description}</span>
-                    )}
-                    <div className="attachedContainer">
-                        <h6>Documentos adjuntos</h6>
-                        {order.attached != undefined && order.attached != "" && (
-                            (JSON.parse(order.attached)).map((element,index)=>(
-                                <div className="attachedCard" key={index} onClick={()=>{
-                                    onPreviewAttachment(element.id)
-                                }}>
-                                    <i className="bi bi-card-image"/>
-                                    <span>{element.url}</span>
-                                </div>
-                            ))
-                        )}
-                    </div>
+                <div className="postionHandler" onClick={()=>{
+                    setOpen(!open);
+                }}>
+                    <i className={`fa-solid fa-angle-${open? 'up':'down'}`}/>
                 </div>
             </div>
+            {open && (
+                <div className="bodyOrderBlock">
+                    {order.description != '' && order.description != undefined && (
+                        <span className='descriptionOrder'>Descripción: {order.description}</span>
+                    )}
+                    {order.items.length > 0 ? (
+                        <ul className="itemsList" aria-label={`Ítems de la orden ${order.ownSerial}`}>
+                            {order.items.map(item => {
+                                const relation = relationsByItem.get(String(item.id));
+                                return (
+                                <li key={item.id}>
+                                    <div className="itemInfoLine">
+                                        <div className="borderCurve"/>
+                                        <img src={item.service_img} alt="" />
+                                        <div className="itemData">
+                                            <strong>{item.service_name}</strong>
+                                            <div className="units">
+                                                <span>{`${item.units} ${item.service_units}`}</span>
+                                                <span>${moneyFormat(parseFloat(item.units)*parseFloat(item.unit_value))}</span>
+                                            </div>
+                                            {item.description && (
+                                                <span className='itemDesc'>Nota: {item.description}</span>
+                                            )}
+                                        </div>
+                                    <div className="selectThirdPartyCotnainer">
+                                        <SearchinList
+                                            title={'Proveedor asignado'}
+                                            placeHolder={'Seleccione un proveedor'}
+                                            list={thirdparties}
+                                            disabled={disabled || !relation || relation.disabled}
+                                            value={relation?.thirdParty_id ?? null}
+                                            canClear
+                                            action={supplier => onSupplierChange(item.id, supplier)}
+                                        />
+                                        {relation?.disabled && <span>Asignación guardada</span>}
+                                    </div>
+                                    </div>
+                                    <FormInput textArea={true} title={'Nota de asignación'} disabled={disabled || !relation || relation.disabled} placeholder={'Ej: Ten en cuenta...'} action={event=>onNoteChange?.(item.id,event.target.value)}/>
+                                </li>
+                                );
+                            })}
+                        </ul>
+                    ) : (
+                        <p>Esta orden no tiene ítems adjuntos.</p>
+                    )}
+                    <div className="footerData">
+                        <div className="attachedContainer">
+                            <h6>Documentos adjuntos</h6>
+                            {order.attached != undefined && order.attached != "" && (
+                                (JSON.parse(order.attached)).map((element,index)=>(
+                                    <div className="attachedCard" key={index} onClick={()=>{
+                                        onPreviewAttachment(element.id)
+                                    }}>
+                                        <i className="bi bi-card-image"/>
+                                        <span>{element.url}</span>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

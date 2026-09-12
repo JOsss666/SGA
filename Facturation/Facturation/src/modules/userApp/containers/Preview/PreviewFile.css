@@ -2,21 +2,19 @@
 .PreviewFile{
     display: flex;
     flex-direction: column;
-    width:99dvw;
-    position: x;
-    top: -1vh;
-    left: -1vw;
+    width:80dvw;
+    position: relative;
 }
 
 .PreviewFile .headPreview{
     position: fixed;
     padding: 2vh 2vw;
     width: 100%;
-    background-color: var(--translucidMenu);
+    border-radius: 2vh;
     backdrop-filter: blur(1vh);
     display: flex;
-    left: -1vh;
-    top: -1vh;
+    top: 0;
+    left: 0;
 }
 
 .PreviewFile .headPreview .nameIconContainer{
@@ -33,7 +31,7 @@
     font-weight: 500;
     color: var(--mainText);
     margin: auto 0;
-    max-width: 50%;
+    max-width: 20vw;
     text-overflow: ellipsis;
     overflow: hidden;
     text-wrap: nowrap;
@@ -41,12 +39,7 @@
 }
 
 .PreviewFile .headPreview .closePreview{
-    position: absolute;
-    top: 3.5vh;
-    right: 2vw;
-    font-size: clamp(3px,3vh, 30px);
-    cursor: pointer;
-    color: var(--mainText);
+    display: none;
 }
 
 
@@ -56,6 +49,44 @@
     margin-left: auto;
     gap: .5vw;
     padding: 0 1vh;
+}
+
+.PreviewFile .previewAction{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 6vh;
+    height: 6vh;
+    min-width: 44px;
+    min-height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--sectionTitle);
+    font-size: clamp(18px, 2.7vh, 30px);
+    cursor: pointer;
+}
+
+.PreviewFile .previewAction:hover{
+    background: var(--iconHover);
+}
+
+.PreviewFile .previewAction:focus-visible{
+    outline: 2px solid var(--chatAccent);
+    outline-offset: 2px;
+}
+
+.PreviewFile .previewAction:disabled{
+    opacity: .5;
+    cursor: wait;
+}
+
+.PreviewFile .fileC [role="alert"]{
+    color: var(--statusError);
+}
+
+.PreviewFile .fileC [role="status"]{
+    color: var(--mainText);
 }
 
 

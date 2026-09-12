@@ -28,6 +28,7 @@ import { authenticateSession } from '../middleware/authenticateSession.js';
 import { sessionErrorHandler } from '../middleware/sessionErrorHandler.js';
 import { requireTrustedOrigin } from '../middleware/requireTrustedOrigin.js';
 import { requireCompanyAccess } from '../middleware/requireCompanyAccess.js';
+import supplierDelegationController from '../controllers/supplierDelegationController.js';
 
 const router = express.Router();
 
@@ -263,6 +264,13 @@ router.post('/inventory/deleteItemPricesList',inventoryController.deleteItemPric
 // SGA - PROCESS
 
 router.post('/process/getProcessInstances', processController.getProcessInstances);
+
+router.post('/process/orders-delegation/list', express.json({limit:'256kb'}),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess,
+    supplierDelegationController.list, sessionErrorHandler);
+router.post('/process/orders-delegation/register', express.json({limit:'2mb'}),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess,
+    supplierDelegationController.register, sessionErrorHandler);
 
 router.post('/process/getProcessState', processController.getProcessState);
 

@@ -21,3 +21,7 @@
     gap: 1vh;
 }
 
+.FormNewThirdPartyDelegation form .footer{
+    display: flex;
+    gap: 1vh;
+}

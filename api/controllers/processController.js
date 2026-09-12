@@ -1,6 +1,8 @@
 
 import { useDataBase, withTransaction } from "../app.js";
 import { companyTimeZoneSql } from "../services/businessTimeZoneService.js";
+import { createProcessInstance } from "../services/processInstanceService.js";
+import { validateDelegationProgress } from "../services/delegationProgressService.js";
 const processController = {};
 
 processController.createDocument = async(info,ownSerial)=>{
@@ -778,58 +780,7 @@ processController.createProcessInstace = (req,res)=>{
     req.on('end',async()=>{
         try {
             const info = JSON.parse(data);
-            const instance = await withTransaction(async (client) => {
-                const instanceResult = await client.query(`
-                    INSERT INTO "Process".process_instance(
-                        company_id,
-                        process_id,
-                        step_id,
-                        status,
-                        parent_id,
-                        parent_step,
-                        start_date,
-                        "delivery_date",
-                        "thirdParty_id",
-                        responsable
-                    )
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-                    RETURNING id, created_at;
-                `, [
-                    info.company_id,
-                    info.process_id,
-                    info.step_id,
-                    info.status,
-                    info.parent_id,
-                    info.parent_step,
-                    info.start_date,
-                    info.delivery_date,
-                    info.thirdParty_id,
-                    info.user_id
-                ]);
-
-                const createdInstance = instanceResult.rows[0];
-                await client.query(`
-                    INSERT INTO "Process".process_historial(
-                        company_id,
-                        instance_id,
-                        previous_step,
-                        next_step,
-                        user_id,
-                        created_at,
-                        description
-                    )
-                    VALUES ($1, $2, $3, $3, $4, $5, $6);
-                `, [
-                    info.company_id,
-                    createdInstance.id,
-                    info.step_id,
-                    info.user_id,
-                    createdInstance.created_at,
-                    'Creación de instancia de proceso'
-                ]);
-
-                return createdInstance;
-            });
+            const instance = await withTransaction(client => createProcessInstance(client, info));
 
             res.writeHead(200,{'Content-Type':'application/json'});
             res.end(JSON.stringify(instance));
@@ -1046,7 +997,23 @@ processController.getProcessState = (req,res)=>{
                         'name', ps.name,
                         'order', ps."order",
                         'required_roll', ps.required_roll,
-                        'subprocess_id', ps.id,
+                        'subprocesses', COALESCE((
+                            SELECT JSON_AGG(JSON_BUILD_OBJECT(
+                                'id', child.id,
+                                'ownSerial', child."ownSerial",
+                                'process_code', child_process.code,
+                                'step_id', child.step_id,
+                                'step_name', child_step.name,
+                                'is_completed', child_step.end_process,
+                                'status', child.status,
+                                'thirdParty_name', supplier.names
+                            ) ORDER BY child.id)
+                            FROM "Process".process_instance child
+                            JOIN "Process".processes child_process ON child_process.id=child.process_id AND child_process.company_id=pi.company_id
+                            JOIN "Process".process_steps child_step ON child_step.id=child.step_id AND child_step.process_id=child.process_id
+                            LEFT JOIN "Ecosystem".thirdparties supplier ON supplier.id=child."thirdParty_id" AND supplier.company_id=pi.company_id
+                            WHERE child.company_id=pi.company_id AND child.parent_id=pi.id AND child.parent_step=ps.id
+                        ), '[]'::json),
                         'advancement', COALESCE(
                             (
                                 SELECT JSON_BUILD_OBJECT(
@@ -1206,7 +1173,8 @@ processController.getInstanceHistorial = (req,res)=>{
     })
 }
 
-async function validateFullProcessRequirements(instance_id, process_id) {
+async function validateFullProcessRequirements(instance_id, process_id, client) {
+    const query = async (sql, values) => [true, (await client.query(sql, values)).rows];
     try {
         // 1. Obtenemos TODOS los documentos requeridos para este proceso según la tabla de relaciones
         const requirementsQuery = `
@@ -1217,7 +1185,7 @@ async function validateFullProcessRequirements(instance_id, process_id) {
             AND required = true
             GROUP BY "docType"
         `;
-        const reqRes = await useDataBase(requirementsQuery, [instance_id, process_id], 1);
+        const reqRes = await query(requirementsQuery, [instance_id, process_id]);
         
         if (!reqRes[0] || reqRes[1].length === 0) return { success: true };
 
@@ -1231,7 +1199,7 @@ async function validateFullProcessRequirements(instance_id, process_id) {
             WHERE di.instance_id = $1
             GROUP BY d.document_type
         `;
-        const countRes = await useDataBase(countQuery, [instance_id], 1);
+        const countRes = await query(countQuery, [instance_id]);
         const attachedDocs = countRes[1] || [];
 
         // 3. Validamos faltantes
@@ -1268,76 +1236,36 @@ processController.nextProcessStep = async (req, res) => {
         try {
             let info = JSON.parse(data);
 
-            // 1. Obtener información de la instancia y el proceso
-            const instanceQuery = `
-                SELECT pi.id, pi.step_id, pi.process_id, ps.order as current_order
-                FROM "Process".process_instance pi
-                JOIN "Process".process_steps ps ON pi.step_id = ps.id
-                WHERE pi.id = $1
-            `;
-            const instanceQ = await useDataBase(instanceQuery, [info.instance_id], 1);
-            if (!instanceQ[0]) throw new Error("Instancia no encontrada");
-
-            const instance = instanceQ[1][0];
-
-            // 2. Buscar el siguiente paso
-            const nextStepQuery = `
-                SELECT id, name, required_roll, "order", end_process
-                FROM "Process".process_steps
-                WHERE process_id = $1 AND "order" > $2
-                ORDER BY "order" ASC
-                LIMIT 1
-            `;
-            const nextStepQ = await useDataBase(nextStepQuery, [instance.process_id, instance.current_order], 1);
-
-            if (!nextStepQ[0]) {
-                res.writeHead(200);
-                return res.end(JSON.stringify({ success: false, message: "El proceso ya ha finalizado." }));
-            }
-            const nextStep = nextStepQ[1][0];
-
-            // 3. Validar Permisos
-            const hasPermission = nextStep.required_roll.includes(info.user_roll);
-            if (!hasPermission) {
-                res.writeHead(200);
-                return res.end(JSON.stringify({ success: false, error: "No tienes el rol necesario para autorizar este paso." }));
-            }
-
-            // --- CAMBIO CLAVE: Validación de Cierre ---
-            // Si el siguiente paso es el de cierre (end_process), validamos TODO el historial de documentos
-            if (nextStep.end_process) {
-                const validation = await validateFullProcessRequirements(info.instance_id, instance.process_id);
-                if (!validation.success) {
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ 
-                        success: false, 
-                        error: validation.error 
-                    }));
+            const result = await withTransaction(async client => {
+                const instance = (await client.query(`
+                    SELECT pi.*, ps."order" AS current_order
+                    FROM "Process".process_instance pi
+                    JOIN "Process".process_steps ps ON pi.step_id=ps.id AND pi.process_id=ps.process_id
+                    WHERE pi.id=$1 AND pi.company_id=$2 FOR UPDATE OF pi
+                `,[info.instance_id,info.company_id])).rows[0];
+                if(!instance) throw new Error('Instancia no encontrada');
+                if(instance.status !== 'active') throw new Error('La instancia no está activa.');
+                if(info.previous_step != null && String(info.previous_step) !== String(instance.step_id)) throw new Error('El proceso cambió de paso. Recarga e intenta nuevamente.');
+                const nextStep=(await client.query(`
+                    SELECT id,name,required_roll,"order",end_process FROM "Process".process_steps
+                    WHERE process_id=$1 AND company_id=$2 AND "order">$3 ORDER BY "order" LIMIT 1
+                `,[instance.process_id,info.company_id,instance.current_order])).rows[0];
+                if(!nextStep) return {success:false,message:'El proceso ya ha finalizado.'};
+                if(!nextStep.required_roll.map(String).includes(String(info.user_roll))) throw new Error('No tienes el rol necesario para autorizar este paso.');
+                await validateDelegationProgress(client, instance);
+                if(nextStep.end_process) {
+                    const validation=await validateFullProcessRequirements(instance.id,instance.process_id,client);
+                    if(!validation.success) throw new Error(validation.error);
                 }
-            }
-
-            // 4. Actualizar la instancia
-            const updateQuery = `
-                UPDATE "Process".process_instance 
-                SET step_id = $1, updated_at = CURRENT_TIMESTAMP, responsable = $3
-                WHERE id = $2
-            `;
-            await useDataBase(updateQuery, [nextStep.id, info.instance_id, info.user_id], 2);
-
-            // 5. Historial
-            await useDataBase(`
-                INSERT INTO "Process".process_historial(
-                    company_id, instance_id, previous_step, next_step, user_id, description)
-                VALUES ($1, $2, $3, $4, $5, $6);
-            `, [info.company_id, info.instance_id, instance.step_id, nextStep.id, info.user_id, info.description || 'Avance de etapa'], 2);
-
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ 
-                success: true, 
-                message: `El proceso ha avanzado a: ${nextStep.name}`,
-                nextStepId: nextStep.id 
-            }));
-
+                await client.query(`UPDATE "Process".process_instance SET step_id=$1, updated_at=CURRENT_TIMESTAMP AT TIME ZONE 'UTC', responsable=$3 WHERE id=$2`,[nextStep.id,instance.id,info.user_id]);
+                await client.query(`
+                    INSERT INTO "Process".process_historial(company_id,instance_id,previous_step,next_step,user_id,description,created_at)
+                    VALUES ($1,$2,$3,$4,$5,$6,CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
+                `,[info.company_id,instance.id,instance.step_id,nextStep.id,info.user_id,info.description || 'Avance de etapa']);
+                return {success:true,message:`El proceso ha avanzado a: ${nextStep.name}`,nextStepId:nextStep.id};
+            });
+            res.writeHead(200,{'Content-Type':'application/json'});
+            res.end(JSON.stringify(result));
         } catch (error) {
             console.error(error);
             res.writeHead(500);

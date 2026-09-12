@@ -6,6 +6,7 @@ import { useAlert, useAppInfo, useNotifications } from "../../../../context/cont
 import { FormInput } from "../../components/FormInput";
 import { LoadingSpace } from "../LoadingSpace";
 import { SelectTpeNewDoc } from "../forms/SelectTypeNewDoc";
+import { PreviewDocument } from "../Preview/PreviewDocument";
 
 export function ProcessStatusAlert({instance_id,reloadFun}){
 
@@ -281,6 +282,14 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                             {element.name}
                                         </span>
                                         <div className="attachedDocsC">
+                                            {element.subprocesses?.map(child => (
+                                                <button type="button" className="subprocessLink" key={child.id} onClick={()=>{
+                                                    popInAlert(<ProcessStatusAlert instance_id={child.id} reloadFun={getInstanceInfo}/>);
+                                                }}>
+                                                    <span>{child.process_code}#{child.ownSerial} · {child.thirdParty_name || 'Proveedor'}</span>
+                                                    <span>{child.status === 'cancelled' ? 'Cancelado' : child.step_name}</span>
+                                                </button>
+                                            ))}
                                             {(element.isCompleted || element.isActual) && element.advancement && (
                                                 <div className="responsableInfo">
                                                     <i className="fa-solid fa-angles-right" aria-hidden="true"/>
@@ -302,7 +311,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                                 element.required_docs?.map((req, i) => (
                                                     <span key={i}className="requiredDocAlert" onClick={()=>{
                                                         console.log(`Abriendo formulario para: ${req.docType}`)
-                                                        popInAlert(<SelectTpeNewDoc docType={req.docType} info={{
+                                                        popInAlert(<SelectTpeNewDoc docType={req.docType} reloadFun={getInstanceInfo} info={{
                                                             instance_id:info.id,
                                                             step_id: element.id
                                                         }}/>)
@@ -313,7 +322,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                                 ))}
                                             {element.attached_Docs.map((doc, i) => (
                                                 <span key={i} className="attachedDoc" onClick={()=>{
-                                                    window.open(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${doc.doc_id}`,'_blank','noopener,noreferrer')
+                                                    popInAlert(<PreviewDocument doc_id={doc.doc_id}/>);
                                                 }}>
                                                     <i className="fa-solid fa-file-circle-check"/>
                                                     {`${doc.document_type} #${doc.ownSerial}`}

@@ -18,6 +18,7 @@ import { FormNewPurchase } from "./forms/FormNewPurchase";
 import { FormNewENote } from "./forms/FormNewENote";
 import { SellInvoiceDesign } from "./Alerts/SellInvoiceDesing";
 import './New.css'
+import { FormNewThirdPartyDelegation } from "./forms/FormNewThirdPartyDelegation";
 
 export function New(){
     const {userConfig,appInfo,userInfo, appConfig} = useAppInfo();
@@ -60,6 +61,8 @@ export function New(){
             [{ text: 'Crear recibo de caja', children: <FormNewCashRecipt />, icon: <i className="fa-solid fa-receipt" /> }] : []),
         
         {text:'Factura de venta',children:<FormNewInvoice/>,icon:<i className="fa-solid fa-file-invoice"/>},
+
+        {text:'Asignación a proveedor', children:<FormNewThirdPartyDelegation instnacePreInfo={{}}/>,icon:<i className="bi bi-person-bounding-box"/>},
 
         {text:'Compra',children:<FormNewPurchase/>,icon:<i className="fa-solid fa-cart-shopping"/>},
 
