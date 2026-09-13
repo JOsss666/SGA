@@ -90,7 +90,7 @@ export function ClientOrderDelegationCard({
                                         {relation?.disabled && <span>Asignación guardada</span>}
                                     </div>
                                     </div>
-                                    <FormInput textArea={true} title={'Nota de asignación'} disabled={disabled || !relation || relation.disabled} placeholder={'Ej: Ten en cuenta...'} action={event=>onNoteChange?.(item.id,event.target.value)}/>
+                                    <FormInput textArea={true} title={'Nota de asignación'} value={relation?.asignationNote ?? ''} disabled={disabled || !relation || relation.disabled} placeholder={'Ej: Ten en cuenta...'} action={value=>onNoteChange?.(item.id,value)}/>
                                 </li>
                                 );
                             })}

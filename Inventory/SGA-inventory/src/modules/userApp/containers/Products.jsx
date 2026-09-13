@@ -25,7 +25,7 @@ export function Products(){
 
     const getProducts = async()=>{
         setLoading(true);
-        let res = await postInfo('/inventory/getProducts',{
+        let res = await postInfo('/inventory/getPS',{
             company_id:appInfo.company_id
         })
         if(res[0]){

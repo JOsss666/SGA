@@ -141,6 +141,7 @@
     font-size: clamp(2px,2vh,20px);
     font-weight: 500;
     margin-bottom: .5vh;
+    color: var(--mainText);
 }
 
 .clientOrderDelegationCard .itemsList li .itemData .units{

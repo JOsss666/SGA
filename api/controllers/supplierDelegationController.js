@@ -19,5 +19,6 @@ const handle = operation => async (req,res) => {
 
 export default {
     register:handle(req=>service.register(req.body,req.auth)),
-    list:handle(req=>service.list(req.body.instance_id,req.auth))
+    update:handle(req=>service.update(req.body,req.auth)),
+    list:handle(req=>service.list(req.body.instance_id,req.auth,req.body.delegation_document_id))
 };

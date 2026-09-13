@@ -40,6 +40,7 @@ sellInvoiceService.register = async (info) => {
         }
         */
         
+        // Accountability enabled
         const accountResult = await utilsController.accountDocument(
             documentInfo,
             { client }

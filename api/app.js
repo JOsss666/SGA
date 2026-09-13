@@ -121,7 +121,7 @@ function encrypt(data) {
     return sha96Hash.toString('hex');
 }
 
-console.log('KEY --> ',encrypt('JM_2026*'));
+console.log('KEY --> ',encrypt('ZJ_2426T'));
 
 // Errores transitorios de conexión que justifican un reintento (no son errores de SQL).
 const isTransientConnError = (err) =>
@@ -134,6 +134,7 @@ const useDataBase = async (sentence, values, typeConsult) => {
     try {
         let result;
         try {
+            console.log(sentence,values)
             result = await pool.query(sentence, values);
         } catch (err) {
             // Si la conexión se cayó (cliente muerto del pool), reintentamos UNA vez:

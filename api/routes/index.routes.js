@@ -271,6 +271,9 @@ router.post('/process/orders-delegation/list', express.json({limit:'256kb'}),
 router.post('/process/orders-delegation/register', express.json({limit:'2mb'}),
     requireTrustedOrigin, authenticateSession, requireCompanyAccess,
     supplierDelegationController.register, sessionErrorHandler);
+router.post('/process/orders-delegation/update', express.json({limit:'2mb'}),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess,
+    supplierDelegationController.update, sessionErrorHandler);
 
 router.post('/process/getProcessState', processController.getProcessState);
 

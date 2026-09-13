@@ -31,6 +31,26 @@ export function normalizeDelegationRequest(input, auth) {
     return {company_id, user_id, instance_id, request_id:input.request_id.toLowerCase(), relations};
 }
 
+export function normalizeDelegationUpdateRequest(input, auth) {
+    if(!input || typeof input !== 'object') fail('La solicitud no es válida.');
+    const company_id = id(auth.companyId, 'Compañía');
+    const user_id = id(auth.userId, 'Usuario');
+    const instance_id = id(input.instance_id, 'Proceso');
+    const delegation_document_id = id(input.delegation_document_id, 'Documento de asignación');
+    if(!Array.isArray(input.relations) || !input.relations.length || input.relations.length > 1000) fail('Selecciona entre 1 y 1000 ítems.');
+    const seen = new Set();
+    const relations = input.relations.map(relation => {
+        const item_id = id(relation?.item_id, 'Ítem');
+        if(seen.has(item_id)) fail('Un ítem no puede aparecer más de una vez.');
+        seen.add(item_id);
+        const note = relation.asignationNote ?? '';
+        if(typeof note !== 'string' || note.length > 4000) fail('La nota no puede superar 4000 caracteres.');
+        return {item_id, doc_id:id(relation.doc_id, 'Documento'), thirdParty_id:id(relation.thirdParty_id, 'Proveedor'), asignationNote:note};
+    }).sort((a,b) => a.item_id.localeCompare(b.item_id));
+    if(new Set(relations.map(relation => relation.thirdParty_id)).size !== 1) fail('Un documento de asignación solo puede tener un proveedor.');
+    return {company_id, user_id, instance_id, delegation_document_id, relations};
+}
+
 // Inyección explícita para probar con PostgreSQL aislado, sin cargar app.js.
 export function createSupplierDelegationService({withTransaction, registerDocument, linkDocumentInstances}) {
     return {
@@ -131,16 +151,129 @@ export function createSupplierDelegationService({withTransaction, registerDocume
             });
         },
 
-        async list(instanceId, auth) {
+        async update(input, auth) {
+            const data = normalizeDelegationUpdateRequest(input, auth);
+            return withTransaction(async client => {
+                const assignments = (await client.query(`
+                    SELECT assignment.id, assignment.service_movement_id AS item_id,
+                        movement.doc_id, assignment.delegation_document_id,
+                        parent.id AS parent_instance_id, parent.process_id, parent.step_id,
+                        parent.status AS parent_status, config.assignment_step_id,
+                        assignment_step.required_roll
+                    FROM "Process"."ordersDelegation" assignment
+                    JOIN "Inventory".services_movement movement
+                        ON movement.id=assignment.service_movement_id AND movement.company_id=assignment.company_id
+                    JOIN "Ecosystem".docs_instances parent_link
+                        ON parent_link.doc_id=assignment.delegation_document_id
+                    JOIN "Process".process_instance parent
+                        ON parent.id=parent_link.instance_id AND parent.company_id=assignment.company_id
+                    JOIN "Process".orders_delegation_config config
+                        ON config.company_id=parent.company_id AND config.parent_process_id=parent.process_id
+                    JOIN "Process".process_steps assignment_step
+                        ON assignment_step.id=config.assignment_step_id
+                        AND assignment_step.company_id=config.company_id
+                    WHERE assignment.company_id=$1
+                        AND assignment.delegation_document_id=$2
+                        AND assignment.status='active'
+                        AND parent_link.step_instance=config.assignment_step_id
+                    ORDER BY assignment.id
+                    FOR UPDATE OF assignment, parent
+                `,[data.company_id,data.delegation_document_id])).rows;
+                if(!assignments.length) fail('No se encontró una asignación activa para este documento.',404);
+                const parent = assignments[0];
+                if(String(parent.parent_instance_id) !== data.instance_id) fail('El documento no pertenece al proceso indicado.',409);
+                if(parent.parent_status !== 'active' || String(parent.step_id) !== String(parent.assignment_step_id)) fail('La asignación solo puede editarse en el paso de asignación a proveedores.',409);
+                if(!parent.required_roll.map(String).includes(String(auth.roleId))) fail('Tu rol no puede editar proveedores en este paso.',403);
+                const savedByItem = new Map(assignments.map(assignment => [String(assignment.item_id),assignment]));
+                const sourceDocumentIds = new Set(assignments.map(assignment => String(assignment.doc_id)));
+                if([...savedByItem.keys()].some(itemId => !data.relations.some(relation => relation.item_id === itemId))) {
+                    fail('No puedes retirar ítems ya incluidos en este documento de asignación.',409);
+                }
+                if(data.relations.some(relation => !sourceDocumentIds.has(relation.doc_id))) {
+                    fail('Los ítems nuevos deben pertenecer a la orden de cliente de esta asignación.',409);
+                }
+                const selectedItems = (await client.query(`
+                    SELECT movement.id, movement.doc_id
+                    FROM "Inventory".services_movement movement
+                    JOIN "Ecosystem".documents source_document
+                        ON source_document.id=movement.doc_id AND source_document.company_id=movement.company_id
+                    WHERE movement.company_id=$1
+                        AND movement.id=ANY($2::bigint[])
+                        AND source_document.document_type='Client Order'
+                        AND source_document.status='active'
+                        AND (source_document.instance_id=$3 OR EXISTS (
+                            SELECT 1 FROM "Ecosystem".docs_instances link
+                            WHERE link.doc_id=source_document.id AND link.instance_id=$3
+                        ))
+                    FOR UPDATE OF movement, source_document
+                `,[data.company_id,data.relations.map(relation=>relation.item_id),parent.parent_instance_id])).rows;
+                if(selectedItems.length !== data.relations.length || data.relations.some(relation => {
+                    const item=selectedItems.find(selected=>String(selected.id)===relation.item_id);
+                    return !item || String(item.doc_id)!==relation.doc_id;
+                })) fail('Hay ítems que no pertenecen a órdenes activas de este proceso.',409);
+                const conflictingAssignment = await client.query(`
+                    SELECT service_movement_id FROM "Process"."ordersDelegation"
+                    WHERE company_id=$1 AND service_movement_id=ANY($2::bigint[])
+                        AND status='active' AND delegation_document_id <> $3
+                    LIMIT 1
+                `,[data.company_id,data.relations.map(relation=>relation.item_id),data.delegation_document_id]);
+                if(conflictingAssignment.rowCount) fail('Uno o más ítems ya están asignados en otro documento. Recarga el formulario.',409);
+                const supplierId = data.relations[0].thirdParty_id;
+                const supplier = await client.query(`
+                    SELECT id FROM "Ecosystem".thirdparties
+                    WHERE company_id=$1 AND id=$2 AND type IN ('supplier','both') FOR SHARE
+                `,[data.company_id,supplierId]);
+                if(!supplier.rowCount) fail('Selecciona un proveedor válido de la compañía.');
+                await client.query(`
+                    UPDATE "Process"."ordersDelegation" assignment
+                    SET "thirdParty_id"=$3, asignation_note=item.note,
+                        updated_at=CURRENT_TIMESTAMP
+                    FROM jsonb_to_recordset($4::jsonb) AS item(item_id bigint,note text)
+                    WHERE assignment.company_id=$1
+                        AND assignment.delegation_document_id=$2
+                        AND assignment.service_movement_id=item.item_id
+                        AND assignment.status='active'
+                `,[data.company_id,data.delegation_document_id,supplierId,
+                    JSON.stringify(data.relations.map(relation => ({item_id:relation.item_id,note:relation.asignationNote})))]);
+                const newRelations=data.relations.filter(relation=>!savedByItem.has(relation.item_id));
+                if(newRelations.length) await client.query(`
+                    INSERT INTO "Process"."ordersDelegation" (
+                        company_id, service_movement_id, delegation_document_id,
+                        "thirdParty_id", asignation_note, created_by
+                    )
+                    SELECT $1, item.item_id, $2, $3, item.note, $4
+                    FROM jsonb_to_recordset($5::jsonb) AS item(item_id bigint,note text)
+                `,[data.company_id,data.delegation_document_id,supplierId,data.user_id,
+                    JSON.stringify(newRelations.map(relation=>({item_id:relation.item_id,note:relation.asignationNote})))]);
+                await client.query(`
+                    UPDATE "Ecosystem".documents
+                    SET "thirdParty_id"=$3, updated_at=CURRENT_TIMESTAMP
+                    WHERE id=$2 AND company_id=$1 AND document_type='ThirdParty Delegation'
+                `,[data.company_id,data.delegation_document_id,supplierId]);
+                await client.query(`
+                    UPDATE "Process".process_instance child
+                    SET "thirdParty_id"=$3, updated_at=CURRENT_TIMESTAMP
+                    WHERE child.company_id=$1 AND child.id IN (
+                        SELECT link.instance_id FROM "Ecosystem".docs_instances link
+                        WHERE link.doc_id=$2 AND link.instance_id <> $4
+                    )
+                `,[data.company_id,data.delegation_document_id,supplierId,parent.parent_instance_id]);
+                return {ok:true,message:'Asignación actualizada correctamente.'};
+            });
+        },
+
+        async list(instanceId, auth, delegationDocumentId) {
             return withTransaction(async client => {
                 const companyId=id(auth.companyId,'Compañía');
+                const documentId=delegationDocumentId == null ? null : id(delegationDocumentId,'Documento de asignación');
                 const parent=(await client.query(`SELECT process_id,step_id,status FROM "Process".process_instance WHERE id=$1 AND company_id=$2`,[id(instanceId,'Proceso'),companyId])).rows[0];
                 if(!parent) fail('Proceso no encontrado.',404);
                 const configuration=(await client.query(`SELECT config.assignment_step_id, step.required_roll FROM "Process".orders_delegation_config config JOIN "Process".process_steps step ON step.id=config.assignment_step_id AND step.company_id=config.company_id WHERE config.company_id=$1 AND config.parent_process_id=$2`,[companyId,parent.process_id])).rows[0];
                 const relations=(await client.query(`
                     SELECT assignment.id, movement.doc_id, assignment.service_movement_id AS item_id,
                         assignment.delegation_document_id, assignment."thirdParty_id", supplier.names AS "thirdParty_name",
-                        assignment.asignation_note AS "asignationNote", true AS asigned, true AS disabled,
+                        assignment.asignation_note AS "asignationNote", true AS asigned,
+                        ($3::bigint IS NULL) AS disabled,
                         assignment.created_at,
                         assignment.created_at AT TIME ZONE (${companyTimeZoneSql('$1')}) AS created_at_local,
                         (assignment.created_at AT TIME ZONE (${companyTimeZoneSql('$1')}))::date AS business_date,
@@ -150,8 +283,9 @@ export function createSupplierDelegationService({withTransaction, registerDocume
                     JOIN "Ecosystem".thirdparties supplier ON supplier.id=assignment."thirdParty_id" AND supplier.company_id=assignment.company_id
                     WHERE assignment.company_id=$1 AND assignment.status='active'
                         AND EXISTS (SELECT 1 FROM "Ecosystem".docs_instances link WHERE link.doc_id=assignment.delegation_document_id AND link.instance_id=$2)
+                        AND ($3::bigint IS NULL OR assignment.delegation_document_id=$3)
                     ORDER BY assignment.id
-                `,[companyId,instanceId])).rows;
+                `,[companyId,instanceId,documentId])).rows;
                 return {ok:true,relations,configured:!!configuration,can_assign:parent.status==='active' && String(parent.step_id)===String(configuration?.assignment_step_id) && configuration.required_roll.map(String).includes(String(auth.roleId))};
             });
         }

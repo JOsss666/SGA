@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import pg from 'pg';
-import { createSupplierDelegationService, normalizeDelegationRequest } from './supplierDelegationService.js';
+import { createSupplierDelegationService, normalizeDelegationRequest, normalizeDelegationUpdateRequest } from './supplierDelegationService.js';
 import { validateDelegationProgress } from './delegationProgressService.js';
 
 const auth={companyId:7,userId:83,roleId:30};
@@ -17,6 +17,8 @@ test('valida IDs, duplicados y notas antes de iniciar una transacción',()=>{
     assert.throws(()=>normalizeDelegationRequest(request([]),auth),/Selecciona/);
     const data=normalizeDelegationRequest({...request([relation(1)]),company_id:8,user_id:99},auth);
     assert.equal(data.company_id,'7');assert.equal(data.user_id,'83');
+    assert.throws(()=>normalizeDelegationUpdateRequest({instance_id:1000,delegation_document_id:200,relations:[relation(1,212),relation(2,213)]},auth),/un proveedor/);
+    assert.equal(normalizeDelegationUpdateRequest({instance_id:1000,delegation_document_id:200,relations:[relation(1)]},auth).delegation_document_id,'200');
 });
 
 // Requiere PostgreSQL local; crea y elimina una base propia, nunca usa la base de negocio.
@@ -44,7 +46,7 @@ test('delegación transaccional con PostgreSQL aislado', {skip:!process.env.SGA_
         await pool.query(`TRUNCATE "Process"."ordersDelegation","Process".orders_delegation_requests,"Ecosystem".docs_instances,"Ecosystem".documents_group,"Inventory".services_movement,"Ecosystem".documents,"Process".process_historial,"Process".process_instance RESTART IDENTITY CASCADE`);
         await pool.query(`INSERT INTO "Process".process_instance(id,company_id,process_id,step_id,status) VALUES(1000,7,9,70,'active'),(1001,8,9,70,'active');
             INSERT INTO "Ecosystem".documents(id,company_id,store_id,document_type,status,attached,instance_id) VALUES(100,7,23,'Client Order','active','[]',1000),(101,7,23,'Client Order','active','[]',1000),(102,8,23,'Client Order','active','[]',1001);
-            INSERT INTO "Inventory".services_movement VALUES(1,7,100,5,2),(2,7,100,5,3),(3,7,101,6,4),(4,8,102,5,1);`);
+            INSERT INTO "Inventory".services_movement VALUES(1,7,100,5,2),(2,7,100,5,3),(3,7,101,6,4),(4,8,102,5,1),(5,7,100,5,1);`);
     };
     const counts=async()=>(await pool.query(`SELECT (SELECT count(*) FROM "Process"."ordersDelegation") AS assignments,(SELECT count(*) FROM "Ecosystem".documents WHERE document_type='ThirdParty Delegation') AS documents,(SELECT count(*) FROM "Process".process_instance WHERE parent_id IS NOT NULL) AS children,(SELECT count(*) FROM "Process".orders_delegation_requests) AS requests`)).rows[0];
     try {
@@ -65,6 +67,17 @@ test('delegación transaccional con PostgreSQL aislado', {skip:!process.env.SGA_
             assert.deepEqual(await service.register(payload,auth),JSON.parse(JSON.stringify(result)));
             const loaded=await service.list(1000,auth);assert.equal(loaded.relations.length,3);assert.equal(loaded.relations[0].thirdParty_name,'José');
             assert.equal(loaded.relations[0].business_time_zone,'America/Bogota');
+            const editableDocument=result.delegations.find(delegation=>delegation.source_doc_id==='100').doc_id;
+            const updated=await service.update({
+                instance_id:1000,
+                delegation_document_id:editableDocument,
+                relations:[relation(1,213,100),{...relation(2,213,100),asignationNote:'Nueva indicación'},relation(5,213,100)]
+            },auth);
+            assert.equal(updated.message,'Asignación actualizada correctamente.');
+            const updatedAssignments=(await pool.query(`SELECT "thirdParty_id",asignation_note FROM "Process"."ordersDelegation" WHERE delegation_document_id=$1 ORDER BY service_movement_id`,[editableDocument])).rows;
+            assert.deepEqual(updatedAssignments,[{thirdParty_id:'213',asignation_note:'Trabajo asignado'},{thirdParty_id:'213',asignation_note:'Nueva indicación'},{thirdParty_id:'213',asignation_note:'Trabajo asignado'}]);
+            assert.equal((await pool.query(`SELECT "thirdParty_id" FROM "Ecosystem".documents WHERE id=$1`,[editableDocument])).rows[0].thirdParty_id,'213');
+            assert.equal((await pool.query(`SELECT "thirdParty_id" FROM "Process".process_instance WHERE parent_id=1000 AND "thirdParty_id"=213`)).rowCount,2);
         });
         await t.test('rollback de documento, grupo, subproceso e historial ante error intermedio',async()=>{
             await reset();const failing=createSupplierDelegationService({...adapters,linkDocumentInstances:async()=>{throw new Error('fallo simulado')}});
@@ -97,7 +110,7 @@ test('delegación transaccional con PostgreSQL aislado', {skip:!process.env.SGA_
         await t.test('bloquea avance con ítems pendientes o subprocesos sin entregar',async()=>{
             await reset();let parent=(await pool.query(`SELECT * FROM "Process".process_instance WHERE id=1000`)).rows[0];
             await assert.rejects(withTransaction(client=>validateDelegationProgress(client,parent)),/pendientes/);
-            await service.register(request([relation(1),relation(2),relation(3,213,101)]),auth);
+            await service.register(request([relation(1),relation(2),relation(3,213,101),relation(5)]),auth);
             await withTransaction(client=>validateDelegationProgress(client,parent));
             parent={...parent,step_id:71};
             await assert.rejects(withTransaction(client=>validateDelegationProgress(client,parent)),/entregados/);

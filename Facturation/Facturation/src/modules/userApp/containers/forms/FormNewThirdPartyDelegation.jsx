@@ -22,7 +22,7 @@ async function delegationRequest(path, payload) {
     return result;
 }
 
-export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun}){
+export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun,forUpdate=false,asignedDocument}){
 
     // Requirements
     const {appInfo} = useAppInfo();
@@ -60,6 +60,9 @@ export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun}){
     },[orderRelations]);
 
     const pendingRelations = orderRelations.filter(relation=>relation.asigned && !relation.disabled);
+    const relationsToSave = forUpdate
+        ? orderRelations.filter(relation=>relation.asigned)
+        : pendingRelations;
 
     // Info getters
     const getThirdParties =async()=>{
@@ -126,7 +129,9 @@ export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun}){
         const supplierId = supplier?.id ?? null;
         const asigned = supplierId !== null && supplierId !== '';
         setOrderRelations(previousRelations => previousRelations.map(relation => {
-            if(disabled || relation.disabled || String(relation.doc_id) !== String(documentId) || String(relation.item_id) !== String(itemId)){
+            const belongsToEditedDocument = forUpdate && String(relation.doc_id) === String(documentId);
+            const isSelectedItem = String(relation.doc_id) === String(documentId) && String(relation.item_id) === String(itemId);
+            if(disabled || relation.disabled || (!belongsToEditedDocument && !isSelectedItem)){
                 return relation;
             }
             return {
@@ -156,19 +161,26 @@ export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun}){
     }
 
     const handleSave = async()=>{
-        if(savingRef.current || !canAssign || loadingOrders || !pendingRelations.length) return;
+        if(savingRef.current || !canAssign || loadingOrders || !relationsToSave.length) return;
         savingRef.current = true;
         setSaving(true);
         setSaveError('');
         setSaveMessage('');
-        requestId.current ??= crypto.randomUUID();
+        if(!forUpdate) requestId.current ??= crypto.randomUUID();
         try {
-            const result = await delegationRequest('register', {
-                company_id:appInfo.company_id, instance_id:instnaceInfo.id,
-                request_id:requestId.current,
-                relations:pendingRelations.map(({doc_id,item_id,thirdParty_id,asignationNote})=>({doc_id,item_id,thirdParty_id,asignationNote}))
-            });
+            const payload = {
+                company_id:appInfo.company_id,
+                instance_id:instnaceInfo.id,
+                relations:relationsToSave.map(({doc_id,item_id,thirdParty_id,asignationNote})=>({doc_id,item_id,thirdParty_id,asignationNote}))
+            };
+            const result = forUpdate
+                ? await delegationRequest('update',{...payload,delegation_document_id:asignedDocument})
+                : await delegationRequest('register',{...payload,request_id:requestId.current});
             setSaveMessage(result.message);
+            if(forUpdate) {
+                reloadFun?.();
+                return;
+            }
             // Bloquear inmediatamente los ítems confirmados, incluso si falla la recarga.
             const savedItems = new Set(result.delegations.flatMap(group=>group.item_ids.map(String)));
             setOrderRelations(previous=>previous.map(relation=>savedItems.has(String(relation.item_id)) ? {...relation,disabled:true} : relation));
@@ -208,7 +220,11 @@ export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun}){
                     throw new Error('No se pudieron cargar las órdenes de cliente.');
                 }
                 const orders = ordersResponse[1];
-                const saved = await delegationRequest('list',{company_id:appInfo.company_id,instance_id:instnaceInfo.id});
+                const saved = await delegationRequest('list',{
+                    company_id:appInfo.company_id,
+                    instance_id:instnaceInfo.id,
+                    ...(forUpdate ? {delegation_document_id:asignedDocument} : {})
+                });
                 if(cancelled) return;
                 if(!saved.configured) throw new Error('Este proceso no tiene configuración de delegación.');
                 setCanAssign(saved.can_assign);
@@ -230,11 +246,15 @@ export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun}){
                     if(!itemsByDocument.has(documentId)) itemsByDocument.set(documentId, []);
                     itemsByDocument.get(documentId).push(item);
                 }
-                setClientOrders(orders.map(order => ({
+                const ordersWithItems = orders.map(order => ({
                     ...order,
                     items:itemsByDocument.get(String(order.id)) ?? []
-                })));
-                setOrderRelations(orders.flatMap(order => (
+                }));
+                const selectedDocumentIds = new Set(saved.relations.map(relation=>String(relation.doc_id)));
+                setClientOrders(forUpdate
+                    ? ordersWithItems.filter(order=>selectedDocumentIds.has(String(order.id)))
+                    : ordersWithItems);
+                const relations = orders.flatMap(order => (
                     (itemsByDocument.get(String(order.id)) ?? []).map(item => savedByItem.get(String(item.id)) ?? ({
                         doc_id:order.id,
                         item_id:item.id,
@@ -244,7 +264,10 @@ export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun}){
                         asigned:false,
                         asignationNote:''
                     }))
-                )));
+                ));
+                setOrderRelations(forUpdate
+                    ? relations.filter(relation => selectedDocumentIds.has(String(relation.doc_id)))
+                    : relations);
             } catch(error) {
                 if(!cancelled) setOrdersError(error.message || 'No se pudieron cargar las órdenes y sus ítems.');
             } finally {
@@ -254,7 +277,7 @@ export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun}){
 
         loadOrdersWithItems();
         return ()=>{ cancelled = true; };
-    },[instnaceInfo.id, appInfo.company_id, loadVersion])
+    },[instnaceInfo.id, appInfo.company_id, loadVersion, forUpdate, asignedDocument])
 
     useEffect(()=>{
         handleGetInitialInfo();
@@ -267,14 +290,14 @@ export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun}){
 
     return(
         <div className="FormNewThirdPartyDelegation">
-            <BoldTitle text={'Asignación a proveedores'}/>
-            <DescriptionSpan text={'Administre y asigne los ítems de las órdenes de cliente a proveedores'}/>
+            <BoldTitle text={forUpdate ? 'Editar asignación a proveedores' : 'Asignación a proveedores'}/>
+            <DescriptionSpan text={forUpdate ? 'Actualice el proveedor y las notas de esta asignación.' : 'Administre y asigne los ítems de las órdenes de cliente a proveedores'}/>
             {!loading && (
                 <form action="" onSubmit={(e)=>{
                     e.preventDefault();
                     handleSave();
                 }}>
-                    {data.id == undefined && (
+                    {!forUpdate && data.id == undefined && (
                         <SearchinList title={'Proceso adjunto'} placeHolder={'Seleccione el proceso'} disabled={disabled || saving} list={processInstances} action={instance=>{
                             requestId.current=null;
                             setSaveMessage('');
@@ -311,7 +334,7 @@ export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun}){
                             {!loadingOrders && !ordersError && !canAssign && <p>La asignación se habilita cuando el proceso está en el paso de asignación a proveedores.</p>}
                             <div className="footer">
                                 <FormButton negative={true} disabled={saving} text={'Cerrar'} onClick={event=>{event.preventDefault();popOutAlert();}}/>
-                                <FormButton disabled={saving || loadingOrders || !canAssign || !pendingRelations.length} loading={saving} text={saving ? 'Guardando…' : `Guardar asignaciones (${pendingRelations.length})`}/>
+                                <FormButton disabled={saving || loadingOrders || !canAssign || !relationsToSave.length} loading={saving} text={saving ? 'Guardando…' : forUpdate ? 'Guardar cambios' : `Guardar asignaciones (${pendingRelations.length})`}/>
                             </div>
                         </>
                     )}

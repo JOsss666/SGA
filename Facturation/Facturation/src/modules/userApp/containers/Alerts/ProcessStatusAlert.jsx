@@ -7,6 +7,7 @@ import { FormInput } from "../../components/FormInput";
 import { LoadingSpace } from "../LoadingSpace";
 import { SelectTpeNewDoc } from "../forms/SelectTypeNewDoc";
 import { PreviewDocument } from "../Preview/PreviewDocument";
+import { FormNewThirdPartyDelegation } from "../forms/FormNewThirdPartyDelegation";
 
 export function ProcessStatusAlert({instance_id,reloadFun}){
 
@@ -322,7 +323,16 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                                 ))}
                                             {element.attached_Docs.map((doc, i) => (
                                                 <span key={i} className="attachedDoc" onClick={()=>{
-                                                    popInAlert(<PreviewDocument doc_id={doc.doc_id}/>);
+                                                    const isAssignedDocument = doc.document_type === 'ThirdParty Delegation';
+                                                    popInAlert(isAssignedDocument
+                                                        ? <FormNewThirdPartyDelegation
+                                                            forUpdate
+                                                            asignedDocument={doc.doc_id}
+                                                            instnacePreInfo={{instance_id:info.id}}
+                                                            reloadFun={getInstanceInfo}
+                                                        />
+                                                        : <PreviewDocument doc_id={doc.doc_id}/>
+                                                    );
                                                 }}>
                                                     <i className="fa-solid fa-file-circle-check"/>
                                                     {`${doc.document_type} #${doc.ownSerial}`}

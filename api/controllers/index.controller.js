@@ -2191,7 +2191,7 @@ controller.getThirdParties = (req,res)=>{
 
         if(info.type != undefined){
             values.push(`${info.type}`)
-            whereClauses.push(`"Ecosystem".thirdparties.type = ${values.length}"`)
+            whereClauses.push(`"Ecosystem".thirdparties.type = $${values.length}`)
         }
 
         const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
