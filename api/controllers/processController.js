@@ -1004,6 +1004,19 @@ processController.getProcessState = (req,res)=>{
                                 'process_code', child_process.code,
                                 'step_id', child.step_id,
                                 'step_name', child_step.name,
+                                'delivery_date', child.delivery_date,
+                                'order', child_step."order",
+                                'max_order', (
+                                    SELECT MAX(child_process_step."order")
+                                    FROM "Process".process_steps child_process_step
+                                    WHERE child_process_step.process_id=child.process_id
+                                        AND child_process_step.company_id=child.company_id
+                                ),
+                                -- La fecha legacy de la instancia está almacenada en UTC sin zona.
+                                'created_at', child.created_at AT TIME ZONE 'UTC',
+                                'created_at_local', (child.created_at AT TIME ZONE 'UTC') AT TIME ZONE (${companyTimeZoneSql('$1')}),
+                                'business_date', ((child.created_at AT TIME ZONE 'UTC') AT TIME ZONE (${companyTimeZoneSql('$1')}))::date,
+                                'business_time_zone', ${companyTimeZoneSql('$1')},
                                 'is_completed', child_step.end_process,
                                 'status', child.status,
                                 'thirdParty_name', supplier.names
