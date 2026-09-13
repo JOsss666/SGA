@@ -1,0 +1,4 @@
+interface:
+  display_name: "SGA Data Safety"
+  short_description: "Protege datos y cambios SQL de SGA"
+  default_prompt: "Usa $sga-data-safety para implementar este cambio de datos de forma aditiva y segura."

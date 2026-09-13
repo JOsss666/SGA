@@ -38,6 +38,17 @@ agrupe, exporte o presente fechas de negocio:
 - Antes de modificar JSX o CSS, identifica el módulo exacto y lee las referencias requeridas por `sga-workflow`.
 - Para tareas exclusivamente de backend, base de datos, infraestructura o lógica sin impacto visual, no uses `ui-ux-pro-max`; aplica las herramientas y prácticas pertinentes a esa tarea.
 
+## Seguridad de datos, SQL y producción
+
+- Para toda consulta o modificación de SQL, migraciones, modelos, repositorios, servicios, controladores o endpoints con acceso a datos, usa siempre la skill `sga-data-safety`.
+- Toda operación ejecutada directamente por el agente debe ser meramente aditiva, controlada y no destructiva.
+- Ajustarse a la estructura actual y reutilizar la infraestructura existente antes de crear nuevas tablas, servicios, rutas o abstracciones.
+- No ejecutar `DROP`, `TRUNCATE`, eliminaciones, sobrescrituras masivas, recreaciones ni cambios irreversibles sobre datos o estructuras existentes.
+- No ejecutar `UPDATE` o `DELETE` directos sobre producción sin autorización explícita, respaldo verificado, alcance preciso y plan de reversión.
+- Preservar la compatibilidad de otros módulos y endpoints. No renombrar ni eliminar contratos existentes como parte de un cambio localizado.
+- Tratar toda conexión no identificada como producción hasta comprobar el ambiente y limitar cualquier inspección inicial a operaciones de solo lectura.
+- La autorización para implementar una funcionalidad no autoriza a modificar o eliminar información de producción.
+
 ## Alcance
 
 Estas instrucciones aplican a todo el árbol del repositorio `/Users/camm/Documents/SGA`.
