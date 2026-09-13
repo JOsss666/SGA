@@ -8,6 +8,7 @@ import { LoadingSpace } from "../LoadingSpace";
 import { SelectTpeNewDoc } from "../forms/SelectTypeNewDoc";
 import { PreviewDocument } from "../Preview/PreviewDocument";
 import { FormNewThirdPartyDelegation } from "../forms/FormNewThirdPartyDelegation";
+import { SubProcessCard } from "../../components/SubProcessCard";
 
 export function ProcessStatusAlert({instance_id,reloadFun}){
 
@@ -62,7 +63,6 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
             company_id:appInfo.company_id,
             id:instance_id
         })
-        console.log(res);
         if(res[0]){
             setInfo(res[1][0])
             await getProcessState();
@@ -283,14 +283,6 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                             {element.name}
                                         </span>
                                         <div className="attachedDocsC">
-                                            {element.subprocesses?.map(child => (
-                                                <button type="button" className="subprocessLink" key={child.id} onClick={()=>{
-                                                    popInAlert(<ProcessStatusAlert instance_id={child.id} reloadFun={getInstanceInfo}/>);
-                                                }}>
-                                                    <span>{child.process_code}#{child.ownSerial} · {child.thirdParty_name || 'Proveedor'}</span>
-                                                    <span>{child.status === 'cancelled' ? 'Cancelado' : child.step_name}</span>
-                                                </button>
-                                            ))}
                                             {(element.isCompleted || element.isActual) && element.advancement && (
                                                 <div className="responsableInfo">
                                                     <i className="fa-solid fa-angles-right" aria-hidden="true"/>
@@ -305,6 +297,9 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                                     </time>
                                                 </div>
                                             )}
+                                            {element.subprocesses?.map(child => (
+                                                <SubProcessCard info={child} reloadFun={getInstanceInfo}/>
+                                            ))}
                                             {(element.isCompleted || element.isActual) && !element.advancement && (
                                                 <span className="noAdvancementInfo">Sin registro de avance</span>
                                             )}
