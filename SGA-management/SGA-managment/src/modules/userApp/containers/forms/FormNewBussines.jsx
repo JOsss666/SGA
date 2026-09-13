@@ -30,8 +30,8 @@ export function FormNewBussines({info,edit,reloadFun}){
         photo
     }
     const createBussines = async()=>{
-        setDisabled(true)
-        setLoading(false)
+        setDisabled(true);
+        setLoading(false);
         let res = await postInfo('/createBussines',formInfo);
         if(res[0]){
             addNotification({
