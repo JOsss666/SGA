@@ -1,51 +1,78 @@
-
 .TagIndicator{
-    padding: .5vh 1.5vh;
-    border-radius: 2vh;
-    display: flex;
-    background-color: #DEE5E5;
+    --tagBackground: var(--tagNeutralBg);
+    --tagForeground: var(--tagNeutralText);
+    display: inline-flex;
+    align-items: center;
+    gap: .5em;
     width: fit-content;
+    max-width: 100%;
     height: fit-content;
+    padding: .45em .7em;
+    border-radius: .65em;
+    background-color: var(--tagBackground);
+    color: var(--tagForeground);
+    font-size: clamp(.75rem, 2vh, 1rem);
+    line-height: 1.3;
+    vertical-align: middle;
 }
 
 .TagIndicator h5{
-    font-size: clamp(2.2px,2vh,22px);
-    font-weight: 500;
-    color: #00022E;
+    min-width: 0;
+    margin: 0;
+    color: inherit;
+    font-size: inherit;
+    font-weight: 650;
+    line-height: inherit;
+    overflow-wrap: anywhere;
 }
 
-.active_color{
-    background-color: #CBFBF1;
-}
-
-.active_color h5{
-    color: #1F7A55;
-}
-
-.disabled_color{
-    background-color: #FFBBAD;
-}
-
-.suspended_color{
-    background-color: #FBF5B9;
-}
-
-.indicator_color{
-    background-color: #DBEAFE;
-}
-
-.indicator_color h5{
-    color: #155DFC;
-}
-
-
-.category_color{
-    background-color: #BFB6F3;
+.TagIndicator .tagIndicatorIcon{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 1.45em;
+    height: 1.45em;
+    border-radius: .5em;
+    background-color: color-mix(in srgb, var(--tagForeground) 15%, transparent);
 }
 
 .TagIndicator i{
-    font-size: clamp(2px,2vh,20px);
-    margin: auto;
-    margin-left: .7vh;
-    cursor: pointer;
+    flex-shrink: 0;
+    color: inherit;
+    font-size: 1em;
+    line-height: 1;
+}
+
+.TagIndicator.active_color,
+.TagIndicator.green_color{
+    --tagBackground: var(--tagGreenBg);
+    --tagForeground: var(--tagGreenText);
+}
+
+.TagIndicator.disabled_color{
+    --tagBackground: var(--tagRedBg);
+    --tagForeground: var(--tagRedText);
+}
+
+.TagIndicator.suspended_color{
+    --tagBackground: var(--tagAmberBg);
+    --tagForeground: var(--tagAmberText);
+}
+
+.TagIndicator.indicator_color,
+.TagIndicator.blue_color{
+    --tagBackground: var(--tagBlueBg);
+    --tagForeground: var(--tagBlueText);
+}
+
+.TagIndicator.category_color,
+.TagIndicator.purple_color{
+    --tagBackground: var(--tagPurpleBg);
+    --tagForeground: var(--tagPurpleText);
+}
+
+.TagIndicator.info_color{
+    --tagBackground: var(--tagInfoBg);
+    --tagForeground: var(--tagInfoText);
 }
