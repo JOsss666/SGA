@@ -1,0 +1,41 @@
+
+
+.SubProcessCard{
+    display: flex;
+    padding: 1vh;
+    border-radius: 2vh;
+    flex-direction: column;
+    background-color: var(--cardHover);
+    cursor: pointer;
+}
+
+.SubProcessCard .headSubProcess{
+    display: flex;
+    position: relative;
+    gap: 1vh;
+    align-items: center;
+    margin-bottom: .5vh;
+    padding: 1vh;
+}
+
+.SubProcessCard .headSubProcess .TagIndicator{
+    position: absolute;
+    top: 0vh;
+    right: 0vh;
+}
+
+.SubProcessCard .headSubProcess i{
+    font-size: clmap(3px,3vh,30px);
+}
+
+.SubProcessCard .headSubProcess strong{
+    font-size: clmap(2px,2vh,20px);
+    color: var(--mainText);
+    font-weight: 500;
+}
+
+.SubProcessCard .delivery_date{
+    padding: 1vh;
+    color: var(--descriptionText);
+    font-size: clmap(1.8px,1.8vh,18px);
+}
