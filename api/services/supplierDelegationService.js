@@ -28,7 +28,8 @@ export function normalizeDelegationRequest(input, auth) {
         if(typeof note !== 'string' || note.length > 4000) fail('La nota no puede superar 4000 caracteres.');
         return {item_id, doc_id:id(relation.doc_id, 'Documento'), thirdParty_id:id(relation.thirdParty_id, 'Proveedor'), asignationNote:note};
     }).sort((a,b) => a.item_id.localeCompare(b.item_id));
-    return {company_id, user_id, instance_id, request_id:input.request_id.toLowerCase(), relations};
+    if(input.consolidated !== undefined && typeof input.consolidated !== 'boolean') fail('consolidated debe ser booleano.');
+    return {company_id, user_id, instance_id, request_id:input.request_id.toLowerCase(), consolidated:input.consolidated === true, relations};
 }
 
 export function normalizeDelegationUpdateRequest(input, auth) {
@@ -56,7 +57,7 @@ export function createSupplierDelegationService({withTransaction, registerDocume
     return {
         async register(input, auth) {
             const data = normalizeDelegationRequest(input, auth);
-            const hash = createHash('sha256').update(JSON.stringify({instance_id:data.instance_id, user_id:data.user_id, relations:data.relations})).digest('hex');
+            const hash = createHash('sha256').update(JSON.stringify({instance_id:data.instance_id, user_id:data.user_id, consolidated:data.consolidated, relations:data.relations})).digest('hex');
             return withTransaction(async client => {
                 const request = await client.query(`
                     INSERT INTO "Process".orders_delegation_requests(company_id, request_id, payload_hash)
@@ -112,7 +113,11 @@ export function createSupplierDelegationService({withTransaction, registerDocume
                 await client.query(`SELECT pg_advisory_xact_lock(hashtextextended($1,0))`,[`supplier-delegation:${data.company_id}`]);
                 const groups = new Map();
                 for(const relation of data.relations) {
-                    const key = `${relation.doc_id}:${relation.thirdParty_id}`;
+                    // La consolidación masiva comparte una sola OTP por proveedor.
+                    // La asignación habitual conserva una OTP por orden y proveedor.
+                    const key = data.consolidated
+                        ? String(relation.thirdParty_id)
+                        : `${relation.doc_id}:${relation.thirdParty_id}`;
                     if(!groups.has(key)) groups.set(key,[]);
                     groups.get(key).push(relation);
                 }
@@ -128,7 +133,9 @@ export function createSupplierDelegationService({withTransaction, registerDocume
                         created_by:data.user_id, description:order.description || 'Delegación de trabajo a proveedor', attached
                     },{client,includeProcessFields:false});
                     if(!document?.id) throw new Error('No se pudo crear el documento de delegación.');
-                    await client.query(`INSERT INTO "Ecosystem".documents_group(main_doc_id,doc_id) VALUES ($1,$2)`,[first.doc_id,document.id]);
+                    for(const sourceDocumentId of new Set(relations.map(relation=>relation.doc_id))) {
+                        await client.query(`INSERT INTO "Ecosystem".documents_group(main_doc_id,doc_id) VALUES ($1,$2)`,[sourceDocumentId,document.id]);
+                    }
                     const child = await createProcessInstance(client,{
                         company_id:data.company_id, process_id:config.child_process_id, step_id:config.child_initial_step_id,
                         status:'active', parent_id:data.instance_id, parent_step:config.production_step_id,

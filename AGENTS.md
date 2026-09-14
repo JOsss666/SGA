@@ -30,3 +30,37 @@ agrupe, exporte o presente fechas de negocio:
 - Incluir pruebas alrededor de medianoche y, cuando corresponda, zonas con
   horario de verano.
 
+## Desarrollo frontend y UI/UX
+
+- Para cualquier cambio de frontend, interfaz visual, experiencia de usuario o interacción dentro de SGA, usa siempre la skill `sga-workflow` como flujo principal.
+- En esos mismos cambios, usa también la skill `ui-ux-pro-max` como apoyo de diseño, accesibilidad, responsive, interacción, tipografía, color y calidad visual.
+- Sigue primero las instrucciones explícitas del usuario y las convenciones existentes del módulo afectado. Si hay conflicto, prevalecen las reglas del repositorio y de `sga-workflow`.
+- Antes de modificar JSX o CSS, identifica el módulo exacto y lee las referencias requeridas por `sga-workflow`.
+- Para tareas exclusivamente de backend, base de datos, infraestructura o lógica sin impacto visual, no uses `ui-ux-pro-max`; aplica las herramientas y prácticas pertinentes a esa tarea.
+
+## Seguridad de datos, SQL y producción
+
+- Para toda consulta o modificación de SQL, migraciones, modelos, repositorios, servicios, controladores o endpoints con acceso a datos, usa siempre la skill `sga-data-safety`.
+- Toda operación ejecutada directamente por el agente debe ser meramente aditiva, controlada y no destructiva.
+- Ajustarse a la estructura actual y reutilizar la infraestructura existente antes de crear nuevas tablas, servicios, rutas o abstracciones.
+- No ejecutar `DROP`, `TRUNCATE`, eliminaciones, sobrescrituras masivas, recreaciones ni cambios irreversibles sobre datos o estructuras existentes.
+- No ejecutar `UPDATE` o `DELETE` directos sobre producción sin autorización explícita, respaldo verificado, alcance preciso y plan de reversión.
+- Preservar la compatibilidad de otros módulos y endpoints. No renombrar ni eliminar contratos existentes como parte de un cambio localizado.
+- Tratar toda conexión no identificada como producción hasta comprobar el ambiente y limitar cualquier inspección inicial a operaciones de solo lectura.
+- La autorización para implementar una funcionalidad no autoriza a modificar o eliminar información de producción.
+
+## Alcance
+
+Estas instrucciones aplican a todo el árbol del repositorio `/Users/camm/Documents/SGA`.
+
+## Servidor local
+
+- Cuando el usuario pida iniciar, levantar, ejecutar o reiniciar "el servidor", interpreta que se refiere al backend global de SGA.
+- Ejecuta siempre `npm run server-dev` con el directorio de trabajo `/Users/camm/Documents/SGA`, sin importar qué módulo esté activo o sea el tema de la conversación.
+- No confundas "el servidor" con el servidor de desarrollo Vite de un módulo. Inicia Vite únicamente cuando el usuario pida explícitamente el frontend, la interfaz o el módulo web.
+
+## Flujo Git
+
+- Cuando el usuario diga "actualizar los cambios", ejecuta `git pull origin test` desde la raíz `/Users/camm/Documents/SGA`.
+- Cuando el usuario diga "enviar cambios", crea un pull request con la rama `test` como destino (base).
+- Nunca dirijas un pull request a `main` dentro de este flujo. Antes de crear el PR, confirma mediante una comprobación de solo lectura que la rama base sea `test`.

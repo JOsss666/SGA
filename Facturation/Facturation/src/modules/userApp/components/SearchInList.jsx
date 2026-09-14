@@ -12,7 +12,8 @@ export function SearchinList({
     noActVal,
     canClear,
     defaultValue = {},
-    value
+    value,
+    disabledPlaceholder
 }){
     
     const [searchValue, setSearchValue] = useState('');
@@ -137,7 +138,7 @@ export function SearchinList({
                 <input 
                     type="text"
                     value={inputValue}
-                    placeholder={disabled ? "Sin opciones disponibles" : placeHolder} 
+                    placeholder={disabled ? (disabledPlaceholder ?? "Sin opciones disponibles") : placeHolder}
                     disabled={disabled} 
                     onFocus={() => setVisibleList(true)}
                     onKeyDown={handleKeyDown}

@@ -21,6 +21,18 @@
     gap: 1vh;
 }
 
+.FormNewThirdPartyDelegation .bulkSupplierAssignment{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5vh;
+    margin: 0 2vh;
+}
+
+.FormNewThirdPartyDelegation .bulkSupplierAssignment > span{
+    color: var(--descriptionText);
+    font-size: 0.78rem;
+}
+
 .FormNewThirdPartyDelegation form .footer{
     display: flex;
     gap: 1vh;
