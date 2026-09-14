@@ -79,6 +79,14 @@ test('delegación transaccional con PostgreSQL aislado', {skip:!process.env.SGA_
             assert.equal((await pool.query(`SELECT "thirdParty_id" FROM "Ecosystem".documents WHERE id=$1`,[editableDocument])).rows[0].thirdParty_id,'213');
             assert.equal((await pool.query(`SELECT "thirdParty_id" FROM "Process".process_instance WHERE parent_id=1000 AND "thirdParty_id"=213`)).rowCount,2);
         });
+        await t.test('consolida varias órdenes en una sola OTP para el mismo proveedor',async()=>{
+            await reset();
+            const result=await service.register({...request([relation(1),relation(2),relation(3,213,101)]),consolidated:true},auth);
+            assert.equal(result.delegations.length,1);
+            assert.deepEqual(await counts(),{assignments:'3',documents:'1',children:'1',requests:'1'});
+            assert.equal((await pool.query(`SELECT * FROM "Ecosystem".documents_group`)).rowCount,2);
+            assert.equal((await pool.query(`SELECT "thirdParty_id" FROM "Process".process_instance WHERE parent_id=1000 AND "thirdParty_id"=213`)).rowCount,1);
+        });
         await t.test('rollback de documento, grupo, subproceso e historial ante error intermedio',async()=>{
             await reset();const failing=createSupplierDelegationService({...adapters,linkDocumentInstances:async()=>{throw new Error('fallo simulado')}});
             await assert.rejects(failing.register(request([relation(1)]),auth),/simulado/);
