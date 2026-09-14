@@ -263,6 +263,8 @@ router.post('/inventory/deleteItemPricesList',inventoryController.deleteItemPric
 
 // SGA - PROCESS
 
+router.post('/nexo360/getProcessAdministrationReport', processController.getNexoProcessAdministrationReport);
+
 router.post('/process/getProcessInstances', processController.getProcessInstances);
 
 router.post('/process/orders-delegation/list', express.json({limit:'256kb'}),

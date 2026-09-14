@@ -11,7 +11,6 @@ import { CardReport } from '../components/CardReport';
 import { SearchBar } from '../components/SearchBar';
 import { SelectOptions } from '../components/SelectOptions';
 import { FormButton } from '../components/FormButton';
-import { useEffect, useState } from 'react';
 import { ReportKardex } from './reports/ReportKardex';
 import { PathLocation } from '../components/PathLocation';
 import { ReportAccountTransactions } from './reports/ReportAccountTransactions';
@@ -22,6 +21,13 @@ import { useAppInfo,useAiAssistant, useAlert } from '../../../context/context';
 import { CashBoxesCloseReport } from './reports/CashBoxesCloseReport';
 import { ReportHistorialInstance } from './reports/ReportHIstorialInstance';
 import { PortfolioReportDetail } from './reports/PortfolioReportDetail';
+import { ButtonDownload } from '../components/ButtonDownload';
+import { DocumentPreview } from './Alerts/DocumentPreview';
+import { LoadingSpace } from './LoadingSpace';
+import { CheckSquare } from '../components/CheckSquare';
+import { FormNewThirdPartyDelegation } from './forms/FormNewThirdPartyDelegation';
+import { UniversalTable } from '../../../../../../Treasury/SGA - Treasuty/src/modules/userApp/containers/universalTable';
+import { UniversalRow } from '../../../../../../Treasury/SGA - Treasuty/src/modules/userApp/components/universalRow';
 
 // Costume modules
 
@@ -37,11 +43,19 @@ import { PortfolioReportDetail } from './reports/PortfolioReportDetail';
         import('../../../../../../costume-modules/zjSAS.S/src/containers/reports/AuditoryClicksReport').then(module => ({ default: module.AuditoryClicksReport }))
     );
 
+    // NEXO 360
+    const CustomNexoProcessAdministrationReport = React.lazy(() =>
+        import('../../../../../../costume-modules/nexo360/src/pages/processAdministrationReport').then(module => ({ default: module.ProcessAdministrationReport }))
+    );
+
 export function Reports(){
 
     const {userConfig,userInfo,appInfo,appConfig} = useAppInfo();
     const navigate = useNavigate();
     const location = useLocation();
+    const hasNexoProcessAdministration = import.meta.env.DEV || Boolean(
+        appConfig?.access?.services?.personalized?.['custom-modules']?.nexo360_process_admin?.access
+    );
 
     console.log(userConfig)
     
@@ -122,6 +136,11 @@ export function Reports(){
                             <CardReport type={'processes'} title={'Informe de procesos'} description={'Visualiza los procesos de tu empresa'} onClick={()=>{
                                 handleNavigate('Processes')
                             }}/>
+                            {hasNexoProcessAdministration && (
+                                <CardReport type={'processes'} title={'Administración de procesos NEXO 360'} description={'Sigue cada orden desde el cliente hasta la gestión administrativa y el proveedor'} onClick={() => {
+                                    handleNavigate('NexoProcessAdministration')
+                                }}/>
+                            )}
                             {false && (
                                 <CardReport type={'processes'} title={'Eficiencia usuarios'} description={'Visualiza la eficiencia de los usuarios de tu empresa'} onClick={()=>{
                                     handleNavigate('Eficiency')
@@ -174,6 +193,25 @@ export function Reports(){
                 <Route path='/BriefCases/:thirdParty_id' element={<PortfolioReportDetail/>}/>
                 <Route path='/ProcessInstanceHistorial' element={<ReportHistorialInstance/>}/>
                 <Route path='/CashBoxesCloseReport' element={<CashBoxesCloseReport/>}/>
+                {hasNexoProcessAdministration && (
+                    <Route path='/NexoProcessAdministration' element={
+                        <Suspense fallback={<div>Cargando informe NEXO 360...</div>}>
+                            <CustomNexoProcessAdministrationReport
+                                appInfo={appInfo}
+                                useAlert={useAlert}
+                                UniversalTable={UniversalTable}
+                                UniversalRow={UniversalRow}
+                                SearchBar={SearchBar}
+                                CheckSquare={CheckSquare}
+                                FormButton={FormButton}
+                                FormNewThirdPartyDelegation={FormNewThirdPartyDelegation}
+                                ButtonDownload={ButtonDownload}
+                                DocumentPreview={DocumentPreview}
+                                LoadingSpace={LoadingSpace}
+                            />
+                        </Suspense>
+                    }/>
+                )}
                 {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
                     <Route path='/zjClicksReport' element={
                     <Suspense fallback={<div>Cargando componente pesado...</div>}>

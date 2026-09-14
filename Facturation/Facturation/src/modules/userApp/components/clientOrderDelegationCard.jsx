@@ -10,12 +10,13 @@ export function ClientOrderDelegationCard({
     relationsByItem = new Map(),
     thirdparties = [],
     disabled = false,
+    initiallyCollapsed = false,
     onSupplierChange,
     onPreviewAttachment,
     onNoteChange
 }){
     // Control
-    const [open,setOpen] = useState(true);
+    const [open,setOpen] = useState(!initiallyCollapsed);
 
     const selectedSuppliers = new Map();
     let assignedCount = 0;

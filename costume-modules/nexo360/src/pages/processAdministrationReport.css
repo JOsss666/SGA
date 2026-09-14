@@ -1,0 +1,8 @@
+.processAdministrationReport { width:100%; min-width:0; padding-bottom:5vh; color:var(--mainText); }
+.processAdministrationReport .processAdministrationReportHeader { display:flex; align-items:flex-end; justify-content:space-between; gap:3vh; margin:1vh 1vh 2.5vh; }
+.processAdministrationReport .processAdministrationReportHeader h1 { margin:.5vh 0; color:var(--sectionTitle); font-size:clamp(26px,3.2vh,38px); font-weight:600; }
+.processAdministrationReport .processAdministrationReportHeader span { color:var(--descriptionText); font-size:clamp(11px,1.4vh,14px); font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+.processAdministrationReport .processAdministrationReportHeader .ButtonDownload { width:15%; min-width:150px; max-width:210px; margin-left:auto; }
+.processAdministrationReport .processAdministrationReportHeader .ButtonDownload button { min-height:4.4vh; padding:.8vh 1vh; font-size:clamp(12px,1.65vh,16px); }
+.processAdministrationReport .processAdministrationReportNotice { display:flex; align-items:center; gap:1vh; margin:0 1vh 2vh; padding:1.2vh 1.5vh; border:1px solid var(--inputsBorder); border-radius:1vh; color:var(--mainText); background:var(--lightGradient2); }
+@media (max-width:720px) { .processAdministrationReport .processAdministrationReportHeader { align-items:stretch; flex-direction:column; } .processAdministrationReport .processAdministrationReportHeader .ButtonDownload { width:100%; max-width:none; } }
