@@ -111,7 +111,13 @@ let companyConfig = {
                     "expires":"---"
                 }
             },
-            "personalized":{},
+            "personalized":{
+                "custom-modules":{
+                    "nexo360_process_admin":{
+                        "access":false
+                    }
+                }
+            },
             "e_facturation":{
                 "use":true,
                 "instance":"full",

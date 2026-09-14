@@ -8,7 +8,16 @@ import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { PreviewDocument } from "../containers/Preview/PreviewDocument"
 import { ProcessStatusAlert } from "../containers/Alerts/ProcessStatusAlert"
 
-export function RowTableReport({columns,info,hidden,navigation}){
+export function RowTableReport({
+    columns,
+    info,
+    hidden,
+    navigation,
+    renderCell,
+    onRowClick,
+    selectable = true,
+    rowClassName
+}){
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -113,15 +122,19 @@ export function RowTableReport({columns,info,hidden,navigation}){
 
     if(!hidden){
         return(
-            <div className={`RowTableReport ${navigation? 'RowTableReport_redirectRow':''}`} onClick={()=>{
+            <div className={`RowTableReport ${navigation || onRowClick ? 'RowTableReport_redirectRow':''} ${rowClassName ? rowClassName(info) : ''}`} onClick={()=>{
+                if(onRowClick){
+                    onRowClick(info)
+                    return
+                }
                 if(info.id != undefined && navigation){
                     handleNavigate(info.id)
                 }
             }}>
-                <CheckSquare/>
+                {selectable && <CheckSquare/>}
                 {columns.map((element,index)=>(
-                    <div key={index} className="ElementRow">
-                        {dictionaryElementsColum[element]}
+                    <div key={index} className={`ElementRow headColum_${element}`}>
+                        {renderCell ? renderCell(element, info) : dictionaryElementsColum[element]}
                     </div>
                 ))}
             </div>
