@@ -1,0 +1,172 @@
+
+.TableHistorialInstance{
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 100%;
+    padding: .1vh;
+}
+
+.TableHistorialInstance .headTable{
+    display: flex;
+    gap: .5vw;
+    padding: 2vh;
+    width: 100%;
+    background-color: var(--menuAside);
+    border-radius: 1vh;
+    box-shadow: 0 .1vh 1vh var(--translucidMenu);
+    outline: solid .1vh var(--inputsBorder);
+}
+
+.TableHistorialInstance .headTable .thTitle{
+    margin: auto .5vw;
+    width: 10vw;
+    color: var(--mainText);
+    font-size: clamp(2px,2vh,20px);
+}
+
+.TableHistorialInstance .headTable .thTitle:nth-child(2){
+    width: 5vw;
+}
+
+.TableHistorialInstance .headTable .thTitle:nth-child(3),
+.TableHistorialInstance .headTable .thTitle:nth-child(4){
+    width: 15vw;
+    text-align: center;
+}
+
+
+.TableHistorialInstance .bodyTable{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: 55vh;
+    overflow-y: auto;
+    position:relative;
+}
+
+.TableHistorialInstance .bodyTable .rowTable{
+    display: flex;
+    gap: .5vw;
+    width: 100%;
+    padding: 1vh 2vh;
+    border-bottom: dashed .1vh var(--inputsBorder);
+    cursor: pointer;
+    transition: .3s;
+    min-height: 60px; 
+    align-items:center;
+}
+
+.TableHistorialInstance .bodyTable .rowTable:hover{
+    background-color: var(--cardHover);
+}
+
+.TableHistorialInstance .bodyTable .rowTable .rowElement{
+    margin: auto .5vw;
+    padding: 0 1vh;
+    width: 10vw;
+    color: var(--descriptionText);
+    flex-shrink: 0;
+}
+
+.TableHistorialInstance .bodyTable .rowTable .UserCard{
+    width: 25vw;
+    margin: auto 1vh;
+    max-width: 15vw;
+}
+
+.TableHistorialInstance .bodyTable .rowTable .UserCard img{
+    height: 5vh;
+    width: 5vh;
+    border: hidden;
+    outline: none;
+    border-radius: .5vh;
+}
+
+.TableHistorialInstance .bodyTable .rowTable .UserCard strong{
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+}
+
+
+.TableHistorialInstance .bodyTable .rowTable .rightAl{
+    text-align: right;
+}
+
+.TableHistorialInstance .bodyTable .rowTable .leftAl{
+    text-align: left;
+}
+
+.TableHistorialInstance .bodyTable .rowTable .idHolder{
+    width: 5vw;
+}
+
+
+.TableHistorialInstance .bodyTable .rowTable .redirect{
+    font-weight: 500;
+    color: var(--mainText);
+    cursor: pointer;
+}
+
+.TableHistorialInstance .bodyTable .advanceStepContainer{
+    display: flex;
+    padding: 1vh;
+    width: 15vw;
+    height: fit-content;
+    margin: auto 0;
+    position: relative;
+}
+
+.TableHistorialInstance .bodyTable .advanceStepContainer .stepBuble{
+    padding: .5vh 1vh; 
+    border-radius: 2vh;
+    display: flex;
+    background-color: var(--cardHover);
+    outline: solid .1vh var(--inputsBorder);
+    margin: auto;
+    width: 40%;
+}
+
+.TableHistorialInstance .bodyTable .advanceStepContainer .actualStep{
+    margin-right: 1vw;
+    background-color: #155DFC;
+    outline: none;
+}
+
+.TableHistorialInstance .bodyTable .advanceStepContainer .flowIndicator{
+    margin: auto 1vh;
+    color: #155DFC;
+}
+
+.TableHistorialInstance .bodyTable .advanceStepContainer .stepBuble span{
+    margin: auto;
+    font-size: clamp(1.8px,1.8vh,18px);
+    color: var(--descriptionText);
+    text-align: center;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: none;
+    text-wrap: nowrap;
+}
+
+.TableHistorialInstance .bodyTable .advanceStepContainer .actualStep span{
+    color: #fff;
+}
+
+
+.TableHistorialInstance .bodyTable .rowTable .redirect:hover{
+    color: #155DFC;
+}
+
+.TableHistorialInstance .virtualContainer{
+    width:100%;
+    position:relative;
+}
+
+.TableHistorialInstance .virtualRow{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+}

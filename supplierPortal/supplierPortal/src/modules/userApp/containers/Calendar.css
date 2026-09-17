@@ -1,0 +1,337 @@
+.Calendar{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 100%;
+}
+
+/* -------- SIDEBARS -------- */
+.Calendar .SideBar{
+    width: 40vh;
+    padding: 2vh;
+    margin: 1vh;
+    border: solid var(--sidebar-border) .3vh;
+    border-radius: 3vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+}
+
+.Calendar .SideBarLeft{
+  width:20vw;
+  background-color: var(--cardHover);
+}
+
+.Calendar .SideBar ul{
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: .2vh;
+    align-items: start;
+}
+
+.Calendar .SideBar ul li{
+    display: flex;
+    flex-direction: row;
+    gap: 0 1vh;
+    padding: 1vh 2vh;
+    font-size: 2vh;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 3vh;
+    width: 100%;
+    color: var(--descriptionText);
+    font-size: clamp(2.2px,2.2vh,22px);
+}
+
+.Calendar .SideBar ul li i{
+    font-size: 3.5vh;
+}
+
+.Calendar .SideBar ul li:hover{
+  color: var(--mainText);
+}
+
+/* SIDEBAR LEFT */
+.Calendar .SideBarLeft .FormButton{
+    width: fit-content;
+    font-weight: 400;
+    font-size: 1.5vh;
+    align-items: end;
+}
+
+.Calendar .SideBarLeft .Categories ul{
+  display: flex;
+  flex-direction: column;
+  gap: 1vh;
+}
+
+.Calendar .SideBarLeft .Categories ul .NewElementSelect{
+  border-radius: 2.5vh;
+}
+
+.Calendar .SideBarLeft .Categories .ButtonCategories{
+    background-color: transparent;
+    border: none;
+    font-size: 2vh;
+    padding: 2vh;
+    font-weight: 500;
+    align-content: start;
+    color: var(--sidebar-text);
+}
+
+.Calendar .SideBarLeft .Categories .activeCategory {
+  background: var(--iconHover);
+  font-weight: 600;
+}
+
+/* SIDEBAR RIGHT */
+.Calendar .SideBarRight {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.Calendar .SideBarRight .AiResume{
+  width: 100% ;
+  box-shadow: none;
+}
+
+.Calendar .SideBarRight .Events .NewElementSelect{
+  padding: 0;
+  width: 100%;
+}
+
+.Calendar .SideBarRight .Events {
+  padding: 2vh 0;
+  border-top: solid .1vh var(--inputsBorder);
+  border-bottom: solid .1vh var(--inputsBorder);
+  margin: 2vh auto;
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  gap: 1vh;
+  width: 100%;
+}
+
+.Calendar .SideBarRight .Events li{
+    width: 100%;
+    display: flex;
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+}
+
+.Calendar .SideBarRight .Events li:hover{
+  color: var(--mainText);
+  transition: .3s;
+}
+
+.Calendar .SideBarRight .Events li i{
+  margin-right: 1vh;
+  font-size: clamp(2.5px,2.5vh,25px);
+}
+
+/* -------- CALENDAR BODY -------- */
+
+.Calendar .CalendarBody{
+    width:60%;
+    padding: 2vh;
+    height: 98%;
+    margin: auto;
+    border-radius: 1vh;
+    background: var(--bg);
+    transition: .3s;
+}
+
+.Calendar .CalendarBody .fc {
+  border-radius: 1.5vh;
+  overflow: hidden;
+  color: var(--calendar-text);
+}
+
+/* Encabezado */
+.Calendar .CalendarBody .fc-header-toolbar{
+  padding:0 2vh;
+}
+
+.Calendar .CalendarBody .fc-toolbar-title{
+  font-size: clamp(2.2px,3vh,30px);
+  font-weight: 600;
+  color: var(--mainText);
+}
+
+
+.Calendar .fc-col-header{
+  background-color:var(--lightSelected);
+  border: hidden;
+}
+
+.Calendar .fc-col-header-cell{
+  padding: .7vh 1vh;
+  border: hidden;
+}
+
+.Calendar .fc-col-header-cell-cushion {
+  font-size: clamp(1.8px,1.8vh,18px);
+  font-weight: 500;
+  color: var(--descriptionText);
+}
+
+    /* Buttons */
+
+.Calendar .CalendarBody .fc .fc-button {
+  background-color: var(--cardHover);
+  color: var(--descriptionText);
+  font-weight: 500;
+  border: hidden;
+}
+
+
+.Calendar .CalendarBody .fc .fc-button.fc-button-active {
+  background-color: #007AFF;
+  color: #FFF;
+  border: hidden;
+  outline: none;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+/* Cuerpo del calendario */
+
+    /* Malla de calendario */
+
+.Calendar .CalendarBody .fc-timegrid{
+  border-radius: 2vh;
+  padding: 1vh;
+}
+
+.Calendar .CalendarBody .fc-scrollgrid{
+  border: solid .1vh var(--inputsBorder);
+  border-radius: 2vh;
+  overflow:hidden;
+}
+
+.Calendar .fc-scrollgrid td,
+.Calendar .fc-scrollgrid th {
+  border: dashed .1vh var(--inputsBorder);
+}
+
+
+.Calendar .fc-timegrid-slot-major {
+  border-top: solid .1vh var(--sectionTitle);
+}
+
+.Calendar .fc-daygrid-day-frame {
+  padding: 1vh;
+  cursor: pointer;
+  transition: .3s;
+}
+
+.Calendar .fc-daygrid-day-frame:hover{
+  background-color: var(--cardHover);
+}
+
+.Calendar .fc-daygrid-day-number {
+  font-size: clamp(2px,2vh,20px);
+  font-weight: 400;
+  color: var(--sectionTitle);
+}
+
+
+    /* Eventos */
+
+.Calendar .CalendarBody .fc-timegrid-event .fc-event-main {
+  background: inherit !important;
+  color: #fff;
+  font-weight: 600;
+}
+
+.Calendar .CalendarBody .fc-timegrid-event {
+  border-radius: 1vh;
+  overflow: hidden;
+  padding: .5vh;
+}
+
+/* Today colors */
+.Calendar .CalendarBody .fc-daygrid-day.fc-day-today {
+  background-color: var(--lightSelected) !important;
+}
+
+.Calendar .fc-timegrid-slot-label{
+  padding:.5vh;
+  align-items: center;         /* centro vertical */
+  justify-content: center;
+}
+
+.Calendar .fc-timegrid-slot-label-cushion{
+  color: var(--descriptionText);
+  font-size: clamp(11.8px,1.8vh,18px);
+}
+
+
+.Calendar .CalendarBody .fc-timegrid-col.fc-day-today{
+  background-color: var(--lightSelected) !important;
+}
+
+.Calendar .CalendarBody .fc-day-today {
+  border: none !important;
+}
+
+/* Scrollbars ocultos */
+.Calendar .CalendarBody .fc-scroller::-webkit-scrollbar {
+  display: none;
+}
+.Calendar .CalendarBody .fc-scroller {
+  scrollbar-width: none;
+}
+
+/* General */
+.Calendar .Dot {
+  width: 1vh;
+  height: 1vh;
+  border-radius: 3vh;
+}
+
+/* Evento resaltado */
+.Calendar .highlight-event {
+  outline: 3px solid #303030;
+  transition: 0.3s;
+}
+
+.Calendar .custom-event {
+  padding: .3vh .6vh;
+  font-size: 1.3vh;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- THEME VARIABLES ---------- */
+
+/* Light mode */
+.Calendar .calendar-light {
+  --calendar-bg: #ffffff;
+  --calendar-text: #111827;
+  --calendar-grid: #e5e7eb;
+
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #d1d5db;
+  --sidebar-text: #111827;
+  --sidebar-hover: #f3f4f6;
+  --sidebar-active: #e8f0ff;
+}
+
+/* Dark mode */
+.Calendar.calendar-dark {
+  --calendar-bg: #303030;
+  --calendar-text: #e5e7eb;
+  --calendar-grid: #1f2937;
+
+  --sidebar-bg: #303030;
+  --sidebar-border: #1f2937;
+  --sidebar-text: #e5e7eb;
+  --sidebar-hover: #111827;
+  --sidebar-active: #1e293b;
+}

@@ -1,0 +1,18 @@
+.portalHome {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: clamp(1rem, 4vw, 3rem);
+  gap: 1rem;
+  color: var(--mainText);
+  background: var(--bg);
+}
+
+.portalHome h1 {
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  overflow-wrap: anywhere;
+}
+
+.portalHome a {
+  color: inherit;
+}

@@ -1,0 +1,50 @@
+.VoiceMessage{
+    display: flex;
+    align-items: center;
+    gap: 1.2vh;
+    min-width: 24vh;
+}
+
+.VoiceMessage .playBtn{
+    height: 4.4vh;
+    width: 4.4vh;
+    min-width: 4.4vh;
+    border-radius: 100%;
+    background-color: var(--chatAccent);
+    display: flex;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.VoiceMessage .playBtn:hover{
+    filter: brightness(1.08);
+}
+
+.VoiceMessage .playBtn i{
+    margin: auto;
+    margin-left: 1.1vh;
+    color: #fff;
+    font-size: clamp(2px,1.5vh,15px);
+}
+
+.VoiceMessage .waveform{
+    display: flex;
+    align-items: center;
+    gap: .4vh;
+    height: 3.4vh;
+    flex: 1;
+}
+
+.VoiceMessage .waveBar{
+    width: .35vh;
+    min-width: 2px;
+    border-radius: 1vh;
+    background-color: var(--chatAccent);
+    opacity: .5;
+}
+
+.VoiceMessage .duration{
+    font-size: clamp(1.8px,1.4vh,14px);
+    color: var(--descriptionText);
+    white-space: nowrap;
+}

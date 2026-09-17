@@ -1,0 +1,54 @@
+
+.SettingLine{
+    display: flex;
+    padding: 1vh;
+    background-color: var(--menuAside);
+    border-bottom: solid .1vh var(--inputsBorder);
+    cursor: pointer;
+    color: var(--sectionTitle);
+}
+
+.SettingLine:hover{
+    background-color: var(--settingsHover);
+}
+
+.SettingLine span{
+    margin: auto;
+    margin-right: 4vh;
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+}
+
+.SettingLine .iconContainer{
+    height: 5vh;
+    width: 5vh;
+    border-radius: 1vh;
+    display: flex;
+    overflow: hidden;
+}
+
+.SettingLine .iconContainer i{
+    margin: auto;
+    font-size: clamp(2.2px,2.5vh,25px);
+    color: #fff;
+}
+
+.SettingLine .iconContainer img{
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+}
+
+.SettingLine strong{
+    font-weight: 400;
+    margin: auto 1vh;
+    margin-left: 2vh;
+    font-size: clamp(2px,2vh,20px);
+}
+
+.SettingLine .navigateIcon{
+    margin: auto 0;
+    margin-right: 2vh;
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
+}

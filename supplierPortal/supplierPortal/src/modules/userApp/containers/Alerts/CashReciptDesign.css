@@ -1,0 +1,53 @@
+.CashReciptDesign{
+    margin-top: 8vh;
+    background-color: #fff;
+    border-radius: 1vh;
+    max-height: 80dvh;
+    overflow-y: auto;
+}
+
+.CashReciptDesign_goBackBtn{
+    position: absolute;
+    top: 3vh;
+    left: 3vh;
+    color: var(--descriptionText);
+    cursor: pointer;
+}
+
+.CashReciptDesign_goBackBtn i{
+    margin-right: 1vh;
+}
+
+.CashReciptDesign_suitElectronOptions{
+    position: absolute;
+    bottom: 2vh;
+    width: 90%;
+    left: 5%;
+    padding: .5vh 1vh;
+    display: flex;
+    background-color: var(--menuAside);
+    border-radius: 4vh;
+    outline: solid .1vh var(--inputsBorder);
+}
+
+.CashReciptDesign_suitElectronOptions .ButtonMenu{
+    margin: auto;
+}
+
+.SelectCashRecipt{
+    padding: 2vh;
+    padding-top: 6vh;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    height: 100%;
+    background-color: var(--menuAsidecle);
+}
+
+@media (max-width:500px) {
+    .CashReciptDesign{
+        padding: 2vh 10vw !important; 
+        width: 100vw !important;
+        border-radius: 2vh;
+    }
+}

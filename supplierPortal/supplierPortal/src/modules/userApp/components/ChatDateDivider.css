@@ -1,0 +1,14 @@
+.ChatDateDivider{
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1vh;
+}
+
+.ChatDateDivider span{
+    background-color: var(--cardHover);
+    color: var(--descriptionText);
+    font-size: clamp(1.8px,1.4vh,14px);
+    font-weight: 500;
+    padding: .6vh 1.8vh;
+    border-radius: 2vh;
+}

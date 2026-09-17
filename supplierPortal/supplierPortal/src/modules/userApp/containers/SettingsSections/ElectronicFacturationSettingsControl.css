@@ -1,0 +1,69 @@
+
+.ElectronicFacturationSettingsControl{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.ElectronicFacturationSettingsControl .head{
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+    margin-bottom: 3vh;
+}
+
+.ElectronicFacturationSettingsControl .body{
+    display: flex;
+    padding: 1vh;
+    height: 75vh;
+    width: 100%;
+    overflow-y: auto;
+}
+
+.ElectronicFacturationSettingsControl .body .enabledRanges{
+    flex-wrap: wrap;
+    gap: 2vh;
+    display: flex;
+}
+
+.ElectronicFacturationSettingsControl .body .enabledRanges .numberingRangeCard .headcard{
+    display: flex;
+    width: 100%;
+    padding: 1vh 0;
+    align-items: center;
+    display: flex;
+    gap: 1vh;
+}
+
+.ElectronicFacturationSettingsControl .body .enabledRanges .numberingRangeCard .headcard h6{
+    font-size: clamp(2.2px,2.2vh,22px);
+    color: var(--mainText);
+    font-weight: 700;
+}
+
+.ElectronicFacturationSettingsControl .body .enabledRanges .numberingRangeCard .headcard i{
+    font-size: clamp(2.2px,2.2vh,22px);
+    color: #F54927;
+}
+
+.ElectronicFacturationSettingsControl .body .enabledRanges .numberingRangeCard{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    border-radius: 2vh;
+    background-color: var(--cardHover);
+    width: 15vw;
+    border: solid .1vh var(--inputsBorder);
+    gap: 1vh;
+}
+
+.ElectronicFacturationSettingsControl .body .enabledRanges .numberingRangeCard span{
+    font-size: clamp(1.9px,1.9vh,19px);
+    color: var(--descriptionText);
+}
+
+.ElectronicFacturationSettingsControl .body .enabledRanges .numberingRangeCard span b{
+    font-weight: 500;
+    color: var(--mainText);
+    margin-right: 1vh;
+}

@@ -1,0 +1,29 @@
+@import '../../containers/UserApp.css';
+
+.ActionButton{
+    display: inline-flex;
+    align-items: center;
+    gap: .9vh;
+    padding: 1vh 1.8vh;
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 3vh;
+    background-color: var(--menuAside);
+    color: var(--mainText);
+    font: inherit;
+    font-size: clamp(2px,2vh,20px);
+    cursor: pointer;
+    min-height: 4.4vh;
+}
+
+.ActionButton:hover{
+    background-color: var(--cardHover);
+}
+
+.ActionButton i{
+    color: var(--chatAccent);
+}
+
+.ActionButton:focus-visible{
+    outline: solid .2vh var(--chatAccent);
+    outline-offset: .3vh;
+}

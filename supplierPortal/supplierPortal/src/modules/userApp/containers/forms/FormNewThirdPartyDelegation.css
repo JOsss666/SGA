@@ -1,0 +1,27 @@
+
+.FormNewThirdPartyDelegation{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    min-width: 30vw;
+}
+
+.FormNewThirdPartyDelegation .BoldTitle{
+    margin-left: 2vh;
+}
+
+.FormNewThirdPartyDelegation .DescriptionSpan{
+    margin-left: 2vh;
+}
+
+
+.FormNewThirdPartyDelegation form{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.FormNewThirdPartyDelegation form .footer{
+    display: flex;
+    gap: 1vh;
+}

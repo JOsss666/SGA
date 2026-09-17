@@ -1,0 +1,109 @@
+
+.FormNewUser{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    width: 25vw;
+}
+
+.FormNewUser .BoldTitle{
+    margin: 1vh auto;
+}
+
+.FormNewUser .stageProcess{
+    padding: 1vh;
+    width: 100%;
+    margin: 1vh auto;
+}
+
+.FormNewUser .stageProcess .progresBar{
+    height: 1vh;
+    width: 100%;
+    background-color: var(--menuAside);
+    border-radius: 1vh;
+    box-shadow: inset 0 .1vh 1vh var(--inputsBorder);
+}
+
+.FormNewUser .stageProcess .progresBar .Progress{
+    height: 100%;
+    border-radius: 1vh;
+    background-color: #007AFF;
+    transition: .3s;
+    box-shadow: 0 .1vh 1vh var(--inputsBorder);
+}
+
+.FormNewUser form{
+    padding: 1vh;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.FormNewUser .userPhoto{ 
+    margin: 1vh auto;
+    height: 20vh;
+    width: 50%;
+    padding: 1vh;
+    cursor: pointer;
+}
+
+.FormNewUser .actualPhoto{
+    height: 100%;
+    width: 100%;
+    border-radius: 2vh;
+    overflow: hidden;
+    background-color: var(--inputsBg);
+    outline: dashed .2vh var(--inputsBorder);
+}
+
+.FormNewUser .FormButton{
+    margin-top: 2vh;
+}
+
+
+.FormNewUser .actualPhoto img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.FormNewUser .userPhoto .FileInput{
+    display: none;
+}
+
+.FormNewUser .userPhoto:hover .actualPhoto{
+    display: none;
+}
+
+
+.FormNewUser .userPhoto:hover .FileInput{
+    display: block;
+}
+
+
+.FormNewUser .accessSwitch{
+    display: flex;
+    width: 100%;
+}
+
+.FormNewUser .accessSwitch h6{
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 400;
+    color: var(--descriptionText);
+}
+
+.FormNewUser .accessSwitch .SwitchOption{
+    margin: auto;
+    margin-right: 2vh;
+}
+
+@media (max-width:500px) {
+    .FormNewUser{
+        width: 100dvw;
+    }
+
+    .FormNewUser .userPhoto{
+        width: 100%;
+        height: 30vh;
+    }
+}

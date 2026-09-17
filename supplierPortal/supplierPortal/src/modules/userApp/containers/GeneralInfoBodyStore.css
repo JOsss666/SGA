@@ -1,0 +1,39 @@
+.GeneralInfoBody {
+    width: 100%;
+    padding: 2dvh;
+}
+
+.GeneralInfoForm {
+    display: flex;
+    flex-direction: column;
+    gap: 3dvh;
+}
+
+.FormRow {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7dvh;
+    max-width: 80dvw;
+}
+
+.FormActions {
+    display: flex;
+    justify-content: flex-start; 
+    margin-top: 2dvh;
+    padding-top: 2dvh;
+    border-top: 0.1dvh solid var(--border);
+}
+
+.FormActions .FormButton {
+    min-width: auto;
+    width: auto; 
+    border: none;
+    border-radius: 0.5dvh; 
+    padding: 1.5dvh 5dvh; 
+    font-size: 2dvh; 
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+
