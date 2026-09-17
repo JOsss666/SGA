@@ -20,6 +20,8 @@ import './itemsList.css';
 export function ItemsList({
     blocks = [],
     setItems,
+    itemUnitsLabel,
+    visibleItemTotal,
     disabled = false,
     productsAndServices = [],
     onDeleteInstance,
@@ -128,9 +130,11 @@ export function ItemsList({
                                     ? `${block.docInfo.document_type}#${block.docInfo.ownSerial}`
                                     : 'Lista de productos y servicios'}
                             </strong>
-                            <span>
-                                Total: ${block.docInfo != undefined ? moneyFormat(block.docInfo.pending_value) : 0}
-                            </span>
+                            {visibleItemTotal == undefined && visibleItemTotal != false && (
+                                <span>
+                                    Total: ${block.docInfo != undefined ? moneyFormat(block.docInfo.pending_value) : 0}
+                                </span>
+                            )}
                             {!disabled && (
                                 <span
                                     className="quitContainer"
@@ -146,11 +150,15 @@ export function ItemsList({
                             {block.docInfo != undefined && block.items.map((item, index) => (
                                 <div className="itemRow" key={index}>
                                     <UserCard imgSrc={item.service_img} name={item.service_name} />
-                                    <strong className="valueItemRow">Unidades: {item.units}</strong>
+                                    <strong className="valueItemRow">{itemUnitsLabel ?? 'Unidades'}: {item.units}</strong>
                                     <strong className="valueItemRow">Val unidad: {moneyFormat(item.unit_value)}</strong>
-                                    <strong className="valueItemRow">
-                                        Total: {moneyFormat(parseFloat(item.units) * parseFloat(item.unit_value))}
-                                    </strong>
+                                    {visibleItemTotal == undefined && visibleItemTotal != false && (
+                                        <strong className="valueItemRow">
+                                            Total: {moneyFormat(parseFloat(item.units) * parseFloat(item.unit_value))}
+                                        </strong>
+                                    )}
+
+                                    
                                 </div>
                             ))}
 
@@ -161,7 +169,7 @@ export function ItemsList({
 
                                     <strong className="valueItemRow rowInputItem">
                                         <FormInput
-                                            title={'Unidades'}
+                                            title={itemUnitsLabel ?? 'Unidades'}
                                             type={'number'}
                                             step="any"
                                             min={0}
