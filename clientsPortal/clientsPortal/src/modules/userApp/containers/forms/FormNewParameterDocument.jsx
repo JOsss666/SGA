@@ -85,6 +85,44 @@ const isItemBlockSelector = field => {
     return field.component === "SearchinList" && (action === "addItemBlock" || action === "selectMultiple");
 };
 
+// Un "reference" es un campo derivado: su valor no lo diligencia el usuario, sino
+// que se arma concatenando los valores de los demás campos en un solo string
+// (formato CSV, separador configurable). Es opcional: si un paramDoc no lo trae,
+// nada de esto se ejecuta.
+const isReferenceField = field => getSpecialProps(field).action === "reference";
+
+// Arma el string del campo reference a partir de los valores actuales del resto
+// de campos. Por defecto toma todos los campos escalares (texto/número/fecha) en
+// el orden del config; se puede acotar con specialProps.fieldKeys.
+function buildReferenceValue(field, fields, values, itemBlock) {
+    const specialProps = getSpecialProps(field);
+    const separator = specialProps.separator ?? "; ";
+    const blockFieldKeys = new Set(itemBlock?.fields.map(blockField => blockField.key) ?? []);
+
+    const explicitKeys = Array.isArray(specialProps.fieldKeys) && specialProps.fieldKeys.length
+        ? specialProps.fieldKeys
+        : null;
+
+    const sourceFields = explicitKeys
+        ? explicitKeys.map(key => fields.find(candidate => candidate.key === key)).filter(Boolean)
+        : fields.filter(candidate => {
+            if (isReferenceField(candidate)) return false;                 // ni sí mismo ni otros reference
+            if (blockFieldKeys.has(candidate.key)) return false;           // subcampos del item-block
+            if (candidate.type === "array") return false;                  // colecciones/items
+            if (candidate.component === "FileInput" || candidate.component === "SearchinList") return false;
+            const candidateProps = getSpecialProps(candidate);
+            return !["addToCollection", "addItemBlock", "selectMultiple"].includes(candidateProps.action);
+        });
+
+    const parts = sourceFields.map(sourceField => {
+        const raw = values[sourceField.key];
+        if (raw == null || Array.isArray(raw)) return "";
+        return String(raw).trim();
+    });
+
+    return (specialProps.includeEmpty === true ? parts : parts.filter(part => part !== "")).join(separator);
+}
+
 function getItemBlockDefinition(fields) {
     const selectorIndex = fields.findIndex(isItemBlockSelector);
     if (selectorIndex === -1) return null;
@@ -253,6 +291,26 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
 
     const visibleFields = useMemo(() => document?.config.fields.filter(field => field.visible !== false) ?? [], [document]);
     const itemBlock = useMemo(() => getItemBlockDefinition(visibleFields), [visibleFields]);
+    const referenceFields = useMemo(() => document?.config.fields.filter(isReferenceField) ?? [], [document]);
+
+    // Recalcula los campos reference cada vez que cambian los valores. Solo escribe
+    // cuando el string resultante cambia, así el efecto no entra en bucle (los
+    // reference nunca se toman a sí mismos como fuente).
+    useEffect(() => {
+        if (!referenceFields.length) return;
+        setValues(current => {
+            let changed = false;
+            const next = { ...current };
+            referenceFields.forEach(field => {
+                const computed = buildReferenceValue(field, document.config.fields, current, itemBlock);
+                if (current[field.key] !== computed) {
+                    next[field.key] = computed;
+                    changed = true;
+                }
+            });
+            return changed ? next : current;
+        });
+    }, [values, referenceFields, itemBlock, document]);
 
     // Opciones del selector del item-block (productos/servicios) en el shape que
     // espera ItemsList: { text, value:<objeto completo> }, para que su buscador
@@ -364,6 +422,7 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
         const errors = {};
         visibleFields.forEach(field => {
             if (field.disabled || field.readOnly || field.props?.disabled) return;
+            if (isReferenceField(field)) return;
             const specialProps = getSpecialProps(field);
             if (isItemBlockSelector(field)) {
                 const blocks = values[itemBlock?.blockKey] ?? [];
@@ -461,9 +520,10 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
         const specialProps = getSpecialProps(field);
         const isAddToCollection = specialProps.action === "addToCollection";
         const isBlockSelector = isItemBlockSelector(field);
+        const isReference = isReferenceField(field);
         const options = field.requirements ? catalogs[field.requirements] ?? [] : normalizeOptions(field.options);
         const title = `${field.title ?? field.key}`;
-        const disabled = Boolean(field.disabled || field.readOnly || props.disabled || loadingCatalogs || submitting);
+        const disabled = Boolean(field.disabled || field.readOnly || props.disabled || isReference || loadingCatalogs || submitting);
         const block = blockIndex === null ? null : values[itemBlock.blockKey]?.[blockIndex];
         const value = block ? block[field.key] : values[field.key];
         const errorKey = block ? `${itemBlock.blockKey}.${blockIndex}.${field.key}` : field.key;
@@ -508,7 +568,7 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
             <Component title={title} type={props.type ?? (field.type === "number" || field.type === "integer" ? "number" : "text")}
                 textArea={Boolean(props.textArea)} value={value} placeholder={props.placeholder}
                 min={props.min} max={props.max} step={props.step} disabled={disabled}
-                required={field.required} action={updateValue} />
+                required={isReference ? false : field.required} action={updateValue} />
             {field.helpText ? <p>{field.helpText}</p> : null}
             {fieldErrors[errorKey] ? <p role="alert">{fieldErrors[errorKey]}</p> : null}
         </div>;
@@ -539,6 +599,8 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
                                 <div className="itemsListField" key={field.key}>
                                     <ItemsList
                                         title={itemBlock.title}
+                                        visibleItemTotal={false}
+                                        //itemUnitsLabel={document.config.itemsLabel}
                                         blocks={[{ docInfo: undefined, items: values[itemBlock.blockKey] ?? [] }]}
                                         setItems={setItemBlockItems}
                                         disabled={loadingCatalogs || submitting}
