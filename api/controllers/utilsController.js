@@ -81,8 +81,8 @@ utilsController.registerDocument = async (info, options = {}) => {
             description,
             attached,
             instance_id,
-            step_instance)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+            step_instance${info.specialConfig !== undefined ? ', "specialConfig"' : ''})
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12${info.specialConfig !== undefined ? ', $13::jsonb' : ''})
         RETURNING id, "ownSerial";
     `;
 
@@ -100,6 +100,7 @@ utilsController.registerDocument = async (info, options = {}) => {
         instanceId,
         stepId
     ];
+    if (info.specialConfig !== undefined) values.push(JSON.stringify(info.specialConfig));
 
     if (options.client) {
         const result = await options.client.query(docCreation, values);
