@@ -1,0 +1,130 @@
+.PreviewLinkedDocument {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+    width: min(42rem, 78vw);
+    max-height: 70vh;
+    padding: 1.5vh;
+    overflow: hidden;
+    color: var(--mainText);
+}
+
+.PreviewLinkedDocument > .header {
+    display: flex;
+    flex-direction: column;
+    gap: .7vh;
+}
+
+.PreviewLinkedDocument > .header h6,
+.PreviewLinkedDocument section h6 {
+    font-size: clamp(2.2px,2.2vh,22px);
+    margin: 0;
+    color: var(--mainText);
+    font-weight: 400;
+    margin-bottom: 1vh;
+}
+
+.PreviewLinkedDocument .header h6{
+    font-size: clamp(2.5px,2.5vh,25px);
+    font-weight: 500;
+    margin-bottom: 0;
+}
+
+
+.PreviewLinkedDocument .header .SearchBar{
+    margin: 1vh auto;
+}
+
+.PreviewLinkedDocument > .header > span,
+.PreviewLinkedDocument .linkedCard span,
+.PreviewLinkedDocument .linkedCard small {
+    color: var(--descriptionText);
+    font-size: clamp(1.8px,1.8vh,18px);
+}
+
+.PreviewLinkedDocument .body {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    min-height: 0;
+    padding-right: .5vh;
+    overflow-y: auto;
+}
+
+.PreviewLinkedDocument section,
+.PreviewLinkedDocument .linkedList {
+    display: flex;
+    flex-direction: column;
+    gap: .8vh;
+}
+
+.PreviewLinkedDocument .linkedCard {
+    display: flex;
+    align-items: center;
+    gap: 1.2vh;
+    width: 100%;
+    padding: 1.2vh;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: 1.2vh;
+    background: var(--bg);
+    color: var(--mainText);
+    text-align: left;
+}
+
+.PreviewLinkedDocument .linkedCard > i {
+    flex: 0 0 auto;
+    color: #c52b2b;
+    font-size: 3vh;
+    margin: auto 1vh;
+    text-align: center;
+}
+
+.PreviewLinkedDocument .linkedCard > div:not(.MoreOptions) {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.PreviewLinkedDocument .linkedCard strong,
+.PreviewLinkedDocument .linkedCard span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: clamp(1.8px,1.8vh,18px);
+}
+
+.PreviewLinkedDocument .linkedCard strong{
+    font-weight: 500;
+}
+
+.PreviewLinkedDocument .linkedCard strong span {
+    margin-left: 1vh;
+    font-weight: 400;
+}
+
+.PreviewLinkedDocument .linkedFile {
+    cursor: pointer;
+    font: inherit;
+}
+
+.PreviewLinkedDocument .linkedFile:hover,
+.PreviewLinkedDocument .linkedCard:hover {
+    background: var(--cardHover);
+}
+
+.PreviewLinkedDocument .linkedStatus {
+    padding: 2vh;
+    color: var(--descriptionText);
+    text-align: center;
+}
+
+.PreviewLinkedDocument .linkedError {
+    color: #c52b2b;
+}
+
+@media (max-width: 700px) {
+    .PreviewLinkedDocument {
+        width: 88vw;
+    }
+}

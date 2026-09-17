@@ -1,0 +1,63 @@
+.sgaTreasury .universalTableLoadingShader {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+}
+
+.sgaTreasury .universalTableLoadingShader .universalTableLoadingText {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.sgaTreasury .universalTableLoadingShader .universalTableLoadingRow {
+    display: flex;
+    width: 100%;
+    min-height: 5.6vh;
+    align-items: center;
+    border-bottom: .1vh solid var(--inputsBorder);
+}
+
+.sgaTreasury .universalTableLoadingShader .universalTableLoadingCell {
+    position: relative;
+    display: block;
+    height: 1.6vh;
+    margin: 1.1vh 1.4vh;
+    overflow: hidden;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--descriptionText) 14%, var(--inputsBg));
+}
+
+.sgaTreasury .universalTableLoadingShader .universalTableLoadingCell::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-110%);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in srgb, var(--mainText) 15%, transparent),
+        transparent
+    );
+    animation: universalTableShaderSweep 1.3s ease-in-out infinite;
+}
+
+@keyframes universalTableShaderSweep {
+    to {
+        transform: translateX(110%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sgaTreasury .universalTableLoadingShader .universalTableLoadingCell::after {
+        animation: none;
+        transform: none;
+        opacity: .45;
+    }
+}
