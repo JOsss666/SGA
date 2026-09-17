@@ -29,6 +29,7 @@ import { sessionErrorHandler } from '../middleware/sessionErrorHandler.js';
 import { requireTrustedOrigin } from '../middleware/requireTrustedOrigin.js';
 import { requireCompanyAccess } from '../middleware/requireCompanyAccess.js';
 import supplierDelegationController from '../controllers/supplierDelegationController.js';
+import externalAccesThirdPartyController from '../controllers/externalThirdPartyAccesController.js';
 
 const router = express.Router();
 
@@ -40,6 +41,7 @@ const upload = multer({ dest: CHUNKS_DIR });
 router.use('/api/integrations/v1', integrationRouter);
 router.use('/api/system-ai/v1', systemAIRouter);
 router.use('/api/auth/v1', sessionRouter);
+
 
 // SGA General
 
@@ -197,6 +199,8 @@ router.post(
 
 router.post(`/inventory/getComercialProducts`,inventoryController.getComercialProducts);
 
+router.post('/inventory/getPresets',inventoryController.getPresets);
+
 router.post('/inventory/createProduct',inventoryController.createProduct);
 
 router.post('/inventory/updateProduct',inventoryController.updateProduct);
@@ -266,6 +270,8 @@ router.post('/inventory/deleteItemPricesList',inventoryController.deleteItemPric
 router.post('/nexo360/getProcessAdministrationReport', processController.getNexoProcessAdministrationReport);
 
 router.post('/process/getProcessInstances', processController.getProcessInstances);
+router.post('/process/getEvidenceOptions', express.json({ limit: '16kb', strict: true }), processController.getEvidenceOptions);
+router.post('/process/registerEvidence', express.json({ limit: '256kb', strict: true }), processController.registerEvidence);
 
 router.post('/process/orders-delegation/list', express.json({limit:'256kb'}),
     requireTrustedOrigin, authenticateSession, requireCompanyAccess,
@@ -385,7 +391,25 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
 
 
 
-// EXTERNAL SERVICES
+    // EXTERNAL SERVICES
+
+    //
+
+    router.post(
+        '/externalAccess/create',
+        express.json({ limit: '16kb', strict: true }),
+        requireTrustedOrigin,
+        authenticateSession,
+        requireCompanyAccess,
+        externalAccesThirdPartyController.create,
+        sessionErrorHandler
+    );
+    router.post('/externalAccess/logIn', externalAccesThirdPartyController.logIn);
+    router.post('/externalAccess/getCompanyInfo', externalAccesThirdPartyController.getCompanyInfo);
+    router.post('/externalAccess/getUserInfo', externalAccesThirdPartyController.getUserInfo);
+    router.post('/externalAccess/logOut', externalAccesThirdPartyController.logOut);
+    router.post('/externalAccess/getParamDocs',externalAccesThirdPartyController.getParamsDocs);
+    router.post('/externalAccess/registerParamDoc', express.json({ limit: '2mb', strict: true }), externalAccesThirdPartyController.registerParamDoc);
 
     // ELECTRONIC FACTURATION
     
@@ -429,6 +453,6 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
 
     router.get('/electronicFacturation/getMunicipalities',electronicFacturationController.getMunicipalities);
 
-    router.post('/electronicFacturationController.getDocumentFullInfo',electronicFacturationController.getDocumentFullInfo);
+    router.post('/electronicFacturation/getDocumentFullInfo',electronicFacturationController.getDocumentFullInfo);
 
 export default router;
