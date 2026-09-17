@@ -110,7 +110,7 @@ export function FormNewENote({InfoParams,reloadFun}){
             type:'electronic invoice'
         })
         console.log('Facturas dispo: ',res)
-        if(res[0]){n
+        if(res[0]){
             let C = []
             res[1].forEach(element => {
                 C.push({
@@ -125,7 +125,7 @@ export function FormNewENote({InfoParams,reloadFun}){
     const getInvoiceInfo = async(bill_number,thirdParty_id)=>{
         setDisabled(true);
         setLoadingInvoice(true);
-        let res = await postInfo('/electronicFacturationController.getDocumentFullInfo',{
+        let res = await postInfo('/electronicFacturation/getDocumentFullInfo',{
             bill_numer:bill_number
         });
         console.log('/// Res: ',res)
