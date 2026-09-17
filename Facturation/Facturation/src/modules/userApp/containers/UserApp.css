@@ -2,6 +2,20 @@
 /*  VARIABLES LIGHT AND DARKMODE */
 
 :root {
+    --tagNeutralBg: #eeeeef;
+    --tagNeutralText: #363638;
+    --tagGreenBg: #e4faf1;
+    --tagGreenText: #147e4b;
+    --tagBlueBg: #eaf1ff;
+    --tagBlueText: #2867c7;
+    --tagPurpleBg: #f4efff;
+    --tagPurpleText: #7c4bdd;
+    --tagInfoBg: #e4f6fc;
+    --tagInfoText: #08788f;
+    --tagRedBg: #ffebe7;
+    --tagRedText: #b83c32;
+    --tagAmberBg: #fff6d9;
+    --tagAmberText: #886210;
     --statusSuccess: #31C950;
     --statusError: #dc2626;
     --bg: #ffffff;
@@ -32,6 +46,20 @@
 }
 
 :root.dark {
+    --tagNeutralBg: #29292e;
+    --tagNeutralText: #dedee4;
+    --tagGreenBg: #123b2b;
+    --tagGreenText: #78e2ad;
+    --tagBlueBg: #192e50;
+    --tagBlueText: #8bb8ff;
+    --tagPurpleBg: #322344;
+    --tagPurpleText: #c3a2ff;
+    --tagInfoBg: #123541;
+    --tagInfoText: #77d5ec;
+    --tagRedBg: #442425;
+    --tagRedText: #ffaaa1;
+    --tagAmberBg: #3d321b;
+    --tagAmberText: #f5d379;
     --statusSuccess: #4ade80;
     --statusError: #f87171;
     --bg: #09090B;
