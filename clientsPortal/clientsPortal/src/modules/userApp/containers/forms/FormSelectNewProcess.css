@@ -1,0 +1,81 @@
+.FormSelectNewProcess{
+    display: flex;
+    flex-direction: column;
+    padding: 2vh;
+    padding-top: 4vh;
+    width: 40vw;
+    gap: 2vh;
+}
+
+.FormSelectNewProcess .BoldTitle{
+    margin-bottom: 2vh;
+}
+
+.FormSelectNewProcess .aviableProcessGrid{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.FormSelectNewProcess .aviableProcessGrid .aviableProcessCard{
+    display: flex;
+    width: 100%;
+    padding: 1vh;
+    background-color: var(--menuAside);
+    border-radius: 1vh;
+    gap: 2vh;
+    cursor: pointer;
+    outline: solid .1vh var(--inputsBorder);
+    transition:.3s;
+}
+
+.FormSelectNewProcess .aviableProcessGrid .aviableProcessCard:hover{
+    background-color: var(--cardHover);
+    transform: scale(1.025);
+}
+
+.FormSelectNewProcess .aviableProcessGrid .aviableProcessCard img{
+    height: 7vh;
+    width: 7vh;
+    border-radius: .5vh;
+    outline: solid .1vh var(--inputsBorder);
+    margin: auto 0;
+
+}
+
+.FormSelectNewProcess .aviableProcessGrid .aviableProcessCard .infoProcess{
+    display: flex;
+    flex-direction: column;
+    padding-right: 2vh;
+}
+
+.FormSelectNewProcess .aviableProcessGrid .aviableProcessCard .infoProcess strong{
+    color: var(--mainText);
+    font-size: clamp(2.5px,2.5vh,25px);
+    font-weight: 500;
+    margin-bottom: .25vh;
+}
+
+.FormSelectNewProcess .aviableProcessGrid .aviableProcessCard .infoProcess span{
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 400;
+    margin-bottom: .25vh;
+}
+
+.FormSelectNewProcess .LoadingSpace{
+    height: 100dvh;
+}
+
+.FormSelectNewProcess .formProcessConfirmartion{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+@media (max-width:500px) {
+    .FormSelectNewProcess{
+        width: 100dvw;
+        padding-top: 10vh;
+    }
+}

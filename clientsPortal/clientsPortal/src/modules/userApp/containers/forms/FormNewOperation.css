@@ -1,0 +1,95 @@
+
+@import '../UserApp.css';
+
+.FormNewOperation{
+    padding: 1vh;
+    border-radius: 2vh;
+    background-color: var(--bg);
+    display: flex;
+    flex-direction: column;
+    margin: 4vh;
+    width: 40vw;
+    overflow: auto;
+    transition: .3s;
+}
+
+.FormNewOperation .headForm{
+    display: flex;
+    padding: 2vh;
+}
+
+.FormNewOperation .headForm .BoldTitle{
+    margin: auto 0;
+    margin-right: 2vh;
+    color: var(--mainText);
+}
+
+.FormNewOperation .headForm .TagIndicator{
+    margin: auto 0;
+}
+
+.FormNewOperation .headForm .TagIndicator h5{
+    font-size: clamp(2px,2.8vh,28px);
+    font-weight: 600;
+}
+
+.FormNewOperation .headForm .dateDoc{
+    margin: auto;
+    margin-right: 1vh;
+    font-size: clamp(2px,2.8vh,28px);
+    color: var(--descriptionText);
+}
+
+.FormNewOperation .bodyForm{
+    padding: 1vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.FormNewOperation .bodyForm .FormSec{
+    margin: 1vh auto;
+    width: 100%;
+    border-top: dashed .4vh #ccc;
+    padding-top: 2vh;
+}
+
+.FormNewOperation .bodyForm .FormSec .secFormTtl{
+    font-size: clamp(2px,3vh,30px);
+    font-weight: 500;
+    margin-left: 1vh;
+    color: var(--sectionTitle);
+}
+
+.FormNewOperation .bodyForm .FormSec .LabelValue{
+    width: 100%;
+}
+
+.FormNewOperation .bodyForm .FormSec .LabelValue .val{
+    text-align: right;
+}
+
+.FormNewOperation .bodyForm .flex_valuesSec .LabelValue{
+    flex-direction: column;
+}
+
+.FormNewOperation .bodyForm .flex_valuesSec .LabelValue .val{
+    text-align: left;
+}
+
+.FormNewOperation .bodyForm .FormSec .LabelValue .lab, .FormNewOperation .bodyForm .FormSec .LabelValue .val{
+    margin-top: .5vh;
+    width: 100%;
+}
+
+.FormNewOperation .bodyForm .FormSec .FormButton{
+    margin: 1vh auto;
+}
+
+.FormNewOperation .bodyForm .submitSec .LabelValue{
+    margin-bottom: 3vh;
+    font-size: clamp(3px,3vh,30px);
+}
+
+.FormNewOperation .bodyForm .submitSec .LabelValue .lab{
+    font-weight: 600;
+}

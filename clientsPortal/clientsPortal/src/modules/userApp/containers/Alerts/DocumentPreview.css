@@ -1,0 +1,63 @@
+.DocumentPreview{
+    width: 95dvw;
+    height: 100dvh;
+    overflow-y: auto;
+    padding: 12vh 2vh;
+}
+
+.DocumentPreview header{
+    display: flex;
+    position: fixed;
+    background-color: var(--translucidMenu);
+    backdrop-filter: blur(1vh);
+    align-items: center;
+    width: inherit;
+    padding: 2vh 2vw;
+    z-index: 10;
+    top: 0vh;
+    right: 0;
+    padding-top: 3vh;
+    border-bottom-right-radius: 2vh;
+    border-bottom-left-radius: 2vh;
+    border: solid .1vh var(--inputsBorder);
+}
+
+.DocumentPreview header .docInfo{
+    display: flex;
+    gap: 1vh;
+    align-items: center;
+}
+
+.DocumentPreview header .docInfo i{
+    font-size: clamp(3px,3vh,30px);
+    color: #FB2C36;
+}
+
+.DocumentPreview header .docInfo strong{
+    font-size: clamp(3px,3vh,30px);
+    color: var(--mainText);
+    font-weight: 500;
+}
+
+.DocumentPreview header .MenuPreviewOptions{
+    display: flex;
+    margin: auto;
+    margin-right: 2vw;
+}
+
+.DocumentPreview header .ToolsContainer{
+    position: fixed;
+    top: 13vh;
+    right: 2vw;
+    background-color: var(--menuAside);
+    border: solid .1vh var(--inputsBorder);
+    padding: 1vh;
+    border-radius: 2vh;
+}
+
+.DocumentPreview .spaceDoc{
+    display: flex;
+    width: fit-content;
+    height: fit-content;
+    margin: auto;
+}

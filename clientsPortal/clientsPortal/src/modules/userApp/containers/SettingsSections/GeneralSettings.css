@@ -1,0 +1,7 @@
+
+.GeneralSettings{
+    display: flex;
+    flex-direction: column;
+    gap: 3vh;
+    padding-top: 2vh;
+}

@@ -1,0 +1,42 @@
+
+.FormNewParameterDocument{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    width: 70vw;
+}
+
+
+.FormNewParameterDocument form{
+    display: flex;
+    flex-wrap: wrap;
+    gap:4vh 2vh;
+    margin: 1vh auto;
+    margin-top: 3vh;
+}
+
+.FormNewParameterDocument form .FormInput,
+.FormNewParameterDocument form .SearchinList{
+    width: 20vw;
+}
+
+.FormNewParameterDocument form .FacturationSearchinList label {
+    margin-bottom: 1vh;
+}
+
+.FormNewParameterDocument form .FileInput,
+.FormNewParameterDocument form textarea{
+    width: 70vw !important;
+    margin:0 auto;
+}
+
+/* El item-block ocupa toda la fila en su posición declarada: fuerza el
+   flex-wrap y empuja hacia abajo los campos que vengan después. */
+.FormNewParameterDocument form .itemsListField{
+    width: 100%;
+}
+
+.FormNewParameterDocument_loadingSpace{
+    width: 40vw;
+    height: 50vh;
+}

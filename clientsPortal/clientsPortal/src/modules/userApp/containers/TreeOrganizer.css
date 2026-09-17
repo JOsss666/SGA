@@ -1,0 +1,116 @@
+
+.TreeOrganizer{
+    display: flex;
+    flex-direction: column;
+    border-left: solid .3vh var(--inputsBorder);
+}
+
+.TreeOrganizer::before {
+    content: ''; /* Obligatorio para pseudo-elementos */
+    position: absolute;
+    top: 10%; /* Comienza 10% desde arriba (deja un 10% de espacio) */
+    left: 0;
+    /* Dibuja la línea vertical */
+    border-left: solid .3vh var(--inputsBorder);
+    
+    /* Controla la altura: 100% - 10% superior - 10% inferior = 80% */
+    height: 10%; 
+}
+
+.TreeOrganizer .treeItem{
+    padding-top: 1vh;
+    display: flex;
+    flex-direction: column;
+    padding-right: 2vh;
+    width: fit-content;
+}
+
+.TreeOrganizer .treeItem .listTitle{
+    display: flex;
+}
+
+.TreeOrganizer .treeItem .listTitle .despleChildren{
+    display: flex;
+    height: 3vh;
+    width: 3vh;
+    border-radius: 100%;
+    background-color: var(--iconHover);
+    cursor: pointer;
+    margin: auto 0;
+    margin-left: 2vh;
+}
+
+.TreeOrganizer .treeItem .listTitle .despleChildren i{
+    margin: auto;
+    color: var(--mainText);
+}
+
+.TreeOrganizer .treeItem .listTitle .NewChildrenCreation{
+    display: none;
+    height: 3vh;
+    width: 3vh;
+    border-radius: 100%;
+    background-color: #CBFBF1;
+    cursor: pointer;
+    margin: auto 0;
+    margin-left: 2vh;
+}
+
+.TreeOrganizer .treeItem .listTitle:hover .NewChildrenCreation{
+    display: flex;
+}
+
+.TreeOrganizer .treeItem .listTitle .NewChildrenCreation i{
+    margin: auto;
+    color: #2A9689;
+}
+
+.TreeOrganizer .treeItem .listTitle strong{
+    display: flex;
+    cursor: pointer;
+    transition: .3s;
+    font-weight: 500;
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+}
+
+.TreeOrganizer .treeItem .listTitle strong:hover{
+    color: #007AFF;
+}
+
+.TreeOrganizer .treeItem .listTitle strong {
+    margin: auto 0;
+    margin-right: 1vh;
+}
+
+.TreeOrganizer .treeItem .listTitle .fatherIcon{
+    color: #A65F1B;
+}
+
+.TreeOrganizer .openIconFolder{
+    color: #F0B13B ;
+    margin-right: 1vh;
+}
+
+.TreeOrganizer .FinalChildren{
+    color: var(--descriptionText);
+    margin-right: 1vh;
+}
+
+.TreeOrganizer .treeItem .identOrganizator{
+    width: 2vh;
+    height: 1vh;
+    border-bottom: solid .3vh var(--inputsBorder);
+    border-bottom-left-radius: 1vh;
+    margin: auto 0;
+    margin-right: 1vh;
+    margin-left: -.1vh;
+}
+
+.TreeOrganizer .treeItem  .listTitle strong{
+    padding: 1vh 0;
+}
+
+.TreeOrganizer .ChildrenContainer{
+    padding-left: 3vh;
+}
