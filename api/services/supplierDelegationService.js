@@ -145,6 +145,15 @@ export function createSupplierDelegationService({withTransaction, registerDocume
                         {instance_id:data.instance_id,step_id:config.assignment_step_id},
                         {instance_id:child.id,step_id:config.child_initial_step_id}
                     ],{client});
+                    // La(s) Client Order de origen también quedan ligadas al subproceso
+                    // creado, para que el subproceso "vea" el documento de la orden
+                    // (docs_instances). Antes esto lo hacía la creación de la orden;
+                    // ahora que el subproceso se crea en la asignación, se liga aquí.
+                    for(const sourceDocumentId of new Set(relations.map(relation=>relation.doc_id))) {
+                        await linkDocumentInstances(sourceDocumentId,[
+                            {instance_id:child.id,step_id:config.child_initial_step_id}
+                        ],{client});
+                    }
                     await client.query(`
                         INSERT INTO "Process"."ordersDelegation" (company_id,service_movement_id,delegation_document_id,"thirdParty_id",asignation_note,created_by)
                         SELECT $1, item.item_id, $2, $3, item.note, $4
