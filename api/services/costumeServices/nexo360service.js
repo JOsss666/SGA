@@ -168,40 +168,10 @@ export function createNexo360Service({ withTransaction, registerDocument, regist
             attached: values.artworkFiles ?? [],
             description: values.description ?? ''
         }, { client });
-        let subprocess = null;
-        if (orderContext.instance_id) {
-            // El subproceso procede de la configuración interna, nunca del payload del portal.
-            const configuration = await client.query(`
-                SELECT child.id AS process_id, initial.id AS step_id
-                FROM "Process".process_instance parent
-                JOIN "Process".orders_delegation_config config
-                    ON config.company_id = parent.company_id AND config.parent_process_id = parent.process_id
-                JOIN "Process".processes child
-                    ON child.id = config.child_process_id AND child.company_id = parent.company_id
-                    AND child.status = 'active' AND child.id <> parent.process_id
-                JOIN LATERAL (
-                    SELECT step.id FROM "Process".process_steps step
-                    WHERE step.company_id = child.company_id AND step.process_id = child.id
-                    ORDER BY step."order", step.id LIMIT 1
-                ) initial ON initial.id = config.child_initial_step_id
-                WHERE parent.company_id = $1 AND parent.id = $2
-                    AND parent.step_id = $3 AND parent.status = 'active';
-            `, [orderContext.company_id, orderContext.instance_id, orderContext.step_id]);
-            const initial = configuration.rows[0];
-            if (!initial) fail('Falta configurar un subproceso activo con su primera etapa para la orden.', 422);
-            const child = await createProcessInstance(client, {
-                company_id: orderContext.company_id, process_id: initial.process_id, step_id: initial.step_id,
-                status: 'active', parent_id: orderContext.instance_id, parent_step: orderContext.step_id,
-                thirdParty_id: orderContext.thirdParty_id, user_id: orderContext.created_by
-            });
-            if (!child?.id) throw new Error('No se pudo crear el subproceso de la orden.');
-            const link = await linkDocumentInstances(order.id, {
-                instances: [{ instance_id: child.id, step_id: initial.step_id }]
-            }, { client });
-            if (link?.status !== 'OK') throw new Error('No se pudo vincular la orden a la primera etapa del subproceso.');
-            subprocess = { instance_id: child.id, process_id: initial.process_id, step_instance: initial.step_id };
-            order.steps.push({ name: 'linkClientOrderSubprocess', status: 'OK', ...subprocess });
-        }
+        // Los subprocesos ya NO se crean al generar la Client Order. La orden queda
+        // ligada a su proceso padre (en generateClientOrder) y los subprocesos se
+        // crean después, durante la asignación a proveedores (supplierDelegationService).
+        const subprocess = null;
         await client.query(`
             INSERT INTO "Ecosystem".documents_group (main_doc_id, doc_id)
             VALUES ($1, $2);
