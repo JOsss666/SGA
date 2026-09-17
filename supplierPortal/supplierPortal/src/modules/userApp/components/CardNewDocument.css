@@ -1,0 +1,71 @@
+@import '../containers/UserApp.css';
+
+.CardNewDocument{
+    display: flex;
+    flex-direction: column;
+    width: 18vw;
+    height: 25vh;
+    border-radius: 2vh;
+    padding: 2vh;
+    padding-left: 3vh;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    background-image: linear-gradient(45deg,var(--lightGradient1),var(--lightGradient2),var(--lightGradient4));
+    box-shadow: 0 .2vh 1vh var(--inputsBg);
+    animation-name: appearCardNewDocument;
+    animation-duration: .5s;
+    outline: solid .1vh var(--inputsBorder);
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+}
+
+.CardNewDocument .tutorialCard{
+    position: absolute;
+    top: 2vh;
+    right: 3vh;
+    font-size: clamp(3px,3.5vh,35px);
+    transition: .3s;
+    color: var(--descriptionText);
+}
+
+.CardNewDocument:hover .tutorialCard{
+    color: #FF2D08;
+}
+
+.CardNewDocument:hover strong{
+    margin-top: 25%;
+    margin-bottom: 1vh;
+    color:var(--mainText);
+}
+
+.CardNewDocument strong{
+    margin-bottom: 4vh;
+    font-size: clamp(3px,3vh,35px);
+    font-weight:600;
+    color: #353535;
+    margin-top: 45%;
+    transition: .3s;
+    color:var(--mainText);
+}
+
+.CardNewDocument span{
+    font-size: clamp(2.5px,2.5vh,25px);
+    font-weight:400;
+    color:var(--descriptionText);
+}
+
+
+@keyframes appearCardNewDocument {
+    0%{
+        top: 50%;
+        opacity: 0%;
+        transform: scale(0.95);
+    }
+
+    100%{
+        top: 0;
+        opacity: 100%;
+        transform: scale(1.0);
+    }
+}

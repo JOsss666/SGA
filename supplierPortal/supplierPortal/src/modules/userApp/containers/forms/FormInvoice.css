@@ -1,0 +1,42 @@
+
+.FormInvoice{
+    width: 93dvw;
+    padding: 1vh;
+    position: relative;
+}
+
+.FormInvoice form{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2vh;
+}
+
+.FormInvoice .errorContainer{
+    position: absolute;
+    width: 99%;
+    top: 1vh;
+    background-color: #FEF2F2;
+    border-radius: 1vh;
+    padding: 2vh;
+    border: solid .2vh #FF6467;
+}
+
+.FormInvoice .errorContainer .closeErrorBtn{
+    cursor: pointer;
+    position: absolute;
+    top: 1.5vh;
+    right: 2vh;
+    font-size: clamp(3px,3vh,30px);
+    color: #FF6467;   
+}
+
+.FormInvoice .errorContainer span{
+    color: #FF6467;   
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+}
+
+.FormInvoice form .FormButton{
+    margin-top: 3vh;
+    width: 20%;
+}

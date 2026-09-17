@@ -1,0 +1,103 @@
+
+
+.AccountPannel{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+    width:fit-content;
+}
+
+.AccountPannel .head{
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+}
+
+.AccountPannel .head h6{
+    font-size: clamp(2.2px,3vh,30px);
+    font-weight: 500;
+    color: var(--mainText);
+}
+
+.AccountPannel .head .generalInfoline{
+    display: flex;
+    gap: 1vw;
+    margin: 1vh 0;
+}
+
+.AccountPannel .head span{
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+}
+
+.AccountPannel .body{
+    display: flex;
+    flex-direction: column;
+    margin-top: 2vh;
+}
+
+.AccountPannel .body .headTable{
+    display: flex;
+    gap: 1vh;
+    padding: 1vh 2vh;
+    margin-bottom: 1vh;
+    background-color: var(--cardHover);
+    border-radius: 1vh;
+}
+
+.AccountPannel .body .headTable span{
+    font-size: clamp(2px,2vh,20px);
+    width: 10vw;
+    text-align: left;
+    font-weight: 600;
+    color: var(--mainText);
+    padding: 0 1vh;
+}
+
+.AccountPannel .body .tableContnet{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding: 0 1vh;
+}
+
+.AccountPannel .body .tableContnet .transactionLine{
+    display: flex;
+    gap: 1vh;
+    padding: 1vh;
+    border-bottom: dashed .2vh var(--inputsBorder);
+    padding-bottom: 2vh;
+}
+
+.AccountPannel .body .tableContnet .transactionLine span{
+    font-size: clamp(2px,2vh,20px);
+    width: 10vw;
+    text-align: left;
+    font-weight: 400;
+    color: var(--mainText);
+    padding: 0 1vh;
+}
+
+.AccountPannel .body .tableContnet .transactionLine .item_subTotal,
+.AccountPannel .body .tableContnet .transactionLine .item_total{
+    text-align: right;
+}
+
+.AccountPannel .body .tableContnet .transactionLine .item_nature,
+.AccountPannel .body .headTable .item_id,
+.AccountPannel .body .tableContnet .transactionLine .item_id,
+.AccountPannel .body .headTable .item_subTotal,
+.AccountPannel .body .headTable .item_total,
+.AccountPannel .body .headTable .item_nature{
+    text-align: center;
+}
+
+.AccountPannel .body .headTable .item_id,
+.AccountPannel .body .tableContnet .transactionLine .item_id{
+    width: 5vw;
+}
+
+.AccountPannel .body .headTable .item_concept_name,
+.AccountPannel .body .tableContnet .transactionLine .item_concept_name{
+    width: 17vw;
+}

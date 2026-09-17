@@ -1,0 +1,37 @@
+
+.FormEmitElectronicSellInvoice{
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+    min-height: 50vh;
+}
+
+.FormEmitElectronicSellInvoice form{
+    margin-top: 1vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.FormEmitElectronicSellInvoice .InvoiceInfo{
+    height: fit-content;
+    margin: 0 auto;
+}
+
+.FormEmitElectronicSellInvoice .InvoiceInfo .NoResults img{
+    height: 30vh;
+}
+
+.FormEmitElectronicSellInvoice .InvoiceInfo .InvoiceVisualRepresentation{
+    border-radius: 2vh;
+}
+
+.FormEmitElectronicSellInvoice form .actionsForn{
+    display:flex;
+    gap: 1vw;
+}
+
+.FormEmitElectronicSellInvoice form .disabledActionsForm .FormButton:nth-child(2){
+    cursor: not-allowed;
+    opacity: 40%;
+}

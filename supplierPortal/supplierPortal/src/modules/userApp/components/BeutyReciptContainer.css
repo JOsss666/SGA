@@ -1,0 +1,58 @@
+
+.BeutyReciptContainer{
+    min-height: 20vh;
+    min-width: 30vh;
+    height: fit-content;
+    position: relative;
+}
+
+.BeutyReciptContainer .postColor{
+    position: absolute;
+    width: 20%;
+    height: 85%;
+    bottom: 0;
+    right: 0;
+    background-color: #ddd;
+    border-bottom-right-radius: 2vh;
+    border-top-right-radius: 1vh;
+    z-index: 4;
+    border-right: solid .1vh #ccc;
+    border-top: solid .1vh #ccc;
+}
+
+.BeutyReciptContainer .mainSpace{
+    position: absolute;
+    width: 94%;
+    height: 100%;
+    background-color: #fff;
+    z-index: 5;
+    border-radius: 2vh;
+    border-bottom-right-radius: 0vh;
+    border: solid .1vh #ccc;
+    padding: 1vh;
+}
+
+.BeutyReciptContainer .curvyDiv, .BeutyReciptContainer .curvyDiv2{
+    position: absolute;
+    height: 10%;
+    width: 10%;
+    bottom: 0;
+    right: 5%;
+}
+
+.BeutyReciptContainer .curvyDiv{
+    z-index: 6;
+    background-color: #fff;
+    border-bottom: solid .1vh #ccc;
+}
+
+.BeutyReciptContainer .curvyDiv2{
+    z-index: 7;
+    background-color: #ddd;
+    border-bottom-left-radius: 2vh;
+    border-bottom-right-radius: 2vh;
+    right: 0%;
+    width: 6.2%;
+    border-left: solid .1vh #ccc;
+    border-bottom: solid .1vh #ccc;
+}
