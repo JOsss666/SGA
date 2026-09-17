@@ -1,0 +1,104 @@
+{
+  "table": "\"Ecosystem\".\"externalThirdPatiesAccess\"",
+  "recordCount": 0,
+  "columns": [
+    {
+      "name": "company_id",
+      "type": "bigint",
+      "not_null": true,
+      "default_value": null
+    },
+    {
+      "name": "id",
+      "type": "bigint",
+      "not_null": true,
+      "default_value": null
+    },
+    {
+      "name": "thirdParty_id",
+      "type": "bigint",
+      "not_null": true,
+      "default_value": null
+    },
+    {
+      "name": "config",
+      "type": "jsonb",
+      "not_null": true,
+      "default_value": "'{}'::jsonb"
+    },
+    {
+      "name": "created-at",
+      "type": "timestamp without time zone",
+      "not_null": true,
+      "default_value": "CURRENT_TIMESTAMP"
+    },
+    {
+      "name": "expires_at",
+      "type": "timestamp without time zone",
+      "not_null": true,
+      "default_value": "CURRENT_TIMESTAMP"
+    }
+  ],
+  "constraints": [
+    {
+      "conname": "company_id",
+      "definition": "FOREIGN KEY (company_id) REFERENCES \"Ecosystem\".companies(company_id) ON DELETE CASCADE"
+    },
+    {
+      "conname": "externalThirdPatiesAccess_company_id_not_null",
+      "definition": "NOT NULL company_id"
+    },
+    {
+      "conname": "externalThirdPatiesAccess_config_not_null",
+      "definition": "NOT NULL config"
+    },
+    {
+      "conname": "externalThirdPatiesAccess_created-at_not_null",
+      "definition": "NOT NULL \"created-at\""
+    },
+    {
+      "conname": "externalThirdPatiesAccess_expires_at_not_null",
+      "definition": "NOT NULL expires_at"
+    },
+    {
+      "conname": "externalThirdPatiesAccess_id_not_null",
+      "definition": "NOT NULL id"
+    },
+    {
+      "conname": "externalThirdPatiesAccess_thirdParty_id_not_null",
+      "definition": "NOT NULL \"thirdParty_id\""
+    },
+    {
+      "conname": "thirdParties_acces_id",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "conname": "thirdParty_id",
+      "definition": "FOREIGN KEY (\"thirdParty_id\") REFERENCES \"Ecosystem\".thirdparties(id) ON DELETE CASCADE"
+    },
+    {
+      "conname": "unique_thirdPartyAccesCompany",
+      "definition": "UNIQUE (\"thirdParty_id\", company_id)"
+    }
+  ],
+  "indexes": [
+    {
+      "indexdef": "CREATE UNIQUE INDEX \"thirdParties_acces_id\" ON \"Ecosystem\".\"externalThirdPatiesAccess\" USING btree (id)"
+    },
+    {
+      "indexdef": "CREATE UNIQUE INDEX \"unique_thirdPartyAccesCompany\" ON \"Ecosystem\".\"externalThirdPatiesAccess\" USING btree (\"thirdParty_id\", company_id)"
+    }
+  ],
+  "identity": [
+    {
+      "column_name": "id",
+      "is_identity": "YES",
+      "identity_generation": "ALWAYS",
+      "identity_start": "1",
+      "identity_increment": "1",
+      "identity_minimum": "1",
+      "identity_maximum": "9223372036854775807",
+      "identity_cycle": "NO"
+    }
+  ]
+}
