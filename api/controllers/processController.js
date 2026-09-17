@@ -1,9 +1,27 @@
 
 import { useDataBase, withTransaction } from "../app.js";
 import { companyTimeZoneSql } from "../services/businessTimeZoneService.js";
-import { createProcessInstance } from "../services/processInstanceService.js";
-import { validateDelegationProgress } from "../services/delegationProgressService.js";
+import { createProcessInstance, createProcessEvidenceService, isExternalAccess, resolveExternalAccessUser } from "../services/processInstanceService.js";
+import utilsController from './utilsController.js';
+import { advanceProcessStep } from "../services/processStepService.js";
 const processController = {};
+
+const handleEvidence = method => async (req, res) => {
+    try {
+        const service = createProcessEvidenceService({
+            withTransaction,
+            registerDocument: utilsController.registerDocument,
+            linkDocumentInstances: utilsController.linkDocumentInstances
+        });
+        const data = await service[method](req.body ?? {});
+        res.status(method === 'register' ? 201 : 200).json({ status: 'OK', data });
+    } catch (error) {
+        const status = error.statusCode || 500;
+        res.status(status).json({ status: 'ERROR', message: status < 500 ? error.message : 'No se pudo guardar o consultar la evidencia. Intenta nuevamente.' });
+    }
+};
+processController.getEvidenceOptions = handleEvidence('options');
+processController.registerEvidence = handleEvidence('register');
 
 processController.createDocument = async(info,ownSerial)=>{
         console.log(info)
@@ -71,6 +89,8 @@ processController.getAttachedDocuments = (req,res)=>{
                 "Ecosystem".documents.store_id,
                 "Ecosystem".documents."thirdParty_id",
                 "Ecosystem".documents.document_type,
+                COALESCE("Ecosystem".documents."specialConfig"->>'paramDoc_id',
+                    "Ecosystem".documents."specialConfig"->>'paramdoc_id') AS paramdoc_id,
                 "Ecosystem".documents."ownSerial",
                 "Ecosystem".documents.status,
                 "Ecosystem".documents."subTotal",
@@ -894,8 +914,8 @@ processController.createProcessInstace = (req,res)=>{
             res.end(JSON.stringify(instance));
         } catch (error) {
             console.error('Error creando instancia de proceso:', error);
-            res.writeHead(500,{'Content-Type':'application/json'});
-            res.end(JSON.stringify({ error: error.message }));
+            res.writeHead(error.statusCode || 500,{'Content-Type':'application/json'});
+            res.end(JSON.stringify({ error: error.message, message: error.message }));
         }
     })
     req.on('error',(err)=>{
@@ -944,7 +964,7 @@ processController.getProcessInstances =(req,res)=>{
             values.push(info.status);
         }
 
-        if(info.thirdParty_id != undefined && info.status[0] != 'all' ){
+        if(info.thirdParty_id != undefined){
             whereClauses.push(`"Process".process_instance."thirdParty_id" = $${values.length +1}`);
             values.push(info.thirdParty_id);
         }
@@ -1021,6 +1041,24 @@ processController.updateProcessInstanceStatus = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        // Acceso externo (portal): el responsable/autor debe ser el usuario interno
+        // del acceso, nunca el tercero ni un user_id enviado por el cliente.
+        if (isExternalAccess(info)) {
+            try {
+                const resolved = await resolveExternalAccessUser(
+                    (sql, params) => useDataBase(sql, params, 1).then(([ok, rows]) => {
+                        if (!ok) throw new Error('No fue posible validar el acceso externo.');
+                        return rows;
+                    }),
+                    info
+                );
+                info = { ...info, company_id: resolved.company_id, user_id: resolved.user_id };
+            } catch (error) {
+                res.writeHead(error.statusCode || 500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: error.message, message: error.message }));
+                return;
+            }
+        }
         let sentence;
         let consulta;
         if(info.status != 'cancelled'){
@@ -1191,10 +1229,11 @@ processController.getProcessState = (req,res)=>{
                     step_id, 
                     JSON_AGG(
                         JSON_BUILD_OBJECT(
-                            'docType', "docType",
+                            'docType', CASE WHEN paramdoc_id IS NOT NULL THEN 'JSON Parametrization' ELSE "docType"::text END,
                             'required', required,
                             'min', min_number,
-                            'max', max_number
+                            'max', max_number,
+                            'paramdoc_id', paramdoc_id
                         )
                     ) AS list
                 FROM "Process".step_doc_realtion
@@ -1299,12 +1338,13 @@ async function validateFullProcessRequirements(instance_id, process_id, client) 
     try {
         // 1. Obtenemos TODOS los documentos requeridos para este proceso según la tabla de relaciones
         const requirementsQuery = `
-            SELECT "docType", SUM(min_number) as total_min
+            SELECT CASE WHEN paramdoc_id IS NOT NULL THEN 'JSON Parametrization' ELSE "docType"::text END AS "docType",
+                paramdoc_id, SUM(min_number) as total_min
             FROM "Process".step_doc_realtion
             WHERE company_id = (SELECT company_id FROM "Process".process_instance WHERE id = $1)
             AND step_id IN (SELECT id FROM "Process".process_steps WHERE process_id = $2)
             AND required = true
-            GROUP BY "docType"
+            GROUP BY "docType", paramdoc_id
         `;
         const reqRes = await query(requirementsQuery, [instance_id, process_id]);
         
@@ -1314,11 +1354,13 @@ async function validateFullProcessRequirements(instance_id, process_id, client) 
 
         // 2. Contamos qué documentos tiene la instancia actualmente
         const countQuery = `
-            SELECT d.document_type, COUNT(di.doc_id) as total
+            SELECT d.document_type,
+                COALESCE(d."specialConfig"->>'paramDoc_id', d."specialConfig"->>'paramdoc_id') AS paramdoc_id,
+                COUNT(DISTINCT di.doc_id) as total
             FROM "Ecosystem".docs_instances di
             JOIN "Ecosystem".documents d ON di.doc_id = d.id
-            WHERE di.instance_id = $1
-            GROUP BY d.document_type
+            WHERE di.instance_id = $1 AND d.status::text <> 'cancelled'
+            GROUP BY d.document_type, COALESCE(d."specialConfig"->>'paramDoc_id', d."specialConfig"->>'paramdoc_id')
         `;
         const countRes = await query(countQuery, [instance_id]);
         const attachedDocs = countRes[1] || [];
@@ -1326,8 +1368,9 @@ async function validateFullProcessRequirements(instance_id, process_id, client) 
         // 3. Validamos faltantes
         let missingDocs = [];
         for (const req of requirements) {
-            const docData = attachedDocs.find(d => d.document_type === req.docType);
-            const currentTotal = docData ? parseInt(docData.total) : 0;
+            const currentTotal = attachedDocs.filter(d => d.document_type === req.docType
+                && (req.paramdoc_id == null || String(d.paramdoc_id) === String(req.paramdoc_id)))
+                .reduce((sum, document) => sum + Number(document.total), 0);
 
             if (currentTotal < req.total_min) {
                 missingDocs.push(`${req.docType} (Mínimo: ${req.total_min}, Actual: ${currentTotal})`);
@@ -1350,6 +1393,9 @@ async function validateFullProcessRequirements(instance_id, process_id, client) 
 }
 
 
+processController.advanceProcessInstance = (client, info) =>
+    advanceProcessStep(client, info, validateFullProcessRequirements);
+
 processController.nextProcessStep = async (req, res) => {
     let data = '';
     req.on('data', chunk => { data += chunk; });
@@ -1358,32 +1404,16 @@ processController.nextProcessStep = async (req, res) => {
             let info = JSON.parse(data);
 
             const result = await withTransaction(async client => {
-                const instance = (await client.query(`
-                    SELECT pi.*, ps."order" AS current_order
-                    FROM "Process".process_instance pi
-                    JOIN "Process".process_steps ps ON pi.step_id=ps.id AND pi.process_id=ps.process_id
-                    WHERE pi.id=$1 AND pi.company_id=$2 FOR UPDATE OF pi
-                `,[info.instance_id,info.company_id])).rows[0];
-                if(!instance) throw new Error('Instancia no encontrada');
-                if(instance.status !== 'active') throw new Error('La instancia no está activa.');
-                if(info.previous_step != null && String(info.previous_step) !== String(instance.step_id)) throw new Error('El proceso cambió de paso. Recarga e intenta nuevamente.');
-                const nextStep=(await client.query(`
-                    SELECT id,name,required_roll,"order",end_process FROM "Process".process_steps
-                    WHERE process_id=$1 AND company_id=$2 AND "order">$3 ORDER BY "order" LIMIT 1
-                `,[instance.process_id,info.company_id,instance.current_order])).rows[0];
-                if(!nextStep) return {success:false,message:'El proceso ya ha finalizado.'};
-                if(!nextStep.required_roll.map(String).includes(String(info.user_roll))) throw new Error('No tienes el rol necesario para autorizar este paso.');
-                await validateDelegationProgress(client, instance);
-                if(nextStep.end_process) {
-                    const validation=await validateFullProcessRequirements(instance.id,instance.process_id,client);
-                    if(!validation.success) throw new Error(validation.error);
+                // Acceso externo (portal): resolver el responsable interno antes de
+                // escribir instancia/historial; un tercero no puede ser autor.
+                if (isExternalAccess(info)) {
+                    const resolved = await resolveExternalAccessUser(
+                        (sql, params) => client.query(sql, params).then(r => r.rows),
+                        info
+                    );
+                    info = { ...info, company_id: resolved.company_id, user_id: resolved.user_id };
                 }
-                await client.query(`UPDATE "Process".process_instance SET step_id=$1, updated_at=CURRENT_TIMESTAMP AT TIME ZONE 'UTC', responsable=$3 WHERE id=$2`,[nextStep.id,instance.id,info.user_id]);
-                await client.query(`
-                    INSERT INTO "Process".process_historial(company_id,instance_id,previous_step,next_step,user_id,description,created_at)
-                    VALUES ($1,$2,$3,$4,$5,$6,CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
-                `,[info.company_id,instance.id,instance.step_id,nextStep.id,info.user_id,info.description || 'Avance de etapa']);
-                return {success:true,message:`El proceso ha avanzado a: ${nextStep.name}`,nextStepId:nextStep.id};
+                return processController.advanceProcessInstance(client, info);
             });
             res.writeHead(200,{'Content-Type':'application/json'});
             res.end(JSON.stringify(result));
