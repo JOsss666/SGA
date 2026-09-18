@@ -78,13 +78,14 @@ export function ProcessesReport(){
     };
 
     const validateInstance = (instance)=>{
+        // No se filtra por tercero: los procesos sin thirdParty_name (p.ej. subprocesos
+        // internos) también deben aparecer en el informe.
         return (
             instance &&
             instance.id &&
             instance.process_name &&
             instance.process_code &&
             instance.ownSerial &&
-            instance.thirdParty_name &&
             instance.step_name &&
             instance.responsable_name &&
             instance.current_step_order &&
