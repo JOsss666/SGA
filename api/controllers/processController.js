@@ -1070,8 +1070,9 @@ processController.updateProcessInstanceStatus = (req,res)=>{
                     delivery_date = $2,
                     status = $3,
                     "thirdParty_id" = $4,
-                    responsable = $5
-                WHERE company_id = $6 AND id = $7;
+                    responsable = $5,
+                    name = $6
+                WHERE company_id = $7 AND id = $8;
             `;
             consulta = await useDataBase(sentence,[
                 info.start_date,
@@ -1079,6 +1080,7 @@ processController.updateProcessInstanceStatus = (req,res)=>{
                 info.status,
                 (info.thirdParty_id === '' || info.thirdParty_id === undefined) ? null : info.thirdParty_id,
                 info.user_id,
+                info.name,
                 info.company_id,
                 info.id
             ],2);

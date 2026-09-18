@@ -31,6 +31,7 @@ export function FormSelectNewProcess (){
     const today = new Date().toISOString().split('T')[0];
     const [start_date,setStart_date] = useState(today);
     const [delivery_date,setDelivery_date] = useState();
+    const [name,setName] = useState('');
     const thirdParty_id = userInfo.user_id;
     
     const getAviableProcess = async()=>{
@@ -97,6 +98,7 @@ export function FormSelectNewProcess (){
         let res = await postInfo('/process/updateProcessInstanceStatus',{
             company_id:appInfo.company_id,
             start_date,
+            name,
             delivery_date,
             status:'active',
             id:newInstanceInfo.id,
@@ -202,6 +204,7 @@ export function FormSelectNewProcess (){
                     }}>
                         <FormInput title={'Fecha de inicio'} type={'datetime-local'} disabled={disabled} value={start_date} action={setStart_date} />
                         <FormInput title={'Fecha de entrega'} type={'datetime-local'} disabled={disabled} value={delivery_date} action={setDelivery_date} />
+                        <FormInput title={'Nombre o referencia del proceso'} placeholder={'Nombre o descripción para identificar proceso'} disabled={disabled} action={setName}/>
                         <FormButton text={`Confirmar ${newInstanceInfo.process_code}#${newInstanceInfo.ownSerial}`} onClick={()=>{
                             updateProcessInstance();
                         }}/>
