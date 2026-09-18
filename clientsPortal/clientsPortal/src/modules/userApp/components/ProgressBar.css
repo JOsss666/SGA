@@ -23,7 +23,7 @@
 .ProgressBar strong{
     margin: auto;
     width: 25%;
-    font-size: clamp(2px,2vh,20px);
+    font-size: clamp(1.6px,1.6vh,16px);
     font-weight: 400;
     color: var(--descriptionText);
 }
