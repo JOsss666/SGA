@@ -191,4 +191,39 @@ externalThirdPartyAccesService.getParamsDocs = async (info = {}) => {
     return rows;
 };
 
+// Previsualización read-only: dado el company_key (público, presente en el link de
+// preview) y el doc_id de un documento ya creado de tipo "JSON Parametrization",
+// resuelve la plantilla original (títulos, orden, item-blocks) leyendo el
+// paramdoc_id que quedó guardado en el propio specialConfig del documento. No
+// requiere access_key porque la ruta de preview no tiene tercero autenticado; el
+// alcance se limita a documentos de la compañía dueña del company_key.
+externalThirdPartyAccesService.getParamDocTemplate = async (info = {}) => {
+    const companyKey = asTrimmedString(info.company_key);
+    const docId = asTrimmedString(info.doc_id);
+    if (!companyKey || !/^[1-9]\d*$/.test(docId)) {
+        const error = new Error('company_key y doc_id son obligatorios y doc_id debe ser un entero válido.');
+        error.statusCode = 400;
+        throw error;
+    }
+
+    const [ok, rows] = await useDataBase(`
+        SELECT t.id, t.name, t.description, t.config
+        FROM "Ecosystem".documents d
+        JOIN "Ecosystem".companies c ON c.company_id = d.company_id
+        JOIN "Custom"."externalDocParameters" t
+          ON t.id = COALESCE(
+                NULLIF(d."specialConfig"->>'paramdoc_id', ''),
+                NULLIF(d."specialConfig"->>'paramDoc_id', '')
+             )::bigint
+         AND (t.company_id = d.company_id OR t.company_id = 0)
+        WHERE c.company_key = $1
+          AND d.id = $2
+          AND d.document_type = 'JSON Parametrization'
+        LIMIT 1;
+    `, [companyKey, docId], 1);
+
+    if (!ok) return null;
+    return rows[0] ?? null;
+};
+
 export default externalThirdPartyAccesService;
