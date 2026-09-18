@@ -32,6 +32,27 @@
 
 }
 
+.ProcessStatusAlert .headProcess .comercialView{
+    display: flex;
+    flex-direction: column;
+    margin: 1vh auto;
+    gap: 1vh;
+}
+
+.ProcessStatusAlert .headProcess .comercialView img{
+    width: 10vh;
+    height: 10vh;
+    object-fit: contain;
+    margin: 0 auto;
+}
+
+.ProcessStatusAlert .headProcess .comercialView span{
+    color: var(--mainText);
+    font-size: clamp(2px,2vh,20px);
+    margin: 0 auto;
+    font-weight: 500;
+}
+
 .ProcessStatusAlert .headProcess .BoldTitle{
     margin: 0 auto;
     margin-bottom: 2vh;

@@ -10,7 +10,7 @@ import { SelectTpeNewDoc } from "../forms/SelectTypeNewDoc";
 import { PreviewDocument } from "../Preview/PreviewDocument";
 import { FormNewThirdPartyDelegation } from "../forms/FormNewThirdPartyDelegation";
 
-export function ProcessStatusAlert({instance_id,reloadFun}){
+export function ProcessStatusAlert({instance_id,reloadFun,visibleMissing,visibleSupprocesses}){
 
     // requirements
     const {popOutAlert,popInAlert} = useAlert();
@@ -54,7 +54,6 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
         }
     };
 
-
     // Getters of info
     const getInstanceInfo = async()=>{
         setDisabled(true);
@@ -86,9 +85,10 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
     const getAttachedDocuments = async()=>{
         setDisabled(true)
         setLoadingDocuments(true)
+        const allowedTypes = userInfo.responsable_config.access.information.documents.overAll? undefined:userInfo.responsable_config.access.information.documents.enabled
         let res = await postInfo('/process/getAttachedDocuments',{
             company_id:appInfo.company_id,
-            //allowedTypes:types,
+            allowedTypes,
             instance_id:info.id
         })
         console.log('DDDDD ',res)
@@ -210,12 +210,17 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
     return(
         <div className="ProcessStatusAlert">
             <div className="headProcess">
-                <BoldTitle text={'Estado Proceso'}/>
+                <div className="comercialView">
+                    <img src={appInfo.img? appInfo.img:"https://cdnmain.sga360.co/static/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.webp"} alt="" />
+                    <span>{appInfo.legal_name}</span>
+                </div>
+                <BoldTitle text={`${info.process_name} - ${info.process_code}#${info.ownSerial}`}/>
                 <div className="instanceContainer">
-                    <span className="InstanceProceesIndicator">
-                        {`${info.process_name} - `}
-                        <b>{`${info.process_code}#${info.ownSerial}`}</b>
-                    </span>
+                    {info.name != undefined && info.name != null && (
+                        <span className="InstanceProceesIndicator">
+                            {`"${info.name}"`}
+                        </span>
+                    ) }
                     <span className="InstanceProceesIndicator">
                         {info.thirdParty_name}
                     </span>
@@ -249,7 +254,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                             {element.name}
                                         </span>
                                         <div className="attachedDocsC">
-                                            {element.subprocesses?.map(child => (
+                                            {visibleSupprocesses === true && element.subprocesses?.map(child => (
                                                 <button type="button" className="subprocessLink" key={child.id} onClick={()=>{
                                                     popInAlert(<ProcessStatusAlert instance_id={child.id} reloadFun={getInstanceInfo}/>);
                                                 }}>
@@ -274,7 +279,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                             {(element.isCompleted || element.isActual) && !element.advancement && (
                                                 <span className="noAdvancementInfo">Sin registro de avance</span>
                                             )}
-                                            {element.order <= currentOrder && !element.checkDocs &&
+                                            {visibleMissing === true && element.order <= currentOrder && !element.checkDocs &&
                                                 element.missingRequirements.map((req, i) => (
                                                     <button type="button" key={i} className="requiredDocAlert" onClick={()=>{
                                                         popInAlert(<SelectTpeNewDoc docType={requirementType(req)} paramdocId={req.paramdoc_id} reloadFun={getInstanceInfo} info={{
