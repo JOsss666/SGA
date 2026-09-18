@@ -1,0 +1,95 @@
+/* Espeja el layout de FormNewParameterDocument para que el preview se vea igual
+   al formulario original, pero en modo lectura. */
+
+.ParameterDocumentPreview{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    width: fit-content;
+    max-width: 70dvw;
+}
+
+.ParameterDocumentPreview .previewFieldsGrid{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4vh 2vh;
+    margin: 3vh auto 1vh;
+    width: 100%;
+}
+
+.ParameterDocumentPreview .previewField{
+    width: 20vw;
+}
+
+.ParameterDocumentPreview .previewField .FacturationFormInput,
+.ParameterDocumentPreview .previewField .FacturationSearchinList{
+    width: 100%;
+}
+
+.ParameterDocumentPreview .previewField .FacturationFormInput input{
+    color: var(--mainText);
+}
+
+/* Los campos de texto largo y archivos ocupan toda la fila, igual que en el form. */
+.ParameterDocumentPreview .previewField:has(textarea),
+.ParameterDocumentPreview .previewFiles{
+    width: 70vw;
+    max-width: 100%;
+}
+
+.ParameterDocumentPreview .itemsListField{
+    width: 100%;
+}
+
+.ParameterDocumentPreview .previewField > label,
+.ParameterDocumentPreview .previewCollection > label,
+.ParameterDocumentPreview .previewFiles > label{
+    display: block;
+    margin-bottom: 1vh;
+    font-weight: 600;
+    opacity: .85;
+}
+
+.ParameterDocumentPreview .previewEmpty{
+    opacity: .6;
+    font-style: italic;
+}
+
+.ParameterDocumentPreview .previewCollection ul{
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+    margin: 0;
+    padding-left: 2vh;
+}
+
+.ParameterDocumentPreview .previewFileChips{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1vh;
+}
+
+.ParameterDocumentPreview .previewFileChip{
+    display: inline-flex;
+    align-items: center;
+    gap: .5vh;
+    padding: .6vh 1.2vh;
+    border-radius: 8px;
+    background: rgba(127,127,127,.12);
+    text-decoration: none;
+    color: inherit;
+    font-size: .9rem;
+}
+
+.ParameterDocumentPreview .previewFileChip:hover{
+    background: rgba(127,127,127,.2);
+}
+
+@media (max-width: 900px){
+    .ParameterDocumentPreview,
+    .ParameterDocumentPreview .previewField,
+    .ParameterDocumentPreview .previewField:has(textarea),
+    .ParameterDocumentPreview .previewFiles{
+        width: 100%;
+    }
+}

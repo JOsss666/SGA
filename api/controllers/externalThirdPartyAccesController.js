@@ -83,6 +83,22 @@ externalAccesThirdPartyController.getParamsDocs = (req, res) => {
         });
 };
 
+externalAccesThirdPartyController.getParamDocTemplate = (req, res) => {
+    readBody(req)
+        .then(info => externalThirdPartyAccesService.getParamDocTemplate(info))
+        .then(template => {
+            if (!template) {
+                sendResponse(res, 404, 'ERROR', null, 'No se encontró la plantilla del documento solicitado.');
+                return;
+            }
+            sendResponse(res, 200, 'OK', template, 'Plantilla del documento obtenida correctamente.');
+        })
+        .catch(error => {
+            console.error('Error en getParamDocTemplate:', error.message);
+            sendResponse(res, error.statusCode || 500, 'ERROR', null, error.message);
+        });
+};
+
 externalAccesThirdPartyController.registerParamDoc = async (req, res) => {
     try {
         const result = await externalThirdPartyAccesService.registerParamDoc(await readBody(req));

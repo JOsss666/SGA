@@ -409,6 +409,7 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     router.post('/externalAccess/getUserInfo', externalAccesThirdPartyController.getUserInfo);
     router.post('/externalAccess/logOut', externalAccesThirdPartyController.logOut);
     router.post('/externalAccess/getParamDocs',externalAccesThirdPartyController.getParamsDocs);
+    router.post('/externalAccess/getParamDocTemplate',externalAccesThirdPartyController.getParamDocTemplate);
     router.post('/externalAccess/registerParamDoc', express.json({ limit: '2mb', strict: true }), externalAccesThirdPartyController.registerParamDoc);
 
     // ELECTRONIC FACTURATION
