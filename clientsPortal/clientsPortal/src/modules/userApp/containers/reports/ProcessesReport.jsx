@@ -42,6 +42,7 @@ export function ProcessesReport(){
 
     const columsTr = [
         "ID",
+        "Nombre Proceso",
         "Proceso",
         "Tercero",
         "Etapa",
@@ -96,6 +97,8 @@ export function ProcessesReport(){
         return info.map(element => ({
 
             "ID": element?.id || "",
+
+            "Nombre Proceso": element?.name || "",
 
             "Proceso": element?.process_name || "",
 
