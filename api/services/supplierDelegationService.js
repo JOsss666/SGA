@@ -89,9 +89,11 @@ export function createSupplierDelegationService({withTransaction, registerDocume
                 if(parent.status !== 'active' || String(parent.step_id) !== String(config.assignment_step_id)) fail('El proceso debe estar activo en el paso de asignación a proveedores.',409);
                 if(!config.required_roll.map(String).includes(String(auth.roleId))) fail('Tu rol no puede asignar proveedores en este paso.',403);
                 const items = (await client.query(`
-                    SELECT movement.id, movement.doc_id, document.store_id, document.attached, document.description
+                    SELECT movement.id, movement.doc_id, document.store_id, document.attached, document.description,
+                        service.name AS service_name
                     FROM "Inventory".services_movement movement
                     JOIN "Ecosystem".documents document ON document.id=movement.doc_id AND document.company_id=movement.company_id
+                    LEFT JOIN "Inventory"."products&services" service ON service.id=movement.service_id AND service.company_id=movement.company_id
                     WHERE movement.company_id=$1 AND movement.id=ANY($2::bigint[])
                         AND document.document_type='Client Order' AND document.status='active'
                         AND (document.instance_id=$3 OR EXISTS (
@@ -136,10 +138,18 @@ export function createSupplierDelegationService({withTransaction, registerDocume
                     for(const sourceDocumentId of new Set(relations.map(relation=>relation.doc_id))) {
                         await client.query(`INSERT INTO "Ecosystem".documents_group(main_doc_id,doc_id) VALUES ($1,$2)`,[sourceDocumentId,document.id]);
                     }
+                    // El nombre del subproceso es la "suma" (concatenación) de los nombres
+                    // de los ítems a realizar en esta delegación. Se limita a 500 chars
+                    // (largo de process_instance.name).
+                    const subprocessName = relations
+                        .map(relation => itemsById.get(relation.item_id)?.service_name)
+                        .filter(Boolean)
+                        .join(' + ')
+                        .slice(0, 500) || null;
                     const child = await createProcessInstance(client,{
                         company_id:data.company_id, process_id:config.child_process_id, step_id:config.child_initial_step_id,
                         status:'active', parent_id:data.instance_id, parent_step:config.production_step_id,
-                        thirdParty_id:first.thirdParty_id, user_id:data.user_id
+                        thirdParty_id:first.thirdParty_id, user_id:data.user_id, name:subprocessName
                     });
                     await linkDocumentInstances(document.id,[
                         {instance_id:data.instance_id,step_id:config.assignment_step_id},

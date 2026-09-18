@@ -53,13 +53,14 @@ export async function createProcessInstance(client, info) {
     const result = await client.query(`
         INSERT INTO "Process".process_instance (
             company_id, process_id, step_id, status, parent_id, parent_step,
-            start_date, "delivery_date", "thirdParty_id", responsable, created_at, updated_at
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,
+            start_date, "delivery_date", "thirdParty_id", responsable, name, created_at, updated_at
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
             CURRENT_TIMESTAMP AT TIME ZONE 'UTC', CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
         RETURNING id, "ownSerial", created_at AT TIME ZONE 'UTC' AS created_at
     `, [info.company_id, info.process_id, info.step_id, info.status,
         info.parent_id ?? null, info.parent_step ?? null, info.start_date ?? null,
-        info.delivery_date ?? null, info.thirdParty_id ?? null, info.user_id]);
+        info.delivery_date ?? null, info.thirdParty_id ?? null, info.user_id,
+        info.name ?? null]);
     const instance = result.rows[0];
     await client.query(`
         INSERT INTO "Process".process_historial (
