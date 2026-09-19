@@ -1,11 +1,14 @@
 import { companyTimeZoneSql } from '../../services/businessTimeZoneService.js';
 
 export const createNexoProcessReportHandler = ({ useDataBase }) => async (req, res) => {
-    if (!req.auth?.userId) {
-        return res.status(401).json({ error: 'Se requiere una sesión autenticada.' });
+    // La compañía se identifica por header/body, igual que el resto de endpoints de la app.
+    // (Evita depender de la cookie de sesión, que no viaja cross-site en Safari.)
+    const rawCompanyId = req.get?.('X-SGA-Company-Id') ?? req.body?.company_id;
+    const companyId = Number(rawCompanyId);
+    if (!Number.isSafeInteger(companyId) || companyId <= 0) {
+        return res.status(400).json({ error: 'Se requiere una compañía válida.' });
     }
-    const companyId = req.auth.companyId;
-    if (companyId !== 7 || (req.body?.company_id != null && String(req.body.company_id) !== '7')) {
+    if (companyId !== 7) {
         return res.status(403).json({ error: 'Este informe está disponible únicamente para la compañía 7.' });
     }
     try {
