@@ -600,7 +600,7 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
                                     <ItemsList
                                         title={itemBlock.title}
                                         visibleItemTotal={false}
-                                        //itemUnitsLabel={document.config.itemsLabel}
+                                        itemUnitsLabel={document.config.itemsLabel}
                                         blocks={[{ docInfo: undefined, items: values[itemBlock.blockKey] ?? [] }]}
                                         setItems={setItemBlockItems}
                                         disabled={loadingCatalogs || submitting}
