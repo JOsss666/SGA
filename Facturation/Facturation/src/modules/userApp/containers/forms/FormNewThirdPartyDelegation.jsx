@@ -25,7 +25,7 @@ async function delegationRequest(path, payload) {
 export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun,forUpdate=false,asignedDocument,clientOrders,ClientOrders,selectedDocumentIds=[],singleProvider=false}){
 
     // Requirements
-    const {appInfo} = useAppInfo();
+    const {appInfo, userInfo} = useAppInfo();
     const {popInAlert,popOutAlert} = useAlert();
 
     // Control
@@ -229,6 +229,7 @@ export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun,forUpdate
             for(const [instanceId, relations] of relationsByInstance){
                 const payload = {
                     company_id:appInfo.company_id,
+                    user_id:userInfo.user_id,
                     instance_id:instanceId,
                     consolidated:singleProvider,
                     relations:relations.map(({doc_id,item_id,thirdParty_id,asignationNote})=>({doc_id,item_id,thirdParty_id,asignationNote}))
@@ -294,6 +295,7 @@ export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun,forUpdate
                     instanceId,
                     await delegationRequest('list',{
                         company_id:appInfo.company_id,
+                        user_id:userInfo.user_id,
                         instance_id:instanceId,
                         ...(forUpdate ? {delegation_document_id:asignedDocument} : {})
                     })
