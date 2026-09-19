@@ -47,7 +47,7 @@ export function FormNewProduct({info,update,reloadFun}){
     // form info
 
         // Sec 0 --> General Info
-        const [photo,setPhoto] = useState('https://res.cloudinary.com/djjxugmni/image/upload/v1764620093/ChatGPT_Image_1_dic_2025_15_04_38_3_hcdqxl.png');
+        const [photo,setPhoto] = useState('https://cdnmain.sga360.co/Branding/LOGO%20SGA.png');
         const [type_product,setType_product] = useState('product');
         const [name,setName] = useState('');
         const [code,setCode] = useState('');

@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import './FormInput.css'
 import { moneyFormat } from '../../../utils/functions';
 
-export function FormInput({action,title,defaultValue,placeholder,children,type,disabled,textArea,value,moneyF,min,max,required,step,onSubmit}){
+export function FormInput({action,title,defaultValue,placeholder,children,type,disabled,textArea,value,moneyF,min,max,required,step,onSubmit,hideLabel=false,readOnly=false,onFocus,onClick,ariaLabel}){
 
     const inRef = useRef();
     const moneyFspan = useRef();
@@ -20,7 +20,7 @@ export function FormInput({action,title,defaultValue,placeholder,children,type,d
 
     return(
         <div className="FacturationFormInput">
-            <label htmlFor="">{title}</label>
+            {!hideLabel && <label htmlFor="">{title}</label>}
             <div className="inputContainer">
                 {moneyF && (
                     <span onClick={()=>{
@@ -37,7 +37,11 @@ export function FormInput({action,title,defaultValue,placeholder,children,type,d
                         value={value !== undefined ? value : undefined}
                         defaultValue={value === undefined ? defaultValue : undefined}
                         onChange={(event)=>action?.(event.target.value)}
+                        onFocus={onFocus}
+                        onClick={onClick}
                         disabled={disabled}
+                        readOnly={readOnly}
+                        aria-label={ariaLabel}
                         onKeyDown={handleKeyDown}
                         type={type}
                         placeholder={placeholder}

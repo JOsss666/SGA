@@ -244,6 +244,30 @@ electronicFacturationController.deletePendingBill = (req, res) => {
     });
 };
 
+// Elimina una nota crédito en Factus sin exponer el access_token al frontend.
+// Body esperado: { reference | reference_code | number, company_id, environment? }
+electronicFacturationController.deleteCreditNote = async (req, res) => {
+    try {
+        const info = req.body ?? {};
+        const companyId = req.auth?.companyId ?? getCompanyIdFromInfo(info);
+        const environment = await resolveEnvironmentFromInfo({
+            ...info,
+            company_id: companyId
+        });
+        const reference = info.reference ?? info.reference_code ?? info.number;
+        const data = await factusService.deleteCreditNote({
+            company_id: companyId,
+            environment,
+            reference
+        });
+
+        res.status(200).json({ status: 'OK', data });
+    } catch (error) {
+        console.error('Error al eliminar la nota crédito:', error.message);
+        res.status(400).json({ status: 'Error', message: error.message });
+    }
+};
+
 electronicFacturationController.getTaxes = async (req, res) => {
     try {
         const info = {
@@ -333,6 +357,10 @@ electronicFacturationController.newInvoice = (req,res)=>{
         const environment = await resolveEnvironmentFromInfo(info);
         console.log('Ambiente Factus para factura:', environment);
         const numberingPolicy = await resolveInvoiceNumberingPolicy(info);
+	    const paymentDueDate = `${info.document?.payment_due_date ?? ''}`.trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(paymentDueDate)) {
+            throw new Error('La fecha límite de pago debe tener formato YYYY-MM-DD.');
+        }
 	    let params = {
 	        "document": "01",
 	        "numbering_range_id": await factusService.getNumberingRangeId({
@@ -345,6 +373,8 @@ electronicFacturationController.newInvoice = (req,res)=>{
         "reference_code": `FVE_${info.document.ownSerial}`,
         "observation":info.document.e_invoiceDescription,
         "payment_method_code": info.document.paymentMethod_code,
+        "payment_form": info.document.payment_form === '2' ? '2':'1',
+        "payment_due_date": paymentDueDate,
         "customer": {
             "identification": info.customer.indentification_number,
             "dv": `${info.customer.dv}` ?? "3",

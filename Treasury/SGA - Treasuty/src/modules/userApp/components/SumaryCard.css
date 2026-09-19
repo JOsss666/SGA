@@ -1,0 +1,56 @@
+
+.SumaryCard{
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+    background-color: var(--bg);
+    padding: 2vh;
+    border-radius: 1vh;
+    padding-right: 5vh;
+    position: relative;
+    border: dashed .1vh var(--inputsBorder);
+    cursor: pointer;
+    transition: .3s;
+}
+
+.SumaryCard:hover{
+    background-color: var(--cardHover);
+}
+
+.SumaryCard .redirectIcon{
+    position: absolute;
+    top: .5vh;
+    right: .5vh;
+    padding: .5vh;
+    border-radius: .5vh;
+    background-color: var(--cardHover);
+    border: solid .1vh var(--inputsBorder);
+}
+
+.SumaryCard .redirectIcon i{
+    color: var(--mainText);
+}
+
+.SumaryCard .head{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1vh;
+}
+
+.SumaryCard .head h6{
+    font-size: clamp(2px,2.5vh,25px);
+    color: var(--mainText);
+    font-weight: 500;
+}
+
+.SumaryCard .head span{
+    color: var(--descriptionText);
+    margin-top: .25vh;
+}
+
+.SumaryCard .valueSumaryCard{
+    margin: auto 0;
+    font-size: clamp(3.5px,3.5vh,35px);
+    color: var(--mainText);
+    font-weight: 600;
+}

@@ -1,0 +1,38 @@
+.processStatusBadge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.8vh;
+    max-width: 100%;
+    padding: .35vh 1vh;
+    border: 1px solid var(--inputsBorder);
+    border-radius: 999px;
+    color: var(--mainText);
+    background: var(--lightGradient3);
+    font-size: clamp(11px, 1.45vh, 14px);
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.processStatusBadge.processStatusBadgesuccess {
+    border-color: var(--nexoSuccessBorder, var(--inputsBorder));
+    color: var(--nexoSuccessText, var(--mainText));
+    background: var(--nexoSuccessBg, var(--lightGradient3));
+}
+
+.processStatusBadge.processStatusBadgewarning {
+    border-color: var(--nexoWarningBorder, var(--inputsBorder));
+    color: var(--nexoWarningText, var(--mainText));
+    background: var(--nexoWarningBg, var(--lightGradient3));
+}
+
+.processStatusBadge.processStatusBadgedanger {
+    border-color: var(--nexoDangerBorder, var(--inputsBorder));
+    color: var(--nexoDangerText, var(--mainText));
+    background: var(--nexoDangerBg, var(--lightGradient4));
+}
+
+.processStatusBadge.processStatusBadgeinfo {
+    border-color: var(--nexoInfoBorder, var(--inputsBorder));
+    color: var(--nexoInfoText, var(--mainText));
+    background: var(--nexoInfoBg, var(--lightGradient1));
+}

@@ -21,7 +21,7 @@ export function FormNewBussines({info,edit,reloadFun}){
     // FormInfo
     const [name,setName] = useState('');
     const [description,setDescription] = useState('');
-    const [photo,setPhoto] = useState('https://res.cloudinary.com/djjxugmni/image/upload/v1765903321/ChatGPT_Image_16_dic_2025_11_41_43_zhakuf.png');
+    const [photo,setPhoto] = useState('https://cdnmain.sga360.co/static/ChatGPT_Image_16_dic_2025_11_41_43_zhakuf.webp');
 
     const formInfo = {
         company_id:appInfo.company_id,
@@ -30,8 +30,8 @@ export function FormNewBussines({info,edit,reloadFun}){
         photo
     }
     const createBussines = async()=>{
-        setDisabled(true)
-        setLoading(false)
+        setDisabled(true);
+        setLoading(false);
         let res = await postInfo('/createBussines',formInfo);
         if(res[0]){
             addNotification({

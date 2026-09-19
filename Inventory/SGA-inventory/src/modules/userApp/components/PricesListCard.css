@@ -46,6 +46,7 @@
 .PricesListCard .headCard .titleList{
     display: flex;
     gap:2vh;
+    height: fit-content;
 }
 
 .PricesListCard .descriptionList{

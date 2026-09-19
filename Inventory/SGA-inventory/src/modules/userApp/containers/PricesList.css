@@ -59,3 +59,9 @@
     width: fit-content;
     height: fit-content;
 }
+
+.PricesList .gridPricesList{
+    display: flex;
+    gap: 2vw;
+    flex-wrap: wrap;
+}

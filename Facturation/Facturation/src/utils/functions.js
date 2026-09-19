@@ -2134,8 +2134,8 @@ export async function scanDevices() {
     // Test clone Company:
     export async function cloneCompany(){
         let res = await postInfo('/companies/clone-configuration', {
-            source_company_id: 5,
-            target_company_id: 6,
+            source_company_id: 1,
+            target_company_id: 7,
         });
         console.log('|||||||||||||||||||||||| REspuesta clonación: ',res);
     }

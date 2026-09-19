@@ -6,6 +6,7 @@ import sellInvoicesTool from './definitions/getFacturationSellInvoices.tool.js';
 import purchasesTool from './definitions/getFacturationPurchases.tool.js';
 import processInstancesTool from './definitions/getProcessProcessInstances.tool.js';
 import getDocumentsTool from './definitions/getDocumentsTool.js';
+import getThirdPartiesTool from './definitions/getThirdParties.tool.js';
 
 // Executors
 import executeSellInvoices from './executors/getFacturationSellInvoices.executor.js';
@@ -13,6 +14,7 @@ import executePurchases from './executors/getFacturationPurchases.executor.js';
 import executeProcessInstances from './executors/getProcessProcessInstances.executor.js';
 import executeGetAccountability from './executors/getAccountability.executor.js';
 import executeGetDocuments from './executors/getDocuments.tool.js';
+import executeGetThirdParties from './executors/getThirdParties.executor.js';
 
 const JSON_SCHEMA_TYPES = new Set(['object', 'array', 'string', 'integer', 'number', 'boolean', 'null']);
 
@@ -100,7 +102,8 @@ const toolRegistry = new ToolRegistry([
     { tool: purchasesTool, execute: executePurchases },
     { tool: processInstancesTool, execute: executeProcessInstances },
     {tool:getAccountabilityTool,execute:executeGetAccountability},
-    {tool:getDocumentsTool,execute:executeGetDocuments}
+    {tool:getDocumentsTool,execute:executeGetDocuments},
+    {tool:getThirdPartiesTool,execute:executeGetThirdParties}
 ]);
 
 export { ToolRegistry };

@@ -12,6 +12,7 @@ import { OptionsChatAi } from '../components/ChatAiComponents/OptionsChatAi';
 import { ChatComposer } from '../components/ChatAiComponents/ChatComposer';
 import { AiAddHandler } from '../components/ChatAiComponents/AiAddHandler';
 import { AgentsSelector } from '../components/ChatAiComponents/AgentsSelector';
+import { buildAiAttachmentContext } from '../components/ChatAiComponents/aiAttachmentContext';
 import { ToolActivity, TypingIndicator } from '../components/ChatAiComponents/ToolActivity';
 import { stripAgentDebugMarker } from '../components/ChatAiComponents/agentText';
 import { ChatActionsContext } from '../components/ChatAiComponents/chatActionsContext';
@@ -221,9 +222,11 @@ export function ChatAi({visible}){
 
         try {
             const ready = attached.filter(element => !element.loading);
-            const context = ready.length > 0
-                ? `\n\nContexto adjunto por el usuario:\n${JSON.stringify(ready)}`
-                : '';
+            const context = buildAiAttachmentContext({
+                attachments:ready,
+                prompt:trimmed,
+                maxInputCharacters:MAX_PROMPT_CHARACTERS
+            });
             const result = await streamAgentPrompt({
                 target: selectedAgentId,
                 content: `${trimmed}${context}`,
@@ -561,7 +564,7 @@ export function ChatAi({visible}){
                 </span>
                 {usedTokens > 0 && (
                     <span className='tokensAi' title='Tokens consumidos en esta conversación'>
-                        <i className="fa-solid fa-coins"/>{usedTokens.toLocaleString('es-CO')}
+                        |<i className="fa-solid fa-coins"/>{usedTokens.toLocaleString('es-CO')}
                     </span>
                 )}
                 {chat.length > 0 && (

@@ -241,6 +241,13 @@ let userConfig = {
                 "AI":{
                     "use":true,
                     "instance":"full",
+                    "tokens":{
+                        "limited":false,
+                        "sesiónLimit":20000,
+                        "sesionDurationMinutes":240,
+                        "weeklylimit":100000,
+                        "autoRestoreSessión":false,
+                    },
                     "expires":"never",
                     "thirdParties":{
                         "overAll":false,

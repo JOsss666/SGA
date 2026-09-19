@@ -6,6 +6,9 @@ import { useAlert, useAppInfo, useNotifications } from "../../../../context/cont
 import { FormInput } from "../../components/FormInput";
 import { LoadingSpace } from "../LoadingSpace";
 import { SelectTpeNewDoc } from "../forms/SelectTypeNewDoc";
+import { PreviewDocument } from "../Preview/PreviewDocument";
+import { FormNewThirdPartyDelegation } from "../forms/FormNewThirdPartyDelegation";
+import { SubProcessCard } from "../../components/SubProcessCard";
 
 export function ProcessStatusAlert({instance_id,reloadFun}){
 
@@ -60,7 +63,6 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
             company_id:appInfo.company_id,
             id:instance_id
         })
-        console.log(res);
         if(res[0]){
             setInfo(res[1][0])
             await getProcessState();
@@ -295,6 +297,9 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                                     </time>
                                                 </div>
                                             )}
+                                            {element.subprocesses?.map(child => (
+                                                <SubProcessCard info={child} reloadFun={getInstanceInfo}/>
+                                            ))}
                                             {(element.isCompleted || element.isActual) && !element.advancement && (
                                                 <span className="noAdvancementInfo">Sin registro de avance</span>
                                             )}
@@ -302,8 +307,9 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                                 element.required_docs?.map((req, i) => (
                                                     <span key={i}className="requiredDocAlert" onClick={()=>{
                                                         console.log(`Abriendo formulario para: ${req.docType}`)
-                                                        popInAlert(<SelectTpeNewDoc docType={req.docType} info={{
-                                                            instance_id:info.id
+                                                        popInAlert(<SelectTpeNewDoc docType={req.docType} reloadFun={getInstanceInfo} info={{
+                                                            instance_id:info.id,
+                                                            step_id: element.id
                                                         }}/>)
                                                     }}>
                                                         <i className="fa-solid fa-triangle-exclamation"/>
@@ -312,7 +318,16 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                                 ))}
                                             {element.attached_Docs.map((doc, i) => (
                                                 <span key={i} className="attachedDoc" onClick={()=>{
-                                                    window.open(`https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${doc.doc_id}`,'_blank','noopener,noreferrer')
+                                                    const isAssignedDocument = doc.document_type === 'ThirdParty Delegation';
+                                                    popInAlert(isAssignedDocument
+                                                        ? <FormNewThirdPartyDelegation
+                                                            forUpdate
+                                                            asignedDocument={doc.doc_id}
+                                                            instnacePreInfo={{instance_id:info.id}}
+                                                            reloadFun={getInstanceInfo}
+                                                        />
+                                                        : <PreviewDocument doc_id={doc.doc_id}/>
+                                                    );
                                                 }}>
                                                     <i className="fa-solid fa-file-circle-check"/>
                                                     {`${doc.document_type} #${doc.ownSerial}`}

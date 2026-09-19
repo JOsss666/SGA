@@ -1,0 +1,44 @@
+.sgaTreasury .banks {
+    display: flex;
+    width: 100%;
+    min-height: 100%;
+    padding: 2vh 3vw;
+    flex-direction: column;
+}
+
+.sgaTreasury .banks .headSection {
+    display: flex;
+    flex-direction: column;
+    gap: .8vh;
+}
+
+.banks .filtersContainer{
+    display: flex;
+    gap: 1vh;
+    align-items: center;
+    padding: 1vh 0;
+    margin: 2vh 0;
+}
+
+.banks .filtersContainer .SearchBar input{
+    width: 10vw;
+    margin: auto 0;
+    transition: .3s;
+}
+
+.banks .filtersContainer .SearchBar input:focus{
+    width: 25vw;
+    outline: solid .1vh #155DFC;
+}
+
+.banks .filtersContainer .rangeInputs{
+    display: flex;
+    gap: .5vh;
+    align-items: center;
+}
+
+.banks .filtersContainer .FormButton{
+    width: fit-content;
+    text-wrap: nowrap;
+    padding: 1.5vh 2vh;
+}

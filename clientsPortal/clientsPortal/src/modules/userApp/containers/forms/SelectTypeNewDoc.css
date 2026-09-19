@@ -1,0 +1,85 @@
+
+.SelectTpeNewDoc{
+    display: flex;
+    flex-direction: column;
+    width: 30vw;
+    margin-top: 4vh;
+}
+
+.SelectTpeNewDoc .BoldTitle{
+    margin: 2vh auto;
+    margin-bottom: 3vh;
+}
+
+.SelectTpeNewDoc .SearchBar{
+    margin: 0 auto;
+    width: 94%;
+}
+
+.SelectTpeNewDoc .gridTypes{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh 2vh;
+    max-height: 78vh;
+    overflow-y: auto;
+}
+
+.SelectTpeNewDoc .gridTypes .typeDoc{
+    display: flex;
+    width: 100%;
+    padding: 1vh;
+    background-color: var(--cardHover);
+    outline: solid .1vh var(--inputsBorder);
+    border-radius: 1vh;
+    cursor: pointer;
+    margin: 1vh auto;
+}
+
+.SelectTpeNewDoc .gridTypes .typeDoc:hover{
+    box-shadow: 0 .2vh 1vh #0003;
+}
+
+.SelectTpeNewDoc .gridTypes img{
+    height: 8vh;
+    width: 8vh;
+    margin: auto 1vh;
+    object-fit: cover;
+    border-radius: 1vh;
+    
+}
+
+.SelectTpeNewDoc .gridTypes .hiddenDoc{
+    display: none;
+}
+
+.SelectTpeNewDoc .gridTypes .infoContaier{
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+    margin: auto 2vh;
+}
+
+.SelectTpeNewDoc .gridTypes .infoContaier strong{
+    font-size: clamp(3px,3vh,30px);
+    font-weight: 500;
+    margin-bottom: .5vh;
+    color: var(--mainText);
+}
+
+.SelectTpeNewDoc .gridTypes .infoContaier span{
+    font-size: clamp(3px,2.2vh,30px);
+    font-weight: 400;
+    color: var(--descriptionText);
+}
+
+@media (max-width:500px) {
+    .SelectTpeNewDoc{
+        width: 100dvw;
+        padding-top: 4vh;
+    }
+
+    .SelectTpeNewDoc .gridTypes{
+        margin-top: 1vh;
+        max-height: 75vh;
+    }
+}

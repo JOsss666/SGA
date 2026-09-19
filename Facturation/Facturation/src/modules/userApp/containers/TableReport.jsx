@@ -5,7 +5,19 @@ import { useMemo, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import "./TableReport.css";
 
-export function TableReport({ columns, info, type, searchValue, navigation, summaryValues }) {
+export function TableReport({
+    columns,
+    info,
+    type,
+    searchValue,
+    navigation,
+    summaryValues,
+    renderCell,
+    onRowClick,
+    selectable = true,
+    rowClassName,
+    rowHeight = 50
+}) {
 
     // Filtrado optimizado
     const filteredInfo = useMemo(() => {
@@ -27,7 +39,7 @@ export function TableReport({ columns, info, type, searchValue, navigation, summ
     const rowVirtualizer = useVirtualizer({
         count: filteredInfo.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 50, // altura aproximada de cada fila
+        estimateSize: () => rowHeight,
         overscan: 5
     });
 
@@ -57,9 +69,11 @@ export function TableReport({ columns, info, type, searchValue, navigation, summ
 
             {/* HEADER */}
             <div className="headTable">
-                <span>
-                    <CheckSquare />
-                </span>
+                {selectable && (
+                    <span>
+                        <CheckSquare />
+                    </span>
+                )}
 
                 {columns.map((element, index) => (
                     <span
@@ -108,6 +122,10 @@ export function TableReport({ columns, info, type, searchValue, navigation, summ
                                         columns={columns}
                                         info={element}
                                         navigation={navigation}
+                                        renderCell={renderCell}
+                                        onRowClick={onRowClick}
+                                        selectable={selectable}
+                                        rowClassName={rowClassName}
                                     />
                                 </div>
                             );

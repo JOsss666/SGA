@@ -438,7 +438,7 @@ export function AppInfoProvider({children}){
         {text:'Crear',path:'new',icon:<i className="ti ti-sparkle-2"/>,action:handleNavigate},
         {text:'Terceros',path:'thirdparties',icon:<i className="fa-regular fa-user"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
         // Default tools
-        {text:'Panel Principal',path:'mainPanel',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515340/Grupo5logos_3_qp85tn.png'/>,action:handleNavigate},
+        {text:'Panel Principal',path:'mainPanel',icon:<i className="bi bi-grid-1x2"/>,action:handleNavigate},
         {text:'Bancos',path:'banks',icon:<i className="bi bi-bank"/>,action:handleNavigate},
         {text:'Cartera',path:'briefcases',icon:<i className="bi bi-wallet2"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
         {text:'Cajas POS',path:'CashBoxes',icon:<i className="ti ti-cash-register"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
@@ -467,10 +467,10 @@ export function AppInfoProvider({children}){
     ]
 
     const secondOptionsMenu = [
-        {text:'Configuración',path:'settings',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579057/ChatGPT_Image_27_oct_2025_10_28_59_1_vfix8g.png'/>,action:handleNavigate},
-        {text:'Tutoriales',path:'tutorials',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761515342/Grupo5logos_4_rhapbp.png'/>,action:handleNavigate},
-        {text:'Ayuda',path:'help',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760911291/AyudaLogo1_v362of.png'/>,action:handleNavigate},
-        {text:'Cerrar Sesión',path:'logOut',icon:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1760911296/CerrarSesionLogo1_moghr7.png'/>,action:handleNavigate},
+        {text:'Configuración',path:'settings',icon:<i className="bi bi-gear"/>,action:handleNavigate},
+        {text:'Tutoriales',path:'tutorials',icon:<i className="bi bi-camera-video"/>,action:handleNavigate},
+        {text:'Ayuda',path:'help',icon:<i className="bi bi-patch-question-fill"/>,action:handleNavigate},
+        {text:'Cerrar Sesión',path:'logOut',icon:<i className="bi bi-door-open"/>,action:handleNavigate},
         //{text:'Registro',path:'../../signUp',icon:<i className="fa-solid fa-user-plus"/>},
     ]
 

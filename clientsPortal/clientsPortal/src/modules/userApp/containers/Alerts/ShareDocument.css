@@ -1,0 +1,94 @@
+
+.ShareDocuments{
+    min-height: 40vh;
+    width: 30vw;
+    padding: 1vh 2vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.ShareDocuments .headShare{
+    margin-bottom: 2vh;
+}
+
+.ShareDocuments .BoldTitle{
+    margin-bottom: .5vh;
+}
+
+.ShareDocuments .bodyShare{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.ShareDocuments .MembersShare{
+    padding: 2vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 2vh;
+    outline: solid .1vh #ddd;
+}
+
+.ShareDocuments .MembersShare .headMemberShares{
+    display: flex;
+}
+
+.ShareDocuments .MembersShare .headMemberShares .inconHMS{
+    display: flex;
+    height: 7.5vh;
+    width: 7.5vh;
+    border-radius: 100%;
+    background-color: #31D492;
+    margin: auto 1vh;
+}
+
+.ShareDocuments .MembersShare .headMemberShares .inconHMS i{
+    margin: auto;
+    font-size: clamp(4px,4vh,40px);
+}
+
+.ShareDocuments .MembersShare .headMemberShares .infoHMS{
+    width: 70%;
+    margin: auto 1vh;
+}
+
+.ShareDocuments .MembersShare .headMemberShares .infoHMS .BoldTitle{
+    font-size: clamp(2.2px,2.5vh,25px);
+}
+
+.ShareDocuments .MembersShare .SearchBar{
+    width: 25vw;
+    margin: 2vh auto;
+}
+
+.ShareDocuments .quickShareOptions{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh 0;
+}
+
+.ShareDocuments .quickShareOptions .CardTitleLogo{
+    margin: .25vh 0;
+}
+
+.ShareDocuments .gridBubbleOptions{
+    display: flex;
+    padding: 2vh 0;
+    border-radius: 2vh;
+}
+
+.ShareDocuments .gridBubbleOptions .ServiceBubble{
+    margin: auto 0;
+    margin-right: 1vh;
+}
+
+.ShareDocuments .gridBubbleOptions .ServiceBubble:nth-child(1){
+    animation-delay: .1s;
+}
+
+.ShareDocuments .gridBubbleOptions .ServiceBubble:nth-child(2){
+    animation-delay: .2s;
+}
+
+.ShareDocuments .gridBubbleOptions .ServiceBubble:nth-child(3){
+    animation-delay: .3s;
+}

@@ -48,14 +48,12 @@ systemAI/
 ├── skills/
 │   ├── definitions/        # Skills versionadas y sus metadatos
 │   └── loaders/            # Descubrimiento y carga de skills
-├── tools/
-│   ├── definitions/        # Contratos y catalogo de herramientas
-│   └── executors/          # Ejecucion controlada de herramientas
-└── tests/
-    ├── fixtures/           # Datos estables para pruebas
-    ├── integration/        # Flujos completos con dependencias controladas
-    └── unit/               # Pruebas aisladas
+└── tools/
+    ├── definitions/        # Contratos y catalogo de herramientas
+    └── executors/          # Ejecucion controlada de herramientas
 ```
+
+Las pruebas de este módulo están centralizadas en `../test/systemAI/unit/`.
 
 ## Reglas de dependencia
 

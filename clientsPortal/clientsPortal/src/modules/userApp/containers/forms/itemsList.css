@@ -1,0 +1,147 @@
+.ItemsList{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.ItemsList .itemsListTitle{
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--mainText);
+    font-weight: 500;
+}
+
+.ItemsList .gridItemsContainer{
+    width: 100%;
+    display: flex;
+    flex-direction: column-reverse;
+    padding: 1vh 2vh;
+    border-radius: 1vh;
+    outline: solid .1vh var(--inputsBorder);
+    gap: 2vh;
+}
+
+.ItemsList .itemBlock{
+    padding: 1vh 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.ItemsList .itemBlock .headBlock{
+    display: flex;
+    gap: 2vw;
+}
+
+.ItemsList .itemBlock .headBlock strong{
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+    font-weight: 400;
+    margin: auto 0;
+    margin-left: 4vh;
+}
+
+.ItemsList .itemBlock .headBlock span{
+    margin: auto;
+    margin-right: 1vh;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--descriptionText);
+}
+
+.ItemsList .itemBlock .headBlock .quitContainer{
+    margin: auto 1vh;
+}
+
+.ItemsList .itemBlock .headBlock .quitContainer i{
+    cursor: pointer;
+    transition: .3s ease all;
+}
+
+.ItemsList .itemBlock .headBlock .quitContainer i:hover{
+    color: #FB2C36;
+    transform: rotateZ(15deg);
+}
+
+.ItemsList .itemBlock .gridItems{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding-left: 1vw;
+}
+
+.ItemsList .itemBlock .gridItems .itemRow{
+    display: flex;
+    width: 100%;
+    gap: 2vw;
+    padding: 1vh;
+    border-radius: 1vh;
+    border-bottom: .2vh dashed var(--inputsBorder);
+}
+
+.ItemsList .itemBlock .gridItems .itemRow:hover{
+    background-color: var(--cardHover);
+}
+
+.ItemsList .itemBlock .gridItems .UserCard{
+    width: 40%;
+}
+
+.ItemsList .itemBlock .gridItems .valueItemRow{
+    margin: auto 0;
+    text-align: right;
+    width: 15%;
+    font-weight: 400;
+    color: var(--descriptionText);
+}
+
+.ItemsList .itemBlock .gridItems .rowInputItem .FacturationFormInput{
+    width: 10vw;
+    min-width: 0;
+}
+
+.ItemsList .itemBlock .gridItems .rowInputItem .FacturationFormInput label{
+    font-weight: 400;
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
+}
+
+.ItemsList .itemBlock .gridItems .itemRow .deleteItem{
+    margin: auto 0;
+    cursor: pointer;
+    color: var(--descriptionText);
+    transition: .3s ease all;
+}
+
+.ItemsList .itemBlock .gridItems .itemRow .deleteItem:hover{
+    color: #FB2C36;
+    transform: scale(1.15);
+}
+
+.ItemsList .personalizaedView{
+    padding-left: 1vw;
+}
+
+@media (max-width:500px) {
+    .ItemsList .itemBlock .gridItems .UserCard{
+        width: 100%;
+    }
+
+    .ItemsList .itemBlock .gridItems .itemRow{
+        flex-direction: column;
+    }
+
+    .ItemsList .itemBlock .gridItems .rowInputItem .FacturationFormInput{
+        width: 72dvw;
+    }
+
+    .ItemsList .itemBlock .gridItems .valueItemRow{
+        width: 100%;
+        margin-top: .5vh;
+    }
+
+    .ItemsList .itemBlock .gridItems .itemRow .deleteItem{
+        width: 100%;
+        text-align: right;
+        margin-top: .5vh;
+    }
+}

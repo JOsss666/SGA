@@ -1,0 +1,109 @@
+.DevicesSettings{
+    display: flex;
+    flex-direction: column;
+    max-height: 80dvh;
+    overflow-y: auto;
+}
+
+.DevicesSettings .headSection{
+    margin-bottom: 2vh;
+}
+
+.DevicesSettings .gridDevicesTypesContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.DevicesSettings .gridDevicesTypesContainer .deviceTypeGrid .gridDevices{
+    display: flex;
+    gap: 2vh;
+    margin-top: 2vh;
+}
+
+.DevicesSettings .gridDevicesTypesContainer .deviceTypeGrid .gridDevices .deviceCard{
+    display: flex;
+    height: fit-content;
+    position: relative;
+    border-radius: 2vh;
+    cursor: pointer;
+    gap: 1vw;
+    padding: 1vh;
+    width: 20vw;
+    border: solid .1vh var(--inputsBorder);
+    transition: .3s;
+    top: 0;
+}
+
+.DevicesSettings .gridDevicesTypesContainer .deviceTypeGrid .gridDevices .deviceCard:hover{
+    top: -1vh;
+    background-color: var(--cardHover);
+}
+
+.DevicesSettings .gridDevicesTypesContainer .deviceTypeGrid .gridDevices .deviceCard img{
+    height: 6vh;
+    width: 6vh;
+    border-radius: 1vh;
+    border: solid .1vh var(--inputsBorder);
+    background-color: var(--menuAside);
+}
+
+.DevicesSettings .gridDevicesTypesContainer .deviceTypeGrid .gridDevices .deviceCard .infoDevice{
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+    margin: auto 0;
+    width: 60%;
+}
+
+.DevicesSettings .gridDevicesTypesContainer .deviceTypeGrid .gridDevices .deviceCard strong{
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+    text-wrap: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--mainText);
+}
+
+.DevicesSettings .gridDevicesTypesContainer .deviceTypeGrid .gridDevices .deviceCard span{
+    font-size: clamp(1.8px,1.8vh,18px);
+    font-weight: 400;
+    text-wrap: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--descriptionText);
+}
+
+.DevicesSettings .gridDevicesTypesContainer .deviceTypeGrid .gridDevices .deviceCard .statusIndicator{
+    position: absolute;
+    top: 1vh;
+    right: 1vh;
+    height: 1vh;
+    width: 2vh;
+    border-radius: .5vh;
+}
+
+.DevicesSettings .gridDevicesTypesContainer .deviceTypeGrid .gridDevices .deviceCard .active_statusIndicator{
+    background-color: #05DF72;
+    box-shadow: 0 0 1vh #B9F8CF;
+}
+
+.DevicesSettings .gridDevicesTypesContainer .deviceTypeGrid .gridDevices .deviceCard .disconected_statusIndicator{
+    background-color: #FE9A37;
+    box-shadow: 0 0 1vh #FE9A37;
+}
+
+.DevicesSettings .gridDevicesTypesContainer .deviceTypeGrid .gridDevices .active_cardState{
+    opacity: 100%;
+    cursor: pointer;
+}
+
+.DevicesSettings .gridDevicesTypesContainer .deviceTypeGrid .gridDevices .disconected_cardState{
+    opacity: 60%;
+    cursor: not-allowed;
+}
+
+
+.DevicesSettings .LoadingSpace{
+    height: 70vh;
+}

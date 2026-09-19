@@ -27,6 +27,11 @@
     font-size: clamp(2.5px,2.5vh,25px);
 }
 
+.OptionsChatAi .selectedOptionHolder .childrenIndicator img{
+    height: 3vh;
+    width: 3vh;
+}
+
 .OptionsChatAi .selectedOptionHolder .selectedOption{
     margin: auto 0;
     display: flex;

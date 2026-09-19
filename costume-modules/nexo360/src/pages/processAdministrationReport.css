@@ -1,0 +1,20 @@
+
+.processAdministrationReport{
+    display: flex;
+    flex-direction: column;
+}
+
+.processAdministrationReport .settingsReport{
+    display: flex;
+    gap: 2vh;
+    width: 100%;
+    padding: 1vh;
+    align-items: center;
+}
+
+/* El RangeDate va envuelto en .sgaTreasury (su CSS está scopeado ahí); este
+   wrapper solo participa del layout flex de la barra de filtros. */
+.processAdministrationReport .settingsReport > .sgaTreasury{
+    display: flex;
+    align-items: center;
+}

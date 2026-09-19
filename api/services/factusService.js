@@ -252,6 +252,18 @@ const normalizeFactusResponseList = (responseData) => (
     ?? []
 );
 
+const isEnabledNumberingRange = (range) => {
+    const isActive = range.is_active ?? range.active ?? true;
+    const isExpired = range.is_expired ?? false;
+
+    return isActive !== false
+        && isActive !== 0
+        && `${isActive}`.toLowerCase() !== 'false'
+        && isExpired !== true
+        && isExpired !== 1
+        && `${isExpired}`.toLowerCase() !== 'true';
+};
+
 const getCachedNumberingRanges = async (credential) => {
     const companyId = credential.request_company_id;
     if (!Number.isInteger(companyId) || companyId <= 0) return null;
@@ -387,10 +399,18 @@ factusService.getNumberingRangeId = async ({
     const rangeIdOf = (item) => `${item.id ?? item.provider_range_id}`;
 
     const ranges = await factusService.getNumberingRanges({ company_id, environment });
-    let ofType = ranges.filter((item) => item.document === documentName || item.document_name === documentName);
+    const rangesOfType = ranges.filter(
+        (item) => item.document === documentName || item.document_name === documentName
+    );
+
+    if (rangesOfType.length === 0) {
+        throw new Error(`No se encontró rango de numeración para ${documentName}.`);
+    }
+
+    let ofType = rangesOfType.filter(isEnabledNumberingRange);
 
     if (ofType.length === 0) {
-        throw new Error(`No se encontró rango de numeración para ${documentName}.`);
+        throw new Error(`No hay un rango de numeración activo y vigente para ${documentName}.`);
     }
 
     // Restricción por rol: solo los rangos incluidos en la lista blanca.
@@ -520,6 +540,35 @@ factusService.deletePendingBill = async ({
 
     if (!response.ok) {
         throw new Error(response.data?.message || `Error al eliminar la factura pendiente en Factus (${response.status}).`);
+    }
+
+    return response.data;
+};
+
+// Elimina una nota crédito en Factus por su referencia (por ejemplo, NCF2).
+// El token se resuelve internamente con las credenciales de la compañía.
+factusService.deleteCreditNote = async ({
+    company_id,
+    environment = DEFAULT_ENVIRONMENT,
+    reference
+} = {}) => {
+    const referenceValue = `${reference ?? ''}`.trim();
+    if (!referenceValue) {
+        throw new Error('La referencia de la nota crédito es requerida.');
+    }
+
+    const response = await factusService.request({
+        company_id,
+        environment,
+        path: `/v1/credit-notes/reference/${encodeURIComponent(referenceValue)}`,
+        method: 'DELETE'
+    });
+
+    if (!response.ok) {
+        throw new Error(
+            response.data?.message
+            || `Error al eliminar la nota crédito ${referenceValue} en Factus (${response.status}).`
+        );
     }
 
     return response.data;

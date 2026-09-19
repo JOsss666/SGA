@@ -24,7 +24,6 @@ const CONFIGURATION_TABLES = [
     ['Inventory', 'prices_lists'],
     ['Inventory', 'store_pricesLists'],
     ['Inventory', 'priceList_items'],
-    ['Treasury', 'cash_boxes'],
     ['Fiscal', 'product_tax_relations'],
     ['Fiscal', 'company_tax_classifications'],
     ['Fiscal', 'company_jurisdiction_tax_profiles'],
@@ -41,7 +40,7 @@ const EXCLUDED_DATA = [
     'transacciones y detalles contables',
     'stocks, movimientos y movimientos de servicios',
     'cuentas por cobrar, cuentas por pagar y pagos de cartera',
-    'turnos y liquidaciones de caja',
+    'cajas, turnos y liquidaciones de caja',
     'instancias e historial de procesos',
     'activos',
     'integraciones, credenciales, tokens y rangos electrónicos',
@@ -121,7 +120,7 @@ const remapRoleConfig = (sourceConfig, maps) => {
     setEnabledIds(config, ['access', 'bussines'], maps.get('Ecosystem.bussines'));
     setEnabledIds(config, ['access', 'costCenters'], maps.get('Ecosystem.costCenters'));
     setEnabledIds(config, ['access', 'payments', 'payment_methods'], maps.get('Ecosystem.payment_methods'));
-    setEnabledIds(config, ['access', 'sections', 'cashBoxes'], maps.get('Treasury.cash_boxes'));
+    setEnabledIds(config, ['access', 'sections', 'cashBoxes'], undefined, { clear: true });
     setEnabledIds(config, ['access', 'process_instances'], undefined, { clear: true });
     return config;
 };
@@ -397,13 +396,6 @@ companyConfigurationService.clone = async (payload = {}) => {
             ...row,
             "priceList_id": remapId(allMaps.get('Inventory.prices_lists'), source.priceList_id),
             "product&service_id": remapId(allMaps.get('Inventory.products&services'), source['product&service_id'])
-        }));
-        await clone('Treasury', 'cash_boxes', (row, source, allMaps) => ({
-            ...row,
-            "allowedStores": remapIdArray(allMaps.get('Ecosystem.stores'), source.allowedStores),
-            "allowedUsers": [],
-            status: 'closed',
-            base: 0
         }));
 
         await clone('Fiscal', 'product_tax_relations', (row, source, allMaps) => ({

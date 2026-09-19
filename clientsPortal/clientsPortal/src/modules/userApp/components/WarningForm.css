@@ -1,0 +1,29 @@
+
+.WarningForm{
+    width: 100%;
+    padding: 2vh;
+    border-radius: 1vh;
+    background-color: #f0f0f0;
+    margin: 1vh auto;
+}
+
+.WarningForm h5{
+    margin-bottom: 1vh;
+    font-weight: 600;
+    color: #333;
+    font-size: clamp(2.2px,2.5vh,30px);
+}
+
+.WarningForm span{
+    font-size: clamp(2.2px,2.5vh,30px);
+    color: #555;
+}
+
+.WarningForm span strong{
+    font-weight: 600;
+    color: #222;
+}
+
+.WarningForm i{
+    margin-left: 1vh;
+}

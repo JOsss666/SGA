@@ -76,11 +76,18 @@ inventoryController.createCatetory = (req,res)=>{
 inventoryController.getProducts = async (req, res, next) => {
     try {
         const info = req.body || {};
+        const companyId = Number(info.company_id);
+        if (!Number.isSafeInteger(companyId) || companyId <= 0) {
+            return res.status(400).json([
+                false,
+                { message: 'Se requiere un company_id válido.' }
+            ]);
+        }
         const values = [];
         let whereClauses = [];
 
         whereClauses.push(`ps.company_id = $1`);
-        values.push(req.auth.companyId)
+        values.push(companyId);
 
         if (info.category_id != null) {
             whereClauses.push(`c.id = $${values.length +1}`);
@@ -253,6 +260,54 @@ inventoryController.getComercialProducts = (req,res)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
+}
+
+// Catálogo de presets (agrupaciones de productos) en un shape compatible con
+// getComercialProducts, para poder seleccionarlos como un item más en el front.
+// No expande el preset a sus productos (eso lo hace getInternalPresets); aquí solo
+// se devuelve el preset como opción seleccionable, con sus componentes adjuntos.
+inventoryController.getPresets = async (req,res)=>{
+    try {
+        const info = await readJsonBody(req);
+
+        if(info.company_id == undefined){
+            sendJson(res, 400, { status: 'Error', message: 'company_id es obligatorio.' });
+            return;
+        }
+
+        const consulta = await useDataBase(`
+            SELECT
+                p.id AS product_id,
+                p.id AS id,
+                p.id AS preset_id,
+                p.name,
+                p.description,
+                NULL::text AS img,
+                ''::text AS code,
+                true AS is_preset,
+                0::numeric AS unit_price,
+                0::numeric AS unit_value,
+                '[]'::jsonb AS price_tiers,
+                COALESCE(
+                    jsonb_agg(
+                        jsonb_build_object('product_id', r.product_id, 'units', r.units)
+                    ) FILTER (WHERE r.product_id IS NOT NULL),
+                    '[]'::jsonb
+                ) AS components
+            FROM "Inventory".presets p
+            LEFT JOIN "Inventory"."presetsProductRelations" r
+                ON r.preset_id = p.id
+            WHERE p.company_id = $1
+              AND p.is_active = true
+            GROUP BY p.id, p.name, p.description
+            ORDER BY p.name ASC;
+        `, [info.company_id], 1);
+
+        sendJson(res, 200, consulta);
+    } catch (err) {
+        console.error('Error en getPresets:', err);
+        sendJson(res, 500, { status: 'Error', message: err.message });
+    }
 }
 
 inventoryController.createProduct = async (req,res)=>{
@@ -1494,6 +1549,16 @@ inventoryController.getServicesMovements = (req,res)=>{
             values.push(info.doc_id);
         }
 
+        if(info.doc_ids !== undefined){
+            if(!Array.isArray(info.doc_ids) || info.doc_ids.some(id => !/^[0-9]+$/.test(String(id)))){
+                res.writeHead(400, {'Content-Type':'application/json'});
+                res.end(JSON.stringify({error:'doc_ids debe ser una lista de IDs de documentos'}));
+                return;
+            }
+            whereClauses.push(`sm.doc_id = ANY($${values.length + 1}::bigint[])`);
+            values.push([...new Set(info.doc_ids.map(String))]);
+        }
+
         if(info.instance_id != undefined){
             whereClauses.push(`sm.instance_id = $${values.length + 1}`);
             values.push(info.instance_id);
@@ -1509,6 +1574,7 @@ inventoryController.getServicesMovements = (req,res)=>{
 
                 ps.name AS service_name,
                 ps.img AS service_img,
+                ps.units AS service_units,
                 ps.type,
 
                 ps.tax_id,
@@ -1684,6 +1750,31 @@ inventoryController.deleteItemPricesList = (req,res)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
+}
+
+inventoryController.getInternalPresets = async(presets)=>{
+    const promises = presets.map(async (preset) => {
+        const components = await useDataBase(`
+            SELECT 
+                product_id, preset_id, units
+            FROM 
+                "Inventory"."presetsProductRelations"
+            WHERE preset_id = $1;
+        `, [preset.id], 1);
+
+        if (components[0] === true) {
+            return components[1].map((component) => ({
+                ...component,
+                units: Number(component.units) * Number(preset.units)
+            }));
+        }
+        return [];
+    });
+
+    const results = await Promise.all(promises);
+    const C = results.flat();
+
+    return C;
 }
 
 export default inventoryController;

@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Route, Routes,useLocation, useNavigate  } from 'react-router-dom';
 import { BoldTitle } from "../components/BoldTitle";
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import { DescriptionSpan } from "../components/DescriptionSpan";
 import { DespleList } from "../components/DespleList";
 import './Reports.css'
@@ -10,8 +10,6 @@ import { ReportBalance } from './reports/ReportBalance';
 import { CardReport } from '../components/CardReport';
 import { SearchBar } from '../components/SearchBar';
 import { SelectOptions } from '../components/SelectOptions';
-import { FormButton } from '../components/FormButton';
-import { useEffect, useState } from 'react';
 import { ReportKardex } from './reports/ReportKardex';
 import { PathLocation } from '../components/PathLocation';
 import { ReportAccountTransactions } from './reports/ReportAccountTransactions';
@@ -23,25 +21,14 @@ import { CashBoxesCloseReport } from './reports/CashBoxesCloseReport';
 import { ReportHistorialInstance } from './reports/ReportHIstorialInstance';
 import { PortfolioReportDetail } from './reports/PortfolioReportDetail';
 
-// Costume modules
-
-    // Z&J S.A.S
-    const CustomZJClicksReport = React.lazy(() => 
-        import('../../../../../../costume-modules/zjSAS.S/src/containers/reports/ClicksReport').then(module => ({ default: module.ClicksReport }))
-    );
-    const CustomZJServicesReport = React.lazy(() => 
-        import('../../../../../../costume-modules/zjSAS.S/src/containers/reports/ServiceMovements').then(module => ({ default: module.ServiceMovements }))
-    );
-
-    const CustomZJAuditoryClicksReport = React.lazy(() => 
-        import('../../../../../../costume-modules/zjSAS.S/src/containers/reports/AuditoryClicksReport').then(module => ({ default: module.AuditoryClicksReport }))
-    );
+import { getCustomReports } from '../../../../../../costume-modules/reports';
 
 export function Reports(){
 
     const {userConfig,userInfo,appInfo,appConfig} = useAppInfo();
     const navigate = useNavigate();
     const location = useLocation();
+    const customReports = getCustomReports(appInfo, appConfig);
 
     console.log(userConfig)
     
@@ -130,21 +117,9 @@ export function Reports(){
                             <CardReport type={'contable'} title={'Informe de cartera (Alpha)'} description={'Versión de prueba Alpha V 0.1'} onClick={()=>{
                                 handleNavigate('BriefCases')
                             }}/>
-                            {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                                <CardReport type={'processes'} title={'Informe de clicks (Beta)'} description={'Versión de prueba Beta V 1.1'} onClick={()=>{
-                                    handleNavigate('zjClicksReport')
-                                }}/>
-                            )}
-                            {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                                <CardReport type={'inventarios'} title={'Informe de servicios (Alpha)'} description={'Versión de prueba Alpha V 1.1'} onClick={()=>{
-                                    handleNavigate('zjServicesReport')
-                                }}/>
-                            )}
-                            {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                                <CardReport type={'processes'} title={'Auditoria de clicks (V0.01)'} description={'Versión de prueba Alpha V 1.1'} onClick={()=>{
-                                    handleNavigate('zjAuditoryClicksReport')
-                                }}/>
-                            )}
+                            {customReports.map((report) => (
+                                <CardReport key={report.path} type={report.type} title={report.title} description={report.description} onClick={() => handleNavigate(report.path)}/>
+                            ))}
                             <CardReport type={'contable'} title={'Informe Cierres de caja'} description={'Consulte los cierres de caja'} onClick={()=>{
                                 handleNavigate('CashBoxesCloseReport')
                             }}/>
@@ -174,27 +149,13 @@ export function Reports(){
                 <Route path='/BriefCases/:thirdParty_id' element={<PortfolioReportDetail/>}/>
                 <Route path='/ProcessInstanceHistorial' element={<ReportHistorialInstance/>}/>
                 <Route path='/CashBoxesCloseReport' element={<CashBoxesCloseReport/>}/>
-                {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                    <Route path='/zjClicksReport' element={
-                    <Suspense fallback={<div>Cargando componente pesado...</div>}>
-                        <CustomZJClicksReport useAlert={useAlert} appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} useAiAssistant={useAiAssistant}/>
-                    </Suspense>
+                {customReports.map(({ path, Component }) => (
+                    <Route key={path} path={`/${path}`} element={
+                        <Suspense fallback={<div role="status">Cargando informe personalizado...</div>}>
+                            <Component key={appInfo?.company_id} appInfo={appInfo} userInfo={userInfo} userConfig={userConfig} useAlert={useAlert} useAiAssistant={useAiAssistant}/>
+                        </Suspense>
                     }/>
-                )}
-                {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                    <Route path='/zjAuditoryClicksReport' element={
-                    <Suspense fallback={<div>Cargando modulo personalizado...</div>}>
-                        <CustomZJAuditoryClicksReport useAlert={useAlert} appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} useAiAssistant={useAiAssistant}/>
-                    </Suspense>
-                    }/>
-                )}
-                {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                    <Route path='/zjServicesReport' element={
-                    <Suspense fallback={<div>Cargando componente pesado...</div>}>
-                        <CustomZJServicesReport appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} useAiAssistant={useAiAssistant}/>
-                    </Suspense>
-                    }/>
-                )}
+                ))}
             </Routes>
         </div>
     )

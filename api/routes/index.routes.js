@@ -11,6 +11,7 @@ import { uploadMiddleware } from '../uploadMiddleWare.js';
 import facturationController from '../controllers/facturationController.js';
 // Custom controllers import
     import zjController from '../controllers/custom-controllers/zjController.js';
+    import nexo360Controller from '../controllers/custom-controllers/nexo360Controller.js';
 import assetsController from '../controllers/assetsController.js';
 import AnalyticController from '../controllers/AnalyticsController.js';
 import electronicFacturationController from '../controllers/electronicFacturationController.js';
@@ -28,6 +29,8 @@ import { authenticateSession } from '../middleware/authenticateSession.js';
 import { sessionErrorHandler } from '../middleware/sessionErrorHandler.js';
 import { requireTrustedOrigin } from '../middleware/requireTrustedOrigin.js';
 import { requireCompanyAccess } from '../middleware/requireCompanyAccess.js';
+import supplierDelegationController from '../controllers/supplierDelegationController.js';
+import externalAccesThirdPartyController from '../controllers/externalThirdPartyAccesController.js';
 
 const router = express.Router();
 
@@ -39,6 +42,7 @@ const upload = multer({ dest: CHUNKS_DIR });
 router.use('/api/integrations/v1', integrationRouter);
 router.use('/api/system-ai/v1', systemAIRouter);
 router.use('/api/auth/v1', sessionRouter);
+
 
 // SGA General
 
@@ -185,14 +189,18 @@ router.post('/inventory/createSubCategory',inventoryController.createCatetory);
 router.post(
     '/inventory/getProducts',
     express.json({ limit: '32kb', strict: true }),
-    requireTrustedOrigin,
-    authenticateSession,
-    requireCompanyAccess,
-    inventoryController.getProducts,
-    sessionErrorHandler
+    inventoryController.getProducts
+);
+
+router.post(
+    '/inventory/getPS',
+    express.json({ limit: '32kb', strict: true }),
+    inventoryController.getProducts
 );
 
 router.post(`/inventory/getComercialProducts`,inventoryController.getComercialProducts);
+
+router.post('/inventory/getPresets',inventoryController.getPresets);
 
 router.post('/inventory/createProduct',inventoryController.createProduct);
 
@@ -261,6 +269,18 @@ router.post('/inventory/deleteItemPricesList',inventoryController.deleteItemPric
 // SGA - PROCESS
 
 router.post('/process/getProcessInstances', processController.getProcessInstances);
+router.post('/process/getEvidenceOptions', express.json({ limit: '16kb', strict: true }), processController.getEvidenceOptions);
+router.post('/process/registerEvidence', express.json({ limit: '256kb', strict: true }), processController.registerEvidence);
+
+router.post('/process/orders-delegation/list', express.json({limit:'256kb'}),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess,
+    supplierDelegationController.list, sessionErrorHandler);
+router.post('/process/orders-delegation/register', express.json({limit:'2mb'}),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess,
+    supplierDelegationController.register, sessionErrorHandler);
+router.post('/process/orders-delegation/update', express.json({limit:'2mb'}),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess,
+    supplierDelegationController.update, sessionErrorHandler);
 
 router.post('/process/getProcessState', processController.getProcessState);
 
@@ -368,9 +388,33 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
 
     router.post('/zj852/getServiceMovements',zjController.getServiceMovements);
 
+    // NEXO 360: sesión y pertenencia verificadas antes de consultar el informe.
+    router.post('/nexo360/getProcessAdministrationReport', express.json({ limit: '16kb' }),
+        requireTrustedOrigin, authenticateSession, requireCompanyAccess,
+        nexo360Controller.getProcessAdministrationReport, sessionErrorHandler);
 
 
-// EXTERNAL SERVICES
+
+    // EXTERNAL SERVICES
+
+    //
+
+    router.post(
+        '/externalAccess/create',
+        express.json({ limit: '16kb', strict: true }),
+        requireTrustedOrigin,
+        authenticateSession,
+        requireCompanyAccess,
+        externalAccesThirdPartyController.create,
+        sessionErrorHandler
+    );
+    router.post('/externalAccess/logIn', externalAccesThirdPartyController.logIn);
+    router.post('/externalAccess/getCompanyInfo', externalAccesThirdPartyController.getCompanyInfo);
+    router.post('/externalAccess/getUserInfo', externalAccesThirdPartyController.getUserInfo);
+    router.post('/externalAccess/logOut', externalAccesThirdPartyController.logOut);
+    router.post('/externalAccess/getParamDocs',externalAccesThirdPartyController.getParamsDocs);
+    router.post('/externalAccess/getParamDocTemplate',externalAccesThirdPartyController.getParamDocTemplate);
+    router.post('/externalAccess/registerParamDoc', express.json({ limit: '2mb', strict: true }), externalAccesThirdPartyController.registerParamDoc);
 
     // ELECTRONIC FACTURATION
     
@@ -379,6 +423,16 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     router.post('/electronicFacturation/setNumberingRangeCurrent', electronicFacturationController.setNumberingRangeCurrent);
 
     router.post('/electronicFacturation/deletePendingBill', electronicFacturationController.deletePendingBill);
+
+    router.post(
+        '/electronicFacturation/deleteCreditNote',
+        express.json({ limit: '16kb', strict: true }),
+        requireTrustedOrigin,
+        authenticateSession,
+        requireCompanyAccess,
+        electronicFacturationController.deleteCreditNote,
+        sessionErrorHandler
+    );
 
     router.get('/electronicFacturation/showActualToken', electronicFacturationController.showActualToken);
 
@@ -404,6 +458,6 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
 
     router.get('/electronicFacturation/getMunicipalities',electronicFacturationController.getMunicipalities);
 
-    router.post('/electronicFacturationController.getDocumentFullInfo',electronicFacturationController.getDocumentFullInfo);
+    router.post('/electronicFacturation/getDocumentFullInfo',electronicFacturationController.getDocumentFullInfo);
 
 export default router;

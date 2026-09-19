@@ -206,7 +206,11 @@
 
 
 
-
+.UserApp .AiPet{
+    position: fixed;
+    bottom: 2dvh;
+    right: 2dvh;
+}
 
 
 .UserApp .asideMenuApp .ServiceSgaCard{

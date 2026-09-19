@@ -2092,6 +2092,27 @@ controller.getDocuments = (req,res)=>{
         whereClauses.push(`"Ecosystem".documents.company_id = $1`);
         values.push(info.company_id)
 
+        if(info.allowedIds !== undefined){
+            if(!Array.isArray(info.allowedIds) || info.allowedIds.length > 1000){
+                res.writeHead(400, {'Content-Type':'application/json'});
+                res.end(JSON.stringify({error:'allowedIds debe ser un arreglo de máximo 1000 IDs.'}));
+                return;
+            }
+            const allowedIds = [...new Set(info.allowedIds.map(String))];
+            if(allowedIds.some(id => !/^[1-9]\d*$/.test(id))){
+                res.writeHead(400, {'Content-Type':'application/json'});
+                res.end(JSON.stringify({error:'allowedIds contiene un ID inválido.'}));
+                return;
+            }
+            if(allowedIds.length === 0){
+                res.writeHead(200, {'Content-Type':'text/plain'});
+                res.end(JSON.stringify([true, []]));
+                return;
+            }
+            whereClauses.push(`"Ecosystem".documents.id = ANY($${values.length + 1}::bigint[])`);
+            values.push(allowedIds);
+        }
+
         if(info.allowedTypes != undefined){
             whereClauses.push(`"Ecosystem".documents.document_type = ANY($${values.length + 1}::document_types[])`);
             values.push(info.allowedTypes);
@@ -2131,7 +2152,7 @@ controller.getDocuments = (req,res)=>{
                 "Ecosystem".documents.created_at AT TIME ZONE (${companyTimeZoneSql('$1')}) AS created_at_local,
                 ("Ecosystem".documents.created_at AT TIME ZONE (${companyTimeZoneSql('$1')}))::date AS business_date,
                 ${companyTimeZoneSql('$1')} AS business_time_zone,
-                "Ecosystem".docs_instances.instance_id,
+                COALESCE("Ecosystem".documents.instance_id, "Ecosystem".docs_instances.instance_id) AS instance_id,
                 "Process".process_instance."ownSerial" as "instanceOwnSerial"
             FROM
                 "Ecosystem".documents
@@ -2184,6 +2205,22 @@ controller.getThirdParties = (req,res)=>{
             values.push(info.id)
         }
 
+        if(info.identificationNumber != undefined){
+            whereClauses.push(`"Ecosystem".thirdparties.indentification_number = $${values.length + 1}`)
+            values.push(`${info.identificationNumber}`.trim())
+        }
+
+        if(info.type != undefined){
+            const thirdPartyType = `${info.type}`.trim().toLowerCase();
+            if(thirdPartyType === 'supplier'){
+                values.push('supplier','both');
+                whereClauses.push(`"Ecosystem".thirdparties.type IN ($${values.length - 1}, $${values.length})`)
+            }else{
+                values.push(thirdPartyType)
+                whereClauses.push(`"Ecosystem".thirdparties.type = $${values.length}`)
+            }
+        }
+
         const whereQuery = `WHERE ${whereClauses.join(" AND ")}`;
         
         // 1. Columnas básicas
@@ -2213,6 +2250,7 @@ controller.getThirdParties = (req,res)=>{
                 tti.nature AS "thirdParty_nature",
                 tti."identidicationType_id",
                 tti.regime,
+                tpl."priceList_id" AS "thirdPartyPricesList_id",
                 tti.retention_type,
                 tti.economic_activity,
                 tti."attachedRut",
@@ -2228,6 +2266,8 @@ controller.getThirdParties = (req,res)=>{
             joinClause = `
                 LEFT JOIN "Ecosystem"."thirdPartyComercialInfo" ci
                     ON "Ecosystem".thirdparties.id = ci."thirdParty_id"
+                LEFT JOIN "Inventory"."thirdparties_pricesList" tpl
+                    ON "Ecosystem".thirdparties.id = tpl."thirdParty_id" 
                 LEFT JOIN "Ecosystem".mv_thirdparty_account_balances b
                     ON "Ecosystem".thirdparties.id = b."thirdParty_id"
                     AND "Ecosystem".thirdparties.company_id = b.company_id

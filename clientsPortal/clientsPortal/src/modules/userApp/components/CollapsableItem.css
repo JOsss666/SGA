@@ -1,0 +1,40 @@
+
+
+.CollapsableItem{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.CollapsableItem .head{
+    width: 100%;
+    display: flex;
+    border: solid .1vh var(--inputsBorder);
+    padding: 1vh;
+    border-radius: 2vh;
+    cursor: pointer;
+    background-color: var(--cardHover);
+}
+
+.CollapsableItem .head h6{
+    font-size: clamp(2.5px,2.5vh,25px);
+    margin: auto;
+    margin-left: 1vh;
+    color: var(--mainText);
+    font-weight: 700;
+}
+
+.CollapsableItem .head i{
+    margin: auto;
+    margin-right: 2vh;
+    font-size: clamp(2.5px,2.5vh,25px);
+    color: var(--mainText);
+}
+
+.CollapsableItem .body{
+    padding: 1vh 0;
+    border: dashed .2vh var(--inputsBorder);
+    border-top: none;
+    border-bottom-left-radius: 2vh;
+    border-bottom-right-radius: 2vh;
+}

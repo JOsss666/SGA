@@ -1,0 +1,184 @@
+.sgaTreasury .briefCases {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    min-height: 100%;
+    padding: 2vh 3vw 3vh;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.sgaTreasury .briefCases .briefCasesHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2vh;
+}
+
+.sgaTreasury .briefCases .briefCasesHeader > div {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: .7vh;
+}
+
+.sgaTreasury .briefCases .briefCasesSampleBadge {
+    display: inline-flex;
+    min-height: 3.6vh;
+    padding: .7vh 1.2vh;
+    align-items: center;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: 999px;
+    color: var(--chatAccent);
+    background: var(--inputsBg);
+    font-size: clamp(.72rem, 1.4vh, .86rem);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.sgaTreasury .briefCases .briefCasesSummary {
+    display: flex;
+    width: 100%;
+    gap: 2vw;
+    margin: 1vh 0;
+}
+
+.sgaTreasury .briefCases .briefCasesSummary article {
+    display: flex;
+    min-width: 0;
+    min-height: 8.5vh;
+    padding: 1.5vh 1.7vh;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: .5vh;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: 1vh;
+    background: var(--inputsBg);
+    box-shadow: var(--chatBubbleShadow);
+}
+
+.sgaTreasury .briefCases .briefCasesSummary span {
+    color: var(--descriptionText);
+    font-size: clamp(.72rem, 1.45vh, .9rem);
+}
+
+.sgaTreasury .briefCases .briefCasesSummary strong {
+    overflow: hidden;
+    color: var(--mainText);
+    font-size: clamp(1rem, 2.2vh, 1.35rem);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sgaTreasury .briefCases .briefCasesToolbar {
+    display: flex;
+    width: 100%;
+    gap: 2vw;
+}
+
+.sgaTreasury .briefCases .briefCasesToolbar .SearchBar{
+    width: fit-content;
+}
+
+.sgaTreasury .briefCases .briefCasesToolbar .SearchBar input{
+    width: 15vw;
+    transition: .3s ease-out;
+}
+
+.sgaTreasury .briefCases .briefCasesTable .universalTable {
+    height: 48vh;
+}
+
+.sgaTreasury .briefCases .briefCasesToolbar .SearchBar input:focus{
+    width: 30vw;
+}
+
+.sgaTreasury .briefCases .briefCasesToolbar .rightOptions{
+    margin: auto;
+    margin-right: 0;
+}
+
+
+
+.sgaTreasury .briefCases .briefCasesError {
+    display: flex;
+    min-height: 5vh;
+    padding: 1vh 1.3vh;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1vh;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: .8vh;
+    color: var(--mainText);
+    background: var(--lightGradient4);
+}
+
+.sgaTreasury .briefCases .briefCasesError button {
+    min-height: 4.4vh;
+    padding: .8vh 1.2vh;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: .7vh;
+    color: var(--mainText);
+    background: var(--inputsBg);
+    cursor: pointer;
+}
+
+.sgaTreasury .briefCases .briefCasesError button:hover {
+    background: var(--cardHover);
+}
+
+.sgaTreasury .briefCases .briefCasesError button:focus-visible {
+    outline: .25vh solid var(--chatAccent);
+    outline-offset: .2vh;
+}
+
+.sgaTreasury .briefCases .briefCasesTable {
+    width: 100%;
+    min-width: 0;
+}
+
+.sgaTreasury .briefCases .briefCasesCurrency {
+    display: block;
+    overflow: hidden;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sgaTreasury .briefCases .briefCasesStatus {
+    display: inline-flex;
+    align-items: center;
+    gap: .6vh;
+    color: var(--descriptionText);
+    white-space: nowrap;
+}
+
+.sgaTreasury .briefCases .briefCasesStatus i {
+    color: var(--descriptionText);
+    font-size: .55em;
+}
+
+.sgaTreasury .briefCases .briefCasesStatus.enabled i {
+    color: var(--chatAccent);
+}
+
+@media (max-width: 720px) {
+    .sgaTreasury .briefCases {
+        padding: 2vh 2vh 3vh;
+    }
+
+    .sgaTreasury .briefCases .briefCasesHeader,
+    .sgaTreasury .briefCases .briefCasesSummary {
+        flex-direction: column;
+    }
+
+    .sgaTreasury .briefCases .briefCasesSampleBadge {
+        align-self: flex-start;
+    }
+
+    .sgaTreasury .briefCases .briefCasesSummary article {
+        width: 100%;
+        min-height: 7.5vh;
+    }
+}

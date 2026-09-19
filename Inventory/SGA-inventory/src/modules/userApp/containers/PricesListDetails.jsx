@@ -186,7 +186,7 @@ export function PricesListDetails(){
         if(userConfig.access.cellars.enabled.length > 1){
             allowedCellars = userConfig.access.cellars.enabled.length;
         }
-        let res = await postInfo('/inventory/getProducts',{
+        let res = await postInfo('/inventory/getPS',{
             company_id:appInfo.company_id,
             allowedStores,
             allowedCellars,
