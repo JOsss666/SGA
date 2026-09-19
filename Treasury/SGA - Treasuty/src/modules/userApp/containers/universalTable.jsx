@@ -7,6 +7,11 @@ import './universalTable.css';
 const normalizeText = (value) => String(value ?? '').trim().toLocaleLowerCase('es-CO');
 const normalizeFilterValue = (value) => String(value ?? '');
 
+// Una celda puede tener múltiples valores (arreglo): cada elemento se trata como
+// un token independiente para filtrar/buscar. Los valores escalares se envuelven
+// en un token único, así el comportamiento con columnas normales no cambia.
+const toFilterTokens = (value) => (Array.isArray(value) ? value : [value]);
+
 const getInitialSort = (columns) => {
     const sortedColumn = columns.find((column) => ['ASC', 'DESC'].includes(column.order));
     return sortedColumn ? { key: sortedColumn.key, order: sortedColumn.order } : null;
@@ -16,7 +21,7 @@ const normalizeColumnValues = (column, results) => {
     const providedValues = Array.isArray(column.values) ? column.values : [];
     const sourceValues = providedValues.length > 0
         ? providedValues
-        : results.map((result) => result?.[column.key]);
+        : results.flatMap((result) => toFilterTokens(result?.[column.key]));
     const uniqueValues = new Map();
 
     sourceValues.forEach((entry) => {
@@ -101,13 +106,14 @@ export function UniversalTable({
         const normalizedSearch = normalizeText(searchValue);
         const filtered = tableResults.filter((result) => {
             const matchesSearch = !normalizedSearch || visibleColumns.some((column) => (
-                normalizeText(result?.[column.key]).includes(normalizedSearch)
+                toFilterTokens(result?.[column.key]).some((token) => normalizeText(token).includes(normalizedSearch))
             ));
 
             if (!matchesSearch) return false;
 
+            // Una celda multi-valor pasa el filtro si cualquiera de sus tokens está seleccionado.
             return Object.entries(columnFilters).every(([columnKey, selectedValues]) => (
-                selectedValues.includes(normalizeFilterValue(result?.[columnKey]))
+                toFilterTokens(result?.[columnKey]).some((token) => selectedValues.includes(normalizeFilterValue(token)))
             ));
         });
 
