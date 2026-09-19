@@ -1,4 +1,8 @@
-const apiBaseUrl = "https://sga-2zgp.onrender.com";
+import { urlSer } from '../../utils/functions';
+
+// Fuente única de la URL del backend: se controla desde utils/functions.js (urlSer),
+// igual que el resto de llamadas del módulo. No hardcodear otra URL aquí.
+const apiBaseUrl = urlSer;
 
 export async function getProcessAdministrationReport(companyId) {
     const response = await fetch(`${apiBaseUrl}/nexo360/getProcessAdministrationReport`, {
