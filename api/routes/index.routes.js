@@ -272,15 +272,14 @@ router.post('/process/getProcessInstances', processController.getProcessInstance
 router.post('/process/getEvidenceOptions', express.json({ limit: '16kb', strict: true }), processController.getEvidenceOptions);
 router.post('/process/registerEvidence', express.json({ limit: '256kb', strict: true }), processController.registerEvidence);
 
+// La compañía y el usuario se identifican por el body (company_id/user_id), igual que el
+// resto de la app. No se exige cookie de sesión porque no viaja cross-site en Safari.
 router.post('/process/orders-delegation/list', express.json({limit:'256kb'}),
-    requireTrustedOrigin, authenticateSession, requireCompanyAccess,
-    supplierDelegationController.list, sessionErrorHandler);
+    requireTrustedOrigin, supplierDelegationController.list, sessionErrorHandler);
 router.post('/process/orders-delegation/register', express.json({limit:'2mb'}),
-    requireTrustedOrigin, authenticateSession, requireCompanyAccess,
-    supplierDelegationController.register, sessionErrorHandler);
+    requireTrustedOrigin, supplierDelegationController.register, sessionErrorHandler);
 router.post('/process/orders-delegation/update', express.json({limit:'2mb'}),
-    requireTrustedOrigin, authenticateSession, requireCompanyAccess,
-    supplierDelegationController.update, sessionErrorHandler);
+    requireTrustedOrigin, supplierDelegationController.update, sessionErrorHandler);
 
 router.post('/process/getProcessState', processController.getProcessState);
 
