@@ -414,6 +414,12 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     router.post('/externalAccess/getCompanyInfo', externalAccesThirdPartyController.getCompanyInfo);
     router.post('/externalAccess/getUserInfo', externalAccesThirdPartyController.getUserInfo);
     router.post('/externalAccess/logOut', externalAccesThirdPartyController.logOut);
+    // Delegación a proveedores desde el portal externo: autenticada por
+    // company_key + access_key (el tercero no tiene cookie de sesión), actuando
+    // con la identidad/rol del responsable interno del acceso.
+    router.post('/externalAccess/orders-delegation/list', express.json({ limit: '256kb' }), externalAccesThirdPartyController.delegationList);
+    router.post('/externalAccess/orders-delegation/register', express.json({ limit: '2mb' }), externalAccesThirdPartyController.delegationRegister);
+    router.post('/externalAccess/orders-delegation/update', express.json({ limit: '2mb' }), externalAccesThirdPartyController.delegationUpdate);
     router.post('/externalAccess/getParamDocs',externalAccesThirdPartyController.getParamsDocs);
     router.post('/externalAccess/getParamDocTemplate',externalAccesThirdPartyController.getParamDocTemplate);
     router.post('/externalAccess/registerParamDoc', express.json({ limit: '2mb', strict: true }), externalAccesThirdPartyController.registerParamDoc);

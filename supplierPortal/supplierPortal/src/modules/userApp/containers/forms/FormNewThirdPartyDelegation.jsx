@@ -12,7 +12,7 @@ import { PreviewFile } from "../Preview/PreviewFile";
 import { urlSer } from '../../../../App';
 
 async function delegationRequest(path, payload) {
-    const response = await fetch(`${urlSer}/process/orders-delegation/${path}`, {
+    const response = await fetch(`${urlSer}/externalAccess/orders-delegation/${path}`, {
         method:'POST', credentials:'include',
         headers:{'Content-Type':'application/json','X-SGA-Company-Id':String(payload.company_id)},
         body:JSON.stringify(payload), signal:AbortSignal.timeout(60000)
@@ -25,7 +25,7 @@ async function delegationRequest(path, payload) {
 export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun,forUpdate=false,asignedDocument}){
 
     // Requirements
-    const {appInfo} = useAppInfo();
+    const {appInfo, userInfo} = useAppInfo();
     const {popInAlert,popOutAlert} = useAlert();
 
     // Control
@@ -170,6 +170,8 @@ export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun,forUpdate
         try {
             const payload = {
                 company_id:appInfo.company_id,
+                company_key:appInfo.company_key,
+                access_key:userInfo.user_key,
                 instance_id:instnaceInfo.id,
                 relations:relationsToSave.map(({doc_id,item_id,thirdParty_id,asignationNote})=>({doc_id,item_id,thirdParty_id,asignationNote}))
             };
@@ -222,6 +224,8 @@ export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun,forUpdate
                 const orders = ordersResponse[1];
                 const saved = await delegationRequest('list',{
                     company_id:appInfo.company_id,
+                    company_key:appInfo.company_key,
+                    access_key:userInfo.user_key,
                     instance_id:instnaceInfo.id,
                     ...(forUpdate ? {delegation_document_id:asignedDocument} : {})
                 });
