@@ -1,4 +1,4 @@
-const apiBaseUrl = "http://localhost:3000";
+const apiBaseUrl = "https://sga-2zgp.onrender.com";
 
 export async function getProcessAdministrationReport(companyId) {
     const response = await fetch(`${apiBaseUrl}/nexo360/getProcessAdministrationReport`, {
