@@ -7,20 +7,39 @@ import { CheckSquare } from '../../../../Facturation/Facturation/src/modules/use
 import { LoadingSpace } from '../../../../Facturation/Facturation/src/modules/userApp/containers/LoadingSpace';
 import { DocumentPreview } from '../../../../Facturation/Facturation/src/modules/userApp/containers/Alerts/DocumentPreview';
 import { ButtonDownload } from '../../../../Facturation/Facturation/src/modules/userApp/components/ButtonDownload';
-import { SearchBar } from "../../../../Facturation/Facturation/src/modules/userApp/components/SearchBar";
-import { useState } from "react";
-import { ProcessMetricFilter } from "../components/processMetricFilter";
+import { useMemo, useState } from "react";
 import { ProcessAdministrationTable } from "../containers/processAdministrationTable";
 import { useProcessAdministrationReport } from "../hooks/useProcessAdministrationReport";
 import "./processAdministrationReport.css";
+import { PathLocation } from "../../../../Facturation/Facturation/src/modules/userApp/components/PathLocation";
+import { BoldTitle } from "../../../../Facturation/Facturation/src/modules/userApp/components/BoldTitle";
+import { SearchBar } from "../../../../Facturation/Facturation/src/modules/userApp/components/SearchBar";
+import { RangeDate } from "../../../../Treasury/SGA - Treasuty/src/modules/userApp/components/RangeDate";
+import { ProcessStatusAlert } from "../../../../Facturation/Facturation/src/modules/userApp/containers/Alerts/ProcessStatusAlert";
 
-const exportColumns = ["id", "clientName", "store", "city", "product", "status", "clientStage", "administrationStage", "providerStage", "promisedAt"];
+const exportColumns = ["reference", "clientName", "processName", "processInstanceName", "processStage", "deliveryAt", "createdAt", "status", "paramDocReference"];
+
+// El rango de fechas del informe se evalúa sobre la fecha de creación de la orden.
+const withinCreatedRange = (createdAt, { minDate, maxDate }) => {
+    if (!minDate && !maxDate) return true;
+    if (!createdAt) return false;
+    const day = String(createdAt).slice(0, 10); // yyyy-MM-dd
+    if (minDate && day < minDate) return false;
+    if (maxDate && day > maxDate) return false;
+    return true;
+};
 
 export function ProcessAdministrationReport({ appInfo, useAlert }) {
     const { popInAlert } = useAlert();
     const report = useProcessAdministrationReport(appInfo?.company_id);
     const [selectedOrderIds, setSelectedOrderIds] = useState([]);
     const [selectionNotice, setSelectionNotice] = useState("");
+    const [dateRange, setDateRange] = useState({ minDate: "", maxDate: "" });
+    const visibleOrders = useMemo(
+        () => report.filteredOrders.filter((order) => withinCreatedRange(order.createdAt, dateRange)),
+        [report.filteredOrders, dateRange]
+    );
+    const openProcess = (instanceId) => { if (instanceId) popInAlert(<ProcessStatusAlert instance_id={instanceId} />); };
     const openClientOrder = (order) => popInAlert(<DocumentPreview data={{
         ...order,
         doc_id: order.doc_id || order.documentId || order.id,
@@ -46,17 +65,21 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
     return <main className="processAdministrationReport ReportDocument">
         <header className="processAdministrationReportHeader">
             <div>
-                <span>NEXO 360 · Informe personalizado</span>
-                <h1>Administración de procesos</h1>
+                <PathLocation/>
+                <BoldTitle text={'Administración de procesos'}/>
             </div>
-            <ButtonDownload info={report.filteredOrders} columns={exportColumns} title="Informe administración procesos NEXO 360" text="Descargar informe" />
         </header>
-
-        <ProcessMetricFilter FormButton={FormButton} totals={report.totals} value={report.quickFilter} onChange={report.selectQuickFilter} />
+        <div className="settingsReport">
+            <SearchBar placeholder={'Buscar documento'} value={report.search} action={report.setSearch}/>
+            <div className="sgaTreasury">
+                <RangeDate label="Rango de creación" updateRange={setDateRange} align="left"/>
+            </div>
+            <ButtonDownload info={visibleOrders} columns={exportColumns} title="Informe administración procesos NEXO 360" text="Descargar informe" />
+        </div>
         {report.notice && <div className="processAdministrationReportNotice" role="status"><i className="fa-solid fa-circle-info" aria-hidden="true" />{report.notice}</div>}
         {selectionNotice && <div className="processAdministrationReportNotice" role="alert"><i className="fa-solid fa-circle-exclamation" aria-hidden="true" />{selectionNotice}</div>}
         {report.loading
             ? <LoadingSpace />
-            : <ProcessAdministrationTable UniversalTable={UniversalTable} UniversalRow={UniversalRow} SearchBar={SearchBar} CheckSquare={CheckSquare} FormButton={FormButton} search={report.search} setSearch={report.setSearch} orders={report.filteredOrders} total={report.orders.length} selectedOrderIds={selectedOrderIds} onToggleOrder={toggleOrder} onBulkAssign={openBulkAssignment} onOpen={openClientOrder} />}
+            : <ProcessAdministrationTable UniversalTable={UniversalTable} UniversalRow={UniversalRow} TagIndicator={TagIndicator} SearchBar={SearchBar} CheckSquare={CheckSquare} FormButton={FormButton} search={report.search} setSearch={report.setSearch} orders={visibleOrders} total={report.orders.length} selectedOrderIds={selectedOrderIds} onToggleOrder={toggleOrder} onBulkAssign={openBulkAssignment} onOpen={openClientOrder} onOpenProcess={openProcess} />}
     </main>;
 }
