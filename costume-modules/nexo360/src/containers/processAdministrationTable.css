@@ -1,18 +1,190 @@
-.processAdministrationTable { min-width:0; margin:0 1vh; overflow-x:auto; border:1px solid var(--inputsBorder); border-radius:1.2vh; background:var(--inputsBg); }
-.processAdministrationTable > header { display:flex; align-items:center; justify-content:space-between; gap:2vh; padding:1.7vh; border-bottom:1px solid var(--inputsBorder); }
-.processAdministrationTable h2,.processAdministrationTable p { margin:0; }
-.processAdministrationTable p,.processAdministrationTable small { color:var(--descriptionText); }
-.processAdministrationTable > header > strong { padding:.6vh 1vh; border-radius:999px; background:var(--lightSelected); white-space:nowrap; }
-.processAdministrationTable .processAdministrationTableTools { display:flex; min-width:min(100%,42vh); align-items:center; justify-content:flex-end; gap:1vh; }
-.processAdministrationTable .processAdministrationTableTools .SearchBar { width:100%; min-width:24vh; }
-.processAdministrationTable .processAdministrationTableBulk { display:flex; align-items:center; justify-content:space-between; gap:1vh; padding:1vh 1.7vh; border-bottom:1px solid var(--inputsBorder); background:var(--lightSelected); }
-.processAdministrationTable .processAdministrationTableBulk span { color:var(--mainText); }
-.processAdministrationTable .processAdministrationTableBulk .FormButton { width:auto; min-height:4.4vh; padding:.7vh 1.2vh; white-space:nowrap; }
-.processAdministrationTable .sgaTreasury { min-width:0; }
-.processAdministrationTable .universalTable { border:0; border-radius:0; box-shadow:none; }
-.processAdministrationTable .universalRowCell > span { display:flex; min-width:0; flex-direction:column; gap:.45vh; }
-.processAdministrationTable .universalRowCell b,.processAdministrationTable .universalRowCell small { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.processAdministrationTable .processAdministrationTableOrder { display:flex; width:100%; min-width:0; padding:0; flex-direction:column; gap:.45vh; border:0; color:var(--mainText); background:transparent; cursor:pointer; text-align:left; }
-.processAdministrationTable .processAdministrationTableOrder:hover b,.processAdministrationTable .processAdministrationTableOrder:focus-visible b { text-decoration:underline; }
-.processAdministrationTable .processAdministrationTableOrder:focus-visible { outline:2px solid var(--mainText); outline-offset:2px; }
-@media (max-width:720px) { .processAdministrationTable > header,.processAdministrationTable .processAdministrationTableTools,.processAdministrationTable .processAdministrationTableBulk { align-items:stretch; flex-direction:column; } .processAdministrationTable .processAdministrationTableTools { min-width:0; } .processAdministrationTable .processAdministrationTableBulk .FormButton { width:100%; } }
+.processAdministrationTable {
+    min-width: 0;
+    margin: 0 1vh;
+    overflow-x: auto;
+    border: 1px solid var(--inputsBorder);
+    border-radius: 1.2vh;
+    background: var(--inputsBg);
+}
+
+.processAdministrationTable > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2vh;
+    padding: 1.7vh;
+    border-bottom: 1px solid var(--inputsBorder);
+}
+
+.processAdministrationTable h2,
+.processAdministrationTable p {
+    margin: 0;
+}
+
+.processAdministrationTable p,
+.processAdministrationTable small {
+    color: var(--descriptionText);
+}
+
+.processAdministrationTable > header > strong {
+    padding: .6vh 1vh;
+    border-radius: 999px;
+    background: var(--lightSelected);
+    white-space: nowrap;
+}
+
+.processAdministrationTable .processAdministrationTableTools {
+    display: flex;
+    min-width: min(100%, 42vh);
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1vh;
+}
+
+.processAdministrationTable .processAdministrationTableTools .SearchBar {
+    width: 100%;
+    min-width: 24vh;
+}
+
+.processAdministrationTable .processAdministrationTableBulk {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1vh;
+    padding: 1vh 1.7vh;
+    border-bottom: 1px solid var(--inputsBorder);
+    background: var(--lightSelected);
+}
+
+.processAdministrationTable .processAdministrationTableBulk span {
+    color: var(--mainText);
+}
+
+.processAdministrationTable .processAdministrationTableBulk .FormButton {
+    width: auto;
+    min-height: 4.4vh;
+    padding: .7vh 1.2vh;
+    white-space: nowrap;
+}
+
+.processAdministrationTable .sgaTreasury {
+    min-width: 0;
+}
+
+.processAdministrationTable .universalTable {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.processAdministrationTable .universalRowCell > span {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: .45vh;
+}
+
+.processAdministrationTable .universalRowCell b,
+.processAdministrationTable .universalRowCell small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.processAdministrationTable .processAdministrationTableOrder {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    flex-direction: column;
+    gap: .45vh;
+    border: 0;
+    color: var(--mainText);
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    /* Los botones no heredan el tamaño de fuente de la celda: se iguala al mismo
+       clamp que usan las demás columnas para que el texto no se vea sobredimensionado. */
+    font-family: inherit;
+    font-size: clamp(.78rem, 1.65vh, 1rem);
+}
+
+.processAdministrationTable .processAdministrationTableOrder b {
+    font-size: 1.15em;
+}
+
+.processAdministrationTable .processAdministrationTableOrder:hover b,
+.processAdministrationTable .processAdministrationTableOrder:focus-visible b {
+    text-decoration: underline;
+}
+
+.processAdministrationTable .processAdministrationTableOrder:focus-visible {
+    outline: 2px solid var(--mainText);
+    outline-offset: 2px;
+}
+
+/* Contenedor de los TagIndicator multi-valor (Estado producción / Proveedores). */
+.processAdministrationTable .processAdministrationTags {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: .5vh;
+}
+
+.processAdministrationTable .TagIndicator {
+    font-size: clamp(1.4px, 1.4vh, 14px) !important;
+    /* El "bulto" del pill viene sobre todo del padding (em-based): se comprime
+       para que el tag se vea realmente más pequeño con la fuente ya reducida. */
+    padding: .2em .55em !important;
+    gap: .3em !important;
+    border-radius: .5em !important;
+}
+
+/* Cada tag de subproceso es clickeable (abre su ProcessStatusAlert). */
+.processAdministrationTable .processAdministrationTagButton {
+    display: inline-flex;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.processAdministrationTable .processAdministrationTagButton:hover .TagIndicator,
+.processAdministrationTable .processAdministrationTagButton:focus-visible .TagIndicator {
+    outline: 1px solid currentColor;
+}
+
+/* Columna Proceso: identificador (code#serial) que abre el estado del proceso. */
+.processAdministrationTable .processAdministrationTableProcess {
+    padding: 0;
+    border: 0;
+    color: var(--chatAccent, var(--mainText));
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+}
+
+.processAdministrationTable .processAdministrationTableProcess:hover,
+.processAdministrationTable .processAdministrationTableProcess:focus-visible {
+    text-decoration: underline;
+}
+
+@media (max-width: 720px) {
+    .processAdministrationTable > header,
+    .processAdministrationTable .processAdministrationTableTools,
+    .processAdministrationTable .processAdministrationTableBulk {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .processAdministrationTable .processAdministrationTableTools {
+        min-width: 0;
+    }
+
+    .processAdministrationTable .processAdministrationTableBulk .FormButton {
+        width: 100%;
+    }
+}
