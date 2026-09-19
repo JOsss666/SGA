@@ -1,3 +1,4 @@
+import { getCustomReports } from '../../../../../../../costume-modules/reports';
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom";
 import { SearchBar } from "../../components/SearchBar";
@@ -253,11 +254,12 @@ export function SearchResultsPannel({searchValue}){
         {text:'Informe de cierres de caja', path:'reports/CashBoxesCloseReport', group:'Informes', icon:<i className="fa-solid fa-cash-register"/>},
 
         {text:'Estadísticas de procesos', path:'analytics/processInstances', group:'Estadísticas', icon:<i className="fa-solid fa-chart-line"/>},
-        ...(appConfig?.access?.services?.personalized?.['custom-modules']?.['z&j_clicksControl']?.access ? [
-            {text:'Informe de clicks', path:'reports/zjClicksReport', group:'Informes personalizados', icon:<i className="fa-solid fa-arrow-pointer"/>},
-            {text:'Informe de servicios', path:'reports/zjServicesReport', group:'Informes personalizados', icon:<i className="fa-solid fa-screwdriver-wrench"/>},
-            {text:'Auditoría de clicks', path:'reports/zjAuditoryClicksReport', group:'Informes personalizados', icon:<i className="fa-solid fa-shield-halved"/>}
-        ] : [])
+        ...getCustomReports(appInfo, appConfig).map(report => ({
+            text: report.title,
+            path: `reports/${report.path}`,
+            group: 'Informes personalizados',
+            icon: <i className={report.icon}/>
+        }))
     ];
 
     const sectionCanCreate = (sectionName) => (

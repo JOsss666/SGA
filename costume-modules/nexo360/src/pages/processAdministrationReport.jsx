@@ -1,3 +1,13 @@
+import { FormButton } from '../../../../Facturation/Facturation/src/modules/userApp/components/FormButton';
+import { TagIndicator } from '../../../../Facturation/Facturation/src/modules/userApp/components/TagIndicator';
+import { UniversalRow } from '../../../../Treasury/SGA - Treasuty/src/modules/userApp/components/universalRow';
+import { UniversalTable } from '../../../../Treasury/SGA - Treasuty/src/modules/userApp/containers/universalTable';
+import { FormNewThirdPartyDelegation } from '../../../../Facturation/Facturation/src/modules/userApp/containers/forms/FormNewThirdPartyDelegation';
+import { CheckSquare } from '../../../../Facturation/Facturation/src/modules/userApp/components/CheckSquare';
+import { LoadingSpace } from '../../../../Facturation/Facturation/src/modules/userApp/containers/LoadingSpace';
+import { DocumentPreview } from '../../../../Facturation/Facturation/src/modules/userApp/containers/Alerts/DocumentPreview';
+import { ButtonDownload } from '../../../../Facturation/Facturation/src/modules/userApp/components/ButtonDownload';
+import { SearchBar } from "../../../../Facturation/Facturation/src/modules/userApp/components/SearchBar";
 import { useState } from "react";
 import { ProcessMetricFilter } from "../components/processMetricFilter";
 import { ProcessAdministrationTable } from "../containers/processAdministrationTable";
@@ -6,7 +16,7 @@ import "./processAdministrationReport.css";
 
 const exportColumns = ["id", "clientName", "store", "city", "product", "status", "clientStage", "administrationStage", "providerStage", "promisedAt"];
 
-export function ProcessAdministrationReport({ appInfo, useAlert, UniversalTable, UniversalRow, SearchBar, CheckSquare, FormButton, FormNewThirdPartyDelegation, ButtonDownload, DocumentPreview, LoadingSpace }) {
+export function ProcessAdministrationReport({ appInfo, useAlert }) {
     const { popInAlert } = useAlert();
     const report = useProcessAdministrationReport(appInfo?.company_id);
     const [selectedOrderIds, setSelectedOrderIds] = useState([]);
