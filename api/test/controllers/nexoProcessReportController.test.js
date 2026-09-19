@@ -7,12 +7,17 @@ const response = () => ({
     json(body) { this.body = body; return this; }
 });
 
+// La compañía se toma del header X-SGA-Company-Id (con fallback a body.company_id).
+const request = ({ header, body } = {}) => ({
+    get(name) { return name === 'X-SGA-Company-Id' ? header : undefined; },
+    body
+});
+
 for (const [name, req, expectedStatus] of [
-    ['sin sesión', { body: { company_id: 7 } }, 401],
-    ['otra compañía', { auth: { userId: 1, companyId: 8 }, body: { company_id: 8 } }, 403],
-    ['suplantación por body', { auth: { userId: 1, companyId: 8 }, body: { company_id: 7 } }, 403],
-    ['body de otra compañía', { auth: { userId: 1, companyId: 7 }, body: { company_id: 8 } }, 403],
-    ['sin compañía verificada', { auth: { userId: 1 }, body: { company_id: 7 } }, 403]
+    ['sin compañía', request({}), 400],
+    ['compañía no numérica', request({ header: 'abc' }), 400],
+    ['otra compañía por header', request({ header: '8' }), 403],
+    ['otra compañía por body', request({ body: { company_id: 8 } }), 403]
 ]) {
     test(`rechaza ${name} antes de consultar datos`, async () => {
         let queries = 0;
@@ -24,8 +29,13 @@ for (const [name, req, expectedStatus] of [
     });
 }
 
-for (const body of [undefined, { company_id: 7 }, { company_id: '7' }]) {
-    test(`consulta únicamente la compañía autenticada 7 con body ${JSON.stringify(body)}`, async () => {
+for (const req of [
+    request({ header: '7' }),
+    request({ header: '7', body: { company_id: 7 } }),
+    request({ body: { company_id: 7 } }),
+    request({ body: { company_id: '7' } })
+]) {
+    test(`consulta únicamente la compañía 7 con ${JSON.stringify(req.body)} / header ${req.get('X-SGA-Company-Id')}`, async () => {
         const rows = [{ id: 42, doc_id: 42 }];
         const handler = createNexoProcessReportHandler({
             useDataBase: async (sql, values, mode) => {
@@ -37,7 +47,7 @@ for (const body of [undefined, { company_id: 7 }, { company_id: '7' }]) {
             }
         });
         const res = response();
-        await handler({ auth: { userId: 1, companyId: 7 }, body }, res);
+        await handler(req, res);
         assert.equal(res.statusCode, 200);
         assert.deepEqual(res.body, rows);
     });

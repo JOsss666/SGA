@@ -388,9 +388,11 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
 
     router.post('/zj852/getServiceMovements',zjController.getServiceMovements);
 
-    // NEXO 360: sesión y pertenencia verificadas antes de consultar el informe.
+    // NEXO 360: informe restringido a la compañía 7 (identificada por X-SGA-Company-Id/company_id),
+    // siguiendo el mismo modelo que el resto de endpoints de la app. Se conserva el filtro por
+    // origen confiable; no se exige cookie de sesión porque no viaja cross-site en Safari.
     router.post('/nexo360/getProcessAdministrationReport', express.json({ limit: '16kb' }),
-        requireTrustedOrigin, authenticateSession, requireCompanyAccess,
+        requireTrustedOrigin,
         nexo360Controller.getProcessAdministrationReport, sessionErrorHandler);
 
 
