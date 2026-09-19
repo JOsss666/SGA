@@ -300,8 +300,8 @@ export function AppInfoProvider({children}){
         {text:'Inicio',path:'',icon:<img src='https://cdnmain.sga360.co/static/LogoInicio1_nsuzaj.webp' />,action:handleNavigate},
         ...(userConfig.access != undefined && userConfig.access.sections.new.overAll ? [{text:'Crear',path:'new',icon:<i className="fa-solid fa-plus"/>,action:handleNavigate}]:[]),
         {text:'Informes',path:'reports',icon:<img src='https://cdnmain.sga360.co/static/InformesLogo1_iisxav.webp'/>,action:handleNavigate},
-        {text:'Estadisticas',path:'analytics',icon:<img src='https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.webp'/>,action:handleNavigate},
-        {text:'Calendario',path:'calendar',icon:<img src='https://cdnmain.sga360.co/static/LogoCalendario1_ig0avt.webp'/>,action:handleNavigate},
+        // {text:'Estadisticas',path:'analytics',icon:<img src='https://cdnmain.sga360.co/static/ChatGPT_Image_27_oct_2025_10_28_59_2_u5cama.webp'/>,action:handleNavigate},
+        // {text:'Calendario',path:'calendar',icon:<img src='https://cdnmain.sga360.co/static/LogoCalendario1_ig0avt.webp'/>,action:handleNavigate},
     ]
 
     const secondOptionsMenu = [

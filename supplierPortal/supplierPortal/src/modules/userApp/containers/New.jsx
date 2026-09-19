@@ -6,8 +6,8 @@ import {FormClicksControl} from '../../../../../../costume-modules/zjSAS.S/src/c
 import { useEffect, useState } from "react";
 import { verifiClicksControl } from "../../../../../../costume-modules/zjSAS.S/utils/functions";
 import { NoResults } from "./NoResults";
-import { ClientOrderPreview } from "./Alerts/ClientOrderPreview";
-import { SellInvoiceDesign } from "./Alerts/SellInvoiceDesing";
+// import { ClientOrderPreview } from "./Alerts/ClientOrderPreview";
+// import { SellInvoiceDesign } from "./Alerts/SellInvoiceDesing";
 import './New.css'
 import { FormNewParameterDocument } from "./forms/FormNewParameterDocument";
 import { FormNewEvidence } from "./forms/FormNewEvidence";
@@ -47,9 +47,9 @@ export function New(){
         
         {text:'Crear nueva evidencia',children:<FormNewEvidence/>,icon:<i className="bi bi-paperclip"/>},
         
-        {text:'Imprimir Ordes de cliente',children:<ClientOrderPreview/>,icon:<i className="fa-solid fa-print"/>},
+        // {text:'Imprimir Ordes de cliente',children:<ClientOrderPreview/>,icon:<i className="fa-solid fa-print"/>},
         
-        {text:'Imprimir Factura de venta',children:<SellInvoiceDesign/>,icon:<i className="fa-solid fa-print"/>},
+        // {text:'Imprimir Factura de venta',children:<SellInvoiceDesign/>,icon:<i className="fa-solid fa-print"/>},
     ]
 
     return(
