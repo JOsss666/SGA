@@ -11,6 +11,7 @@ import { uploadMiddleware } from '../uploadMiddleWare.js';
 import facturationController from '../controllers/facturationController.js';
 // Custom controllers import
     import zjController from '../controllers/custom-controllers/zjController.js';
+    import nexo360Controller from '../controllers/custom-controllers/nexo360Controller.js';
 import assetsController from '../controllers/assetsController.js';
 import AnalyticController from '../controllers/AnalyticsController.js';
 import electronicFacturationController from '../controllers/electronicFacturationController.js';
@@ -267,8 +268,6 @@ router.post('/inventory/deleteItemPricesList',inventoryController.deleteItemPric
 
 // SGA - PROCESS
 
-router.post('/nexo360/getProcessAdministrationReport', processController.getNexoProcessAdministrationReport);
-
 router.post('/process/getProcessInstances', processController.getProcessInstances);
 router.post('/process/getEvidenceOptions', express.json({ limit: '16kb', strict: true }), processController.getEvidenceOptions);
 router.post('/process/registerEvidence', express.json({ limit: '256kb', strict: true }), processController.registerEvidence);
@@ -388,6 +387,11 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     router.post('/zj852/registerServiceMachine',zjController.registerServiceMachine);
 
     router.post('/zj852/getServiceMovements',zjController.getServiceMovements);
+
+    // NEXO 360: sesión y pertenencia verificadas antes de consultar el informe.
+    router.post('/nexo360/getProcessAdministrationReport', express.json({ limit: '16kb' }),
+        requireTrustedOrigin, authenticateSession, requireCompanyAccess,
+        nexo360Controller.getProcessAdministrationReport, sessionErrorHandler);
 
 
 

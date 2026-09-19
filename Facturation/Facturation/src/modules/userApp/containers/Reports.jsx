@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Route, Routes,useLocation, useNavigate  } from 'react-router-dom';
 import { BoldTitle } from "../components/BoldTitle";
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import { DescriptionSpan } from "../components/DescriptionSpan";
 import { DespleList } from "../components/DespleList";
 import './Reports.css'
@@ -10,7 +10,6 @@ import { ReportBalance } from './reports/ReportBalance';
 import { CardReport } from '../components/CardReport';
 import { SearchBar } from '../components/SearchBar';
 import { SelectOptions } from '../components/SelectOptions';
-import { FormButton } from '../components/FormButton';
 import { ReportKardex } from './reports/ReportKardex';
 import { PathLocation } from '../components/PathLocation';
 import { ReportAccountTransactions } from './reports/ReportAccountTransactions';
@@ -21,41 +20,15 @@ import { useAppInfo,useAiAssistant, useAlert } from '../../../context/context';
 import { CashBoxesCloseReport } from './reports/CashBoxesCloseReport';
 import { ReportHistorialInstance } from './reports/ReportHIstorialInstance';
 import { PortfolioReportDetail } from './reports/PortfolioReportDetail';
-import { ButtonDownload } from '../components/ButtonDownload';
-import { DocumentPreview } from './Alerts/DocumentPreview';
-import { LoadingSpace } from './LoadingSpace';
-import { CheckSquare } from '../components/CheckSquare';
-import { FormNewThirdPartyDelegation } from './forms/FormNewThirdPartyDelegation';
-import { UniversalTable } from '../../../../../../Treasury/SGA - Treasuty/src/modules/userApp/containers/universalTable';
-import { UniversalRow } from '../../../../../../Treasury/SGA - Treasuty/src/modules/userApp/components/universalRow';
 
-// Costume modules
-
-    // Z&J S.A.S
-    const CustomZJClicksReport = React.lazy(() => 
-        import('../../../../../../costume-modules/zjSAS.S/src/containers/reports/ClicksReport').then(module => ({ default: module.ClicksReport }))
-    );
-    const CustomZJServicesReport = React.lazy(() => 
-        import('../../../../../../costume-modules/zjSAS.S/src/containers/reports/ServiceMovements').then(module => ({ default: module.ServiceMovements }))
-    );
-
-    const CustomZJAuditoryClicksReport = React.lazy(() => 
-        import('../../../../../../costume-modules/zjSAS.S/src/containers/reports/AuditoryClicksReport').then(module => ({ default: module.AuditoryClicksReport }))
-    );
-
-    // NEXO 360
-    const CustomNexoProcessAdministrationReport = React.lazy(() =>
-        import('../../../../../../costume-modules/nexo360/src/pages/processAdministrationReport').then(module => ({ default: module.ProcessAdministrationReport }))
-    );
+import { getCustomReports } from '../../../../../../costume-modules/reports';
 
 export function Reports(){
 
     const {userConfig,userInfo,appInfo,appConfig} = useAppInfo();
     const navigate = useNavigate();
     const location = useLocation();
-    const hasNexoProcessAdministration = import.meta.env.DEV || Boolean(
-        appConfig?.access?.services?.personalized?.['custom-modules']?.nexo360_process_admin?.access
-    );
+    const customReports = getCustomReports(appInfo, appConfig);
 
     console.log(userConfig)
     
@@ -136,11 +109,6 @@ export function Reports(){
                             <CardReport type={'processes'} title={'Informe de procesos'} description={'Visualiza los procesos de tu empresa'} onClick={()=>{
                                 handleNavigate('Processes')
                             }}/>
-                            {hasNexoProcessAdministration && (
-                                <CardReport type={'processes'} title={'Administración de procesos NEXO 360'} description={'Sigue cada orden desde el cliente hasta la gestión administrativa y el proveedor'} onClick={() => {
-                                    handleNavigate('NexoProcessAdministration')
-                                }}/>
-                            )}
                             {false && (
                                 <CardReport type={'processes'} title={'Eficiencia usuarios'} description={'Visualiza la eficiencia de los usuarios de tu empresa'} onClick={()=>{
                                     handleNavigate('Eficiency')
@@ -149,21 +117,9 @@ export function Reports(){
                             <CardReport type={'contable'} title={'Informe de cartera (Alpha)'} description={'Versión de prueba Alpha V 0.1'} onClick={()=>{
                                 handleNavigate('BriefCases')
                             }}/>
-                            {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                                <CardReport type={'processes'} title={'Informe de clicks (Beta)'} description={'Versión de prueba Beta V 1.1'} onClick={()=>{
-                                    handleNavigate('zjClicksReport')
-                                }}/>
-                            )}
-                            {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                                <CardReport type={'inventarios'} title={'Informe de servicios (Alpha)'} description={'Versión de prueba Alpha V 1.1'} onClick={()=>{
-                                    handleNavigate('zjServicesReport')
-                                }}/>
-                            )}
-                            {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                                <CardReport type={'processes'} title={'Auditoria de clicks (V0.01)'} description={'Versión de prueba Alpha V 1.1'} onClick={()=>{
-                                    handleNavigate('zjAuditoryClicksReport')
-                                }}/>
-                            )}
+                            {customReports.map((report) => (
+                                <CardReport key={report.path} type={report.type} title={report.title} description={report.description} onClick={() => handleNavigate(report.path)}/>
+                            ))}
                             <CardReport type={'contable'} title={'Informe Cierres de caja'} description={'Consulte los cierres de caja'} onClick={()=>{
                                 handleNavigate('CashBoxesCloseReport')
                             }}/>
@@ -193,46 +149,13 @@ export function Reports(){
                 <Route path='/BriefCases/:thirdParty_id' element={<PortfolioReportDetail/>}/>
                 <Route path='/ProcessInstanceHistorial' element={<ReportHistorialInstance/>}/>
                 <Route path='/CashBoxesCloseReport' element={<CashBoxesCloseReport/>}/>
-                {hasNexoProcessAdministration && (
-                    <Route path='/NexoProcessAdministration' element={
-                        <Suspense fallback={<div>Cargando informe NEXO 360...</div>}>
-                            <CustomNexoProcessAdministrationReport
-                                appInfo={appInfo}
-                                useAlert={useAlert}
-                                UniversalTable={UniversalTable}
-                                UniversalRow={UniversalRow}
-                                SearchBar={SearchBar}
-                                CheckSquare={CheckSquare}
-                                FormButton={FormButton}
-                                FormNewThirdPartyDelegation={FormNewThirdPartyDelegation}
-                                ButtonDownload={ButtonDownload}
-                                DocumentPreview={DocumentPreview}
-                                LoadingSpace={LoadingSpace}
-                            />
+                {customReports.map(({ path, Component }) => (
+                    <Route key={path} path={`/${path}`} element={
+                        <Suspense fallback={<div role="status">Cargando informe personalizado...</div>}>
+                            <Component key={appInfo?.company_id} appInfo={appInfo} userInfo={userInfo} userConfig={userConfig} useAlert={useAlert} useAiAssistant={useAiAssistant}/>
                         </Suspense>
                     }/>
-                )}
-                {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                    <Route path='/zjClicksReport' element={
-                    <Suspense fallback={<div>Cargando componente pesado...</div>}>
-                        <CustomZJClicksReport useAlert={useAlert} appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} useAiAssistant={useAiAssistant}/>
-                    </Suspense>
-                    }/>
-                )}
-                {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                    <Route path='/zjAuditoryClicksReport' element={
-                    <Suspense fallback={<div>Cargando modulo personalizado...</div>}>
-                        <CustomZJAuditoryClicksReport useAlert={useAlert} appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} useAiAssistant={useAiAssistant}/>
-                    </Suspense>
-                    }/>
-                )}
-                {appConfig?.access?.services?.personalized?.['custom-modules']?.["z&j_clicksControl"]?.access && (
-                    <Route path='/zjServicesReport' element={
-                    <Suspense fallback={<div>Cargando componente pesado...</div>}>
-                        <CustomZJServicesReport appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} useAiAssistant={useAiAssistant}/>
-                    </Suspense>
-                    }/>
-                )}
+                ))}
             </Routes>
         </div>
     )
