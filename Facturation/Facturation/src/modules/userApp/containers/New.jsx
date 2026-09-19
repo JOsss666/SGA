@@ -62,7 +62,9 @@ export function New(){
         
         {text:'Factura de venta',children:<FormNewInvoice/>,icon:<i className="fa-solid fa-file-invoice"/>},
 
-        {text:'Asignación a proveedor', children:<FormNewThirdPartyDelegation instnacePreInfo={{}}/>,icon:<i className="bi bi-person-bounding-box"/>},
+        ...(userConfig?.access?.sections?.reports?.documents?.ThirdPartyDelegation === true ? [
+            {text:'Asignación a proveedor', children:<FormNewThirdPartyDelegation instnacePreInfo={{}}/>,icon:<i className="bi bi-person-bounding-box"/>},
+        ] : []),
 
         {text:'Compra',children:<FormNewPurchase/>,icon:<i className="fa-solid fa-cart-shopping"/>},
 
