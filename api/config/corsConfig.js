@@ -11,7 +11,10 @@ export const allowedOrigins = Object.freeze([
     'https://management.sga360.co',
     'https://www.process.sga360.co',
     'https://process.sga360.co',
-    'https://treasury.sga360.co'
+    'https://treasury.sga360.co',
+    // External connections
+    'https://suppliers.sga360.co',
+    'https://clients.sga360.co'
 ]);
 
 export default allowedOrigins;
