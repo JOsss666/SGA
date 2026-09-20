@@ -14,6 +14,7 @@ import { FormSelectMachine } from "../../../../../../../costume-modules/zjSAS.S/
 import { FormNewInvoice } from "./FormNewInvoice";
 import { FormNewBudget } from "./FormNewBudget";
 import { FormNewThirdPartyDelegation } from './FormNewThirdPartyDelegation';
+import { FormNewParameterDocument } from "./FormNewParameterDocument";
 
 export function SelectTpeNewDoc({info,docType,reloadFun}){
     const {userConfig,appInfo,userInfo} = useAppInfo();
@@ -35,6 +36,7 @@ export function SelectTpeNewDoc({info,docType,reloadFun}){
     const documents = [
         {title:'Asignación a proveedores',docType:'ThirdParty Delegation',img:'https://cdnmain.sga360.co/static/Cuadricula3Documentos_5_she308.webp',alert:<FormNewThirdPartyDelegation instnacePreInfo={info} reloadFun={reloadFun}/>},
         {title:'Orden de Cliente',docType:'Client Order',img:'https://cdnmain.sga360.co/static/Cuadricula3Documentos_5_she308.webp',alert:<FormNewClientOrder canRepeatServices={true} params={info} reloadFun={endProcess}/>},
+        {title:'Formulario personalizado',docType:'JSON Parametrization',img:'https://cdnmain.sga360.co/static/Cuadricula3Documentos_5_she308.webp',alert:<FormNewParameterDocument params={info} />},
         {title:'Factura de venta',docType:'Sell Invoice',img:'https://cdnmain.sga360.co/static/ChatGPT_Image_17_dic_2025_18_27_41_1_a3acbd.webp',alert:<FormNewInvoice info={info} reloadFun={endProcess}/>},
         {title:'Documento de compra',img:'https://cdnmain.sga360.co/static/ChatGPT_Image_17_dic_2025_18_27_41_3_nph10p.webp',alert:<FormNewDC info={info} reloadFun={endProcess}/>},
         {title:'Recibo de caja',docType:'Cash Recipt',img:'https://cdnmain.sga360.co/static/ChatGPT_Image_17_dic_2025_18_27_41_4_ioz7jp.webp',alert:<FormNewCashRecipt InfoParams={info} reloadFun={endProcess} />},
