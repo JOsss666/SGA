@@ -642,8 +642,13 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
                     return (
                         <button type="button" key={choiceId} className="paramDocChoice"
                             onClick={() => setSelectedId(choiceId)}>
-                            <strong>{choice.name ?? `Documento #${choiceId}`}</strong>
-                            {choice.description ? <span>{choice.description}</span> : null}
+                            <div className="iconC">
+                                <i className="bi bi-file-earmark-richtext-fill"/>
+                            </div>
+                            <div className="info">
+                                <strong>{choice.name ?? `Documento #${choiceId}`}</strong>
+                                {choice.description ? <span>{choice.description}</span> : null}
+                            </div>
                         </button>
                     );
                 })}
@@ -655,14 +660,14 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
 
     return (
         <div className="FormNewParameterDocument" aria-busy={loadingCatalogs}>
-            <BoldTitle text={document.config.title ?? document.name} />
-            {/* Volver al selector cuando había varias plantillas y el padre no forzó una. */}
             {paramdocId == null && choices.length > 1 && !submitting && (
                 <button type="button" className="paramDocChangeBtn"
                     onClick={() => { setDocument(null); setSelectedId(null); }}>
-                    ← Cambiar documento
+                    ← Cambiar plantilla documento
                 </button>
             )}
+            <BoldTitle text={document.config.title ?? document.name} />
+            {/* Volver al selector cuando había varias plantillas y el padre no forzó una. */}
             {document.config.description || document.description ? <DescriptionSpan text={document.config.description ?? document.description} /> : null}
             <form onSubmit={handleSubmit} onInvalidCapture={event => {
                 const label = event.target.closest('.FacturationFormInput')?.querySelector('label')?.textContent;

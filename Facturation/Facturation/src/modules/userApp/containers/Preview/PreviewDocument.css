@@ -2,7 +2,8 @@
 .PreviewDocument{
     height: 100dvh;
     overflow-y: auto;
-    width: 60dvw;
+    min-width: 60dvw;
+    width: fit-content;
     background-color: var(--bg);
     padding: 2vh 4vh;
     display: flex;
