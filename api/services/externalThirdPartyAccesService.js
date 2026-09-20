@@ -184,11 +184,16 @@ externalThirdPartyAccesService.getParamsDocs = async (info = {}) => {
         FROM "Custom"."externalDocParameters" d
         WHERE (d.company_id = $1 OR d.company_id = 0)
           AND (d."thirdParty_id" = $2 OR d."thirdParty_id" IS NULL OR d."thirdParty_id" = 0)
+          -- Portal externo: excluir plantillas atadas a un usuario interno (user_id);
+          -- esas son de la app (Facturation), no del acceso de terceros.
+          AND (d.user_id IS NULL OR d.user_id = 0)
         ORDER BY d.id;
     `, [access.company_id, access.user_id], 1);
 
-    if (!ok) throw new Error('No fue posible consultar los documentos parametrizados.');
-    return rows;
+    // useDataBase(typeConsult=1) devuelve [false, []] cuando no hay filas: eso NO es un
+    // error, es "sin plantillas habilitadas". Solo es error si rows no es un arreglo.
+    if (!ok && !Array.isArray(rows)) throw new Error('No fue posible consultar los documentos parametrizados.');
+    return Array.isArray(rows) ? rows : [];
 };
 
 // Previsualización read-only: dado el company_key (público, presente en el link de

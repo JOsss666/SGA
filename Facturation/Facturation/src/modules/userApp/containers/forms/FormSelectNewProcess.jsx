@@ -35,6 +35,7 @@ export function FormSelectNewProcess (){
     const today = new Date().toISOString().split('T')[0];
     const [start_date,setStart_date] = useState(today);
     const [delivery_date,setDelivery_date] = useState();
+    const [name,setName] = useState('');
     const [statusNewInstance,setStatusNewInstance] = useState('active');
     const [thirdParty_id,setThirdParty_id] = useState();
     
@@ -109,6 +110,7 @@ export function FormSelectNewProcess (){
             company_id:appInfo.company_id,
             start_date,
             delivery_date,
+            name,
             status:statusNewInstance,
             id:newInstanceInfo.id,
             user_id:userInfo.user_id,
@@ -188,6 +190,7 @@ export function FormSelectNewProcess (){
                     <form className="formProcessConfirmartion" action="" onSubmit={(e)=>{
                         e.preventDefault();
                     }}>
+                        <FormInput title={'Nombre o referencia del proceso'} placeholder={'Nombre o descripción para identificar proceso'} disabled={disabled} value={name} action={setName} />
                         <FormInput title={'Fecha de inicio'} type={'datetime-local'} disabled={disabled} value={start_date} action={setStart_date} />
                         <FormInput title={'Fecha de entrega'} type={'datetime-local'} disabled={disabled} value={delivery_date} action={setDelivery_date} />
                         <SearchinList title={'Estado'} placeHolder={'Seleccione el estado'} action={setStatusNewInstance} disabled={disabled} list={[

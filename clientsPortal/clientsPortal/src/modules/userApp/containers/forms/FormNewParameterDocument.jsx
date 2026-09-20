@@ -194,8 +194,12 @@ function normalizeOptions(items) {
 
 export function FormNewParameterDocument({ params, document: initialDocument, onSubmit }) {
     const { appInfo, userInfo } = useAppInfo();
-    const paramdocId = params?.paramdoc_id ?? 1;
+    // Sin default: si no llega un paramdoc_id, el form resuelve solo cuál abrir a
+    // partir de las plantillas habilitadas (una sola -> directo; varias -> selector).
+    const paramdocId = params?.paramdoc_id ?? null;
     const [document, setDocument] = useState(null);
+    const [choices, setChoices] = useState([]);
+    const [selectedId, setSelectedId] = useState(null);
     const [values, setValues] = useState({});
     const [catalogs, setCatalogs] = useState({});
     const [loading, setLoading] = useState(true);
@@ -225,7 +229,23 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
                         access_key: userInfo.user_key
                     });
                     const documents = asList(unwrapResponse(response));
-                    const selectedDocument = documents.find(item => String(item.paramdoc_id ?? item.document_id ?? item.id) === String(paramdocId));
+                    if (!documents.length) throw new Error("No hay documentos parametrizados habilitados para este acceso.");
+
+                    // Id objetivo: el que envía el padre, o el que el usuario eligió en el selector.
+                    let effectiveId = paramdocId ?? selectedId;
+
+                    if (effectiveId == null) {
+                        // Sin id: cuenta plantillas únicas (por nombre, por compat con filas legacy).
+                        const uniqueByName = [...new Map(documents.map(doc => [doc.name, doc])).values()];
+                        if (uniqueByName.length > 1) {
+                            // Más de una habilitada -> queda en modo selección (no carga aún).
+                            if (active) { setChoices(uniqueByName); setDocument(null); }
+                            return;
+                        }
+                        effectiveId = uniqueByName[0].paramdoc_id ?? uniqueByName[0].document_id ?? uniqueByName[0].id;
+                    }
+
+                    const selectedDocument = documents.find(item => String(item.paramdoc_id ?? item.document_id ?? item.id) === String(effectiveId));
                     if (!selectedDocument) throw new Error("El documento solicitado no está disponible para este acceso.");
 
                     // Las configuraciones legacy pueden llegar en varias filas con el mismo nombre.
@@ -246,7 +266,7 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
 
         loadTemplate();
         return () => { active = false; };
-    }, [appInfo.company_id, initialDocument, paramdocId, params?.config, params?.document, userInfo.user_key, appInfo.company_key]);
+    }, [appInfo.company_id, initialDocument, paramdocId, selectedId, params?.config, params?.document, userInfo.user_key, appInfo.company_key]);
 
     useEffect(() => {
         if (!document) return undefined;
@@ -578,10 +598,44 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
         <LoadingSpace title={'Cargando información'} description={'Esto no debe tardar mucho'}/>
     </div>;
     if (error) return <div className="FormNewParameterDocument"><p role="alert">{error}</p></div>;
+
+    // Selector: solo cuando no llegó un paramdoc_id explícito y hay varias plantillas
+    // habilitadas. Al elegir una, setSelectedId dispara la recarga y abre esa plantilla.
+    if (!document && choices.length > 1) return (
+        <div className="FormNewParameterDocument paramDocPicker">
+            <BoldTitle text={'Selecciona un documento'} />
+            <DescriptionSpan text={'Tienes varias plantillas habilitadas. Elige una para continuar.'} />
+            <div className="paramDocChoices">
+                {choices.map(choice => {
+                    const choiceId = choice.paramdoc_id ?? choice.document_id ?? choice.id;
+                    return (
+                        <button type="button" key={choiceId} className="paramDocChoice"
+                            onClick={() => setSelectedId(choiceId)}>
+                            <div className="iconC">
+                                <i className="bi bi-file-earmark-richtext-fill"/>
+                            </div>
+                            <div className="info">
+                                <strong>{choice.name ?? `Documento #${choiceId}`}</strong>
+                                {choice.description ? <span>{choice.description}</span> : null}
+                            </div>
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
+    );
+
     if (!document) return <div className="FormNewParameterDocument"><p>No hay un documento configurado.</p></div>;
 
     return (
         <div className="FormNewParameterDocument" aria-busy={loadingCatalogs}>
+            {/* Volver al selector cuando había varias plantillas y el padre no forzó una. */}
+            {paramdocId == null && choices.length > 1 && !submitting && (
+                <button type="button" className="paramDocChangeBtn"
+                    onClick={() => { setDocument(null); setSelectedId(null); }}>
+                    ← Cambiar plantilla documento
+                </button>
+            )}
             <BoldTitle text={document.config.title ?? document.name} />
             {document.config.description || document.description ? <DescriptionSpan text={document.config.description ?? document.description} /> : null}
             <form onSubmit={handleSubmit} onInvalidCapture={event => {
