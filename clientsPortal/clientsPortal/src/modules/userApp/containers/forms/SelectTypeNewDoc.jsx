@@ -70,11 +70,12 @@ export function SelectTpeNewDoc({info,docType,reloadFun,paramdocId}){
         return document ? document.alert : <span>Documento no encontrado</span>;
     }
 
-    // Documento parametrizado: se identifica por su paramdoc_id (no por docType).
-    // Abre la plantilla concreta y, al enviarse, avanza la cola vía endProcess.
-    if(paramdocId != null){
+    // Documento parametrizado: por paramdoc_id específico, o por docType 'JSON Parametrization'
+    // (requisito de "cualquier plantilla"). Si no hay id, el form muestra el selector de
+    // plantillas habilitadas. Al enviarse, avanza la cola vía endProcess.
+    if(paramdocId != null || docType === 'JSON Parametrization'){
         return <FormNewParameterDocument
-            params={{ ...info, paramdoc_id: paramdocId }}
+            params={{ ...info, ...(paramdocId != null ? { paramdoc_id: paramdocId } : {}) }}
             onSubmit={endProcess}
         />;
     }

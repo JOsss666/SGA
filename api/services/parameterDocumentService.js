@@ -46,7 +46,135 @@ export function validateParameterPayload(payload, config) {
 
 // El destino se resuelve en una lista explícita, nunca como ruta/import suministrado por el portal.
 export function createParameterDocumentService({ withTransaction, registerDocument, linkDocumentInstances, actions }) {
+    // Segunda fase compartida por el registro externo e interno: con el documento
+    // principal ya confirmado, ejecuta la acción del `destiny` en su propia transacción.
+    async function finalizeWithSecondary(primary, templateId) {
+        const { document, context, action, destiny } = primary;
+        const primaryResult = {
+            id: document.id, doc_id: document.id, ownSerial: document.ownSerial,
+            paramDoc_id: templateId, instance_id: context.instance_id ?? null,
+            step_instance: context.step_id ?? null, document_type: 'JSON Parametrization', destiny
+        };
+        try {
+            const secondary = await withTransaction(async client => {
+                // El bloqueo anterior terminó con el primer COMMIT: comprobar la etapa otra vez.
+                if (context.instance_id) {
+                    const result = await client.query(`
+                        SELECT id, step_id, "thirdParty_id" FROM "Process".process_instance
+                        WHERE company_id = $1 AND id = $2 AND status = 'active'
+                        FOR UPDATE;
+                    `, [context.company_id, context.instance_id]);
+                    const instance = result.rows[0];
+                    if (!instance || String(instance.step_id) !== context.step_id
+                        || String(instance.thirdParty_id) !== context.thirdParty_id) {
+                        fail('La instancia o su etapa cambió después de guardar el documento principal.', 409);
+                    }
+                }
+                const result = await action({ payload: primary.payload, context, doc_id: document.id }, { client });
+                if (!result?.id) throw new Error('El flujo no devolvió el documento secundario.');
+                return result;
+            });
+            return { status: 'OK', ...primaryResult, secondary_doc_id: secondary.id, secondary };
+        } catch (error) {
+            error.primaryDocument = { ...primaryResult, secondary_doc_id: null, secondary_status: 'ERROR' };
+            throw error;
+        }
+    }
+
     return {
+        // Registro interno (app Facturation): identidad por company_id + user_id del
+        // usuario autenticado, sin acceso externo (accesKey). El cliente lo elige el
+        // usuario en el formulario (payload.values.client_id).
+        async registerInternal(request) {
+            const companyId = id(request?.company_id, 'company_id');
+            const userId = id(request?.user_id, 'user_id');
+            const payload = request.payload;
+            const templateId = id(payload?.paramdoc_id, 'paramdoc_id');
+            const supplied = value => value !== undefined && value !== null && value !== '';
+            const instanceId = supplied(request.instance_id) ? id(request.instance_id, 'instance_id') : undefined;
+            const steps = ['step_instance', 'step_id'].filter(key => supplied(request[key])).map(key => id(request[key], key));
+            if (new Set(steps).size > 1) fail('step_instance y step_id deben identificar la misma etapa.');
+            if (steps.length && !instanceId) fail('La etapa requiere un instance_id.');
+            const primary = await withTransaction(async client => {
+                // El usuario interno debe existir y estar activo en la compañía.
+                const userResult = await client.query(`
+                    SELECT user_id FROM "Ecosystem".users
+                    WHERE company_id = $1 AND user_id = $2 AND status = 'active';
+                `, [companyId, userId]);
+                if (!userResult.rows[0]) fail('Usuario interno no válido para la compañía.', 401);
+                // Plantilla: por compañía y visibilidad de usuario (igual que getParamDocsOptions).
+                const templateResult = await client.query(`
+                    SELECT d.config FROM "Custom"."externalDocParameters" d
+                    WHERE d.id = $1 AND (d.company_id = $2 OR d.company_id = 0)
+                      AND (d.user_id = $3 OR d.user_id IS NULL OR d.user_id = 0)
+                    FOR SHARE;
+                `, [templateId, companyId, userId]);
+                if (!templateResult.rows[0]) fail('Documento parametrizado no autorizado.', 403);
+                const rawConfig = templateResult.rows[0].config;
+                const config = typeof rawConfig === 'string' ? JSON.parse(rawConfig) : rawConfig;
+                if (!isObject(config)) fail('La plantilla no está configurada.', 422);
+                validateParameterPayload(payload, config);
+                const action = Object.hasOwn(actions, config.destiny) ? actions[config.destiny] : undefined;
+                if (typeof action !== 'function') fail('El flujo personalizado no está implementado.', 422);
+
+                // store_id y precios (componentValues) provienen de la plantilla del servidor;
+                // el creador es el usuario interno autenticado y el cliente lo elige en el form.
+                const execution = config.execution ?? {};
+                const clientId = id(payload.values.client_id ?? payload.values.clientId, 'client_id');
+                const context = {
+                    company_id: companyId,
+                    store_id: id(execution.store_id, 'config.execution.store_id'),
+                    created_by: userId,
+                    thirdParty_id: clientId,
+                    componentValues: execution.componentValues,
+                    instance_id: undefined, step_id: undefined, instances: []
+                };
+                // Si la plantilla restringe clientes se respeta; si no, cualquier cliente válido de la compañía.
+                if (Array.isArray(execution.allowedClientIds) && execution.allowedClientIds.length
+                    && !execution.allowedClientIds.map(String).includes(context.thirdParty_id)) {
+                    fail('Cliente no autorizado para esta plantilla.', 403);
+                }
+                const scopeResult = await client.query(`
+                    SELECT
+                      EXISTS (SELECT 1 FROM "Ecosystem".stores WHERE company_id = $1 AND id = $2) AS store_ok,
+                      EXISTS (SELECT 1 FROM "Ecosystem".users WHERE company_id = $1 AND user_id = $3 AND status = 'active') AS user_ok,
+                      EXISTS (SELECT 1 FROM "Ecosystem".thirdparties WHERE company_id = $1 AND id = $4) AS client_ok;
+                `, [context.company_id, context.store_id, context.created_by, context.thirdParty_id]);
+                const scope = scopeResult.rows[0];
+                if (!scope?.store_ok || !scope.user_ok || !scope.client_ok) fail('La configuración referencia una tienda, usuario o cliente no disponible para la compañía.', 422);
+                if (instanceId) {
+                    const instanceResult = await client.query(`
+                        SELECT id, step_id, "thirdParty_id"
+                        FROM "Process".process_instance
+                        WHERE company_id = $1 AND id = $2 AND status = 'active'
+                        FOR SHARE;
+                    `, [context.company_id, instanceId]);
+                    const instance = instanceResult.rows[0];
+                    if (!instance || String(instance.thirdParty_id) !== context.thirdParty_id || !instance.step_id) {
+                        fail('La instancia no está activa o no pertenece a esta compañía y cliente.', 422);
+                    }
+                    const stepId = id(instance.step_id, 'step_instance');
+                    if (steps.length && steps[0] !== stepId) fail('La etapa de la instancia cambió. Actualiza el formulario antes de enviar.', 409);
+                    context.instance_id = instanceId;
+                    context.step_id = stepId;
+                    context.instances = [{ instance_id: instanceId, step_id: stepId }];
+                }
+                const document = await registerDocument({
+                    ...context,
+                    thirdParty_id: context.thirdParty_id,
+                    doc_type: 'JSON Parametrization', status: 'active', subTotal: 0, total: 0,
+                    description: payload.values.description ?? '', attached: payload.values.artworkFiles ?? [],
+                    specialConfig: payload
+                }, { client, includeProcessFields: true });
+                if (!document?.id) throw new Error('No se pudo registrar la parametrización.');
+                if (context.instances.length) {
+                    const link = await linkDocumentInstances(document.id, context, { client });
+                    if (link?.status !== 'OK') throw new Error('No se pudo relacionar la parametrización con el proceso.');
+                }
+                return { document, context, action, destiny: config.destiny, payload };
+            });
+            return finalizeWithSecondary(primary, templateId);
+        },
         async register(request) {
             const companyKey = request?.company_key;
             const accessKey = request?.access_key;
@@ -141,39 +269,10 @@ export function createParameterDocumentService({ withTransaction, registerDocume
                     const link = await linkDocumentInstances(document.id, context, { client });
                     if (link?.status !== 'OK') throw new Error('No se pudo relacionar la parametrización con el proceso.');
                 }
-                return { document, context, action, destiny: config.destiny };
+                return { document, context, action, destiny: config.destiny, payload };
             });
             // El principal y su vínculo ya están confirmados antes de iniciar la orden.
-            const { document, context, action, destiny } = primary;
-            const primaryResult = {
-                id: document.id, doc_id: document.id, ownSerial: document.ownSerial,
-                paramDoc_id: templateId, instance_id: context.instance_id ?? null,
-                step_instance: context.step_id ?? null, document_type: 'JSON Parametrization', destiny
-            };
-            try {
-                const secondary = await withTransaction(async client => {
-                    // El bloqueo anterior terminó con el primer COMMIT: comprobar la etapa otra vez.
-                    if (context.instance_id) {
-                        const result = await client.query(`
-                            SELECT id, step_id, "thirdParty_id" FROM "Process".process_instance
-                            WHERE company_id = $1 AND id = $2 AND status = 'active'
-                            FOR UPDATE;
-                        `, [context.company_id, context.instance_id]);
-                        const instance = result.rows[0];
-                        if (!instance || String(instance.step_id) !== context.step_id
-                            || String(instance.thirdParty_id) !== context.thirdParty_id) {
-                            fail('La instancia o su etapa cambió después de guardar el documento principal.', 409);
-                        }
-                    }
-                    const result = await action({ payload, context, doc_id: document.id }, { client });
-                    if (!result?.id) throw new Error('El flujo no devolvió el documento secundario.');
-                    return result;
-                });
-                return { status: 'OK', ...primaryResult, secondary_doc_id: secondary.id, secondary };
-            } catch (error) {
-                error.primaryDocument = { ...primaryResult, secondary_doc_id: null, secondary_status: 'ERROR' };
-                throw error;
-            }
+            return finalizeWithSecondary(primary, templateId);
         }
     };
 }

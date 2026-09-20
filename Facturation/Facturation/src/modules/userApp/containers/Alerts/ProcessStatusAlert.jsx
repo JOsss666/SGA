@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { BoldTitle } from "../../components/BoldTitle";
 import './ProcessStatusAlert.css'
-import { postInfo } from "../../../../utils/functions";
+import { postInfo, documentTypeName } from "../../../../utils/functions";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { FormInput } from "../../components/FormInput";
 import { LoadingSpace } from "../LoadingSpace";
@@ -309,11 +309,15 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                                         console.log(`Abriendo formulario para: ${req.docType}`)
                                                         popInAlert(<SelectTpeNewDoc docType={req.docType} reloadFun={getInstanceInfo} info={{
                                                             instance_id:info.id,
-                                                            step_id: element.id
+                                                            step_id: element.id,
+                                                            // Tercero de la instancia: el paramDoc lo fija como cliente y oculta el campo.
+                                                            thirdParty_id: info.thirdParty_id,
+                                                            // Plantilla concreta exigida por el paso (para el paramDoc).
+                                                            paramdoc_id: req.paramdoc_id
                                                         }}/>)
                                                     }}>
                                                         <i className="fa-solid fa-triangle-exclamation"/>
-                                                        Requiere al menos {req.min} {req.docType}
+                                                        Requiere al menos {req.min} {documentTypeName(req.docType)}
                                                     </span>
                                                 ))}
                                             {element.attached_Docs.map((doc, i) => (
@@ -330,7 +334,7 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                                     );
                                                 }}>
                                                     <i className="fa-solid fa-file-circle-check"/>
-                                                    {`${doc.document_type} #${doc.ownSerial}`}
+                                                    {`${documentTypeName(doc.document_type, doc.name)} #${doc.ownSerial}`}
                                                 </span>
                                             ))}
                                         </div>

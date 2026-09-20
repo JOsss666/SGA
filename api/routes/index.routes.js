@@ -12,6 +12,7 @@ import facturationController from '../controllers/facturationController.js';
 // Custom controllers import
     import zjController from '../controllers/custom-controllers/zjController.js';
     import nexo360Controller from '../controllers/custom-controllers/nexo360Controller.js';
+    import paramDocInternalController from '../controllers/custom-controllers/paramDocInternalController.js';
 import assetsController from '../controllers/assetsController.js';
 import AnalyticController from '../controllers/AnalyticsController.js';
 import electronicFacturationController from '../controllers/electronicFacturationController.js';
@@ -157,6 +158,12 @@ router.post('/updateConcept/:id',controller.updateConcept);
 router.post('/getConcepts',controller.getConcepts);
 
 router.post('/getDocParams',controller.getDocParams);
+
+router.post('/getParamDocsOptions',controller.getParamDocsOptions);
+
+// Registro interno de documentos parametrizados desde la app (Facturation): identidad
+// por company_id + user_id; dispara el flujo custom del `destiny` (p. ej. nexo360).
+router.post('/registerParamDoc', express.json({ limit: '2mb', strict: true }), paramDocInternalController.registerParamDoc);
 
 router.post('/createPaymentMethod',controller.createPaymentMethod);
 

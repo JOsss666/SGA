@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useAppInfo } from "../../../../context/context";
+import { useAlert, useAppInfo } from "../../../../context/context";
 import { postInfo } from "../../../../utils/functions";
 import { BoldTitle } from "../../components/BoldTitle";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
@@ -138,6 +138,7 @@ function getItemBlockDefinition(fields) {
         selector,
         blockKey: specialProps.blockKey ?? "itemBlock",
         title: specialProps.blockTitle ?? selector.title ?? "Ítems",
+        hasBudget:specialProps.hasBudget,
         fields: blockFields
     };
 }
@@ -161,7 +162,12 @@ function normalizeTemplate(source) {
     return { ...template, config: { ...template.config, fields } };
 }
 
-function initialValues(fields) {
+// Campo "cliente": por convención de key o por su catálogo de terceros. Cuando el
+// proceso pasa el tercero de la instancia, este campo se fija y se oculta.
+const CLIENT_FIELD_KEYS = ["client_id", "clientId"];
+const isClientField = field => CLIENT_FIELD_KEYS.includes(field.key) || field.requirements === "clients";
+
+function initialValues(fields, lockedClientId = null) {
     const itemBlock = getItemBlockDefinition(fields);
     const blockFieldKeys = new Set(itemBlock?.fields.map(field => field.key) ?? []);
     const values = Object.fromEntries(fields.map(field => [
@@ -178,6 +184,15 @@ function initialValues(fields) {
 
     if (itemBlock) values[itemBlock.blockKey] = [];
 
+    // Cliente fijado por el proceso: se asigna a los campos de cliente existentes y,
+    // además, a la key canónica `client_id` que exige el registro (aunque la plantilla
+    // no traiga un campo de cliente).
+    if (lockedClientId != null && lockedClientId !== "") {
+        const clientId = String(lockedClientId);
+        values.client_id = clientId;
+        fields.forEach(field => { if (isClientField(field)) values[field.key] = clientId; });
+    }
+
     return values;
 }
 
@@ -192,12 +207,18 @@ function normalizeOptions(items) {
     }).filter(item => item.value != null && item.text);
 }
 
-export function FormNewParameterDocument({ params, document: initialDocument, onSubmit }) {
+export function FormNewParameterDocument({ params, document: initialDocument, onSubmit, reloadFun }) {
     const { appInfo, userInfo } = useAppInfo();
-    // Sin default: si no llega un paramdoc_id, el form resuelve solo cuál abrir a
-    // partir de las plantillas habilitadas (una sola -> directo; varias -> selector).
+    const { popOutAlert} = useAlert();
+    // Sin default: si el proceso (u otro padre) no envía paramdoc_id, el form
+    // resuelve solo cuál abrir a partir de las plantillas habilitadas.
     const paramdocId = params?.paramdoc_id ?? null;
+    // Cliente impuesto por el proceso (tercero de la instancia). Si llega, el campo de
+    // cliente se fija a este valor y se oculta para no permitir un tercero que no cuadre.
+    const lockedClientId = params?.thirdParty_id ?? params?.client_id ?? params?.clientId ?? null;
     const [document, setDocument] = useState(null);
+    // Plantillas disponibles cuando no llega un paramdoc_id explícito. Si hay más
+    // de una, se muestra un selector; si hay una sola, se abre directo.
     const [choices, setChoices] = useState([]);
     const [selectedId, setSelectedId] = useState(null);
     const [values, setValues] = useState({});
@@ -223,13 +244,16 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
                 let source = initialDocument ?? params?.document ?? params?.config;
 
                 if (!source) {
-                    if (!appInfo.company_key || !userInfo.user_key) return;
-                    const response = await postInfo("/externalAccess/getParamDocs", {
-                        company_key: appInfo.company_key,
-                        access_key: userInfo.user_key
+                    if (!appInfo.company_id) return;
+                    // App interna: se resuelve por company_id (+ user_id) contra la
+                    // plantilla guardada en "Custom"."externalDocParameters", no por
+                    // el acceso externo (accesKey), que no aplica a un usuario interno.
+                    const response = await postInfo("/getParamDocsOptions", {
+                        company_id: appInfo.company_id,
+                        user_id: userInfo.user_id
                     });
                     const documents = asList(unwrapResponse(response));
-                    if (!documents.length) throw new Error("No hay documentos parametrizados habilitados para este acceso.");
+                    if (!documents.length) throw new Error("No hay documentos parametrizados habilitados.");
 
                     // Id objetivo: el que envía el padre, o el que el usuario eligió en el selector.
                     let effectiveId = paramdocId ?? selectedId;
@@ -242,11 +266,12 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
                             if (active) { setChoices(uniqueByName); setDocument(null); }
                             return;
                         }
+                        // Una sola habilitada -> se abre directo.
                         effectiveId = uniqueByName[0].paramdoc_id ?? uniqueByName[0].document_id ?? uniqueByName[0].id;
                     }
 
                     const selectedDocument = documents.find(item => String(item.paramdoc_id ?? item.document_id ?? item.id) === String(effectiveId));
-                    if (!selectedDocument) throw new Error("El documento solicitado no está disponible para este acceso.");
+                    if (!selectedDocument) throw new Error("El documento solicitado no está disponible.");
 
                     // Las configuraciones legacy pueden llegar en varias filas con el mismo nombre.
                     // Se combinan antes de normalizarlas para no descartar campos.
@@ -256,7 +281,7 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
                 const loadedDocument = normalizeTemplate(source);
                 if (!active) return;
                 setDocument(loadedDocument);
-                setValues(initialValues(loadedDocument.config.fields));
+                setValues(initialValues(loadedDocument.config.fields, lockedClientId));
             } catch (loadError) {
                 if (active) setError(loadError.message ?? "No se pudo cargar el documento parametrizado.");
             } finally {
@@ -266,7 +291,7 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
 
         loadTemplate();
         return () => { active = false; };
-    }, [appInfo.company_id, initialDocument, paramdocId, selectedId, params?.config, params?.document, userInfo.user_key, appInfo.company_key]);
+    }, [appInfo.company_id, initialDocument, paramdocId, selectedId, lockedClientId, params?.config, params?.document, userInfo.user_id]);
 
     useEffect(() => {
         if (!document) return undefined;
@@ -309,7 +334,9 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
         return () => { active = false; };
     }, [appInfo.company_id, document]);
 
-    const visibleFields = useMemo(() => document?.config.fields.filter(field => field.visible !== false) ?? [], [document]);
+    // Se oculta el campo de cliente cuando el proceso ya impuso el tercero (lockedClientId).
+    const visibleFields = useMemo(() => document?.config.fields.filter(field =>
+        field.visible !== false && !(lockedClientId != null && isClientField(field))) ?? [], [document, lockedClientId]);
     const itemBlock = useMemo(() => getItemBlockDefinition(visibleFields), [visibleFields]);
     const referenceFields = useMemo(() => document?.config.fields.filter(isReferenceField) ?? [], [document]);
 
@@ -492,7 +519,7 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
         paramdoc_id: document.id ?? paramdocId,
         paramDoc_id: document.id ?? paramdocId,
         destiny: document.config.destiny,
-        values: { ...values, thirdParty_id: userInfo.user_id }
+        values: { ...values }
     });
 
     const handleSubmit = async event => {
@@ -502,9 +529,11 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
 
         // Enviar el mismo payload que se conserva en specialConfig y se devuelve al padre.
         const completedDocument = buildCompletedDocument();
+        // App interna: identidad por company_id/user_id del contexto, no por accesKey.
+        // NOTA: requiere un endpoint interno de registro (ver pendiente de backend).
         const request = {
-            company_key: appInfo.company_key,
-            access_key: userInfo.user_key,
+            company_id: appInfo.company_id,
+            user_id: userInfo.user_id,
             // Contexto del proceso cuando el paramDoc se abre desde un paso (cola de docs).
             instance_id: params?.instance_id,
             step_id: params?.step_id,
@@ -514,14 +543,14 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
         setSubmitting(true);
         setSubmitFeedback(null);
         try {
-            const response = await postInfo('/externalAccess/registerParamDoc', request);
+            const response = await postInfo('/registerParamDoc', request);
             if (response?.status !== 'OK' || !response.data?.doc_id) {
                 throw new Error(response?.message ?? 'No se confirmó el registro del documento.');
             }
             setSubmitFeedback({ type: 'ok', message: response.message ?? 'Documento y orden registrados correctamente.' });
             onSubmit?.({ ...completedDocument, response });
             // Reiniciar el formulario tras un envío exitoso.
-            setValues(initialValues(document.config.fields));
+            setValues(initialValues(document.config.fields, lockedClientId));
             setFieldErrors({});
         } catch (submitError) {
             console.error('Error al enviar el documento parametrizado:', submitError);
@@ -531,6 +560,8 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
             });
         } finally {
             setSubmitting(false);
+            popOutAlert();
+            reloadFun?.();
         }
     };
 
@@ -629,7 +660,6 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
 
     return (
         <div className="FormNewParameterDocument" aria-busy={loadingCatalogs}>
-            {/* Volver al selector cuando había varias plantillas y el padre no forzó una. */}
             {paramdocId == null && choices.length > 1 && !submitting && (
                 <button type="button" className="paramDocChangeBtn"
                     onClick={() => { setDocument(null); setSelectedId(null); }}>
@@ -637,6 +667,7 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
                 </button>
             )}
             <BoldTitle text={document.config.title ?? document.name} />
+            {/* Volver al selector cuando había varias plantillas y el padre no forzó una. */}
             {document.config.description || document.description ? <DescriptionSpan text={document.config.description ?? document.description} /> : null}
             <form onSubmit={handleSubmit} onInvalidCapture={event => {
                 const label = event.target.closest('.FacturationFormInput')?.querySelector('label')?.textContent;
@@ -655,6 +686,7 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
                                         title={itemBlock.title}
                                         visibleItemTotal={false}
                                         itemUnitsLabel={document.config.itemsLabel}
+                                        hasBudget={getSpecialProps(itemBlock.selector).hasBudget}
                                         blocks={[{ docInfo: undefined, items: values[itemBlock.blockKey] ?? [] }]}
                                         setItems={setItemBlockItems}
                                         disabled={loadingCatalogs || submitting}
