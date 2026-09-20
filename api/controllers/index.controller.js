@@ -2178,6 +2178,45 @@ controller.getDocuments = (req,res)=>{
     })
 }
 
+controller.getParamDocsOptions = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        values.push(info.company_id);
+        whereClauses.push(`company_id = $${values.length}`);
+
+        if(info.user_id != undefined){
+            values.push(info.user_id);
+            whereClauses.push(`user_id = $${values.length}`);
+        }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
+        let sentence = `
+            SELECT id, name, description, config
+                FROM "Custom"."externalDocParameters"
+            ${whereQuery}
+            ORDER BY id;
+        `;
+
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 controller.getSalute = (req,res)=>{
     console.log('Recibido')
     req.on('end',async()=>{
