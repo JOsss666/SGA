@@ -91,6 +91,8 @@ processController.getAttachedDocuments = (req,res)=>{
                 "Ecosystem".documents.document_type,
                 COALESCE("Ecosystem".documents."specialConfig"->>'paramDoc_id',
                     "Ecosystem".documents."specialConfig"->>'paramdoc_id') AS paramdoc_id,
+                -- Nombre de la plantilla para documentos parametrizados (JSON Parametrization).
+                paramtpl.name AS name,
                 "Ecosystem".documents."ownSerial",
                 "Ecosystem".documents.status,
                 "Ecosystem".documents."subTotal",
@@ -108,6 +110,12 @@ processController.getAttachedDocuments = (req,res)=>{
                 "Ecosystem".documents
             ON
                 "Ecosystem".docs_instances.doc_id = "Ecosystem".documents.id
+            LEFT JOIN
+                "Custom"."externalDocParameters" paramtpl
+            ON
+                paramtpl.id = NULLIF(COALESCE("Ecosystem".documents."specialConfig"->>'paramDoc_id',
+                    "Ecosystem".documents."specialConfig"->>'paramdoc_id'), '')::bigint
+                AND (paramtpl.company_id = "Ecosystem".documents.company_id OR paramtpl.company_id = 0)
             LEFT JOIN
                 "Process".process_instance
             ON

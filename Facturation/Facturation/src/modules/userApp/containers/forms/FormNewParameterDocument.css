@@ -41,39 +41,81 @@
     height: 50vh;
 }
 /* Selector de plantilla cuando hay varias habilitadas y no llega un paramdoc_id */
-.paramDocPicker .paramDocChoices{
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 12px;
-    margin-top: 12px;
-}
-.paramDocChoice{
+.FormNewParameterDocument .paramDocChoices{
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 1vh;
+    margin-top: 2vh;
+}
+.FormNewParameterDocument .paramDocChoice{
+    width: 100%;
+    display: flex;
+    padding: 1vh;
+    background-color: var(--bg);
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 1vh;
     text-align: left;
-    padding: 14px 16px;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    background: #fff;
-    cursor: pointer;
-    transition: border-color .15s ease, box-shadow .15s ease;
-}
-.paramDocChoice:hover{
-    border-color: #2563eb;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, .12);
-}
-.paramDocChoice strong{ font-size: 15px; }
-.paramDocChoice span{ font-size: 12px; color: #6b7280; }
-.paramDocChangeBtn{
-    align-self: flex-start;
-    margin: 4px 0 8px;
-    padding: 4px 10px;
-    font-size: 13px;
-    color: #2563eb;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 6px;
+    gap: 1vh;
     cursor: pointer;
 }
-.paramDocChangeBtn:hover{ background: #eff6ff; }
+
+.FormNewParameterDocument .paramDocChoice:hover{
+    background-color: var(--cardHover);
+    transition: .3s;
+}
+
+.FormNewParameterDocument .paramDocChoice .iconC{
+    height: 5vh;
+    width: 5vh;
+    margin: auto 0;
+    display: flex;
+    border-radius: 1vh;
+    background-color: var(--cardHover);
+    border: solid .1vh var(--inputsBorder);
+    margin-right: 1vh;
+}
+
+.FormNewParameterDocument  .paramDocChoice .iconC i{
+    margin: auto;
+    font-size: clamp(2px,3vh,30px);
+    color: #2B7FFF;
+}
+
+.FormNewParameterDocument .paramDocChoice  .info{
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+    margin: auto 0;
+}
+
+.FormNewParameterDocument .paramDocChoice  strong{
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 500;
+    color: var(--mainText);
+}
+
+.FormNewParameterDocument .paramDocChoice  span{
+    font-size: clamp(1.8px,1.8vh,18px);
+    color: var(--descriptionText);
+}
+
+.FormNewParameterDocument .paramDocChangeBtn{
+    display: flex;
+    padding: 1vh;
+    color: #fff;
+    background-color: #2B7FFF;
+    border: hidden;
+    outline: solid .1vh var(--inputsBorder);
+    border-radius: 1vh;
+    width: fit-content;
+    align-items: center;
+    gap: 1vh;
+    font-size: clamp(2.2px,2.2vh,22px);
+    margin-bottom: 2vh;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.FormNewParameterDocument .paramDocChangeBtn:hover{
+    transform: scale(0.95);
+}

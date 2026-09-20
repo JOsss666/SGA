@@ -32,10 +32,26 @@ function normalizePresets(presets) {
     }));
 }
 
+// Modo products: los ítems ya son productos con su valor unitario diligenciado en
+// el formulario. No se expanden presets ni se leen precios de componentValues.
+function normalizeProducts(products) {
+    if (!Array.isArray(products) || !products.length || products.length > 1000) fail('items debe contener entre 1 y 1000 productos.');
+    return products.map((item, index) => ({
+        product_id: id(item?.product_id ?? item?.id ?? item?.service_id, `items[${index}].product_id`),
+        units: decimal(item?.units, `items[${index}].units`, true),
+        unit_value: money(decimal(item?.unit_value, `items[${index}].unit_value`)),
+        description: item?.sell_desc ?? item?.description ?? ''
+    }));
+}
+
 /**
- * paramDoc: company_id, store_id, thirdParty_id, created_by, items [{id, units}],
- * componentValues { [product_id]: unit_value }, description, attached e instancias opcionales.
- * Los valores son por unidad de producto, no por preset. No se infieren precios ni impuestos.
+ * paramDoc: company_id, store_id, thirdParty_id, created_by, description, attached e
+ * instancias opcionales. El manejo de items depende del modo:
+ *  - Presets: items [{ id|preset_id, units }] + componentValues { [product_id]: unit_value }.
+ *    Los precios salen del config; los presets se expanden en sus productos-componente.
+ *  - Products: items [{ product_id|id, units, unit_value, sell_desc }] SIN componentValues.
+ *    El valor unitario lo trae cada ítem desde el formulario.
+ * En ambos casos los valores son por unidad de producto. No se infieren precios ni impuestos.
  */
 export function createNexo360Service({ withTransaction, registerDocument, registerPurchaseItems, linkDocumentInstances, advanceProcessInstance, createProcessInstance }) {
     async function transformPresets(presets, { company_id, client } = {}) {
@@ -74,11 +90,12 @@ export function createNexo360Service({ withTransaction, registerDocument, regist
             thirdParty_id: id(paramDoc.thirdParty_id, 'thirdParty_id'), created_by: id(paramDoc.created_by, 'created_by'),
             doc_type: 'Client Order', status: 'active', description: paramDoc.description ?? '', attached: paramDoc.attached ?? []
         };
-        const presets = normalizePresets(paramDoc.items);
         const componentValues = paramDoc.componentValues;
-        if (!componentValues || typeof componentValues !== 'object' || Array.isArray(componentValues)) {
-            fail('componentValues debe indicar el valor unitario de cada producto del preset.');
-        }
+        // El config decide el modo: con componentValues -> presets (precios del config);
+        // sin componentValues -> products (el ítem ya trae su unit_value del formulario).
+        const usePresets = componentValues != null && typeof componentValues === 'object' && !Array.isArray(componentValues);
+        const presets = usePresets ? normalizePresets(paramDoc.items) : null;
+        const productItems = usePresets ? null : normalizeProducts(paramDoc.items);
         const requestedInstances = Array.isArray(paramDoc.instances) && paramDoc.instances.length
             ? paramDoc.instances
             : paramDoc.instance_id == null || paramDoc.instance_id === '' ? [] : [paramDoc.instance_id];
@@ -113,12 +130,30 @@ export function createNexo360Service({ withTransaction, registerDocument, regist
             }
             info.instance_id = info.instances[0]?.instance_id;
             info.step_id = info.instances[0]?.step_id;
-            const components = await transformPresets(presets, { company_id: info.company_id, client });
-            info.items = components.map(component => {
-                const value = Object.hasOwn(componentValues, component.product_id) ? componentValues[component.product_id] : undefined;
-                const unit_value = money(decimal(value, `componentValues[${component.product_id}]`));
-                return { ...component, unit_value, total: money(component.units * unit_value) };
-            });
+            if (usePresets) {
+                const components = await transformPresets(presets, { company_id: info.company_id, client });
+                info.items = components.map(component => {
+                    const value = Object.hasOwn(componentValues, component.product_id) ? componentValues[component.product_id] : undefined;
+                    const unit_value = money(decimal(value, `componentValues[${component.product_id}]`));
+                    return { ...component, unit_value, total: money(component.units * unit_value) };
+                });
+            } else {
+                // Modo products: validar existencia/estado de cada producto en la compañía,
+                // igual que transformPresets lo garantiza para los componentes de un preset.
+                const productIds = [...new Set(productItems.map(item => item.product_id))];
+                const available = await client.query(`
+                    SELECT id FROM "Inventory"."products&services"
+                    WHERE company_id = $1 AND id = ANY($2::bigint[]) AND status = 'active';
+                `, [info.company_id, productIds]);
+                const availableIds = new Set(available.rows.map(row => String(row.id)));
+                const missing = productIds.filter(productId => !availableIds.has(productId));
+                if (missing.length) fail(`Productos no disponibles para la compañía: ${missing.join(', ')}.`, 422);
+                info.items = productItems.map(item => ({
+                    product_id: item.product_id, service_id: item.product_id,
+                    units: item.units, unit_value: item.unit_value,
+                    total: money(item.units * item.unit_value), description: item.description
+                }));
+            }
             info.subTotal = money(info.items.reduce((sum, item) => sum + item.total, 0));
             info.total = info.subTotal;
             // Rechaza diferencias: evita perder impuestos u otros importes aún no traducidos.
@@ -153,6 +188,8 @@ export function createNexo360Service({ withTransaction, registerDocument, regist
             const progress = await advanceProcessInstance(client, {
                 company_id: context.company_id, instance_id: context.instance_id,
                 previous_step: context.step_id, user_id: context.created_by,
+                // Avance del sistema para crear la orden: no se valida el rol del responsable.
+                bypassRoll: true,
                 description: `ParamDoc #${doc_id} registrado; avance para crear Client Order.`
             });
             if (!progress.success) fail(progress.message ?? 'No hay una etapa siguiente para crear la orden.', 422);

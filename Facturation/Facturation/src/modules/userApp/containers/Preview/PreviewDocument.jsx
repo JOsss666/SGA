@@ -9,6 +9,7 @@ import { MoreOptions } from "../../components/MoreOptions";
 import { useParams } from "react-router-dom";
 import { LoadingAppDataPage } from "../LoadingAppDataPage";
 import { PreviewFile } from "./PreviewFile";
+import { ParameterDocumentPreview } from "./ParameterDocumentPreview";
 import { getElectronicDocumentOptions } from "../../components/ElectronicDocumentCard";
 
 export function PreviewDocument({doc_id}){
@@ -24,6 +25,9 @@ export function PreviewDocument({doc_id}){
     const [thirdParyInfo, setThirdPartyInfo] = useState({});
     const [id,setId] = useState(doc_id? doc_id:params.doc_id);
     const [attachedTransactions,setAttachedTransactions] = useState([]);
+    // Preview de documentos parametrizados (JSON Parametrization): plantilla + valores.
+    const [paramTemplate,setParamTemplate] = useState(null);
+    const [paramValues,setParamValues] = useState({});
     const [electronicInvoices,setElectronicInvoices] = useState([]);
 
     // Control
@@ -108,7 +112,8 @@ export function PreviewDocument({doc_id}){
         "Depreciation": "Depreciación",
         "NIIF Adjustment": "Ajuste NIIF",
         "Equivalent Purchase Document": "Documento Equivalente de Compra",
-        "Machine use": "Uso de Máquina"
+        "Machine use": "Uso de Máquina",
+        "JSON Parametrization": "Documento Parametrizado"
     };
 
 
@@ -123,6 +128,27 @@ export function PreviewDocument({doc_id}){
             setDocInfo(res[1][0])
         }
         setLoading(false);
+    }
+
+    // Documentos parametrizados: los valores diligenciados viven en specialConfig, y la
+    // plantilla (títulos/orden/item-blocks) se resuelve read-only por company_key + doc_id.
+    const getParamDocTemplate = async()=>{
+        let specialConfig = docInfo.specialConfig;
+        if(typeof specialConfig === 'string'){
+            try{ specialConfig = JSON.parse(specialConfig); }catch{ specialConfig = null; }
+        }
+        setParamValues(specialConfig?.values ?? {});
+        try{
+            const res = await postInfo('/externalAccess/getParamDocTemplate',{
+                company_key: appInfo.company_key ?? params.company_key,
+                doc_id: docInfo.id
+            });
+            if(res?.status === 'OK'){
+                setParamTemplate(res.data);
+            }
+        }catch(error){
+            console.error('No fue posible cargar la plantilla del documento parametrizado:', error);
+        }
     }
 
     const getThirdParties = async()=>{
@@ -230,6 +256,9 @@ const getSellInvoiceServices = async(instance_id)=>{
                 case "Sell Invoice":
                 getSellInvoiceServices(docInfo.instance_id);
                 break;
+                case "JSON Parametrization":
+                getParamDocTemplate();
+                break;
             }
             let attArray = []
             let docsAtt = JSON.parse(typeof(JSON.parse(docInfo.attached)) == "object"? docInfo.attached:"[]");
@@ -285,6 +314,11 @@ const getSellInvoiceServices = async(instance_id)=>{
                     ))}
                 </div>
             )}
+                    {docInfo.document_type == 'JSON Parametrization' && paramTemplate && (
+                        <div className="detailsDocument">
+                            <ParameterDocumentPreview template={paramTemplate} values={paramValues}/>
+                        </div>
+                    )}
                     {docInfo.document_type == 'Sell Invoice' && (
                         <div className="detailsDocument">
                             {attachedServices.map((element,index)=>(

@@ -17,15 +17,34 @@ import { FormNewInvoice } from "./forms/FormNewInvoice";
 import { FormNewPurchase } from "./forms/FormNewPurchase";
 import { FormNewENote } from "./forms/FormNewENote";
 import { SellInvoiceDesign } from "./Alerts/SellInvoiceDesing";
-import './New.css'
 import { FormNewThirdPartyDelegation } from "./forms/FormNewThirdPartyDelegation";
+import { postInfo } from "../../../utils/functions";
+import './New.css'
+import { FormNewParameterDocument } from "./forms/FormNewParameterDocument";
 
 export function New(){
     const {userConfig,appInfo,userInfo, appConfig} = useAppInfo();
+    const [paramDocs,setParamDocs] = useState([]);
     const {popInAlert,popOutAlert} = useAlert();
     const [disabled,setDisabled] = useState(false);
     const [messgeDisabled,setMessageDisabled] = useState('')
     const [numberingRangesStatus, setNumberingRangesStatus] = useState('idle');
+
+    // PramDocs options
+
+    const getParamDoc = async()=>{
+        let res = await postInfo('/getParamDocsOptions',{
+            company_id:appInfo.company_id,
+            user_id:userInfo.user_id
+        });
+        console.log('Hola ',res)
+        if(res[0] === false) return [];
+        setParamDocs(res[1])
+    }
+    
+    useEffect(()=>{
+        console.log('Param Docus', paramDocs);
+    },[paramDocs])
 
     useEffect(() => {
         if (!appConfig?.access) return;
@@ -37,6 +56,10 @@ export function New(){
             verifyClicksControlZ();
         }
     }, [appConfig]);
+
+    useEffect(()=>{
+        getParamDoc();     
+    },[]) 
 
 
     let verifyClicksControlZ = async () => {
@@ -52,7 +75,7 @@ export function New(){
     }
 
     const options = [
-        { text: 'Crear orden de trabajo', children: <FormSelectNewProcess />, icon: <i className="fa-solid fa-bell-concierge" /> },
+        { text: 'Crear nuevo proceso', children: <FormSelectNewProcess />, icon: <i className="fa-solid fa-code-merge"/>},
         { text: 'Crear nueva orden de cliente', children: <FormNewClientOrder canRepeatServices={true} />, icon: <i className="fa-regular fa-file" /> },
         
         // Simplificado con optional chaining
@@ -62,13 +85,13 @@ export function New(){
         
         {text:'Factura de venta',children:<FormNewInvoice/>,icon:<i className="fa-solid fa-file-invoice"/>},
 
-        ...(userConfig?.access?.sections?.reports?.documents?.ThirdPartyDelegation === true ? [
-            {text:'Asignación a proveedor', children:<FormNewThirdPartyDelegation instnacePreInfo={{}}/>,icon:<i className="bi bi-person-bounding-box"/>},
-        ] : []),
+        {text:'Nota débito o crédito',children:<FormNewENote/>,icon:<i className="fa-solid fa-note-sticky"/>},
 
         {text:'Compra',children:<FormNewPurchase/>,icon:<i className="fa-solid fa-cart-shopping"/>},
 
-        {text:'Nota débito o crédito',children:<FormNewENote/>,icon:<i className="fa-solid fa-note-sticky"/>},
+        ...(userConfig?.access?.sections?.reports?.documents?.ThirdPartyDelegation === true ? [
+            {text:'Asignación a proveedor', children:<FormNewThirdPartyDelegation instnacePreInfo={{}}/>,icon:<i className="bi bi-person-bounding-box"/>},
+        ] : []),
 
         ...(userConfig?.access?.sections?.users?.overAll ?
             [{ text: 'Crear usuario', children: <FormNewUser />, icon: <i className="fa-solid fa-person-circle-plus" /> }] : []),
@@ -146,6 +169,14 @@ export function New(){
             <DescriptionSpan text={'Crea todo lo que necesites en un solo click'}/>
             {!disabled && (
                 <div className="gridOptions">
+                    {paramDocs.map((element,index)=>(
+                         <span key={index} onClick={()=>{
+                            popInAlert(<FormNewParameterDocument params={element}/>)
+                        }}>
+                            <i className="bi bi-file-earmark-code-fill"/>
+                            {`Crear ${element.name}`}
+                        </span>
+                    ))}
                     {options.map((element,index)=>(
                         <span key={index} onClick={()=>{
                             popInAlert(element.children)

@@ -2,7 +2,10 @@ import { validateDelegationProgress } from './delegationProgressService.js';
 
 // Reutiliza la transacción del llamador; no confirma cambios por su cuenta.
 export async function advanceProcessStep(client, info, validateFullProcessRequirements) {
-    if (info.user_roll == null) {
+    // Flujos del sistema (p. ej. crear la Client Order tras un paramDoc) pueden avanzar
+    // sin validar el rol del responsable contra el required_roll del paso.
+    const bypassRoll = info.bypassRoll === true;
+    if (!bypassRoll && info.user_roll == null) {
         const user = (await client.query(`
             SELECT config.role FROM "Ecosystem".users u
             JOIN "Ecosystem".users_config config ON config.user_id = u.user_id
@@ -25,7 +28,7 @@ export async function advanceProcessStep(client, info, validateFullProcessRequir
         WHERE process_id=$1 AND company_id=$2 AND "order">$3 ORDER BY "order", id LIMIT 1
     `,[instance.process_id,info.company_id,instance.current_order])).rows[0];
     if(!nextStep) return {success:false,message:'El proceso ya ha finalizado.'};
-    if(!nextStep.required_roll.map(String).includes(String(info.user_roll))) throw new Error('No tienes el rol necesario para autorizar este paso.');
+    if(!bypassRoll && !nextStep.required_roll.map(String).includes(String(info.user_roll))) throw new Error('No tienes el rol necesario para autorizar este paso.');
     await validateDelegationProgress(client, instance);
     if(nextStep.end_process) {
         const validation=await validateFullProcessRequirements(instance.id,instance.process_id,client);
