@@ -1,0 +1,79 @@
+
+.FormNewParameterDocument{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    width: 70vw;
+}
+
+
+.FormNewParameterDocument form{
+    display: flex;
+    flex-wrap: wrap;
+    gap:4vh 2vh;
+    margin: 1vh auto;
+    margin-top: 3vh;
+}
+
+.FormNewParameterDocument form .FormInput,
+.FormNewParameterDocument form .SearchinList{
+    width: 20vw;
+}
+
+.FormNewParameterDocument form .FacturationSearchinList label {
+    margin-bottom: 1vh;
+}
+
+.FormNewParameterDocument form .FileInput,
+.FormNewParameterDocument form textarea{
+    width: 70vw !important;
+    margin:0 auto;
+}
+
+/* El item-block ocupa toda la fila en su posición declarada: fuerza el
+   flex-wrap y empuja hacia abajo los campos que vengan después. */
+.FormNewParameterDocument form .itemsListField{
+    width: 100%;
+}
+
+.FormNewParameterDocument_loadingSpace{
+    width: 40vw;
+    height: 50vh;
+}
+/* Selector de plantilla cuando hay varias habilitadas y no llega un paramdoc_id */
+.paramDocPicker .paramDocChoices{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+.paramDocChoice{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+    padding: 14px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+.paramDocChoice:hover{
+    border-color: #2563eb;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, .12);
+}
+.paramDocChoice strong{ font-size: 15px; }
+.paramDocChoice span{ font-size: 12px; color: #6b7280; }
+.paramDocChangeBtn{
+    align-self: flex-start;
+    margin: 4px 0 8px;
+    padding: 4px 10px;
+    font-size: 13px;
+    color: #2563eb;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.paramDocChangeBtn:hover{ background: #eff6ff; }
