@@ -258,6 +258,8 @@ export function FormNewThirdPartyDelegation({instnacePreInfo,reloadFun,forUpdate
         } finally {
             savingRef.current = false;
             setSaving(false);
+            popOutAlert();
+            reloadFun?.();
         }
     };
 
