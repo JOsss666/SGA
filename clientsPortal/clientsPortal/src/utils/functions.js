@@ -2140,3 +2140,53 @@ export async function scanDevices() {
         });
         console.log('|||||||||||||||||||||||| REspuesta clonación: ',res);
     }
+
+export const documentTypeNames = {
+    "Sell Invoice": "Factura de Venta",
+    "Purchase Invoice": "Factura de Compra",
+    "Cash Recipt": "Recibo de Caja",
+    "Exit Recipt": "Recibo de Egreso",
+    "Accounting Recipt": "Comprobante Contable",
+    "Debit Note": "Nota Débito",
+    "Credit Note": "Nota Crédito",
+    "Beginning Balance": "Saldo Inicial",
+    "Price Recipt": "Recibo de Precio",
+    "Sales Order": "Orden de Venta",
+    "Product Shipment": "Envío de Producto",
+    "Sales Returns": "Devolución de Venta",
+    "Inventory Booking": "Registro de Inventario",
+    "Inventory Transfer": "Transferencia de Inventario",
+    "Inventory Entry": "Entrada de Inventario",
+    "Inventory Out": "Salida de Inventario",
+    "Inventory Return": "Devolución de Inventario",
+    "Inventory Donation": "Donación de Inventario",
+    "Inventory Loss": "Pérdida de Inventario",
+    "Inventory Consume": "Consumo de Inventario",
+    "Production Order": "Orden de Producción",
+    "Client Order": "Orden de Cliente",
+    "Purchase Document": "Documento de Compra",
+    "Transaction": "Transacción",
+    "Portfolio Adjustment": "Ajuste de Cartera",
+    "Bank Deposit": "Depósito Bancario",
+    "Purchase Order": "Orden de Compra",
+    "Sales Quotation": "Cotización de Venta",
+    "Inventory Adjustment": "Ajuste de Inventario",
+    "Cost Transfer": "Transferencia de Costos",
+    "Payroll Voucher": "Comprobante de Nómina",
+    "Payroll Provision": "Provisión de Nómina",
+    "Payroll Adjustment": "Ajuste de Nómina",
+    "Amortization": "Amortización",
+    "Depreciation": "Depreciación",
+    "NIIF Adjustment": "Ajuste NIIF",
+    "Equivalent Purchase Document": "Documento Equivalente de Compra",
+    "Machine use": "Uso de Máquina",
+    "ThirdParty Delegation": "Delegación a Tercero",
+    "JSON Parametrization": "Documento Parametrizado"
+};
+
+// Devuelve el nombre legible de un tipo de documento. Para JSON Parametrization
+// prefiere el nombre de la plantilla (name) si está disponible.
+export function documentTypeName(docType, name) {
+    if (docType === 'JSON Parametrization' && name) return name;
+    return documentTypeNames[docType] ?? docType ?? '';
+}

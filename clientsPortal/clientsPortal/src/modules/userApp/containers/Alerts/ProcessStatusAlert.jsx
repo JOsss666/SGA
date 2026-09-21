@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { BoldTitle } from "../../components/BoldTitle";
 import './ProcessStatusAlert.css'
-import { postInfo } from "../../../../utils/functions";
+import { postInfo, documentTypeName } from "../../../../utils/functions";
 import { missingDocumentRequirements, requirementType } from "../../../../utils/processDocumentRequirements";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { FormInput } from "../../components/FormInput";
@@ -279,7 +279,9 @@ export function ProcessStatusAlert({instance_id,reloadFun,visibleMissing,visible
                                             {(element.isCompleted || element.isActual) && !element.advancement && (
                                                 <span className="noAdvancementInfo">Sin registro de avance</span>
                                             )}
-                                            {visibleMissing === true && element.order <= currentOrder && !element.checkDocs &&
+                                            {visibleMissing === true
+                                                && element.required_roll?.includes(parseInt(userInfo.role))
+                                                && element.order <= currentOrder && !element.checkDocs &&
                                                 element.missingRequirements.map((req, i) => (
                                                     <button type="button" key={i} className="requiredDocAlert" onClick={()=>{
                                                         popInAlert(<SelectTpeNewDoc docType={requirementType(req)} paramdocId={req.paramdoc_id} reloadFun={getInstanceInfo} info={{
@@ -289,7 +291,7 @@ export function ProcessStatusAlert({instance_id,reloadFun,visibleMissing,visible
                                                         }}/>)
                                                     }}>
                                                         <i className="fa-solid fa-triangle-exclamation"/>
-                                                        Requiere al menos {req.min ?? 1} {requirementType(req)}{req.paramdoc_id != null ? ` (plantilla #${req.paramdoc_id})` : ""}
+                                                        Requiere al menos {req.min ?? 1} {documentTypeName(requirementType(req))}{req.paramdoc_id != null ? ` (plantilla #${req.paramdoc_id})` : ""}
                                                     </button>
                                                 ))}
                                             {element.attached_Docs.map((doc, i) => (
@@ -306,7 +308,7 @@ export function ProcessStatusAlert({instance_id,reloadFun,visibleMissing,visible
                                                     );
                                                 }}>
                                                     <i className="fa-solid fa-file-circle-check"/>
-                                                    {`${doc.document_type} #${doc.ownSerial}`}
+                                                    {`${documentTypeName(doc.document_type, doc.name)} #${doc.ownSerial}`}
                                                 </span>
                                             ))}
                                         </div>
