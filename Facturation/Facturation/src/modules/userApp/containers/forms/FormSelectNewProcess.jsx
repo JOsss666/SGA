@@ -44,6 +44,7 @@ export function FormSelectNewProcess (){
         setLoading(true);
         let res = await postInfo('/process/getAviableProceses',{
             company_id:appInfo.company_id,
+            user_id:userInfo.user_id,
             alloweProcesses:undefined
         })
         if(res[0]){
