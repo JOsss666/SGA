@@ -209,6 +209,52 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
     const [submitting, setSubmitting] = useState(false);
     const [submitFeedback, setSubmitFeedback] = useState(null); // { type: 'ok' | 'error', message }
 
+    // Contexto de proceso: si el padre inyecta instance_id (p. ej. desde la cola de docs
+    // requeridos de un paso), la orden queda atada a ese proceso y NO se muestra selector.
+    // Si NO se pasa (p. ej. "Crear nueva orden" fuera del proceso), mostramos un
+    // SearchinList para que el cliente elija a qué instancia activa vincular la orden.
+    const contextInstanceId = params?.instance_id ?? null;
+    const needsInstanceSelector = contextInstanceId == null;
+    const [instanceOptions, setInstanceOptions] = useState([]);
+    const [selectedInstanceId, setSelectedInstanceId] = useState(null);
+    const [loadingInstances, setLoadingInstances] = useState(false);
+
+    // Instancias activas del propio tercero (userInfo.user_id = thirdParty_id en el portal).
+    // Solo se cargan cuando no vino un instance_id del contexto.
+    useEffect(() => {
+        if (!needsInstanceSelector) return undefined;
+        let active = true;
+
+        (async () => {
+            setLoadingInstances(true);
+            try {
+                // Filtro de procesos permitidos por el rol (mismo esquema {overAll, enabled}
+                // que getAviableProceses). overAll:true -> sin restricción; overAll:false ->
+                // solo los process_id habilitados. Se envía como allowedTypes (filtra por process_id).
+                const processesAccess = userInfo.responsable_config?.access?.processes;
+                const allowedTypes = processesAccess && processesAccess.overAll === false
+                    ? (Array.isArray(processesAccess.enabled) ? processesAccess.enabled : [])
+                    : undefined;
+                const response = await postInfo('/process/getProcessInstances', {
+                    company_id: appInfo.company_id,
+                    thirdParty_id: userInfo.user_id,
+                    status: ['active'],
+                    allowedTypes
+                });
+                if (!active) return;
+                const rows = Array.isArray(response) && response[0] ? response[1] : [];
+                setInstanceOptions(rows.map(row => ({
+                    text: `${row.process_code}#${row.ownSerial}${row.name ? ` · ${row.name}` : ''}`,
+                    value: row.id
+                })));
+            } finally {
+                if (active) setLoadingInstances(false);
+            }
+        })();
+
+        return () => { active = false; };
+    }, [needsInstanceSelector, appInfo.company_id, userInfo.user_id]);
+
     useEffect(() => {
         let active = true;
 
@@ -505,8 +551,9 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
         const request = {
             company_key: appInfo.company_key,
             access_key: userInfo.user_key,
-            // Contexto del proceso cuando el paramDoc se abre desde un paso (cola de docs).
-            instance_id: params?.instance_id,
+            // Contexto del proceso: viene del paso (cola de docs) o del selector de instancias.
+            // Cuando se elige por selector solo mandamos instance_id; el backend resuelve el step.
+            instance_id: params?.instance_id ?? selectedInstanceId ?? undefined,
             step_id: params?.step_id,
             payload: completedDocument
         };
@@ -642,6 +689,18 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
                 const label = event.target.closest('.FacturationFormInput')?.querySelector('label')?.textContent;
                 setSubmitFeedback({ type: 'error', message: `${label || 'Campo inválido'}: ${event.target.validationMessage}` });
             }}>
+                {/* Selector de proceso: solo cuando el instance_id no llegó del contexto. */}
+                {needsInstanceSelector && (
+                    <SearchinList
+                        title={'Proceso'}
+                        placeHolder={loadingInstances ? 'Cargando procesos activos...' : 'Vincular a un proceso (opcional)'}
+                        list={instanceOptions}
+                        value={selectedInstanceId}
+                        canClear={true}
+                        disabled={submitting || loadingInstances}
+                        action={setSelectedInstanceId}
+                    />
+                )}
                 {visibleFields
                     .filter(field => !itemBlock?.fields.some(blockField => blockField.key === field.key))
                     .map(field => {
