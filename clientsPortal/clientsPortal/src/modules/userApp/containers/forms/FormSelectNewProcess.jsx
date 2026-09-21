@@ -39,6 +39,9 @@ export function FormSelectNewProcess (){
         setLoading(true);
         let res = await postInfo('/process/getAviableProceses',{
             company_id:appInfo.company_id,
+            // En el portal externo el rol/config vienen del responsable interno
+            // (el tercero no tiene users_config), así que resolvemos el filtro con su id.
+            user_id:userInfo.responsable,
             alloweProcesses:undefined
         })
         if(res[0]){
