@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { processAdministrationDemo } from "../data/processAdministrationDemo";
 import { getProcessAdministrationReport } from "../services/nexoProcessApi";
+import { useRealtime } from "../../utils/useRealTime";
 
 const normalizeResponse = (response) => {
     if (Array.isArray(response?.data)) return response.data;
@@ -15,6 +16,13 @@ export function useProcessAdministrationReport(companyId) {
     const [isDemo, setIsDemo] = useState(false);
     const [quickFilter, setQuickFilter] = useState("all");
     const [search, setSearch] = useState("");
+    const [refreshVersion, setRefreshVersion] = useState(0);
+
+    useRealtime(companyId, (payload) => {
+        if (payload?.table === "process_instance") {
+            setRefreshVersion((current) => current + 1);
+        }
+    });
 
     useEffect(() => {
         let active = true;
@@ -25,6 +33,7 @@ export function useProcessAdministrationReport(companyId) {
                 if (active) {
                     setOrders(normalizeResponse(response));
                     setIsDemo(false);
+                    setNotice("");
                 }
             } catch (error) {
                 console.error("No fue posible cargar el informe administrativo NEXO 360", error);
@@ -40,7 +49,7 @@ export function useProcessAdministrationReport(companyId) {
             }
         })();
         return () => { active = false; };
-    }, [companyId]);
+    }, [companyId, refreshVersion]);
 
     const totals = useMemo(() => ({
         total: orders.length,

@@ -750,17 +750,43 @@ processController.getAviableProcess = (req,res)=>{
         let info = JSON.parse(data);
         let values = [];
         let whereClauses = [];
-        
+
         whereClauses.push(`pi.company_id = $1`);
         values.push(info.company_id);
 
-        if(info.alloweProcesses != undefined){
+        // Procesos permitidos: se puede pasar una lista explícita (info.alloweProcesses)
+        // y/o resolverla desde la config del rol del usuario (access.processes).
+        let allowedProcesses = Array.isArray(info.alloweProcesses) ? info.alloweProcesses : undefined;
+
+        // Restricción por usuario: leemos access.processes del rol.
+        //   overAll:true (o sin config) -> sin restricción (ve todos los procesos)
+        //   overAll:false              -> solo los ids listados en "enabled" (vacío = ninguno)
+        if(info.user_id != undefined){
+            const processesAccess = await useDataBase(`
+                SELECT "Ecosystem".roles.config->'access'->'processes' AS processes
+                FROM "Ecosystem".users_config
+                JOIN "Ecosystem".roles
+                  ON "Ecosystem".roles.id = "Ecosystem".users_config.role
+                WHERE "Ecosystem".users_config.user_id = $1
+                  AND "Ecosystem".users_config.company_id = $2
+                LIMIT 1
+            `,[info.user_id, info.company_id], 3);
+            const access = processesAccess?.processes;
+            if(access && access.overAll === false){
+                const enabled = Array.isArray(access.enabled) ? access.enabled : [];
+                allowedProcesses = allowedProcesses != undefined
+                    ? allowedProcesses.filter(id => enabled.map(String).includes(String(id)))
+                    : enabled;
+            }
+        }
+
+        if(allowedProcesses != undefined){
             whereClauses.push(`pi.id = ANY($${values.length +1})`);
-            values.push(info.alloweProcesses);
+            values.push(allowedProcesses);
         }
 
         if(info.status != undefined){
-            whereClauses.push(`pi.status = $${values.length +1})`);
+            whereClauses.push(`pi.status = $${values.length +1}`);
             values.push(info.status);
         }
 

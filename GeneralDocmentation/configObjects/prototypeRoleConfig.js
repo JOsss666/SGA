@@ -51,6 +51,10 @@ let userConfig = {
                 "enabled":[]
             }
         },
+        "processes":{
+            "overAll":true,
+            "enabled":[]
+        },
         "process_instances":{
             "overAll":true,
             "enabled":[]
