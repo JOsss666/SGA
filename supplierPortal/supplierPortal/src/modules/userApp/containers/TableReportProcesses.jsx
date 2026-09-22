@@ -11,6 +11,7 @@ import './TableReportProcesses.css';
 // el render visual se resuelve con `renderers`.
 const PROCESS_COLUMNS = [
     { key: 'identifier', label: 'ID', flex: '0 0 9rem', minWidth: '8rem' },
+    { key: 'name', label: 'Nombre' },
     { key: 'process_name', label: 'Proceso' },
     { key: 'thirdParty_name', label: 'Tercero' },
     { key: 'step_name', label: 'Etapa' },
@@ -39,6 +40,7 @@ const computeProgress = (instance) => {
 const toRow = (instance) => ({
     id: instance.id,
     identifier: `${instance.process_code}#${instance.ownSerial}`,
+    name: instance.name ?? '',
     process_name: instance.process_name,
     thirdParty_name: instance.thirdParty_name,
     step_name: instance.step_name,

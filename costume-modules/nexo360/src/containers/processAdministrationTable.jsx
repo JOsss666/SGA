@@ -12,13 +12,13 @@ const columns = [
     { key: "clientName", label: "Cliente", flex: "0 0 12rem", minWidth: "12rem" },
     { key: "processIdentifier", label: "Proceso", flex: "0 0 9rem", minWidth: "9rem" },
     { key: "processInstanceName", label: "Nombre del proceso", flex: "0 0 14rem", minWidth: "14rem" },
+    { key: "paramDocReference", label: "Referencia", flex: "0 0 18rem", minWidth: "18rem" },
     { key: "processStage", label: "Etapa proceso", flex: "0 0 13rem", minWidth: "13rem" },
     { key: "commitment", label: "Compromiso", flex: "0 0 11rem", minWidth: "11rem" },
     { key: "createdAt", label: "Fecha de creación", flex: "0 0 11rem", minWidth: "11rem" },
     { key: "deliveryAt", label: "Fecha de entrega", flex: "0 0 11rem", minWidth: "11rem" },
     { key: "providers", label: "Proveedores", flex: "0 0 14rem", minWidth: "14rem" },
     { key: "productionStates", label: "Estado producción", flex: "0 0 16rem", minWidth: "16rem" },
-    { key: "paramDocReference", label: "Referencia", flex: "0 0 18rem", minWidth: "18rem" }
 ];
 
 const shortDate = (value) => value ? new Intl.DateTimeFormat("es-CO", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(value)) : "Sin fecha";

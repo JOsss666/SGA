@@ -251,9 +251,6 @@ const getSellInvoiceServices = async(instance_id)=>{
                         <i className="fa-regular fa-file-lines"/>
                         <BoldTitle text={`${dictionaryDocTypes[docInfo.document_type]} #${docInfo.ownSerial}`}/>
                     </div>
-                    <div className="thirdPartyAndCompanyInfo">
-                        <UserCard name={thirdParyInfo.names} desc={thirdParyInfo.type} imgSrc={thirdParyInfo.img? thirdParyInfo.img:'https://i.pinimg.com/736x/55/62/fb/5562fb835d1de1ea974bdf0039726208.jpg'}/>
-                    </div>
                     {docInfo.description && (
                     <DescriptionSpan text={`Descripción: ${docInfo.description}`}/>
                     )}
