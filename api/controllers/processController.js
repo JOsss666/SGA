@@ -959,6 +959,147 @@ processController.getProcessInstances =(req,res)=>{
     })
 }
 
+// Clon de getProcessInstances para el informe "custom" del portal de proveedores:
+// devuelve las mismas instancias de proceso pero agregando, por cada instancia, la
+// o las referencias del paramDoc (JSON Parametrization) ligadas a sus documentos
+// adjuntos. La referencia se resuelve igual que en el informe NEXO 360: por el
+// paramDoc principal del grupo del documento (documents_group.main_doc_id) y, si el
+// documento adjunto es en sí un JSON Parametrization, por su propia referencia.
+processController.getProcessInstancesWithReferences = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`"Process".process_instance.company_id = $1`);
+        values.push(info.company_id)
+
+        if(info.id != undefined){
+            whereClauses.push(`"Process".process_instance.id = $${values.length +1}`);
+            values.push(info.id);
+        }
+
+        if(info.process_id != undefined){
+            whereClauses.push(`"Process".process_instance.process_id = $${values.length +1}`);
+            values.push(info.process_id)
+        }
+
+        if(info.allowedInstances != undefined){
+            whereClauses.push(`"Process".process_instance.id = ANY($${values.length +1})`);
+            values.push(info.allowedInstances);
+        }
+
+        if(info.allowedTypes != undefined){
+            whereClauses.push(`"Process".process_instance.process_id = ANY($${values.length +1})`);
+            values.push(info.allowedTypes);
+        }
+
+        if(info.status != undefined && info.status[0] != 'all' ){
+            whereClauses.push(`"Process".process_instance.status = ANY($${values.length +1})`);
+            values.push(info.status);
+        }
+
+        if(info.thirdParty_id != undefined){
+            whereClauses.push(`"Process".process_instance."thirdParty_id" = $${values.length +1}`);
+            values.push(info.thirdParty_id);
+        }
+
+        // Dates Filters
+            if (info.start_date) {
+                values.push(info.start_date);
+                whereClauses.push(
+                    `"Process".process_instance.created_at >= $${values.length}`
+                );
+            }
+
+            if (info.end_date) {
+                values.push(info.end_date);
+                whereClauses.push(
+                    `"Process".process_instance.created_at <= $${values.length}`
+                );
+            }
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+        let sentence = `
+            SELECT
+                "Process".process_instance.*,
+                "Ecosystem".users.user_name AS responsable_name,
+                "Process".processes.name AS process_name,
+                "Process".processes.code AS process_code,
+                "Process".processes.id AS process_id,
+                "Ecosystem".thirdparties.names AS "thirdParty_name",
+                "Process".process_steps.name AS step_name,
+                "Process".process_steps.order AS current_step_order,
+                -- Contamos el total de pasos para este proceso específico
+                (SELECT COUNT(*)
+                FROM "Process".process_steps
+                WHERE "Process".process_steps.process_id = "Process".processes.id
+                ) AS total_steps,
+                -- Referencias del paramDoc ligadas a los documentos de la instancia.
+                COALESCE(process_references.references_text, '') AS references_text,
+                COALESCE(process_references.references_list, '[]'::json) AS references_list
+            FROM
+                "Process".process_instance
+            LEFT JOIN
+                "Process".processes
+            ON
+                "Process".process_instance.process_id = "Process".processes.id
+            LEFT JOIN
+                "Ecosystem".users
+            ON
+                "Process".process_instance.responsable = "Ecosystem".users.user_id
+            LEFT JOIN
+                "Ecosystem".thirdparties
+            ON
+                "Process".process_instance."thirdParty_id" = "Ecosystem".thirdparties.id
+            LEFT JOIN
+                "Process".process_steps
+            ON
+                "Process".process_instance.step_id = "Process".process_steps.id
+            LEFT JOIN LATERAL (
+                SELECT
+                    STRING_AGG(DISTINCT refs.reference, ', ' ORDER BY refs.reference) AS references_text,
+                    JSON_AGG(DISTINCT refs.reference) AS references_list
+                FROM "Ecosystem".docs_instances link
+                JOIN "Ecosystem".documents linked_doc
+                    ON linked_doc.id = link.doc_id
+                LEFT JOIN LATERAL (
+                    -- (a) el documento adjunto es en sí un paramDoc (JSON Parametrization)
+                    SELECT linked_doc."specialConfig"->'values'->>'reference' AS reference
+                    WHERE linked_doc.document_type = 'JSON Parametrization'
+                    UNION
+                    -- (b) el paramDoc principal del grupo del documento adjunto
+                    SELECT paramdoc_doc."specialConfig"->'values'->>'reference' AS reference
+                    FROM "Ecosystem".documents_group dg
+                    JOIN "Ecosystem".documents paramdoc_doc
+                        ON paramdoc_doc.id = dg.main_doc_id
+                        AND paramdoc_doc.document_type = 'JSON Parametrization'
+                    WHERE dg.doc_id = linked_doc.id
+                ) refs ON TRUE
+                WHERE link.instance_id = "Process".process_instance.id
+                    AND refs.reference IS NOT NULL
+                    AND refs.reference <> ''
+            ) process_references ON TRUE
+            ${whereQuery}
+            ORDER BY
+                "Process".process_instance.id DESC
+        ;`;
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err))
+    })
+}
+
 processController.updateProcessInstanceStatus = (req,res)=>{
     let data = '';
     req.on('data',chunk=>{

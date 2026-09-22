@@ -5,6 +5,7 @@ import { CardReport } from '../components/CardReport';
 import { SearchBar } from '../components/SearchBar';
 import { SelectOptions } from '../components/SelectOptions';
 import { ProcessesReport } from './reports/ProcessesReport';
+import { ProcessesReferencesReport } from './reports/ProcessesReferencesReport';
 import './Reports.css';
 
 export function Reports() {
@@ -37,10 +38,17 @@ export function Reports() {
                                 description="Visualiza tus procesos y su avance"
                                 onClick={() => navigate(`${reportsPath}/Processes`)}
                             />
+                            <CardReport
+                                type="processes"
+                                title="Informe de procesos con referencias"
+                                description="Tus procesos, su avance y sus referencias"
+                                onClick={() => navigate(`${reportsPath}/ProcessesReferences`)}
+                            />
                         </div>
                     </>
                 } />
                 <Route path="/Processes" element={<ProcessesReport />} />
+                <Route path="/ProcessesReferences" element={<ProcessesReferencesReport />} />
                 <Route path="*" element={<Navigate to={reportsPath} replace />} />
             </Routes>
         </div>

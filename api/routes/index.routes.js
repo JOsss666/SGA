@@ -276,6 +276,7 @@ router.post('/inventory/deleteItemPricesList',inventoryController.deleteItemPric
 // SGA - PROCESS
 
 router.post('/process/getProcessInstances', processController.getProcessInstances);
+router.post('/process/getProcessInstancesWithReferences', processController.getProcessInstancesWithReferences);
 router.post('/process/getEvidenceOptions', express.json({ limit: '16kb', strict: true }), processController.getEvidenceOptions);
 router.post('/process/registerEvidence', express.json({ limit: '256kb', strict: true }), processController.registerEvidence);
 
