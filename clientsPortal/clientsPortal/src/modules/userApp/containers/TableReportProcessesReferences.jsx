@@ -6,14 +6,15 @@ import { formatDate } from '../../../utils/functions';
 import { UniversalTable } from './universalTable';
 import './TableReportProcesses.css';
 
-// Columnas del informe de procesos para UniversalTable.
+// Clon de TableReportProcesses con una columna adicional "Referencias" que muestra
+// la o las referencias del paramDoc (JSON Parametrization) ligadas al proceso.
 // El `key` apunta al valor primitivo de cada fila (para orden/filtro/búsqueda);
 // el render visual se resuelve con `renderers`.
 const PROCESS_COLUMNS = [
     { key: 'identifier', label: 'ID', flex: '0 0 9rem', minWidth: '8rem' },
     { key: 'name', label: 'Nombre' },
     { key: 'process_name', label: 'Proceso' },
-    { key: 'thirdParty_name', label: 'Tercero' },
+    { key: 'references', label: 'Referencias', minWidth: '12rem' },
     { key: 'step_name', label: 'Etapa' },
     { key: 'progress', label: 'Avance', minWidth: '9rem' },
     { key: 'delivery_date', label: 'Fecha de entrega' },
@@ -25,6 +26,7 @@ const PROCESS_COLUMNS = [
 // Celdas que necesitan un elemento React (el resto usa el render por defecto).
 const PROCESS_RENDERERS = {
     progress: ({ value }) => <ProgressBar progress={value} />,
+    references: ({ value }) => <span title={value}>{value || '—'}</span>,
     delivery_date: ({ value }) => <span>{formatDate(value)}</span>,
     updated_at: ({ value }) => <span>{formatDate(value)}</span>,
     start_date: ({ value }) => <span>{formatDate(value)}</span>
@@ -36,13 +38,23 @@ const computeProgress = (instance) => {
     return Number(((Number(instance.current_step_order) / denominator) * 100).toFixed(1));
 };
 
+// Normaliza las referencias del backend a un texto legible.
+// El backend entrega `references_text` (string) y `references_list` (array json).
+const referencesText = (instance) => {
+    if (instance.references_text) return instance.references_text;
+    if (Array.isArray(instance.references_list)) {
+        return instance.references_list.filter(Boolean).join(', ');
+    }
+    return '';
+};
+
 // Transforma una instancia del backend en una fila lista para la tabla.
 const toRow = (instance) => ({
     id: instance.id,
     identifier: `${instance.process_code}#${instance.ownSerial}`,
     name: instance.name ?? '',
     process_name: instance.process_name,
-    thirdParty_name: instance.thirdParty_name,
+    references: referencesText(instance),
     step_name: instance.step_name,
     progress: computeProgress(instance),
     delivery_date: instance.delivery_date,
@@ -51,7 +63,7 @@ const toRow = (instance) => ({
     status: instance.status
 });
 
-export function TableReportProcesses({ settingsReport, info = [], searchValue = '', loading = false }) {
+export function TableReportProcessesReferences({ settingsReport, info = [], searchValue = '', loading = false }) {
 
     const { popInAlert } = useAlert();
 

@@ -2192,3 +2192,19 @@ export function documentTypeName(docType, name) {
     if (docType === 'JSON Parametrization' && name) return name;
     return documentTypeNames[docType] ?? docType ?? '';
 }
+
+
+export async function registerFacturationCredentials(){
+    let res = await postInfo('/electronicFacturation/providerCredentials',{
+        "company_id": 7,
+        "provider": "factus",
+        "environment": "production",
+        "api_url": "https://api.factus.com.co",
+        "client_id": "a2cd5763-2624-41d6-8dab-d259e3da0c6d",
+        "client_secret": "2NILBYpXsXGnmIqWu9g82dhe6dPpzYeLXQjoXWz2",
+        "username": "cmurillo.nvc@gmail.com",
+        "password": "4kOjF9AP",
+        "status": "active"
+    })
+    return(res)
+}

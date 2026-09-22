@@ -13,12 +13,15 @@ import { SearchBar } from "../../components/SearchBar";
 import { SelectOptions } from "../../components/SelectOptions";
 import { LoadingSpace } from "../LoadingSpace";
 import { FilterReports } from "./FilterReports";
-import { TableReportProcesses } from "../TableReportProcesses";
+import { TableReportProcessesReferences } from "../TableReportProcessesReferences";
 import "./ReportDocuments.css";
 import "./ProcessesReport.css";
 import { useRealtime } from "../../../../utils/useRealTime";
 
-export function ProcessesReport(){
+// Informe "custom" para el portal de proveedores: clon del Informe de Procesos que
+// añade una columna con la o las referencias del paramDoc (JSON Parametrization)
+// ligadas a cada proceso. Consume /process/getProcessInstancesWithReferences.
+export function ProcessesReferencesReport(){
 
     const [info, setInfo] = useState([]);
     const { appInfo, userInfo } = useAppInfo();
@@ -44,7 +47,7 @@ export function ProcessesReport(){
         "ID",
         "Nombre Proceso",
         "Proceso",
-        "Tercero",
+        "Referencias",
         "Etapa",
         "Avance",
         "Fecha de entrega",
@@ -92,6 +95,15 @@ export function ProcessesReport(){
         );
     };
 
+    // Referencias del proceso (una o varias) como texto legible.
+    const referencesText = (element) => {
+        if (element?.references_text) return element.references_text;
+        if (Array.isArray(element?.references_list)) {
+            return element.references_list.filter(Boolean).join(", ");
+        }
+        return "";
+    };
+
     const setInfoForReportDownload = () => {
 
         return info.map(element => ({
@@ -102,7 +114,7 @@ export function ProcessesReport(){
 
             "Proceso": element?.process_name || "",
 
-            "Tercero": element?.thirdParty_name || "",
+            "Referencias": referencesText(element),
 
             "Etapa": element?.step_name || "",
 
@@ -147,7 +159,7 @@ export function ProcessesReport(){
         setLoading(true);
 
         try{
-            let res = await postInfo("/process/getProcessInstances",settingsReport);
+            let res = await postInfo("/process/getProcessInstancesWithReferences",settingsReport);
             if(!res || !Array.isArray(res) || !res[0]){
                 console.warn("Respuesta inválida");
                 setInfo([]);
@@ -208,9 +220,9 @@ export function ProcessesReport(){
 
             <div className="headReport">
 
-                <BoldTitle text={"Informe de Procesos"} />
+                <BoldTitle text={"Informe de Procesos con Referencias"} />
 
-                <DescriptionSpan text={"Balance de instancias de procesos."} />
+                <DescriptionSpan text={"Balance de instancias de procesos con sus referencias."} />
 
             </div>
 
@@ -271,7 +283,7 @@ export function ProcessesReport(){
                 <ButtonDownload
                     info={setInfoForReportDownload()}
                     columns={columsTr}
-                    title={"Informe_instancias_procesos"}
+                    title={"Informe_instancias_procesos_referencias"}
                 />
 
                 <FilterReports
@@ -286,7 +298,7 @@ export function ProcessesReport(){
 
                 {!loading && (
 
-                    <TableReportProcesses
+                    <TableReportProcessesReferences
                         searchValue={searchValue}
                         settingsReport={settingsReport}
                         info={info}

@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { BoldTitle } from "../../components/BoldTitle";
 import { SearchinList } from "../../components/SearchInList";
@@ -65,6 +65,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const [thirdParty_id,setThirdParty_id] = useState();
     const [thirdPartyInfo,setThirdPartyInfo] = useState({});
     const [paymentMethod,setPaymentMethod] = useState([]);
+    const nextPaymentRowId = useRef(0);
     const [bussines_id,setBussines_id] = useState();
     const [store_id,setStore_id] = useState();
     const [costCenter_id,setCostCenter_id] = useState();
@@ -773,25 +774,12 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
 
     const addPaymentMethod = (newPayment) => {
         if(newPayment.id != undefined){
-            setPaymentMethod(prev => {
-                
-                // Permitir seleccionar varias veces el mismo metodo de pago
-                /*
-                const exists = prev.some(item => item.id === newPayment.id);
-                if (exists) {
-                    // Opcional: Podrías lanzar una alerta o simplemente no hacer nada
-                    console.warn("Este método de pago ya ha sido agregado.");
-                    alert(`El metodo de pago ${newPayment.name} ya fue agregado`)
-                    return prev; 
-                }
-                    */
-                // Si no existe, lo agregamos al array
-                return [...prev, newPayment];
-            });
+            const paymentRow = { ...newPayment, paymentRowId: nextPaymentRowId.current++ };
+            setPaymentMethod(prev => [...prev, paymentRow]);
         }
     };
-    const removePaymentMethod = (id) => {
-        setPaymentMethod(prev => prev.filter(item => item.id !== id));
+    const removePaymentMethod = (paymentRowId) => {
+        setPaymentMethod(prev => prev.filter(item => item.paymentRowId !== paymentRowId));
     };
 
     const calcTotalFromPayments = ()=>{
@@ -819,10 +807,10 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
         return(newTTl)
     }
 
-    const updatePaymentValue = (id, key, newValue) => {
+    const updatePaymentValue = (paymentRowId, key, newValue) => {
         setPaymentMethod(prev => 
             prev.map(item => 
-                item.id === id 
+                item.paymentRowId === paymentRowId
                     ? { ...item, [key]: newValue } 
                     : item
             )
@@ -867,20 +855,20 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
         setItemBlocks(updatedDocuments);
     };
 
-    const setAplyVoucher = (id,value)=>{
+    const setAplyVoucher = (paymentRowId,value)=>{
         setPaymentMethod(prev=>
             prev.map(item =>
-                item.id === id
+                item.paymentRowId === paymentRowId
                     ?{...item,["aplyVoucher"]:value}
                     :item
             )
         )
     }
 
-    const updateVoucher = (id,voucher)=>{
+    const updateVoucher = (paymentRowId,voucher)=>{
         setPaymentMethod(prev =>
             prev.map(item => 
-                item.id === id 
+                item.paymentRowId === paymentRowId
                     ? { ...item, ["voucher"]: voucher } 
                     : item
             )
@@ -1460,27 +1448,27 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                                         modifique el valor o agrege un metodo valido.
                                     </span>
                                 )}
-                                {paymentMethod.map((element,index)=>(
-                                    <div key={index} className={`PaymentMethodCard ${disabledByValue? 'disabledPaymentMethodCard':''}`}>
+                                {paymentMethod.map((element)=>(
+                                    <div key={element.paymentRowId} className={`PaymentMethodCard ${disabledByValue? 'disabledPaymentMethodCard':''}`}>
                                         <div className="payMC">
                                             <strong>{element.name}</strong>
                                             {!element.for_balance && (
-                                                <input className="inputPaymentValue" step={0.001} type="number"  placeholder="$0" onChange={(e)=>{
-                                                    updatePaymentValue(element.id,"value",e.target.value)
+                                                <input className="inputPaymentValue" step={0.001} type="number" value={element.value ?? ''} placeholder="$0" onChange={(e)=>{
+                                                    updatePaymentValue(element.paymentRowId,"value",e.target.value)
                                                 }}/>
                                             )}
                                             {element.for_balance && (
-                                                <input className="inputPaymentValue" step={0.001} max={thirdPartyInfo.thirdParty_balance} type="number" placeholder={`Max $ ${formatCurrency(thirdPartyInfo.thirdParty_balance)}`} onChange={(e)=>{
-                                                    updatePaymentValue(element.id,"value",e.target.value)
+                                                <input className="inputPaymentValue" step={0.001} max={thirdPartyInfo.thirdParty_balance} type="number" value={element.value ?? ''} placeholder={`Max $ ${formatCurrency(thirdPartyInfo.thirdParty_balance)}`} onChange={(e)=>{
+                                                    updatePaymentValue(element.paymentRowId,"value",e.target.value)
                                                 }}/>
                                             )}
                                             <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
-                                                removePaymentMethod(element.id)
+                                                removePaymentMethod(element.paymentRowId)
                                             }}/>
                                         </div>
                                         {!element.aplyVoucher && (
                                             <button className="addVoucherToPayment" onClick={()=>{
-                                            setAplyVoucher(element.id,true)
+                                            setAplyVoucher(element.paymentRowId,true)
                                             }}>
                                                 <i className="fa-solid fa-plus"/>
                                                 Añadir voucher o referencia a {element.name}
@@ -1491,11 +1479,11 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                                                 <strong>
                                                     Voucher o referencia
                                                 </strong>
-                                                <input type="text" placeholder="Ej: AR23..." onChange={(e)=>{
-                                                    updateVoucher(element.id,e.target.value);
+                                                <input type="text" value={element.voucher ?? ''} placeholder="Ej: AR23..." onChange={(e)=>{
+                                                    updateVoucher(element.paymentRowId,e.target.value);
                                                 }}/>
                                                 <i title={`Eliminar ${element.name}`} className="fa-solid fa-trash delPaymentBtn" onClick={()=>{
-                                                    setAplyVoucher(element.id,false)
+                                                    setAplyVoucher(element.paymentRowId,false)
                                                 }}/>
                                             </div>
                                         )}
