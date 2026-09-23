@@ -10,8 +10,8 @@ import { saveAs } from 'file-saver';
 
 
 
-//export const urlSer = 'http://localhost:3000';
-export const urlSer = 'https://sga-2zgp.onrender.com';
+export const urlSer = 'http://localhost:3000';
+//export const urlSer = 'https://sga-2zgp.onrender.com';
 
 export async function postInfo(route,informacion){
     console.log('Funcion post');
@@ -312,3 +312,10 @@ export async function verifiClicksControl(){
         return([false,[]])
     }
 }
+
+export const formatDate = (date, noHour = false) => {
+    if (!date) return '--/--/--';
+    const parts = String(date).match(/^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}:\d{2}))?/);
+    if (!parts) return '--/--/--';
+    return noHour || !parts[2] ? parts[1] : `${parts[1]} ${parts[2]}`;
+};

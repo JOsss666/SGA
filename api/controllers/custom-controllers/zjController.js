@@ -1,6 +1,8 @@
 import { useDataBase } from "../../app.js";
 import processController from "../processController.js";
 
+import { appendBusinessDateRange, companyTimeZoneSql } from "../../services/businessTimeZoneService.js";
+
 const zjController = {};
 
 zjController.getlastClickControl = (req,res)=>{
@@ -67,43 +69,74 @@ zjController.getHistorialClicksControl = (req,res)=>{
         data += chunk;
     })
     req.on('end',async()=>{
-        console.log(data);
-        let info = JSON.parse(data);
-        let values = [];
-        let whereClauses = [];
+        try {
+            let info = JSON.parse(data);
+            const validDate = value => !value || (
+                typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+                !Number.isNaN(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value
+            );
+            if (!validDate(info.start_date) || !validDate(info.end_date) ||
+                (info.start_date && info.end_date && info.start_date > info.end_date)) {
+                res.writeHead(400, {'Content-Type': 'application/json'});
+                return res.end(JSON.stringify([false, 'El rango de fechas no es válido.']));
+            }
+            let values = [];
+            let whereClauses = [];
 
-        if(info.asset_id != undefined){
-            whereClauses.push(`"Custom"."z&j_clickControl".asset_id = $${values.length +1}`);
-            values.push(info.asset_id);
+            if(info.asset_id != undefined){
+                whereClauses.push(`"Custom"."z&j_clickControl".asset_id = $${values.length +1}`);
+                values.push(info.asset_id);
+            }
+
+            if (info.company_id != null) {
+                values.push(info.company_id);
+                whereClauses.push(`"Custom"."z&j_clickControl".company_id = $${values.length}`);
+            }
+            const companyPlaceholder = '"Custom"."z&j_clickControl".company_id';
+            appendBusinessDateRange({
+                whereClauses,
+                values,
+                column: '"Custom"."z&j_clickControl".created_at',
+                start: info.start_date,
+                end: info.end_date,
+                companyPlaceholder
+            });
+            const timeZone = companyTimeZoneSql(companyPlaceholder);
+
+            const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+
+            let sentence = `
+                SELECT
+                    "Custom"."z&j_clickControl" .*,
+                    to_char("Custom"."z&j_clickControl".created_at AT TIME ZONE (${timeZone}), 'YYYY-MM-DD HH24:MI:SS') AS created_at_local,
+                    to_char("Custom"."z&j_clickControl".created_at AT TIME ZONE (${timeZone}), 'YYYY-MM-DD') AS business_date,
+                    ${timeZone} AS business_time_zone,
+                    "Ecosystem".users.user_name AS responsable,
+                    "AssetManagement".assets.name AS asset_name,
+                    "AssetManagement".assets.model AS asset_model,
+                    "AssetManagement".assets.img AS asset_img
+                FROM
+                    "Custom"."z&j_clickControl"
+                LEFT JOIN
+                    "Ecosystem".users
+                ON
+                    "Custom"."z&j_clickControl".updated_by = "Ecosystem".users.user_id
+                LEFT JOIN
+                    "AssetManagement".assets
+                ON
+                    "Custom"."z&j_clickControl".asset_id = "AssetManagement".assets.id
+                ${whereQuery}
+                ORDER BY created_at DESC;
+            `;
+            let consulta = await useDataBase(sentence,values,1);
+            res.writeHead(200,{'Content-Type':'text/plain'})
+            res.end(JSON.stringify(consulta));
+        } catch (error) {
+            res.writeHead(error instanceof SyntaxError ? 400 : 500, {'Content-Type': 'application/json'});
+            res.end(JSON.stringify([false, 'No fue posible consultar el historial de clicks.']));
         }
-
-        const whereQuery = whereClauses.length > 0
-        ? `WHERE ${whereClauses.join(" AND ")}`
-        : "";
-
-        let sentence = `
-            SELECT 
-                "Custom"."z&j_clickControl" .*,
-                "Ecosystem".users.user_name AS responsable,
-                "AssetManagement".assets.name AS asset_name,
-                "AssetManagement".assets.model AS asset_model,
-                "AssetManagement".assets.img AS asset_img
-	        FROM 
-                "Custom"."z&j_clickControl" 
-            LEFT JOIN
-                "Ecosystem".users
-            ON 
-                "Custom"."z&j_clickControl".updated_by = "Ecosystem".users.user_id
-            LEFT JOIN
-                "AssetManagement".assets
-            ON
-                "Custom"."z&j_clickControl".asset_id = "AssetManagement".assets.id
-            ${whereQuery}
-            ORDER BY created_at DESC;
-        `;
-        let consulta = await useDataBase(sentence,values,1);
-        res.writeHead(200,{'Content-Type':'text/plain'})
-        res.end(JSON.stringify(consulta));
     })
     req.on('error',(err)=>{
         res.writeHead(500,{'Content-Type':'text/plain'})

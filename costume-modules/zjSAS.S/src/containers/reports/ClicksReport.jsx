@@ -9,7 +9,7 @@ import { ButtonDownload } from '../../components/ButtonDownload';
 import { AiButton } from '../../components/ChatAiComponents/AiButton';
 import { useEffect, useState, useRef, useMemo } from "react";
 import { FilterReports } from './FilterReports'
-import { postInfo } from "../../../utils/functions";
+import { urlSer } from "../../../utils/functions";
 import { LoadingSpace } from "../LoadingSpace";
 import { TableClicks } from "../TableClicks";
 import './ClicksReport.css'
@@ -20,8 +20,9 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
     const [disabled,setDisabled] = useState(false);
     const [loading,setLoading] = useState(true);
     const [searchValue,setSearchValue] = useState('');
-    const [start_date,setStart_date] = useState(undefined);
-    const [end_date,setEnd_date] = useState(undefined);
+    const [start_date,setStart_date] = useState('');
+    const [end_date,setEnd_date] = useState('');
+    const [error,setError] = useState('');
     const [visibleSettings,setVisibleSettings] = useState(false); 
 
     const reportRef = useRef();
@@ -36,31 +37,62 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
         "Fecha"
     ];
 
-    const settingsReport = {
-        columsReport,
-        company_id: appInfo.company_id,
-        start_date,
-        end_date
-    };
+    useEffect(()=>{
+        const controller = new AbortController();
+        setInfo([]);
+        setError('');
 
-    const getClicksHistoric = async()=>{
-        setDisabled(true);
-        setLoading(true);
-
-        let res = await postInfo('/zj852/getHistorialClicksControl', settingsReport);
-
-        if(res[0]){
-            console.log("DATA BACKEND:", res[1]);
-            setInfo(res[1]);
+        if (start_date && end_date && start_date > end_date) {
+            setError('La fecha inicial no puede ser posterior a la fecha final.');
+            setLoading(false);
+            setDisabled(false);
+            return () => controller.abort();
         }
 
-        setLoading(false);
-        setDisabled(false);
-    }
+        if (!appInfo.company_id) {
+            setLoading(false);
+            setDisabled(false);
+            return () => controller.abort();
+        }
 
-    useEffect(()=>{
+        const getClicksHistoric = async () => {
+            setDisabled(true);
+            setLoading(true);
+            try {
+                const response = await fetch(`${urlSer}/zj852/getHistorialClicksControl`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-SGA-Company-Id': String(appInfo.company_id)
+                    },
+                    body: JSON.stringify({
+                        company_id: appInfo.company_id,
+                        start_date: start_date || undefined,
+                        end_date: end_date || undefined
+                    }),
+                    signal: controller.signal
+                });
+                const result = await response.json();
+                if (!response.ok || !result[0] || !Array.isArray(result[1])) {
+                    throw new Error('No fue posible cargar el informe. Intenta nuevamente.');
+                }
+                if (!controller.signal.aborted) setInfo(result[1]);
+            } catch {
+                if (!controller.signal.aborted) {
+                    setError('No fue posible cargar el informe. Intenta nuevamente.');
+                }
+            } finally {
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                    setDisabled(false);
+                }
+            }
+        };
+
         getClicksHistoric();
-    },[]);
+        return () => controller.abort();
+    },[appInfo.company_id, start_date, end_date]);
 
     const tableData = useMemo(() => {
         if(!Array.isArray(info)) return []
@@ -80,7 +112,7 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
         "Clicks": "initialClicks",
         "Responsable": "responsable",
         "Descripcion": "description",
-        "Fecha": "created_at"
+        "Fecha": "created_at_local"
     };
 
     const setInfoForReportDownload = () => {
@@ -116,9 +148,9 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
                 <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
 
                 <div className="rangeInput">
-                    <FormInput type={"date"} title={"Fecha Inicial"} action={setStart_date} />
+                    <FormInput type={"date"} title={"Fecha Inicial"} action={setStart_date} value={start_date} max={end_date || undefined} required={false} />
                     <span>-</span>
-                    <FormInput type={"date"} title={"Fecha Final"} action={setEnd_date} />
+                    <FormInput type={"date"} title={"Fecha Final"} action={setEnd_date} value={end_date} min={start_date || undefined} required={false} />
                 </div>
 
                 <SelectOptions
@@ -171,7 +203,12 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
 
             </div>
 
-            {!loading && (
+            {error && <p role="alert">{error}</p>}
+            {!loading && !error && tableData.length === 0 && (
+                <p role="status">No hay registros para los filtros seleccionados.</p>
+            )}
+
+            {!loading && !error && (
                 <div ref={reportRef}>
                     <TableClicks 
                         columns={columsReport} 

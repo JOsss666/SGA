@@ -1,6 +1,6 @@
 import './TableClicks.css'
 import {UserCard} from '../components/UserCard'
-import { moneyFormat } from '../../utils/functions'
+import { formatDate, moneyFormat } from '../../utils/functions'
 import {PreviewFile} from './Preview/PreviewFile'
 import { useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
@@ -144,7 +144,7 @@ export function TableClicks({columns,info,disabled, useAlert, appInfo}){
                                     </span>
 
                                     <span className='rowTable'>
-                                        {element.created_at ? element.created_at.substring(0,16) : '---'}
+                                        {formatDate(element.created_at_local || element.created_at, false)}
                                     </span>
 
                                 </div>
