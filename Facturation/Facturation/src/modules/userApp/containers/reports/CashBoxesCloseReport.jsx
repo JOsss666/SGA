@@ -4,89 +4,69 @@ import { postInfo, parseSettlementReportByPeriodToXlsx } from "../../../../utils
 import { BoldTitle } from "../../components/BoldTitle";
 import { ButtonMenu } from "../../components/ButtonMenu";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
-import { FormButton } from "../../components/FormButton";
 import { FormInput } from "../../components/FormInput";
 import { PathLocation } from "../../components/PathLocation";
 import { SearchBar } from "../../components/SearchBar";
-import { SelectOptions } from "../../components/SelectOptions";
-import { TableReport } from "../TableReport";
 import "./ReportDocuments.css";
-import { LoadingSpace } from "../LoadingSpace";
 import { ButtonDownload } from "../../components/ButtonDownload";
 import { AiButton } from "../../components/ChatAiComponents/AiButton";
 import { TableCashBoxClose } from "../TableCashBoxClose";
 
-export function CashBoxesCloseReport({type}) {
+const columnsOp = [
+    "Responsable",
+    "Caja",
+    "Saldo inicial",
+    "Saldo actual",
+    "Saldo final",
+    "Fecha de inicio",
+    "Fecha de cierre",
+    "Estado"
+];
+
+export function CashBoxesCloseReport() {
 
     // Prev Info
     const [info, setInfo] = useState([]);
+    const [visibleRows, setVisibleRows] = useState([]);
+    const [loadError, setLoadError] = useState('');
     const { appInfo } = useAppInfo();
     const [searchValue,setSearchValue] = useState("");
 
     // Actions Page
-    const [loading, setLoading] = useState(false);
-    
-    
+    const [loading, setLoading] = useState(true);
+
+
     // Filters
     const [startDate,setStartDate] = useState();
     const [endDate,setEndDate] = useState();
-    const [cashStore_id,setStore_id] = useState();
-    const [cashBox_id,setCashBox_id] = useState();
+    const [cashStore_id] = useState();
+    const [cashBox_id] = useState();
 
     // Settings Report
-    const documentTypes = {
-        'Client Order': "Ordenes de Cliente",
-        'Production Order': "Ordenes de Producción",
-        'Purchase Document': "Documentos de Compra",
-        'Inventory Consume': "Consumos de inventario",
-        'Sell Invoice': "Facturas de venta",
-        TR: "Transacciónes",
-        TR_details: "Detalles de la Transacción",
-    };
-
-    const columnsOp = [
-        "Responsable",
-        "Caja",
-        "Saldo inicial",
-        "Saldo actual",
-        "Saldo final",
-        "Fecha de inicio",
-        "Fecha de cierre",
-        "Estado"
-    ];
-
-    const settingsReport = {
-        columns: columnsOp,
-        company_id: appInfo.company_id
-    };
-
-    // [AGREGADO] datos visibles
-    const tableData = Array.isArray(info)
-        ? info.filter((row)=>
-            Object.values(row)
-                .join(" ")
-                .toLowerCase()
-                .includes(searchValue.toLowerCase())
-        )
-        : [];
-
-    const GetDocuments = async () => {
-        setLoading(true);
-        let res = await postInfo('/facturation/getRegisterShift',settingsReport);
-        console.log(res);
-        if(res[0]){
-            setInfo(res[1])
-        }
-        setLoading(false)
-    };
-
     useEffect(() => {
-        GetDocuments();
-    }, []);
-
-    useEffect(()=>{
-        console.log(info)
-    },[info])
+        let active = true;
+        const getDocuments = async () => {
+            setLoading(true);
+            setLoadError('');
+            try {
+                const res = await postInfo('/facturation/getRegisterShift', {
+                    columns: columnsOp,
+                    company_id: appInfo.company_id
+                });
+                if (!res?.[0] || !Array.isArray(res[1])) throw new Error('Invalid shift response');
+                if (active) setInfo(res[1]);
+            } catch {
+                if (active) {
+                    setInfo([]);
+                    setLoadError('No se pudieron cargar los cierres de caja. Vuelve a abrir el informe para intentarlo de nuevo.');
+                }
+            } finally {
+                if (active) setLoading(false);
+            }
+        };
+        getDocuments();
+        return () => { active = false; };
+    }, [appInfo.company_id]);
 
     const columnMap = {
         "Responsable": "responsable",
@@ -100,7 +80,7 @@ export function CashBoxesCloseReport({type}) {
     };
 
     const setInfoForReportDownload = () => {
-        return tableData.map(element => {
+        return visibleRows.map(element => {
             let row = {};
 
             columnsOp.forEach(col => {
@@ -141,7 +121,7 @@ export function CashBoxesCloseReport({type}) {
         <PathLocation />
         <div className="headReport">
             <BoldTitle text={`Informe Cierres de caja`} />
-            <DescriptionSpan text={`Informe del los cierres de caja.`} />
+            <DescriptionSpan text={`Informe de los cierres de caja.`} />
         </div>
         <div className="settingsReport">
             <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
@@ -150,18 +130,9 @@ export function CashBoxesCloseReport({type}) {
             <span>-</span>
             <FormInput type={"date"} title={"Fecha Final"} action={setEndDate} />
             </div>
-            {false && (<SelectOptions
-            options={[
-                "Ascendente (fecha)",
-                "Descendente (fecha)",
-                "Ascendente (Nombre)",
-                "Descendente (Nombre)",
-            ]}
-            title={"Orden"}
-            />)}
             <ButtonMenu title={"Mas Ajustes"} children={<i className="fa-solid fa-sliders" />} noRotate={true} />
             <ButtonMenu title={"Agregar a favoritos"} children={<i className="fa-regular fa-star" />} noRotate={true} />
-            <AiButton attached={info} sugerence={[
+            <AiButton attached={visibleRows} sugerence={[
                 {text:'¿Que representa este informe?',context:`Procesos - Informe `},
                 {text:'Realiza un analisis de este informe',context:`Procesos - Informe - `},
                 {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Informe - `}
@@ -179,13 +150,15 @@ export function CashBoxesCloseReport({type}) {
                 />
             </div>
         </div>
+        {loadError && <p role="alert">{loadError}</p>}
         <div className="SpaceReport" id="SpaceReport">
-            {!loading && (
-                <TableCashBoxClose info={info} columns={columnsOp} searchValue={searchValue}/>
-            )}
-            {loading && (
-                <LoadingSpace title={"Cargando información"} description={"Esto no debe tardar mucho..."} />
-            )}
+            <TableCashBoxClose
+                info={info}
+                columns={columnsOp}
+                searchValue={searchValue}
+                loading={loading}
+                onResultsChange={setVisibleRows}
+            />
         </div>
         </div>
     );

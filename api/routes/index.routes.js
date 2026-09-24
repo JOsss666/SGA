@@ -398,6 +398,10 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     // NEXO 360: informe restringido a la compañía 7 (identificada por X-SGA-Company-Id/company_id),
     // siguiendo el mismo modelo que el resto de endpoints de la app. Se conserva el filtro por
     // origen confiable; no se exige cookie de sesión porque no viaja cross-site en Safari.
+    router.post('/nexo360/getOtpProductionReport', express.json({ limit: '16kb' }),
+        requireTrustedOrigin,
+        nexo360Controller.getOtpProductionReport, sessionErrorHandler);
+
     router.post('/nexo360/getProcessAdministrationReport', express.json({ limit: '16kb' }),
         requireTrustedOrigin,
         nexo360Controller.getProcessAdministrationReport, sessionErrorHandler);
@@ -419,6 +423,8 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     );
     router.post('/externalAccess/logIn', externalAccesThirdPartyController.logIn);
     router.post('/externalAccess/getCompanyInfo', externalAccesThirdPartyController.getCompanyInfo);
+    router.post('/externalAccess/nexo360/getOtpProductionReport', express.json({ limit: '16kb' }),
+        externalAccesThirdPartyController.getOtpProductionReport);
     router.post('/externalAccess/getUserInfo', externalAccesThirdPartyController.getUserInfo);
     router.post('/externalAccess/logOut', externalAccesThirdPartyController.logOut);
     // Delegación a proveedores desde el portal externo: autenticada por

@@ -3,7 +3,6 @@ import { BoldTitle } from "../components/BoldTitle";
 import { Suspense } from 'react';
 import { DescriptionSpan } from "../components/DescriptionSpan";
 import { DespleList } from "../components/DespleList";
-import './Reports.css'
 import { ReportDocuments } from './reports/ReportDocuments';
 import { ReportTransactionDetails } from '../components/ReportTransactionDetails';
 import { ReportBalance } from './reports/ReportBalance';
@@ -20,8 +19,9 @@ import { useAppInfo,useAiAssistant, useAlert } from '../../../context/context';
 import { CashBoxesCloseReport } from './reports/CashBoxesCloseReport';
 import { ReportHistorialInstance } from './reports/ReportHIstorialInstance';
 import { PortfolioReportDetail } from './reports/PortfolioReportDetail';
-
 import { getCustomReports } from '../../../../../../costume-modules/reports';
+import { AiButton } from '../components/ChatAiComponents/AiButton';
+import './Reports.css'
 
 export function Reports(){
 
@@ -45,41 +45,9 @@ export function Reports(){
                             <BoldTitle text={'Informes de procesos'}/>
                             <DescriptionSpan text={'Selecciona el informe que necesites'}/>
                         </div>
-                        <div className="menuBar">
-                            <div className="spaceSelectReports">
-                                <DespleList children={<i className="fa-solid fa-book"/>} father={{
-                                    title:'Informes de Documentos'
-                                }} options={[
-                                    {title:'Ordenes de cliente (OC)',children:<i className="fa-solid fa-file-contract"/>,action:handleNavigate,path:'OCS'},
-                                    {title:'Ordenes de producción (OP)',children:<i className="fa-solid fa-file-lines"/>,action:handleNavigate,path:'OPS'},
-                                    {title:'Documentos de compra (DC)',children:<i className="fa-solid fa-file-lines"/>,action:handleNavigate,path:'DCS'},
-                                    {title:'Consumos de inventario (CI)',children:<i className="fa-solid fa-file-lines"/>,action:handleNavigate,path:'CIS'},
-                                    {title:'Facturas de venta (FV)',children:<i className="fa-solid fa-file-invoice"/>,action:handleNavigate,path:'FVS'},
-                                    {title:'Transacciones (TR)',children:<i className="fa-solid fa-magnifying-glass-chart"/>,action:handleNavigate,path:'TRS'},
-                                    {title:'Informes adicionales',options:[
-                                        {title:'Informe Costos Operativos',children:<i className="fa-solid fa-book"/>},
-                                    ]}
-                                ]}/>
-                                <DespleList children={<i className="fa-solid fa-book"/>} father={{
-                                    title:'Informes por estado'
-                                }} options={[
-                                    {title:'Documentos reportados',children:<i className="fa-solid fa-book"/>},
-                                    {title:'Balance de prueba',children:<i className="fa-solid fa-book"/>,action:handleNavigate,path:'Balance'},
-                                    {title:'Estado de Existencias y Movimientos (Kardex)',children:<i className="fa-solid fa-book"/>,action:handleNavigate,path:'kardex'},
-                                    {title:'Estado Ordenes de producción',children:<i className="fa-solid fa-file-lines"/>},
-                                    {title:'Volumen ordenes de clientes',children:<i className="fa-solid fa-file-lines"/>},
-                                    {title:'Informes adicionales',options:[
-                                        {title:'Informe Costos Operativos',children:<i className="fa-solid fa-book"/>}
-                                    ]}
-                                ]}/>
-                            </div>
-                            <div className="optionsBar">
-                                <i className="fa-solid fa-bars IconList"/>
-                                <i className="fa-solid fa-table-cells-large IconList"/>
-                                <SearchBar placeholder={'Buscar'}/>
-                                <SelectOptions title={'Filtro'} options={['ninguno']}/>
-                                <SelectOptions title={'Orden'} options={['Alfabetico','Fecha de Creación','Rol']}/>
-                            </div>
+                        <div className="filterSettings">
+                            <SearchBar placeholder={'Buscar informe'}/>
+                            <AiButton/>
                         </div>
                         <div className="galleryReports">
                             {false && <CardReport type={'Documento'} title={'Ordenes de cliente (OCS)'} description={'Consulta los detalles de todas tus Ordenes de cliente'} onClick={()=>{
@@ -152,7 +120,7 @@ export function Reports(){
                 {customReports.map(({ path, Component }) => (
                     <Route key={path} path={`/${path}`} element={
                         <Suspense fallback={<div role="status">Cargando informe personalizado...</div>}>
-                            <Component key={appInfo?.company_id} appInfo={appInfo} userInfo={userInfo} userConfig={userConfig} useAlert={useAlert} useAiAssistant={useAiAssistant}/>
+                            <Component key={appInfo?.company_id} showParentStage={path === 'NexoOtpProduction'} appInfo={appInfo} userInfo={userInfo} userConfig={userConfig} useAlert={useAlert} useAiAssistant={useAiAssistant}/>
                         </Suspense>
                     }/>
                 ))}

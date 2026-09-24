@@ -33,6 +33,7 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
     const { popInAlert } = useAlert();
     const report = useProcessAdministrationReport(appInfo?.company_id);
     const [selectedOrderIds, setSelectedOrderIds] = useState([]);
+    const [filteredRows, setFilteredRows] = useState([]);
     const [selectionNotice, setSelectionNotice] = useState("");
     const [dateRange, setDateRange] = useState({ minDate: "", maxDate: "" });
     const visibleOrders = useMemo(
@@ -74,12 +75,12 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
             <div className="sgaTreasury">
                 <RangeDate label="Rango de creación" updateRange={setDateRange} align="left"/>
             </div>
-            <ButtonDownload info={visibleOrders} columns={exportColumns} title="Informe administración procesos NEXO 360" text="Descargar informe" />
+            {!report.loading && <ButtonDownload info={filteredRows} columns={exportColumns} title="Informe administración procesos NEXO 360" text="Descargar informe" />}
         </div>
         {report.notice && <div className="processAdministrationReportNotice" role="status"><i className="fa-solid fa-circle-info" aria-hidden="true" />{report.notice}</div>}
         {selectionNotice && <div className="processAdministrationReportNotice" role="alert"><i className="fa-solid fa-circle-exclamation" aria-hidden="true" />{selectionNotice}</div>}
         {report.loading
             ? <LoadingSpace />
-            : <ProcessAdministrationTable UniversalTable={UniversalTable} UniversalRow={UniversalRow} TagIndicator={TagIndicator} SearchBar={SearchBar} CheckSquare={CheckSquare} FormButton={FormButton} search={report.search} setSearch={report.setSearch} orders={visibleOrders} total={report.orders.length} selectedOrderIds={selectedOrderIds} onToggleOrder={toggleOrder} onBulkAssign={openBulkAssignment} onOpen={openClientOrder} onOpenProcess={openProcess} />}
+            : <ProcessAdministrationTable UniversalTable={UniversalTable} UniversalRow={UniversalRow} TagIndicator={TagIndicator} SearchBar={SearchBar} CheckSquare={CheckSquare} FormButton={FormButton} search={report.search} setSearch={report.setSearch} orders={visibleOrders} onFilteredResultsChange={setFilteredRows} total={report.orders.length} selectedOrderIds={selectedOrderIds} onToggleOrder={toggleOrder} onBulkAssign={openBulkAssignment} onOpen={openClientOrder} onOpenProcess={openProcess} />}
     </main>;
 }

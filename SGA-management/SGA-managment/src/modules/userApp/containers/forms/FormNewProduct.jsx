@@ -125,8 +125,8 @@ export function FormNewProduct({info,update,reloadFun}){
             {label:'Nombre', value:name},
         ],
         1: [
+            {label:'Unidades de medida', value:units},
             ...(inventariable ? [
-                {label:'Unidades de medida', value:units},
                 {label:'Stock inicial', value:stock},
                 {label:'Stock mínimo', value:minStock},
                 {label:'Stock máximo', value:maxStock}
@@ -226,6 +226,8 @@ export function FormNewProduct({info,update,reloadFun}){
         const purchaseRetentionOptions = [];
         const sellTaxOptions = [];
         const sellRetentionOptions = [];
+
+        console.log('Total impuestos: ',taxesList);
 
         taxesList.forEach((tax) => {
             const taxType = `${tax.tax_type ?? tax.type ?? ''}`.toLowerCase();
@@ -437,20 +439,20 @@ export function FormNewProduct({info,update,reloadFun}){
                         <div className="tagSection">
                             <TagIndicator title={'📦 Parametrización Inventario'} type={'suspended'}/>
                         </div>
+                        <SearchinList title={'Unidades de medida'} action={setUnits} placeHolder={'Seleccione unidad'} list={meassureUnits}/>
                         <div className="accessSwitch">
                             <h6>Es Inventariable?</h6>
                             <SwitchOption action={setInventariable} defaultValue={inventariable}/>
                         </div>
                         {(inventariable) && (
                             <>
-                                <SearchinList title={'Unidades de medida'} action={setUnits} placeHolder={'Seleccione unidad'} list={meassureUnits}/>
                                 <FormInput title={'Stock inicial'} action={setStock} placeholder={'0 unidades'} value={stock} disabled={disabled}/>
                                 <FormInput title={'Stock minimo'} action={setMinStock} placeholder={'0 unidades'} value={minStock} disabled={disabled}/>
                                 <FormInput title={'Stock maximo'} action={setMaxStock} placeholder={'0 unidades'} value={maxStock} disabled={disabled}/>
                             </>
                         )}
                         <FormInput title={'Disponible a partir de'} action={setAvailableDate} value={availableDate} type={'date'} disabled={disabled}/>
-                        <FormInput title={'Disponible hasta'} action={setAvailableDate} value={availableDate} type={'date'} disabled={disabled}/>
+                        <FormInput title={'Disponible hasta'} action={setAviableUntil} value={aviableUnitl} type={'date'} disabled={disabled}/>
                     </section>
                 )}
                 {/* Stage for purchase -- Etapa para configurar la Compra*/}

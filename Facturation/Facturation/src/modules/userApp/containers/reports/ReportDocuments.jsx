@@ -9,6 +9,7 @@ import { PathLocation } from "../../components/PathLocation";
 import { SearchBar } from "../../components/SearchBar";
 import { SelectOptions } from "../../components/SelectOptions";
 import { TableReport } from "../TableReport";
+import { TableReportTransactions } from "../tableReportTransactions";
 import "./ReportDocuments.css";
 import { LoadingSpace } from "../LoadingSpace";
 import { ButtonDownload } from "../../components/ButtonDownload";
@@ -213,7 +214,11 @@ export function ReportDocuments({ type }) {
 
             <div className="SpaceReport" id="SpaceReport">
 
-                {!loading && (
+                {type === 'TR' && (
+                    <TableReportTransactions info={tableData} loading={loading} />
+                )}
+
+                {type !== 'TR' && !loading && (
                     <TableReport
                         columns={settingsReport.columns}
                         info={tableData}
@@ -223,7 +228,7 @@ export function ReportDocuments({ type }) {
                     />
                 )}
 
-                {loading && (
+                {type !== 'TR' && loading && (
                     <LoadingSpace
                         title={"Cargando información"}
                         description={"Esto no debe tardar mucho..."}

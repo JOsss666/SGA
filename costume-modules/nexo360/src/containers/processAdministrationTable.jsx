@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import "./processAdministrationTable.css";
 
 // Cada fila es una Orden de Cliente. Estado producción y Proveedores son
@@ -75,8 +76,8 @@ const buildProviders = (order) => {
     return providers.length > 0 ? providers : ["Sin asignar"];
 };
 
-export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIndicator, SearchBar, CheckSquare, FormButton, search, setSearch, orders, total, selectedOrderIds, onToggleOrder, onBulkAssign, onOpen, onOpenProcess }) {
-    const results = orders.map((order) => {
+export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIndicator, SearchBar, CheckSquare, FormButton, search, setSearch, orders, total, selectedOrderIds, onToggleOrder, onBulkAssign, onOpen, onOpenProcess, onFilteredResultsChange }) {
+    const results = useMemo(() => orders.map((order) => {
         const productionTags = buildProductionTags(order);
         return {
             ...order,
@@ -90,7 +91,7 @@ export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIn
             providers: buildProviders(order),
             commitment: commitmentStatus(order.deliveryAt)
         };
-    });
+    }), [orders]);
 
     const renderers = {
         select: ({ info }) => <CheckSquare title="" checked={selectedOrderIds.includes(info.id)} action={() => onToggleOrder(info)} />,
@@ -126,6 +127,6 @@ export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIn
 
     return <section className="processAdministrationTable">
         {selectedOrderIds.length > 0 && <div className="processAdministrationTableBulk"><span>{selectedOrderIds.length} orden{selectedOrderIds.length > 1 ? 'es' : ''} seleccionada{selectedOrderIds.length > 1 ? 's' : ''}: gestione los proveedores por cada ítem o componente.</span><FormButton text={`Asignar ${selectedOrderIds.length} órdenes`} onClick={onBulkAssign}/></div>}
-        <div className="sgaTreasury"><UniversalTable columns={columns} results={results} searchValue={search} Row={UniversalRow} getRowKey={(order) => order.id} selectedRows={selectedOrderIds} rowHeight={76} height="min(56vh, 580px)" rowProps={{ renderers }} /></div>
+        <div className="sgaTreasury"><UniversalTable columns={columns} results={results} onFilteredResultsChange={onFilteredResultsChange} searchValue={search} Row={UniversalRow} getRowKey={(order) => order.id} selectedRows={selectedOrderIds} rowHeight={76} height="min(56vh, 580px)" rowProps={{ renderers }} /></div>
     </section>;
 }

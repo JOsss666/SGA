@@ -16,6 +16,31 @@
     cursor: not-allowed;
 }
 
+.universalTable .universalTableTotals {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+    border-bottom: .1vh solid var(--inputsBorder);
+    color: var(--mainText);
+    background: var(--menuAside);
+}
+
+.universalTable .universalTableTotalCell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 1.1vh 1.4vh;
+    min-height: 3rem;
+    font-size: clamp(.78rem, 1.65vh, 1rem);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.universalTable .universalTableTotalCell span {
+    overflow-wrap: anywhere;
+    text-align: right;
+}
+
 .sgaTreasury .universalTable .universalTableHeaderViewport {
     width: 100%;
     flex: 0 0 auto;
