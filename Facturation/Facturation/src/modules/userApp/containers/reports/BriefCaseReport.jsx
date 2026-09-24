@@ -4,30 +4,78 @@ import { ButtonDownload } from "../../components/ButtonDownload";
 import { ButtonMenu } from "../../components/ButtonMenu";
 import { AiButton } from "../../components/ChatAiComponents/AiButton";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
-import { FormInput } from "../../components/FormInput";
 import { PathLocation } from "../../components/PathLocation";
 import { SearchBar } from "../../components/SearchBar";
 import { SelectOptions } from "../../components/SelectOptions";
 import './BriefCaseReport.css'
 import './ReportDocuments.css'
 import { FilterReports } from "./FilterReports";
-import { TableReport } from "../TableReport";
+import { UniversalTable } from "../universalTable";
+import { useNavigate } from "react-router-dom";
 import { moneyFormat, postInfo } from "../../../../utils/functions";
 import { useAppInfo } from "../../../../context/context";
-import { LoadingSpace } from "../LoadingSpace";
+
+const numberValue = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
+const sumMoney = (getValue) => (rows) => `$ ${moneyFormat(rows.reduce((sum, row) => sum + getValue(row), 0))}`;
+
+const portfolioColumns = [
+    { key: 'names', label: 'Terceros', minWidth: '12rem' },
+    { key: 'credit', label: 'Habilitado', values: [{ value: true, label: 'Sí' }, { value: false, label: 'No' }] },
+    { key: 'credit_term', label: 'Plazo' },
+    { key: 'credit_value', label: 'Cupo máximo', minWidth: '12rem', total: sumMoney((row) => numberValue(row.credit_value)) },
+    { key: 'availableCredit', label: 'Cupo disponible', minWidth: '12rem', total: sumMoney((row) => numberValue(row.credit_value) - numberValue(row.thirdParty_totalDebt)) },
+    { key: 'balance', label: 'Cartera', minWidth: '12rem', total: sumMoney((row) => row.balance) },
+    { key: 'thirdParty_currentBalance', label: 'Corriente', minWidth: '12rem', total: sumMoney((row) => numberValue(row.thirdParty_currentBalance)) },
+    { key: 'thirdParty_overdueBalance', label: 'Vencido', minWidth: '12rem', total: sumMoney((row) => numberValue(row.thirdParty_overdueBalance)) }
+];
+
+const renderMoney = ({ value }) => <span className="portfolioAmount">{moneyFormat(value)}</span>;
+
+function PortfolioNameCell({ value, info }) {
+    const navigate = useNavigate();
+    const openDetail = (event) => {
+        event.stopPropagation();
+        navigate(String(info.id));
+    };
+
+    return (
+        <span
+            className="portfolioDetailLink"
+            role="link"
+            tabIndex={0}
+            onClick={openDetail}
+            onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openDetail(event);
+                }
+            }}
+        >{value || 'Sin nombre'}</span>
+    );
+}
+
+const portfolioRenderers = {
+    names: PortfolioNameCell,
+    credit_term: ({ value }) => <span>{value || 0} días</span>,
+    credit_value: renderMoney,
+    availableCredit: renderMoney,
+    balance: renderMoney,
+    thirdParty_currentBalance: renderMoney,
+    thirdParty_overdueBalance: renderMoney
+};
 
 export function BriefCaseReport(){
 
     //Requirements
-    const {appInfo,userConfig} = useAppInfo();
+    const {appInfo} = useAppInfo();
+    const navigate = useNavigate();
 
     // Control
     const [info,setInfo] = useState([]);
     const [loading,setLoading] = useState(true);
-    const [disabled,setDisabled] = useState(false);
+    const [visibleRows, setVisibleRows] = useState([]);
+    const [loadError, setLoadError] = useState('');
     const [searchValue,setSearchValue] = useState('');
-    const [startDate, setStart_date] = useState();
-    const [endDate,setEnd_date] = useState();
     const [visibleSettings,setVisibleSettings] = useState(false);
 
     // FormSettings
@@ -44,34 +92,30 @@ export function BriefCaseReport(){
 
     const filters = [];
 
-    const FormSettings = {
-        columsTr
-    }
-
-    // Getters of info
-    const getThirdParties = async(id,limit)=>{
-        setDisabled(true);
-        setLoading(true);
-
-        let res = await postInfo('/getThirdParties',{
-            company_id:appInfo.company_id,
-            comercialInfo:true
-        });
-
-        console.log(res);
-
-        if(res[0]){
-            console.log("BACKEND DATA:", res[1]);
-            setInfo(res[1])
-        }
-
-        setLoading(false);
-        setDisabled(false);
-    }
-
-    useEffect(()=>{
+    useEffect(() => {
+        let active = true;
+        const getThirdParties = async () => {
+            setLoading(true);
+            setLoadError('');
+            try {
+                const res = await postInfo('/getThirdParties', {
+                    company_id: appInfo.company_id,
+                    comercialInfo: true
+                });
+                if (!res?.[0] || !Array.isArray(res[1])) throw new Error('Invalid portfolio response');
+                if (active) setInfo(res[1]);
+            } catch {
+                if (active) {
+                    setInfo([]);
+                    setLoadError('No se pudo cargar la cartera. Vuelve a abrir el informe para intentarlo de nuevo.');
+                }
+            } finally {
+                if (active) setLoading(false);
+            }
+        };
         getThirdParties();
-    },[])
+        return () => { active = false; };
+    }, [appInfo.company_id]);
 
     // [AGREGADO] Datos visibles en la tabla según el buscador
     // Esto asegura que el Excel/CSV exporte exactamente lo mismo que ve el usuario
@@ -86,38 +130,13 @@ export function BriefCaseReport(){
             : []
     ), [info, searchValue]);
 
-    const tableSummary = useMemo(() => {
-        const parseMoneyValue = (value) => {
-            const number = Number(value);
-            return Number.isFinite(number) ? number : 0;
-        };
-
-        const totals = tableData.reduce((acc, row) => {
-            const creditValue = parseMoneyValue(row.credit_value);
-            const totalDebt = parseMoneyValue(row.thirdParty_totalDebt);
-
-            acc["Cupo_max"] += creditValue;
-            acc["Cupo_disponible"] += creditValue - totalDebt;
-            acc["Cartera"] += parseMoneyValue(row.thirdParty_balance ?? row.thirdParty_totalDebt);
-            acc["Corriente"] += parseMoneyValue(row.thirdParty_currentBalance);
-            acc["Vencido"] += parseMoneyValue(row.thirdParty_overdueBalance);
-
-            return acc;
-        }, {
-            "Cupo_max":0,
-            "Cupo_disponible": 0,
-            "Cartera": 0,
-            "Corriente": 0,
-            "Vencido": 0
-        });
-
-        return Object.fromEntries(
-            Object.entries(totals).map(([key, value]) => [
-                key,
-                `$ ${moneyFormat(Number(value.toFixed(2)))}`
-            ])
-        );
-    }, [tableData]);
+    const rows = useMemo(() => tableData.map((row) => ({
+        ...row,
+        credit: Boolean(row.credit),
+        // Preserve the existing row and summary calculations.
+        availableCredit: numberValue(row.aviable_credit) - numberValue(row.thirdParty_currentBalance),
+        balance: numberValue(row.thirdParty_balance ?? row.thirdParty_totalDebt)
+    })), [tableData]);
 
     const columnMap = {
         "Terceros": "names",
@@ -131,7 +150,7 @@ export function BriefCaseReport(){
     };
 
     const setInfoForReportDownload = () => {
-        return tableData.map(element => {
+        return visibleRows.map(element => {
 
             let row = {};
 
@@ -199,7 +218,7 @@ export function BriefCaseReport(){
                 <ButtonMenu title={"Agregar a favoritos"} children={<i className="fa-regular fa-star" />} noRotate={true} />
 
                 {/* [CAMBIO] ahora AI usa los datos filtrados */}
-                <AiButton attached={tableData} sugerence={[
+                <AiButton attached={visibleRows} sugerence={[
                     {text:'¿Que proceso deberia priorizar?',context:`Procesos - Balance - Cuentas contables - Saldo`},
                     {text:'Realiza un analisis de este informe',context:`Procesos - Balance - Cuentas contables - Saldo`},
                     {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Balance - Cuentas contables - Saldo`}
@@ -216,21 +235,21 @@ export function BriefCaseReport(){
 
             </div>
 
-            {!loading && (
-                <div className="bodyreport" id="bodyreport">
-                    <TableReport
-                        navigation={true}
-                        columns={columsTr}
-                        info={tableData} 
-                        searchValue={searchValue}
-                        summaryValues={tableSummary}
-                    />
-                </div>
-            )}
-
-            {loading && (
-                <LoadingSpace title={'Cargando cartera'} description={'Esto no debe tardar mucho'}/>
-            )}
+            {loadError && <p role="alert">{loadError}</p>}
+            <div className="bodyreport portfolioUniversalReport sgaTreasury" id="bodyreport">
+                <UniversalTable
+                    columns={portfolioColumns}
+                    results={rows}
+                    loading={loading}
+                    getRowKey={(row) => row.id}
+                    onResultsChange={setVisibleRows}
+                    rowProps={{
+                        renderers: portfolioRenderers,
+                        onRowClick: (row) => navigate(String(row.id))
+                    }}
+                    emptyMessage={loadError || 'No hay terceros para mostrar'}
+                />
+            </div>
 
         </div>
     )

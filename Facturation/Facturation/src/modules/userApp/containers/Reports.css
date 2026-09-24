@@ -6,6 +6,26 @@
     position: relative;
 }
 
+.Reports .filterSettings{
+    display: flex;
+    padding: 0 2vh;
+    gap: 2vh;
+}
+
+.Reports .filterSettings .SearchBar{
+    width: fit-content;
+}
+
+.Reports .filterSettings .SearchBar input{
+    width: 20vw;
+    transition: .3s;
+}
+
+.Reports .filterSettings .SearchBar input:focus{
+    width: 30vw;
+}
+
+
 .Reports .headSection{
     margin-left: 2vh;
     margin-bottom: 2vh;
@@ -23,7 +43,7 @@
 }
 
 .Reports .galleryReports{
-    margin-top: 10vh;
+    margin-top: 5vh;
     height: 68vh;
     padding: 2vh;
     display: flex;

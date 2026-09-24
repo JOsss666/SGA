@@ -50,6 +50,7 @@ export function UniversalTable({
     height,
     selectedRows = [],
     getRowKey,
+    onResultsChange,
     rowProps = {},
     emptyMessage = 'No hay resultados disponibles'
 }) {
@@ -129,6 +130,17 @@ export function UniversalTable({
             return sortConfig.order === 'DESC' ? comparison * -1 : comparison;
         });
     }, [columnFilters, searchValue, sortConfig, tableResults, visibleColumns]);
+
+    // Optional column.total: a React node or a function of all filtered rows
+    // (not just the virtualized rows currently on screen).
+    const hasTotals = visibleColumns.some((column) => column.total != null);
+    const totals = useMemo(() => visibleColumns.map((column) => (
+        typeof column.total === 'function' ? column.total(filteredResults) : column.total
+    )), [filteredResults, visibleColumns]);
+
+    useEffect(() => {
+        onResultsChange?.(filteredResults);
+    }, [filteredResults, onResultsChange]);
 
     const rowVirtualizer = useVirtualizer({
         count: filteredResults.length,
@@ -240,6 +252,34 @@ export function UniversalTable({
             aria-colcount={visibleColumns.length}
         >
             <div className="universalTableHeaderViewport" ref={headerRef} role="rowgroup">
+                {hasTotals && (
+                    <div
+                        className="universalTableTotals"
+                        role="row"
+                        aria-label="Totales de las filas filtradas"
+                        style={{ minWidth: `${minimumTableWidth}px` }}
+                    >
+                        {visibleColumns.map((column, index) => (
+                            <div
+                                className="universalTableTotalCell"
+                                role="cell"
+                                key={column.key}
+                                style={{
+                                    flex: column.flex ?? '1 1 10rem',
+                                    minWidth: column.minWidth ?? '8rem',
+                                    maxWidth: column.maxWidth
+                                }}
+                            >
+                                {column.total != null && (
+                                    <span title={typeof totals[index] === 'string' || typeof totals[index] === 'number'
+                                        ? `Total ${column.label}: ${totals[index]}` : undefined}>
+                                        {loading ? '—' : totals[index]}
+                                    </span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
                 <div
                     className="universalTableHeader"
                     role="row"
