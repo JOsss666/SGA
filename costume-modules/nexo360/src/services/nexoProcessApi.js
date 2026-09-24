@@ -22,3 +22,13 @@ export async function getProcessAdministrationReport(companyId) {
 
     return response.json();
 }
+
+export async function getOtpProductionReport(companyId, dateRange, signal) {
+    const response = await fetch(`${apiBaseUrl}/nexo360/getOtpProductionReport`, {
+        method: 'POST', credentials: 'include', signal,
+        headers: { 'Content-Type': 'application/json', 'X-SGA-Company-Id': String(companyId) },
+        body: JSON.stringify({ company_id: companyId, ...dateRange })
+    });
+    if (!response.ok) throw new Error('No fue posible cargar el informe de OTP.');
+    return response.json();
+}

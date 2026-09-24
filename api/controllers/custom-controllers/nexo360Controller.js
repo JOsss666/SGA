@@ -1,4 +1,5 @@
 import { useDataBase } from '../../app.js';
+import { createNexoOtpReportHandler } from './nexoOtpReportController.js';
 import { createNexoProcessReportHandler } from './nexoProcessReportController.js';
 import utilsController from '../utilsController.js';
 import processController from '../processController.js';
@@ -13,6 +14,8 @@ const nexo360Controller = createNexo360Service({
     registerPurchaseItems: utilsController.registerPurchaseItems,
     linkDocumentInstances: utilsController.linkDocumentInstances
 });
+
+nexo360Controller.getOtpProductionReport = createNexoOtpReportHandler({ useDataBase });
 
 nexo360Controller.getProcessAdministrationReport = createNexoProcessReportHandler({ useDataBase });
 

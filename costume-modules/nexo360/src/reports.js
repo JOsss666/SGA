@@ -8,4 +8,12 @@ export const nexoReports = [{
     icon: 'fa-solid fa-diagram-project',
     canAccess: (appInfo) => String(appInfo?.company_id) === '7',
     Component: lazy(() => import('./pages/processAdministrationReport').then(module => ({ default: module.ProcessAdministrationReport })))
+}, {
+    path: 'NexoOtpProduction',
+    title: 'Producción de proveedores por OTP NEXO 360',
+    description: 'Consulta las OTP con su OP padre, orden de cliente y medidas de producción',
+    type: 'processes',
+    icon: 'fa-solid fa-gears',
+    canAccess: (appInfo) => String(appInfo?.company_id) === '7',
+    Component: lazy(() => import('./pages/otpProductionReport').then(module => ({ default: module.OtpProductionReport })))
 }];

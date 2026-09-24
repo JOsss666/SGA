@@ -1,0 +1,98 @@
+.otpProductionReport {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.otpProductionReport header{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+}
+
+.otpProductionReport header .PathLocation{
+    margin-left: -1vh;
+}
+
+.otpProductionReport .otpProductionReportTools {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2vh;
+    padding: 1vh;
+    margin-bottom: 1vh;
+}
+.otpProductionReport .otpProductionReportSearch {
+    min-width: 0;
+}
+.otpProductionReport .otpProductionReportSearch .SearchBar {
+    width: 20vw;
+}
+.otpProductionReport .otpProductionReportTools > .sgaTreasury {
+    display: flex;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.otpProductionReport .otpProductionReportTools .ButtonDownload{
+    width: fit-content;
+    margin: auto;
+    margin-right: 1vh;
+}
+
+.otpProductionReport .otpProductionReportNote {
+    color: var(--descriptionText);
+    margin: 1vh 0;
+}
+.otpProductionReport .otpProductionReportTable {
+    min-width: 0;
+    overflow-x: auto;
+    margin: 1vh;
+    border: 1px solid var(--inputsBorder);
+    border-radius: 1.2vh;
+    background: var(--inputsBg);
+}
+.otpProductionReport .otpProductionReportLink {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--chatAccent, var(--mainText));
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+.otpProductionReport .otpProductionReportLink:hover {
+    text-decoration: underline;
+}
+.otpProductionReport button:focus-visible {
+    outline: 2px solid var(--mainText);
+    outline-offset: 2px;
+}
+.otpProductionReport .otpProductionReportError {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1vh;
+    color: var(--mainText);
+}
+.otpProductionReport .otpProductionReportVisuallyHidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+@media (max-width: 720px) {
+    .otpProductionReport .otpProductionReportTools {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .otpProductionReport .otpProductionReportSearch {
+        flex-basis: auto;
+    }
+}

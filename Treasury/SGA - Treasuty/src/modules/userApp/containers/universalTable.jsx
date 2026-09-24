@@ -56,6 +56,7 @@ export function UniversalTable({
     selectedRows = [],
     getRowKey,
     rowProps = {},
+    onFilteredResultsChange,
     emptyMessage = 'No hay resultados disponibles'
 }) {
     const tableResults = Array.isArray(results) ? results : info;
@@ -135,6 +136,11 @@ export function UniversalTable({
             return sortConfig.order === 'DESC' ? comparison * -1 : comparison;
         });
     }, [columnFilters, searchValue, sortConfig, tableResults, visibleColumns]);
+
+    // Compartir todas las filas filtradas, no solo las renderizadas por virtualización.
+    useEffect(() => {
+        onFilteredResultsChange?.(filteredResults);
+    }, [filteredResults, onFilteredResultsChange]);
 
     const rowVirtualizer = useVirtualizer({
         count: filteredResults.length,
