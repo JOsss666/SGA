@@ -152,7 +152,7 @@ export function Reports(){
                 {customReports.map(({ path, Component }) => (
                     <Route key={path} path={`/${path}`} element={
                         <Suspense fallback={<div role="status">Cargando informe personalizado...</div>}>
-                            <Component key={appInfo?.company_id} appInfo={appInfo} userInfo={userInfo} userConfig={userConfig} useAlert={useAlert} useAiAssistant={useAiAssistant}/>
+                            <Component key={appInfo?.company_id} showParentStage={path === 'NexoOtpProduction'} appInfo={appInfo} userInfo={userInfo} userConfig={userConfig} useAlert={useAlert} useAiAssistant={useAiAssistant}/>
                         </Suspense>
                     }/>
                 ))}

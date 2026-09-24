@@ -23,6 +23,16 @@ export async function getProcessAdministrationReport(companyId) {
     return response.json();
 }
 
+export async function getSupplierOtpProductionReport({ apiBaseUrl, companyKey, accessKey }, { minDate, maxDate }, signal) {
+    const response = await fetch(`${apiBaseUrl}/externalAccess/nexo360/getOtpProductionReport`, {
+        method: 'POST', credentials: 'include', signal,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ company_key: companyKey, access_key: accessKey, minDate, maxDate })
+    });
+    if (!response.ok) throw new Error('No fue posible cargar las OTP del proveedor.');
+    return response.json();
+}
+
 export async function getOtpProductionReport(companyId, dateRange, signal) {
     const response = await fetch(`${apiBaseUrl}/nexo360/getOtpProductionReport`, {
         method: 'POST', credentials: 'include', signal,

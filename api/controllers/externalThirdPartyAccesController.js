@@ -1,9 +1,15 @@
+import { useDataBase } from '../app.js';
+import { createNexoOtpReportHandler } from './custom-controllers/nexoOtpReportController.js';
 import externalThirdPartyAccesService from '../services/externalThirdPartyAccesService.js';
 import utilsController from './utilsController.js';
 import sessionRepository from '../repositories/sessionRepository.js';
 import { createSupplierDelegationService } from '../services/supplierDelegationService.js';
 
 const externalAccesThirdPartyController = {};
+externalAccesThirdPartyController.getOtpProductionReport = createNexoOtpReportHandler({
+    useDataBase,
+    resolveSupplierAccess: info => externalThirdPartyAccesService.getUserInfo(info)
+});
 
 // Servicio de delegación reutilizado para el acceso externo. El tercero del portal
 // se autentica por company_key + access_key (no por cookie de sesión) y la delegación

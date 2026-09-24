@@ -16,25 +16,33 @@ import './otpProductionReport.css';
 
 const commitmentTypes = { 'A tiempo': 'active', 'Cerca de vencer': 'suspended', Vencido: 'disabled', 'Sin fecha': 'info' };
 
-export function OtpProductionReport({ appInfo, useAlert, showClient = true }) {
+export function OtpProductionReport({ appInfo, useAlert, showClient = true, showParentStage = false, supplierAccess, onOpenOtp }) {
     const { popInAlert } = useAlert();
     const [search, setSearch] = useState('');
     const [filteredRows, setFilteredRows] = useState([]);
     const [dateRange, setDateRange] = useState({ minDate: '', maxDate: '' });
-    const columns = useMemo(() => getOtpColumns(showClient), [showClient]);
+    const clientVisible = !supplierAccess && showClient;
+    const parentStageVisible = !supplierAccess && showParentStage;
+    const columns = useMemo(() => getOtpColumns(clientVisible, parentStageVisible), [clientVisible, parentStageVisible]);
     const exportColumns = useMemo(() => columns.map(({ label }) => label), [columns]);
-    const searchLabel = showClient ? 'Buscar OTP, OP, orden o cliente' : 'Buscar OTP, OP u orden';
-    const report = useOtpProductionReport(appInfo?.company_id, dateRange, showClient);
+    const searchLabel = clientVisible ? 'Buscar OTP, OP, orden o cliente' : 'Buscar OTP, OP u orden';
+    const report = useOtpProductionReport(appInfo?.company_id, dateRange, clientVisible, parentStageVisible, supplierAccess);
     const visibleRows = useMemo(() => filterOtpRows(report.rows, search, columns), [report.rows, search, columns]);
     const downloadRows = useMemo(() => exportOtpRows(filteredRows, columns), [filteredRows, columns]);
-    const processLink = (id, label) => id
-        ? <button type="button" className="otpProductionReportLink" onClick={() => popInAlert(<ProcessStatusAlert instance_id={id} />)}>{label || '—'}</button>
+    const processLink = (id, label, openProcess) => id
+        ? <button type="button" className="otpProductionReportLink" onClick={() => openProcess ? openProcess(id) : popInAlert(<ProcessStatusAlert instance_id={id} />)}>{label || '—'}</button>
         : <span>—</span>;
     const renderers = {
         ...Object.fromEntries(columns.map(({ key }) => [key, ({ value }) => <span title={String(value ?? '')}>{value ?? '—'}</span>])),
-        otpIdentifier: ({ info }) => processLink(info.instanceId, info.otpIdentifier),
-        parentIdentifier: ({ info }) => processLink(info.parentInstanceId, info.parentIdentifier),
-        clientOrder: ({ info }) => info.clientOrderId
+        otpIdentifier: ({ info }) => supplierAccess && !onOpenOtp
+            ? <span>{info.otpIdentifier}</span>
+            : processLink(info.instanceId, info.otpIdentifier, onOpenOtp),
+        parentIdentifier: ({ info }) => supplierAccess
+            ? <span>{info.parentIdentifier || '—'}</span>
+            : processLink(info.parentInstanceId, info.parentIdentifier),
+        clientOrder: ({ info }) => supplierAccess
+            ? <span>{info.clientOrder || 'Sin orden asociada'}</span>
+            : info.clientOrderId
             ? <button type="button" className="otpProductionReportLink" onClick={() => popInAlert(<DocumentPreview data={{ doc_id: info.clientOrderId, doc_type: 'Client Order', ownSerial: info.clientOrderSerial }} />)}>{info.clientOrder}</button>
             : <span>Sin orden asociada</span>,
         commitment: ({ value }) => <TagIndicator title={value} type={commitmentTypes[value] || 'info'} icon={null} desc={`Compromiso: ${value}`} />,
@@ -53,7 +61,7 @@ export function OtpProductionReport({ appInfo, useAlert, showClient = true }) {
         </div>
         {report.error && <div role="alert" className="otpProductionReportError">{report.error}<button type="button" onClick={report.retry}>Reintentar</button></div>}
         {report.loading ? <LoadingSpace /> : !report.error && <section className="otpProductionReportTable" aria-label="Informe de producción por OTP">
-            <div className="sgaTreasury"><UniversalTable columns={columns} results={visibleRows} onFilteredResultsChange={setFilteredRows} Row={UniversalRow} getRowKey={row => row.id} rowHeight={76} height="min(56vh, 580px)" rowProps={{ renderers }} emptyMessage="No hay OTP para los filtros seleccionados" /></div>
+            <div className="sgaTreasury"><UniversalTable fitColumnsToContent columns={columns} results={visibleRows} onFilteredResultsChange={setFilteredRows} Row={UniversalRow} getRowKey={row => row.id} rowHeight={76} height="min(56vh, 580px)" rowProps={{ renderers }} emptyMessage="No hay OTP para los filtros seleccionados" /></div>
         </section>}
     </main>;
 }

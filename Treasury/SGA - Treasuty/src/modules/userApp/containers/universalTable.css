@@ -373,3 +373,17 @@
         scroll-behavior: auto;
     }
 }
+
+/* Encabezados intrínsecos; sus medidas también se aplican a las filas virtuales. */
+.sgaTreasury .universalTable.fitContentColumns .universalTableSortButton {
+    flex: 0 0 auto;
+}
+.sgaTreasury .universalTable.fitContentColumns .universalTableSortButton span {
+    overflow: visible;
+    text-overflow: clip;
+    flex-shrink: 0;
+}
+.sgaTreasury .universalTable.fitContentColumns .universalTableHeaderCell,
+.sgaTreasury .universalTable.fitContentColumns .universalRowCell {
+    box-sizing: border-box;
+}

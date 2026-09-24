@@ -423,6 +423,8 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     );
     router.post('/externalAccess/logIn', externalAccesThirdPartyController.logIn);
     router.post('/externalAccess/getCompanyInfo', externalAccesThirdPartyController.getCompanyInfo);
+    router.post('/externalAccess/nexo360/getOtpProductionReport', express.json({ limit: '16kb' }),
+        externalAccesThirdPartyController.getOtpProductionReport);
     router.post('/externalAccess/getUserInfo', externalAccesThirdPartyController.getUserInfo);
     router.post('/externalAccess/logOut', externalAccesThirdPartyController.logOut);
     // Delegación a proveedores desde el portal externo: autenticada por

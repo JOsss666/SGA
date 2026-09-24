@@ -6,10 +6,19 @@ import { SearchBar } from '../components/SearchBar';
 import { SelectOptions } from '../components/SelectOptions';
 import { ProcessesReport } from './reports/ProcessesReport';
 import { ProcessesReferencesReport } from './reports/ProcessesReferencesReport';
+import { lazy, Suspense } from 'react';
+import { useAlert, useAppInfo } from '../../../context/context';
+import { urlSer } from '../../../App';
+import { ProcessStatusAlert } from './Alerts/ProcessStatusAlert';
 import './Reports.css';
+
+const OtpProductionReport = lazy(() => import('../../../../../../costume-modules/nexo360/src/pages/otpProductionReport').then(module => ({ default: module.OtpProductionReport })));
 
 export function Reports() {
     const navigate = useNavigate();
+    const { appInfo } = useAppInfo();
+    const { popInAlert } = useAlert();
+    const canViewNexoOtp = String(appInfo?.company_id) === '7';
     const { company_key, user_key } = useParams();
     const reportsPath = `/SGA_management/${company_key}/${user_key}/reports`;
 
@@ -32,6 +41,12 @@ export function Reports() {
                             </div>
                         </div>
                         <div className="galleryReports">
+                            {canViewNexoOtp && <CardReport
+                                type="processes"
+                                title="Producción por OTP NEXO 360"
+                                description="Consulta tus órdenes de producción y sus medidas"
+                                onClick={() => navigate(`${reportsPath}/NexoOtpProduction`)}
+                            />}
                             <CardReport
                                 type="processes"
                                 title="Informe de procesos"
@@ -47,6 +62,14 @@ export function Reports() {
                         </div>
                     </>
                 } />
+                {canViewNexoOtp && <Route path="/NexoOtpProduction" element={
+                    <Suspense fallback={<div role="status">Cargando informe de OTP...</div>}>
+                        <OtpProductionReport appInfo={appInfo} useAlert={useAlert}
+                            showClient={false} showParentStage={false}
+                            supplierAccess={{ companyKey: company_key, accessKey: user_key, apiBaseUrl: urlSer }}
+                            onOpenOtp={instanceId => popInAlert(<ProcessStatusAlert instance_id={instanceId} />)} />
+                    </Suspense>
+                } />}
                 <Route path="/Processes" element={<ProcessesReport />} />
                 <Route path="/ProcessesReferences" element={<ProcessesReferencesReport />} />
                 <Route path="*" element={<Navigate to={reportsPath} replace />} />

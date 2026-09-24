@@ -1,4 +1,4 @@
-import { cloneElement, isValidElement, useEffect, useMemo, useRef, useState } from 'react';
+import { cloneElement, isValidElement, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { UniversalRow } from '../components/universalRow';
 import { UniversalTableLoadingShader } from '../components/universalTableLoadingShader';
@@ -57,6 +57,7 @@ export function UniversalTable({
     getRowKey,
     rowProps = {},
     onFilteredResultsChange,
+    fitColumnsToContent = false,
     emptyMessage = 'No hay resultados disponibles'
 }) {
     const tableResults = Array.isArray(results) ? results : info;
@@ -72,6 +73,27 @@ export function UniversalTable({
     const tableRef = useRef(null);
     const bodyRef = useRef(null);
     const headerRef = useRef(null);
+
+    const [contentWidths, setContentWidths] = useState({});
+    useLayoutEffect(() => {
+        if (!fitColumnsToContent || !headerRef.current) return;
+        const cells = [...headerRef.current.querySelectorAll('[role="columnheader"]')];
+        const measure = () => {
+            const widths = Object.fromEntries(cells.map((cell, index) => [
+                visibleColumns[index].key, cell.getBoundingClientRect().width
+            ]));
+            setContentWidths(current => Object.keys(current).length === cells.length
+                && Object.entries(widths).every(([key, width]) => current[key] === width) ? current : widths);
+        };
+        measure();
+        const observer = new ResizeObserver(measure);
+        cells.forEach(cell => observer.observe(cell));
+        return () => observer.disconnect();
+    }, [fitColumnsToContent, visibleColumns]);
+    const rowColumns = useMemo(() => fitColumnsToContent ? visibleColumns.map(column => {
+        const width = contentWidths[column.key];
+        return width ? { ...column, flex: `0 0 ${width}px`, minWidth: `${width}px`, maxWidth: `${width}px` } : column;
+    }) : visibleColumns, [fitColumnsToContent, visibleColumns, contentWidths]);
 
     useEffect(() => {
         setSortConfig(getInitialSort(columns));
@@ -149,7 +171,9 @@ export function UniversalTable({
         overscan: 7
     });
 
-    const minimumTableWidth = Math.max(visibleColumns.length * 150, 620);
+    const minimumTableWidth = Math.max(fitColumnsToContent
+        ? Object.values(contentWidths).reduce((sum, width) => sum + width, 0)
+        : visibleColumns.length * 150, 620);
     const optionsForOpenColumn = useMemo(
         () => openFilterKey ? columnValueOptions[openFilterKey] ?? [] : [],
         [columnValueOptions, openFilterKey]
@@ -200,7 +224,7 @@ export function UniversalTable({
         const sharedProps = {
             ...rowProps,
             info: result,
-            columns: visibleColumns,
+            columns: rowColumns,
             disabled,
             selected: selectedRows.includes(rowKey),
             index
@@ -242,7 +266,7 @@ export function UniversalTable({
 
     return (
         <section
-            className={`universalTable${disabled ? ' disabled' : ''}`}
+            className={`universalTable${disabled ? ' disabled' : ''}${fitColumnsToContent ? ' fitContentColumns' : ''}`}
             ref={tableRef}
             style={height === undefined ? undefined : { height }}
             role="table"
@@ -268,9 +292,10 @@ export function UniversalTable({
                                 aria-sort={isSorted ? (sortConfig.order === 'ASC' ? 'ascending' : 'descending') : 'none'}
                                 key={column.key}
                                 style={{
-                                    flex: column.flex ?? '1 1 10rem',
-                                    minWidth: column.minWidth ?? '8rem',
-                                    maxWidth: column.maxWidth
+                                    flex: fitColumnsToContent ? '0 0 auto' : column.flex ?? '1 1 10rem',
+                                    width: fitColumnsToContent ? 'fit-content' : undefined,
+                                    minWidth: fitColumnsToContent ? 'max-content' : column.minWidth ?? '8rem',
+                                    maxWidth: fitColumnsToContent ? undefined : column.maxWidth
                                 }}
                                 data-status={column.status ?? undefined}
                             >
@@ -375,7 +400,7 @@ export function UniversalTable({
                 onScroll={syncHeaderScroll}
             >
                 <div className="universalTableBodyContent" style={{ minWidth: `${minimumTableWidth}px` }}>
-                    {loading && <UniversalTableLoadingShader columns={visibleColumns} />}
+                    {loading && <UniversalTableLoadingShader columns={rowColumns} />}
 
                     {!loading && filteredResults.length === 0 && (
                         <div className="universalTableEmpty" role="status">

@@ -102,3 +102,95 @@ for (const showClient of [undefined, true, false]) {
         assert.equal(res.statusCode, 200);
     });
 }
+
+for (const showParentStage of [undefined, false, true]) {
+    test(`Etapa OP usa la etapa del padre solo cuando se solicita: ${showParentStage}`, async () => {
+        const handler = createNexoOtpReportHandler({ useDataBase: async sql => {
+            assert.equal(sql.includes('parent_step.name AS "parentStage"'), showParentStage === true);
+            assert.equal(sql.includes('parent_step.id = parent.step_id'), showParentStage === true);
+            if (showParentStage) {
+                assert.match(sql, /parent_step.company_id = parent.company_id/);
+                assert.match(sql, /parent_step.process_id = parent.process_id/);
+            }
+            return [true, []];
+        } });
+        const res = response();
+        await handler(request({ company_id: 7, showParentStage }), res);
+        assert.equal(res.statusCode, 200);
+    });
+}
+
+test('rechaza parámetros de Etapa OP que no sean booleanos', async () => {
+    let called = false;
+    const handler = createNexoOtpReportHandler({ useDataBase: async () => { called = true; } });
+    const res = response();
+    await handler(request({ company_id: 7, showParentStage: 'true' }), res);
+    assert.equal(res.statusCode, 400);
+    assert.equal(called, false);
+});
+
+test('Etapa OP es opcional e independiente de Cliente en tabla, búsqueda y exportación', () => {
+    const rows = [{ parentIdentifier: 'OP#20', parentStage: 'Asignación proveedores', processStage: 'Impresión', height: 0 }];
+    for (const showClient of [false, true]) {
+        for (const showParentStage of [false, true]) {
+            const columns = getOtpColumns(showClient, showParentStage);
+            assert.equal(columns.some(c => c.key === 'clientName'), showClient);
+            assert.equal(columns.some(c => c.key === 'parentStage'), showParentStage);
+            assert.equal(filterOtpRows(rows, 'Asignación proveedores', columns).length, showParentStage ? 1 : 0);
+            const exported = exportOtpRows(rows, columns)[0];
+            assert.equal(Object.hasOwn(exported, 'Etapa OP'), showParentStage);
+            assert.equal(exported['Etapa proceso'], 'Impresión');
+            if (showParentStage) {
+                assert.equal(columns[2].label, 'Etapa OP');
+                assert.equal(exported['Etapa OP'], 'Asignación proveedores');
+            }
+        }
+    }
+    assert.equal(getOtpColumns().some(c => c.key === 'parentStage'), false);
+});
+
+test('el portal usa la identidad autenticada e ignora compañía, proveedor y columnas enviados por el cliente', async () => {
+    const handler = createNexoOtpReportHandler({
+        resolveSupplierAccess: async credentials => {
+            assert.deepEqual(credentials, { company_key: 'company', access_key: 'access' });
+            return { company_id: 7, user_id: 212 };
+        },
+        useDataBase: async (sql, values) => {
+            assert.deepEqual(values, [7, '212', '2026-09-24', '2026-09-24']);
+            assert.match(sql, /otp\."thirdParty_id" = \$2/);
+            assert.match(sql, /\$3::date/);
+            assert.match(sql, /\$4::date/);
+            assert.equal(sql.includes('AS "clientName"'), false);
+            assert.equal(sql.includes('AS "parentStage"'), false);
+            return [true, [{ id: '10:20' }]];
+        }
+    });
+    const res = response();
+    await handler(request({ company_key: 'company', access_key: 'access', company_id: 8, thirdParty_id: 999,
+        showClient: true, showParentStage: true, minDate: '2026-09-24', maxDate: '2026-09-24' }, '8'), res);
+    assert.equal(res.statusCode, 200);
+    assert.deepEqual(res.body, [true, [{ id: '10:20' }]]);
+});
+
+for (const [access, expected] of [[null, 401], [{ company_id: 7 }, 401], [{ company_id: 7, user_id: 0 }, 401], [{ company_id: 8, user_id: 212 }, 403]]) {
+    test(`portal rechaza acceso inválido o ajeno: ${JSON.stringify(access)}`, async () => {
+        let called = false;
+        const handler = createNexoOtpReportHandler({ resolveSupplierAccess: async () => access, useDataBase: async () => { called = true; } });
+        const res = response();
+        await handler(request({ company_id: 7, thirdParty_id: 212 }), res);
+        assert.equal(res.statusCode, expected);
+        assert.equal(called, false);
+    });
+}
+
+test('el portal no consulta OTP si falla la validación de acceso', async () => {
+    let called = false;
+    const handler = createNexoOtpReportHandler({
+        resolveSupplierAccess: async () => { throw Object.assign(new Error('Credenciales ausentes'), { statusCode: 400 }); },
+        useDataBase: async () => { called = true; }
+    });
+    const res = response();
+    await handler(request(), res);
+    assert.equal(res.statusCode, 401);
+    assert.equal(called, false);
+});

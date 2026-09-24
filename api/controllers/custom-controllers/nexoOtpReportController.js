@@ -3,17 +3,36 @@ import { appendBusinessDateRange, companyTimeZoneSql } from '../../services/busi
 const validDate = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
     && !Number.isNaN(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
 
-export const createNexoOtpReportHandler = ({ useDataBase }) => async (req, res) => {
-    const companyId = Number(req.get?.('X-SGA-Company-Id') ?? req.body?.company_id);
+export const createNexoOtpReportHandler = ({ useDataBase, resolveSupplierAccess }) => async (req, res) => {
+    let supplierAccess;
+    if (resolveSupplierAccess) {
+        try {
+            supplierAccess = await resolveSupplierAccess({ company_key: req.body?.company_key, access_key: req.body?.access_key });
+        } catch (error) {
+            return res.status(error.statusCode === 400 ? 401 : 500).json({ error: 'No fue posible validar el acceso del proveedor.' });
+        }
+        if (!supplierAccess || !Number.isSafeInteger(Number(supplierAccess.user_id)) || Number(supplierAccess.user_id) <= 0) {
+            return res.status(401).json({ error: 'Acceso de proveedor no válido o vencido.' });
+        }
+    }
+    const companyId = Number(resolveSupplierAccess ? supplierAccess.company_id : req.get?.('X-SGA-Company-Id') ?? req.body?.company_id);
     if (!Number.isSafeInteger(companyId) || companyId <= 0) return res.status(400).json({ error: 'Se requiere una compañía válida.' });
     if (companyId !== 7) return res.status(403).json({ error: 'Este informe está disponible únicamente para NEXO 360.' });
-    const { minDate, maxDate, showClient = true } = req.body ?? {};
+    const { minDate, maxDate } = req.body ?? {};
+    // La ruta externa decide el alcance; los flags y IDs enviados por el navegador no lo amplían.
+    const showClient = resolveSupplierAccess ? false : (req.body?.showClient ?? true);
+    const showParentStage = resolveSupplierAccess ? false : (req.body?.showParentStage ?? false);
+    if (typeof showParentStage !== 'boolean') return res.status(400).json({ error: 'showParentStage debe ser booleano.' });
     if (typeof showClient !== 'boolean') return res.status(400).json({ error: 'showClient debe ser booleano.' });
     if ((minDate && !validDate(minDate)) || (maxDate && !validDate(maxDate)) || (minDate && maxDate && minDate > maxDate)) {
         return res.status(400).json({ error: 'El rango de fechas no es válido.' });
     }
     const values = [companyId];
     const whereClauses = ["otp.company_id = $1", "otp.status = 'active'"];
+    if (resolveSupplierAccess) {
+        values.push(String(supplierAccess.user_id));
+        whereClauses.push('otp."thirdParty_id" = $2');
+    }
     // process_instance.created_at es timestamp legacy UTC, verificado en catálogo.
     appendBusinessDateRange({ whereClauses, values, column: "(otp.created_at AT TIME ZONE 'UTC')", start: minDate, end: maxDate });
     const timeZone = companyTimeZoneSql('$1');
@@ -25,6 +44,7 @@ export const createNexoOtpReportHandler = ({ useDataBase }) => async (req, res) 
                 source.id AS "clientOrderId", source."ownSerial" AS "clientOrderSerial",
                 child_process.code || '#' || otp."ownSerial" AS "otpIdentifier",
                 parent_process.code || '#' || parent."ownSerial" AS "parentIdentifier",
+                ${showParentStage ? 'parent_step.name AS "parentStage",' : ''}
                 CASE WHEN source.id IS NOT NULL THEN 'Orden #' || source."ownSerial" END AS "clientOrder",
                 ${showClient ? 'COALESCE(customer.names, order_customer.names) AS "clientName",' : ''}
                 paramdoc.values->>'height' AS height,
@@ -49,6 +69,7 @@ export const createNexoOtpReportHandler = ({ useDataBase }) => async (req, res) 
             JOIN "Process".process_instance parent ON parent.id = otp.parent_id AND parent.company_id = otp.company_id
             JOIN "Process".processes child_process ON child_process.id = otp.process_id AND child_process.company_id = otp.company_id
             JOIN "Process".processes parent_process ON parent_process.id = parent.process_id AND parent_process.company_id = otp.company_id
+            ${showParentStage ? 'LEFT JOIN "Process".process_steps parent_step ON parent_step.id = parent.step_id AND parent_step.company_id = parent.company_id AND parent_step.process_id = parent.process_id' : ''}
             LEFT JOIN "Process".process_steps step ON step.id = otp.step_id AND step.company_id = otp.company_id
             LEFT JOIN "Ecosystem".thirdparties supplier ON supplier.id = otp."thirdParty_id" AND supplier.company_id = otp.company_id
             LEFT JOIN "Ecosystem".thirdparties customer ON customer.id = parent."thirdParty_id" AND customer.company_id = otp.company_id

@@ -16,9 +16,12 @@ export const otpColumns = [
     ['productionStates', 'Estado producción', 14]
 ].map(([key, label, width]) => ({ key, label, flex: `0 0 ${width}rem`, minWidth: `${width}rem` }));
 
-export const getOtpColumns = (showClient = true) => showClient
-    ? otpColumns
-    : otpColumns.filter(({ key }) => key !== 'clientName');
+export const getOtpColumns = (showClient = true, showParentStage = false) => {
+    const columns = showClient ? otpColumns : otpColumns.filter(({ key }) => key !== 'clientName');
+    if (!showParentStage) return columns;
+    const parentStage = { key: 'parentStage', label: 'Etapa OP', flex: '0 0 13rem', minWidth: '13rem' };
+    return columns.flatMap(column => column.key === 'parentIdentifier' ? [column, parentStage] : [column]);
+};
 
 export const normalizeOtpResponse = response => {
     if (response?.[0] === false) throw new Error('No fue posible cargar las OTP.');
