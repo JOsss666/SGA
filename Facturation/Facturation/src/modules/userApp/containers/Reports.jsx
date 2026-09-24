@@ -3,7 +3,6 @@ import { BoldTitle } from "../components/BoldTitle";
 import { Suspense } from 'react';
 import { DescriptionSpan } from "../components/DescriptionSpan";
 import { DespleList } from "../components/DespleList";
-import './Reports.css'
 import { ReportDocuments } from './reports/ReportDocuments';
 import { ReportTransactionDetails } from '../components/ReportTransactionDetails';
 import { ReportBalance } from './reports/ReportBalance';
@@ -20,9 +19,9 @@ import { useAppInfo,useAiAssistant, useAlert } from '../../../context/context';
 import { CashBoxesCloseReport } from './reports/CashBoxesCloseReport';
 import { ReportHistorialInstance } from './reports/ReportHIstorialInstance';
 import { PortfolioReportDetail } from './reports/PortfolioReportDetail';
-
 import { getCustomReports } from '../../../../../../costume-modules/reports';
 import { AiButton } from '../components/ChatAiComponents/AiButton';
+import './Reports.css'
 
 export function Reports(){
 
