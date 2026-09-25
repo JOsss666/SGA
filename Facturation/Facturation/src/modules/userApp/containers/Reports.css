@@ -11,6 +11,7 @@
     display: flex;
     padding: 0 2vh;
     gap: 2vh;
+    margin: 1vh 0;
 }
 
 .Reports .filterSettings .SearchBar{
@@ -32,6 +33,13 @@
     display: flex;
     gap: 4vh;
     flex-wrap: wrap;   
+}
+
+.Reports .headSection{
+    padding-left: 2vh;
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
 }
 
 @media (max-width:500px) {
