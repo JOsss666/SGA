@@ -129,16 +129,6 @@ export function ReportHistorialInstance() {
                 <span>-</span>
                 <FormInput action={setEndDate} value={end_date} min={start_date || undefined} required={false} type="date" title="Fecha Final" />
                 </div>
-                <SelectOptions
-                options={[
-                    "Ascendente (fecha)",
-                    "Descendente (fecha)",
-                    "Ascendente (Nombre)",
-                    "Descendente (Nombre)",
-                ]}
-                title={"Orden"}
-                />
-                <ButtonMenu title={"Mas Ajustes"} children={<i className="fa-solid fa-sliders" />} noRotate={true} />
                 <ButtonMenu title={"Agregar a favoritos"} children={<i className="fa-regular fa-star" />} noRotate={true} />
                 <AiButton attached={info} sugerence={[
                     {text:'¿Que representa este informe?',context:`Procesos - Informe `},

@@ -196,24 +196,6 @@ export function BriefCaseReport(){
 
                 <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
 
-                <SelectOptions
-                    options={[
-                        "Ascendente (fecha)",
-                        "Descendente (fecha)",
-                        "Ascendente (Nombre)",
-                        "Descendente (Nombre)",
-                    ]}
-                    title={"Orden"}
-                />
-
-                <ButtonMenu
-                    title={"Mas Ajustes"}
-                    children={<i className="fa-solid fa-sliders" />}
-                    noRotate={true}
-                    onClick={()=>{
-                        setVisibleSettings(!visibleSettings)
-                    }}
-                />
 
                 <ButtonMenu title={"Agregar a favoritos"} children={<i className="fa-regular fa-star" />} noRotate={true} />
 
@@ -231,7 +213,6 @@ export function BriefCaseReport(){
                     title={"Informe_Cartera"}
                 />
 
-                <FilterReports hidden={visibleSettings} columns={columsTr} filters={filters}/>
 
             </div>
 
