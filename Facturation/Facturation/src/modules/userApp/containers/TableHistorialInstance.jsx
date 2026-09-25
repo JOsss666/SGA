@@ -1,95 +1,57 @@
-import { useMemo, useRef } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import './TableCashBoxClose.css'
+import { useMemo } from "react";
 import { UserCard } from "../components/UserCard";
-import { formatDate, moneyFormat } from "../../../utils/functions";
-import { useAlert } from "../../../context/context";
-import './TableHistorialInstance.css'
+import { formatDate } from "../../../utils/functions";
+import { UniversalTable } from "./universalTable";
+import './TableHistorialInstance.css';
 
-export function TableHistorialInstance({columns,info,searchValue,navigation}){
-    const {popInAlert} = useAlert();
-    const parentRef = useRef(null);
-    const filteredInfo = useMemo(() => {
-        if (!searchValue?.trim()) return info;
+const historyColumns = [
+    { key: 'process_name', label: 'Proceso' },
+    { key: 'identifier', label: 'Instancia', minWidth: '9rem' },
+    { key: 'user_name', label: 'Responsable', minWidth: '12rem' },
+    { key: 'action', label: 'Accion', minWidth: '16rem' },
+    { key: 'description', label: 'Descripción', minWidth: '14rem' },
+    { key: 'created_at', label: 'Fecha', minWidth: '11rem' },
+    { key: 'status', label: 'Estado' }
+];
 
-        const lower = searchValue.toLowerCase();
-
-        return info.filter(row =>
-            Object.values(row).some(val =>
-                val?.toString().toLowerCase().includes(lower)
-            )
-        );
-    }, [info, searchValue]);
-
-    const rowVirtualizer = useVirtualizer({
-        count: filteredInfo.length,
-        getScrollElement: () => parentRef.current,
-        estimateSize: () => 60,
-        overscan: 6,
-        getItemKey: index => index
-    });
-
-    console.log("INFO:", info.length)
-    console.log("FILTERED:", filteredInfo.length)
-    console.log("VIRTUAL:", rowVirtualizer.getVirtualItems())
-
-    return(
-        <div className="TableHistorialInstance">
-            <div className="headTable">
-                {columns.map((element,index)=>(
-                    <span className="thTitle" key={index}>
-                        {element}
-                    </span>
-                ))}
-            </div>
-            <div
-                ref={parentRef}
-                className="bodyTable"
-            >
-                <div
-                    style={{
-                        height: `${rowVirtualizer.getTotalSize()}px`,
-                        width: "100%",
-                        position: "relative"
-                    }}
-                >
-                    {rowVirtualizer.getVirtualItems().map(virtualRow => {
-                        const element = filteredInfo[virtualRow.index];
-                        return (
-                            <div
-                                key={virtualRow.key}
-                                data-index={virtualRow.index}
-                                ref={rowVirtualizer.measureElement}
-                                style={{
-                                    position: "absolute",
-                                    top: 0,
-                                    left: 0,
-                                    width: "100%",
-                                    transform: `translateY(${virtualRow.start}px)`
-                                }}
-                            >
-                                <div className="rowTable">
-                                    <span className="rowElement">{element.process_name}</span>
-                                    <span className="rowElement idHolder">{`${element.process_code}#${element.instance_id}`}</span>
-                                    <UserCard name={element.user_name} imgSrc={element.user_img}/>
-                                <div className="advanceStepContainer">
-                                    <div className="stepBuble prevStep" title={element.prevstep_name}>
-                                        <span>{element.prevstep_name}</span>
-                                    </div>
-                                    <i className="fa-solid fa-arrow-right flowIndicator"/>
-                                    <div className="stepBuble actualStep" title={element.nextstep_name}>
-                                        <span>{element.nextstep_name}</span>
-                                    </div>
-                                </div>
-                                    <span className="rowElement ">{element.description? element.description:'---'}</span>
-                                    <span className="rowElement ">{formatDate(element.created_at)}</span>
-                                    <span className="rowElement ">{element.status}</span>
-                                </div>
-                            </div>
-                        )
-                    })}
-                </div>
-            </div>
+const renderers = {
+    user_name: ({ value, info }) => (
+        <div className="historyResponsible" title={value || 'Sin responsable'}>
+            <UserCard name={value || '—'} imgSrc={info.user_img} />
         </div>
-    )
+    ),
+    action: ({ value, info }) => (
+        <div className="historyTransition" title={value} aria-label={value}>
+            <span className="historyStep">{info.prevstep_name || '—'}</span>
+            <i className="fa-solid fa-arrow-right" aria-hidden="true" />
+            <span className="historyStep historyNextStep">{info.nextstep_name || '—'}</span>
+        </div>
+    ),
+    description: ({ value }) => <span title={value || '---'}>{value || '---'}</span>,
+    created_at: ({ value, info }) => <span>{info.created_at_local ? info.created_at_local.replace('T', ' ') : value ? formatDate(value) : '—'}</span>
+};
+
+export function TableHistorialInstance({ columns, info = [], searchValue = '', loading = false }) {
+    const visibleColumns = useMemo(() => columns
+        ? historyColumns.filter((column) => columns.includes(column.label))
+        : historyColumns, [columns]);
+    const rows = useMemo(() => (Array.isArray(info) ? info.map((entry) => ({
+        ...entry,
+        identifier: `${entry.process_code ?? ''}#${entry.instance_id ?? ''}`,
+        action: `${entry.prevstep_name || '—'} → ${entry.nextstep_name || '—'}`
+    })) : []), [info]);
+
+    return (
+        <div className="TableHistorialInstance sgaTreasury">
+            <UniversalTable
+                columns={visibleColumns}
+                results={rows}
+                searchValue={searchValue}
+                loading={loading}
+                getRowKey={(row, index) => row.id ?? index}
+                rowProps={{ renderers }}
+                emptyMessage="No hay acciones de procesos para mostrar"
+            />
+        </div>
+    );
 }

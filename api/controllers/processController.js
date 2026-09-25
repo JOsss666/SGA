@@ -1,6 +1,6 @@
 
 import { useDataBase, withTransaction } from "../app.js";
-import { companyTimeZoneSql } from "../services/businessTimeZoneService.js";
+import { appendBusinessDateRange, companyTimeZoneSql } from "../services/businessTimeZoneService.js";
 import { createProcessInstance, createProcessEvidenceService, isExternalAccess, resolveExternalAccessUser } from "../services/processInstanceService.js";
 import utilsController from './utilsController.js';
 import { advanceProcessStep } from "../services/processStepService.js";
@@ -1334,20 +1334,35 @@ processController.getInstanceHistorial = (req,res)=>{
         let values= [];
         let whereClauses = [];
 
-        // Dates Filters
-            if (info.start_date) {
-                values.push(info.start_date);
-                whereClauses.push(
-                    `"Process".process_historial.created_at >= $${values.length}`
-                );
-            }
-
-            if (info.end_date) {
-                values.push(info.end_date);
-                whereClauses.push(
-                    `"Process".process_historial.created_at <= $${values.length}`
-                );
-            }
+        const companyColumn = '"Process".process_historial.company_id';
+        let companyPlaceholder = companyColumn;
+        if (info.company_id != null) {
+            values.push(info.company_id);
+            companyPlaceholder = `$${values.length}`;
+            whereClauses.push(`${companyColumn} = ${companyPlaceholder}`);
+        }
+        const timeZone = companyTimeZoneSql(companyPlaceholder);
+        // El historial legacy almacena UTC sin zona, igual que getProcessInstances.
+        const createdAt = `("Process".process_historial.created_at AT TIME ZONE 'UTC')`;
+        const isDateOnly = value => /^\d{4}-\d{2}-\d{2}$/.test(value ?? '');
+        appendBusinessDateRange({
+            whereClauses,
+            values,
+            column: createdAt,
+            start: isDateOnly(info.start_date) ? info.start_date : undefined,
+            end: isDateOnly(info.end_date) ? info.end_date : undefined,
+            companyPlaceholder
+        });
+        // Compatibilidad con consumidores que todavía envían fecha y hora.
+        for (const [value, operator] of [[info.start_date, '>='], [info.end_date, '<=']]) {
+            if (!value || isDateOnly(value)) continue;
+            values.push(value);
+            const placeholder = `$${values.length}`;
+            const instant = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(value)
+                ? `${placeholder}::timestamptz`
+                : `(${placeholder}::timestamp AT TIME ZONE (${timeZone}))`;
+            whereClauses.push(`${createdAt} ${operator} ${instant}`);
+        }
 
         const whereQuery = whereClauses.length > 0
             ? `WHERE ${whereClauses.join(" AND ")}`
@@ -1356,6 +1371,9 @@ processController.getInstanceHistorial = (req,res)=>{
         let sentence = `
             SELECT
                 "Process".process_historial.*,
+                to_char(${createdAt} AT TIME ZONE (${timeZone}), 'YYYY-MM-DD"T"HH24:MI:SS') AS created_at_local,
+                (${createdAt} AT TIME ZONE (${timeZone}))::date AS business_date,
+                ${timeZone} AS business_time_zone,
                 prevstep.name AS prevstep_name,
                 nextstep.name AS nextstep_name,
                 "Process".processes.name AS process_name,

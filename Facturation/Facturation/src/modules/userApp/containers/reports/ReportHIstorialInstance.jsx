@@ -1,20 +1,27 @@
-import { useEffect, useState, useMemo} from "react";
+import { useEffect, useState} from "react";
 import { useAppInfo } from "../../../../context/context";
 import { postInfo } from "../../../../utils/functions";
 import { BoldTitle } from "../../components/BoldTitle";
 import { ButtonMenu } from "../../components/ButtonMenu";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
-import { FormButton } from "../../components/FormButton";
 import { FormInput } from "../../components/FormInput";
 import { PathLocation } from "../../components/PathLocation";
 import { SearchBar } from "../../components/SearchBar";
 import { SelectOptions } from "../../components/SelectOptions";
-import { TableReport } from "../TableReport";
 import "./ReportDocuments.css";
-import { LoadingSpace } from "../LoadingSpace";
 import { ButtonDownload } from "../../components/ButtonDownload";
 import { AiButton } from "../../components/ChatAiComponents/AiButton";
 import {TableHistorialInstance} from '../TableHistorialInstance'
+
+const columnsOp = [
+        "Proceso",
+        "Instancia",
+        "Responsable",
+        "Accion",
+        "Descripción",
+        "Fecha",
+        "Estado"
+    ];
 
 export function ReportHistorialInstance() {
 
@@ -25,65 +32,47 @@ export function ReportHistorialInstance() {
 
     // Control
     const [loading, setLoading] = useState(false);
-    const [disabled,setDisabled] = useState(false);
-    const [start_date,setStartDate] = useState();
-    const [end_date,setEndDate] = useState();
+    const [start_date,setStartDate] = useState("");
+    const [end_date,setEndDate] = useState("");
 
-    // Settings Report
-    const documentTypes = {
-        'Client Order': "Ordenes de Cliente",
-        'Production Order': "Ordenes de Producción",
-        'Purchase Document': "Documentos de Compra",
-        'Inventory Consume': "Consumos de inventario",
-        'Sell Invoice': "Facturas de venta",
-        TR: "Transacciónes",
-        TR_details: "Detalles de la Transacción",
-    };
+    const [error, setError] = useState('');
+    const invalidRange = Boolean(start_date && end_date && start_date > end_date);
 
-    const columnsOp = [
-        "Proceso",
-        "Instancia",
-        "Responsable",
-        "Accion",
-        "Descripción",
-        "Fecha",
-        "Estado"
-    ];
-
-    const settingsReport = useMemo(() => ({
-        columns: columnsOp,
-        company_id: appInfo.company_id,
-        start_date,
-        end_date
-    }), [appInfo.company_id, start_date, end_date]);
-
-
-    const getHistorial = async () => {
-        setLoading(true);
-
-        let res = await postInfo('/process/getInstanceHistorial',settingsReport);
-
-        console.log("BACKEND DATA:", res);
-
-        if(res && res[0] && Array.isArray(res[1])){
-            setInfo(res[1]);
-        }else{
+    useEffect(() => {
+        let active = true;
+        if (!appInfo.company_id || invalidRange) {
             setInfo([]);
+            setLoading(false);
+            return;
         }
 
-        setLoading(false);
-        
-    };
+        const getHistorial = async () => {
+            setLoading(true);
+            setError('');
+            try {
+                const result = await postInfo('/process/getInstanceHistorial', {
+                    columns: columnsOp,
+                    company_id: appInfo.company_id,
+                    start_date,
+                    end_date
+                });
+                if (!result?.[0] || !Array.isArray(result[1])) {
+                    throw new Error('Respuesta inválida');
+                }
+                if (active) setInfo(result[1]);
+            } catch {
+                if (active) {
+                    setInfo([]);
+                    setError('No fue posible cargar el historial. Intenta cambiar el rango de fechas.');
+                }
+            } finally {
+                if (active) setLoading(false);
+            }
+        };
 
-    useEffect(()=>{
         getHistorial();
-    },[])
-
-    useEffect(()=>{
-        if(start_date && end_date){
-            getHistorial();
-        }
-    },[start_date,end_date])
+        return () => { active = false; };
+    }, [appInfo.company_id, start_date, end_date, invalidRange]);
 
     const columnMap = {
         "Proceso": "process_name",
@@ -109,7 +98,7 @@ export function ReportHistorialInstance() {
 
                 // formatear fecha
                 if (backendKey === "created_at") {
-                    value = new Date(value).toLocaleString();
+                    value = element.created_at_local?.replace('T', ' ') ?? new Date(value).toLocaleString();
                 }
 
                 row[col] = value;
@@ -123,7 +112,7 @@ export function ReportHistorialInstance() {
     };
 
 
-    console.log("REQUEST:", settingsReport);
+
     
 
     return (
@@ -136,9 +125,9 @@ export function ReportHistorialInstance() {
             <div className="settingsReport">
                 <SearchBar placeholder={"Buscar"} action={setSearchValue}/>
                 <div className="rangeInput">
-                <FormInput action={setStartDate} type={"datetime-local"} title={"Fecha Inicial"} />
+                <FormInput action={setStartDate} value={start_date} max={end_date || undefined} required={false} type="date" title="Fecha Inicial" />
                 <span>-</span>
-                <FormInput action={setEndDate} type={"datetime-local"} title={"Fecha Final"} />
+                <FormInput action={setEndDate} value={end_date} min={start_date || undefined} required={false} type="date" title="Fecha Final" />
                 </div>
                 <SelectOptions
                 options={[
@@ -162,13 +151,16 @@ export function ReportHistorialInstance() {
                     title={"Historial_instancias_procesos"}
                 />
             </div>
+            {(invalidRange || error) && (
+                <p role="alert">{invalidRange ? 'La fecha inicial debe ser anterior o igual a la fecha final.' : error}</p>
+            )}
             <div className="SpaceReport">
-                {!loading && (
-                    <TableHistorialInstance info={info} columns={columnsOp} searchValue={searchValue}/>
-                )}
-                {loading && (
-                    <LoadingSpace title={"Cargando información"} description={"Esto no debe tardar mucho..."} />
-                )}
+                <TableHistorialInstance
+                    info={info}
+                    columns={columnsOp}
+                    searchValue={searchValue}
+                    loading={loading}
+                />
             </div>
         </div>
     );
