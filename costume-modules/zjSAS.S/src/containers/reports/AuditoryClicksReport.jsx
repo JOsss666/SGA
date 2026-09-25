@@ -73,6 +73,10 @@ export function AuditoryClicksReport({appInfo,userInfo,userConfig,popInAlert,pop
     // Aditional data
     const [acDiference,setAcDiference] = useState(0);
 
+    // El preview se abre con el popInAlert del contexto (igual que la tabla
+    // original), no con el prop, que en el host no dispara la alerta.
+    const { popInAlert: openAlert } = useAlert();
+
     const filters = {};
 
     const settingsReport = {
@@ -120,14 +124,14 @@ export function AuditoryClicksReport({appInfo,userInfo,userConfig,popInAlert,pop
 
     const rowProps = useMemo(() => ({
         renderers: AUDIT_RENDERERS,
-        onRowClick: (row) => popInAlert(
+        onRowClick: (row) => openAlert(
             <PreviewFile
                 id={extractIdFromAttached(row.clickControlAttached)}
                 useAlert={useAlert}
                 appInfo={appInfo}
             />
         )
-    }), [popInAlert, useAlert, appInfo]);
+    }), [openAlert, useAlert, appInfo]);
 
     return(
         <div className="AuditoryClicksReport">

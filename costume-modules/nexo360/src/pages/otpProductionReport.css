@@ -1,98 +1,409 @@
-.otpProductionReport {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    max-width: 100%;
+
+/*  VARIABLES LIGHT AND DARKMODE */
+
+:root {
+    --tagNeutralBg: #eeeeef;
+    --tagNeutralText: #363638;
+    --tagGreenBg: #e4faf1;
+    --tagGreenText: #147e4b;
+    --tagBlueBg: #eaf1ff;
+    --tagBlueText: #2867c7;
+    --tagPurpleBg: #f4efff;
+    --tagPurpleText: #7c4bdd;
+    --tagInfoBg: #e4f6fc;
+    --tagInfoText: #08788f;
+    --tagRedBg: #ffebe7;
+    --tagRedText: #b83c32;
+    --tagAmberBg: #fff6d9;
+    --tagAmberText: #886210;
+    --statusSuccess: #31C950;
+    --statusError: #dc2626;
+    --bg: #ffffff;
+    --menuAside:#FAFAFA;
+    --lightGradient1: #EEF2FF;
+    --lightGradient2: #F7FAFF;
+    --lightGradient3: #F8FAFD;
+    --lightGradient4: #FEF2F2;
+    --text: #111111;
+    --mainText:#121212;
+    --sectionTitle:#1E1E1E;
+    --descriptionText:#838383;
+    --iconHover:#DFF2FE;
+    --inputsBg:#fff;
+    --inputsBorder:#ddd;
+    --translucidMenu:#ffffff90;
+    --cardHover:#F3F4F6;
+    --bgOpacity:#ffffff50;
+    --bgImage: url('https://i.pinimg.com/1200x/23/5f/8d/235f8df39cf98153029b9cc09495f390.jpg');
+    --mobileBgImage: url('https://i.pinimg.com/1200x/8a/5a/4a/8a5a4adbb2a79bd9d715a0396fc34811.jpg');
+    --settingsHover:#f5f5f5;
+    --lightSelected:#F3F4F6;
+    --chatOwnBubble:#E7F0FF;
+    --chatReceivedBubble:#ffffff;
+    --chatBubbleShadow:0 .3vh 1.4vh #0000000f;
+    --chatAccent:#3C83F7;
+    --chatBubbleBorder:#EEF1F5
 }
 
-.otpProductionReport header{
-    display: flex;
-    flex-direction: column;
-    padding: 1vh;
+:root.dark {
+    --tagNeutralBg: #29292e;
+    --tagNeutralText: #dedee4;
+    --tagGreenBg: #123b2b;
+    --tagGreenText: #78e2ad;
+    --tagBlueBg: #192e50;
+    --tagBlueText: #8bb8ff;
+    --tagPurpleBg: #322344;
+    --tagPurpleText: #c3a2ff;
+    --tagInfoBg: #123541;
+    --tagInfoText: #77d5ec;
+    --tagRedBg: #442425;
+    --tagRedText: #ffaaa1;
+    --tagAmberBg: #3d321b;
+    --tagAmberText: #f5d379;
+    --statusSuccess: #4ade80;
+    --statusError: #f87171;
+    --bg: #09090B;
+    --menuAside:#121212;
+    --lightGradient1: #0C0A09;
+    --lightGradient2: #121212;
+    --lightGradient3: #1E1E1E;
+    --lightGradient4: #252525;
+    --text: #e6eef6;
+    --mainText:#fff;
+    --sectionTitle:#E1E1E1;
+    --descriptionText:#bbb;
+    --iconHover:#303030;
+    --inputsBg:#19181D;
+    --inputsBorder:#2c2c2c;
+    --translucidMenu:#00000090;
+    --cardHover:#191919;
+    --bgOpacity:#00000050;
+    --settingsHover:#111;
+    --bgImage: url('https://i.pinimg.com/1200x/80/d1/bd/80d1bd8f8c9777a8ff1a8b4ed534418e.jpg');
+    --mobileBgImage: url('https://i.pinimg.com/1200x/74/cd/9b/74cd9bfd5eae92db44061a3664145b4b.jpg');
+    --lightSelected:#18181B;
+    --chatOwnBubble:#1E3A63;
+    --chatReceivedBubble:#1C1C1F;
+    --chatBubbleShadow:0 .3vh 1.4vh #00000040;
+    --chatAccent:#5B9CFF;
+    --chatBubbleBorder:#2A2A2E
 }
 
-.otpProductionReport header .PathLocation{
-    margin-left: -1vh;
+.UserApp{
+    height: 100%;
+    width: 100%;
+    position: relative;
+    display:flex;
+    transition: .3s;
+    background-color: var(--bg);
 }
 
-.otpProductionReport .otpProductionReportTools {
+.UserApp .headApp{
+    position: fixed;
+    z-index: 30;
+    width: 100%;
+    height: 10vh;
     display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 2vh;
-    padding: 1vh;
-    margin-bottom: 1vh;
-}
-.otpProductionReport .otpProductionReportSearch {
-    min-width: 0;
-}
-.otpProductionReport .otpProductionReportSearch .SearchBar {
-    width: 20vw;
-}
-.otpProductionReport .otpProductionReportTools > .sgaTreasury {
-    display: flex;
-    min-width: 0;
-    max-width: 100%;
+    padding: 0 2vh;
+    transition: .3s;
+    padding-left: 7vw;
 }
 
-.otpProductionReport .otpProductionReportTools .ButtonDownload{
-    width: fit-content;
-    margin: auto;
-    margin-right: 1vh;
-}
-
-.otpProductionReport .otpProductionReportNote {
-    color: var(--descriptionText);
-    margin: 1vh 0;
-}
-.otpProductionReport .otpProductionReportTable {
-    min-width: 0;
-    overflow-x: auto;
-    margin: 1vh;
-    border: 1px solid var(--inputsBorder);
-    border-radius: 1.2vh;
-    background: var(--inputsBg);
-}
-.otpProductionReport .otpProductionReportLink {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--chatAccent, var(--mainText));
-    font: inherit;
-    font-weight: 600;
-    text-align: left;
-    cursor: pointer;
-}
-.otpProductionReport .otpProductionReportLink:hover {
-    text-decoration: underline;
-}
-.otpProductionReport button:focus-visible {
-    outline: 2px solid var(--mainText);
-    outline-offset: 2px;
-}
-.otpProductionReport .otpProductionReportError {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin: 1vh;
-    color: var(--mainText);
-}
-.otpProductionReport .otpProductionReportVisuallyHidden {
+.UserApp .headApp .ServicesGrid{
     position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+    top: 11vh;
+    right: 15vw;
 }
-@media (max-width: 720px) {
-    .otpProductionReport .otpProductionReportTools {
-        align-items: stretch;
-        flex-direction: column;
+
+.UserApp .headApp .UserCard{
+    margin: auto 2vh;
+}
+
+.UserApp .headApp .BigTitle{
+    margin: auto 2vh;
+    width: 25%;
+}
+
+.UserApp .headApp .SearchBar{
+    margin: 2vh 0;
+    width: 25vw;
+}
+
+.UserApp .headApp .SearchBar i{
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
+    left: 2.5vh;
+    top: 3vh !important;
+}
+
+.UserApp .headApp .SearchBar input{
+    border: none;
+    background-color: var(--menuAside);
+    outline: none;
+    padding-left: 7vh;
+    outline: solid .1vh var(--inputsBorder);
+}
+
+.UserApp .headApp .resultsQuickSerch{
+    position: absolute;
+    width: 25vw;
+    max-height: 40vh;
+    overflow: hidden;
+    background-color: var(--translucidMenu);
+    backdrop-filter: blur(2vh);
+    top: 8vh;
+    left: 7vw;
+    border-radius: 2vh;
+}
+
+.UserApp .headApp .resultsQuickSerch .AppIcon img{
+    height: 3vh;
+    width: 3vh;
+    margin: auto 0;
+}
+
+.UserApp .headApp .resultsQuickSerch .AppIcon span{
+    margin-left: 0;
+}
+
+.UserApp .headApp .SearchBar input{
+    border-radius: 3vh;
+}
+
+
+.UserApp .headApp .subMenuHeader{
+    display: flex;
+    margin: auto;
+    margin-right: 0;
+}
+
+.UserApp .headApp .subMenuHeader .ButtonMenu{
+    margin: auto 1vh;
+}
+
+.UserApp .headApp .SwitchColorMode{
+    margin: auto 3vw;
+}
+
+
+.UserApp .asideMenuApp{
+    width: fit-content;
+    height: 100%;
+    transition: .3s;
+}
+
+.UserApp .asideMenuApp .menusHolder {
+    position: absolute;
+    height: 100%;
+    width: fit-content;
+    background-color: var(--translucidMenu);
+    backdrop-filter: blur(1vh);
+    z-index: 40; /* Eliminado el duplicado */
+    transition: .3s;
+    overflow-y: auto;
+    border-top-right-radius: 3vh;
+    border-bottom-right-radius: 3vh;
+    
+    /* Firefox: Por defecto oculto, pero permite scroll */
+    scrollbar-width: none; 
+}
+
+/* --- Estilos para Chrome, Edge y Safari --- */
+
+/* 1. Definir que la barra existe y su ancho en PX */
+*::-webkit-scrollbar {
+    width: 6px;  /* No uses %, usa px o vh */
+    height: 6px;
+    display: none; /* Oculto por defecto */
+}
+
+/* 2. Mostrar la barra al hacer hover sobre el contenedor */
+*:hover::-webkit-scrollbar {
+    display: block;
+}
+
+/* 3. Fondo del track */
+
+*::-webkit-scrollbar-track {
+    background: var(--cardHover);
+    border-radius: 8px;
+}
+
+/* 4. El tirador (thumb) */
+*::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: var(--inputsBorder); /* O un color más claro */
+    border: 1px solid var(--inputsBorder);
+}
+
+
+
+
+
+
+.UserApp .asideMenuApp .ServiceSgaCard{
+    margin: 1vh;
+    margin-bottom: 2vh;
+    /*background-color: var(--menuAside);*/
+    
+    z-index: 10;
+    padding-top: 1vh;
+}
+
+.UserApp .asideMenuApp .activeMenusHolder{
+    box-shadow: 0 .4vh 1vh #3333;
+    min-width: 18vw;
+}
+
+.UserApp .bodyApp{
+    height: 100dvh;
+    width: 100dvw;
+    padding-left: 5dvw;
+    border-radius: 4vh;
+    padding-top: 10vh;
+    transition: .3s;
+    background-color: var(--bg);
+    overflow: hidden;
+}
+
+.UserApp .closeMenuMobileIcon, .UserApp .openMenuMobileIcon{
+    display: none;
+}
+
+/* Para Chrome, Safari, Edge y Opera (Webkit) */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+/* Para Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/*  Responsive Design -> Mobile  */
+
+@media (max-width:500px) {
+
+    .UserApp .headApp .UserCard,
+    .UserApp .headApp .SearchBar{
+        display: none;
     }
-    .otpProductionReport .otpProductionReportSearch {
-        flex-basis: auto;
+
+    .UserApp .headApp .ServicesGrid{
+        position: absolute;
+        top: 40dvh;
+        height: 60dvh;
+        right: 0;
+        width: 100%;
+        max-width: 100%;
+        flex-wrap: wrap;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
     }
+
+    .UserApp .headApp .ServicesGrid .serviceBubble{
+        margin: 2vh auto;
+        width: 30vw;
+        overflow-x: hidden;
+    }
+
+    .UserApp .asideMenuApp{
+        height: fit-content;
+        position: relative;
+        height: 100%;
+    }
+
+    .UserApp .asideMenuApp .MenuApp{
+        display: none;
+    }
+
+    .UserApp .asideMenuApp .ServiceSgaCard{
+        display: none;
+    }
+
+    .UserApp .asideMenuApp .menusHolder {
+        padding-top: 2vh;
+        position: absolute;
+        height: fit-content;
+        width: fit-content;
+        background-color: var(--menuAside);
+        backdrop-filter: blur(1vh);
+        z-index: 40; /* Eliminado el duplicado */
+        transition: .3s;
+        overflow-y: auto;
+        border-top-right-radius: 0vh;
+        border-bottom-right-radius: 0vh;
+        
+        /* Firefox: Por defecto oculto, pero permite scroll */
+        scrollbar-width: none; 
+    }
+
+    .UserApp .asideMenuApp .activeMenusHolder{
+        width: 100dvw;
+        height: 100%;
+        position: relative;
+    }
+
+    .UserApp .asideMenuApp .activeMenusHolder .MenuApp{
+        display: flex;
+    }
+
+    .UserApp .asideMenuApp .activeMenusHolder .closeMenuMobileIcon{
+        display: flex;
+        position: absolute;
+        top: 3vh;
+        right: 3vh;
+        font-size: clamp(3px,3vh,30px);
+        color: var(--mainText);
+        padding: 1vh;
+        height: 5vh;
+        width: 5vh;
+        text-align: center;
+        border-radius: 100%;
+        background-color: var(--cardHover);
+    }
+
+    .UserApp .asideMenuApp .activeMenusHolder .ServiceSgaCard{
+        display: flex;
+    }
+
+    .UserApp .asideMenuApp .hiddenAsideMenu .openMenuMobileIcon{
+        display: flex;
+        font-size: clamp(3px,3vh,30px);
+        color: var(--mainText);
+        padding: 1vh;
+        height: 5vh;
+        width: 5vh;
+        text-align: center;
+        border-radius: 100%;
+        background-color: var(--cardHover);
+        margin-top: .5vh;
+        margin-left: 2vh;
+    }
+    .UserApp .asideMenuApp .menusHolder .openMenuMobileIcon i{
+        margin: auto;
+    }
+
+    .UserApp .asideMenuApp .activeMenusHolder .closeMenuMobileIcon i{
+        margin: auto;
+    }
+
+    .UserApp .asideMenuApp .hiddenAsideMenu{
+        background-color: transparent;
+        backdrop-filter: none;
+    }
+
+    .UserApp .bodyApp{
+        height: 100dvh;
+        width: 100dvw;
+        padding-left: 0;
+        border-radius: 0;
+        padding-top: 8vh;
+        transition: .3s;
+        background-color: var(--bg);
+        overflow: hidden;
+    }
+
 }

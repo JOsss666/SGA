@@ -63,6 +63,10 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
 
     const reportRef = useRef();
 
+    // El preview se abre con el popInAlert del contexto (igual que la tabla
+    // original), no con el prop, que en el host no dispara la alerta.
+    const { popInAlert: openAlert } = useAlert();
+
     const filters = {};
 
     useEffect(()=>{
@@ -133,14 +137,14 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
 
     const rowProps = useMemo(() => ({
         renderers: CLICKS_RENDERERS,
-        onRowClick: (row) => popInAlert(
+        onRowClick: (row) => openAlert(
             <PreviewFile
                 id={extractIdFromAttached(row.attached)}
                 useAlert={useAlert}
                 appInfo={appInfo}
             />
         )
-    }), [popInAlert, useAlert, appInfo]);
+    }), [openAlert, useAlert, appInfo]);
 
     return(
         <div className="ClicksReport ReportDocument">
@@ -160,15 +164,6 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
                     <span>-</span>
                     <FormInput type={"date"} title={"Fecha Final"} action={setEnd_date} value={end_date} min={start_date || undefined} required={false} />
                 </div>
-
-                <ButtonMenu
-                    title={"Mas Ajustes"}
-                    children={<i className="fa-solid fa-sliders" />}
-                    noRotate={true}
-                    onClick={()=>{
-                        setVisibleSettings(!visibleSettings)
-                    }}
-                />
 
                 <ButtonMenu
                     title={"Agregar a favoritos"}
@@ -191,12 +186,6 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
                     columns={columsReport}
                     title="Informe_Clicks"
                     component={reportRef}
-                />
-
-                <FilterReports
-                    hidden={visibleSettings}
-                    columns={columsReport}
-                    filters={filters}
                 />
 
             </div>
