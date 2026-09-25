@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { urlSer } from '../../../../App';
-import { downloadAttachment, getAttachmentUrl, printAttachment, shareAttachment } from '../../../../utils/attachmentActions';
+import { downloadAttachment, getAttachmentUrl, openAttachmentInNewTab, printAttachment, shareAttachment } from '../../../../utils/attachmentActions';
 import './PreviewFile.css'
 import { useAlert, useAppInfo } from '../../../../context/context';
 import { LoadingSpace } from '../LoadingSpace';
@@ -79,7 +79,8 @@ export function PreviewFile({id}){
     const actions = [
         {text:'Descargar', icon:<i className="fa-solid fa-cloud-arrow-down"/>, action:()=>handleAction(downloadAttachment)},
         ...(canPrint ? [{text:'Imprimir', icon:<i className="fa-solid fa-print"/>, action:()=>handleAction(printAttachment)}] : []),
-        {text:'Compartir', icon:<i className="fa-solid fa-arrow-up-from-bracket"/>, action:()=>handleAction(shareAttachment)}
+        {text:'Compartir', icon:<i className="fa-solid fa-arrow-up-from-bracket"/>, action:()=>handleAction(shareAttachment)},
+        {text:'Abrir en nueva pestaña', icon:<i className="fa-solid fa-up-right-from-square"/>, action:()=>handleAction(openAttachmentInNewTab)}
     ];
 
     const renderContent = () => {
@@ -189,7 +190,6 @@ export function PreviewFile({id}){
                             {busy && <p role="status">Preparando archivo…</p>}
                             {error && <p role="alert">{error}</p>}
                             {message && <p role="status">{message}</p>}
-                            {info?.url && <a href={info.url} target="_blank" rel="noopener noreferrer">Abrir archivo en nueva pestaña</a>}
                             {renderContent()}
                         </div>
                     </div>
