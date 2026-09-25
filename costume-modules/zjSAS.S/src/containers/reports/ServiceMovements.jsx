@@ -7,20 +7,76 @@ import {SelectOptions} from '../../components/SelectOptions';
 import {ButtonMenu} from '../../components/ButtonMenu';
 import {ButtonDownload} from '../../components/ButtonDownload';
 import {AiButton} from '../../components/ChatAiComponents/AiButton';
-import { useEffect, useState } from "react";
+import {UserCard} from '../../components/UserCard';
+import { useEffect, useMemo, useState } from "react";
 import {FilterReports} from './FilterReports'
 import { moneyFormat, postInfo } from "../../../utils/functions";
-import { LoadingSpace } from "../LoadingSpace";
 import {useRealtime} from '../../../utils/useRealTime.js'
+import { useParams } from 'react-router-dom'
+import { UniversalTable } from "../universalTable";
 import './ClicksReport.css'
-import { TableMovmentServices } from "../TableMovementServices";
+
+// Columnas del informe de servicios para UniversalTable.
+const SERVICE_COLUMNS = [
+    { key: 'service_name', label: 'Servicio', flex: '1 1 12rem', minWidth: '11rem' },
+    { key: 'instance_label', label: 'Instancia', minWidth: '9rem' },
+    { key: 'thirdparty_name', label: 'Tercero' },
+    {
+        key: 'clicksTotal',
+        label: 'Clicks',
+        minWidth: '8rem',
+        total: (rows) => moneyFormat(rows.reduce((sum, row) => sum + (row.clicksTotal || 0), 0))
+    },
+    {
+        key: 'units',
+        label: 'Unidades',
+        minWidth: '8rem',
+        total: (rows) => moneyFormat(rows.reduce((sum, row) => sum + (parseInt(row.units) || 0), 0))
+    },
+    { key: 'unit_value', label: 'Valor unitario', minWidth: '9rem' },
+    {
+        key: 'total',
+        label: 'Total',
+        minWidth: '9rem',
+        total: (rows) => `$ ${moneyFormat(rows.reduce((sum, row) => sum + (parseFloat(row.total) || 0), 0).toFixed(2))}`
+    },
+    { key: 'description', label: 'Descripción' },
+    { key: 'machine_name', label: 'Maquina', flex: '1 1 12rem', minWidth: '11rem' },
+    { key: 'created_at', label: 'Fecha', minWidth: '9rem' }
+];
+
+// Etiquetas y mapeo usados para exportar el informe.
+const columsReport = [
+    "Servicio", "Instancia", "Tercero", "Clicks", "Unidades",
+    "Valor unitario", "Total", "Descripción", "Maquina", "Fecha"
+];
+const columnMap = {
+    "Servicio": "service_name",
+    "Instancia": "instance_serial",
+    "Tercero": "thirdparty_name",
+    "Clicks": "controlClicks",
+    "Unidades": "units",
+    "Valor unitario": "unit_value",
+    "Total": "total",
+    "Descripción": "description",
+    "Maquina": "machine_name",
+    "Fecha": "created_at"
+};
+
+// Añade a cada fila los campos derivados que la tabla ordena/muestra.
+const toRow = (element) => ({
+    ...element,
+    clicksTotal: (parseInt(element.units) || 0) * (parseFloat(element.controlClicks) || 0),
+    instance_label: `${element.process_code}#${element.instance_serial}`
+});
 
 export function ServiceMovements({appInfo,userInfo,userConfig,popInAlert,popOutAlert, useAiAssistant}){
 
-    console.log(appInfo,userInfo,userConfig,popInAlert,popOutAlert)
+    const params = useParams();
 
     // requirements
     const [info,setInfo] = useState([]);
+    const [visibleRows,setVisibleRows] = useState([]);
 
     // Control
     const [disabled,setDisabled] = useState(false);
@@ -28,27 +84,13 @@ export function ServiceMovements({appInfo,userInfo,userConfig,popInAlert,popOutA
     const [searchValue,setSearchValue] = useState('');
     const [start_date,setStart_date] = useState(undefined);
     const [end_date,setEnd_date] = useState(undefined);
-    const [visibleSettings,setVisibleSettings] = useState(false); 
+    const [visibleSettings,setVisibleSettings] = useState(false);
     const [totalValue,setTotalValue] = useState(0);
     const [totalServices,setTotalServices] = useState(0);
     const [totalClicks,setTotalClicks] = useState(0);
 
     // Settings Report
-
     const filters = {};
-
-    const columsReport = [
-        "Servicio",
-        "Instancia",
-        "Tercero",
-        "Clicks",
-        "Unidades",
-        "Valor unitario",
-        "Total",
-        "Descripción",
-        "Maquina",
-        "Fecha"
-    ]
 
     const settingsReport = {
         columsReport,
@@ -57,110 +99,123 @@ export function ServiceMovements({appInfo,userInfo,userConfig,popInAlert,popOutA
         end_date
     }
 
-     // Gettrers of info
+    const rows = useMemo(() => (Array.isArray(info) ? info.map(toRow) : []), [info]);
 
+    // Getters of info
     const getServiceMovements = async()=>{
-    setDisabled(true);
-    setLoading(true)
-    let res = await postInfo('/zj852/getServiceMovements',settingsReport);
-    console.log(res);
-    if(res[0]){
-        console.log("DATA BACKEND:", res[1]);
-        setInfo(res[1]);
-    }else{
-        setInfo([])
-    }
-    setLoading(false);
-    setDisabled(false);
-    }
-
-     // functions
-
-    const calcTotals = ()=>{
-    let ttlS = info.length;
-    let ttlClicks = 0;
-    let ttlValue = 0;
-    info.forEach(element => {
-        if(element.controlClicks != undefined){
-            ttlClicks += parseFloat(element.controlClicks * element.units)
+        setDisabled(true);
+        setLoading(true)
+        let res = await postInfo('/zj852/getServiceMovements',settingsReport);
+        if(res[0]){
+            setInfo(res[1]);
+        }else{
+            setInfo([])
         }
-        ttlValue += parseFloat(element.total)
-    });
-    let defTTVal = ttlValue?.toFixed(2)
-    setTotalClicks(ttlClicks);
-    setTotalServices(ttlS);
-    setTotalValue(defTTVal);
+        setLoading(false);
+        setDisabled(false);
+    }
+
+    // functions
+    const calcTotals = ()=>{
+        let ttlS = info.length;
+        let ttlClicks = 0;
+        let ttlValue = 0;
+        info.forEach(element => {
+            if(element.controlClicks != undefined){
+                ttlClicks += parseFloat(element.controlClicks * element.units)
+            }
+            ttlValue += parseFloat(element.total)
+        });
+        let defTTVal = ttlValue?.toFixed(2)
+        setTotalClicks(ttlClicks);
+        setTotalServices(ttlS);
+        setTotalValue(defTTVal);
     }
 
     useRealtime(appInfo.company_id, (payload) => {
         if (payload.table === 'process_instance') {
-            getInstances();
+            getServiceMovements();
         }
     });
 
-     // Effects listener
+    // Effects listener
     useEffect(()=>{
-    getServiceMovements();
+        getServiceMovements();
     },[])
 
     useEffect(()=>{
-    getServiceMovements();
+        getServiceMovements();
     },[start_date,end_date])
 
     useEffect(()=>{
-    calcTotals();
+        calcTotals();
     },[info])
 
+    // Exporta exactamente lo que la tabla tiene filtrado/ordenado en pantalla.
+    const setInfoForReportDownload = () => visibleRows.map((element) => {
+        const row = {};
+        columsReport.forEach((col) => {
+            const backendKey = columnMap[col];
+            let value = element[backendKey] ?? "";
 
-    const columnMap = {
-        "Servicio": "service_name",
-        "Instancia": "instance_serial",
-        "Tercero": "thirdparty_name",
-        "Clicks": "controlClicks",
-        "Unidades": "units",
-        "Valor unitario": "unit_value",
-        "Total": "total",
-        "Descripción": "description",
-        "Maquina": "machine_name",
-        "Fecha": "created_at"
-    };
+            if(backendKey === "controlClicks" || backendKey === "units"){
+                value = Number(value);
+            }
+            if(backendKey === "unit_value" || backendKey === "total"){
+                value = Number(value);
+            }
+            if(backendKey === "created_at" && value){
+                value = new Date(value).toLocaleString();
+            }
 
-
-    const setInfoForReportDownload = () => {
-
-        return info.map(element => {
-
-            let row = {};
-
-            columsReport.forEach(col => {
-
-                const backendKey = columnMap[col];
-
-                let value = element[backendKey] ?? "";
-
-                // formateo de números
-                if(backendKey === "controlClicks" || backendKey === "units"){
-                    value = Number(value);
-                }
-
-                if(backendKey === "unit_value" || backendKey === "total"){
-                    value = Number(value);
-                }
-
-                // formateo de fecha
-                if(backendKey === "created_at"){
-                    value = new Date(value).toLocaleString();
-                }
-
-                row[col] = value;
-
-            });
-
-            return row;
-
+            row[col] = value;
         });
+        return row;
+    });
 
-    };
+    const rowProps = useMemo(() => ({
+        renderers: {
+            service_name: ({ info: row }) => (
+                <UserCard name={row.service_name} desc={row.service_code} imgSrc={row.service_img} />
+            ),
+            instance_label: ({ value, info: row }) => (
+                <span
+                    className="serviceInstanceLink"
+                    role="link"
+                    tabIndex={0}
+                    onClick={() => window.open(
+                        `https://facturation.sga360.co/preview/Process/${params.company_key}/${row.instance_id}`,
+                        '_blank',
+                        'noopener,noreferrer'
+                    )}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            window.open(
+                                `https://facturation.sga360.co/preview/Process/${params.company_key}/${row.instance_id}`,
+                                '_blank',
+                                'noopener,noreferrer'
+                            );
+                        }
+                    }}
+                >
+                    {value}
+                </span>
+            ),
+            clicksTotal: ({ value }) => <span>{value}</span>,
+            units: ({ value }) => <span>{moneyFormat(parseInt(value))}</span>,
+            unit_value: ({ value }) => <span>{moneyFormat(parseFloat(value))}</span>,
+            total: ({ value }) => <span>{moneyFormat(parseFloat(value))}</span>,
+            machine_name: ({ info: row }) => (
+                <UserCard
+                    name={row.machine_name ? row.machine_name : '---'}
+                    desc={row.machine_model ? row.machine_model : '---'}
+                    imgSrc={row.machine_img}
+                />
+            ),
+            created_at: ({ value }) => <span>{value ? String(value).substring(0, 16) : '---'}</span>
+        }
+    }), [params.company_key]);
 
     return(
         <div className="ClicksReport ReportDocument">
@@ -203,7 +258,7 @@ export function ServiceMovements({appInfo,userInfo,userConfig,popInAlert,popOutA
                     setVisibleSettings(!visibleSettings)
                 }}/>
                 <ButtonMenu title={"Agregar a favoritos"} children={<i className="fa-regular fa-star" />} noRotate={true} />
-                <AiButton attached={info} useAiAssistant={useAiAssistant} sugerence={[
+                <AiButton attached={visibleRows} useAiAssistant={useAiAssistant} sugerence={[
                     {text:'¿Que representa este informe?',context:`Procesos - Balance - Cuentas contables - Saldo`},
                     {text:'Realiza un analisis de este informe',context:`Procesos - Balance - Cuentas contables - Saldo`},
                     {text:'¿Que acciones me recomiendas basado en este informe?',context:`Procesos - Balance - Cuentas contables - Saldo`}
@@ -216,12 +271,16 @@ export function ServiceMovements({appInfo,userInfo,userConfig,popInAlert,popOutA
                 <FilterReports hidden={visibleSettings} columns={columsReport} filters={filters}/>
             </div>
             <div className="contentReport">
-                {!loading && (
-                    <TableMovmentServices searchValue={searchValue} columns={columsReport} info={info} disabled={disabled}/>
-                )}
-                {loading && (
-                    <LoadingSpace title={'Cargando registro de clicks'} description={'Esto no debe tardar mucho'}/>
-                )}
+                <UniversalTable
+                    columns={SERVICE_COLUMNS}
+                    results={rows}
+                    searchValue={searchValue}
+                    loading={loading}
+                    disabled={disabled}
+                    rowProps={rowProps}
+                    onResultsChange={setVisibleRows}
+                    emptyMessage="No hay servicios para mostrar"
+                />
             </div>
         </div>
     )

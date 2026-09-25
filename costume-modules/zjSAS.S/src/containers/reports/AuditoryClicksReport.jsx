@@ -2,132 +2,132 @@ import {BoldTitle} from '../../components/BoldTitle';
 import { ButtonDownload } from '../../components/ButtonDownload';
 import { ButtonMenu } from '../../components/ButtonMenu';
 import { AiButton } from '../../components/ChatAiComponents/AiButton';
-import { FormInput } from '../../components/FormInput';
 import { PathLocation } from '../../components/PathLocation';
 import { SearchBar } from '../../components/SearchBar';
-import { SelectOptions } from '../../components/SelectOptions';
+import { UserCard } from '../../components/UserCard';
 import { FilterReports } from './FilterReports';
-import { useState,useEffect,useRef, useMemo } from 'react';
-import { moneyFormat, postInfo } from '../../../utils/functions';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { moneyFormat, postInfo, extractIdFromAttached } from '../../../utils/functions';
 import './AuditoryClicksReport.css'
-import { LoadingSpace } from '../LoadingSpace';
-import { TableAuditClicks } from '../TableAuditClicks';
+import { UniversalTable } from '../universalTable';
+import { PreviewFile } from '../Preview/PreviewFile';
 import {LabelValue} from '../../components/LabelValue'
 
+// Columnas del informe de auditoría de clicks para UniversalTable.
+const AUDIT_COLUMNS = [
+    { key: 'fecha', label: 'Fecha', minWidth: '9rem' },
+    { key: 'machine_name', label: 'Maquina', flex: '1 1 12rem', minWidth: '11rem' },
+    { key: 'initial_clicks', label: 'Clicks iniciales', minWidth: '9rem' },
+    { key: 'next_initial_clicks', label: 'Clicks cierre', minWidth: '9rem' },
+    { key: 'clicksEjecutados', label: 'Clicks Ejecutados', minWidth: '9rem' },
+    { key: 'clicksRegistrados', label: 'Clicks Registrados', minWidth: '9rem' },
+    {
+        key: 'diferencia',
+        label: 'Diferencia',
+        minWidth: '8rem',
+        total: (rows) => moneyFormat(rows.reduce((sum, row) => sum + (parseFloat(row.diferencia) || 0), 0))
+    }
+];
+
+const AUDIT_RENDERERS = {
+    fecha: ({ value }) => <span>{value ? String(value).substring(0, 10) : '---'}</span>,
+    machine_name: ({ info }) => (
+        <UserCard name={info.machine_name} desc={info.machine_model} imgSrc={info.machine_img} />
+    ),
+    initial_clicks: ({ value }) => <span>{moneyFormat(parseFloat(value))}</span>,
+    next_initial_clicks: ({ value }) => <span>{moneyFormat(parseFloat(value))}</span>,
+    clicksEjecutados: ({ value }) => <span>{moneyFormat(parseFloat(value))}</span>,
+    clicksRegistrados: ({ value }) => <span>{moneyFormat(parseFloat(value))}</span>,
+    diferencia: ({ value }) => <span>{moneyFormat(parseFloat(value))}</span>
+};
+
+// Etiquetas y mapeo usados para exportar el informe.
+const columsReport = [
+    "Fecha", "Maquina", "Clicks iniciales", "Clicks cierre",
+    "Clicks Ejecutados", "Clicks Registrados", "Diferencia"
+];
+const columnMap = {
+    "Fecha": "fecha",
+    "Maquina": "machine_name",
+    "Clicks iniciales": "initial_clicks",
+    "Clicks cierre": "next_initial_clicks",
+    "Clicks Ejecutados": "clicksEjecutados",
+    "Clicks Registrados": "clicksRegistrados",
+    "Diferencia": "diferencia"
+};
 
 export function AuditoryClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert,useAlert ,useAiAssistant}){
 
     // requierements
     const reportRef = useRef();
     const [info,setInfo] = useState([]);
+    const [visibleRows,setVisibleRows] = useState([]);
     // Control
     const [disabled,setDisabled] = useState(false);
     const [loading,setLoading] = useState(true);
     const [searchValue,setSearchValue] = useState('');
     const [start_date,setStart_date] = useState(undefined);
     const [end_date,setEnd_date] = useState(undefined);
-    const [visibleSettings,setVisibleSettings] = useState(false); 
+    const [visibleSettings,setVisibleSettings] = useState(false);
 
     // Aditional data
     const [acDiference,setAcDiference] = useState(0);
-        
-    
-        const filters = {};
-    
-        const columsReport = [
-            "Fecha",
-            "Maquina",
-            "Clicks iniciales",
-            "Clicks cierre",
-            "Clicks Ejecutados",
-            "Clicks Registrados",
-            "Diferencia"
-        ];
-    
-        const settingsReport = {
-            columsReport,
-            company_id: appInfo.company_id,
-            start_date,
-            end_date
-        };
-    
-        const getClicksHistoric = async()=>{
-            setDisabled(true);
-            setLoading(true);
-    
-            let res = await postInfo('/zj852/getAuditClicksReport', settingsReport);
-            if(res[0]){
-                console.log("DATA BACKEND:", res[1]);
-                setInfo(res[1]);
-            }
-    
-            setLoading(false);
-            setDisabled(false);
+
+    const filters = {};
+
+    const settingsReport = {
+        columsReport,
+        company_id: appInfo.company_id,
+        start_date,
+        end_date
+    };
+
+    const getClicksHistoric = async()=>{
+        setDisabled(true);
+        setLoading(true);
+
+        let res = await postInfo('/zj852/getAuditClicksReport', settingsReport);
+        if(res[0]){
+            setInfo(res[1]);
         }
 
-        useEffect(()=>{
-            getClicksHistoric();
-        },[start_date,end_date])
-    
-        useEffect(()=>{
-            getClicksHistoric();
-        },[]);
-    
-        const tableData = useMemo(() => {
-            if(!Array.isArray(info)) return []
-            const search = searchValue.toLowerCase()
-    
-            return info.filter((row)=>
-                Object.values(row)
-                    .join(" ")
-                    .toLowerCase()
-                    .includes(search)
-            )
-    
-        }, [info, searchValue])
+        setLoading(false);
+        setDisabled(false);
+    }
 
+    useEffect(()=>{
+        getClicksHistoric();
+    },[start_date,end_date])
 
-        const calcAcumulatedDiference = (data)=>{
-            let s = 0;
-            data.forEach(element => {
-                s += parseFloat(element.diferencia)
-            });
-            return(s)
-        }
+    useEffect(()=>{
+        getClicksHistoric();
+    },[]);
 
-        useEffect(()=>{
-            if(tableData.length < 1) return;
-            setAcDiference(calcAcumulatedDiference(tableData));
-        },[tableData])
-    
-        const columnMap = {
-            "Fecha": "fecha",
-            "Maquina": "machine_name",
-            "Clicks iniciales":'initial_clicks',
-            "Clicks cierre":'next_initial_clicks',
-            "Clicks Registrados": "clicksRegistrados",
-            "Clicks Ejecutados": "clicksEjecutados",
-            "Diferencia": "diferencia"
-        };
-    
-        const setInfoForReportDownload = () => {
-    
-            return tableData.map(element => {
-    
-                let row = {};
-    
-                columsReport.forEach(col => {
-    
-                    const backendKey = columnMap[col];
-    
-                    row[col] = element[backendKey] ?? "";
-    
-                });
-    
-                return row;
-            });
-    
-        };
+    // Diferencia acumulada de lo que la tabla tiene filtrado en pantalla.
+    useEffect(()=>{
+        const total = visibleRows.reduce((sum, element) => sum + (parseFloat(element.diferencia) || 0), 0);
+        setAcDiference(total);
+    },[visibleRows])
+
+    // Exporta exactamente lo que la tabla tiene filtrado/ordenado en pantalla.
+    const setInfoForReportDownload = () => visibleRows.map((element) => {
+        const row = {};
+        columsReport.forEach((col) => {
+            row[col] = element[columnMap[col]] ?? "";
+        });
+        return row;
+    });
+
+    const rowProps = useMemo(() => ({
+        renderers: AUDIT_RENDERERS,
+        onRowClick: (row) => popInAlert(
+            <PreviewFile
+                id={extractIdFromAttached(row.clickControlAttached)}
+                useAlert={useAlert}
+                appInfo={appInfo}
+            />
+        )
+    }), [popInAlert, useAlert, appInfo]);
 
     return(
         <div className="AuditoryClicksReport">
@@ -137,7 +137,7 @@ export function AuditoryClicksReport({appInfo,userInfo,userConfig,popInAlert,pop
             </div>
 
             <div className="totalsBalanceC">
-                <LabelValue title={"No. Registros"} value={<b>{moneyFormat(tableData.length)}</b>} />
+                <LabelValue title={"No. Registros"} value={<b>{moneyFormat(visibleRows.length)}</b>} />
                 <LabelValue title={"Diferencia acumulada"} value={<b>{moneyFormat(acDiference)}</b>} />
             </div>
 
@@ -164,14 +164,14 @@ export function AuditoryClicksReport({appInfo,userInfo,userConfig,popInAlert,pop
                     }}
                 />
 
-                <ButtonMenu 
-                    title={"Agregar a favoritos"} 
-                    children={<i className="fa-regular fa-star" />} 
-                    noRotate={true} 
+                <ButtonMenu
+                    title={"Agregar a favoritos"}
+                    children={<i className="fa-regular fa-star" />}
+                    noRotate={true}
                 />
 
-                <AiButton 
-                    attached={tableData} 
+                <AiButton
+                    attached={visibleRows}
                     useAiAssistant={useAiAssistant}
                     sugerence={[
                         {text:'¿Que representa este informe?',context:`Clicks - Reporte`},
@@ -180,33 +180,32 @@ export function AuditoryClicksReport({appInfo,userInfo,userConfig,popInAlert,pop
                     ]}
                 />
 
-                <ButtonDownload 
+                <ButtonDownload
                     info={setInfoForReportDownload()}
                     columns={columsReport}
                     title="Informe_Clicks"
                     component={reportRef}
                 />
 
-                <FilterReports 
-                    hidden={visibleSettings} 
-                    columns={columsReport} 
+                <FilterReports
+                    hidden={visibleSettings}
+                    columns={columsReport}
                     filters={filters}
                 />
             </div>
-            {!loading && (
-                <div ref={reportRef}>
-                    <TableAuditClicks
-                        columns={columsReport}
-                        info={tableData}
-                        disabled={disabled}
-                        useAlert={useAlert}
-                        appInfo={appInfo}
-                    />
-                </div>
-            )}
-            {loading && (
-                <LoadingSpace title={'Cargando informe'} description={'Esto no debe tardar mucho'}/>
-            )}
+
+            <div ref={reportRef}>
+                <UniversalTable
+                    columns={AUDIT_COLUMNS}
+                    results={info}
+                    searchValue={searchValue}
+                    loading={loading}
+                    disabled={disabled}
+                    rowProps={rowProps}
+                    onResultsChange={setVisibleRows}
+                    emptyMessage="No hay registros para los filtros seleccionados."
+                />
+            </div>
         </div>
     )
 }

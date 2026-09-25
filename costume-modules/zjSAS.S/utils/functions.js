@@ -319,3 +319,47 @@ export const formatDate = (date, noHour = false) => {
     if (!parts) return '--/--/--';
     return noHour || !parts[2] ? parts[1] : `${parts[1]} ${parts[2]}`;
 };
+
+// Extrae el id de un adjunto que puede venir como objeto, arreglo o JSON
+// anidado y escapado varias veces (formato heredado del control de clicks).
+export const extractIdFromAttached = (attachedValue) => {
+    try {
+        if (!attachedValue) return null;
+
+        let data = attachedValue;
+
+        if (typeof data === 'string') {
+            let cleanStr = data.trim();
+
+            if (cleanStr.startsWith('{"{')) {
+                cleanStr = cleanStr.substring(1, cleanStr.length - 1);
+            }
+
+            let safetyCounter = 0;
+
+            while (typeof cleanStr === 'string' && safetyCounter < 5) {
+                try {
+                    cleanStr = JSON.parse(cleanStr);
+                } catch {
+                    cleanStr = JSON.parse(cleanStr.replace(/\\"/g, '"'));
+                }
+                safetyCounter++;
+            }
+
+            data = cleanStr;
+        }
+
+        if (Array.isArray(data) && data.length > 0) {
+            return data[0].id ? String(data[0].id) : null;
+        }
+
+        if (data && data.id) {
+            return String(data.id);
+        }
+
+        return null;
+    } catch (error) {
+        console.error('Error al extraer ID del attached:', error);
+        return null;
+    }
+};

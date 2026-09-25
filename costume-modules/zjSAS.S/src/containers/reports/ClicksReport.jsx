@@ -7,35 +7,63 @@ import { SelectOptions } from '../../components/SelectOptions';
 import { ButtonMenu } from '../../components/ButtonMenu';
 import { ButtonDownload } from '../../components/ButtonDownload';
 import { AiButton } from '../../components/ChatAiComponents/AiButton';
+import { UserCard } from '../../components/UserCard';
 import { useEffect, useState, useRef, useMemo } from "react";
 import { FilterReports } from './FilterReports'
-import { urlSer } from "../../../utils/functions";
-import { LoadingSpace } from "../LoadingSpace";
-import { TableClicks } from "../TableClicks";
+import { urlSer, formatDate, moneyFormat, extractIdFromAttached } from "../../../utils/functions";
+import { UniversalTable } from "../universalTable";
+import { PreviewFile } from "../Preview/PreviewFile";
 import './ClicksReport.css'
+
+// Columnas del informe de clicks para UniversalTable.
+// El `key` apunta al valor primitivo de cada fila (orden/filtro/búsqueda);
+// el render visual se resuelve con `CLICKS_RENDERERS`.
+const CLICKS_COLUMNS = [
+    { key: 'asset_name', label: 'Maquina', flex: '1 1 12rem', minWidth: '10rem' },
+    {
+        key: 'initialClicks',
+        label: 'Clicks',
+        minWidth: '8rem',
+        total: (rows) => moneyFormat(rows.reduce((sum, row) => sum + (parseInt(row.initialClicks) || 0), 0))
+    },
+    { key: 'responsable', label: 'Responsable' },
+    { key: 'description', label: 'Descripcion' },
+    { key: 'created_at_local', label: 'Fecha' }
+];
+
+const CLICKS_RENDERERS = {
+    asset_name: ({ info }) => (
+        <UserCard name={info.asset_name} desc={info.asset_model} imgSrc={info.asset_img} />
+    ),
+    initialClicks: ({ value }) => <span>{moneyFormat(parseInt(value))}</span>,
+    created_at_local: ({ value, info }) => <span>{formatDate(value || info.created_at, false)}</span>
+};
+
+// Etiquetas y mapeo usados para exportar el informe.
+const columsReport = ["Maquina", "Clicks", "Responsable", "Descripcion", "Fecha"];
+const columnMap = {
+    "Maquina": "asset_name",
+    "Clicks": "initialClicks",
+    "Responsable": "responsable",
+    "Descripcion": "description",
+    "Fecha": "created_at_local"
+};
 
 export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert,useAlert ,useAiAssistant}){
 
     const [info,setInfo] = useState([]);
+    const [visibleRows,setVisibleRows] = useState([]);
     const [disabled,setDisabled] = useState(false);
     const [loading,setLoading] = useState(true);
     const [searchValue,setSearchValue] = useState('');
     const [start_date,setStart_date] = useState('');
     const [end_date,setEnd_date] = useState('');
     const [error,setError] = useState('');
-    const [visibleSettings,setVisibleSettings] = useState(false); 
+    const [visibleSettings,setVisibleSettings] = useState(false);
 
     const reportRef = useRef();
 
     const filters = {};
-
-    const columsReport = [
-        "Maquina",
-        "Clicks",
-        "Responsable",
-        "Descripcion",
-        "Fecha"
-    ];
 
     useEffect(()=>{
         const controller = new AbortController();
@@ -94,45 +122,25 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
         return () => controller.abort();
     },[appInfo.company_id, start_date, end_date]);
 
-    const tableData = useMemo(() => {
-        if(!Array.isArray(info)) return []
-        const search = searchValue.toLowerCase()
-
-        return info.filter((row)=>
-            Object.values(row)
-                .join(" ")
-                .toLowerCase()
-                .includes(search)
-        )
-
-    }, [info, searchValue])
-
-    const columnMap = {
-        "Maquina": "asset_name",
-        "Clicks": "initialClicks",
-        "Responsable": "responsable",
-        "Descripcion": "description",
-        "Fecha": "created_at_local"
-    };
-
-    const setInfoForReportDownload = () => {
-
-        return tableData.map(element => {
-
-            let row = {};
-
-            columsReport.forEach(col => {
-
-                const backendKey = columnMap[col];
-
-                row[col] = element[backendKey] ?? "";
-
-            });
-
-            return row;
+    // Exporta exactamente lo que la tabla tiene filtrado/ordenado en pantalla.
+    const setInfoForReportDownload = () => visibleRows.map((element) => {
+        const row = {};
+        columsReport.forEach((col) => {
+            row[col] = element[columnMap[col]] ?? "";
         });
+        return row;
+    });
 
-    };
+    const rowProps = useMemo(() => ({
+        renderers: CLICKS_RENDERERS,
+        onRowClick: (row) => popInAlert(
+            <PreviewFile
+                id={extractIdFromAttached(row.attached)}
+                useAlert={useAlert}
+                appInfo={appInfo}
+            />
+        )
+    }), [popInAlert, useAlert, appInfo]);
 
     return(
         <div className="ClicksReport ReportDocument">
@@ -153,16 +161,6 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
                     <FormInput type={"date"} title={"Fecha Final"} action={setEnd_date} value={end_date} min={start_date || undefined} required={false} />
                 </div>
 
-                <SelectOptions
-                    options={[
-                        "Ascendente (fecha)",
-                        "Descendente (fecha)",
-                        "Ascendente (Nombre)",
-                        "Descendente (Nombre)",
-                    ]}
-                    title={"Orden"}
-                />
-
                 <ButtonMenu
                     title={"Mas Ajustes"}
                     children={<i className="fa-solid fa-sliders" />}
@@ -172,14 +170,14 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
                     }}
                 />
 
-                <ButtonMenu 
-                    title={"Agregar a favoritos"} 
-                    children={<i className="fa-regular fa-star" />} 
-                    noRotate={true} 
+                <ButtonMenu
+                    title={"Agregar a favoritos"}
+                    children={<i className="fa-regular fa-star" />}
+                    noRotate={true}
                 />
 
-                <AiButton 
-                    attached={tableData} 
+                <AiButton
+                    attached={visibleRows}
                     useAiAssistant={useAiAssistant}
                     sugerence={[
                         {text:'¿Que representa este informe?',context:`Clicks - Reporte`},
@@ -188,43 +186,36 @@ export function ClicksReport({appInfo,userInfo,userConfig,popInAlert,popOutAlert
                     ]}
                 />
 
-                <ButtonDownload 
+                <ButtonDownload
                     info={setInfoForReportDownload()}
                     columns={columsReport}
                     title="Informe_Clicks"
                     component={reportRef}
                 />
 
-                <FilterReports 
-                    hidden={visibleSettings} 
-                    columns={columsReport} 
+                <FilterReports
+                    hidden={visibleSettings}
+                    columns={columsReport}
                     filters={filters}
                 />
 
             </div>
 
             {error && <p role="alert">{error}</p>}
-            {!loading && !error && tableData.length === 0 && (
-                <p role="status">No hay registros para los filtros seleccionados.</p>
-            )}
 
-            {!loading && !error && (
+            {!error && (
                 <div ref={reportRef}>
-                    <TableClicks 
-                        columns={columsReport} 
-                        info={tableData}
+                    <UniversalTable
+                        columns={CLICKS_COLUMNS}
+                        results={info}
+                        searchValue={searchValue}
+                        loading={loading}
                         disabled={disabled}
-                        useAlert={useAlert}
-                        appInfo={appInfo}
+                        rowProps={rowProps}
+                        onResultsChange={setVisibleRows}
+                        emptyMessage="No hay registros para los filtros seleccionados."
                     />
                 </div>
-            )}
-
-            {loading && (
-                <LoadingSpace 
-                    title={'Cargando registro de clicks'} 
-                    description={'Esto no debe tardar mucho'}
-                />
             )}
 
         </div>
