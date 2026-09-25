@@ -71,3 +71,11 @@
     outline-offset: .2vh;
     border-radius: .3vh;
 }
+
+.ClicksReport .universalRowCell[data-column-key="initialClicks"],
+.ClicksReport .universalRowCell[data-column-key="clicksTotal"],
+.ClicksReport .universalRowCell[data-column-key="units"],
+.ClicksReport .universalRowCell[data-column-key="unit_value"],
+.ClicksReport .universalRowCell[data-column-key="total"] {
+    text-align: right;
+}

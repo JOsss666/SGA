@@ -15,10 +15,11 @@ import {useRealtime} from '../../../utils/useRealTime.js'
 import { useParams } from 'react-router-dom'
 import { UniversalTable } from "../universalTable";
 import './ClicksReport.css'
+import './ServiceMovements.css';
 
 // Columnas del informe de servicios para UniversalTable.
 const SERVICE_COLUMNS = [
-    { key: 'service_name', label: 'Servicio', flex: '1 1 12rem', minWidth: '11rem' },
+    { key: 'service_name', label: 'Servicio', flex: '2 0 22rem', minWidth: '22rem' },
     { key: 'instance_label', label: 'Instancia', minWidth: '9rem' },
     { key: 'thirdparty_name', label: 'Tercero' },
     {
@@ -41,7 +42,7 @@ const SERVICE_COLUMNS = [
         total: (rows) => `$ ${moneyFormat(rows.reduce((sum, row) => sum + (parseFloat(row.total) || 0), 0).toFixed(2))}`
     },
     { key: 'description', label: 'Descripción' },
-    { key: 'machine_name', label: 'Maquina', flex: '1 1 12rem', minWidth: '11rem' },
+    { key: 'machine_name', label: 'Maquina', flex: '2 0 20rem', minWidth: '20rem' },
     { key: 'created_at', label: 'Fecha', minWidth: '9rem' }
 ];
 
@@ -218,7 +219,7 @@ export function ServiceMovements({appInfo,userInfo,userConfig,popInAlert,popOutA
     }), [params.company_key]);
 
     return(
-        <div className="ClicksReport ReportDocument">
+        <div className="ServiceMovements ClicksReport ReportDocument">
             <div className="headReport">
                 <PathLocation/>
                 <BoldTitle text={'Informe de Servicios Z&J S.A.S'}/>

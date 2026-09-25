@@ -23,6 +23,7 @@ const CLICKS_COLUMNS = [
     {
         key: 'initialClicks',
         label: 'Clicks',
+        flex: '0 0 10rem',
         minWidth: '8rem',
         total: (rows) => moneyFormat(rows.reduce((sum, row) => sum + (parseInt(row.initialClicks) || 0), 0))
     },
