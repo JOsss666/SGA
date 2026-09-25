@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAppInfo } from "../../../../context/context";
 import { moneyFormat, postInfo } from "../../../../utils/functions";
 import { BoldTitle } from "../../components/BoldTitle";
@@ -8,15 +8,38 @@ import { FormInput } from "../../components/FormInput";
 import { PathLocation } from "../../components/PathLocation";
 import { SearchBar } from "../../components/SearchBar";
 import { SelectOptions } from "../../components/SelectOptions";
-import { TableReport } from "../TableReport";
+import { UniversalTable } from "../universalTable";
+import { Link, useNavigate } from "react-router-dom";
+import "./ReportBalance.css";
 import "./ReportDocuments.css";
-import { LoadingSpace } from "../LoadingSpace";
 import { ButtonDownload } from "../../components/ButtonDownload";
 import { AiButton } from "../../components/ChatAiComponents/AiButton";
 import { LabelValue } from "../../components/LabelValue";
 import { FilterReports } from "./FilterReports";
 
-export function ReportBalance({}) {
+const balanceColumns = [
+    { key: 'account_code', label: 'Cuenta', flex: '0 0 10rem' },
+    { key: 'concept_name', label: 'Concepto', flex: '2 1 16rem', minWidth: '12rem' },
+    { key: 'opening_balance', label: 'Saldo inicial' },
+    { key: 'total_debit', label: 'Débito' },
+    { key: 'total_credit', label: 'Crédito' },
+    { key: 'final_balance', label: 'Saldo' }
+];
+const renderBalanceAmount = ({ value }) => <span>{moneyFormat(Number(value ?? 0))}</span>;
+const balanceRenderers = {
+    account_code: ({ value, info }) => info.id != null ? (
+        <Link className="balanceAccountLink" to={String(info.id)} onClick={event => event.stopPropagation()}>
+            {value}
+        </Link>
+    ) : <span>{value}</span>,
+    opening_balance: renderBalanceAmount,
+    total_debit: renderBalanceAmount,
+    total_credit: renderBalanceAmount,
+    final_balance: renderBalanceAmount
+};
+
+export function ReportBalance() {
+    const navigate = useNavigate();
 
     // Prev Info
     const [info, setInfo] = useState([]);
@@ -29,10 +52,6 @@ export function ReportBalance({}) {
     const [end_date,setEnd_date] = useState(undefined);
     const [allAccounts,setAllAccounts] = useState(false);
     const [visibleSettings,setVisibleSettings] = useState(false);
-    const [totalCredit,setTotalCredit] = useState(0)
-    const [totalDebit,setTotalDebit] = useState(0)
-    const [totalBalance,setTotalBalance] = useState(0)
-    const [totalInitialBalance,setTotalInitialBalance] = useState(0)
 
     const columsTr = [
         "Cuenta",
@@ -104,29 +123,12 @@ export function ReportBalance({}) {
         allAccounts
     };
 
-    const calcTotals = ()=>{
-        let td = 0;
-        let tc = 0;
-        let tb = 0;
-        let tiB = 0;
-        info.forEach(element => {
-            td += element.total_debit
-            tc += element.total_credit
-            tb += element.final_balance
-            tiB += element.opening_balance
-        });
-        console.log(td,tc,tb,tiB)
-        setTotalDebit(td);
-        setTotalCredit(tc);
-        setTotalBalance(tb)
-        setTotalInitialBalance(tiB)
-    }
-
-    useEffect(()=>{
-        if(info.length >0){
-            calcTotals();
-        }
-    },[info])
+    const { totalDebit, totalCredit, totalBalance, totalInitialBalance } = useMemo(() => info.reduce((totals, row) => ({
+        totalDebit: totals.totalDebit + Number(row.total_debit ?? 0),
+        totalCredit: totals.totalCredit + Number(row.total_credit ?? 0),
+        totalBalance: totals.totalBalance + Number(row.final_balance ?? 0),
+        totalInitialBalance: totals.totalInitialBalance + Number(row.opening_balance ?? 0)
+    }), { totalDebit: 0, totalCredit: 0, totalBalance: 0, totalInitialBalance: 0 }), [info]);
 
     const getBalance = async () => {
         setLoading(true);
@@ -148,7 +150,7 @@ export function ReportBalance({}) {
     }, [start_date,end_date,allAccounts]);
 
     return (
-        <div className="ReportDocument">
+        <div className="ReportBalance ReportDocument sgaTreasury">
         <PathLocation />
         <div className="headReport">
             <BoldTitle text={`Balance de prueba`} />
@@ -195,12 +197,18 @@ export function ReportBalance({}) {
             <FilterReports hidden={visibleSettings} columns={columsTr} filters={filters}/>
         </div>
         <div className="SpaceReport">
-                {!loading && (
-                    <TableReport columns={settingsReport.columns} info={info} type={''} searchValue={searchValue} navigation={true}/>
-                )}
-                {loading && (
-                <LoadingSpace title={"Cargando información"} description={"Esto no debe tardar mucho..."} />
-                )}
+                <UniversalTable
+                    columns={balanceColumns}
+                    results={info}
+                    searchValue={searchValue}
+                    loading={loading}
+                    getRowKey={row => row.id ?? row.account_code}
+                    rowProps={{
+                        renderers: balanceRenderers,
+                        onRowClick: row => { if (row.id != null) navigate(String(row.id)); }
+                    }}
+                    emptyMessage="No hay cuentas para mostrar"
+                />
             </div>
         </div>
     );

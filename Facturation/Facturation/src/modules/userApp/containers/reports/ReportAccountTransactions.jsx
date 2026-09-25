@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useAppInfo } from "../../../../context/context";
+import { useState, useEffect, useMemo } from "react";
+import { useAppInfo, useAlert } from "../../../../context/context";
 import { postInfo, moneyFormat } from "../../../../utils/functions";
 import { BoldTitle } from "../../components/BoldTitle";
 import { ButtonDownload } from "../../components/ButtonDownload";
@@ -12,12 +12,27 @@ import { PathLocation } from "../../components/PathLocation";
 import { SearchBar } from "../../components/SearchBar";
 import { SelectOptions } from "../../components/SelectOptions";
 import { LoadingSpace } from "../LoadingSpace";
-import { TableReport } from "../TableReport";
+import { UniversalTable } from "../universalTable";
+import { DocumentPreview } from "../Alerts/DocumentPreview";
+import "./ReportAccountTransactions.css";
 import { FilterReports } from "./FilterReports";
 import { useParams } from "react-router-dom";
 
 
+const accountColumns = [
+    { key: 'identifier', label: 'ID' },
+    { key: 'transactionLabel', label: 'Transacción' },
+    { key: 'documentDate', label: 'Fecha Documento', minWidth: '10rem' },
+    { key: 'documentLabel', label: 'Documento' },
+    { key: 'account_code', label: 'Cuenta' },
+    { key: 'concept', label: 'Concepto', flex: '2 1 14rem', minWidth: '12rem' },
+    { key: 'nature', label: 'Naturaleza' },
+    { key: 'total', label: 'Valor' },
+    { key: 'status', label: 'Estado' }
+];
+
 export function ReportAccountTransactions(){
+    const { popInAlert } = useAlert();
      // Prev Info
     const params = useParams();
     const [info, setInfo] = useState([]);
@@ -31,8 +46,6 @@ export function ReportAccountTransactions(){
     const [start_date,setStart_date] = useState(undefined);
     const [end_date,setEnd_date] = useState(undefined);
     const [visibleSettings,setVisibleSettings] = useState(false);
-    const [totalCredit,setTotalCredit] = useState(0)
-    const [totalDebit,setTotalDebit] = useState(0)
 
     const columns = [
         "ID",
@@ -85,20 +98,8 @@ export function ReportAccountTransactions(){
         status:'posted'
     };
 
-    const calcTotals = ()=>{
-        let td = 0;
-        info.forEach(element => {
-            td += parseInt(element.total)
-        });
-        setTotalDebit(td);
-        setTotalCredit(info.length);
-    }
-
-    useEffect(()=>{
-        if(info.length >0){
-            calcTotals();
-        }
-    },[info])
+    const totalCredit = info.length;
+    const totalDebit = useMemo(() => info.reduce((total, row) => total + Number(row.total ?? 0), 0), [info]);
 
     const GetTransactionDetails = async () => {
         setLoading(true);
@@ -136,14 +137,33 @@ export function ReportAccountTransactions(){
         }
     }, [account_info,start_date,end_date]);
 
-    const visibleInfo = Array.isArray(info)
-        ? info.filter((row)=>
-            Object.values(row)
-                .join(" ")
-                .toLowerCase()
-                .includes(searchValue.toLowerCase())
-        )
-        : [];
+    const visibleInfo = useMemo(() => Array.isArray(info)
+        ? info.filter(row => Object.values(row).join(' ').toLowerCase().includes(searchValue.toLowerCase()))
+        : [], [info, searchValue]);
+    const rows = useMemo(() => visibleInfo.map(row => ({
+        ...row,
+        identifier: `${row.docType ?? ''}# ${row.ownSerial ?? row.id}`,
+        transactionLabel: `${row.docType ?? ''}TR# ${row.transaction_id}`,
+        documentDate: row.created_at?.substring(0, 10) ?? '',
+        documentLabel: row.doc_type ? `${row.doc_type}#${row.ownSerial ?? row.doc_id ?? ''}` : '',
+        concept: row.type === 'payment' ? `Pago ${row.payment_name ?? ''}` : row.concept_name,
+        total: Number(row.total ?? 0)
+    })), [visibleInfo]);
+    const renderDocumentLink = ({ value, info: row, column }) => (
+        <button
+            type="button"
+            className="accountDocumentLink"
+            title={value}
+            aria-label={`Ver documento ${value}`}
+            onClick={() => popInAlert(<DocumentPreview data={column.key === 'documentLabel' ? row : { ...row, type: 'Document' }} />)}
+        >{value || '—'}</button>
+    );
+    const accountRenderers = {
+        identifier: renderDocumentLink,
+        transactionLabel: renderDocumentLink,
+        documentLabel: renderDocumentLink,
+        total: ({ value }) => <span>$ {moneyFormat(value)}</span>
+    };
 
     const infoForDownload = visibleInfo.map((row)=>({
         "ID": row.id ?? "",
@@ -170,7 +190,7 @@ export function ReportAccountTransactions(){
 
     if(!loadingAccInfo){
         return (
-            <div className="ReportDocument">
+            <div className="ReportAccountTransactions ReportDocument sgaTreasury">
             <PathLocation />
             <div className="headReport">
                 <BoldTitle text={`Balance - ${account_info.code} "${account_info.name}"`} />
@@ -215,12 +235,14 @@ export function ReportAccountTransactions(){
                 <FilterReports hidden={visibleSettings} columns={columns} filters={filters}/>
             </div>
             <div className="SpaceReport">
-                {!loading && (
-                    <TableReport columns={settingsReport.columns} info={visibleInfo} type={''} searchValue={''}/>
-                )}
-                {loading && (
-                <LoadingSpace title={"Cargando transacciónes"} description={"Esto no debe tardar mucho..."} />
-                )}
+                <UniversalTable
+                    columns={accountColumns}
+                    results={rows}
+                    loading={loading}
+                    getRowKey={row => row.id}
+                    rowProps={{ renderers: accountRenderers }}
+                    emptyMessage="No hay movimientos para esta cuenta"
+                />
             </div>
             </div>
         );
