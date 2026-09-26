@@ -1,0 +1,34 @@
+.ServiceMovements {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.ServiceMovements .contentReport {
+    min-width: 0;
+    max-width: 100%;
+    overflow: visible;
+}
+
+.ServiceMovements .universalTableHeader,
+.ServiceMovements .universalTableTotals,
+.ServiceMovements .universalTableBodyContent {
+    width: max(100%, 126rem);
+}
+
+.ServiceMovements .universalTableBody {
+    overflow-x: auto;
+}
+
+.ServiceMovements .universalRowCell .UserCard {
+    width: 100%;
+    min-width: 0;
+}
+
+.ServiceMovements .universalRowCell .UserCard img {
+    flex-shrink: 0;
+}
+
+.ServiceMovements .universalRowCell .UserCard .infoUser {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}

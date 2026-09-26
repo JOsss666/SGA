@@ -1,0 +1,41 @@
+.ReportBalance {
+    min-width: 0;
+}
+
+.ReportBalance .SpaceReport {
+    min-width: 0;
+    width: 100%;
+}
+
+.ReportBalance .universalRowCell[data-column-key="opening_balance"],
+.ReportBalance .universalRowCell[data-column-key="total_debit"],
+.ReportBalance .universalRowCell[data-column-key="total_credit"],
+.ReportBalance .universalRowCell[data-column-key="final_balance"] {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.ReportBalance .balanceAccountLink {
+    display: block;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--chatAccent);
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.ReportBalance .balanceAccountLink:hover {
+    text-decoration: underline;
+}
+
+.ReportBalance .balanceAccountLink:focus-visible {
+    outline: 2px solid var(--chatAccent);
+    outline-offset: -2px;
+}

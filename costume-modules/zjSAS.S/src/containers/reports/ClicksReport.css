@@ -2,6 +2,27 @@
 
 .ClicksReport .settingsReport{
     margin-bottom: 2vh;
+    display: flex;
+    gap: 1vh;
+}
+
+.ClicksReport .SearchBar{
+    width: fit-content;
+    min-width: 0;
+}
+
+
+.ClicksReport .settingsReport .FormInput label{
+    display: none;
+}
+
+.ClicksReport .settingsReport .FormInput{
+    width: fit-content;
+    min-width: 0;
+}
+
+.ClicksReport .settingsReport .FormInput input{
+    width: auto;
 }
 
 .ClicksReport .totalsIndicator{
@@ -33,4 +54,28 @@
 .ClicksReport .contentReport{
     overflow-y: auto;
     overflow-x: auto;
+}
+
+.ClicksReport .serviceInstanceLink{
+    color: var(--chatAccent);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.ClicksReport .serviceInstanceLink:hover{
+    text-decoration: underline;
+}
+
+.ClicksReport .serviceInstanceLink:focus-visible{
+    outline: .15vh solid var(--chatAccent);
+    outline-offset: .2vh;
+    border-radius: .3vh;
+}
+
+.ClicksReport .universalRowCell[data-column-key="initialClicks"],
+.ClicksReport .universalRowCell[data-column-key="clicksTotal"],
+.ClicksReport .universalRowCell[data-column-key="units"],
+.ClicksReport .universalRowCell[data-column-key="unit_value"],
+.ClicksReport .universalRowCell[data-column-key="total"] {
+    text-align: right;
 }

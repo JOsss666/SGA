@@ -1,5 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { postInfo } from '../../../utils/functions';
+import {
+    downloadAttachment,
+    openAttachmentInNewTab,
+    printAttachment,
+    shareAttachment
+} from '../../../utils/attachmentActions';
 import './PreviewFile.css'
 import { LoadingSpace } from '../LoadingSpace';
 import { ButtonMenu } from '../../components/ButtonMenu';
@@ -8,13 +14,15 @@ import { MoreOptions } from '../../components/MoreOptions';
 export function PreviewFile({id,useAlert,appInfo}){
 
     // Requirements
-    console.log(id)
     const {popOutAlert} = useAlert();
 
     // Control
     const [info,setInfo] = useState([]);
     const [loading,setLoading] = useState(false);
-    const [disabled,setDisabled] = useState(false);
+    const [busy,setBusy] = useState(false);
+    const [error,setError] = useState('');
+    const [message,setMessage] = useState('');
+    const actionInProgress = useRef(null);
 
     // utils
 
@@ -46,23 +54,54 @@ export function PreviewFile({id,useAlert,appInfo}){
 
 
     // Functions
-    
+
     const getFileInfo = async(attArray)=>{
-        console.log('Obtenido archivo')
-        setDisabled(true);
+        setBusy(false);
+        setError('');
+        setMessage('');
         setLoading(true);
         let res = await postInfo('/getAttachedFiles',{
             company_id:appInfo.company_id,
             allowedDocs:attArray,
             id:id
         })
-        console.log(res);
         if(res[0]){
             setInfo(res[1][0]);
         }
         setLoading(false);
-        setDisabled(false);
     }
+
+    const handleAction = async(action)=>{
+        if(!info?.url || actionInProgress.current) return;
+        const actionToken = Symbol('attachmentAction');
+        actionInProgress.current = actionToken;
+        setBusy(true);
+        setError('');
+        setMessage('');
+        try {
+            const result = await action(info);
+            if(actionInProgress.current === actionToken) setMessage(result);
+        } catch(actionError) {
+            if(actionInProgress.current === actionToken) {
+                setError(actionError instanceof TypeError
+                    ? 'No se pudo acceder al archivo. Revisa tu conexión o ábrelo en una nueva pestaña.'
+                    : actionError.message || 'No se pudo completar la acción.');
+            }
+        } finally {
+            if(actionInProgress.current === actionToken) {
+                actionInProgress.current = null;
+                setBusy(false);
+            }
+        }
+    };
+
+    const canPrint = info?.type === 'application/pdf' || info?.type?.startsWith('image/');
+    const actions = [
+        {text:'Descargar', icon:<i className="fa-solid fa-cloud-arrow-down"/>, action:()=>handleAction(downloadAttachment)},
+        ...(canPrint ? [{text:'Imprimir', icon:<i className="fa-solid fa-print"/>, action:()=>handleAction(printAttachment)}] : []),
+        {text:'Compartir', icon:<i className="fa-solid fa-arrow-up-from-bracket"/>, action:()=>handleAction(shareAttachment)},
+        {text:'Abrir en nueva pestaña', icon:<i className="fa-solid fa-up-right-from-square"/>, action:()=>handleAction(openAttachmentInNewTab)}
+    ];
 
     const renderContent = () => {
         if (!info?.url) return <div className="no-file">No se pudo cargar el recurso</div>;
@@ -107,11 +146,8 @@ export function PreviewFile({id,useAlert,appInfo}){
 
     useEffect(()=>{
         getFileInfo([id]);
+        return ()=>{ actionInProgress.current = null; };
     },[])
-
-    useEffect(()=>{
-        console.log(info);
-    },[info])
 
 
     return(
@@ -124,16 +160,21 @@ export function PreviewFile({id,useAlert,appInfo}){
                             <strong>{info.name}</strong>
                         </div>
                         <div className="optionsDoc">
-                            <ButtonMenu title={'Descargar'} children={<i className="fa-solid fa-cloud-arrow-down"/>} noRotate={true} />
-                            <ButtonMenu title={'Imprimir'} children={<i className="fa-solid fa-print"/>} noRotate={true} />
-                            <ButtonMenu title={'Compartir'} children={<i className="fa-solid fa-arrow-up-from-bracket"/>} noRotate={true}/>
-                            <div className="moreOptC">
-                                <MoreOptions options={[
-                                    {text:'Descargar',icon:<i className="fa-solid fa-cloud-arrow-down"/>},
-                                    {text:'Imprimir',icon:<i className="fa-solid fa-print"/>},
-                                    {text:'Compartir',icon:<i className="fa-solid fa-arrow-up-from-bracket"/>}
-                                ]}/>
-                            </div>
+                            {actions.map(action => (
+                                <ButtonMenu
+                                    key={action.text}
+                                    title={action.text}
+                                    noRotate={true}
+                                    onClick={busy || !info?.url ? undefined : action.action}
+                                >
+                                    {action.icon}
+                                </ButtonMenu>
+                            ))}
+                            {info?.url && !busy && (
+                                <div className="moreOptC">
+                                    <MoreOptions options={actions}/>
+                                </div>
+                            )}
                         </div>
                         <i className="fa-solid fa-xmark closePreview" title='Cerrar previsualización de archivo' onClick={()=>{
                             popOutAlert();
@@ -141,6 +182,9 @@ export function PreviewFile({id,useAlert,appInfo}){
                     </div>
                     <div className="contentContainer">
                         <div className="fileC">
+                            {busy && <p role="status">Preparando archivo…</p>}
+                            {error && <p role="alert">{error}</p>}
+                            {message && <p role="status">{message}</p>}
                             {renderContent()}
                         </div>
                     </div>

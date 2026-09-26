@@ -1,0 +1,38 @@
+.ReportAccountTransactions {
+    min-width: 0;
+}
+
+.ReportAccountTransactions .SpaceReport {
+    min-width: 0;
+    width: 100%;
+}
+
+.ReportAccountTransactions .universalRowCell[data-column-key="total"] {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.ReportAccountTransactions .accountDocumentLink {
+    display: block;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--chatAccent);
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.ReportAccountTransactions .accountDocumentLink:hover {
+    text-decoration: underline;
+}
+
+.ReportAccountTransactions .accountDocumentLink:focus-visible {
+    outline: 2px solid var(--chatAccent);
+    outline-offset: -2px;
+}

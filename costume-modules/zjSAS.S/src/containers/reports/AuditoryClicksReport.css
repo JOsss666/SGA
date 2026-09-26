@@ -130,3 +130,11 @@
     text-align: right;
     width: 100%;
 }
+
+.AuditoryClicksReport .universalRowCell[data-column-key="initial_clicks"],
+.AuditoryClicksReport .universalRowCell[data-column-key="next_initial_clicks"],
+.AuditoryClicksReport .universalRowCell[data-column-key="clicksEjecutados"],
+.AuditoryClicksReport .universalRowCell[data-column-key="clicksRegistrados"],
+.AuditoryClicksReport .universalRowCell[data-column-key="diferencia"] {
+    text-align: right;
+}
