@@ -250,6 +250,7 @@ export function SearchResultsPannel({searchValue}){
         {text:'Informe de procesos', path:'reports/Processes', group:'Informes', icon:<i className="fa-solid fa-diagram-project"/>},
         {text:'Eficiencia de usuarios', path:'reports/Eficiency', group:'Informes', icon:<i className="fa-solid fa-gauge-high"/>},
         {text:'Informe de cartera', path:'reports/BriefCases', group:'Informes', icon:<i className="fa-solid fa-wallet"/>},
+        {text:'Informe Saldos a favor', path:'reports/Advances', group:'Informes', icon:<i className="fa-solid fa-hand-holding-dollar"/>},
         {text:'Historial de procesos', path:'reports/ProcessInstanceHistorial', group:'Informes', icon:<i className="fa-solid fa-clock-rotate-left"/>},
         {text:'Informe de cierres de caja', path:'reports/CashBoxesCloseReport', group:'Informes', icon:<i className="fa-solid fa-cash-register"/>},
 

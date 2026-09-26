@@ -19,6 +19,8 @@ import { useAppInfo,useAiAssistant, useAlert } from '../../../context/context';
 import { CashBoxesCloseReport } from './reports/CashBoxesCloseReport';
 import { ReportHistorialInstance } from './reports/ReportHIstorialInstance';
 import { PortfolioReportDetail } from './reports/PortfolioReportDetail';
+import { AdvancesReport } from './reports/AdvancesReport';
+import { AdvancesReportDetail } from './reports/AdvancesReportDetail';
 import { getCustomReports } from '../../../../../../costume-modules/reports';
 import { AiButton } from '../components/ChatAiComponents/AiButton';
 import './Reports.css'
@@ -85,6 +87,9 @@ export function Reports(){
                             <CardReport type={'contable'} title={'Informe de cartera (Alpha)'} description={'Versión de prueba Alpha V 0.1'} onClick={()=>{
                                 handleNavigate('BriefCases')
                             }}/>
+                            <CardReport type={'contable'} title={'Informe Saldos a favor (Alpha)'} description={'Consulte el saldo a favor (anticipos) de sus terceros'} onClick={()=>{
+                                handleNavigate('Advances')
+                            }}/>
                             {customReports.map((report) => (
                                 <CardReport key={report.path} type={report.type} title={report.title} description={report.description} onClick={() => handleNavigate(report.path)}/>
                             ))}
@@ -115,6 +120,8 @@ export function Reports(){
                 <Route path='/Eficiency' element={<EficiencyReport/>}/>
                 <Route path='/BriefCases' element={<BriefCaseReport/>}/>
                 <Route path='/BriefCases/:thirdParty_id' element={<PortfolioReportDetail/>}/>
+                <Route path='/Advances' element={<AdvancesReport/>}/>
+                <Route path='/Advances/:thirdParty_id' element={<AdvancesReportDetail/>}/>
                 <Route path='/ProcessInstanceHistorial' element={<ReportHistorialInstance/>}/>
                 <Route path='/CashBoxesCloseReport' element={<CashBoxesCloseReport/>}/>
                 {customReports.map(({ path, Component }) => (
