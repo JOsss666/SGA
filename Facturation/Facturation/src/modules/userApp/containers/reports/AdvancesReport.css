@@ -1,0 +1,12 @@
+.AdvancesReport .universalRowCell[data-column-key="advances_count"],
+.AdvancesReport .universalRowCell[data-column-key="total_amount"],
+.AdvancesReport .universalRowCell[data-column-key="used_amount"],
+.AdvancesReport .universalRowCell[data-column-key="available_amount"] {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.AdvancesReport .universalRowCell[data-column-key="available_amount"] .portfolioAmount {
+    font-weight: 600;
+    color: var(--chatAccent);
+}

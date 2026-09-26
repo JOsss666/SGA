@@ -1,0 +1,40 @@
+.PortfolioReportDetail {
+    min-width: 0;
+}
+
+.PortfolioReportDetail .SpaceReport {
+    min-width: 0;
+    width: 100%;
+}
+
+.PortfolioReportDetail .universalRowCell[data-column-key="total"],
+.PortfolioReportDetail .universalRowCell[data-column-key="paid_amount"],
+.PortfolioReportDetail .universalRowCell[data-column-key="pending_amount"] {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.PortfolioReportDetail .portfolioCellLink {
+    display: block;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--chatAccent);
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.PortfolioReportDetail .portfolioCellLink:hover {
+    text-decoration: underline;
+}
+
+.PortfolioReportDetail .portfolioCellLink:focus-visible {
+    outline: 2px solid var(--chatAccent);
+    outline-offset: -2px;
+}

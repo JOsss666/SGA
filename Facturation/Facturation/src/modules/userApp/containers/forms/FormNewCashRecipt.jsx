@@ -1,3 +1,4 @@
+import { useCustomerAdvances } from "../../../../utils/useCustomerAdvances";
 import { useEffect, useState } from "react";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { BoldTitle } from "../../components/BoldTitle";
@@ -14,7 +15,6 @@ import { FormNewThirdParties } from "./FormNewThirdParties";
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
 import { isElectron } from "../../../../App";
 import { LabelValue } from "../../components/LabelValue";
-import { SwitchOption } from "../../components/SwitchOption";
 
 export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
 
@@ -49,9 +49,15 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         const [e_invoice,setE_invoice] = useState(false);
     
     // form info
-    const [thirdParty_id,setThirdParty_id] = useState();
+    const [thirdParty_id,setThirdParty_id] = useState(InfoParams?.thirdParty_id);
     const [thirdPartyInfo,setThirdPartyInfo] = useState({});
     const [paymentMethod,setPaymentMethod] = useState([]);
+    const [requestId] = useState(() => crypto.randomUUID());
+    const [requestStartedAt] = useState(() => Date.now());
+    const advancePayments = useCustomerAdvances(appInfo.company_id, thirdParty_id, paymentMethod);
+    useEffect(() => {
+        setPaymentMethod(previous => previous.map(method => method.for_balance ? { ...method, value: '' } : method));
+    }, [thirdParty_id]);
     const [bussines_id,setBussines_id] = useState();
     const [store_id,setStore_id] = useState();
     const [costCenter_id,setCostCenter_id] = useState();
@@ -65,6 +71,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const [step_id,setStep_id] = useState();
     const [concept_id,setConcept_id] = useState();
     const [conceptAccount_id,setConcept_account_id] = useState();
+    const [isAdvanceReceipt, setIsAdvanceReceipt] = useState(false);
     const [cashBox_id,setCashBox_id] = useState();
     const [shift_id,setShift_id] = useState();
     const [status,setStatus] = useState('active');
@@ -72,6 +79,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     // Object FormInfo
     let FormInfo = {
         paymentMethod,
+        request_id: requestId,
         store_id,
         costCenter_id,
         description,
@@ -109,7 +117,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     }
 
     const addDaysToCurrentDate = (days) => {
-        const date = new Date(); // Obtiene la fecha y hora actual del sistema  
+        const date = new Date(requestStartedAt); // Mantener la fecha estable en los reintentos
         // Sumamos los días usando setDate y getDate para manejar cambios de mes/año automáticamente
         date.setDate(date.getDate() + parseInt(days)); 
         // Retornamos en formato ISO (YYYY-MM-DD) 
@@ -119,7 +127,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     const handleUserConfig = async()=>{
         setDisabled(true)
         setLoading(true)
-        await getThirdParties();
+        await getThirdParties(InfoParams?.thirdParty_id, InfoParams?.thirdParty_id ? 1 : undefined);
         await getConcepts();
         let temInfo = {}
         if(userConfig.access != undefined){
@@ -187,7 +195,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
         }
         
         if(temInfo != {}){
-            setInfo(temInfo);
+            setInfo(previous => ({ ...previous, ...temInfo }));
         }
         setLoading(false);
         setDisabled(false);
@@ -196,8 +204,10 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     let handleConceptChange = (element)=>{
         if(element.id != undefined){
             setConcept_id(element.id);
+            setIsAdvanceReceipt(element.for_balance === true);
+            setDocumentNature(element.for_cashExit ? "CR" : "DB");
             setConcept_account_id(element.account_id);
-            if(element.for_wallet){
+            if(element.for_wallet && !element.for_balance){
                 setMode('briefcase_payment')
                 getBriefcasesBills();
             }else{
@@ -344,6 +354,8 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
             allowedConcepts:userConfig.access.sections.concepts.overAll ? undefined:userConfig.access.sections.concepts.enabled
         })
         if(res[0]){
+            const preset = res[1].find(element => String(element.id) === String(info.concept_id));
+            if (preset) handleConceptChange(preset);
             let C = []
             res[1].forEach(element => {
                 C.push({
@@ -450,7 +462,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 newTTl += parseFloat(element.value)
             }
         });
-        if(instance_id != undefined){
+        if(instance_id != undefined && !isAdvanceReceipt){
             if(newTTl > totalToPay){
                 setDisabled(true);
                 setDisabledByValue(true);
@@ -459,6 +471,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 setDisabledByValue(false);
             }
         }
+        if (isAdvanceReceipt) { setDisabledByValue(false); setDisabled(false); }
         setTotal(newTTl)
         return(newTTl)
     }
@@ -506,6 +519,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 nature: documentNature,
                 due_date:addDaysToCurrentDate(thirdPartyInfo.credit_term != undefined? thirdPartyInfo.credit_term:0),
                 for_wallet:element.for_wallet,
+                for_balance:element.for_balance,
                 voucher:element.voucher,
                 cashBox_id,
                 shift_id,
@@ -583,10 +597,27 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
     // Creation Function
 
     const createCashRecipt = async()=>{
+        if (advancePayments.error) {
+            addNotification({ type: 'error', title: 'Saldo a favor', description: advancePayments.error });
+            return;
+        }
+        if (isAdvanceReceipt && paymentMethod.some(method => method.for_balance || method.for_wallet)) {
+            addNotification({ type: 'error', title: 'Medio de recaudo inválido', description: 'Retire los medios de crédito o saldo a favor para recibir un anticipo.' });
+            return;
+        }
         setDisabled(true)
         setLoading(true)
         const cashReceiptPayload = buildCashReceiptPayload();
-        let res = await postInfo('/facturation/newCashRecipt',cashReceiptPayload);
+        let res;
+        try {
+            res = await postInfo('/facturation/newCashRecipt',cashReceiptPayload);
+        } catch (error) {
+            addNotification({ type: 'error', title: 'No se pudo registrar el documento', description: error.message || 'Intente nuevamente.' });
+            setLoading(false);
+            setDisabled(false);
+            advancePayments.refresh();
+            return;
+        }
         if(res.status === "OK" && Number.isFinite(Number(res.id))){
             addNotification({
                 type:'aproved',
@@ -600,7 +631,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                 await printCashRecipt(cashReceiptPayload,appInfo,true);
                 await printCashRecipt(cashReceiptPayload,appInfo,false);
             }
-            await updatePaidAmount();
+            if (!res.replayed && !isAdvanceReceipt) await updatePaidAmount();
         }else{
             addNotification({
                 type:'error',
@@ -655,7 +686,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
 
     useEffect(()=>{
         calcTotalFromPayments();
-    },[paymentMethod])
+    },[paymentMethod, isAdvanceReceipt])
 
     useEffect(()=>{
     },[briefCaseBills])
@@ -779,9 +810,10 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                             </div>
                         </div>
                     )}
+                    {isAdvanceReceipt && <p role="status">Este concepto registrará el valor recibido como anticipo del tercero. Seleccione cómo recibió el dinero.</p>}
                     {info.paymentMethod == undefined && (
                         <div className="paymentMehtodsContainer">
-                            <SearchinList title={'Metodos de pago'} action={addPaymentMethod} noActVal={true} placeHolder={'Selecione metodos de pago'} list={paymentMehtods}/>
+                            <SearchinList title={'Metodos de pago'} action={addPaymentMethod} noActVal={true} placeHolder={'Selecione metodos de pago'} list={isAdvanceReceipt ? paymentMehtods.filter(option => !option.value.for_balance && !option.value.for_wallet) : paymentMehtods}/>
                             <div className="gridPaymentMethods">
                                 {disabledByValue && (
                                     <span className="warnByValue">
@@ -799,7 +831,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                                                 }}/>
                                             )}
                                             {element.for_balance && (
-                                                <input className="inputPaymentValue" step={0.001} max={thirdPartyInfo.thirdParty_balance} type="number" placeholder={`Max $ ${formatCurrency(thirdPartyInfo.thirdParty_balance)}`} onChange={(e)=>{
+                                                <input className="inputPaymentValue" step={0.001} min={0} max={advancePayments.availableFor(element)} value={element.value ?? ""} aria-label={`Importe a aplicar de ${element.name}`} type="number" placeholder={`Max $ ${formatCurrency(advancePayments.availableFor(element))}`} onChange={(e)=>{
                                                     updatePaymentValue(element.id,"value",e.target.value)
                                                 }}/>
                                             )}
@@ -807,8 +839,13 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                                                 removePaymentMethod(element.id)
                                             }}/>
                                         </div>
+                                        {element.for_balance && (
+                                                <p className="advanceSummary">Disponible: $ {formatCurrency(advancePayments.availableFor(element))} {element.currency}. Restante: $ {formatCurrency(Math.max(0, advancePayments.availableFor(element) - advancePayments.requestedFor(element)))}.
+                                                    {advancePayments.advancesFor(element).map(advance => ` Recibo #${advance.ownSerial}: $ ${formatCurrency(advance.available_amount)}.`).join('')}
+                                                </p>
+                                        )}
                                         {!element.aplyVoucher && (
-                                            <button className="addVoucherToPayment" onClick={()=>{
+                                            <button type="button" className="addVoucherToPayment" onClick={()=>{
                                             setAplyVoucher(element.id,true)
                                             }}>
                                                 <i className="fa-solid fa-plus"/>
@@ -835,7 +872,7 @@ export function FormNewCashRecipt({InfoParams,reloadFun,process_instance_id}){
                     )}
                     <FormInput title={'Descripción'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
                     <FileInput category="files" action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
-                    <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor excede el monto max':'Crear recibo de caja'} disabled={disabled} loading={loading}/>
+                    <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor excede el monto max':'Crear recibo de caja'} disabled={disabled || Boolean(advancePayments.error)} loading={loading}/>
                 </form>
             )}
             {loading && (

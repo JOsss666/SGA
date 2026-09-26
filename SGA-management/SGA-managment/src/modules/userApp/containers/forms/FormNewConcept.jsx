@@ -57,6 +57,9 @@ export function FormNewConcept({reloadInfo, update, updateInfo={}}){
         company_id:appInfo.company_id,
         name,
         account_id:selectedAccount,
+        for_balance,
+        for_wallet,
+        for_cashExit,
     }
 
     const createConcept = async()=>{

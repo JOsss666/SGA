@@ -201,3 +201,34 @@
 
 
 }
+.FormNewInvoice .advanceSummary {
+    color: var(--descriptionText);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+}
+
+.FormNewInvoice .advanceStatus {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--descriptionText);
+}
+
+.FormNewInvoice .advanceStatus button {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    color: var(--mainText);
+    background: var(--inputsBg);
+    border: 1px solid var(--inputsBorder);
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.FormNewInvoice .advanceStatus button:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}

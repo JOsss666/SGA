@@ -1,0 +1,20 @@
+.AdvancesReportDetail {
+    min-width: 0;
+}
+
+.AdvancesReportDetail .SpaceReport {
+    min-width: 0;
+    width: 100%;
+}
+
+.AdvancesReportDetail .universalRowCell[data-column-key="total"],
+.AdvancesReportDetail .universalRowCell[data-column-key="used_amount"],
+.AdvancesReportDetail .universalRowCell[data-column-key="available_amount"] {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.AdvancesReportDetail .universalRowCell[data-column-key="available_amount"] {
+    font-weight: 600;
+    color: var(--chatAccent);
+}

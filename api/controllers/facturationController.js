@@ -104,7 +104,7 @@ facturationController.newCashRecipt = (req,res)=>{
         })
         .catch((err)=>{
             console.error("Error al crear recibo de caja:", err);
-            res.writeHead(500, {'Content-Type':'application/json'});
+            res.writeHead(err.statusCode ?? 500, {'Content-Type':'application/json'});
             res.end(JSON.stringify({
                 status: "Error",
                 message: err.message
@@ -121,7 +121,7 @@ facturationController.newSellInvoice = (req,res)=>{
         })
         .catch((err)=>{
             console.error("Error al crear factura de venta:", err);
-            res.writeHead(500, {'Content-Type':'application/json'});
+            res.writeHead(err.statusCode ?? 500, {'Content-Type':'application/json'});
             res.end(JSON.stringify({
                 status: "Error",
                 message: err.message
