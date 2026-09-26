@@ -1,4 +1,5 @@
 import { useDataBase, withTransaction } from "../app.js";
+import { prepareAdvanceDocument, applyCustomerAdvances, findDocumentRetry, saveDocumentRequest, moneyUnits, moneyText } from "../services/customerAdvanceService.js";
 import processController from "./processController.js";
 
 const utilsController = {};
@@ -58,6 +59,10 @@ utilsController.normalizeProcessInstances = (info) => {
 };
 
 utilsController.registerDocument = async (info, options = {}) => {
+    if (options.client && info.request_id) {
+        const retry = await findDocumentRetry(options.client, info);
+        if (retry) return retry;
+    }
     const processInstances = utilsController.normalizeProcessInstances(info);
     const primaryProcessInstance = processInstances[0];
     const instanceId = options.includeProcessFields
@@ -104,6 +109,7 @@ utilsController.registerDocument = async (info, options = {}) => {
 
     if (options.client) {
         const result = await options.client.query(docCreation, values);
+        await saveDocumentRequest(options.client, info, result.rows[0].id);
         return result.rows[0];
     }
 
@@ -399,7 +405,9 @@ utilsController.getDocumentPaidAmount = (info) => {
         const cashBoxTypes = ["Cash Recipt", "Sell Invoice"];
         return cashBoxTypes.includes(info.doc_type)
             && detail.type === "payment"
-            && detail.for_wallet !== true;
+            && detail.for_wallet !== true
+            && detail.for_balance !== true
+            && info.status !== "draft";
     };
 
     utilsController.registerShiftSettlementDetail = async (info, detail, transactionDetailId, options = {}) => {
@@ -537,14 +545,11 @@ utilsController.getDocumentPaidAmount = (info) => {
     };
 
     utilsController.accountDocument = async (info, options = {}) => {
-        if (!Array.isArray(info.transactionDetails) || info.transactionDetails.length === 0) {
-            return {
-                status: "skipped",
-                description: "El documento no trae detalles contables."
-            };
-        }
-
         const execute = async (clientOptions) => {
+            info = await prepareAdvanceDocument(clientOptions.client, info);
+            if (!Array.isArray(info.transactionDetails) || info.transactionDetails.length === 0) {
+                return { status: "skipped", description: "El documento no trae detalles contables." };
+            }
             const paidAmountResult = await utilsController.updateDocumentPaidAmount(
                 info.doc_id,
                 utilsController.getDocumentPaidAmount(info),
@@ -562,8 +567,11 @@ utilsController.getDocumentPaidAmount = (info) => {
                 clientOptions
             );
 
+            const advances = await applyCustomerAdvances(clientOptions.client, info, transaction.id, details);
+
             return {
                 status: "OK",
+                advances,
                 transaction_id: transaction.id,
                 paidAmountResult,
                 details
@@ -590,15 +598,10 @@ utilsController.applyPortfolioPayments = async (info, payedBills, creationDocume
     const registerPayments = async (client) => {
         const results = [];
 
-        for (const bill of payedBills) {
-            const paymentValue = Number(bill.paid_value);
-            if(paymentValue != 0 && paymentValue != NaN){
-                console.log('Valor a pagar --> ',paymentValue);
-                console.log('Tipo Valor a pagar --> ',typeof(paymentValue));
-                if (!Number.isFinite(paymentValue) || paymentValue <= 0) {
-                    throw new Error(`Valor de pago inválido para cartera #${bill.id}.`);
-                }
-
+        for (const bill of [...payedBills].sort((a, b) => Number(a.id) - Number(b.id))) {
+            const paymentUnits = moneyUnits(bill.paid_value);
+            const paymentValue = moneyText(paymentUnits);
+            if (paymentUnits > 0n) {
                 const accountResult = await client.query(`
                     SELECT
                         id,
@@ -606,17 +609,22 @@ utilsController.applyPortfolioPayments = async (info, payedBills, creationDocume
                         paid_amount,
                         document_id
                     FROM "Treasury".accounts_receivable
-                    WHERE id = $1
+                    WHERE id = $1 AND company_id = $2 AND "thirdParty_id" = $3
                     FOR UPDATE;
-                `, [bill.id]);
+                `, [bill.id, info.company_id, info.thirdParty_id]);
 
                 const account = accountResult.rows[0];
                 if (!account) {
                     throw new Error(`No existe la cuenta por cobrar #${bill.id}.`);
                 }
 
-                const pendingAmount = Number(account.total) - Number(account.paid_amount);
-                if (paymentValue > pendingAmount) {
+                if (bill.document_id != null && String(bill.document_id) !== String(account.document_id)) {
+                    throw new Error("El documento no corresponde a la cuenta por cobrar.");
+                }
+
+                const pendingUnits = moneyUnits(account.total) - moneyUnits(account.paid_amount);
+                const pendingAmount = moneyText(pendingUnits);
+                if (paymentUnits > pendingUnits) {
                     throw new Error(`El pago ${paymentValue} supera el saldo pendiente ${pendingAmount} de cartera #${bill.id}.`);
                 }
 
@@ -644,8 +652,13 @@ utilsController.applyPortfolioPayments = async (info, payedBills, creationDocume
                 await client.query(`
                     UPDATE "Treasury".accounts_receivable
                     SET paid_amount = paid_amount + $2
-                    WHERE id = $1;
-                `, [bill.id, paymentValue]);
+                    WHERE id = $1 AND company_id = $3 AND "thirdParty_id" = $4;
+                `, [bill.id, paymentValue, info.company_id, info.thirdParty_id]);
+
+                await client.query(`UPDATE "Ecosystem".documents
+                    SET paid_amount = paid_amount + $1
+                    WHERE id = $2 AND company_id = $3 AND "thirdParty_id" = $4`,
+                [paymentValue, account.document_id, info.company_id, info.thirdParty_id]);
 
                 results.push({
                     status: "OK",

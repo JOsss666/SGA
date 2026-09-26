@@ -1,7 +1,29 @@
+import { getCustomerAdvances, getCompanyAdvances } from "../services/customerAdvanceService.js";
+import utilsController from "./utilsController.js";
 import { useDataBase } from "../app.js";
 import documentController from "./DocumentController.js";
 
 const treasuryController = {};
+
+treasuryController.getThirdPartyAdvances = async (req, res) => {
+    try {
+        const info = await utilsController.readJsonBody(req);
+        const result = await utilsController.withTransaction(client => getCustomerAdvances(client, info));
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(error.statusCode ?? 500).json({ status: 'Error', message: error.message });
+    }
+};
+
+treasuryController.getCompanyAdvances = async (req, res) => {
+    try {
+        const info = await utilsController.readJsonBody(req);
+        const result = await utilsController.withTransaction(client => getCompanyAdvances(client, info));
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(error.statusCode ?? 500).json({ status: 'Error', message: error.message });
+    }
+};
 
 treasuryController.getThirdPartyPortfolio = (req,res)=>{
     let data = '';

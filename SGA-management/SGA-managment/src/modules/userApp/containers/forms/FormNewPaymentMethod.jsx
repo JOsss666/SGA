@@ -28,6 +28,7 @@ export function FormNewPaymentMethod({reloadFun}){
     const [type,setType] = useState('');
     const [facturation_code,setFacturation_code] = useState('');
     const [status,setStatus] = useState('active');
+    const [forBalance, setForBalance] = useState(false);
 
     // utils
 
@@ -39,7 +40,8 @@ export function FormNewPaymentMethod({reloadFun}){
         currency,
         type,
         status,
-        facturation_code
+        facturation_code,
+        for_balance: forBalance
     }
 
     const paymentMethods = [
@@ -191,6 +193,7 @@ export function FormNewPaymentMethod({reloadFun}){
                     {text:'blocked'},
                     {text:'reported'}
                 ]}/>
+                <label><input type="checkbox" checked={forBalance} disabled={disabled} onChange={event => setForBalance(event.target.checked)} /> Utilizar saldo a favor del tercero</label>
                 <FormButton text={loading? 'Creando ...':'Crear metodo de pago'} loading={loading} disabled={disabled}/>
             </form>
         </div>

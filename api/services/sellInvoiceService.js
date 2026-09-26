@@ -13,6 +13,10 @@ sellInvoiceService.register = async (info) => {
 
         console.log('Fase 1 Documento creado', document)
 
+        if (document?.replayed) {
+            return { document, portfolioResult: { status: 'replayed' }, accountResult: { status: 'replayed' }, processResult: { status: 'replayed' } };
+        }
+
         if (document?.id === undefined) {
             throw new Error("No se pudo crear la factura de venta.");
         }
@@ -106,6 +110,7 @@ sellInvoiceService.register = async (info) => {
         message: `Factura de venta #${document.ownSerial} creada correctamente.`,
         id: document.id,
         ownSerial: document.ownSerial,
+        replayed: document.replayed === true,
         steps
     };
 };
@@ -132,6 +137,14 @@ const deleteSellInvoiceWithClient = async (client, documentId, companyId) => {
             const error = new Error("El documento indicado no es una factura de venta.");
             error.statusCode = 409;
             error.code = "DOCUMENT_IS_NOT_SELL_INVOICE";
+            throw error;
+        }
+
+        const advanceApplications = await client.query(`SELECT id FROM "Treasury".advance_applications
+            WHERE company_id = $1 AND document_id = $2 LIMIT 1`, [companyId, documentId]);
+        if (advanceApplications.rows.length) {
+            const error = new Error('La factura tiene aplicaciones de anticipos. Debe revertirlas mediante un documento compensatorio antes de anularla.');
+            error.statusCode = 409;
             throw error;
         }
 

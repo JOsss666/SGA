@@ -1,3 +1,4 @@
+import { useCustomerAdvances } from "../../../../utils/useCustomerAdvances";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { BoldTitle } from "../../components/BoldTitle";
@@ -62,9 +63,15 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
         const [itemBlocks,setItemBlocks] = useState([{items:[]}]);
     
     // form info
-    const [thirdParty_id,setThirdParty_id] = useState();
+    const [thirdParty_id,setThirdParty_id] = useState(InfoParams?.thirdParty_id);
     const [thirdPartyInfo,setThirdPartyInfo] = useState({});
     const [paymentMethod,setPaymentMethod] = useState([]);
+    const [requestId] = useState(() => crypto.randomUUID());
+    const [requestStartedAt] = useState(() => Date.now());
+    const advancePayments = useCustomerAdvances(appInfo.company_id, thirdParty_id, paymentMethod);
+    useEffect(() => {
+        setPaymentMethod(previous => previous.map(method => method.for_balance ? { ...method, value: '' } : method));
+    }, [thirdParty_id]);
     const nextPaymentRowId = useRef(0);
     const [bussines_id,setBussines_id] = useState();
     const [store_id,setStore_id] = useState();
@@ -101,6 +108,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     // Object FormInfo
     let FormInfo = {
         paymentMethod,
+        request_id: requestId,
         store_id,
         costCenter_id,
         description,
@@ -146,7 +154,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     }
 
     function addDaysToCurrentDate(days) {
-        const date = new Date(); // Obtiene la fecha y hora actual del sistema  
+        const date = new Date(requestStartedAt); // Mantener la fecha estable en los reintentos
         const parsedDays = Number.parseInt(days,10);
         // Sumamos los días usando setDate y getDate para manejar cambios de mes/año automáticamente
         date.setDate(date.getDate() + (Number.isInteger(parsedDays) ? Math.max(0,parsedDays):0));
@@ -157,7 +165,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const handleUserConfig = async()=>{
         setDisabled(true)
         setLoading(true)
-        await getThirdParties();
+        await getThirdParties(InfoParams?.thirdParty_id, InfoParams?.thirdParty_id ? 1 : undefined);
         await getConcepts();
         let temInfo = {}
         if(userConfig.access != undefined){
@@ -914,6 +922,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                 nature: documentNature,
                 due_date:addDaysToCurrentDate(thirdPartyInfo.credit_term != undefined? thirdPartyInfo.credit_term:0),
                 for_wallet:element.for_wallet,
+                for_balance:element.for_balance,
                 voucher:element.voucher,
                 cashBox_id,
                 shift_id,
@@ -958,10 +967,23 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
     // Creation Function
 
     const createSellInvoice = async()=>{
+        if (advancePayments.error) {
+            addNotification({ type: 'error', title: 'Saldo a favor', description: advancePayments.error });
+            return;
+        }
         setDisabled(true)
         setLoading(true)
         const sellInvoicePayload = buildSellInvoicePayload();
-        let res = await postInfo('/facturation/newSellInvoice',sellInvoicePayload);
+        let res;
+        try {
+            res = await postInfo('/facturation/newSellInvoice',sellInvoicePayload);
+        } catch (error) {
+            addNotification({ type: 'error', title: 'No se pudo registrar el documento', description: error.message || 'Intente nuevamente.' });
+            setLoading(false);
+            setDisabled(false);
+            advancePayments.refresh();
+            return;
+        }
         if(res.status !== "OK" || !Number.isFinite(Number(res.id))){
             addNotification({
                 type:'error',
@@ -1019,7 +1041,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             }
 
 
-            await updatePaidAmount();
+            if (!res.replayed) await updatePaidAmount();
         }else{
             addNotification({
                 type:'error',
@@ -1458,7 +1480,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                                                 }}/>
                                             )}
                                             {element.for_balance && (
-                                                <input className="inputPaymentValue" step={0.001} max={thirdPartyInfo.thirdParty_balance} type="number" value={element.value ?? ''} placeholder={`Max $ ${formatCurrency(thirdPartyInfo.thirdParty_balance)}`} onChange={(e)=>{
+                                                <input className="inputPaymentValue" step={0.001} min={0} max={advancePayments.availableFor(element)} value={element.value ?? ""} aria-label={`Importe a aplicar de ${element.name}`} type="number" placeholder={`Max $ ${formatCurrency(advancePayments.availableFor(element))}`} onChange={(e)=>{
                                                     updatePaymentValue(element.paymentRowId,"value",e.target.value)
                                                 }}/>
                                             )}
@@ -1466,8 +1488,13 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                                                 removePaymentMethod(element.paymentRowId)
                                             }}/>
                                         </div>
+                                        {element.for_balance && (
+                                                <p className="advanceSummary">Disponible: $ {formatCurrency(advancePayments.availableFor(element))} {element.currency}. Restante: $ {formatCurrency(Math.max(0, advancePayments.availableFor(element) - advancePayments.requestedFor(element)))}.
+                                                    {advancePayments.advancesFor(element).map(advance => ` Recibo #${advance.ownSerial}: $ ${formatCurrency(advance.available_amount)}.`).join('')}
+                                                </p>
+                                        )}
                                         {!element.aplyVoucher && (
-                                            <button className="addVoucherToPayment" onClick={()=>{
+                                            <button type="button" className="addVoucherToPayment" onClick={()=>{
                                             setAplyVoucher(element.paymentRowId,true)
                                             }}>
                                                 <i className="fa-solid fa-plus"/>
@@ -1495,7 +1522,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                     <FormInput title={'Descripción (Interna)'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
                     <FormInput title={'Descripción (Factura electrónica)'} textArea={true} placeholder={'Anotación o descripción de la factura de venta electronica'} action={set_eInvoiceDescription} disabled={disabled}/>
                     <FileInput category="files" action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
-                    <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor ingresado no es valido':'Crear factura de venta'} disabled={disabledToSubmit? true:disabled} loading={loading}/>
+                    <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor ingresado no es valido':'Crear factura de venta'} disabled={disabledToSubmit || disabled || Boolean(advancePayments.error)} loading={loading}/>
                 </form>
             )}
             {loading && (

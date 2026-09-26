@@ -11,6 +11,10 @@ cashReceiptService.register = async (info) => {
             client
         });
 
+        if (document?.replayed) {
+            return { document, portfolioResult: { status: 'replayed' }, accountResult: { status: 'replayed' }, processResult: { status: 'replayed' } };
+        }
+
         if (document?.id === undefined) {
             throw new Error("No se pudo crear el recibo de caja.");
         }
@@ -80,6 +84,7 @@ cashReceiptService.register = async (info) => {
         message: `Recibo de caja #${document.ownSerial} creado correctamente.`,
         id: document.id,
         ownSerial: document.ownSerial,
+        replayed: document.replayed === true,
         steps
     };
 };

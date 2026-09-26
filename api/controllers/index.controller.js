@@ -9,6 +9,8 @@ import documentController from "./DocumentController.js";
 import materializedViewsController from "./MaterializedViewsController.js";
 import transactionController from "./TransactionController.js";
 import transactionDetailController from "./TransactionDetailController.js";
+import utilsController from "./utilsController.js";
+import { prepareAdvanceDocument } from "../services/customerAdvanceService.js";
 import thirdPartyService from "../services/thirdPartyService.js";
 import { appendBusinessDateRange, companyTimeZoneSql } from "../services/businessTimeZoneService.js";
 const controller = {};
@@ -1361,9 +1363,9 @@ controller.createConcept = (req, res) => {
                 (
                     company_id,
                     name,
-                    account_id
+                    account_id, for_balance, for_wallet, "for_cashExit"
                 )
-                VALUES ($1, $2, $3)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 RETURNING id;
             `;
 
@@ -1373,6 +1375,9 @@ controller.createConcept = (req, res) => {
                     info.company_id,
                     info.name,
                     info.account_id,
+                    info.for_balance === true,
+                    info.for_wallet === true,
+                    info.for_cashExit === true,
                 ],3);
             let insertIdConcept = parseInt(newConcept.id);
             if (typeof(insertIdConcept) !== "number") {
@@ -1633,8 +1638,8 @@ controller.createPaymentMethod = (req,res)=>{
                 currency,
                 type,
                 status,
-                facturation_code)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+                facturation_code, for_balance)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
         `;
         let consulta = await useDataBase(sentence,[
             info.company_id,
@@ -1644,7 +1649,8 @@ controller.createPaymentMethod = (req,res)=>{
             info.currency,
             info.type,
             info.status,
-            info.facturation_code
+            info.facturation_code,
+            info.for_balance === true
         ],2);
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(consulta));
@@ -1764,6 +1770,16 @@ controller.createTransaction = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
+        try {
+            const prepared = await utilsController.withTransaction(client => prepareAdvanceDocument(client, info));
+            if (prepared.createsAdvance || prepared.usesAdvance) {
+                res.status(422).json({ status: 'Error', message: 'Registre los anticipos y sus aplicaciones mediante el recibo o la factura, en una sola operación.' });
+                return;
+            }
+        } catch (error) {
+            res.status(error.statusCode ?? 422).json({ status: 'Error', message: error.message });
+            return;
+        }
         let consulta = await transactionController.createHeader(info);
         const transId = parseInt(consulta.id);
 
