@@ -660,7 +660,10 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             doc_id
         })
         if(res[0]){
-            return(res[1])
+            return res[1].map(item => ({
+                ...item,
+                facturation_description: item.description ?? ''
+            }));
         }
     }
 
@@ -1120,7 +1123,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
         itemBlocks.forEach(element => {
             element.items.forEach(item => {
                 const itemName = `${item.name ?? item.service_name ?? ''}`.trim();
-                const sellDescription = `${item.sell_desc ?? ''}`.trim();
+                const sellDescription = `${item.facturation_description ?? item.sell_desc ?? ''}`.trim();
 
                 itemsToFac.push(
                     {

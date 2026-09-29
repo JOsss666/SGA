@@ -29,6 +29,14 @@ export function ItemsList({
     title = 'Productos y servicios',
 }) {
 
+    const getItemTotals = (item) => {
+        const numberOrZero = value => Number.isFinite(Number(value)) ? Number(value) : 0;
+        const total = numberOrZero(item.units) * numberOrZero(item.unit_value);
+        const taxRate = Math.max(0, numberOrZero(item.tax_rate));
+        const subTotal = total / (1 + taxRate / 100);
+        return { subTotal, taxes: total - subTotal, total };
+    };
+
     // Precio efectivo según escalas de cantidad (price_tiers) del producto.
     const getEffectivePrice = (product, quantity) => {
         const qty = parseInt(quantity) || 0;
@@ -148,23 +156,30 @@ export function ItemsList({
 
                         <div className="gridItems">
                             {/* Items provenientes de un documento/orden: solo lectura. */}
-                            {block.docInfo != undefined && block.items.map((item, index) => (
+                            {block.docInfo != undefined && block.items.map((item, index) => {
+                                const { subTotal, taxes, total } = getItemTotals(item);
+                                return (
                                 <div className="itemRow" key={index}>
                                     <UserCard imgSrc={item.service_img} name={item.service_name} />
                                     <strong className="valueItemRow">{itemUnitsLabel ?? 'Unidades'}: {item.units}</strong>
                                     <strong className="valueItemRow">Val unidad: {moneyFormat(item.unit_value)}</strong>
                                     {visibleItemTotal == undefined && visibleItemTotal != false && (
-                                        <strong className="valueItemRow">
-                                            Total: {moneyFormat(parseFloat(item.units) * parseFloat(item.unit_value))}
-                                        </strong>
+                                        <>
+                                            <strong className="valueItemRow">Sub-total: {moneyFormat(subTotal)}</strong>
+                                            <strong className="valueItemRow">Impuestos: {moneyFormat(taxes)}</strong>
+                                            <strong className="valueItemRow">Total: {moneyFormat(total)}</strong>
+                                        </>
                                     )}
 
                                     
                                 </div>
-                            ))}
+                                );
+                            })}
 
                             {/* Items manuales: editables y eliminables. */}
-                            {block.docInfo == undefined && block.items.map((item, index) => (
+                            {block.docInfo == undefined && block.items.map((item, index) => {
+                                const { subTotal, taxes, total } = getItemTotals(item);
+                                return (
                                 <div className="itemRow" key={index}>
                                     <UserCard imgSrc={item.img} name={item.name} />
 
@@ -189,7 +204,7 @@ export function ItemsList({
                                             step={0.01}
                                             min={0}
                                             required={false}
-                                            defaultValue={item.unit_value}
+                                            value={item.unit_value ?? ''}
                                             placeholder={item.unit_value ?? 0}
                                             disabled={disabled}
                                             action={(value) => editProperty(index_block, index, 'unit_value', value)}
@@ -224,9 +239,35 @@ export function ItemsList({
                                         />
                                     </strong>
 
-                                    <strong className="valueItemRow">
-                                        Total: {moneyFormat(parseFloat(item.units) * parseFloat(item.unit_value))}
-                                    </strong>
+                                    <div className="valueItemRow rowInputItem">
+                                        <FormInput
+                                            title={'Sub-total'}
+                                            type={'text'}
+                                            required={false}
+                                            value={moneyFormat(subTotal)}
+                                            disabled={true}
+                                        />
+                                    </div>
+
+                                    <div className="valueItemRow rowInputItem">
+                                        <FormInput
+                                            title={'Impuestos'}
+                                            type={'text'}
+                                            required={false}
+                                            value={moneyFormat(taxes)}
+                                            disabled={true}
+                                        />
+                                    </div>
+
+                                    <div className="valueItemRow rowInputItem">
+                                        <FormInput
+                                            title={'Total'}
+                                            type={'text'}
+                                            required={false}
+                                            value={moneyFormat(total)}
+                                            disabled={true}
+                                        />
+                                    </div>
 
                                     {!disabled && (
                                         <span
@@ -237,7 +278,8 @@ export function ItemsList({
                                         </span>
                                     )}
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         {/* Buscador para agregar productos/servicios al bloque manual. */}
