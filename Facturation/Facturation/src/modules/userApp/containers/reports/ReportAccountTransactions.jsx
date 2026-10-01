@@ -239,6 +239,7 @@ export function ReportAccountTransactions(){
                     columns={accountColumns}
                     results={rows}
                     loading={loading}
+                    height={'60vh'}
                     getRowKey={row => row.id}
                     rowProps={{ renderers: accountRenderers }}
                     emptyMessage="No hay movimientos para esta cuenta"

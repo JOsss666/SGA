@@ -369,6 +369,16 @@ router.post('/facturation/getTransactionsOfCashRecord',facturationController.get
 
 router.post('/facturation/getSettlementReportByPeriod',facturationController.getSettlementReportByPeriod);
 
+router.post(
+    '/facturation/getMonthlySalesReport',
+    express.json({ limit: '16kb', strict: true }),
+    requireTrustedOrigin,
+    authenticateSession,
+    requireCompanyAccess,
+    facturationController.getMonthlySalesReport,
+    sessionErrorHandler
+);
+
 router.post('/facturation/getBriefcaseBills',facturationController.getBriefcaseBills);
 
 router.post('/facturation/updatePaymentDocument',facturationController.updatePaymentDocument);

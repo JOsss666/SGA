@@ -95,8 +95,16 @@
 }
 
 .ItemsList .itemBlock .gridItems .rowInputItem .FacturationFormInput{
-    width: 10vw;
+    width: 6vw;
     min-width: 0;
+}
+
+.ItemsList .itemBlock .gridItems .itemRow .descriptionRow{
+    width: fit-content;
+}
+
+.ItemsList .itemBlock .gridItems .itemRow .descriptionRow .FacturationFormInput{
+    width: 15vw !important;
 }
 
 .ItemsList .itemBlock .gridItems .rowInputItem .FacturationFormInput label{
@@ -110,6 +118,7 @@
     cursor: pointer;
     color: var(--descriptionText);
     transition: .3s ease all;
+    font-size: clamp(2px,2.5vh,25px);
 }
 
 .ItemsList .itemBlock .gridItems .itemRow .deleteItem:hover{
@@ -137,6 +146,19 @@
     .ItemsList .itemBlock .gridItems .valueItemRow{
         width: 100%;
         margin-top: .5vh;
+        display: flex;
+        flex-direction: column;
+        gap: 1vh;
+    }
+
+    .ItemsList .itemBlock .gridItems .valueItemRow span{
+        font-size: clmap(1.8px,1.8vh,18px);
+        color: var(--descriptionText);
+    }
+
+    .ItemsList .itemBlock .gridItems .valueItemRow strong{
+        font-size: clmap(2px,2vh,20px);
+        color: var(--mainText);
     }
 
     .ItemsList .itemBlock .gridItems .itemRow .deleteItem{

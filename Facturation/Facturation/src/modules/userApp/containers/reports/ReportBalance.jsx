@@ -200,6 +200,7 @@ export function ReportBalance() {
                 <UniversalTable
                     columns={balanceColumns}
                     results={info}
+                    height={'60vh'}
                     searchValue={searchValue}
                     loading={loading}
                     getRowKey={row => row.id ?? row.account_code}

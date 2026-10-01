@@ -183,6 +183,18 @@ export function ItemsList({
                                 <div className="itemRow" key={index}>
                                     <UserCard imgSrc={item.img} name={item.name} />
 
+                                     <strong className="valueItemRow rowInputItem descriptionRow">
+                                        <FormInput
+                                            title={'Descripción'}
+                                            type={'text'}
+                                            required={false}
+                                            defaultValue={item.sell_desc ?? ''}
+                                            placeholder={'Cod #...'}
+                                            disabled={disabled}
+                                            action={(value) => editProperty(index_block, index, 'sell_desc', value)}
+                                        />
+                                    </strong>
+
                                     <strong className="valueItemRow rowInputItem">
                                         <FormInput
                                             title={itemUnitsLabel ?? 'Unidades'}
@@ -199,7 +211,7 @@ export function ItemsList({
 
                                     <strong className="valueItemRow rowInputItem">
                                         <FormInput
-                                            title={'Val unidad'}
+                                            title={'Val unitario'}
                                             type={'number'}
                                             step={0.01}
                                             min={0}
@@ -209,35 +221,8 @@ export function ItemsList({
                                             disabled={disabled}
                                             action={(value) => editProperty(index_block, index, 'unit_value', value)}
                                         />
-                                    </strong>
+                                    </strong>                                   
 
-                                    {hasBudget && (
-                                        <strong className="valueItemRow rowInputItem">
-                                            <FormInput
-                                                title={'Costo'}
-                                                type={'number'}
-                                                step={0.01}
-                                                min={0}
-                                                required={false}
-                                                defaultValue={item.bugetCost}
-                                                placeholder={item.bugetCost ?? 0}
-                                                disabled={disabled}
-                                                action={(value) => editProperty(index_block, index, 'bugetCost', value)}
-                                            />
-                                        </strong>
-                                    )}
-
-                                    <strong className="valueItemRow rowInputItem">
-                                        <FormInput
-                                            title={'Descripción'}
-                                            type={'text'}
-                                            required={false}
-                                            defaultValue={item.sell_desc ?? ''}
-                                            placeholder={'Cod #...'}
-                                            disabled={disabled}
-                                            action={(value) => editProperty(index_block, index, 'sell_desc', value)}
-                                        />
-                                    </strong>
 
                                     <div className="valueItemRow rowInputItem">
                                         <FormInput
@@ -268,7 +253,23 @@ export function ItemsList({
                                             disabled={true}
                                         />
                                     </div>
+                                    
 
+                                    {hasBudget && (
+                                        <strong className="valueItemRow rowInputItem">
+                                            <FormInput
+                                                title={'Costo'}
+                                                type={'number'}
+                                                step={0.01}
+                                                min={0}
+                                                required={false}
+                                                defaultValue={item.bugetCost}
+                                                placeholder={item.bugetCost ?? 0}
+                                                disabled={disabled}
+                                                action={(value) => editProperty(index_block, index, 'bugetCost', value)}
+                                            />
+                                        </strong>
+                                    )}
                                     {!disabled && (
                                         <span
                                             className="deleteItem"
@@ -276,7 +277,8 @@ export function ItemsList({
                                         >
                                             <i className="fa-solid fa-xmark" />
                                         </span>
-                                    )}
+                                    )}  
+
                                 </div>
                                 );
                             })}

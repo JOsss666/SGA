@@ -4,14 +4,16 @@
     flex-direction: column;
     padding: 2vh;
     position: relative;
-    gap: 2vh;
+    gap: 1.5vh;
+    overflow-y: auto;
 }
 
 .Reports .filterSettings{
     display: flex;
     padding: 0 2vh;
     gap: 2vh;
-    margin: 1vh 0;
+    margin:2vh 0;
+    width: fit-content;
 }
 
 .Reports .filterSettings .SearchBar{
@@ -28,11 +30,13 @@
 }
 
 .Reports .galleryReports{
-    height: 68vh;
-    padding: 2vh;
+    height: auto;
+    padding: 3vh 2vh 2vh;
     display: flex;
     gap: 4vh;
-    flex-wrap: wrap;   
+    flex-wrap: wrap;
+    align-content: flex-start;
+    align-items: flex-start;
 }
 
 .Reports .headSection{

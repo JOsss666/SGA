@@ -748,6 +748,129 @@ facturationController.getSettlementReportByPeriod = (req, res) => {
     });
 };
 
+const isValidBusinessDate = (value) => (
+    typeof value === 'string'
+    && /^\d{4}-\d{2}-\d{2}$/.test(value)
+    && !Number.isNaN(Date.parse(value))
+    && new Date(value).toISOString().slice(0, 10) === value
+);
+
+facturationController.getMonthlySalesReport = async (req, res) => {
+    const companyId = Number(req.auth?.companyId);
+    const { start_date: startDate, end_date: endDate } = req.body ?? {};
+
+    if (!Number.isSafeInteger(companyId) || companyId <= 0) {
+        return res.status(400).json({ error: 'Se requiere una compañía válida.' });
+    }
+
+    if (!isValidBusinessDate(startDate) || !isValidBusinessDate(endDate) || startDate > endDate) {
+        return res.status(400).json({ error: 'El periodo del informe no es válido.' });
+    }
+
+    const values = [companyId];
+    const whereClauses = [
+        'invoice.company_id = $1',
+        `invoice.document_type = 'Sell Invoice'`,
+        `invoice.status = 'active'`
+    ];
+    appendBusinessDateRange({
+        whereClauses,
+        values,
+        column: 'invoice.created_at',
+        start: startDate,
+        end: endDate,
+        companyPlaceholder: '$1'
+    });
+    const businessTimeZone = companyTimeZoneSql('$1');
+
+    try {
+        const result = await useDataBase(`
+            SELECT
+                invoice.id,
+                invoice."ownSerial",
+                invoice.description,
+                invoice.total,
+                invoice.status,
+                invoice.created_at,
+                invoice.created_at AT TIME ZONE (${businessTimeZone}) AS created_at_local,
+                TO_CHAR(invoice.created_at AT TIME ZONE (${businessTimeZone}), 'YYYY-MM-DD') AS business_date,
+                ${businessTimeZone} AS business_time_zone,
+                thirdparty.names AS thirdparty_name,
+                store.name AS store_name,
+                invoice_user.user_name,
+                related_process.instance_id,
+                related_process.process_code,
+                related_process.instance_ownSerial,
+                CASE
+                    WHEN related_process.process_code IS NOT NULL AND related_process.instance_ownSerial IS NOT NULL
+                    THEN related_process.process_code || '#' || related_process.instance_ownSerial::text
+                END AS process_label,
+                cost_center.name AS cost_center_name,
+                electronic.number AS electronic_invoice_number
+            FROM "Ecosystem".documents invoice
+            LEFT JOIN "Ecosystem".thirdparties thirdparty
+                ON thirdparty.id = invoice."thirdParty_id"
+                AND thirdparty.company_id = invoice.company_id
+            LEFT JOIN "Ecosystem".stores store
+                ON store.id = invoice.store_id
+                AND store.company_id = invoice.company_id
+            LEFT JOIN "Ecosystem".users invoice_user
+                ON invoice_user.user_id = invoice.created_by
+            LEFT JOIN LATERAL (
+                SELECT
+                    process_type.code AS process_code,
+                    process_instance.id AS instance_id,
+                    process_instance."ownSerial" AS instance_ownSerial
+                FROM (
+                    SELECT linked_instance.instance_id, 1 AS priority
+                    FROM "Ecosystem".docs_instances linked_instance
+                    WHERE linked_instance.doc_id = invoice.id
+                    UNION ALL
+                    SELECT invoice.instance_id, 2 AS priority
+                    WHERE invoice.instance_id IS NOT NULL
+                ) related_instance
+                JOIN "Process".process_instance
+                    ON process_instance.id = related_instance.instance_id
+                    AND process_instance.company_id = invoice.company_id
+                JOIN "Process".processes process_type
+                    ON process_type.id = process_instance.process_id
+                    AND process_type.company_id = invoice.company_id
+                ORDER BY related_instance.priority, process_instance.id DESC
+                LIMIT 1
+            ) related_process ON TRUE
+            LEFT JOIN LATERAL (
+                SELECT center.name
+                FROM "Ecosystem".transactions invoice_transaction
+                LEFT JOIN "Ecosystem"."costCenters" center
+                    ON center.id = invoice_transaction."costCenter_id"
+                    AND center.company_id = invoice.company_id
+                WHERE invoice_transaction.company_id = invoice.company_id
+                    AND invoice_transaction.doc_id = invoice.id
+                ORDER BY (invoice_transaction."costCenter_id" IS NULL), invoice_transaction.id DESC
+                LIMIT 1
+            ) cost_center ON TRUE
+            LEFT JOIN LATERAL (
+                SELECT electronic_document.number
+                FROM "ElectronicFacturation".documents electronic_document
+                WHERE electronic_document.doc_id = invoice.id
+                    AND electronic_document.company_id = invoice.company_id
+                    AND electronic_document.type = 'electronic invoice'
+                ORDER BY electronic_document.id DESC
+                LIMIT 1
+            ) electronic ON TRUE
+            WHERE ${whereClauses.join(' AND ')}
+            ORDER BY invoice.created_at DESC, invoice.id DESC;
+        `, values, 1);
+
+        if (result?.[0] === false && Array.isArray(result[1])) return res.status(200).json([true, []]);
+        if (result?.[0] === false) throw new Error('No fue posible consultar las facturas.');
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error('Error al cargar el informe mensual de ventas:', error);
+        return res.status(500).json({ error: 'No fue posible cargar el informe de ventas.' });
+    }
+};
+
 
 facturationController.getBriefcaseBills = (req,res)=>{
     let data = '';

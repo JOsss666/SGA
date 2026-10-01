@@ -659,6 +659,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             company_id:appInfo.company_id,
             doc_id
         })
+        console.log('Elementos disponibles: ',res)
         if(res[0]){
             return res[1].map(item => ({
                 ...item,
@@ -1523,7 +1524,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                         </div>
                     )}
                     <FormInput title={'Descripción (Interna)'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
-                    <FormInput title={'Descripción (Factura electrónica)'} textArea={true} placeholder={'Anotación o descripción de la factura de venta electronica'} action={set_eInvoiceDescription} disabled={disabled}/>
+                    <FormInput title={'Descripción (Factura electrónica)'} textArea={true} placeholder={'Anotación o descripción de la factura de venta electronica'} action={set_eInvoiceDescription} disabled={disabled} />
                     <FileInput category="files" action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
                     <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor ingresado no es valido':'Crear factura de venta'} disabled={disabledToSubmit || disabled || Boolean(advancePayments.error)} loading={loading}/>
                 </form>
