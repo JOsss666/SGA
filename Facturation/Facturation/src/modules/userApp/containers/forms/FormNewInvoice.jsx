@@ -1024,7 +1024,24 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                     setDisabled(false);
                     return;
                 }
-                e_info = await handleCreationOfEinvoice(res.id);
+                try {
+                    e_info = await handleCreationOfEinvoice(res.id);
+                } catch (error) {
+                    const statusCode = error?.httpStatus;
+                    const statusLabel = statusCode
+                        ? `Err:${statusCode}${error.statusText ? ` — ${error.statusText}` : ''}`
+                        : '';
+                    const errorDetails = formatElectronicInvoiceErrors(error?.errors);
+                    alert([
+                        'Error al emitir factura electrónica:',
+                        statusLabel,
+                        error?.message ?? 'No fue posible completar la emisión.',
+                        errorDetails
+                    ].filter(Boolean).join('\n\n'));
+                    setLoading(false);
+                    setDisabled(false);
+                    return;
+                }
                 if(e_info.id == undefined){
                     const errorDetails = formatElectronicInvoiceErrors(e_info.errors);
                     alert([
