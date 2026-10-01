@@ -756,7 +756,7 @@ const isValidBusinessDate = (value) => (
 );
 
 facturationController.getMonthlySalesReport = async (req, res) => {
-    const companyId = Number(req.auth?.companyId);
+    const companyId = Number(req.body?.company_id);
     const { start_date: startDate, end_date: endDate } = req.body ?? {};
 
     if (!Number.isSafeInteger(companyId) || companyId <= 0) {
