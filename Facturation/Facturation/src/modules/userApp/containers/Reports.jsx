@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { DescriptionSpan } from "../components/DescriptionSpan";
 import { DespleList } from "../components/DespleList";
 import { ReportDocuments } from './reports/ReportDocuments';
+import { SalesReport } from './reports/SalesReport';
 import { ReportTransactionDetails } from '../components/ReportTransactionDetails';
 import { ReportBalance } from './reports/ReportBalance';
 import { CardReport } from '../components/CardReport';
@@ -87,6 +88,9 @@ export function Reports(){
                             <CardReport type={'contable'} title={'Informe de cartera (Alpha)'} description={'Versión de prueba Alpha V 0.1'} onClick={()=>{
                                 handleNavigate('BriefCases')
                             }}/>
+                            <CardReport type={'contable'} title={'Informe de ventas'} description={'Consulta las facturas de venta y el total vendido en el periodo'} onClick={()=>{
+                                handleNavigate('Sales')
+                            }}/>
                             <CardReport type={'contable'} title={'Informe Saldos a favor (Alpha)'} description={'Consulte el saldo a favor (anticipos) de sus terceros'} onClick={()=>{
                                 handleNavigate('Advances')
                             }}/>
@@ -119,6 +123,7 @@ export function Reports(){
                 <Route path='/Processes' element={<ProcessesReport/>}/>
                 <Route path='/Eficiency' element={<EficiencyReport/>}/>
                 <Route path='/BriefCases' element={<BriefCaseReport/>}/>
+                <Route path='/Sales' element={<SalesReport/>}/>
                 <Route path='/BriefCases/:thirdParty_id' element={<PortfolioReportDetail/>}/>
                 <Route path='/Advances' element={<AdvancesReport/>}/>
                 <Route path='/Advances/:thirdParty_id' element={<AdvancesReportDetail/>}/>

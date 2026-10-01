@@ -39,15 +39,30 @@ export async function postInfo(route,informacion){
         })
         .then(response =>{
             if(response.ok == false){
-                return response.json().then(err => {
-                    reject(err);
-                });
+                return response.json().then(
+                    err => {
+                        const errorInfo = err && typeof err === 'object' && !Array.isArray(err)
+                            ? err
+                            : { message: String(err ?? '') };
+                        reject({
+                            ...errorInfo,
+                            httpStatus: response.status,
+                            statusText: response.statusText
+                        });
+                    },
+                    () => reject({
+                        message: `HTTP ${response.status} ${response.statusText}`.trim(),
+                        httpStatus: response.status,
+                        statusText: response.statusText
+                    })
+                );
             }
             return response.json()
         })
         .then(data=>{
             resolve(data)
         })
+        .catch(error => reject(error));
     })
 }
 

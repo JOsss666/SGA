@@ -1,0 +1,214 @@
+.RangeDate {
+    position: relative;
+    display: inline-flex;
+    width: min(100%, 24rem);
+    min-width: 18rem;
+}
+
+.RangeDate .RangeDateInputs {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: .7rem;
+}
+
+.RangeDate .RangeDateInput {
+    display: block;
+    min-width: 0;
+    flex: 1;
+}
+
+.RangeDate .RangeDateInput input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 2.9rem;
+    padding: .6rem .75rem;
+    border: 1px solid var(--inputsBorder);
+    border-radius: .65rem;
+    background: var(--inputsBg);
+    box-shadow: 0 .25rem .6rem var(--translucidMenu);
+    color: var(--mainText);
+    font: inherit;
+    cursor: pointer;
+}
+
+.RangeDate .RangeDateInput input:focus-visible,
+.RangeDate .RangeDateActions button:focus-visible,
+.RangeDate .rdp-button_next:focus-visible,
+.RangeDate .rdp-button_previous:focus-visible,
+.RangeDate .rdp-day_button:focus-visible {
+    outline: 2px solid var(--chatAccent);
+    outline-offset: 2px;
+}
+
+.RangeDate .RangeDateInput input:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+}
+
+.RangeDate .RangeDateVisuallyHidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.RangeDate .RangeDateSeparator {
+    flex: 0 0 auto;
+    color: var(--descriptionText);
+    font-weight: 600;
+}
+
+.RangeDate .RangeDatePopover {
+    position: absolute;
+    top: calc(100% + .6rem);
+    z-index: 40;
+    display: flex;
+    width: max-content;
+    max-width: min(92vw, 23rem);
+    padding: 1rem;
+    flex-direction: column;
+    border: 1px solid var(--inputsBorder);
+    border-radius: .75rem;
+    color: var(--mainText);
+    background: var(--inputsBg);
+    box-shadow: var(--chatBubbleShadow);
+}
+
+.RangeDate.alignLeft .RangeDatePopover {
+    left: 0;
+}
+
+.RangeDate.alignRight .RangeDatePopover {
+    right: 0;
+}
+
+.RangeDate .rdp-root {
+    --rdp-accent-color: var(--chatAccent);
+    --rdp-accent-background-color: var(--lightSelected);
+    --rdp-day-width: 2.75rem;
+    --rdp-day-height: 2.75rem;
+    --rdp-day_button-width: 2.55rem;
+    --rdp-day_button-height: 2.55rem;
+    --rdp-day_button-border-radius: .55rem;
+    --rdp-today-color: var(--chatAccent);
+    --rdp-disabled-opacity: .4;
+    --rdp-outside-opacity: .45;
+    --rdp-range_middle-background-color: var(--lightSelected);
+    --rdp-range_middle-color: var(--mainText);
+    --rdp-range_start-color: var(--bg);
+    --rdp-range_end-color: var(--bg);
+    --rdp-range_start-date-background-color: var(--chatAccent);
+    --rdp-range_end-date-background-color: var(--chatAccent);
+    margin: 0;
+}
+
+.RangeDate .rdp-month_caption {
+    color: var(--mainText);
+    font-size: 1rem;
+    text-transform: capitalize;
+}
+
+.RangeDate .rdp-weekday {
+    color: var(--descriptionText);
+    font-size: .8rem;
+    font-weight: 500;
+}
+
+.RangeDate .rdp-day_button,
+.RangeDate .rdp-button_next,
+.RangeDate .rdp-button_previous {
+    border-radius: .5rem;
+    color: var(--mainText);
+    cursor: pointer;
+    font-weight: 400;
+}
+
+.RangeDate .rdp-day_button:hover:not(:disabled),
+.RangeDate .rdp-button_next:hover:not(:disabled),
+.RangeDate .rdp-button_previous:hover:not(:disabled) {
+    background: var(--cardHover);
+    color: var(--mainText);
+}
+
+.RangeDate .rdp-range_middle .rdp-day_button,
+.RangeDate .rdp-range_middle .rdp-day_button:hover:not(:disabled) {
+    color: var(--mainText);
+}
+
+.RangeDate .rdp-footer {
+    padding-top: 1rem;
+    color: var(--descriptionText);
+    font-size: .8rem;
+    text-align: center;
+}
+
+.RangeDate .RangeDateActions {
+    display: flex;
+    margin-top: .75rem;
+    padding-top: .75rem;
+    justify-content: flex-end;
+    gap: .65rem;
+    border-top: 1px solid var(--inputsBorder);
+}
+
+.RangeDate .RangeDateActions button {
+    min-width: 5.5rem;
+    min-height: 2.75rem;
+    padding: .6rem .9rem;
+    border: 1px solid var(--inputsBorder);
+    border-radius: .55rem;
+    color: var(--mainText);
+    background: var(--inputsBg);
+    cursor: pointer;
+    font: inherit;
+}
+
+.RangeDate .RangeDateActions button:hover:not(:disabled) {
+    background: var(--cardHover);
+}
+
+.RangeDate .RangeDateActions button.primary {
+    border-color: var(--chatAccent);
+    background: var(--chatAccent);
+    color: var(--bg);
+    font-weight: 600;
+}
+
+.RangeDate .RangeDateActions button.primary:hover:not(:disabled) {
+    filter: brightness(.95);
+}
+
+.RangeDate .RangeDateActions button:disabled {
+    cursor: not-allowed;
+    opacity: .45;
+}
+
+.RangeDate .RangeDateActions button i {
+    margin-left: .5rem;
+}
+
+@media (max-width: 520px) {
+    .RangeDate {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .RangeDate .RangeDatePopover {
+        right: 0;
+        left: auto;
+        max-width: calc(100vw - 2rem);
+        overflow-x: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .RangeDate * {
+        scroll-behavior: auto;
+    }
+}
