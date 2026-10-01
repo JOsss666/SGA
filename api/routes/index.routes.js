@@ -372,11 +372,7 @@ router.post('/facturation/getSettlementReportByPeriod',facturationController.get
 router.post(
     '/facturation/getMonthlySalesReport',
     express.json({ limit: '16kb', strict: true }),
-    requireTrustedOrigin,
-    authenticateSession,
-    requireCompanyAccess,
-    facturationController.getMonthlySalesReport,
-    sessionErrorHandler
+    facturationController.getMonthlySalesReport
 );
 
 router.post('/facturation/getBriefcaseBills',facturationController.getBriefcaseBills);
