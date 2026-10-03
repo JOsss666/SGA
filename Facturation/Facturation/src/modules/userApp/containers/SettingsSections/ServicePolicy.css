@@ -1,0 +1,52 @@
+
+
+.ServicePolicy{
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    margin: 1vh auto;
+    overflow-y: auto;
+    height: fit-content;
+    position: relative;
+    max-height: 80dvh;
+    overflow-y: auto;
+    padding: 1vh 2vh;
+}
+
+.ServicePolicy .headPolicy{
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+    align-items: center;
+    margin-bottom: 4vh;
+}
+
+.ServicePolicy .headPolicy span{
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
+}
+
+.ServicePolicy .headPolicy img{
+    width: 8vh;
+    height: 8vh;
+    margin-bottom: 2vh;
+}
+
+.ServicePolicy section{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 2vh;
+    gap: 2vh;
+}
+
+.ServicePolicy section strong{
+    color: var(--mainText);
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 600;
+}
+
+.ServicePolicy section p{
+    color: var(--mainText);
+    font-size: clamp(1.8px,1.8vh,18px);
+    padding-left: 2vh;
+}
