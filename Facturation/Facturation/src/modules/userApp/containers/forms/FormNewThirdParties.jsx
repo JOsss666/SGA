@@ -59,25 +59,25 @@ const createInitialTaxConfig = () => ({
 
 const normalizeTaxConfig = (taxConfig = {}) => {
     const initialConfig = createInitialTaxConfig();
+    const normalizeSection = (initialSection, savedSection = {}) => {
+        const section = {...initialSection,...savedSection};
+        Object.keys(initialSection).forEach(key => {
+            if(typeof initialSection[key] === 'boolean'){
+                const value = savedSection[key];
+                section[key] = value === true || value === 'true' || value === 1 || value === '1';
+            }
+        });
+        return section;
+    };
 
     return {
         rent:{
-            ...initialConfig.rent,
-            ...(taxConfig.rent ?? {}),
+            ...normalizeSection(initialConfig.rent,taxConfig.rent ?? {}),
             regime:taxConfig.rent?.regime ?? taxConfig.regime ?? ''
         },
-        iva:{
-            ...initialConfig.iva,
-            ...(taxConfig.iva ?? {})
-        },
-        ring:{
-            ...initialConfig.ring,
-            ...(taxConfig.ring ?? {})
-        },
-        consumption:{
-            ...initialConfig.consumption,
-            ...(taxConfig.consumption ?? {})
-        },
+        iva:normalizeSection(initialConfig.iva,taxConfig.iva ?? {}),
+        ring:normalizeSection(initialConfig.ring,taxConfig.ring ?? {}),
+        consumption:normalizeSection(initialConfig.consumption,taxConfig.consumption ?? {}),
         territorialTaxes:Array.isArray(taxConfig.territorialTaxes)
             ? taxConfig.territorialTaxes
             : []
@@ -120,7 +120,7 @@ const createInitialFormData = (companyId = null) => ({
     thirdPartyProductTaxRelations:[]
 });
 
-export function FormNewThirdParties({reloadFun,quickCreation}){
+export function FormNewThirdParties({reloadFun,quickCreation,forUpdate=false,thirdPartyId}){
 
     const {addNotification} = useNotifications();
     const {popOutAlert, popInAlert} = useAlert();
@@ -145,6 +145,8 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
     const [formData,setFormData] = useState(() => (
         createInitialFormData(appInfo.company_id ?? null)
     ));
+    const [formLoaded,setFormLoaded] = useState(!forUpdate);
+    const [formLoadError,setFormLoadError] = useState(false);
 
     const maxStage = 3;
     const {
@@ -164,6 +166,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
         municipality_jurisdiction_id,
         mucipality_id,
         locality_id,
+        city,
         address,
         type,
         credit,
@@ -176,6 +179,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
         IVA_responsability,
         retention_type,
         economic_activity,
+        attachedRut,
         withholdingRetentions,
         thirdPartyProductTaxRelations
     } = formData;
@@ -310,7 +314,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
             )
         );
         const requestedMunicipalityCode = `${
-            data.municipality_code || data.mucipality_id || ''
+            data.municipality_code || data.mucipality_id || data.municipality_id || ''
         }`.replace(/\D/g, '');
         let municipalityRow = municipalityRows.find(element => (
             requestedMunicipalityCode
@@ -505,7 +509,12 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
     };
 
     const validateStage = (stageToValidate)=>{
-        const missingFields = requiredFieldsByStage[stageToValidate].filter(field => isEmpty(field.value));
+        const stageFields = stageToValidate === 0 && forUpdate
+            ? requiredFieldsByStage[stageToValidate]
+                .filter(field => !['Departamento','Municipio o región','Ciudad o localidad'].includes(field.label))
+                .concat({label:'Ciudad o localidad',value:city})
+            : requiredFieldsByStage[stageToValidate];
+        const missingFields = stageFields.filter(field => isEmpty(field.value));
 
         if(missingFields.length > 0){
             setError(`Error de validación: completa ${missingFields.map(field => field.label).join(', ')}.`);
@@ -535,7 +544,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
             const options = res.data.map(element => ({ text:element.name, value:element.id }));
             setCountries(options);
             const colombia = res.data.find(element => element.iso_code_2 === 'CO');
-            if(colombia){
+            if(colombia && !forUpdate){
                 updateFields({
                     country_id:colombia.id,
                     country:colombia.name
@@ -647,8 +656,8 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
         });
     };
 
-    // Creation function
-    const createThirdParty = async()=>{
+    // Creation and update share the same multi-step form.
+    const saveThirdParty = async()=>{
         if(!validateFullForm()){
             return;
         }
@@ -663,14 +672,29 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
             company_id:appInfo.company_id ?? formData.company_id,
             taxConfig:normalizeTaxConfig(withholdingRetentions)
         };
-        let res = await postInfo('/createThirdParty',payload);
-        const thirdPartyId = res?.[1] ?? res?.id ?? res?.thirdParty_id;
-        if(res?.[0] || thirdPartyId){
-            if(thirdPartyProductTaxRelations.length > 0 && thirdPartyId != undefined){
+        let res;
+        try {
+            res = await postInfo(
+                forUpdate ? '/updateThirdParty' : '/createThirdParty',
+                forUpdate ? {...payload,id:thirdPartyId} : payload
+            );
+        } catch(err) {
+            addNotification({
+                type:'error',
+                title:`Error al ${forUpdate ? 'actualizar' : 'crear'} tercero`,
+                description:err?.message ?? 'No fue posible guardar la información.'
+            });
+            setLoading(false);
+            setDisabled(false);
+            return;
+        }
+        const savedThirdPartyId = res?.[1] ?? res?.id ?? res?.thirdParty_id;
+        if(res?.[0] || savedThirdPartyId){
+            if(!forUpdate && thirdPartyProductTaxRelations.length > 0 && savedThirdPartyId != undefined){
                 try {
                     const relationsRes = await postInfo('/inventory/createThirdPartyProductTaxRelation',{
                         company_id:appInfo.company_id,
-                        third_party_id:thirdPartyId,
+                        third_party_id:savedThirdPartyId,
                         relations:thirdPartyProductTaxRelations
                     });
 
@@ -691,8 +715,8 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
             }
             addNotification({
                 type:'aproved',
-                title:`Tercero ${first_name} creado correctamente`,
-                description:`El tercero ${first_name} fue creado correctamente.`
+                title:`Tercero ${first_name} ${forUpdate ? 'actualizado' : 'creado'} correctamente`,
+                description:`El tercero ${first_name} fue ${forUpdate ? 'actualizado' : 'creado'} correctamente.`
             })
             popOutAlert();
             if(reloadFun != undefined){
@@ -702,8 +726,8 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
         else{
             addNotification({
                 type:'error',
-                title:`Error al crear tercerp "${first_name}"`,
-                description:`Hubo un problema al crear el tercero "${first_name}", intentelo de nuevo.`
+                title:`Error al ${forUpdate ? 'actualizar' : 'crear'} tercero "${first_name}"`,
+                description:`Hubo un problema al ${forUpdate ? 'actualizar' : 'crear'} el tercero "${first_name}", inténtelo de nuevo.`
             })
         }
         setLoading(false);
@@ -716,21 +740,128 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
             return;
         }
 
-        createThirdParty();
+        saveThirdParty();
     }
 
 
     // Events listeners
 
     useEffect(()=>{
-        if(appInfo.company_id){
+        if(appInfo.company_id && !forUpdate){
             updateField('company_id',appInfo.company_id);
         }
-    },[appInfo.company_id])
+    },[appInfo.company_id,forUpdate])
+
+    useEffect(()=>{
+        if(!forUpdate || !thirdPartyId || !appInfo.company_id) return;
+
+        let cancelled = false;
+        const loadThirdParty = async()=>{
+            setLoading(true);
+            setFormLoaded(false);
+            setFormLoadError(false);
+            try {
+                const response = await postInfo('/getThirdParties',{
+                    company_id:appInfo.company_id,
+                    id:thirdPartyId,
+                    comercialInfo:true
+                });
+                const thirdParty = response?.[0] ? response[1]?.[0] : undefined;
+                if(!thirdParty){
+                    throw new Error('No se encontró la información del tercero.');
+                }
+
+                const taxConfig = typeof thirdParty.taxConfig === 'string'
+                    ? JSON.parse(thirdParty.taxConfig || '{}')
+                    : thirdParty.taxConfig;
+                const [geographyResult,relationsResult] = await Promise.allSettled([
+                    resolveAiGeography({
+                        ...thirdParty,
+                        municipality_code:thirdParty.municipality_id,
+                        city:thirdParty.city || thirdParty.municipality_name
+                    }),
+                    postInfo('/inventory/getThirdPartyProductTaxRelations',{
+                        company_id:appInfo.company_id,
+                        third_party_id:thirdPartyId
+                    })
+                ]);
+                if(cancelled) return;
+
+                const geography = geographyResult.status === 'fulfilled'
+                    ? geographyResult.value
+                    : {
+                        countryOptions:[],
+                        departmentOptions:[],
+                        municipalityOptions:[],
+                        localityOptions:[],
+                        values:{
+                            country:thirdParty.country ?? '',
+                            country_id:null,
+                            department_id:null,
+                            municipality_jurisdiction_id:null,
+                            mucipality_id:thirdParty.municipality_id ?? '',
+                            locality_id:null,
+                            city:thirdParty.city || thirdParty.municipality_name || ''
+                        }
+                    };
+                const relationResponse = relationsResult.status === 'fulfilled'
+                    ? relationsResult.value
+                    : [];
+                const relationRows = Array.isArray(relationResponse?.[1])
+                    ? relationResponse[1]
+                    : Array.isArray(relationResponse)
+                        ? relationResponse
+                    : relationResponse?.data ?? relationResponse?.rows ?? [];
+                setCountries(geography.countryOptions);
+                setDepartments(geography.departmentOptions);
+                setMunicipalities(geography.municipalityOptions);
+                setLocalities(geography.localityOptions);
+                setFormData({
+                    ...createInitialFormData(appInfo.company_id),
+                    ...thirdParty,
+                    ...geography.values,
+                    id:thirdPartyId,
+                    userPhoto:thirdParty.userPhoto ?? thirdParty.img ?? createInitialFormData().userPhoto,
+                    first_name:thirdParty.first_name ?? '',
+                    second_name:thirdParty.second_name ?? '',
+                    first_surname:thirdParty.first_surname ?? '',
+                    second_surname:thirdParty.second_surname ?? '',
+                    indentification_type:thirdParty.indentification_type ?? '',
+                    indentification_number:thirdParty.indentification_number ?? '',
+                    identidicationType_id:thirdParty.identidicationType_id ?? null,
+                    typePerson:thirdParty.thirdParty_nature ?? thirdParty.nature ?? 2,
+                    withholdingRetentions:normalizeTaxConfig(taxConfig ?? {}),
+                    thirdPartyProductTaxRelations:relationRows.map(relation => ({
+                        ...relation,
+                        relation_type:`${relation.operation_type ?? relation.operation}_${relation.tax_role ?? relation.role}`,
+                        tax_name:relation.tax_name ?? relation.name
+                    }))
+                });
+                setFormLoaded(true);
+            } catch(err) {
+                if(!cancelled){
+                    setError(err?.message ?? 'No se pudo cargar la información del tercero.');
+                    setVisibleError(true);
+                    setFormLoaded(true);
+                    setFormLoadError(true);
+                    addNotification({
+                        type:'error',
+                        title:'No se pudo cargar el tercero',
+                        description:err?.message ?? 'Inténtelo de nuevo.'
+                    });
+                }
+            } finally {
+                if(!cancelled) setLoading(false);
+            }
+        };
+
+        loadThirdParty();
+        return ()=>{ cancelled = true; };
+    },[forUpdate,thirdPartyId,appInfo.company_id]);
     
     useEffect(()=>{
         getCountries();
-    },[])
+    },[forUpdate])
 
     useEffect(()=>{
         if(country_id) getDepartments(country_id);
@@ -752,6 +883,15 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
 /** PENDIENTE REVISAR **/
     return(
         <div className="FormNewThirdParties" ref={formContainerRef}>
+            {forUpdate && !formLoaded && (
+                <LoadingSpace title={'Cargando información del tercero'} description={'Esto no debe tardar mucho...'}/>
+            )}
+            {formLoadError && (
+                <div className="errorContainer" role="alert">
+                    <span>{error}</span>
+                </div>
+            )}
+            {(!forUpdate || (formLoaded && !formLoadError)) && <>
             {visibleError && (
                 <div className="errorContainer">
                     <span>{error}</span>
@@ -771,7 +911,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                     </FileInput>
                 </div>
                 <div className="mainHeadInfo">
-                    <BoldTitle text={'Nuevo Tercero'}/>  
+                    <BoldTitle text={forUpdate ? 'Editar tercero' : 'Nuevo Tercero'}/>
                     {first_name != "" && first_name != undefined && (
                         <DescriptionSpan 
                             text={`Completa la información ${
@@ -926,6 +1066,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                 companyId={appInfo.company_id}
                                 info={formData}
                                 disabled={disabled}
+                                readOnly={forUpdate}
                                 value={thirdPartyProductTaxRelations}
                                 action={value=>updateField('thirdPartyProductTaxRelations',value)}
                             />
@@ -991,6 +1132,11 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                 >
                                     <i className="fa-regular fa-folder-open"/>
                                 </FileInput>
+                                {forUpdate && attachedRut && (
+                                    <a href={attachedRut} target="_blank" rel="noreferrer">
+                                        Ver soporte RUT actual
+                                    </a>
+                                )}
                             </>
                         )}
                     </form>
@@ -1024,7 +1170,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Responsable del impuesto sobre RENTA</span>
                                         <SwitchOption
                                             key={`rent-responsible-${withholdingRetentions.rent.rentTaxResponsable}`}
-                                            defaultValue={withholdingRetentions.rent.rentTaxResponsable}
+                                            value={withholdingRetentions.rent.rentTaxResponsable}
                                             action={value=>updateNestedField(['withholdingRetentions','rent','rentTaxResponsable'],value)}
                                         />
                                     </div>
@@ -1032,7 +1178,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Declarante impuesto sobre la RENTA</span>
                                         <SwitchOption
                                             key={`rent-declarant-${withholdingRetentions.rent.rentTaxDeclarant}`}
-                                            defaultValue={withholdingRetentions.rent.rentTaxDeclarant}
+                                            value={withholdingRetentions.rent.rentTaxDeclarant}
                                             action={value=>updateNestedField(['withholdingRetentions','rent','rentTaxDeclarant'],value)}
                                         />
                                     </div>
@@ -1051,7 +1197,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Agente retenedor a titulo de RENTA</span>
                                         <SwitchOption
                                             key={`rent-withholding-${withholdingRetentions.rent.rentWithholdingAgent}`}
-                                            defaultValue={withholdingRetentions.rent.rentWithholdingAgent}
+                                            value={withholdingRetentions.rent.rentWithholdingAgent}
                                             action={value=>updateNestedField(['withholdingRetentions','rent','rentWithholdingAgent'],value)}
                                         />
                                     </div>
@@ -1059,7 +1205,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Autorreteneor a titulo de RENTA</span>
                                         <SwitchOption
                                             key={`rent-self-withholding-${withholdingRetentions.rent.rentSelfWithholdingAgent}`}
-                                            defaultValue={withholdingRetentions.rent.rentSelfWithholdingAgent}
+                                            value={withholdingRetentions.rent.rentSelfWithholdingAgent}
                                             action={value=>updateNestedField(['withholdingRetentions','rent','rentSelfWithholdingAgent'],value)}
                                         />
                                     </div>
@@ -1067,7 +1213,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Autoretenedor especial de RENTA</span>
                                         <SwitchOption
                                             key={`rent-special-self-${withholdingRetentions.rent.rentSpecialSelfWithholdingAgent}`}
-                                            defaultValue={withholdingRetentions.rent.rentSpecialSelfWithholdingAgent}
+                                            value={withholdingRetentions.rent.rentSpecialSelfWithholdingAgent}
                                             action={value=>updateNestedField(['withholdingRetentions','rent','rentSpecialSelfWithholdingAgent'],value)}
                                         />
                                     </div>
@@ -1079,7 +1225,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Entidad estatal</span>
                                         <SwitchOption
                                             key={`iva-state-${withholdingRetentions.iva.stateEntity}`}
-                                            defaultValue={withholdingRetentions.iva.stateEntity}
+                                            value={withholdingRetentions.iva.stateEntity}
                                             action={value=>updateNestedField(['withholdingRetentions','iva','stateEntity'],value)}
                                         />
                                     </div>
@@ -1087,7 +1233,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Gran Contribuyente DIAN</span>
                                         <SwitchOption
                                             key={`iva-major-${withholdingRetentions.iva.DIANMajorTaxpayer}`}
-                                            defaultValue={withholdingRetentions.iva.DIANMajorTaxpayer}
+                                            value={withholdingRetentions.iva.DIANMajorTaxpayer}
                                             action={value=>updateNestedField(['withholdingRetentions','iva','DIANMajorTaxpayer'],value)}
                                         />
                                     </div>
@@ -1095,7 +1241,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Responsable de IVA</span>
                                         <SwitchOption
                                             key={`iva-responsible-${withholdingRetentions.iva.ivaTaxResponsable}`}
-                                            defaultValue={withholdingRetentions.iva.ivaTaxResponsable}
+                                            value={withholdingRetentions.iva.ivaTaxResponsable}
                                             action={value=>updateNestedField(['withholdingRetentions','iva','ivaTaxResponsable'],value)}
                                         />
                                     </div>
@@ -1103,7 +1249,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Agente retenedor a titulo de IVA</span>
                                         <SwitchOption
                                             key={`iva-withholding-${withholdingRetentions.iva.ivaWithholdingAgent}`}
-                                            defaultValue={withholdingRetentions.iva.ivaWithholdingAgent}
+                                            value={withholdingRetentions.iva.ivaWithholdingAgent}
                                             action={value=>updateNestedField(['withholdingRetentions','iva','ivaWithholdingAgent'],value)}
                                         />
                                     </div>
@@ -1111,7 +1257,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Agente retenedor a titulo de IVA por ventas CI</span>
                                         <SwitchOption
                                             key={`iva-ci-${withholdingRetentions.iva.ivaWithholdingAgentByCI}`}
-                                            defaultValue={withholdingRetentions.iva.ivaWithholdingAgentByCI}
+                                            value={withholdingRetentions.iva.ivaWithholdingAgentByCI}
                                             action={value=>updateNestedField(['withholdingRetentions','iva','ivaWithholdingAgentByCI'],value)}
                                         />
                                     </div>
@@ -1123,7 +1269,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Responsable impuesto de timbre</span>
                                         <SwitchOption
                                             key={`ring-responsible-${withholdingRetentions.ring.ringTaxResponsable}`}
-                                            defaultValue={withholdingRetentions.ring.ringTaxResponsable}
+                                            value={withholdingRetentions.ring.ringTaxResponsable}
                                             action={value=>updateNestedField(['withholdingRetentions','ring','ringTaxResponsable'],value)}
                                         />
                                     </div>
@@ -1131,7 +1277,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Agente retenedor a titulo de timbre</span>
                                         <SwitchOption
                                             key={`ring-withholding-${withholdingRetentions.ring.ringWithholdingAgent}`}
-                                            defaultValue={withholdingRetentions.ring.ringWithholdingAgent}
+                                            value={withholdingRetentions.ring.ringWithholdingAgent}
                                             action={value=>updateNestedField(['withholdingRetentions','ring','ringWithholdingAgent'],value)}
                                         />
                                     </div>
@@ -1139,7 +1285,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Autorretenedor a titulo de timbre</span>
                                         <SwitchOption
                                             key={`ring-self-${withholdingRetentions.ring.ringSelfWithholdingAgent}`}
-                                            defaultValue={withholdingRetentions.ring.ringSelfWithholdingAgent}
+                                            value={withholdingRetentions.ring.ringSelfWithholdingAgent}
                                             action={value=>updateNestedField(['withholdingRetentions','ring','ringSelfWithholdingAgent'],value)}
                                         />
                                     </div>
@@ -1151,7 +1297,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Responsable impuesto al Consumo</span>
                                         <SwitchOption
                                             key={`consumption-responsible-${withholdingRetentions.consumption.consumptionTaxResponsable}`}
-                                            defaultValue={withholdingRetentions.consumption.consumptionTaxResponsable}
+                                            value={withholdingRetentions.consumption.consumptionTaxResponsable}
                                             action={value=>updateNestedField(['withholdingRetentions','consumption','consumptionTaxResponsable'],value)}
                                         />
                                     </div>
@@ -1159,7 +1305,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Agente retenedor a titulo de impuesto al consumo</span>
                                         <SwitchOption
                                             key={`consumption-withholding-${withholdingRetentions.consumption.consumptionWithholdingAgent}`}
-                                            defaultValue={withholdingRetentions.consumption.consumptionWithholdingAgent}
+                                            value={withholdingRetentions.consumption.consumptionWithholdingAgent}
                                             action={value=>updateNestedField(['withholdingRetentions','consumption','consumptionWithholdingAgent'],value)}
                                         />
                                     </div>
@@ -1167,7 +1313,7 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                                         <span>Autorretenedor a titulo de impuesto al consumo</span>
                                         <SwitchOption
                                             key={`consumption-self-${withholdingRetentions.consumption.consumptionSelfWithholdingAgent}`}
-                                            defaultValue={withholdingRetentions.consumption.consumptionSelfWithholdingAgent}
+                                            value={withholdingRetentions.consumption.consumptionSelfWithholdingAgent}
                                             action={value=>updateNestedField(['withholdingRetentions','consumption','consumptionSelfWithholdingAgent'],value)}
                                         />
                                     </div>
@@ -1177,12 +1323,13 @@ export function FormNewThirdParties({reloadFun,quickCreation}){
                     )}
                 </section>
             )}
-            <FormButton disabled={disabled} loading={loading} text={stage === maxStage ? 'Registrar Tercero':'Siguiente'} onClick={handlePrimaryAction}/>
+            <FormButton disabled={disabled} loading={loading} text={stage === maxStage ? (forUpdate ? 'Actualizar tercero' : 'Registrar Tercero'):'Siguiente'} onClick={handlePrimaryAction}/>
             {stage > 0 && (
                 <FormButton disabled={disabled} loading={loading} negative={true} text={'Volver'} onClick={()=>{
                     setStage(stage -1)
                 }}/>
             )}
+            </>}
         </div>
     )
 }       

@@ -42,10 +42,11 @@ export function ProductLinkFiscalConditionsCard({
     companyId,
     info,
     disabled,
+    readOnly = false,
     value = [],
     action
 }) {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(readOnly);
     const [loading, setLoading] = useState(false);
     const [products, setProducts] = useState([]);
     const [relationsByProduct, setRelationsByProduct] = useState({});
@@ -82,12 +83,12 @@ export function ProductLinkFiscalConditionsCard({
 
         setLoading(true);
         try {
-            const productsRes = await postInfo('/inventory/getProducts', {
-                company_id: companyId
-            });
-            const relationsRes = await postInfo('/inventory/getProductTaxRelations', {
-                company_id: companyId
-            });
+            const [productsRes, relationsRes] = await Promise.all([
+                postInfo('/inventory/getProducts', {company_id: companyId}),
+                readOnly
+                    ? Promise.resolve(null)
+                    : postInfo('/inventory/getProductTaxRelations', {company_id: companyId})
+            ]);
 
             if (productsRes?.[0]) {
                 setProducts(productsRes[1]);
@@ -112,6 +113,36 @@ export function ProductLinkFiscalConditionsCard({
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (!readOnly) return;
+
+        const productsById = new Map();
+        value.forEach((relation) => {
+            const productId = relation.product_id;
+            if (productId == null || productsById.has(String(productId))) return;
+
+            productsById.set(String(productId), {
+                id:productId,
+                name:relation.product_name ?? `Producto ${productId}`,
+                code:relation.product_code ?? '',
+                img:relation.product_img ?? ''
+            });
+        });
+
+        setSelectedProducts([...productsById.values()].map((relationProduct) => (
+            products.find(product => String(product.id) === String(relationProduct.id))
+                ?? relationProduct
+        )));
+        setReferencesByProduct(value.reduce((references, relation) => {
+            const productId = relation.product_id;
+            const reference = relation.third_party_reference ?? relation.thirdPartyReference;
+            if (productId != null && reference && !references[productId]) {
+                references[productId] = reference;
+            }
+            return references;
+        }, {}));
+    }, [readOnly, value, products]);
 
     const addProduct = (product) => {
         if (!product?.id) return;
@@ -189,6 +220,37 @@ export function ProductLinkFiscalConditionsCard({
     };
 
     const renderOperation = (product, operationType) => {
+        if (readOnly) {
+            const selectedOperationRelations = selectedRelations.filter((relation) => (
+                String(relation.product_id) === String(product.id)
+                && relation.operation_type === operationType
+            ));
+            return (
+                <div className="operationBlock readOnlyOperationBlock" key={operationType}>
+                    <h5>{OPERATION_LABELS[operationType]}</h5>
+                    {['tax', 'withholding'].map((taxRole) => {
+                        const roleRelations = selectedOperationRelations.filter(
+                            relation => relation.tax_role === taxRole
+                        );
+                        return (
+                            <div className="relationGroup" key={`${operationType}-${taxRole}`}>
+                                <strong>{ROLE_LABELS[taxRole]}</strong>
+                                {roleRelations.length === 0 && (
+                                    <span className="emptyRelationText">Sin relaciones configuradas.</span>
+                                )}
+                                {roleRelations.map((relation, index) => (
+                                    <div className="readOnlyRelation" key={`${relation.relationKey ?? relation.tax_id}-${index}`}>
+                                        <span>{relation.tax_code ? `${relation.tax_code} - ` : ''}{relation.tax_name ?? relation.name ?? `Impuesto ${relation.tax_id}`}</span>
+                                        <small>{relation.rate ?? 0}%</small>
+                                    </div>
+                                ))}
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        }
+
         const productRelations = relationsByProduct[product.id] ?? [];
         const operationRelations = productRelations.filter((relation) => relation.operation_type === operationType);
 
@@ -230,7 +292,7 @@ export function ProductLinkFiscalConditionsCard({
 
     useEffect(() => {
         getRequiredData();
-    }, [companyId]);
+    }, [companyId, readOnly]);
 
     useEffect(() => {
         action?.(selectedRelations);
@@ -241,8 +303,9 @@ export function ProductLinkFiscalConditionsCard({
             <button
                 className="productFiscalHeader"
                 type="button"
-                disabled={disabled}
+                disabled={disabled && !readOnly}
                 onClick={() => setOpen(!open)}
+                aria-expanded={open}
             >
                 <img src="https://cdnmain.sga360.co/static/Cuadricula3Documentos_2_ujr8ce.webp" alt="" />
                 <span>
@@ -254,17 +317,21 @@ export function ProductLinkFiscalConditionsCard({
 
             {open && (
                 <div className="productFiscalBody">
-                    <SearchinList
-                        noActVal={true}
-                        disabled={disabled || loading || productOptions.length === 0}
-                        placeHolder={loading ? 'Cargando productos...' : '+ Agregar producto o servicio'}
-                        list={productOptions}
-                        action={addProduct}
-                    />
+                    {!readOnly && (
+                        <SearchinList
+                            noActVal={true}
+                            disabled={disabled || loading || productOptions.length === 0}
+                            placeHolder={loading ? 'Cargando productos...' : '+ Agregar producto o servicio'}
+                            list={productOptions}
+                            action={addProduct}
+                        />
+                    )}
 
                     {selectedProducts.length === 0 && (
                         <span className="emptyProductsText">
-                            Selecciona productos para definir sus impuestos y retenciones por compra o venta.
+                            {readOnly
+                                ? 'Este tercero no tiene productos asociados.'
+                                : 'Selecciona productos para definir sus impuestos y retenciones por compra o venta.'}
                         </span>
                     )}
 
@@ -276,20 +343,26 @@ export function ProductLinkFiscalConditionsCard({
                                     <h4>{product.name}</h4>
                                     <span>{product.code ?? 'Sin código'}</span>
                                 </div>
-                                <button
+                                {!readOnly && <button
                                     type="button"
                                     title={`Quitar ${product.name}`}
                                     disabled={disabled}
                                     onClick={() => removeProduct(product.id)}
                                 >
                                     <i className="fa-solid fa-trash" />
-                                </button>
+                                </button>}
                             </div>
                             <div className="operationsGrid">
                                 {renderOperation(product, 'purchase')}
                                 {renderOperation(product, 'sell')}
                             </div>
-                            <div className="thirdPartyProductReference">
+                            <div className={`thirdPartyProductReference${readOnly ? ' readOnlyThirdPartyReference' : ''}`}>
+                                {readOnly ? (
+                                    <>
+                                        <strong>{referenceLabel}</strong>
+                                        <span>{referencesByProduct[product.id] || 'Sin referencia configurada.'}</span>
+                                    </>
+                                ) : (
                                 <FormInput
                                     title={referenceLabel}
                                     placeholder={'Como el proveedor llama este item, puede ser util para completar con la IA y demas.'}
@@ -298,6 +371,7 @@ export function ProductLinkFiscalConditionsCard({
                                     value={referencesByProduct[product.id] ?? ''}
                                     action={(reference) => updateProductReference(product.id,reference)}
                                 />
+                                )}
                             </div>
                         </article>
                     ))}

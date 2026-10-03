@@ -51,6 +51,16 @@ export function ThirdParties() {
         navigate(`/SGA_management/${params.company_key}/${params.user_key}/thirdParties/${thirdPartyId}`);
     };
 
+    const handleEditThirdParty = (thirdPartyId) => {
+        popInAlert(
+            <FormNewThirdParties
+                thirdPartyId={thirdPartyId}
+                forUpdate={true}
+                reloadFun={fetchThirdParties}
+            />
+        );
+    };
+
     const handleRetry = () => {
         fetchThirdParties();
     };
@@ -146,7 +156,7 @@ export function ThirdParties() {
                                             key={thirdParty.id}
                                             info={thirdParty}
                                             onCardClick={handleCardClick}
-                                            onEdit={handleCardClick}
+                                            onEdit={handleEditThirdParty}
                                             reloadFun={fetchThirdParties}
                                         />
                                     ))}

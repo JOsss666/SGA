@@ -1,18 +1,28 @@
 import { useEffect, useState } from "react"
 import './SwitchOption.css'
 
-export function SwitchOption({state1,state2,action,defaultValue}){
+export function SwitchOption({state1,state2,action,defaultValue,value}){
 
     const [switched,setSwitched] = useState(defaultValue??false);
+    const isControlled = value !== undefined;
+    const displayedValue = isControlled ? value === true : switched;
 
     useEffect(()=>{
-        if(action!= undefined){
+        if(!isControlled && action!= undefined){
             action(switched);
         }
-    },[switched])
+    },[switched,isControlled])
+
+    const toggleSwitch = ()=>{
+        const nextValue = !displayedValue;
+        if(!isControlled){
+            setSwitched(nextValue);
+        }
+        action?.(nextValue);
+    };
 
     return(
-        <div onClick={()=>{setSwitched(!switched)}} className={`SwitchOption ${switched? 'switchedSwitch':''}`}>
+        <div onClick={toggleSwitch} className={`SwitchOption ${displayedValue? 'switchedSwitch':''}`}>
             <div className="switch"/>
             <span>{state1}</span>
             <span>{state2}</span>
