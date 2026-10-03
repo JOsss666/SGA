@@ -67,6 +67,13 @@
     white-space: nowrap;
 }
 
+.processAdministrationTable .processAdministrationTableBulkActions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 1vh;
+}
+
 .processAdministrationTable .sgaTreasury {
     min-width: 0;
 }
@@ -185,6 +192,10 @@
     }
 
     .processAdministrationTable .processAdministrationTableBulk .FormButton {
+        width: 100%;
+    }
+
+    .processAdministrationTable .processAdministrationTableBulkActions {
         width: 100%;
     }
 }

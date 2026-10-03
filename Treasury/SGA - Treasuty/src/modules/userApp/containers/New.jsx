@@ -43,6 +43,8 @@ export function New(){
     const [disabled,setDisabled] = useState(false);
     const [messgeDisabled,setMessageDisabled] = useState('')
     const [numberingRangesStatus, setNumberingRangesStatus] = useState('idle');
+    // Temporal: permite continuar con las opciones de creación mientras se valida el cierre de clicks.
+    const clicksControlBypass = true;
 
     useEffect(() => {
         if (!appConfig?.access) return;
@@ -103,7 +105,7 @@ export function New(){
         ] : []),
         //{text:'Crear orden de trabajo',children:<SelectTpeNewDoc/>,icon:<i className="fa-solid fa-bell-concierge"/>},
         //{text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
-        //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
+        {text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
 
         {text:'Imprimir recibos',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-print"/>},
         /*
@@ -157,7 +159,7 @@ export function New(){
         <div className="New">
             <BoldTitle text={'Crear nuevo'}/>
             <DescriptionSpan text={'Crea todo lo que necesites en un solo click'}/>
-            {!disabled && (
+            {(clicksControlBypass || !disabled) && (
                 <div className="gridOptions">
                     {options.map((element,index)=>(
                         <span key={index} onClick={()=>{
@@ -169,7 +171,7 @@ export function New(){
                     ))}
                 </div>
             )}
-            {disabled && (
+            {!clicksControlBypass && disabled && (
                 <>
                     <NoResults title={messgeDisabled} img={'https://uxwing.com/wp-content/themes/uxwing/download/signs-and-symbols/stop-blocked-icon.png'}/>
                     {userConfig.access != undefined && (userConfig.access.services.personalized['custom-modules'])["z&j_clicksControl"].access && (

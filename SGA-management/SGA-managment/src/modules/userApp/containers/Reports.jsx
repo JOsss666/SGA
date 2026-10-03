@@ -14,8 +14,12 @@ import { useEffect, useState } from 'react';
 import { ReportKardex } from './reports/ReportKardex';
 import { PathLocation } from '../components/PathLocation';
 import { ReportAccountTransactions } from './reports/ReportAccountTransactions';
+import { ReportAuxiliaryLedger, hasLedgerAccess } from './reports/reportAuxiliaryLedger';
+import { useAppInfo } from '../../../context/context';
 
 export function Reports(){
+    const { userConfig } = useAppInfo();
+    const ledgerAccess = hasLedgerAccess(userConfig);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -60,6 +64,9 @@ export function Reports(){
                                         {title:'Informe Costos Operativos',children:<i className="fa-solid fa-book"/>}
                                     ]}
                                 ]}/>
+                                {ledgerAccess && <DespleList children={<i className="fa-solid fa-book"/>} father={{title:'Reportes contables'}} options={[
+                                    {title:'Libro Auxiliar', children:<i className="fa-solid fa-book"/>, action:handleNavigate, path:'Auxiliar'}
+                                ]}/>}
                                 <DespleList children={<i className="fa-solid fa-calendar-check"/>} father={{
                                     title:'Informes de aplicación'
                                 }} options={[
@@ -77,6 +84,7 @@ export function Reports(){
                             </div>
                         </div>
                         <div className="galleryReports">
+                            {ledgerAccess && <CardReport type="contable" title="Libro Auxiliar" description="Saldos y movimientos por cuenta contable y tercero" onClick={() => handleNavigate('Auxiliar')}/>}
                             <CardReport type={'Documento'} title={'Ordenes de cliente (OCS)'} description={'Consulta los detalles de todas tus Ordenes de cliente'} onClick={()=>{
                                 handleNavigate('OCS')
                             }} />
@@ -113,6 +121,7 @@ export function Reports(){
                 <Route path='/TRS' element={<ReportDocuments type={'TR'}/>} />
                 <Route path='/TRS/:transaction_id' element={<ReportTransactionDetails/>} />
                 <Route path='/Balance' element={<ReportBalance/>}/>
+                <Route path='/Auxiliar' element={<ReportAuxiliaryLedger/>}/>
                 <Route path='/Balance/:account_id' element={<ReportAccountTransactions/>}/>
                 <Route path='/Kardex' element={<ReportKardex/>}/>
             </Routes>

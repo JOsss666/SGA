@@ -14,6 +14,11 @@
     cursor: pointer;
 }
 
+.RowTableReport.RowTableReport_thirdParty{
+    background-color: var(--cardHover);
+    padding-left: 3vh;
+}
+
 .RowTableReport:hover{
     background-color: var(--cardHover);
 }

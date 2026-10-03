@@ -12,7 +12,9 @@ export function SearchinList({
     noActVal,
     canClear,
     defaultValue = {},
-    value
+    value,
+    multiple = false,
+    keepOpenOnMultiple = false
 }){
     
     const [searchValue, setSearchValue] = useState('');
@@ -55,8 +57,22 @@ export function SearchinList({
     const handleSelect = (element) => {
         const optionValue = element.value !== undefined ? element.value : element.text;
 
+        if (multiple) {
+            const selectedValues = Array.isArray(value) ? value.map(String) : [];
+            const nextValues = selectedValues.includes(String(optionValue))
+                ? selectedValues.filter(selected => selected !== String(optionValue))
+                : [...selectedValues, String(optionValue)];
+            if (action) action(nextValues);
+            setSearchValue('');
+            // Los filtros con selección múltiple pueden seguir agregándose sin
+            // obligar a abrir el listado después de cada elección.
+            setVisibleList(keepOpenOnMultiple);
+            setFocusedIndex(-1);
+            return;
+        }
+
         if(!noActVal){
-            setInputValue(element.text);
+            setInputValue(element.selectedText ?? element.text);
             setSearchValue('');
             setSelectedOption(optionValue);
         }
@@ -72,7 +88,7 @@ export function SearchinList({
         setSearchValue('');
         setInputValue('');
         setSelectedOption('');
-        if(action && !noActVal) action('');
+        if(action && !noActVal) action(multiple ? [] : '');
     };
 
     const handleKeyDown = (e) => {
@@ -96,6 +112,15 @@ export function SearchinList({
 
     useEffect(()=>{
         if(noActVal) return;
+
+        if (multiple) {
+            const selectedValues = Array.isArray(value) ? value.map(String) : [];
+            const selectedLabels = list
+                .filter(element => selectedValues.includes(String(element.value !== undefined ? element.value : element.text)))
+                .map(element => element.text);
+            setInputValue(selectedLabels.join(', '));
+            return;
+        }
 
         const isControlled = value !== undefined;
         const selectedValue = isControlled
@@ -122,7 +147,7 @@ export function SearchinList({
         });
 
         setInputValue(selectedElement?.text ?? defaultValue.text ?? '');
-    }, [value, selectedOption, defaultValue.value, defaultValue.text, list, noActVal]);
+    }, [value, selectedOption, defaultValue.value, defaultValue.text, list, noActVal, multiple]);
 
     return(
         <div className="FacturationSearchinList" onClick={()=>{

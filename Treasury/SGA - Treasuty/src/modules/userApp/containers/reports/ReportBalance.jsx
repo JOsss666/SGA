@@ -15,8 +15,10 @@ import { ButtonDownload } from "../../components/ButtonDownload";
 import { AiButton } from "../../components/ChatAiComponents/AiButton";
 import { LabelValue } from "../../components/LabelValue";
 import { FilterReports } from "./FilterReports";
+import { SearchinList } from "../../components/SearchInList";
+import { SwitchOption } from "../../components/SwitchOption";
 
-export function ReportBalance({}) {
+export function ReportBalance() {
 
     // Prev Info
     const [info, setInfo] = useState([]);
@@ -33,6 +35,9 @@ export function ReportBalance({}) {
     const [totalDebit,setTotalDebit] = useState(0)
     const [totalBalance,setTotalBalance] = useState(0)
     const [totalInitialBalance,setTotalInitialBalance] = useState(0)
+    const [groupByThirdParty,setGroupByThirdParty] = useState(false);
+    const [thirdParties,setThirdParties] = useState([]);
+    const [thirdPartyIds,setThirdPartyIds] = useState([]);
 
     const columsTr = [
         "Cuenta",
@@ -46,6 +51,10 @@ export function ReportBalance({}) {
     const balanceXlsxColumns = [
         { header: "Cuenta", key: "account_code", width: 18 },
         { header: "Concepto", key: "concept_name", width: 36 },
+        ...(groupByThirdParty ? [
+            { header: "Identidad", key: "identity", width: 18 },
+            { header: "DV", key: "dv", width: 8 }
+        ] : []),
         { header: "Saldo Inicial", key: "opening_balance", type: "number", numFmt: "#,##0.00", width: 18 },
         { header: "D\u00e9bito", key: "total_debit", type: "number", numFmt: "#,##0.00", width: 18 },
         { header: "Cr\u00e9dito", key: "total_credit", type: "number", numFmt: "#,##0.00", width: 18 },
@@ -96,12 +105,14 @@ export function ReportBalance({}) {
     }
 
     const settingsReport = {
-        columns: columsTr,
+        columns: groupByThirdParty ? ["Cuenta", "Concepto", "Identidad", "DV", "Saldo inicial", "Debito", "Crédito", "Saldo"] : columsTr,
         company_id: appInfo.company_id,
         typePlanAccount:appInfo.accountPlanType,
         start_date,
         end_date,
-        allAccounts
+        allAccounts,
+        group_by_third_party: groupByThirdParty,
+        third_party_ids: thirdPartyIds
     };
 
     const calcTotals = ()=>{
@@ -109,7 +120,7 @@ export function ReportBalance({}) {
         let tc = 0;
         let tb = 0;
         let tiB = 0;
-        info.forEach(element => {
+        info.filter(element => element.row_type !== 'third_party').forEach(element => {
             td += element.total_debit
             tc += element.total_credit
             tb += element.final_balance
@@ -145,7 +156,21 @@ export function ReportBalance({}) {
     useEffect(() => {
         setVisibleSettings(false)
         getBalance();
-    }, [start_date,end_date,allAccounts]);
+    }, [start_date,end_date,allAccounts,groupByThirdParty,thirdPartyIds]);
+
+    useEffect(() => {
+        if (!groupByThirdParty || thirdParties.length > 0 || !appInfo.company_id) return;
+        const getThirdParties = async () => {
+            const res = await postInfo('/getThirdParties', { company_id: appInfo.company_id });
+            if (res[0]) setThirdParties(res[1] || []);
+        };
+        getThirdParties();
+    }, [groupByThirdParty, appInfo.company_id, thirdParties.length]);
+
+    const thirdPartyOptions = thirdParties.map(thirdParty => ({
+        value: thirdParty.id,
+        text: `${thirdParty.indentification_number || ''} ${thirdParty.names || ''}`.trim()
+    }));
 
     return (
         <div className="ReportDocument">
@@ -167,6 +192,18 @@ export function ReportBalance({}) {
             <span>-</span>
             <FormInput type={"date"} title={"Fecha Final"} action={setEnd_date} />
             </div>
+            <SwitchOption state1="Por cuenta" state2="Por tercero" action={setGroupByThirdParty} defaultValue={groupByThirdParty}/>
+            {groupByThirdParty && (
+                <SearchinList
+                    title="Terceros"
+                    placeHolder="Todos los terceros"
+                    list={thirdPartyOptions}
+                    value={thirdPartyIds}
+                    multiple={true}
+                    canClear={true}
+                    action={setThirdPartyIds}
+                />
+            )}
             <SelectOptions
             options={[
                 "Ascendente (fecha)",
@@ -192,7 +229,7 @@ export function ReportBalance({}) {
                 component={"bodyreport"}
                 xlsxOptions={getBalanceXlsxOptions}
             />
-            <FilterReports hidden={visibleSettings} columns={columsTr} filters={filters}/>
+            <FilterReports hidden={visibleSettings} columns={settingsReport.columns} filters={filters}/>
         </div>
         <div className="SpaceReport">
                 {!loading && (

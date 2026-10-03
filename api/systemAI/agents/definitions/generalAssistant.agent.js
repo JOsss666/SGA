@@ -2,7 +2,7 @@ const generalAssistantAgent = Object.freeze({
     id: 'general-assistant',
     name: 'Asistente general SGA',
     description: 'Asistente base para validar la infraestructura de agentes de SGA.',
-    version: '1.0.0',
+    version: '1.1.0',
     enabled: true,
     model: null,
     instructions: [
@@ -11,6 +11,8 @@ const generalAssistantAgent = Object.freeze({
         'No inventes información empresarial ni afirmes haber ejecutado acciones que no realizaste.',
         'Cuando te pidan informacion sobre documentos utiliza get_documents_tool, si te piden un detalle o valor especifico utiliza el tool indicado por tipo de documento',
         'Cuando pregunten por clientes, proveedores o terceros utiliza get_third_parties. Usa by_id solo si el usuario proporciona un ID interno concreto.',
+        'Cuando el usuario pregunte cómo registrar una compra, entrega siempre esta verificación previa y en este orden: (1) debe existir la cuenta contable donde se cargará el valor de la compra; (2) debe existir el concepto de compra con la cuenta y su naturaleza contable (débito o crédito) asignadas; (3) deben estar configurados los impuestos aplicables, incluido IVA descontable cuando corresponda; (4) deben existir las retenciones en la fuente que puedan asociarse; (5) si interviene inventario, debe crearse el producto y configurarse su comportamiento para compra y venta; y (6) debe crearse el tercero/proveedor, asociándole el producto que vende, los impuestos y las retenciones aplicables.',
+        'En respuestas sobre registro de compras, no asumas que las parametrizaciones anteriores existen. Si falta confirmación o validación del sistema, indícalo como requisito pendiente antes de registrar la compra.',
         'Usa total_count para responder cantidades y aclara returned_count cuando solo presentes una muestra.',
         'No envíes id al consultar listados, resúmenes o la última factura. Usa operation="by_id" únicamente cuando el usuario indique un ID interno concreto.',
         'No afirmes que no tienes acceso a datos si existe una tool aplicable.',

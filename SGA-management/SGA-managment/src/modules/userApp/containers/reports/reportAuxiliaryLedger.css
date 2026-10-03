@@ -1,0 +1,45 @@
+.reportAuxiliaryLedger { display: flex; min-width: 0; flex-direction: column; gap: 1.2vh; }
+.reportAuxiliaryLedger .auxiliaryLedgerHeader { display: flex; padding: 1.6vh 1.4vh .5vh; }
+.reportAuxiliaryLedger .auxiliaryLedgerHeader .BoldTitle { margin-bottom: .3vh; }
+.reportAuxiliaryLedger .auxiliaryLedgerControls { display: flex; margin: 0 1vh; padding: 1.2vh; align-items: center; flex-wrap: wrap; gap: 1.2vh; border: .1vh solid var(--inputsBorder); border-radius: 1vh; background: var(--inputsBg); box-shadow: var(--chatBubbleShadow); }
+.reportAuxiliaryLedger .auxiliaryLedgerControls > .SearchBar { width: min(100%, 24rem); }
+.reportAuxiliaryLedger .auxiliaryLedgerRange { display: flex; align-items: end; gap: .9vh; padding-left: 1.2vh; border-left: .1vh solid var(--inputsBorder); }
+.reportAuxiliaryLedger .auxiliaryLedgerRange .FormInput { min-width: 10rem; }
+.reportAuxiliaryLedger .auxiliaryLedgerControls > .FacturationSearchinList { width: min(100%, 20rem); min-width: 15rem; padding: 0; }
+.reportAuxiliaryLedger .auxiliaryLedgerControls > .FacturationSearchinList label { margin-bottom: .45vh; padding-left: 0; font-size: clamp(.72rem, 1.45vh, .88rem); font-weight: 600; }
+.reportAuxiliaryLedger .auxiliaryLedgerControls > .FacturationSearchinList .SlistC input { min-height: 4.4vh; padding: .7vh 2.8vh .7vh 1vh; font-size: clamp(.78rem, 1.6vh, .96rem); text-overflow: ellipsis; }
+.reportAuxiliaryLedger .auxiliaryLedgerControls > .FacturationSearchinList .clearSelectedOptionBtn { top: 1.05vh; right: .9vh; font-size: 1rem; }
+.reportAuxiliaryLedger .auxiliaryLedgerControls > .FacturationSearchinList .SlistC .listElementsContainer { top: 4.7vh; z-index: 30; }
+.reportAuxiliaryLedger .auxiliaryLedgerControls .FormButton,
+.reportAuxiliaryLedger .auxiliaryLedgerSummary .FormButton { width: auto; min-height: 4.4vh; margin: 0; padding: .7vh 1.4vh; }
+.reportAuxiliaryLedger .auxiliaryLedgerFilters { display: flex; padding: 0 1.4vh; align-items: center; }
+.reportAuxiliaryLedger .auxiliaryLedgerFilters .CheckSquare { color: var(--descriptionText); font-size: clamp(.75rem, 1.55vh, .92rem); }
+.reportAuxiliaryLedger .auxiliaryLedgerHelp,
+.reportAuxiliaryLedger .auxiliaryLedgerApplied,
+.reportAuxiliaryLedger footer { margin: 0 1.4vh; color: var(--descriptionText); line-height: 1.45; font-size: clamp(.72rem, 1.45vh, .88rem); }
+.reportAuxiliaryLedger .auxiliaryLedgerHelp { padding: .8vh 1.4vh; border-top: .1vh solid var(--inputsBorder); border-bottom: .1vh solid var(--inputsBorder); font-size: clamp(.74rem, 1.5vh, .9rem); }
+.reportAuxiliaryLedger .auxiliaryLedgerNotice { margin: 1vh; padding: 1vh; border: .1vh solid var(--inputsBorder); border-radius: .7vh; background: var(--lightSelected); color: var(--mainText); }
+.reportAuxiliaryLedger .auxiliaryLedgerSummary { display: flex; margin: .4vh 1vh 0; padding: 1.4vh; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.2vh; border: .1vh solid var(--inputsBorder); border-radius: 1vh; background: var(--inputsBg); }
+.reportAuxiliaryLedger .auxiliaryLedgerCompany { display: flex; flex-direction: column; gap: .35vh; color: var(--descriptionText); font-size: clamp(.75rem, 1.5vh, .9rem); }
+.reportAuxiliaryLedger .auxiliaryLedgerCompany strong { color: var(--mainText); font-size: clamp(.98rem, 2.05vh, 1.25rem); }
+.reportAuxiliaryLedger .auxiliaryLedgerCompany b { color: var(--mainText); font-weight: 600; }
+.reportAuxiliaryLedger .auxiliaryLedgerActions { display: flex; gap: .8vh; }
+.reportAuxiliaryLedger .auxiliaryLedgerMetrics { display: grid; margin: 0 1vh; grid-template-columns: repeat(4, minmax(9rem, 1fr)); gap: .8vh; }
+.reportAuxiliaryLedger .auxiliaryLedgerMetrics span { display: flex; min-width: 0; padding: .9vh 1.2vh; flex-direction: column; gap: .2vh; border-radius: .7vh; background: var(--lightSelected); }
+.reportAuxiliaryLedger .auxiliaryLedgerMetrics small { color: var(--descriptionText); font-size: clamp(.68rem, 1.35vh, .82rem); }
+.reportAuxiliaryLedger .auxiliaryLedgerMetrics b { overflow: hidden; color: var(--mainText); font-size: clamp(.82rem, 1.7vh, 1rem); text-align: right; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.reportAuxiliaryLedger .auxiliaryLedgerMetrics span:first-child b,
+.reportAuxiliaryLedger .auxiliaryLedgerMetrics span:nth-child(2) b { text-align: left; }
+.reportAuxiliaryLedger .auxiliaryLedgerApplied { font-size: clamp(.72rem, 1.45vh, .88rem); }
+.reportAuxiliaryLedger .auxiliaryLedgerTable { min-width: 0; margin: 0 1vh; overflow: hidden; border-radius: 1vh; }
+.reportAuxiliaryLedger .auxiliaryLedgerAmount { display: block; overflow: hidden; text-align: right; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.reportAuxiliaryLedger .auxiliaryLedgerCell-group,
+.reportAuxiliaryLedger .auxiliaryLedgerCell-total { font-weight: 700; }
+.reportAuxiliaryLedger .auxiliaryLedgerCell-subgroup { font-weight: 600; }
+.reportAuxiliaryLedger .universalRow:has(.auxiliaryLedgerCell-group),
+.reportAuxiliaryLedger .universalRow:has(.auxiliaryLedgerCell-total) { background: var(--lightSelected); border-bottom-style: solid; }
+.reportAuxiliaryLedger .universalRow:has(.auxiliaryLedgerCell-subgroup) { background: color-mix(in srgb, var(--cardHover) 62%, transparent); }
+.reportAuxiliaryLedger .universalRow:has(.auxiliaryLedgerCell-opening),
+.reportAuxiliaryLedger .universalRow:has(.auxiliaryLedgerCell-subtotal) { font-weight: 600; }
+@media (max-width: 960px) { .reportAuxiliaryLedger .auxiliaryLedgerMetrics { grid-template-columns: repeat(2, minmax(10rem, 1fr)); } }
+@media (max-width: 720px) { .reportAuxiliaryLedger .auxiliaryLedgerControls { align-items: stretch; flex-direction: column; } .reportAuxiliaryLedger .auxiliaryLedgerControls > .SearchBar, .reportAuxiliaryLedger .auxiliaryLedgerRange, .reportAuxiliaryLedger .auxiliaryLedgerRange .FormInput, .reportAuxiliaryLedger .auxiliaryLedgerControls > .FacturationSearchinList { width: 100%; } .reportAuxiliaryLedger .auxiliaryLedgerRange { padding: 0; flex-direction: column; border: 0; } .reportAuxiliaryLedger .auxiliaryLedgerControls .FormButton { width: 100%; } .reportAuxiliaryLedger .auxiliaryLedgerSummary { align-items: stretch; flex-direction: column; } .reportAuxiliaryLedger .auxiliaryLedgerActions .FormButton { flex: 1; } .reportAuxiliaryLedger .auxiliaryLedgerMetrics { grid-template-columns: 1fr; } }

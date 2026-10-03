@@ -21,6 +21,8 @@ import geographyController from '../controllers/geographyController.js';
 import companyConfigurationController from '../controllers/companyConfigurationController.js';
 import searchController from '../controllers/searchController.js';
 import companyTimeZoneController from '../controllers/companyTimeZoneController.js';
+import auxiliaryLedgerController from '../controllers/auxiliaryLedgerController.js';
+import { createAdjustment, deleteTemplate, listTemplates, saveTemplate } from '../controllers/accountingAdjustmentController.js';
 import integrationRouter from './integration.routes.js';
 import { systemAIRouter } from '../systemAI/index.js';
 import sessionRouter from './session.routes.js';
@@ -31,8 +33,21 @@ import { requireTrustedOrigin } from '../middleware/requireTrustedOrigin.js';
 import { requireCompanyAccess } from '../middleware/requireCompanyAccess.js';
 import supplierDelegationController from '../controllers/supplierDelegationController.js';
 import externalAccesThirdPartyController from '../controllers/externalThirdPartyAccesController.js';
+import { createDeliveryOrder } from '../controllers/custom-controllers/nexoDeliveryOrderController.js';
 
 const router = express.Router();
+
+router.post('/contability/auxiliary-ledger', express.json({ limit: '64kb' }),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess,
+    auxiliaryLedgerController, sessionErrorHandler);
+router.post('/contability/accounting-adjustments', express.json({ limit: '256kb' }),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess, createAdjustment, sessionErrorHandler);
+router.post('/contability/accounting-adjustment-templates/list', express.json({ limit: '16kb' }),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess, listTemplates, sessionErrorHandler);
+router.post('/contability/accounting-adjustment-templates', express.json({ limit: '256kb' }),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess, saveTemplate, sessionErrorHandler);
+router.delete('/contability/accounting-adjustment-templates/:id', express.json({ limit: '16kb' }),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess, deleteTemplate, sessionErrorHandler);
 
 // temporal folder for chunks
 const CHUNKS_DIR = path.join(process.cwd(), "chunks");
@@ -394,6 +409,10 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     router.post('/nexo360/getProcessAdministrationReport', express.json({ limit: '16kb' }),
         requireTrustedOrigin,
         nexo360Controller.getProcessAdministrationReport, sessionErrorHandler);
+
+    router.post('/nexo360/delivery-orders', express.json({ limit: '128kb', strict: true }),
+        requireTrustedOrigin, authenticateSession, requireCompanyAccess,
+        createDeliveryOrder, sessionErrorHandler);
 
 
 

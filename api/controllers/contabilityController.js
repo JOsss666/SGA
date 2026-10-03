@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { send_API_AI } from "../ApiFunctions.js";
 import { companyTimeZoneSql } from "../services/businessTimeZoneService.js";
+import { buildBalanceByThirdPartyQuery } from "../services/balanceByThirdPartyService.js";
 const contabiltyController = {};
 
 contabiltyController.getBalance = (req,res)=>{
@@ -14,6 +15,18 @@ contabiltyController.getBalance = (req,res)=>{
         let info = JSON.parse(data);
         let values = [];
         let whereClauses = []
+
+        if (info.group_by_third_party === true) {
+            try {
+                const balanceQuery = buildBalanceByThirdPartyQuery(info.company_id, info);
+                const consulta = await useDataBase(balanceQuery.text, balanceQuery.values, 1);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify(consulta));
+            } catch (error) {
+                res.writeHead(error.statusCode || 500, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ error: error.message || 'No fue posible generar el balance por tercero.' }));
+            }
+        }
 
         whereClauses.push(`p.company_id = $1 OR company_id = 0`)
         values.push(info.company_id)

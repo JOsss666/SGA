@@ -59,6 +59,14 @@
     box-shadow: none;
 }
 
+@media (max-width: 1100px){
+    .ReportDocument .settingsReport{
+        flex-wrap: wrap;
+        gap: 1vh;
+    }
+
+}
+
 .ReportDocument .settingsReport .FacturationFormInput label{
     position: absolute;
     top: -3vh;

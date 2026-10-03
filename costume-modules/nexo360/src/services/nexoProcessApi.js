@@ -22,3 +22,15 @@ export async function getProcessAdministrationReport(companyId) {
 
     return response.json();
 }
+
+export async function createDeliveryOrder(companyId, payload) {
+    const response = await fetch(`${apiBaseUrl}/nexo360/delivery-orders`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", "X-SGA-Company-Id": String(companyId) },
+        body: JSON.stringify({ ...payload, company_id: companyId })
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw body;
+    return body;
+}

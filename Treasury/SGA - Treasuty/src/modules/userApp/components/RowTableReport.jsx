@@ -52,6 +52,8 @@ export function RowTableReport({columns,info,hidden,navigation}){
         "Referencia":<UserCard name={info.product_name} imgSrc={info.img}/>,
         "Unidades":<span className="rowSpan rightAl mediumCol">{info.units}</span>,
         "Cuenta":<span className="rowSpan">{info.account_code}</span>,
+        "Identidad":<span className="rowSpan">{info.identity || ''}</span>,
+        "DV":<span className="rowSpan">{info.dv || ''}</span>,
         'Estado':<span className="rowSpan idHolder">{info.status}</span>,
         'Descripción':<span className="rowSpan" >{info.description}</span>,
         'Negocio':<span className="rowSpan">{info.bussines_name != undefined? info.bussines_name:'null'}</span>,
@@ -113,7 +115,7 @@ export function RowTableReport({columns,info,hidden,navigation}){
 
     if(!hidden){
         return(
-            <div className={`RowTableReport ${navigation? 'RowTableReport_redirectRow':''}`} onClick={()=>{
+            <div className={`RowTableReport ${navigation? 'RowTableReport_redirectRow':''} ${info.row_type === 'third_party' ? 'RowTableReport_thirdParty' : ''}`} onClick={()=>{
                 if(info.id != undefined && navigation){
                     handleNavigate(info.id)
                 }

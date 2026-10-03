@@ -13,6 +13,7 @@ import { FormNewCashRecipt } from "./FormNewCashRecipt";
 import { FormSelectMachine } from "../../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormSelectMachine";
 import { FormNewInvoice } from "./FormNewInvoice";
 import { FormNewBudget } from "./FormNewBudget";
+import { FormAccountingAdjustment } from "./formAccountingAdjustment";
 
 export function SelectTpeNewDoc({info,docType,reloadFun}){
     const {userConfig,appInfo,userInfo} = useAppInfo();
@@ -37,7 +38,7 @@ export function SelectTpeNewDoc({info,docType,reloadFun}){
         {title:'Documento de compra',img:'https://cdnmain.sga360.co/static/ChatGPT_Image_17_dic_2025_18_27_41_3_nph10p.webp',alert:<FormNewDC info={info} reloadFun={endProcess}/>},
         {title:'Recibo de caja',docType:'Cash Recipt',img:'https://cdnmain.sga360.co/static/ChatGPT_Image_17_dic_2025_18_27_41_4_ioz7jp.webp',alert:<FormNewCashRecipt InfoParams={info} reloadFun={endProcess} />},
         {title:'Recibo de salida',img:'https://cdnmain.sga360.co/static/ChatGPT_Image_17_dic_2025_18_27_41_5_fvbrtz.webp',alert:<span>No disponible aún</span>},
-        {title:'Comprobante contable',img:'https://cdnmain.sga360.co/static/ChatGPT_Image_17_dic_2025_18_27_41_6_uh2t9n.webp',alert:<span>No disponible aún</span>},
+        {title:'Comprobante contable',img:'https://cdnmain.sga360.co/static/ChatGPT_Image_17_dic_2025_18_27_41_6_uh2t9n.webp',alert:<FormAccountingAdjustment reloadFun={endProcess}/>},
         {title:'Nota débito',img:'https://cdnmain.sga360.co/static/ChatGPT_Image_17_dic_2025_18_27_41_7_jpbmlq.webp',alert:<span>No disponible aún</span>},
         {title:'Nota de crédito',img:'https://cdnmain.sga360.co/static/ChatGPT_Image_17_dic_2025_18_27_41_8_bn5s5o.webp',alert:<span>No disponible aún</span>},
         {title:'Presupuesto',docType:'Budget',img:'https://cdnmain.sga360.co/static/Cuadricula3Documentos_5_she308.webp',alert:<FormNewBudget info={info} reloadFun={endProcess}/>},

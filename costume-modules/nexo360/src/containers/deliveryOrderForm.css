@@ -1,0 +1,15 @@
+.deliveryOrderForm { display:flex; flex-direction:column; gap:1rem; max-width:72rem; margin:1rem; padding:1.25rem; border:1px solid var(--inputsBorder); border-radius:1.2vh; background:var(--inputsBg); }
+.deliveryOrderForm header, .deliveryOrderForm footer, .deliveryOrderForm .deliveryOrderFormFields { display:flex; gap:1rem; }
+.deliveryOrderForm header { align-items:flex-start; justify-content:space-between; }
+.deliveryOrderForm header h2, .deliveryOrderForm header p { margin:0; }
+.deliveryOrderForm header p { color:var(--descriptionText); }
+.deliveryOrderForm header button { min-width:44px; min-height:44px; border:0; color:var(--mainText); background:transparent; font:inherit; font-size:2rem; cursor:pointer; }
+.deliveryOrderForm .deliveryOrderFormFields { flex-wrap:wrap; }
+.deliveryOrderForm label { display:flex; min-width:min(100%, 15rem); flex:1 1 15rem; flex-direction:column; gap:.4rem; color:var(--mainText); }
+.deliveryOrderForm input, .deliveryOrderForm textarea { box-sizing:border-box; width:100%; min-height:2.75rem; padding:.55rem; border:1px solid var(--inputsBorder); border-radius:.5rem; color:var(--mainText); background:var(--backGround); font:inherit; }
+.deliveryOrderForm textarea { min-height:5rem; resize:vertical; }
+.deliveryOrderForm .deliveryOrderFormObservations { flex-basis:100%; }
+.deliveryOrderForm .deliveryOrderFormError { margin:0; color:var(--danger, var(--mainText)); }
+.deliveryOrderForm footer { justify-content:flex-end; }
+.deliveryOrderForm footer .FormButton { width:auto; min-height:44px; }
+@media (max-width:720px) { .deliveryOrderForm footer { flex-direction:column-reverse; } .deliveryOrderForm footer .FormButton { width:100%; } }

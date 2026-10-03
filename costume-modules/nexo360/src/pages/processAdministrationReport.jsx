@@ -16,6 +16,7 @@ import { BoldTitle } from "../../../../Facturation/Facturation/src/modules/userA
 import { SearchBar } from "../../../../Facturation/Facturation/src/modules/userApp/components/SearchBar";
 import { RangeDate } from "../../../../Treasury/SGA - Treasuty/src/modules/userApp/components/RangeDate";
 import { ProcessStatusAlert } from "../../../../Facturation/Facturation/src/modules/userApp/containers/Alerts/ProcessStatusAlert";
+import { DeliveryOrderForm } from "../containers/deliveryOrderForm";
 
 const exportColumns = ["reference", "clientName", "processName", "processInstanceName", "processStage", "deliveryAt", "createdAt", "status", "paramDocReference"];
 
@@ -35,6 +36,7 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
     const [selectedOrderIds, setSelectedOrderIds] = useState([]);
     const [selectionNotice, setSelectionNotice] = useState("");
     const [dateRange, setDateRange] = useState({ minDate: "", maxDate: "" });
+    const [showDeliveryForm, setShowDeliveryForm] = useState(false);
     const visibleOrders = useMemo(
         () => report.filteredOrders.filter((order) => withinCreatedRange(order.createdAt, dateRange)),
         [report.filteredOrders, dateRange]
@@ -61,6 +63,15 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
             reloadFun={() => setSelectedOrderIds([])}
         />);
     };
+    const openDeliveryOrder = () => {
+        if (report.isDemo) return setSelectionNotice("No es posible crear órdenes de entrega con datos demostrativos.");
+        if (!selectedOrderIds.length) return setSelectionNotice("Seleccione al menos una orden con productos listos para entrega.");
+        setSelectionNotice(""); setShowDeliveryForm(true);
+    };
+    const createdDeliveryOrder = (order) => {
+        setShowDeliveryForm(false); setSelectedOrderIds([]);
+        setSelectionNotice(`Se creó ${order.order_number} en borrador para ${order.supplier}.`);
+    };
 
     return <main className="processAdministrationReport ReportDocument">
         <header className="processAdministrationReportHeader">
@@ -78,8 +89,9 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
         </div>
         {report.notice && <div className="processAdministrationReportNotice" role="status"><i className="fa-solid fa-circle-info" aria-hidden="true" />{report.notice}</div>}
         {selectionNotice && <div className="processAdministrationReportNotice" role="alert"><i className="fa-solid fa-circle-exclamation" aria-hidden="true" />{selectionNotice}</div>}
+        {showDeliveryForm && <DeliveryOrderForm companyId={appInfo?.company_id} orders={report.orders.filter(({ id }) => selectedOrderIds.includes(id))} onCreated={createdDeliveryOrder} onCancel={() => setShowDeliveryForm(false)}/>}
         {report.loading
             ? <LoadingSpace />
-            : <ProcessAdministrationTable UniversalTable={UniversalTable} UniversalRow={UniversalRow} TagIndicator={TagIndicator} SearchBar={SearchBar} CheckSquare={CheckSquare} FormButton={FormButton} search={report.search} setSearch={report.setSearch} orders={visibleOrders} total={report.orders.length} selectedOrderIds={selectedOrderIds} onToggleOrder={toggleOrder} onBulkAssign={openBulkAssignment} onOpen={openClientOrder} onOpenProcess={openProcess} />}
+            : <ProcessAdministrationTable UniversalTable={UniversalTable} UniversalRow={UniversalRow} TagIndicator={TagIndicator} SearchBar={SearchBar} CheckSquare={CheckSquare} FormButton={FormButton} search={report.search} setSearch={report.setSearch} orders={visibleOrders} total={report.orders.length} selectedOrderIds={selectedOrderIds} onToggleOrder={toggleOrder} onBulkAssign={openBulkAssignment} onCreateDeliveryOrder={openDeliveryOrder} onOpen={openClientOrder} onOpenProcess={openProcess} />}
     </main>;
 }

@@ -1,7 +1,7 @@
 import { BoldTitle } from '../userApp/components/BoldTitle';
 import './Login.css';
 import React, { useState } from 'react';
-import { postInfo } from '../../utils/functions';
+import { urlSer } from '../../App';
 import { FormButton } from '../userApp/components/FormButton';
 import { FormInput } from '../userApp/components/FormInput';
 import {ButtonAccounts} from './components/ButtonAccounts'
@@ -26,14 +26,26 @@ export function Login() {
         event.preventDefault();
         setLoading(true);
         setError(null);
-        const formInfo = { mail, pass };
-        const res = await postInfo("/logIn", formInfo);
-        if (Array.isArray(res) && res[0]) {
-            handleRedirect(res[1][0])
-        } else {
-            setError("Contraseña o usuario incorrecta");
+        try {
+            // El backend local emite una cookie HttpOnly que protege los informes
+            // contables; credentials permite que el navegador la guarde.
+            const response = await fetch(`${urlSer}/logIn`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mail, pass })
+            });
+            const res = await response.json();
+            if (response.ok && Array.isArray(res) && res[0]) {
+                handleRedirect(res[1][0]);
+            } else {
+                setError(res?.error?.message || "Contraseña o usuario incorrecta");
+            }
+        } catch {
+            setError('No fue posible conectar con el servidor local.');
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
 

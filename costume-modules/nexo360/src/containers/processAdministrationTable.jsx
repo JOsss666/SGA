@@ -75,13 +75,13 @@ const buildProviders = (order) => {
     return providers.length > 0 ? providers : ["Sin asignar"];
 };
 
-export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIndicator, SearchBar, CheckSquare, FormButton, search, setSearch, orders, total, selectedOrderIds, onToggleOrder, onBulkAssign, onOpen, onOpenProcess }) {
+export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIndicator, SearchBar, CheckSquare, FormButton, search, setSearch, orders, total, selectedOrderIds, onToggleOrder, onBulkAssign, onCreateDeliveryOrder, onOpen, onOpenProcess }) {
     const results = orders.map((order) => {
         const productionTags = buildProductionTags(order);
         return {
             ...order,
             itemsCount: (order.components || []).length,
-            order: String(order.reference ?? order.id),
+            order: String(order.reference || order.id),
             processIdentifier: order.processOwnSerial ? `${order.processCode ?? ""}#${order.processOwnSerial}` : "—",
             paramDocReference: order.paramDocReference ?? "",
             productionTags,
@@ -95,7 +95,7 @@ export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIn
     const renderers = {
         select: ({ info }) => <CheckSquare title="" checked={selectedOrderIds.includes(info.id)} action={() => onToggleOrder(info)} />,
         order: ({ info }) => <button type="button" className="processAdministrationTableOrder" onClick={() => onOpen(info)}>
-            <b>Orden #{info.reference ?? info.id}</b>
+            <b>Orden #{info.reference || info.id}</b>
             <small>{info.itemsCount} ítem{info.itemsCount === 1 ? "" : "s"}</small>
         </button>,
         clientName: ({ value }) => <span>{value || "Sin cliente"}</span>,
@@ -125,7 +125,7 @@ export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIn
     };
 
     return <section className="processAdministrationTable">
-        {selectedOrderIds.length > 0 && <div className="processAdministrationTableBulk"><span>{selectedOrderIds.length} orden{selectedOrderIds.length > 1 ? 'es' : ''} seleccionada{selectedOrderIds.length > 1 ? 's' : ''}: gestione los proveedores por cada ítem o componente.</span><FormButton text={`Asignar ${selectedOrderIds.length} órdenes`} onClick={onBulkAssign}/></div>}
+        {selectedOrderIds.length > 0 && <div className="processAdministrationTableBulk"><span>{selectedOrderIds.length} orden{selectedOrderIds.length > 1 ? 'es' : ''} seleccionada{selectedOrderIds.length > 1 ? 's' : ''}: gestione los proveedores por cada ítem o componente.</span><div className="processAdministrationTableBulkActions"><FormButton text={`Asignar ${selectedOrderIds.length} órdenes`} onClick={onBulkAssign}/><FormButton text="Generar orden de entrega" onClick={onCreateDeliveryOrder}/></div></div>}
         <div className="sgaTreasury"><UniversalTable columns={columns} results={results} searchValue={search} Row={UniversalRow} getRowKey={(order) => order.id} selectedRows={selectedOrderIds} rowHeight={76} height="min(56vh, 580px)" rowProps={{ renderers }} /></div>
     </section>;
 }

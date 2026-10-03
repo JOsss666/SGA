@@ -64,14 +64,62 @@ export const createNexoProcessReportHandler = ({ useDataBase }) => async (req, r
                 SELECT
                     COUNT(movement.id) AS total_items,
                     COUNT(assignment.id) FILTER (WHERE assignment.id IS NOT NULL) AS assigned_items,
-                    0 AS completed_items,
+                    COUNT(movement.id) FILTER (WHERE EXISTS (
+                        SELECT 1
+                        FROM "Ecosystem".docs_instances delivery_link
+                        JOIN "Process".process_instance delivery_process
+                            ON delivery_process.id = delivery_link.instance_id
+                            AND delivery_process.company_id = movement.company_id
+                            AND delivery_process.parent_id IS NOT NULL
+                            AND delivery_process.status = 'active'
+                        JOIN "Process".process_steps delivery_step
+                            ON delivery_step.id = delivery_process.step_id
+                            AND delivery_step.process_id = delivery_process.process_id
+                            AND delivery_step.company_id = delivery_process.company_id
+                            AND delivery_step.end_process = true
+                        WHERE delivery_link.doc_id = assignment.delegation_document_id
+                    )) AS completed_items,
                     STRING_AGG(DISTINCT supplier.names, ', ') FILTER (WHERE supplier.names IS NOT NULL) AS provider_stage,
                     JSON_AGG(JSON_BUILD_OBJECT(
                         'id', movement.id,
+                        'serviceMovementId', movement.id,
                         'name', COALESCE(service.name, 'Ítem de producción'),
                         'provider', supplier.names,
                         'workOrder', delegation_document."ownSerial",
-                        'status', CASE WHEN assignment.id IS NULL THEN 'Por asignar' ELSE 'Asignado' END
+                        'status', CASE
+                            WHEN assignment.id IS NULL THEN 'Por asignar'
+                            WHEN EXISTS (
+                                SELECT 1
+                                FROM "Ecosystem".docs_instances delivery_link
+                                JOIN "Process".process_instance delivery_process
+                                    ON delivery_process.id = delivery_link.instance_id
+                                    AND delivery_process.company_id = movement.company_id
+                                    AND delivery_process.parent_id IS NOT NULL
+                                    AND delivery_process.status = 'active'
+                                JOIN "Process".process_steps delivery_step
+                                    ON delivery_step.id = delivery_process.step_id
+                                    AND delivery_step.process_id = delivery_process.process_id
+                                    AND delivery_step.company_id = delivery_process.company_id
+                                    AND delivery_step.end_process = true
+                                WHERE delivery_link.doc_id = assignment.delegation_document_id
+                            ) THEN 'Listo para entrega'
+                            ELSE 'En producción'
+                        END,
+                        'readyForDelivery', EXISTS (
+                            SELECT 1
+                            FROM "Ecosystem".docs_instances delivery_link
+                            JOIN "Process".process_instance delivery_process
+                                ON delivery_process.id = delivery_link.instance_id
+                                AND delivery_process.company_id = movement.company_id
+                                AND delivery_process.parent_id IS NOT NULL
+                                AND delivery_process.status = 'active'
+                            JOIN "Process".process_steps delivery_step
+                                ON delivery_step.id = delivery_process.step_id
+                                AND delivery_step.process_id = delivery_process.process_id
+                                AND delivery_step.company_id = delivery_process.company_id
+                                AND delivery_step.end_process = true
+                            WHERE delivery_link.doc_id = assignment.delegation_document_id
+                        )
                     ) ORDER BY movement.id) FILTER (WHERE movement.id IS NOT NULL) AS components
                 FROM "Inventory".services_movement movement
                 LEFT JOIN "Inventory"."products&services" service

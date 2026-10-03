@@ -5,8 +5,12 @@ import { AiAssistanProvider, AlertProvider, AppInfoProvider, NotificationsProvid
 import { Login } from './modules/Login/Login';
 import { SignUp } from './modules/Login/SignUp';
 import { PreviewDocument } from './modules/userApp/containers/Preview/PreviewDocument';
-//export const urlSer = 'http://localhost:3000';
-export const urlSer = 'https://sga-2zgp.onrender.com';
+// Desarrollo local: el navegador consulta el servidor levantado en el puerto 3000.
+// Publicación: usa VITE_API_URL si fue configurada; de lo contrario conserva el
+// backend público de SGA. Así no intenta consultar el localhost del visitante.
+const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+export const urlSer = import.meta.env.VITE_API_URL
+    || (isLocalHost ? 'http://localhost:3000' : 'https://sga-2zgp.onrender.com');
 
 function App() {
   return (
