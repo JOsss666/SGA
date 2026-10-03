@@ -2297,6 +2297,7 @@ controller.getThirdParties = (req,res)=>{
                 ci.credit,
                 ci.credit_value,
                 ci.credit_term,
+                ci.interest_rate,
                 ci.comercial_state,
                 ci.aviable_credit,
                 tti."IVA_responsability",
@@ -2421,6 +2422,38 @@ controller.createThirdParty = (req, res) => {
         res.writeHead(500,{'Content-Type':'text/plain'})
         res.end(JSON.stringify(err));
     })
+};
+
+// Actualización parcial unificada de tercero. La compañía proviene de la sesión
+// validada y debe coincidir con el contexto enviado por el cliente.
+controller.updateThirdParty = async (req, res) => {
+    try {
+        const info = req.body;
+        if (!info || typeof info !== 'object' || Array.isArray(info)) {
+            return res.status(400).json({ ok: false, code: 'INVALID_REQUEST_BODY', message: 'El cuerpo debe ser un objeto JSON.' });
+        }
+        if (Number(info.company_id) !== Number(req.auth?.companyId)) {
+            return res.status(403).json({ ok: false, code: 'COMPANY_CONTEXT_MISMATCH', message: 'La compañía solicitada no coincide con la sesión.' });
+        }
+
+        const result = await thirdPartyService.update({
+            ...info,
+            company_id: req.auth.companyId,
+            performed_by: req.auth.userName ?? req.auth.userId
+        });
+        return res.status(200).json(result);
+    } catch (err) {
+        if (err?.code === '23505') {
+            return res.status(409).json({ ok: false, code: 'THIRD_PARTY_DUPLICATE', message: 'La identificación ya está registrada para esta compañía.' });
+        }
+        const statusCode = Number(err?.statusCode) || 500;
+        if (statusCode >= 500) console.error('Error en updateThirdParty:', err);
+        return res.status(statusCode).json({
+            ok: false,
+            code: err?.code || 'THIRD_PARTY_UPDATE_FAILED',
+            message: statusCode >= 500 ? 'No fue posible actualizar el tercero.' : (err?.message || 'No fue posible actualizar el tercero.')
+        });
+    }
 };
 
 // Bloqueo/desbloqueo de terceros (capacidad nueva del modelo Fiscal, Etapa 5)

@@ -1,6 +1,5 @@
 import './AttachedDocuments.css'
 import { useState } from "react";
-import { useParams } from "react-router-dom";
 import { FileInput } from "../../components/FileInput";
 import { FormButton } from "../../components/FormButton";
 import { useAppInfo, useNotifications } from "../../../../context/context";
@@ -11,7 +10,6 @@ export function AttachedDocuments({info,reloadFun}){
     // Requirements
     const {appInfo,userConfig} = useAppInfo();
     const {addNotification} = useNotifications();
-    const params = useParams();
 
     // Control
     const can_edit = userConfig?.access?.sections?.thirdparties?.can_edit
@@ -26,20 +24,13 @@ export function AttachedDocuments({info,reloadFun}){
         }
     }
 
-    // Persistimos el RUT reutilizando el endpoint tributario (único que escribe
-    // attachedRut), conservando el resto de campos fiscales del tercero.
+    // Solo enviamos el campo editado; el servicio preserva el resto de datos.
     const saveAttachedRut = async()=>{
         setDisabled(true);
         try{
-            const res = await postInfo('/updateThirdPartyTaxInfo',{
+            const res = await postInfo('/updateThirdParty',{
                 company_id:info?.company_id ?? appInfo.company_id,
-                thirdParty_id:params.thirdparty_id,
-                nature:info?.thirdParty_nature,
-                IVA_responsability:info?.IVA_responsability,
-                identidicationType_id:info?.identidicationType_id,
-                regime:info?.regime,
-                retention_type:info?.retention_type ?? 'NO_AGENTE',
-                economic_activity:info?.economic_activity,
+                id:info?.id,
                 attachedRut
             });
             if(res?.[0]){

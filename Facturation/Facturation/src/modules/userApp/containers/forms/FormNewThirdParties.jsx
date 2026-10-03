@@ -88,6 +88,7 @@ const createInitialFormData = (companyId = null) => ({
     company_id:companyId,
     userPhoto:'https://cdnmain.sga360.co/static/noUserImg_p817rb.webp',
     first_name:'',
+    corporative_name:'',
     second_name:'',
     first_surname:'',
     second_surname:'',
@@ -151,6 +152,7 @@ export function FormNewThirdParties({reloadFun,quickCreation,forUpdate=false,thi
     const maxStage = 3;
     const {
         userPhoto,
+        corporative_name,
         first_name,
         second_name,
         first_surname,
@@ -413,6 +415,7 @@ export function FormNewThirdParties({reloadFun,quickCreation,forUpdate=false,thi
         console.log('Actualizando información a: ',data);
         setFormData(current => ({
             ...current,
+            corporative_name:data.corporative_name ?? '',
             first_name:data.first_name ?? '',
             second_name:data.second_name ?? '',
             first_surname:data.first_surname ?? '',
@@ -479,7 +482,7 @@ export function FormNewThirdParties({reloadFun,quickCreation,forUpdate=false,thi
 
     const requiredFieldsByStage = {
         0: [
-            {label:'Primer Nombre o Razón Social', value:first_name},
+            {label:'Primer Nombre', value:first_name},
             {label:'Tipo de Identificación', value:indentification_type},
             {label:'Número de Identificación', value:indentification_number},
             {label:'Correo Electrónico', value:mail},
@@ -672,11 +675,15 @@ export function FormNewThirdParties({reloadFun,quickCreation,forUpdate=false,thi
             company_id:appInfo.company_id ?? formData.company_id,
             taxConfig:normalizeTaxConfig(withholdingRetentions)
         };
+        if(forUpdate){
+            payload.id = thirdPartyId ?? thirdPartyData.id;
+            delete payload.thirdPartyProductTaxRelations;
+        }
         let res;
         try {
             res = await postInfo(
                 forUpdate ? '/updateThirdParty' : '/createThirdParty',
-                forUpdate ? {...payload,id:thirdPartyId} : payload
+                payload
             );
         } catch(err) {
             addNotification({
@@ -688,8 +695,9 @@ export function FormNewThirdParties({reloadFun,quickCreation,forUpdate=false,thi
             setDisabled(false);
             return;
         }
-        const savedThirdPartyId = res?.[1] ?? res?.id ?? res?.thirdParty_id;
-        if(res?.[0] || savedThirdPartyId){
+        const savedThirdPartyId = res?.[1]?.id ?? res?.[1] ?? res?.id ?? res?.thirdParty_id;
+        const saveSucceeded = res?.[0] === true || res?.ok === true;
+        if(saveSucceeded){
             if(!forUpdate && thirdPartyProductTaxRelations.length > 0 && savedThirdPartyId != undefined){
                 try {
                     const relationsRes = await postInfo('/inventory/createThirdPartyProductTaxRelation',{
@@ -821,6 +829,7 @@ export function FormNewThirdParties({reloadFun,quickCreation,forUpdate=false,thi
                     ...thirdParty,
                     ...geography.values,
                     id:thirdPartyId,
+                    corporative_name:thirdParty.corporative_name ?? '',
                     userPhoto:thirdParty.userPhoto ?? thirdParty.img ?? createInitialFormData().userPhoto,
                     first_name:thirdParty.first_name ?? '',
                     second_name:thirdParty.second_name ?? '',
@@ -947,7 +956,8 @@ export function FormNewThirdParties({reloadFun,quickCreation,forUpdate=false,thi
                         e.preventDefault();
                         handlePrimaryAction();
                     }}>
-                        <FormInput type={'text'} action={value=>updateField('first_name',value)} value={first_name} title={'Primer Nombre o Razon Social'} placeholder={'Primer nombre'} disabled={disabled} required={true}/>
+                        <FormInput type={'text'} action={value=>updateField('corporative_name',value)} value={corporative_name} title={'Razón Social'} placeholder={'Razón social registrada del tercero'} disabled={disabled} required={false}/>
+                        <FormInput type={'text'} action={value=>updateField('first_name',value)} value={first_name} title={'Primer Nombre'} placeholder={'Primer nombre'} disabled={disabled} required={true}/>
                         <FormInput type={'text'} action={value=>updateField('second_name',value)} value={second_name} title={'Segundo Nombre'} placeholder={'Segundo nombre'} disabled={disabled} required={false}/>
                         <FormInput type={'text'} action={value=>updateField('first_surname',value)} value={first_surname} title={'Primer Apellido o Diminutivo'} placeholder={'Primer Apellido'} disabled={disabled} required={false}/>
                         <FormInput type={'text'} action={value=>updateField('second_surname',value)} value={second_surname} title={'Segundo Apellido'} placeholder={'Segundo Apellido'} disabled={disabled} required={false}/>

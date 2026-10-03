@@ -5,13 +5,14 @@ import './ComercialInfo.css'
 import { FormButton } from "../../components/FormButton";
 import { SearchinList } from "../../components/SearchInList";
 import { ProductLinkFiscalConditionsCard } from "../../components/ProductLinkFiscalConditionsCard";
-import { useAppInfo } from "../../../../context/context";
+import { useAppInfo, useNotifications } from "../../../../context/context";
 import { postInfo } from "../../../../utils/functions";
 
 export function ComercialInfo({info,reloadFun}){
 
     // Requirements
     const {appInfo,userConfig} = useAppInfo();
+    const {addNotification} = useNotifications();
 
     // control
     const can_edit = userConfig?.access?.sections?.thirdparties?.can_edit
@@ -28,6 +29,7 @@ export function ComercialInfo({info,reloadFun}){
     const [comercial_state,setComercial_state] = useState(info.comercial_state != undefined? info.comercial_state:undefined);
 
     const formInfo = {
+        company_id:info.company_id ?? appInfo.company_id,
         id:info.id,
         credit,
         credit_term,
@@ -38,11 +40,22 @@ export function ComercialInfo({info,reloadFun}){
 
     const updateInfo = async()=>{
         setDisabled(true);
-        console.log(formInfo)
-        let res = await postInfo('/updateThirdPartyComercialInfo',formInfo);
-        if(res[0]){
-            console.log('Actualizacion Exitosa');
-            reloadFun?.();
+        try{
+            const res = await postInfo('/updateThirdParty',formInfo);
+            if(res?.[0]){
+                addNotification({
+                    type:'aproved',
+                    title:'Tercero actualizado',
+                    description:'La información comercial se guardó correctamente.'
+                });
+                reloadFun?.();
+            }
+        }catch(error){
+            addNotification({
+                type:'error',
+                title:'No fue posible actualizar',
+                description:error?.message ?? 'Error al guardar la información comercial.'
+            });
         }
         setDisabled(false);
     }

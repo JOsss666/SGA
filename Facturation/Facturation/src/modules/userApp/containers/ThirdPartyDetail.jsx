@@ -149,7 +149,7 @@ export function ThirdPartyDetail(){
                                 <TaxInfo info={thirdPartyInfo} reloadFun={getThirdPartyInfo}/>
                             )}
                             {!loading && actualSection == 3 && (
-                                <RetentionsInfo info={thirdPartyInfo}/>
+                                <RetentionsInfo info={thirdPartyInfo} reloadFun={getThirdPartyInfo}/>
                             )}
                             {!loading && actualSection == 4 && (
                                 <AttachedDocuments info={thirdPartyInfo} reloadFun={getThirdPartyInfo}/>

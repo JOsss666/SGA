@@ -5,7 +5,6 @@ import { FormInput } from "../../components/FormInput";
 import { SearchinList } from "../../components/SearchInList";
 import { FormButton } from "../../components/FormButton";
 import { getTextFromValue, postInfo } from "../../../../utils/functions";
-import { useParams } from "react-router-dom";
 import { LoadingSpace } from "../LoadingSpace";
 import { ThirdPartyFactusIdentificationTypeCodes, ThirdPartyIvaResponsabilityCodes, ThirdPartyNatureCodes } from "../../../../utils/Constants";
 
@@ -30,7 +29,6 @@ export function TaxInfo({info,reloadFun}){
     // Requierements
     const {appInfo,userConfig} = useAppInfo();
     const {addNotification} = useNotifications();
-    const params = useParams();
 
     // Control
     const [disabled,setDisabled] = useState(false);
@@ -47,7 +45,7 @@ export function TaxInfo({info,reloadFun}){
 
     const formInfo = {
         company_id:info?.company_id ?? appInfo.company_id,
-        thirdParty_id:params.thirdparty_id,
+        id:info?.id,
         nature:typePerson,
         IVA_responsability,
         identidicationType_id,
@@ -63,7 +61,7 @@ export function TaxInfo({info,reloadFun}){
         setDisabled(true)
         setLoading(true)
         try{
-            let res = await postInfo('/updateThirdPartyTaxInfo',formInfo);
+            let res = await postInfo('/updateThirdParty',formInfo);
             if(res?.[0]){
                 addNotification({
                     type:'aproved',

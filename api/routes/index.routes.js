@@ -95,6 +95,16 @@ router.post('/updateThirdPartyTaxInfo',controller.updateThirdPartyTaxInfo);
 
 router.post('/createThirdParty',controller.createThirdParty);
 
+router.post(
+    '/updateThirdParty',
+    express.json({ limit: '128kb', strict: true }),
+    requireTrustedOrigin,
+    authenticateSession,
+    requireCompanyAccess,
+    controller.updateThirdParty,
+    sessionErrorHandler
+);
+
 router.post('/blockThirdParty',controller.blockThirdParty);
 
 router.post('/unblockThirdParty',controller.unblockThirdParty);

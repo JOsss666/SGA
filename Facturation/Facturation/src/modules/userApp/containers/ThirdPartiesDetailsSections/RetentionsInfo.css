@@ -36,3 +36,20 @@
 .RetentionsInfo .taxRentSection .SelectOptions{
     margin: 0 1vh;
 }
+
+.RetentionsInfo .optionsRow{
+    display: flex;
+    gap: 2vh;
+    width: 100%;
+    margin: 2vh 0;
+}
+
+.RetentionsInfo .optionsRow .FormButton{
+    width: min(20vw, 220px);
+}
+
+@media (max-width: 768px){
+    .RetentionsInfo .optionsRow .FormButton{
+        width: 100%;
+    }
+}

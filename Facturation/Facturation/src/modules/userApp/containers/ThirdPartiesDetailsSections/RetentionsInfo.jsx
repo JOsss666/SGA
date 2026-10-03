@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import './RetentionsInfo.css'
 import { CollapsableItem } from "../../components/CollapsableItem";
 import { SwitchOption } from "../../components/SwitchOption";
 import { SelectOptions } from "../../components/SelectOptions";
+import { FormButton } from "../../components/FormButton";
+import { useAppInfo, useNotifications } from "../../../../context/context";
+import { postInfo } from "../../../../utils/functions";
 
 // Misma forma base que el taxConfig de FormNewThirdParties, para leer de forma
 // segura un tercero que todavía no tenga toda la estructura guardada.
@@ -34,6 +37,8 @@ const createInitialTaxConfig = () => ({
     }
 });
 
+const cloneTaxConfig = (config)=>JSON.parse(JSON.stringify(config));
+
 const normalizeTaxConfig = (taxConfig = {}) => {
     const initial = createInitialTaxConfig();
     return {
@@ -48,7 +53,11 @@ const normalizeTaxConfig = (taxConfig = {}) => {
     };
 };
 
-export function RetentionsInfo({info}){
+export function RetentionsInfo({info,reloadFun}){
+
+    const {appInfo,userConfig} = useAppInfo();
+    const {addNotification} = useNotifications();
+    const canEdit = userConfig?.access?.sections?.thirdparties?.can_edit;
 
     // El backend devuelve taxConfig como jsonb (objeto) pero puede venir como
     // string según el consumidor; normalizamos para leerlo sin romper.
@@ -60,9 +69,55 @@ export function RetentionsInfo({info}){
         }
         return normalizeTaxConfig(raw ?? {});
     });
+    const [savedTaxConfig,setSavedTaxConfig] = useState(()=>cloneTaxConfig(withholdingRetentions));
+    const [saving,setSaving] = useState(false);
+    const hasChanges = JSON.stringify(withholdingRetentions) !== JSON.stringify(savedTaxConfig);
 
-    // Los switches son interactivos para reciclar la UI del formulario, pero este
-    // cambio es solo local: todavía no existe endpoint para persistir el taxConfig.
+    useEffect(()=>{
+        let raw = info?.taxConfig ?? {};
+        if(typeof raw === 'string'){
+            try{ raw = JSON.parse(raw || '{}'); }
+            catch{ raw = {}; }
+        }
+        const nextConfig = normalizeTaxConfig(raw ?? {});
+        setWithholdingRetentions(nextConfig);
+        setSavedTaxConfig(cloneTaxConfig(nextConfig));
+    },[info?.id,info?.taxConfig]);
+
+    const saveTaxConfig = async()=>{
+        setSaving(true);
+        try{
+            const response = await postInfo('/updateThirdParty',{
+                company_id:info?.company_id ?? appInfo.company_id,
+                id:info?.id,
+                taxConfig:withholdingRetentions
+            });
+            if(response?.[0]){
+                const savedConfig = cloneTaxConfig(withholdingRetentions);
+                setSavedTaxConfig(savedConfig);
+                addNotification({
+                    type:'aproved',
+                    title:'Retenciones actualizadas',
+                    description:'La configuración tributaria se guardó correctamente.'
+                });
+                reloadFun?.();
+            }
+        }catch(error){
+            addNotification({
+                type:'error',
+                title:'No fue posible actualizar',
+                description:error?.message ?? 'Error al guardar las retenciones.'
+            });
+        }finally{
+            setSaving(false);
+        }
+    };
+
+    const discardTaxConfigChanges = ()=>{
+        setWithholdingRetentions(cloneTaxConfig(savedTaxConfig));
+    };
+
+    // Mantiene los cambios locales hasta que el usuario los guarde explícitamente.
     const updateNestedField = (path,value)=>{
         setWithholdingRetentions(prev=>{
             const next = {...prev};
@@ -84,23 +139,24 @@ export function RetentionsInfo({info}){
                         <span>Responsable del impuesto sobre RENTA</span>
                         <SwitchOption
                             key={`rent-responsible-${withholdingRetentions.rent.rentTaxResponsable}`}
-                            defaultValue={withholdingRetentions.rent.rentTaxResponsable}
-                            action={value=>updateNestedField(['rent','rentTaxResponsable'],value)}
+                            value={withholdingRetentions.rent.rentTaxResponsable}
+                            action={canEdit && !saving ? value=>updateNestedField(['rent','rentTaxResponsable'],value) : undefined}
                         />
                     </div>
                     <div className="labelSwitch">
                         <span>Declarante impuesto sobre la RENTA</span>
                         <SwitchOption
                             key={`rent-declarant-${withholdingRetentions.rent.rentTaxDeclarant}`}
-                            defaultValue={withholdingRetentions.rent.rentTaxDeclarant}
-                            action={value=>updateNestedField(['rent','rentTaxDeclarant'],value)}
+                            value={withholdingRetentions.rent.rentTaxDeclarant}
+                            action={canEdit && !saving ? value=>updateNestedField(['rent','rentTaxDeclarant'],value) : undefined}
                         />
                     </div>
                     <SelectOptions
                         key={`withholding-regime-${withholdingRetentions.rent.regime}`}
                         title={'Regimen'}
                         defaultValue={{value:withholdingRetentions.rent.regime}}
-                        action={value=>updateNestedField(['rent','regime'],value)}
+                        disabled={!canEdit || saving}
+                        action={canEdit && !saving ? value=>updateNestedField(['rent','regime'],value) : undefined}
                         options={[
                             'Regimen Ordinario Renta',
                             'Regimen Simple',
@@ -111,24 +167,24 @@ export function RetentionsInfo({info}){
                         <span>Agente retenedor a titulo de RENTA</span>
                         <SwitchOption
                             key={`rent-withholding-${withholdingRetentions.rent.rentWithholdingAgent}`}
-                            defaultValue={withholdingRetentions.rent.rentWithholdingAgent}
-                            action={value=>updateNestedField(['rent','rentWithholdingAgent'],value)}
+                            value={withholdingRetentions.rent.rentWithholdingAgent}
+                            action={canEdit && !saving ? value=>updateNestedField(['rent','rentWithholdingAgent'],value) : undefined}
                         />
                     </div>
                     <div className="labelSwitch">
                         <span>Autorreteneor a titulo de RENTA</span>
                         <SwitchOption
                             key={`rent-self-withholding-${withholdingRetentions.rent.rentSelfWithholdingAgent}`}
-                            defaultValue={withholdingRetentions.rent.rentSelfWithholdingAgent}
-                            action={value=>updateNestedField(['rent','rentSelfWithholdingAgent'],value)}
+                            value={withholdingRetentions.rent.rentSelfWithholdingAgent}
+                            action={canEdit && !saving ? value=>updateNestedField(['rent','rentSelfWithholdingAgent'],value) : undefined}
                         />
                     </div>
                     <div className="labelSwitch">
                         <span>Autoretenedor especial de RENTA</span>
                         <SwitchOption
                             key={`rent-special-self-${withholdingRetentions.rent.rentSpecialSelfWithholdingAgent}`}
-                            defaultValue={withholdingRetentions.rent.rentSpecialSelfWithholdingAgent}
-                            action={value=>updateNestedField(['rent','rentSpecialSelfWithholdingAgent'],value)}
+                            value={withholdingRetentions.rent.rentSpecialSelfWithholdingAgent}
+                            action={canEdit && !saving ? value=>updateNestedField(['rent','rentSpecialSelfWithholdingAgent'],value) : undefined}
                         />
                     </div>
                 </section>
@@ -139,40 +195,40 @@ export function RetentionsInfo({info}){
                         <span>Entidad estatal</span>
                         <SwitchOption
                             key={`iva-state-${withholdingRetentions.iva.stateEntity}`}
-                            defaultValue={withholdingRetentions.iva.stateEntity}
-                            action={value=>updateNestedField(['iva','stateEntity'],value)}
+                            value={withholdingRetentions.iva.stateEntity}
+                            action={canEdit && !saving ? value=>updateNestedField(['iva','stateEntity'],value) : undefined}
                         />
                     </div>
                     <div className="labelSwitch">
                         <span>Gran Contribuyente DIAN</span>
                         <SwitchOption
                             key={`iva-major-${withholdingRetentions.iva.DIANMajorTaxpayer}`}
-                            defaultValue={withholdingRetentions.iva.DIANMajorTaxpayer}
-                            action={value=>updateNestedField(['iva','DIANMajorTaxpayer'],value)}
+                            value={withholdingRetentions.iva.DIANMajorTaxpayer}
+                            action={canEdit && !saving ? value=>updateNestedField(['iva','DIANMajorTaxpayer'],value) : undefined}
                         />
                     </div>
                     <div className="labelSwitch">
                         <span>Responsable de IVA</span>
                         <SwitchOption
                             key={`iva-responsible-${withholdingRetentions.iva.ivaTaxResponsable}`}
-                            defaultValue={withholdingRetentions.iva.ivaTaxResponsable}
-                            action={value=>updateNestedField(['iva','ivaTaxResponsable'],value)}
+                            value={withholdingRetentions.iva.ivaTaxResponsable}
+                            action={canEdit && !saving ? value=>updateNestedField(['iva','ivaTaxResponsable'],value) : undefined}
                         />
                     </div>
                     <div className="labelSwitch">
                         <span>Agente retenedor a titulo de IVA</span>
                         <SwitchOption
                             key={`iva-withholding-${withholdingRetentions.iva.ivaWithholdingAgent}`}
-                            defaultValue={withholdingRetentions.iva.ivaWithholdingAgent}
-                            action={value=>updateNestedField(['iva','ivaWithholdingAgent'],value)}
+                            value={withholdingRetentions.iva.ivaWithholdingAgent}
+                            action={canEdit && !saving ? value=>updateNestedField(['iva','ivaWithholdingAgent'],value) : undefined}
                         />
                     </div>
                     <div className="labelSwitch">
                         <span>Agente retenedor a titulo de IVA por ventas CI</span>
                         <SwitchOption
                             key={`iva-ci-${withholdingRetentions.iva.ivaWithholdingAgentByCI}`}
-                            defaultValue={withholdingRetentions.iva.ivaWithholdingAgentByCI}
-                            action={value=>updateNestedField(['iva','ivaWithholdingAgentByCI'],value)}
+                            value={withholdingRetentions.iva.ivaWithholdingAgentByCI}
+                            action={canEdit && !saving ? value=>updateNestedField(['iva','ivaWithholdingAgentByCI'],value) : undefined}
                         />
                     </div>
                 </section>
@@ -183,24 +239,24 @@ export function RetentionsInfo({info}){
                         <span>Responsable impuesto de timbre</span>
                         <SwitchOption
                             key={`ring-responsible-${withholdingRetentions.ring.ringTaxResponsable}`}
-                            defaultValue={withholdingRetentions.ring.ringTaxResponsable}
-                            action={value=>updateNestedField(['ring','ringTaxResponsable'],value)}
+                            value={withholdingRetentions.ring.ringTaxResponsable}
+                            action={canEdit && !saving ? value=>updateNestedField(['ring','ringTaxResponsable'],value) : undefined}
                         />
                     </div>
                     <div className="labelSwitch">
                         <span>Agente retenedor a titulo de timbre</span>
                         <SwitchOption
                             key={`ring-withholding-${withholdingRetentions.ring.ringWithholdingAgent}`}
-                            defaultValue={withholdingRetentions.ring.ringWithholdingAgent}
-                            action={value=>updateNestedField(['ring','ringWithholdingAgent'],value)}
+                            value={withholdingRetentions.ring.ringWithholdingAgent}
+                            action={canEdit && !saving ? value=>updateNestedField(['ring','ringWithholdingAgent'],value) : undefined}
                         />
                     </div>
                     <div className="labelSwitch">
                         <span>Autorretenedor a titulo de timbre</span>
                         <SwitchOption
                             key={`ring-self-${withholdingRetentions.ring.ringSelfWithholdingAgent}`}
-                            defaultValue={withholdingRetentions.ring.ringSelfWithholdingAgent}
-                            action={value=>updateNestedField(['ring','ringSelfWithholdingAgent'],value)}
+                            value={withholdingRetentions.ring.ringSelfWithholdingAgent}
+                            action={canEdit && !saving ? value=>updateNestedField(['ring','ringSelfWithholdingAgent'],value) : undefined}
                         />
                     </div>
                 </section>
@@ -211,28 +267,34 @@ export function RetentionsInfo({info}){
                         <span>Responsable impuesto al Consumo</span>
                         <SwitchOption
                             key={`consumption-responsible-${withholdingRetentions.consumption.consumptionTaxResponsable}`}
-                            defaultValue={withholdingRetentions.consumption.consumptionTaxResponsable}
-                            action={value=>updateNestedField(['consumption','consumptionTaxResponsable'],value)}
+                            value={withholdingRetentions.consumption.consumptionTaxResponsable}
+                            action={canEdit && !saving ? value=>updateNestedField(['consumption','consumptionTaxResponsable'],value) : undefined}
                         />
                     </div>
                     <div className="labelSwitch">
                         <span>Agente retenedor a titulo de impuesto al consumo</span>
                         <SwitchOption
                             key={`consumption-withholding-${withholdingRetentions.consumption.consumptionWithholdingAgent}`}
-                            defaultValue={withholdingRetentions.consumption.consumptionWithholdingAgent}
-                            action={value=>updateNestedField(['consumption','consumptionWithholdingAgent'],value)}
+                            value={withholdingRetentions.consumption.consumptionWithholdingAgent}
+                            action={canEdit && !saving ? value=>updateNestedField(['consumption','consumptionWithholdingAgent'],value) : undefined}
                         />
                     </div>
                     <div className="labelSwitch">
                         <span>Autorretenedor a titulo de impuesto al consumo</span>
                         <SwitchOption
                             key={`consumption-self-${withholdingRetentions.consumption.consumptionSelfWithholdingAgent}`}
-                            defaultValue={withholdingRetentions.consumption.consumptionSelfWithholdingAgent}
-                            action={value=>updateNestedField(['consumption','consumptionSelfWithholdingAgent'],value)}
+                            value={withholdingRetentions.consumption.consumptionSelfWithholdingAgent}
+                            action={canEdit && !saving ? value=>updateNestedField(['consumption','consumptionSelfWithholdingAgent'],value) : undefined}
                         />
                     </div>
                 </section>
             </CollapsableItem>
+            {canEdit && hasChanges && (
+                <div className="optionsRow">
+                    <FormButton negative text={'Cancelar'} disabled={saving} onClick={discardTaxConfigChanges}/>
+                    <FormButton text={saving ? 'Guardando...' : 'Guardar cambios'} loading={saving} disabled={saving} onClick={saveTaxConfig}/>
+                </div>
+            )}
         </div>
     )
 }
