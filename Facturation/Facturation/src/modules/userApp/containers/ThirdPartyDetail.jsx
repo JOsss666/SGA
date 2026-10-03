@@ -9,9 +9,11 @@ import { GeneralInfo } from './ThirdPartiesDetailsSections/GeneralInfo'
 import { ComercialInfo } from './ThirdPartiesDetailsSections/ComercialInfo'
 import { postInfo } from '../../../utils/functions'
 import { useParams } from 'react-router-dom'
-import { useAppInfo } from '../../../context/context'
+import { useAppInfo, useNotifications } from '../../../context/context'
 import { LoadingSpace } from './LoadingSpace'
 import { TaxInfo } from './ThirdPartiesDetailsSections/TaxInfo'
+import { RetentionsInfo } from './ThirdPartiesDetailsSections/RetentionsInfo'
+import { AttachedDocuments } from './ThirdPartiesDetailsSections/AttachedDocuments'
 import { PathLocation } from '../components/PathLocation'
 
 export function ThirdPartyDetail(){
@@ -19,6 +21,33 @@ export function ThirdPartyDetail(){
     // dependencias
     const params = useParams();
     const {appInfo} = useAppInfo();
+    const {addNotification} = useNotifications();
+
+    // Copia un dato de contacto del tercero al portapapeles y notifica el resultado
+    const copyContactToClipboard = async(value,label)=>{
+        if(value == undefined || value == null || `${value}`.trim() == ''){
+            addNotification({
+                type:'error',
+                title:`${label} no disponible`,
+                description:`Este tercero no tiene un ${label.toLowerCase()} registrado.`
+            });
+            return;
+        }
+        try{
+            await navigator.clipboard.writeText(`${value}`);
+            addNotification({
+                type:'aproved',
+                title:`${label} copiado exitosamente`,
+                description:`${value}`
+            });
+        }catch(error){
+            addNotification({
+                type:'error',
+                title:`No fue posible copiar el ${label.toLowerCase()}`,
+                description:error?.message ?? 'Intenta nuevamente.'
+            });
+        }
+    }
 
     // control 
     const [loading,setLoading] = useState(false);
@@ -30,7 +59,8 @@ export function ThirdPartyDetail(){
         "Información General",
         "Información Comercial",
         "Infrmación Tributaria",
-        "Estadisticas",
+        "Retenciones",
+        "Documentos Adjuntos",
         "Actividad"
     ]
 
@@ -73,7 +103,11 @@ export function ThirdPartyDetail(){
                     <PathLocation/>
                     <img className='bgImgTag' src="https://i.pinimg.com/1200x/d9/b1/a1/d9b1a1416f466987cc2491c8ce5f83a3.jpg" alt="" />
                     <div className="userCard">
-                        <img src="https://i.pinimg.com/1200x/f0/c8/2a/f0c82a3d92bed43977eaff0f64c6a5f0.jpg" alt="" />
+                        <img
+                            src={thirdPartyInfo.userPhoto ?? thirdPartyInfo.img ?? 'https://cdnmain.sga360.co/static/noUserImg_p817rb.webp'}
+                            onError={(e)=>{ e.currentTarget.src = 'https://cdnmain.sga360.co/static/noUserImg_p817rb.webp' }}
+                            alt={thirdPartyInfo.names ?? 'Foto del tercero'}
+                        />
                         <BoldTitle text={thirdPartyInfo.names}/>
                         <div className="RelationThirdPartyC">
                             <h5>{dictionaryWords[thirdPartyInfo.type]}</h5>
@@ -87,8 +121,8 @@ export function ThirdPartyDetail(){
                         <CardRankingAnalytics value={10} title={'Posición'} icon={<i className="fa-regular fa-file"/>}/>
                     </div>
                     <div className="contactContainer">
-                        <ButtonMenu title={'Correo'} children={<i className="fa-solid fa-envelope"/>}/>
-                        <ButtonMenu title={'Telefono'} children={<i className="fa-solid fa-phone"/>}/>
+                        <ButtonMenu title={'Correo'} onClick={()=>copyContactToClipboard(thirdPartyInfo.mail,'Correo')} children={<i className="bi bi-envelope"/>}/>
+                        <ButtonMenu title={'Telefono'} onClick={()=>copyContactToClipboard(thirdPartyInfo.phone,'Número')} children={<i className="bi bi-telephone"/>}/>
                         <ButtonMenu title={'Compartir'} children={<i className="fa-solid fa-share-nodes"/>}/>
                         <ButtonMenu title={'Eliminar'} children={<i className="fa-solid fa-trash-can"/>}/>
                     </div>
@@ -112,7 +146,13 @@ export function ThirdPartyDetail(){
                                 <ComercialInfo info={thirdPartyInfo} reloadFun={getThirdPartyInfo}/>
                             )}
                             {!loading && actualSection == 2 && (
-                                <TaxInfo info={thirdPartyInfo}/>
+                                <TaxInfo info={thirdPartyInfo} reloadFun={getThirdPartyInfo}/>
+                            )}
+                            {!loading && actualSection == 3 && (
+                                <RetentionsInfo info={thirdPartyInfo}/>
+                            )}
+                            {!loading && actualSection == 4 && (
+                                <AttachedDocuments info={thirdPartyInfo} reloadFun={getThirdPartyInfo}/>
                             )}
                             {loading && (
                                 <LoadingSpace title={'Cargando información del tercero'} description={'Esto no debe tardar mucho...'}/>

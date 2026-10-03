@@ -1,0 +1,38 @@
+
+.RetentionsInfo{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 1vh 0;
+    gap: 2vh;
+}
+
+/* Reciclamos la UI de retenciones del FormNewThirdParties */
+.RetentionsInfo .taxRentSection{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    width: 100%;
+}
+
+.RetentionsInfo .taxRentSection .labelSwitch{
+    display: flex;
+    width: 100%;
+    align-items: center;
+    padding: 1vh 2vh;
+}
+
+.RetentionsInfo .taxRentSection .labelSwitch .SwitchOption{
+    margin: auto;
+    margin-right: 2vh;
+}
+
+.RetentionsInfo .taxRentSection .labelSwitch span{
+    color: var(--mainText);
+    font-weight: 400;
+    font-size: clamp(2.2px,2.2vh,22px);
+}
+
+.RetentionsInfo .taxRentSection .SelectOptions{
+    margin: 0 1vh;
+}

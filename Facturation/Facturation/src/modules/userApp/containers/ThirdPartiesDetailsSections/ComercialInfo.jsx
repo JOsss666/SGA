@@ -2,20 +2,23 @@ import { useEffect, useState } from "react";
 import { SelectOptions } from "../../components/SelectOptions";
 import { FormInput } from "../../components/FormInput";
 import './ComercialInfo.css'
-import { NewElementSelect } from "../../components/NewElementSelect";
 import { FormButton } from "../../components/FormButton";
 import { SearchinList } from "../../components/SearchInList";
+import { ProductLinkFiscalConditionsCard } from "../../components/ProductLinkFiscalConditionsCard";
 import { useAppInfo } from "../../../../context/context";
 import { postInfo } from "../../../../utils/functions";
 
 export function ComercialInfo({info,reloadFun}){
 
     // Requirements
-    const {userConfig} = useAppInfo();
+    const {appInfo,userConfig} = useAppInfo();
 
     // control
     const can_edit = userConfig?.access?.sections?.thirdparties?.can_edit
     const [disabled,setDisabled] = useState(!can_edit);
+
+    // Productos relacionados (impuestos y retenciones por compra/venta)
+    const [productRelations,setProductRelations] = useState([]);
 
     // params form
     const [credit,setCredit] = useState(info.credit != undefined? info.credit:'');
@@ -44,9 +47,31 @@ export function ComercialInfo({info,reloadFun}){
         setDisabled(false);
     }
 
+    // Carga las relaciones producto-impuesto del tercero (igual que FormNewThirdParties).
+    const getProductRelations = async()=>{
+        if(!info?.id) return;
+        try{
+            const res = await postInfo('/inventory/getThirdPartyProductTaxRelations',{
+                company_id:info.company_id ?? appInfo.company_id,
+                third_party_id:info.id
+            });
+            const rows = Array.isArray(res?.[1]) ? res[1] : [];
+            setProductRelations(rows.map(relation => ({
+                ...relation,
+                operation_type:relation.operation_type ?? relation.operation,
+                tax_role:relation.tax_role ?? relation.role,
+                tax_name:relation.tax_name ?? relation.name
+            })));
+        }catch(err){
+            console.error('Error cargando relaciones producto-impuesto del tercero:',err);
+            setProductRelations([]);
+        }
+    }
+
     useEffect(()=>{
         console.log(info)
         console.log(comercial_state)
+        getProductRelations();
     },[info])
 
     return(
@@ -76,14 +101,20 @@ export function ComercialInfo({info,reloadFun}){
                         </>
                     )}
                     {formInfo != info && can_edit && (
-                    <FormButton text={'Guardar Cambios'} disabled={disabled} />
+                    <div className="optionsRow">
+                        <FormButton negative={true} text={'Cancelar'} disabled={disabled} />
+                        <FormButton text={'Guardar Cambios'} disabled={disabled} />
+                    </div>
                 )}
             </form>
-            <div className="listDiscounts">
-                <h6>Lista de descuentos</h6>
-                <div className="gridDiscounts">
-                    <NewElementSelect title={'Crear nuevo descuento'}/>
-                </div>
+            <div className="productRelationsContainer">
+                <h6>Productos relacionados</h6>
+                <ProductLinkFiscalConditionsCard
+                    companyId={info.company_id ?? appInfo.company_id}
+                    info={info}
+                    readOnly={true}
+                    value={productRelations}
+                />
             </div>
         </div>
     )
