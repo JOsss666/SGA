@@ -1,0 +1,26 @@
+
+@import '../containers//UserApp.css';
+
+.PercentTimeIndicator{
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+}
+
+.PercentTimeIndicator strong{
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 700;
+}
+
+.PercentTimeIndicator .positive {
+    color: #36BBA7 ;
+}
+
+.PercentTimeIndicator .negative {
+    color: #FF6467 ;
+}
+
+.PercentTimeIndicator span{
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+}

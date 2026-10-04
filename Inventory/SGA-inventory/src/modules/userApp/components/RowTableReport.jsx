@@ -3,10 +3,10 @@ import { CheckSquare } from "./CheckSquare"
 import { UserCard } from "./UserCard"
 import './RowTableReport.css'
 import { useAlert, usePreview } from "../../../context/context"
-import { DocumentPreview } from "../containers/Alerts/DocumentPreview"
+import { DocumentPreview } from "../containers/alerts/DocumentPreview"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { PreviewDocument } from "../containers/Preview/PreviewDocument"
-import { ProcessStatusAlert } from "../containers/Alerts/ProcessStatusAlert"
+import { ProcessStatusAlert } from "../containers/alerts/ProcessStatusAlert"
 
 export function RowTableReport({columns,info,hidden,navigation}){
 

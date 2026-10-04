@@ -1,6 +1,6 @@
 import { useAlert } from '../../../context/context'
 import { ProgressBar } from '../components/ProgressBar';
-import { ProcessStatusAlert } from './Alerts/ProcessStatusAlert';
+import { ProcessStatusAlert } from './alerts/ProcessStatusAlert';
 import { formatDate } from '../../../utils/functions';
 import { useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';

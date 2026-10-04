@@ -12,7 +12,7 @@ import { urlSer } from '../../../App';
 import { ProcessStatusAlert } from './Alerts/ProcessStatusAlert';
 import './Reports.css';
 
-const OtpProductionReport = lazy(() => import('../../../../../../costume-modules/nexo360/src/pages/otpProductionReport').then(module => ({ default: module.OtpProductionReport })));
+const OtpProductionReport = lazy(() => import('../../../customModules/nexo360/src/pages/otpProductionReport').then(module => ({ default: module.OtpProductionReport })));
 
 export function Reports() {
     const navigate = useNavigate();

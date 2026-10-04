@@ -1,0 +1,10 @@
+
+.MainTitleAi{
+    font-size: clamp(3.5px,3.5vh,35px);
+    font-weight: 700;
+    background: linear-gradient(45deg,#B8E6FE, #F4A8FF); /* gradiente */
+    -webkit-background-clip: text; /* para Chrome, Safari */
+    -webkit-text-fill-color: transparent; /* para mostrar gradiente */
+    background-clip: text; /* estándar */
+    color: transparent; /* oculta color sólido */
+}

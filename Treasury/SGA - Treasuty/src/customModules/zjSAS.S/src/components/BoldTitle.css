@@ -1,0 +1,14 @@
+@import '../containers/UserApp.css';
+
+
+.BoldTitle{
+    font-weight: 500;
+    font-size: clamp(4px,4vh,40px);
+    color:var(--mainText) ;
+    transition: .3s;
+}
+
+.BoldTitle i{
+    font-size: clamp(3.5px,3.5vh,35px);
+    margin-left: 1vh;
+}

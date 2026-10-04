@@ -2,9 +2,9 @@ import { useAlert, useAppInfo } from "../../../context/context"
 import { BoldTitle } from "../components/BoldTitle";
 import { DescriptionSpan } from "../components/DescriptionSpan";
 import { FormSelectNewProcess } from "./forms/FormSelectNewProcess";
-import {FormClicksControl} from '../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormClicksControl'
+import {FormClicksControl} from '../../../customModules/zjSAS.S/src/containers/forms/FormClicksControl'
 import { useEffect, useState } from "react";
-import { verifiClicksControl } from "../../../../../../costume-modules/zjSAS.S/utils/functions";
+import { verifiClicksControl } from "../../../customModules/zjSAS.S/utils/functions";
 import { NoResults } from "./NoResults";
 // import { ClientOrderPreview } from "./Alerts/ClientOrderPreview";
 // import { SellInvoiceDesign } from "./Alerts/SellInvoiceDesing";

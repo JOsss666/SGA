@@ -1,0 +1,100 @@
+
+.AppIcon{
+    position: relative;
+    display: flex;
+    cursor: pointer;
+    animation-name: apperIconApp;
+    animation-duration: .3s;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+}
+
+.onlyAppIcon{
+    flex-direction: column;
+}
+
+.AppIcon .IconButton{
+    height: 5vh;
+    width: 5vh;
+    border-radius: 1vh;
+    border: hidden;
+    outline: none;
+    background-color: transparent;
+    padding: .25vh;
+    transition: .3s;
+    margin: 0 auto;
+    cursor: pointer;
+}
+
+.AppIcon:hover{
+    background-color: var(--cardHover);
+    border-radius: 1vh;
+}
+
+
+
+.AppIcon .IconButton img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: .3s;
+}
+
+.AppIcon .IconButton:hover img{
+    transform: rotateZ(-10deg);
+}
+
+.AppIcon span{
+    margin:1vh auto;
+    font-size: clamp(2.2px,2.2vh,22px);
+    font-weight: 400;
+    max-width: 9vh;
+    color: var(--descriptionText);
+    overflow: hidden;
+    white-space: none;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+}
+
+.AppIcon:hover span{
+    color: var(--mainText);
+}
+
+.horizontalAppIcon{
+    flex-direction: flex;
+    width: 100%;
+    border-radius: 1vh;
+    transition: .3s;
+}
+
+.horizontalAppIcon .IconButton{
+    margin: 0 1vh;
+}
+
+.horizontalAppIcon:hover .IconButton{
+    background-color: none !important;
+}
+
+.horizontalAppIcon span{
+    margin: auto 0;
+    max-width: max-content;
+}
+
+
+@keyframes apperIconApp {
+    0%{
+        bottom: -8vh;
+        opacity: 40%;
+        transform: scale(0.9);
+    }
+
+    80%{
+        bottom: 1vh;
+    }
+
+    100%{
+        bottom: 0;
+        opacity: 100%;
+        transform: scale(1.0);
+    }
+}

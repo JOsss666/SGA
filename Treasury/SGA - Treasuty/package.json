@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@daypicker/react": "^10.0.1",
+    "react-day-picker": "^10.0.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fullcalendar/daygrid": "^6.1.20",
@@ -31,13 +31,17 @@
     "lightweight-charts": "^5.0.9",
     "papaparse": "^5.5.3",
     "qrcode": "^1.5.4",
+    "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0",
     "react-pdf": "^10.2.0",
     "react-router-dom": "^7.4.0",
+    "react-to-print": "^3.2.0",
     "react-virtualized-auto-sizer": "^1.0.26",
     "react-window": "^2.2.1",
     "recharts": "^3.2.1",
+    "remark-gfm": "^4.0.1",
     "socket.io-client": "^4.8.3",
     "xlsx": "^0.18.5"
   },

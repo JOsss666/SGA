@@ -14,8 +14,8 @@ import { FormNewPurchase } from "../forms/FormNewPurchase";
 import { FormNewENote } from "../forms/FormNewENote";
 import { FormNewUser } from "../forms/FormNewUser";
 import { FormNewThirdParties } from "../forms/FormNewThirdParties";
-import { FormSelectMachine } from "../../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormSelectMachine";
-import { FormClicksControl } from "../../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormClicksControl";
+import { FormSelectMachine } from "../../../../customModules/zjSAS.S/src/containers/forms/FormSelectMachine";
+import { FormClicksControl } from "../../../../customModules/zjSAS.S/src/containers/forms/FormClicksControl";
 import './SearchResultsPannel.css'
 
 const SECTIONS_RESULTS_LIMIT = 5;
