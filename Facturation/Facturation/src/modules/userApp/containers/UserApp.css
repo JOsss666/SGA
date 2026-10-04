@@ -279,6 +279,12 @@
     min-width: 18vw;
 }
 
+.UserApp .AiPet{
+    position: fixed;
+    bottom: 2dvh;
+    right: 2dvh;
+}
+
 .UserApp .bodyApp{
     height: 100dvh;
     width: 100dvw;

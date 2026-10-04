@@ -18,6 +18,7 @@ import { Reports } from './Reports';
 import { DocumentPreview } from './Alerts/DocumentPreview';
 import { ConceptsPlan } from './ConceptsPlan';
 import { ChatAi } from './ChatAi';
+import { AiPet } from '../components/AiPet';
 import { SwitchColorMode } from '../components/SwitchColorMode';
 import { Analytics } from './Analytics'; 
 import { AnalyticDocDetail } from './AnalyticDocDetail';
@@ -69,6 +70,7 @@ export function UserApp(){
     const [visibleApps,setVisibleApps] = useState(false);
     const [quickSearch,setQuickSearch] = useState("");
     const [visibleNotifications,setVisibleNotifications] = useState(false)
+    const [showAiPet,setShowAiPet] = useState(true);
     const [visibleResultsSearch,setVisibleResultsSearch] = useState(false);
 
     useEffect(()=>{
@@ -130,7 +132,15 @@ export function UserApp(){
     useEffect(() => {
         if (visibleChatAi) {
             setVisibleNotifications(false);
+            setShowAiPet(false);
+            return undefined;
         }
+
+        const showPetTimer = window.setTimeout(() => {
+            setShowAiPet(true);
+        }, 500);
+
+        return () => window.clearTimeout(showPetTimer);
     }, [visibleChatAi]);
 
     useEffect(() => {
@@ -286,6 +296,8 @@ export function UserApp(){
                     <AlertsHolder/>
                 )}
                 <ChatAi visible={visibleChatAi}/>
+                {/* Mascota IA oculta temporalmente. Reactivar: */}
+                {/* {!visibleChatAi && showAiPet && <AiPet/>} */}
                 </>
             )}
             {loadingAppData && (
