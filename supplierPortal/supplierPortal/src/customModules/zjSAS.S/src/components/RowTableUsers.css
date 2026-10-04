@@ -1,0 +1,58 @@
+
+.RowTableUsers{
+    display: flex;
+    padding: 1vh;
+    width: 100%;
+    border-bottom: dashed .2vh var(--inputsBorder) ;
+}
+
+.RowTableUsers:hover{
+    background-color:var(--iconHover) ;
+}
+
+.RowTableUsers .atributeRow{
+    margin: auto 1vh;
+    font-size: clamp(2.2px,2.2vh,22px);
+    width: 10vw;
+    color: var(--descriptionText);
+    padding: 0 1vh;
+}
+
+.RowTableUsers .UserCard img{
+    height: 5vh;
+    width: 5vh;
+    border-radius: 100%;
+    outline: none;
+    border: none;
+}
+
+.RowTableUsers .UserCard strong{
+    font-size: clamp(2.2px,2.2vh,22px);
+}
+
+.RowTableUsers .UserCard span{
+    font-size: clamp(1.7px,1.7vh,17px);
+    padding: 0;
+}
+
+.RowTableUsers .idContainer{
+    width: 5vw;
+}
+
+
+.RowTableUsers .CheckSquare{
+    margin: auto 0;
+}
+
+.RowTableUsers .UserCardContainer{
+    width: 15vw;
+}
+
+.RowTableUsers .redirectSpan{
+    cursor: pointer;
+    transition: .3s;
+}
+
+.RowTableUsers .redirectSpan:hover{
+    color: #0071E3;
+}

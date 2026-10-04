@@ -12,7 +12,7 @@ import { ButtonMenu } from "../../components/ButtonMenu";
 import { useReactToPrint } from "react-to-print";
 import { parseCashBoxeToXlsx } from "../../../../utils/functions";
 import { useParams } from "react-router-dom";
-import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
+import { ProcessStatusAlert } from "../alerts/ProcessStatusAlert";
 
 export function CashRegisterReport({shift_id}){
 

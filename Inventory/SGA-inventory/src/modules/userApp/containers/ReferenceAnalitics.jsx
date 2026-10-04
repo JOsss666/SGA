@@ -28,12 +28,36 @@ export function ReferenceAnalitics({}){
     const [finalDate,setFinalDate] = useState();
     const [marginUtility,setMarginutility] = useState();
     const params = useParams();
+    const [productInfo,setProductInfo] = useState(()=>location.state ?? {});
+    const productId = params.product_id ?? productInfo.product_id ?? productInfo.id;
 
-    var info = location.state != null? location.state:{};
+    const getProductInfo = async()=>{
+        if(!productId || !appInfo.company_id) return;
+        try{
+            const response = await postInfo('/inventory/getProducts',{
+                company_id:appInfo.company_id,
+                product_id:productId
+            });
+            const product = Array.isArray(response?.[1])
+                ? response[1].find(item => String(item.id) === String(productId))
+                : null;
+            if(product){
+                setProductInfo({
+                    ...product,
+                    product_id:product.id,
+                    product_name:product.name,
+                    product_code:product.code,
+                    product_description:product.description
+                });
+            }
+        }catch(error){
+            console.error('No se pudo cargar el producto:',error);
+        }
+    }
 
     const getTransactions = async()=>{
         setLoading(true);
-        let res = await postInfo('/getDepartures',{company_id:appInfo.company_id,product_id:info.product_id});
+        let res = await postInfo('/getDepartures',{company_id:appInfo.company_id,product_id:productId});
         console.log(res);
         if(res[0]){
             setTransactions(res[1]);
@@ -45,7 +69,7 @@ export function ReferenceAnalitics({}){
         setCahrtsLoading(true);
         let res = await postInfo('/getRotation',{
             company_id:appInfo.company_id,
-            product_id:info.product_id,
+            product_id:productId,
             initialDate,
             finalDate
         })
@@ -74,8 +98,12 @@ export function ReferenceAnalitics({}){
     const columsTrans = ["#","Tienda","Bodega","Destinatario","Unidades","Valor Total","Estado","Fecha"]
 
     useEffect(()=>{
+        getProductInfo();
+    },[appInfo.company_id,params.product_id]);
+
+    useEffect(()=>{
         getTransactions();
-    },[])
+    },[appInfo.company_id,productId]);
 
     useEffect(()=>{
         if(initialDate != null && initialDate != '' && finalDate!= null && finalDate!= ''){
@@ -87,7 +115,7 @@ export function ReferenceAnalitics({}){
         <div className="ReferenceAnalitics appSection">
             <PathLocation/>
             <div className="bodyAnaliticReference">
-                <PreviewProduct info={info}/>
+                <PreviewProduct info={productInfo} productId={productId} reloadFun={getProductInfo}/>
                 <div className="movementsReference">
                     <div className="menuFilterTable">
                         <FormInput action={setInitialDate} type={"date"} title={"Fecha inicial"} max={finalDate}/>

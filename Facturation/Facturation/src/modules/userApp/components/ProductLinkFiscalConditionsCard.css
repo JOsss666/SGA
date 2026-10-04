@@ -226,6 +226,41 @@
     color: #fff;
 }
 
+.ProductLinkFiscalConditionsCard .readOnlyRelation,
+.ProductLinkFiscalConditionsCard .thirdPartyProductReference.readOnlyThirdPartyReference{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1vh;
+    padding: .8vh;
+    border-radius: .6vh;
+    background-color: var(--inputsBg);
+    color: var(--mainText);
+    font-size: clamp(9px,1.6vh,14px);
+}
+
+.ProductLinkFiscalConditionsCard .readOnlyRelation span,
+.ProductLinkFiscalConditionsCard .thirdPartyProductReference.readOnlyThirdPartyReference span{
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.ProductLinkFiscalConditionsCard .readOnlyRelation small{
+    color: var(--descriptionText);
+    white-space: nowrap;
+}
+
+.ProductLinkFiscalConditionsCard .thirdPartyProductReference.readOnlyThirdPartyReference{
+    flex-direction: column;
+    margin-top: 1vh;
+}
+
+.ProductLinkFiscalConditionsCard .thirdPartyProductReference.readOnlyThirdPartyReference strong{
+    color: var(--descriptionText);
+    font-size: clamp(9px,1.6vh,14px);
+    font-weight: 500;
+}
+
 @media (max-width: 700px){
     .ProductLinkFiscalConditionsCard .productFiscalHeader{
         grid-template-columns: minmax(0, 1fr) auto;

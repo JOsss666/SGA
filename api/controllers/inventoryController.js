@@ -22,6 +22,38 @@ const sendJson = (res, statusCode, payload) => {
     res.end(JSON.stringify(payload));
 };
 
+const runAuthenticatedThirdPartyProductUpdate = async (req, res, serviceMethod, label) => {
+    try {
+        const info = req.body;
+        if (!info || typeof info !== 'object' || Array.isArray(info)) {
+            return res.status(400).json({ status: 'Error', code: 'INVALID_REQUEST_BODY', message: 'El cuerpo debe ser un objeto JSON.' });
+        }
+
+        const companyId = Number(req.auth?.companyId);
+        if (!Number.isSafeInteger(companyId) || companyId <= 0) {
+            return res.status(401).json({ status: 'Error', code: 'MISSING_COMPANY_CONTEXT', message: 'Se requiere una compañía activa.' });
+        }
+        if (Number(info.company_id) !== companyId) {
+            return res.status(403).json({ status: 'Error', code: 'COMPANY_CONTEXT_MISMATCH', message: 'La compañía solicitada no coincide con la sesión.' });
+        }
+
+        const result = await serviceMethod({
+            ...info,
+            company_id: companyId,
+            performed_by: req.auth?.userName ?? req.auth?.userId ?? 'api'
+        });
+        return res.status(200).json(result);
+    } catch (error) {
+        const statusCode = Number(error?.statusCode) || (error?.code === '23505' ? 409 : 500);
+        if (statusCode >= 500) console.error(`Error en ${label}:`, error);
+        return res.status(statusCode).json({
+            status: 'Error',
+            code: error?.code || `${label.toUpperCase()}_FAILED`,
+            message: statusCode >= 500 ? 'No fue posible guardar la asociación del producto.' : error.message
+        });
+    }
+};
+
 inventoryController.getSubCategories = (req,res)=>{
     let data = ''
     req.on('data',chunk=>{
@@ -99,6 +131,16 @@ inventoryController.getProducts = async (req, res, next) => {
             values.push(info.type)
         }
 
+        const requestedProductId = info.product_id ?? info.id;
+        if(requestedProductId !== undefined && requestedProductId !== null){
+            const productId = Number(requestedProductId);
+            if(!Number.isSafeInteger(productId) || productId <= 0){
+                return res.status(400).json([false,{message:'Se requiere un product_id válido.'}]);
+            }
+            values.push(productId);
+            whereClauses.push(`ps.id = $${values.length}`);
+        }
+
         whereClauses.push(`ps.status = 'active'`);
 
         const whereQuery = whereClauses.length > 0
@@ -114,7 +156,8 @@ inventoryController.getProducts = async (req, res, next) => {
                 t.rate AS tax_rate,
                 c_exit.account_id AS exit_account,
                 c_entry.account_id AS entry_account,
-                array_remove(array_agg(c.name), NULL) AS categories
+                array_remove(array_agg(DISTINCT c.name), NULL) AS categories,
+                array_remove(array_agg(DISTINCT pc.category_id), NULL) AS category_ids
             FROM
                 "Inventory"."products&services" AS ps
             LEFT JOIN 
@@ -463,6 +506,24 @@ inventoryController.getThirdPartyProductTaxRelations = async (req,res)=>{
         });
     }
 }
+
+inventoryController.updateThirdPartyProductAssociation = async (req, res) => (
+    runAuthenticatedThirdPartyProductUpdate(
+        req,
+        res,
+        productsServicesService.updateThirdPartyProductAssociation,
+        'updateThirdPartyProductAssociation'
+    )
+);
+
+inventoryController.updateThirdPartyProductTaxRelations = async (req, res) => (
+    runAuthenticatedThirdPartyProductUpdate(
+        req,
+        res,
+        productsServicesService.updateThirdPartyProductTaxRelations,
+        'updateThirdPartyProductTaxRelations'
+    )
+);
 
 inventoryController.getPricesListItems = (req, res) => {
     let data = '';

@@ -1,0 +1,101 @@
+
+.AttachedDocuments{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 1vh 0;
+}
+
+.AttachedDocuments .attachedDocsGrid{
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 4vh;
+}
+
+.AttachedDocuments .docItem{
+    display: flex;
+    flex-direction: column;
+}
+
+.AttachedDocuments .docItem h6{
+    margin-bottom: 2vh;
+    font-size: clamp(2.2px,2.5vh,25px);
+    font-weight: 500;
+    color: var(--descriptionText);
+}
+
+.AttachedDocuments .RutContainer{
+    display: flex;
+    height: 25vh;
+    width: 20vw;
+    border-radius: 3vh;
+    overflow: hidden;
+}
+
+.AttachedDocuments .actualRut{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    background-image: url('https://caracol.com.co/resizer/v2/EQ7VIAFLG5AANDY4LDJFBFMWNU.jpg?auth=3281068672af34464e653d5abba85feda8792f64c3f705ce3d97df2c4e9e2d9b&width=650&height=488&quality=70&smart=true');
+    background-size: 100% 100%;
+    border-radius:3vh;
+    cursor: pointer;
+}
+
+.AttachedDocuments .actualRut .noRutAttached{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color:#00000090;
+}
+
+.AttachedDocuments .actualRut .noRutAttached i{
+    margin: auto;
+    margin-bottom: 2vh;
+    color: #fff;
+    font-size: clamp(3px,4vh,40px);
+}
+
+.AttachedDocuments .actualRut .noRutAttached h6{
+    margin: auto;
+    margin-top: 0;
+    color: #fff;
+    font-weight: 500;
+}
+
+.AttachedDocuments .RutContainer .FileInput{
+    display: none;
+}
+
+.AttachedDocuments .RutContainer:hover .actualRut{
+    display: none;
+}
+
+.AttachedDocuments .RutContainer:hover .FileInput{
+    display: flex;
+}
+
+.AttachedDocuments .viewRutLink{
+    margin-top: 2vh;
+    font-size: clamp(2px,2vh,18px);
+    color: #007AFF;
+    text-decoration: none;
+    width: fit-content;
+}
+
+.AttachedDocuments .viewRutLink:hover{
+    text-decoration: underline;
+}
+
+.AttachedDocuments .optionsRow{
+    display: flex;
+    gap: 2vh;
+    margin-top: 3vh;
+}
+
+.AttachedDocuments .optionsRow .FormButton{
+    background-color: #007AFF;
+    width: 20vw;
+}

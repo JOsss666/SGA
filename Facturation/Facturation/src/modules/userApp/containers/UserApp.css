@@ -180,6 +180,30 @@
 .UserApp .headApp .subMenuHeader .ButtonMenu{
     margin: auto 1vh;
 }
+.UserApp .headApp .subMenuHeader .ButtonMenu:hover{
+    background-color: var(--cardHover);
+}
+
+.UserApp .headApp .subMenuHeader .AiAssitantBtn{
+    height: 4.5vh;
+    width: 4.5vh;
+    position: relative;
+    margin: auto 0;
+    cursor: pointer;
+    border-radius: 1vh;
+    transition: .3s ease;
+}
+
+.UserApp .headApp .subMenuHeader .AiAssitantBtn:hover{
+    transform: scale(0.96);
+}
+
+.UserApp .headApp .subMenuHeader .AiAssitantBtn img{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
 
 .UserApp .headApp .SwitchColorMode{
     margin: auto 3vw;

@@ -116,8 +116,8 @@
 .ThirdPartyDetail .scoreAndContact .contactContainer .ButtonMenu{
     margin: auto 0;
     margin-right: 1vh;
-    height: 8vh;
-    width: 8vh;
+    height: 5vh;
+    width: 5vh;
 }
 
 .ThirdPartyDetail .scoreAndContact .contactContainer .ButtonMenu i{
@@ -140,8 +140,8 @@
 
 .ThirdPartyDetail .bodyThirdPartyDetails .menuSectionBody h4{
     font-size: clamp(2.5px,2.5vh,25px);
-    font-weight: 500;
-    color: var(--descriptionText);
+    font-weight: 400;
+    color: var(--mainText);
     margin: auto 0;
     margin-right: 5vh;
     transition: .3s;

@@ -126,6 +126,12 @@ export function ElectronicFacturationSettingsControl(){
                     <Route path='deleteInvoice' element={
                         <NoAccess title={'Seccion aún no disponible'} description={'Pronto habilitaremos esta nueva sección'} noExit={true} />
                     }/>
+                    <Route path='deleteCrNote' element={
+                        <NoAccess title={'Seccion aún no disponible'} description={'Pronto habilitaremos esta nueva sección'} noExit={true} />
+                    }/>
+                    <Route path='deleteDbNote' element={
+                        <NoAccess title={'Seccion aún no disponible'} description={'Pronto habilitaremos esta nueva sección'} noExit={true} />
+                    }/>
                 </Routes>
             </div>
         </div>

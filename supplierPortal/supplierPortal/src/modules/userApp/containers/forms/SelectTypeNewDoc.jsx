@@ -10,7 +10,7 @@ import { SearchBar } from "../../components/SearchBar";
 import { FormNewMovement } from "./FormNewMovement";
 import { FormNewClientOrder } from "./FormNewClientOrder";
 import { FormNewCashRecipt } from "./FormNewCashRecipt";
-import { FormSelectMachine } from "../../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormSelectMachine";
+import { FormSelectMachine } from "../../../../customModules/zjSAS.S/src/containers/forms/FormSelectMachine";
 import { FormNewInvoice } from "./FormNewInvoice";
 import { FormNewBudget } from "./FormNewBudget";
 import { FormNewThirdPartyDelegation } from './FormNewThirdPartyDelegation';

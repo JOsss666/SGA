@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './SearchInList.css'
 
-export function SearchinList({title, placeHolder, list, disabled, action, children, specialOption, noActVal,canClear}){
+export function SearchinList({title, placeHolder, list, disabled, action, children, specialOption, noActVal,canClear,defaultValue}){
     
     const [searchValue, setSearchValue] = useState('');
     const [visibleList, setVisibleList] = useState(false);
@@ -10,6 +10,26 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
     
     const inRef = useRef();
     const listE = useRef(); // Referencia al contenedor <ul>
+    const appliedDefaultValue = useRef(null);
+
+    useEffect(() => {
+        if (defaultValue === undefined || defaultValue === null || defaultValue === '') {
+            appliedDefaultValue.current = null;
+            return;
+        }
+
+        const defaultKey = typeof defaultValue === 'object' ? defaultValue.value : defaultValue;
+        if (defaultKey === appliedDefaultValue.current || !inRef.current) return;
+
+        const option = typeof defaultValue === 'object' && defaultValue.text != null
+            ? defaultValue
+            : list.find(element => String(element.value ?? element.text) === String(defaultKey));
+
+        if (option?.text != null) {
+            inRef.current.value = option.text;
+            appliedDefaultValue.current = defaultKey;
+        }
+    }, [defaultValue, list]);
 
     const filteredList = list.filter(element => 
         !searchValue || element.text.toLowerCase().includes(searchValue.toLowerCase())

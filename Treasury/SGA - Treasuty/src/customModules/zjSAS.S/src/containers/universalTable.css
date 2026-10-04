@@ -1,0 +1,399 @@
+.universalTable {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 60vh;
+    min-width: 0;
+    min-height: 0;
+    flex-direction: column;
+    overflow: visible;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: 1vh;
+    background: var(--inputsBg);
+}
+
+.universalTable.disabled {
+    cursor: not-allowed;
+}
+
+.universalTable .universalTableTotals {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+    border-bottom: .1vh solid var(--inputsBorder);
+    color: var(--mainText);
+    background: var(--menuAside);
+}
+
+.universalTable .universalTableTotalCell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 1.1vh 1.4vh;
+    min-height: 3rem;
+    font-size: clamp(.78rem, 1.65vh, 1rem);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.universalTable .universalTableTotalCell span {
+    overflow-wrap: anywhere;
+    text-align: right;
+}
+
+.universalTable .universalTableHeaderViewport {
+    width: 100%;
+    flex: 0 0 auto;
+    overflow: hidden;
+    border-bottom: .1vh solid var(--inputsBorder);
+    border-radius: 1vh 1vh 0 0;
+    background: var(--menuAside);
+}
+
+.universalTable .universalTableHeader {
+    display: flex;
+    width: 100%;
+    min-height: 5vh;
+    align-items: stretch;
+}
+
+.universalTable .universalTableHeaderCell {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    padding: .25vh 1vh;
+    align-items: center;
+    border-right: .1vh dashed var(--inputsBorder);
+}
+
+.universalTable .universalTableHeaderCell:last-child {
+    border-right: 0;
+}
+
+.universalTable .universalTableSortButton,
+.universalTable .universalTableFilterButton,
+.universalTable .universalTableFilterActions button {
+    border: 0;
+    color: var(--mainText);
+    background: transparent;
+    cursor: pointer;
+}
+
+.universalTable .universalTableSortButton {
+    display: flex;
+    min-width: 0;
+    min-height: 4.4vh;
+    padding: .25vh 1vh;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8vh;
+    font-size: clamp(.76rem, 1.55vh, .95rem);
+    font-weight: 600;
+    text-align: left;
+    border-radius: 1vh;
+}
+
+.universalTable .universalTableSortButton span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 400;
+    font-size: clamp(1.8px,1.8vh,18px);
+}
+
+.universalTable .universalTableSortButton i {
+    margin: auto 0;
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+}
+
+.universalTable .universalTableSortButton .sortedColumIcon{
+    color: var(--chatAccent);
+}
+
+.universalTable .universalTableFilterButton {
+    width: 3vh;
+    min-width: 2rem;
+    min-height: 4.4vh;
+    color: var(--descriptionText);
+    border-radius: 1vh;
+}
+
+.universalTable .universalTableFilterButton i{
+    margin: auto 0;
+    font-size: clamp(2px,2vh,20px);
+    color: var(--descriptionText);
+}
+
+.universalTable .universalTableFilterButton.active {
+    color: var(--chatAccent);
+    background-color: var(--chatAccent);
+}
+
+.universalTable .universalTableFilterButton.active:hover{
+    background-color: #1E1A4D;
+}
+
+.universalTable .universalTableFilterButton.active i{
+    color: #fff;
+}
+
+.universalTable button:hover:not(:disabled) {
+    background: var(--cardHover);
+}
+
+.universalTable button:focus-visible,
+.universalTable input:focus-visible {
+    outline: .15vh solid var(--chatAccent);
+    outline-offset: 0vh;
+}
+
+.universalTable button:disabled,
+.universalTable input:disabled {
+    cursor: not-allowed;
+    opacity: .48;
+}
+
+.universalTable .universalTableFilterMenu {
+    position: absolute;
+    z-index: 20;
+    display: flex;
+    max-height: 36vh;
+    padding: 1.2vh;
+    flex-direction: column;
+    gap: 1vh;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: 1vh;
+    background: var(--inputsBg);
+    box-shadow: var(--chatBubbleShadow);
+}
+
+.universalTable .universalTableFilterMenu > label {
+    display: flex;
+    flex-direction: column;
+    gap: .5vh;
+    color: var(--descriptionText);
+    font-size: clamp(1.8px, 1.8vh, 18px);
+}
+
+.universalTable .universalTableFilterMenuHeader {
+    display: flex;
+    min-height: 3.8vh;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1vh;
+    color: var(--mainText);
+}
+
+.universalTable .universalTableFilterMenuHeader strong {
+    overflow: hidden;
+    font-size: clamp(1.8px, 1.8vh, 18px);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+    padding-left: 1vh;
+}
+
+.universalTable .universalTableFilterMenuHeader strong i{
+    margin-right: 1vh;
+}
+
+.universalTable .universalTableFilterMenuHeader button {
+    width: 3.8vh;
+    height: 3vh;
+    width: 3vh;
+    border-radius: 1vh;
+    border: hidden;
+    outline: solid .1vh var(--inputsBorder);
+    background-color: var(--cardHover);
+    cursor: pointer;
+    display: flex;
+}
+
+.universalTable .universalTableFilterMenuHeader button i{
+    margin: auto;
+    font-size: clamp(1.8px,1.8vh,18px);
+    color: var(--descriptionText);
+}
+
+.universalTable .universalTableFilterMenu input[type='search'] {
+    min-height: 4.2vh;
+    padding: .7vh 1vh;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: .7vh;
+    color: var(--mainText);
+    background: var(--inputsBg);
+    font-size: clamp(1.6px,1.6vh,16px);
+}
+
+.universalTable .universalTableFilterActions {
+    display: flex;
+    gap: .7vh;
+}
+
+.universalTable .universalTableFilterActions button {
+    min-height: 3.8vh;
+    padding: .6vh 1vh;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: .7vh;
+    flex: 1;
+    font-size: clamp(.7rem, 1.35vh, .82rem);
+}
+
+.universalTable .universalTableFilterValues {
+    display: flex;
+    min-height: 5vh;
+    overflow-y: auto;
+    flex-direction: column;
+}
+
+.universalTable .universalTableFilterValues label {
+    display: flex;
+    min-height: 3.8vh;
+    padding: .6vh .5vh;
+    align-items: center;
+    gap: .8vh;
+    border-radius: .5vh;
+    color: var(--mainText);
+    cursor: pointer;
+    font-size: clamp(.72rem, 1.4vh, .86rem);
+}
+
+.universalTable .universalTableFilterValues label:hover {
+    background: var(--cardHover);
+}
+
+.universalTable .universalTableFilterValues input {
+    width: 1.8vh;
+    min-width: 1rem;
+    height: 1.8vh;
+}
+
+.universalTable .universalTableFilterValues span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.universalTable .universalTableFilterValues p {
+    padding: 1.5vh .5vh;
+    color: var(--descriptionText);
+    text-align: center;
+}
+
+.universalTable .universalTableBody {
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow: auto;
+}
+
+.universalTable .universalTableBodyContent {
+    width: 100%;
+}
+
+.universalTable .universalTableVirtualSpace {
+    position: relative;
+    width: 100%;
+}
+
+.universalTable .universalTableVirtualRow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.universalTable .universalTableEmpty {
+    display: flex;
+    min-height: 18vh;
+    padding: 3vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1vh;
+    color: var(--descriptionText);
+    text-align: center;
+}
+
+.universalTable .universalTableEmpty i {
+    font-size: 3.2vh;
+}
+
+.universalTable .universalTableFooter {
+    flex: 0 0 auto;
+    padding: .8vh 1.3vh;
+    border-top: .1vh solid var(--inputsBorder);
+    color: var(--descriptionText);
+    background: var(--menuAside);
+    font-size: clamp(.68rem, 1.3vh, .8rem);
+    text-align: right;
+}
+
+.universalTable .chechBoxValueColumn {
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    display: inline-flex;
+    width: 1.8vh;
+    min-width: 1rem;
+    height: 1.8vh;
+    min-height: 1rem;
+    margin: 0;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border: .16vh solid var(--inputsBorder);
+    border-radius: .35vh;
+    color: var(--mainText);
+    background: var(--inputsBg);
+    cursor: pointer;
+    transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease;
+}
+
+.universalTable .chechBoxValueColumn::after {
+    width: .42vh;
+    min-width: .24rem;
+    height: .78vh;
+    min-height: .42rem;
+    border-right: .2vh solid currentColor;
+    border-bottom: .2vh solid currentColor;
+    content: '';
+    opacity: 0;
+    transform: translateY(-.08vh) rotate(45deg) scale(.55);
+    transition: opacity .14s ease, transform .14s ease;
+}
+
+.universalTable .chechBoxValueColumn:hover:not(:disabled) {
+    border-color: var(--chatAccent);
+    box-shadow: 0 0 0 .25vh color-mix(in srgb, var(--chatAccent) 16%, transparent);
+}
+
+.universalTable .chechBoxValueColumn:checked {
+    border-color: var(--chatAccent);
+    color: #fff;
+    background: var(--chatAccent);
+}
+
+.universalTable .chechBoxValueColumn:checked::after {
+    opacity: 1;
+    transform: translateY(-.08vh) rotate(45deg) scale(1);
+}
+
+.universalTable .chechBoxValueColumn:focus-visible {
+    outline: .25vh solid var(--chatAccent);
+    outline-offset: .25vh;
+}
+
+.universalTable .chechBoxValueColumn:disabled {
+    cursor: not-allowed;
+    opacity: .48;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .universalTable * {
+        scroll-behavior: auto;
+    }
+}

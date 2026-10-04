@@ -27,14 +27,14 @@ import { PortfolioReportDetail } from './reports/PortfolioReportDetail';
 
     // Z&J S.A.S
     const CustomZJClicksReport = React.lazy(() => 
-        import('../../../../../../costume-modules/zjSAS.S/src/containers/reports/ClicksReport').then(module => ({ default: module.ClicksReport }))
+        import('../../../customModules/zjSAS.S/src/containers/reports/ClicksReport').then(module => ({ default: module.ClicksReport }))
     );
     const CustomZJServicesReport = React.lazy(() => 
-        import('../../../../../../costume-modules/zjSAS.S/src/containers/reports/ServiceMovements').then(module => ({ default: module.ServiceMovements }))
+        import('../../../customModules/zjSAS.S/src/containers/reports/ServiceMovements').then(module => ({ default: module.ServiceMovements }))
     );
 
     const CustomZJAuditoryClicksReport = React.lazy(() => 
-        import('../../../../../../costume-modules/zjSAS.S/src/containers/reports/AuditoryClicksReport').then(module => ({ default: module.AuditoryClicksReport }))
+        import('../../../customModules/zjSAS.S/src/containers/reports/AuditoryClicksReport').then(module => ({ default: module.AuditoryClicksReport }))
     );
 
 export function Reports(){

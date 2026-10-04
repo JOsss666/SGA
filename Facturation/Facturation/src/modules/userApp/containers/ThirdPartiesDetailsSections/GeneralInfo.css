@@ -36,9 +36,15 @@
     box-shadow: none;
 }
 
-.GeneralInfo form .FormButton{
-    margin: auto 0;
-    margin-bottom: 0;
+.GeneralInfo .optionsRow{
+    display: flex;
+    gap: 2vh;
+    margin: 2vh 0;
+    margin-top: 5vh;
+    width: 100%;
+}
+
+.GeneralInfo form .optionsRow .FormButton:nth-child(2){
     background-color: #007AFF;
 }
 

@@ -1,6 +1,6 @@
 
 import { AutoResizeTextArea } from '../componets/AutoResizeTextArea'
-import './voiceAsistant.css'
+import './VoiceAsistant.css'
 
 
 export function VoiceAsistant(){

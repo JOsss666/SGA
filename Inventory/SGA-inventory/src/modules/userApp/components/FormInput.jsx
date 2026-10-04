@@ -8,15 +8,10 @@ export function FormInput({action,title,defaultValue,placeholder,children,type,d
     const moneyFspan = useRef();
 
     useEffect(()=>{
-        if(inRef.current != undefined){
-            if(value != undefined){
-                inRef.current.value = value;
-                if(action != undefined){
-                    action(value);
-                }
-            }
+        if(inRef.current && value !== undefined){
+            inRef.current.value = value ?? '';
         }
-    },[inRef])
+    },[value])
 
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' && onSubmit != undefined) {

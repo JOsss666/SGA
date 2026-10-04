@@ -7,6 +7,18 @@
     position: relative;
 }
 
+.ProductCard .productCardMoreOptions{
+    position: absolute;
+    right: 1vh;
+    top: 1vh;
+    z-index: 16;
+}
+
+.ProductCard .productCardMoreOptions .ButtonMenu{
+    height: 5vh;
+    width: 5vh;
+}
+
 .ProductCard_grid{
     flex-direction: column;
     width: 18vw;

@@ -1,0 +1,64 @@
+.universalRow {
+    display: flex;
+    width: 100%;
+    min-height: 5.6vh;
+    align-items: center;
+    border-bottom: .15vh dashed var(--inputsBorder);
+    background: var(--inputsBg);
+    color: var(--mainText);
+    transition: background-color .2s ease, opacity .2s ease;
+}
+
+.universalRow:hover {
+    background: var(--cardHover);
+}
+
+.universalRow.clickable {
+    cursor: pointer;
+}
+
+.universalRow.selected {
+    background: var(--lightSelected);
+    box-shadow: inset .3vh 0 0 var(--chatAccent);
+}
+
+.universalRow.disabled {
+    cursor: not-allowed;
+    opacity: .55;
+    pointer-events: none;
+}
+
+.universalRow .universalRowCell {
+    min-width: 0;
+    padding: 1.1vh 1.4vh;
+    overflow: hidden;
+    font-size: clamp(.78rem, 1.65vh, 1rem);
+}
+
+.universalRow .universalRowCell > span:not(.universalRowStatus) {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.universalRow .universalRowStatus {
+    display: inline-flex;
+    align-items: center;
+    gap: .65vh;
+    padding: .45vh .8vh;
+    border-radius: 999px;
+    background: var(--cardHover);
+    color: var(--descriptionText);
+}
+
+.universalRow .universalRowStatus i {
+    font-size: .55em;
+    color: var(--chatAccent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .universalRow {
+        transition: none;
+    }
+}

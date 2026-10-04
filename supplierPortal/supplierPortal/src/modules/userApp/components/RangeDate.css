@@ -1,0 +1,222 @@
+.sgaTreasury .RangeDate {
+    position: relative;
+    display: inline-flex;
+    width: min(100%, 24rem);
+    min-width: 18rem;
+}
+
+.sgaTreasury .RangeDate .RangeDateInputs {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: .7rem;
+}
+
+.sgaTreasury .RangeDate .RangeDateActions button:focus-visible,
+.sgaTreasury .RangeDate .rdp-button_next:focus-visible,
+.sgaTreasury .RangeDate .rdp-button_previous:focus-visible,
+.sgaTreasury .RangeDate .rdp-day_button:focus-visible {
+    outline: .18rem solid var(--chatAccent);
+    outline-offset: .14rem;
+}
+
+.sgaTreasury .RangeDate .FacturationFormInput {
+    min-width: 0;
+    flex: 1;
+}
+
+.sgaTreasury .RangeDate .FacturationFormInput .inputContainer input {
+    min-height: 2.9rem;
+    padding: 1.5vh 1vh;
+    color: var(--mainText);
+    cursor: pointer;
+    font-size: clamp(.78rem, 1.6vh, .95rem) !important;
+}
+
+.sgaTreasury .RangeDate .FacturationFormInput .inputContainer input::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sgaTreasury .RangeDate .RangeDateSeparator {
+    flex: 0 0 auto;
+    color: var(--descriptionText);
+    font-weight: 600;
+}
+
+.sgaTreasury .RangeDate .RangeDatePopover {
+    position: absolute;
+    top: calc(100% + .6rem);
+    z-index: 40;
+    display: flex;
+    width: max-content;
+    max-width: min(92vw, 23rem);
+    padding: 1rem;
+    flex-direction: column;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: 1.2vh;
+    color: var(--mainText);
+    background: var(--inputsBg);
+    box-shadow: var(--chatBubbleShadow);
+}
+
+.sgaTreasury .RangeDate.alignLeft .RangeDatePopover {
+    left: 0;
+}
+
+.sgaTreasury .RangeDate.alignRight .RangeDatePopover {
+    right: 0;
+}
+
+.sgaTreasury .RangeDate .rdp-root {
+    --rdp-accent-color: var(--chatAccent);
+    --rdp-accent-background-color: var(--lightSelected);
+    --rdp-day-width: 2.75rem;
+    --rdp-day-height: 2.75rem;
+    --rdp-day_button-width: 2.55rem;
+    --rdp-day_button-height: 2.55rem;
+    --rdp-day_button-border-radius: .7rem;
+    --rdp-today-color: var(--chatAccent);
+    --rdp-disabled-opacity: .35;
+    --rdp-outside-opacity: .42;
+    --rdp-range_middle-background-color: #EBF0FF;
+    --rdp-range_middle-color: #6C72CC;
+    --rdp-range_start-color: #fff;
+    --rdp-range_end-color: #fff;
+    --rdp-range_start-date-background-color: var(--chatAccent);
+    --rdp-range_end-date-background-color: var(--chatAccent);
+    margin: 0;
+}
+
+.sgaTreasury .RangeDate .rdp-month_caption {
+    font-size: 1rem;
+    text-transform: capitalize;
+}
+
+.sgaTreasury .RangeDate .rdp-weekday {
+    color: var(--descriptionText);
+    font-size: clamp(1.5px,1.5vh,15px);
+    font-weight: 500;
+}
+
+.sgaTreasury .RangeDate .rdp-day_button,
+.sgaTreasury .RangeDate .rdp-button_next,
+.sgaTreasury .RangeDate .rdp-button_previous {
+    color: var(--descriptionTextE0E7FF);
+    cursor: pointer;
+    font-weight: 400;
+    border-radius: 1vh;
+}
+
+.sgaTreasury .RangeDate .rdp-day_button:hover:not(:disabled),
+.sgaTreasury .RangeDate .rdp-button_next:hover:not(:disabled),
+.sgaTreasury .RangeDate .rdp-button_previous:hover:not(:disabled) {
+    background: var(--cardHover);
+    color: var(--mainText);
+}
+
+.sgaTreasury .RangeDate .rdp-range_middle .rdp-day_button,
+.sgaTreasury .RangeDate .rdp-range_middle .rdp-day_button:hover:not(:disabled) {
+    color: #6C72CC;
+}
+
+.sgaTreasury .RangeDate .rdp-outside.rdp-range_middle {
+    background: #EBF0FF;
+}
+
+.sgaTreasury .RangeDate .rdp-outside.rdp-range_middle .rdp-day_button,
+.sgaTreasury .RangeDate .rdp-outside.rdp-range_middle .rdp-day_button:hover:not(:disabled) {
+    color:#6C72CC ;
+    background: #EBF0FF;
+}
+
+.sgaTreasury .RangeDate .rdp-range_start .rdp-day_button,
+.sgaTreasury .RangeDate .rdp-range_end .rdp-day_button {
+    color:#fff;
+    background: #000;
+}
+
+:root.dark .sgaTreasury .RangeDate .rdp-range_start .rdp-day_button,
+:root.dark .sgaTreasury .RangeDate .rdp-range_end .rdp-day_button {
+    color:#fff;
+    background:var(--chatAccent);
+}
+
+.sgaTreasury .RangeDate .rdp-footer {
+    padding-top: 1rem;
+    color: var(--descriptionText);
+    font-size: .8rem;
+    text-align: center;
+}
+
+.sgaTreasury .RangeDate .RangeDateActions {
+    margin-top: 1vh;
+    display: flex;
+    padding-top: .85rem;
+    justify-content: flex-end;
+    gap: .65rem;
+    border-top: .1vh solid var(--inputsBorder);
+}
+
+.sgaTreasury .RangeDate .RangeDateActions button {
+    min-width: 5.5rem;
+    min-height: 2.75rem;
+    padding: .6rem .9rem;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: .7rem;
+    color: var(--mainText);
+    background: var(--inputsBg);
+    cursor: pointer;
+    font-size: clamp(2px,1.8vh,18px);
+}
+
+.sgaTreasury .RangeDate .rdp-caption_label {
+    color: var(--mainText);
+    font-size: clamp(1.8px,1.8vh,18px);
+    font-weight: 500;
+    text-transform: capitalize;
+    margin-left: 1vh;
+}
+
+.sgaTreasury .RangeDate .RangeDateActions button i{
+    margin-left: 1vh;
+}
+
+.sgaTreasury .RangeDate .RangeDateActions button:hover:not(:disabled) {
+    background: var(--cardHover);
+}
+
+.sgaTreasury .RangeDate .RangeDateActions button.primary:hover:not(:disabled) {
+    background: var(--chatAccent);
+}
+
+.sgaTreasury .RangeDate .RangeDateActions button.primary {
+    border-color: var(--chatAccent);
+    background: var(--chatAccent);
+    color: #fff;
+    font-weight: 500;
+}
+
+.sgaTreasury .RangeDate .RangeDateActions button:disabled {
+    cursor: not-allowed;
+    opacity: .45;
+}
+
+@media (max-width: 520px) {
+    .sgaTreasury .RangeDate {
+        width: 100%;
+    }
+
+    .sgaTreasury .RangeDate .RangeDatePopover {
+        right: 0;
+        left: auto;
+        max-width: calc(100vw - 2rem);
+        overflow-x: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sgaTreasury .RangeDate * {
+        scroll-behavior: auto;
+    }
+}

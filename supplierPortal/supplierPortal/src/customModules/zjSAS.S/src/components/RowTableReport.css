@@ -1,0 +1,84 @@
+
+@import '../containers/UserApp.css';
+
+.RowTableReport{
+    display: flex;
+    background-color: var(--bg);
+    border-bottom: dashed .1vh var(--inputsBorder);
+    transition: .3s;
+    width: 100%;
+    padding-left: 1vh;
+}
+
+.RowTableReport:hover{
+    background-color: var(--cardHover);
+}
+
+.RowTableReport .ElementRow{
+    position: relative;
+    margin: auto 1vh;
+    display: flex;
+    width: fit-content;
+}
+
+.RowTableReport .UserCard{
+    margin: auto 0;
+    width: 10vw;
+    cursor: pointer;
+}
+
+.RowTableReport .UserCard:hover strong{
+    color: #3C83F7;
+}
+
+.RowTableReport .rowSpan{
+    font-size: clamp(2px,1.8vh,20px);
+    color: var(--descriptionText);
+    margin: auto 0;
+    width: 10vw;
+    white-space: nowrap;        /* 🔹 evita el salto de línea */
+    overflow: hidden;           /* 🔹 oculta el texto que se sale del contenedor */
+    text-overflow: ellipsis;    /* 🔹 agrega los puntos suspensivos */
+    display: block;  
+    padding-right: 2vh;
+}
+
+.RowTableReport .Redirect{
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.RowTableReport .Redirect:hover{
+    color: #3C83F7;
+}
+
+.RowTableReport .rightAl{
+    text-align: right;
+}
+
+.RowTableReport .centerAl{
+    text-align: center;
+}
+
+.RowTableReport .idHolder{
+    width: 5vw;
+}
+
+.RowTableReport .mediumCol{
+    width: 7vw;
+}
+
+.RowTableReport .UserCard img{
+    height: 3.5vh;
+    width: 3.5vh;
+}
+
+.RowTableReport .UserCard strong{
+    font-size: clamp(2px,1.8vh,20px);
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: none;
+    text-wrap: nowrap;
+    overflow: hidden;
+    max-width: 6vw;
+}

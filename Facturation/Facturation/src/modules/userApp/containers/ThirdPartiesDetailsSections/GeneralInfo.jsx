@@ -5,13 +5,14 @@ import { FormButton } from "../../components/FormButton";
 import './GeneralInfo.css'
 import { BoldTitle } from "../../components/BoldTitle";
 import { LabelValue } from "../../components/LabelValue";
-import { useAppInfo } from "../../../../context/context";
+import { useAppInfo, useNotifications } from "../../../../context/context";
 import { postInfo } from "../../../../utils/functions";
 
 export function GeneralInfo({info,reloadFun}){
 
     // requirements
-    const {userConfig} = useAppInfo();
+    const {appInfo,userConfig} = useAppInfo();
+    const {addNotification} = useNotifications();
     // Control
     const can_edit = userConfig?.access?.sections?.thirdparties?.can_edit
     const [disabled,setDisabled] = useState(can_edit? !can_edit:true);
@@ -21,6 +22,7 @@ export function GeneralInfo({info,reloadFun}){
     const [lastNames,setLastNames] = useState(info.lastNames != undefined? info.lastNames:'');
     //
     const [first_name,setFirst_name] = useState(info.names != undefined? info.first_name:'');
+    const [corporative_name,setCorporative_name] = useState(info.corporative_name ?? '');
     const [second_name,setSecond_name] = useState(info.names != undefined? info.second_name:'');
     const [first_surname,setFirst_surname] = useState(info.names != undefined? info.first_surname:'');
     const [second_surname,setSecond_surname] = useState(info.names != undefined? info.second_surname:'');
@@ -34,8 +36,9 @@ export function GeneralInfo({info,reloadFun}){
     const [type,setType] = useState(info.type != undefined? info.type:'');
 
     const formInfo = {
-        company_id:info.company_id,
+        company_id:info.company_id ?? appInfo.company_id,
         id:info.id,
+        corporative_name,
         first_name,
         second_name,
         first_surname,
@@ -52,11 +55,22 @@ export function GeneralInfo({info,reloadFun}){
 
     const updateInfo = async()=>{
         setDisabled(true);
-        console.log(formInfo)
-        let res = await postInfo('/updateThirdPartyGeneralInfo',formInfo);
-        if(res[0]){
-            console.log('Actualizacion Exitosa');
-            reloadFun?.();
+        try{
+            const res = await postInfo('/updateThirdParty',formInfo);
+            if(res?.[0]){
+                addNotification({
+                    type:'aproved',
+                    title:'Tercero actualizado',
+                    description:'La información general se guardó correctamente.'
+                });
+                reloadFun?.();
+            }
+        }catch(error){
+            addNotification({
+                type:'error',
+                title:'No fue posible actualizar',
+                description:error?.message ?? 'Error al guardar la información general.'
+            });
         }
         setDisabled(false);
     }
@@ -72,6 +86,7 @@ export function GeneralInfo({info,reloadFun}){
                 e.preventDefault();
                 updateInfo();
             }}>
+                <FormInput action={setCorporative_name} value={corporative_name} title={'Razón Social'} placeholder={'Razón social registrada del tercero'} disabled={disabled} required={false}/>
                 <FormInput action={setFirst_name} value={first_name} title={'Primer Nombre'} placeholder={'Primer nombre'} disabled={disabled}/>
                 <FormInput action={setSecond_name} value={second_name} title={'Segundo Nombre'} placeholder={'Segundo nombre'} disabled={disabled}/>
                 <FormInput action={setFirst_surname} value={first_surname} title={'Primer Apellido'} placeholder={'Primer Apellido'} disabled={disabled}/>
@@ -85,13 +100,17 @@ export function GeneralInfo({info,reloadFun}){
                     <SelectOptions disabled={disabled} defaultValue={{text:'NIT',value:info.indentification_type}} action={setIndentification_type} options={['CC','NIT','CE','PAS']} value={indentification_type}/>
                 </div>
                 <FormInput action={setIndentification_number} title={'Número de documento'} placeholder={'132...'} disabled={disabled} type={'number'} value={indentification_number}/>
+                <FormInput action={()=>{}} title={'Dígito de verificación'} placeholder={'-'} disabled={disabled} type={'number'} value={indentification_number}/>
                 <FormInput action={setmail} title={'Correo electronico'} placeholder={'...@gmail.com'} disabled={disabled} type={'mail'} value={mail}/>
                 <FormInput action={setPhone} title={'Número telefonico'} placeholder={'numero telefonico'} disabled={disabled} value={phone}/>
                 <FormInput action={setCountry} title={'País'} placeholder={'Pais de origen o de registro'} disabled={disabled} value={country}/>
                 <FormInput action={setCity} title={'Ciudad'} placeholder={'Ciudad o departamento'} disabled={disabled} value={city}/>
                 <FormInput action={setAddress} title={'Dirección'} placeholder={'Cll - Cra... '} disabled={disabled} required={false} value={address}/>
                 {formInfo != info && can_edit &&(
-                    <FormButton text={'Guardar Cambios'} disabled={disabled} />
+                    <div className="optionsRow">
+                        <FormButton negative={true} text={'Cancelar'} disabled={disabled} />
+                        <FormButton text={'Guardar Cambios'} disabled={disabled} />                        
+                    </div>
                 )}
             </form>
             <div className="aditionalInfo">
