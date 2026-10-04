@@ -12,6 +12,13 @@
     margin-bottom: 2vh;
 }
 
+.FormNewProduct .productLoadStatus{
+    color: var(--descriptionText);
+    font-size: clamp(12px, 1.8vh, 16px);
+    padding: 2vh 0;
+    text-align: center;
+}
+
 .FormNewProduct .errorContainer{
     position: absolute;
     width:90%;

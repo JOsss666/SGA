@@ -15,7 +15,7 @@ import { SwitchOption } from '../../components/SwitchOption'
 import { DescriptionSpan } from '../../components/DescriptionSpan'
 import { TagIndicator } from '../../components/TagIndicator'
 
-export function FormNewProduct({info,update,reloadFun}){
+export function FormNewProduct({info,update,reloadFun,forUpdate=false,productId}){
 
     if(info == undefined){
         info = {}
@@ -43,6 +43,12 @@ export function FormNewProduct({info,update,reloadFun}){
     const [purchaseRetentionTaxes,setPurchaseRetentionTaxes] = useState([]);
     const [sellTaxes,setSellTaxes] = useState([]);
     const [sellRetentionTaxes,setSellRetentionTaxes] = useState([]);
+    const [originalCategoryIds,setOriginalCategoryIds] = useState([]);
+    const [categoryChanged,setCategoryChanged] = useState(false);
+    const [originalTaxConfig,setOriginalTaxConfig] = useState(null);
+    const resolvedProductId = productId ?? info.id ?? info.product_id;
+    const [productLoaded,setProductLoaded] = useState(!forUpdate);
+    const [productLoadError,setProductLoadError] = useState('');
 
     // form info
 
@@ -80,7 +86,7 @@ export function FormNewProduct({info,update,reloadFun}){
         name,
         code,
         description,
-        category_id,
+        category_id:forUpdate && !categoryChanged ? originalCategoryIds : category_id,
         units,
         stock,
         availableDate,
@@ -98,6 +104,33 @@ export function FormNewProduct({info,update,reloadFun}){
     }
 
     const maxStage = 3;
+
+    const productTypeOptions = [
+        {text:'Producto',value:'product'},
+        {text:'Servicio',value:'service'},
+        {text:'Consumo',value:'consume'},
+        {text:'Activo fijo',value:'fixed asset'},
+        {text:'Combo o Kit',value:'kit'}
+    ];
+
+    const getSelectedOption = (list,value)=>list.find(option => (
+        String(option.value ?? option.text) === String(value)
+    ));
+
+    const toBoolean = (value,fallback=false)=>{
+        if(value === true || value === 1 || value === 'true') return true;
+        if(value === false || value === 0 || value === 'false') return false;
+        return fallback;
+    };
+
+    const getCurrentTaxConfig = ()=>({
+        purchaseTaxed,
+        purchaseTaxId:Number(purchaseTax_id) || null,
+        purchaseWithholdings:purchaseWithholdings.map(tax=>Number(tax.value ?? tax)).filter(Number.isFinite).sort((a,b)=>a-b),
+        taxed,
+        taxId:Number(tax_id) || null,
+        sellWithholdings:sellWithholdings.map(tax=>Number(tax.value ?? tax)).filter(Number.isFinite).sort((a,b)=>a-b)
+    });
 
     const isEmpty = (value)=> value === undefined || value === null || `${value}`.trim() === '';
 
@@ -309,33 +342,128 @@ export function FormNewProduct({info,update,reloadFun}){
         }
     }
 
+    const loadProductInfo = async()=>{
+        const id = Number(resolvedProductId);
+        if(!Number.isSafeInteger(id) || id <= 0){
+            throw new Error('No se recibió un ID válido del producto que se quiere editar.');
+        }
+
+        const [productResponse,taxRelationsResponse] = await Promise.all([
+            postInfo('/inventory/getProducts',{company_id:appInfo.company_id,product_id:id}),
+            postInfo('/inventory/getProductTaxRelations',{company_id:appInfo.company_id,product_id:id})
+                .catch(error=>{
+                    console.warn('No se pudieron cargar las relaciones de impuestos del producto:',error);
+                    return [false,[]];
+                })
+        ]);
+        if(productResponse?.[0] !== true){
+            throw new Error(productResponse?.[1]?.message ?? 'No se pudo consultar la información del producto.');
+        }
+        const product = Array.isArray(productResponse?.[1])
+            ? productResponse[1].find(item => Number(item.id) === id)
+            : null;
+        if(!product){
+            throw new Error('No se encontró el producto solicitado en esta compañía.');
+        }
+
+        const taxRelations = Array.isArray(taxRelationsResponse?.[1]) ? taxRelationsResponse[1] : [];
+        const relationTypeOf = relation => relation.relation_type ?? relation.type;
+        const purchaseTaxRelations = taxRelations.filter(relation => relationTypeOf(relation) === 'purchase_tax');
+        const purchaseWithholdingRelations = taxRelations.filter(relation => relationTypeOf(relation) === 'purchase_withholding');
+        const sellTaxRelations = taxRelations.filter(relation => relationTypeOf(relation) === 'sell_tax');
+        const sellWithholdingRelations = taxRelations.filter(relation => relationTypeOf(relation) === 'sell_withholding');
+        const toTaxOption = relation => ({
+            text:`${relation.tax_name ?? relation.tax_code ?? `Impuesto ${relation.tax_id}`}${relation.rate != null ? ` - ${relation.rate}%` : ''}`,
+            value:relation.tax_id
+        });
+
+        setPhoto(product.img ?? product.photo ?? 'https://cdnmain.sga360.co/Branding/LOGO%20SGA.png');
+        setType_product(product.type ?? product.type_product ?? 'product');
+        setName(product.name ?? '');
+        setCode(product.code ?? '');
+        setDescription(product.description ?? '');
+        const categoryIds = Array.isArray(product.category_ids) ? product.category_ids : [];
+        const categoryId = categoryIds[0]
+            ?? product.category_id
+            ?? categories.find(category => product.categories?.includes(category.text))?.value;
+        setCategory_id(categoryId);
+        setOriginalCategoryIds(categoryIds.length > 0 ? categoryIds : categoryId != null ? [categoryId] : []);
+        setCategoryChanged(false);
+        setInventariable(toBoolean(product.inventariable ?? product.is_inventory ?? product.inventory_controlled));
+        setUnits(product.units ?? 'unit');
+        setStock(product.stock ?? 0);
+        setMinStock(product.minStock ?? product.min_stock ?? 0);
+        setMaxStock(product.maxStock ?? product.max_stock ?? 0);
+        setAvailableDate(product.availableDate ?? product.available_date ?? '');
+        setAviableUntil(product.aviableUnitl ?? product.available_until ?? product.aviable_until ?? '');
+        setDefaultSupplier(product.defaultSupplier ?? product.default_supplier);
+        setPurchaseConcept(product.entry_concept ?? product.purchaseConcept);
+        const purchaseTaxedValue = purchaseTaxRelations.length > 0 || toBoolean(product.purchaseTaxed);
+        const purchaseTaxIdValue = purchaseTaxRelations[0]?.tax_id ?? product.purchaseTax_id;
+        const taxedValue = sellTaxRelations.length > 0 || toBoolean(product.taxed);
+        const taxIdValue = sellTaxRelations[0]?.tax_id ?? product.tax_id;
+        const purchaseWithholdingValues = purchaseWithholdingRelations.map(toTaxOption);
+        const sellWithholdingValues = sellWithholdingRelations.map(toTaxOption);
+        setPurchaseTaxed(purchaseTaxedValue);
+        setPurchaseTax_id(purchaseTaxIdValue);
+        setPurchaseWithholdings(purchaseWithholdingValues);
+        setSellConcept(product.exit_concept ?? product.sellConcept);
+        setTaxed(taxedValue);
+        setTax_id(taxIdValue);
+        setSellWithholdings(sellWithholdingValues);
+        setSellDescription(product.sellDescription ?? product.sell_description ?? '');
+        setOriginalTaxConfig({
+            purchaseTaxed:purchaseTaxedValue,
+            purchaseTaxId:Number(purchaseTaxIdValue) || null,
+            purchaseWithholdings:purchaseWithholdingValues.map(tax=>Number(tax.value)).filter(Number.isFinite).sort((a,b)=>a-b),
+            taxed:taxedValue,
+            taxId:Number(taxIdValue) || null,
+            sellWithholdings:sellWithholdingValues.map(tax=>Number(tax.value)).filter(Number.isFinite).sort((a,b)=>a-b)
+        });
+    };
+
     const createProduct = async()=>{
         if(!validateFullForm()){
             return;
         }
         setDisabled(true);
         setLoading(true);
-        console.log(formInfo)
-        let res = await postInfo('/inventory/createProduct',formInfo);
-        if(res){
+        try{
+            const payload = forUpdate ? {...formInfo,id:Number(resolvedProductId)} : formInfo;
+            if(forUpdate){
+                if(!categoryChanged){
+                    delete payload.category_id;
+                }
+                if(JSON.stringify(getCurrentTaxConfig()) === JSON.stringify(originalTaxConfig)){
+                    ['purchaseTax_id','purchaseTaxed','purchaseWithholdings','tax_id','taxed','sellWithholdings']
+                        .forEach(field=>delete payload[field]);
+                }
+            }
+            const res = await postInfo(forUpdate ? '/inventory/updateProduct' : '/inventory/createProduct',payload);
+            if(res?.status !== 'OK' && res?.[0] !== true){
+                throw new Error(res?.message ?? `No se pudo ${forUpdate ? 'actualizar' : 'crear'} el producto.`);
+            }
             addNotification({
                 type:'aproved',
-                title:`Producto ${name} creado`,
-                description:`El producto ${name} fue creado exitosamente`
-            })
-        }else{
+                title:forUpdate ? `Producto ${name} actualizado` : `Producto ${name} creado`,
+                description:forUpdate ? `El producto ${name} fue actualizado exitosamente.` : `El producto ${name} fue creado exitosamente.`
+            });
+            if(reloadFun != undefined){
+                await reloadFun();
+            }
+            popOutAlert();
+        }catch(error){
             addNotification({
                 type:'error',
-                title:`Error al crear producto`,
-                description:`Hubo un problema al crear el producto ${name}, intentelo de nuevo.`
-            })
+                title:`Error al ${forUpdate ? 'actualizar' : 'crear'} el producto`,
+                description:error?.message ?? `Hubo un problema al ${forUpdate ? 'actualizar' : 'crear'} el producto ${name}.`
+            });
+            setError(error?.message ?? 'No se pudo guardar el producto.');
+            setVisibleError(true);
+        }finally{
+            setLoading(false);
+            setDisabled(false);
         }
-        if(reloadFun != undefined){
-            reloadFun();
-        }
-        popOutAlert();
-        setLoading(false);
-        setDisabled(false);
     }
 
     const handlePrimaryAction = ()=>{
@@ -352,21 +480,49 @@ export function FormNewProduct({info,update,reloadFun}){
     const getRequierdData = async()=>{
         setDisabled(true);
         setLoading(true);
-        await getThirdParties();
-        await getCategories();
-        await getAccounts();
-        await getConcepts();
-        await getTaxes();
-        setLoading(false);
-        setDisabled(false);
+        if(forUpdate){
+            setProductLoaded(false);
+            setProductLoadError('');
+        }
+        try{
+            const optionResults = await Promise.allSettled([
+                getThirdParties(),
+                getCategories(),
+                getAccounts(),
+                getConcepts(),
+                getTaxes()
+            ]);
+            const failedOptions = optionResults.find(result => result.status === 'rejected');
+            if(failedOptions && !forUpdate){
+                throw failedOptions.reason;
+            }
+            if(forUpdate){
+                await loadProductInfo();
+            }
+        }catch(loadError){
+            if(forUpdate){
+                setProductLoadError(loadError?.message ?? 'No se pudo cargar el producto.');
+                setVisibleError(true);
+            }else{
+                addNotification({
+                    type:'error',
+                    title:'No se pudieron cargar las opciones del producto',
+                    description:loadError?.message ?? 'Vuelve a intentarlo.'
+                });
+            }
+        }finally{
+            setProductLoaded(true);
+            setLoading(false);
+            setDisabled(false);
+        }
     }
 
     useEffect(()=>{
-        if(type_product == 'service'){
+        if(!forUpdate && type_product == 'service'){
             setStock(1);
             setUnits('unit');
         }
-    },[type_product])
+    },[type_product,forUpdate])
 
     useEffect(()=>{
         if(!taxed){
@@ -382,7 +538,7 @@ export function FormNewProduct({info,update,reloadFun}){
 
     useEffect(()=>{
         getRequierdData();
-    },[])
+    },[forUpdate,resolvedProductId])
 
     useEffect(()=>{
         console.log(photo);
@@ -398,8 +554,14 @@ export function FormNewProduct({info,update,reloadFun}){
                     }}/>
                 </div>
             )}
-            <BoldTitle text={'Nuevo Producto'}/>
-            <form action="" onSubmit={(e)=>{
+            <BoldTitle text={forUpdate ? 'Editar Producto' : 'Nuevo Producto'}/>
+            {forUpdate && !productLoaded ? (
+                <div className="productLoadStatus" role="status">Cargando información del producto…</div>
+            ) : productLoadError ? (
+                <div className="errorContainer" role="alert">
+                    <span>{productLoadError}</span>
+                </div>
+            ) : <form action="" onSubmit={(e)=>{
                 e.preventDefault();
                 handlePrimaryAction();
             }}>
@@ -414,22 +576,19 @@ export function FormNewProduct({info,update,reloadFun}){
                                 <i className="fa-solid fa-camera"/>
                             </FileInput>
                         </div>
-                        {info.type == undefined && (
-                            <SearchinList title={'Tipo de producto o servicio'} placeHolder={'Producto'} action={setType_product} list={[
-                                {text:'Producto',value:'product'},
-                                {text:'Servicio',value:'service'},
-                                {text:'Consumo',value:'consume'},
-                                {text:'Activo fijo',value:'fixed asset'},
-                                {text:'Combo o Kit',value:'kit'}
-                            ]}/>
+                        {(forUpdate || info.type == undefined) && (
+                            <SearchinList title={'Tipo de producto o servicio'} placeHolder={'Producto'} action={setType_product} list={productTypeOptions} defaultValue={getSelectedOption(productTypeOptions,type_product)} disabled={disabled}/>
                         )}
                         <FormInput title={'Código'} action={setCode} placeholder={'SKU#....'} value={code} disabled={disabled}/>
                         <FormInput title={'Nombre'} action={setName} placeholder={'Nombre de tu producto'} value={name} disabled={disabled}/>
-                        <SearchinList title={'Categorias'} action={setCategory_id} placeHolder={'Seleccine una o varias'} list={categories} specialOption={
+                        <SearchinList title={'Categorias'} action={(value)=>{
+                            setCategory_id(value);
+                            if(forUpdate) setCategoryChanged(true);
+                        }} placeHolder={'Seleccine una o varias'} list={categories} specialOption={
                             <NewElementSelect title={'Crear nueva categoría'} onClick={()=>{
                                 popInAlert(<FormNewCategory/>)
                             }}/>
-                        } disabled={disabled}/>
+                        } disabled={disabled} defaultValue={getSelectedOption(categories,category_id)}/>
                         <FormInput title={'Descripción'} action={setDescription} value={description} placeholder={'Descripción del producto'} disabled={disabled} textArea={true}/>
                     </section>
                 )}
@@ -439,10 +598,10 @@ export function FormNewProduct({info,update,reloadFun}){
                         <div className="tagSection">
                             <TagIndicator title={'📦 Parametrización Inventario'} type={'suspended'}/>
                         </div>
-                        <SearchinList title={'Unidades de medida'} action={setUnits} placeHolder={'Seleccione unidad'} list={meassureUnits}/>
+                        <SearchinList title={'Unidades de medida'} action={setUnits} placeHolder={'Seleccione unidad'} list={meassureUnits} disabled={disabled} defaultValue={getSelectedOption(meassureUnits,units)}/>
                         <div className="accessSwitch">
                             <h6>Es Inventariable?</h6>
-                            <SwitchOption action={setInventariable} defaultValue={inventariable}/>
+                            <SwitchOption action={setInventariable} value={inventariable} disabled={disabled}/>
                         </div>
                         {(inventariable) && (
                             <>
@@ -461,37 +620,33 @@ export function FormNewProduct({info,update,reloadFun}){
                         <div className="tagSection">
                             <TagIndicator title={'📑 Parametrización Compras'} type={'suspended'}/>
                         </div>
-                        <SearchinList title={'Proveedor por defecto'} action={setDefaultSupplier} placeHolder={'Seleccione el proveedor'} list={ThirdParties} disabled={disabled}/>  
-                        <SearchinList title={'Concepto de compra'} action={setPurchaseConcept} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>  
+                        <SearchinList title={'Proveedor por defecto'} action={setDefaultSupplier} placeHolder={'Seleccione el proveedor'} list={ThirdParties} disabled={disabled} defaultValue={getSelectedOption(ThirdParties,defaultSupplier)}/>
+                        <SearchinList title={'Concepto de compra'} action={setPurchaseConcept} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled} defaultValue={getSelectedOption(concepts,purchaseConcept)}/>
                         <div className="accessSwitch">
                             <h6>Compra gravada con impuestos</h6>
-                            <SwitchOption action={setPurchaseTaxed} defaultValue={purchaseTaxed}/>
+                            <SwitchOption action={setPurchaseTaxed} value={purchaseTaxed} disabled={disabled}/>
                         </div>
                         {purchaseTaxed && (
-                            <>
-                                <SearchinList title={'Impuesto asociado a la compra'} action={setPurchaseTax_id} placeHolder={'Seleccione el impuesto'} list={purchaseTaxes} disabled={disabled}/>  
-                                <div className="withholdingsContainer">
-                                    <SearchinList
-                                        title={'Retenciones de compra'}
-                                        action={(taxId)=>{addTaxToList(taxId, purchaseRetentionTaxes, purchaseWithholdings, setPurchaseWithholdings)}}
-                                        placeHolder={'Seleccione una retención'}
-                                        list={purchaseRetentionTaxes}
-                                        disabled={disabled}
-                                        noActVal={true}
-                                    />
-                                    {purchaseWithholdings.map((tax)=>(
-                                        <div className="selectedWithholding" key={tax.value} >
-                                            <span className='withHoldingName'>
-                                                {tax.text}
-                                            </span>
-                                            <i className="fa-solid fa-xmark deleteWithholding" onClick={()=>{
-                                                removeTaxFromList(tax.value, purchaseWithholdings, setPurchaseWithholdings)
-                                            }}/>
-                                        </div>
-                                    ))}
-                                </div>
-                            </>
+                            <SearchinList title={'Impuesto asociado a la compra'} action={setPurchaseTax_id} placeHolder={'Seleccione el impuesto'} list={purchaseTaxes} disabled={disabled} defaultValue={getSelectedOption(purchaseTaxes,purchaseTax_id)}/>
                         )}
+                        <div className="withholdingsContainer">
+                            <SearchinList
+                                title={'Retenciones de compra'}
+                                action={(taxId)=>{addTaxToList(taxId, purchaseRetentionTaxes, purchaseWithholdings, setPurchaseWithholdings)}}
+                                placeHolder={'Seleccione una retención'}
+                                list={purchaseRetentionTaxes}
+                                disabled={disabled}
+                                noActVal={true}
+                            />
+                            {purchaseWithholdings.map((tax)=>(
+                                <div className="selectedWithholding" key={tax.value} >
+                                    <span className='withHoldingName'>{tax.text}</span>
+                                    <i className="fa-solid fa-xmark deleteWithholding" onClick={()=>{
+                                        if(!disabled) removeTaxFromList(tax.value, purchaseWithholdings, setPurchaseWithholdings)
+                                    }}/>
+                                </div>
+                            ))}
+                        </div>
                     </section>
                 )}
                 {/* Stage for sell -- Etapa para configurar la venta*/}
@@ -500,53 +655,51 @@ export function FormNewProduct({info,update,reloadFun}){
                         <div className="tagSection">
                             <TagIndicator title={'💶 Parametrización Ventas'} type={'suspended'}/>
                         </div>
-                        <SearchinList title={'Concepto de venta'} action={setSellConcept} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>  
+                        <SearchinList title={'Concepto de venta'} action={setSellConcept} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled} defaultValue={getSelectedOption(concepts,sellConcept)}/>
                         <div className="accessSwitch">
                             <h6>Venta gravada con impuestos</h6>
-                            <SwitchOption action={setTaxed} defaultValue={taxed}/>
+                            <SwitchOption action={setTaxed} value={taxed} disabled={disabled}/>
                         </div>
                         {taxed && (
-                            <>
-                                <SearchinList title={'Impuesto asociado a la venta'} action={setTax_id} placeHolder={'Seleccione el impuesto'} list={sellTaxes} disabled={disabled}/>  
-                                <div className="withholdingsContainer">
-                                    <SearchinList
-                                        title={'Retenciones de venta'}
-                                        action={(taxId)=>{addTaxToList(taxId, sellRetentionTaxes, sellWithholdings, setSellWithholdings)}}
-                                        placeHolder={'Seleccione una retención'}
-                                        list={sellRetentionTaxes}
-                                        disabled={disabled}
-                                        noActVal={true}
-                                    />
-                                    {sellWithholdings.map((tax)=>(
-                                        <div className="selectedWithholding" key={tax.value} >
-                                            <span className='withHoldingName'>
-                                                {tax.text}
-                                            </span>
-                                            <i className="fa-solid fa-xmark deleteWithholding" onClick={()=>{
-                                                removeTaxFromList(tax.value, sellWithholdings, setSellWithholdings)
-                                            }}/>
-                                        </div>
-                                    ))}
-                                </div>
-                            </>
+                            <SearchinList title={'Impuesto asociado a la venta'} action={setTax_id} placeHolder={'Seleccione el impuesto'} list={sellTaxes} disabled={disabled} defaultValue={getSelectedOption(sellTaxes,tax_id)}/>
                         )}
+                        <div className="withholdingsContainer">
+                            <SearchinList
+                                title={'Retenciones de venta'}
+                                action={(taxId)=>{addTaxToList(taxId, sellRetentionTaxes, sellWithholdings, setSellWithholdings)}}
+                                placeHolder={'Seleccione una retención'}
+                                list={sellRetentionTaxes}
+                                disabled={disabled}
+                                noActVal={true}
+                            />
+                            {sellWithholdings.map((tax)=>(
+                                <div className="selectedWithholding" key={tax.value} >
+                                    <span className='withHoldingName'>{tax.text}</span>
+                                    <i className="fa-solid fa-xmark deleteWithholding" onClick={()=>{
+                                        if(!disabled) removeTaxFromList(tax.value, sellWithholdings, setSellWithholdings)
+                                    }}/>
+                                </div>
+                            ))}
+                        </div>
                         <FormInput title={'Descripción para la venta'} action={setSellDescription} value={sellDescription} placeholder={'Detalles del producto para la venta'} disabled={disabled} textArea={true}/>
-                        
+
                     </section>
                 )}
 
-            <FormButton disabled={disabled} loading={loading} text={stage== maxStage? 'Crear Producto':'Siguiente'}/>
+            <FormButton disabled={disabled} loading={loading} text={stage== maxStage ? (forUpdate ? 'Guardar cambios' : 'Crear Producto') : 'Siguiente'}/>
             {stage > 0 && (
                 <FormButton disabled={disabled} loading={loading} negative={true} text={stage== maxStage? 'Cancelar':'Volver'} onClick={(e)=>{
                     e.preventDefault();
                     if(stage < maxStage){
                         setStage(stage -1)
+                    }else if(forUpdate){
+                        popOutAlert();
                     }else{
                         setStage(0)
                     }
                 }}/>
             )}
-            </form>
+            </form>}
         </div>
     )
 }

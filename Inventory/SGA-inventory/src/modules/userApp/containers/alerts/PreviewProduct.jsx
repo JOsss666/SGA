@@ -5,10 +5,12 @@ import { UserCard } from '../../components/UserCard'
 import { useAlert } from '../../../../context/context'
 import './PreviewProduct.css'
 import { FormFile } from '../forms/FormFile'
+import { FormNewProduct } from '../forms/FormNewProduct'
 
-export function PreviewProduct({info}){
+export function PreviewProduct({info,productId,reloadFun}){
 
     const {popInAlert} = useAlert();
+    const resolvedProductId = productId ?? info?.id ?? info?.product_id;
     const [hideNewImage, setHideNewImage] = useState(true);
     const imgContainer = useRef();
 
@@ -34,7 +36,16 @@ export function PreviewProduct({info}){
                 )}
                 <img src="https://i.pinimg.com/1200x/b8/a3/e7/b8a3e7be8e0ac195fc16084a2ef5badb.jpg" alt="" />
                 <div className="optionsProduct">
-                    <BoldButton title={'Editar información'} children={<i className="fa-solid fa-pen-to-square"/>}/>
+                    <BoldButton title={'Editar información'} onClick={()=>{
+                        popInAlert(
+                            <FormNewProduct
+                                info={info}
+                                productId={resolvedProductId}
+                                forUpdate={true}
+                                reloadFun={reloadFun}
+                            />
+                        );
+                    }} children={<i className="fa-solid fa-pen-to-square"/>}/>
                     <BoldButton title={'Eliminar producto'} children={<i className="fa-solid fa-trash"/>}/>
                     <BoldButton title={'Reportar'} children={<i className="fa-solid fa-flag"/>}/>
                 </div>

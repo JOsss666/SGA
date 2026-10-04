@@ -34,8 +34,10 @@ export function Products(){
         setLoading(false);
     }
 
-    const handleNavigate = (path)=>{
-        navigate(`/SGA_INVENTORY/${params.company_key}/${params.user_key}/Products/${path}`);
+    const handleNavigate = (product)=>{
+        navigate(`/SGA_INVENTORY/${params.company_key}/${params.user_key}/Products/${product.id}`,{
+            state:{...product,product_id:product.id}
+        });
     }
 
     const filterOptions = (value) => {
@@ -70,9 +72,21 @@ export function Products(){
                     <LoadingSpace title={'Cargando productos'} description={'Esto no bede tardar mucho...'}/>
                 )}
                 {!loading && products.map((element,index)=>(
-                    <ProductCard info={element} key={index} hidden={!filterOptions(JSON.stringify(element))} display={displayGird} onClick={()=>{
-                        handleNavigate(element.id)
-                    }}/>
+                    <ProductCard
+                        info={element}
+                        key={index}
+                        hidden={!filterOptions(JSON.stringify(element))}
+                        display={displayGird}
+                        onClick={()=>handleNavigate(element)}
+                        onEdit={(product)=>popInAlert(
+                            <FormNewProduct
+                                info={product}
+                                productId={product.id}
+                                forUpdate={true}
+                                reloadFun={getProducts}
+                            />
+                        )}
+                    />
                 ))}
             </div>
         </div>

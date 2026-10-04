@@ -4,6 +4,20 @@
     position: relative;
 }
 
+.MoreOptions .ButtonMenu{
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+}
+
+.MoreOptions .ButtonMenu:focus-visible{
+    outline: solid .2vh var(--sectionTitle);
+}
+
 .MoreOptions .options{
     position: absolute;
     top: 105%;
@@ -49,6 +63,20 @@
 .MoreOptions .options li:hover{
     padding-left: 4vh;
     background-color: #fff7;
+}
+
+.MoreOptions .options li:focus-visible{
+    outline: solid .2vh var(--sectionTitle);
+    outline-offset: -.2vh;
+}
+
+.MoreOptions .options li[aria-disabled="true"]{
+    cursor: not-allowed;
+    opacity: .55;
+}
+
+.MoreOptions .options li[aria-disabled="true"]:hover{
+    padding-left: 3vh;
 }
 
 .MoreOptions .options li:last-child{

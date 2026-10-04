@@ -99,6 +99,16 @@ inventoryController.getProducts = async (req, res, next) => {
             values.push(info.type)
         }
 
+        const requestedProductId = info.product_id ?? info.id;
+        if(requestedProductId !== undefined && requestedProductId !== null){
+            const productId = Number(requestedProductId);
+            if(!Number.isSafeInteger(productId) || productId <= 0){
+                return res.status(400).json([false,{message:'Se requiere un product_id válido.'}]);
+            }
+            values.push(productId);
+            whereClauses.push(`ps.id = $${values.length}`);
+        }
+
         whereClauses.push(`ps.status = 'active'`);
 
         const whereQuery = whereClauses.length > 0
@@ -114,7 +124,8 @@ inventoryController.getProducts = async (req, res, next) => {
                 t.rate AS tax_rate,
                 c_exit.account_id AS exit_account,
                 c_entry.account_id AS entry_account,
-                array_remove(array_agg(c.name), NULL) AS categories
+                array_remove(array_agg(DISTINCT c.name), NULL) AS categories,
+                array_remove(array_agg(DISTINCT pc.category_id), NULL) AS category_ids
             FROM
                 "Inventory"."products&services" AS ps
             LEFT JOIN 

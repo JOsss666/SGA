@@ -1,10 +1,23 @@
 import './ProductCard.css'
 import { TagIndicator } from './TagIndicator'
+import { MoreOptions } from './MoreOptions'
 
-export function ProductCard({info,display,onClick,hidden}){
+export function ProductCard({info,display,onClick,onEdit,hidden}){
 
     if(!hidden) return(
         <div className={`ProductCard ProductCard_${display}`} onClick={onClick}>
+            {onEdit && (
+                <div className="productCardMoreOptions">
+                    <MoreOptions
+                        stopPropagation={true}
+                        options={[
+                            {text:'Eliminar',icon:<i className="fa-solid fa-trash"/>,disabled:true},
+                            {text:'Ver detalle',icon:<i className="fa-solid fa-eye"/>,disabled:true},
+                            {text:'Editar',icon:<i className="fa-solid fa-pen-to-square"/>,action:()=>onEdit(info)}
+                        ]}
+                    />
+                </div>
+            )}
             <div className="imgContainer">
                 <img src={info.img != undefined? info.img:'https://tiendafliv.com/wp-content/uploads/2021/07/Tornillo-3TPD16-Fb-Front-1.png'} alt="" />
             </div>
