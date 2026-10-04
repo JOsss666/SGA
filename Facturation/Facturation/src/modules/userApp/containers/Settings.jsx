@@ -12,11 +12,12 @@ import { StylesSettings } from "./SettingsSections/StylesSettings";
 import { BillingSettings } from "./SettingsSections/BillingSettings";
 import { SecuritySettings } from "./SettingsSections/SecuritySettings";
 import { SystemSettings } from "./SettingsSections/SystemSettings";
-import { NoResults } from "./NoResults";
+import { NoAccess } from "./NoAccess";
 import { SettingsGroup } from "../components/SettingsGroup";
 import { UserCard } from "../components/UserCard";
 import { useAppInfo } from "../../../context/context";
 import { DevicesSettings } from "./SettingsSections/DevicesSettings";
+import { ServicePolicy } from "./SettingsSections/ServicePolicy";
 
 export function Settings(){
     const {userInfo,userConfig} = useAppInfo();
@@ -24,7 +25,7 @@ export function Settings(){
     const params = useParams();
 
     const sec1 = [
-        {text:'General',path:'',value:``,type:'general',icon:<i className="fa-solid fa-building"/>},
+        {text:'General',path:'',value:``,type:'general',icon:<i className="bi bi-sliders"/>},
         {text:'Cuenta',path:'Account',value:``,type:'functionality',icon:<i className="fa-solid fa-user"/>},
         {text:'Notificaciónes',path:'Alerts',value:'',type:'functionality',icon:<i className="fa-solid fa-bullhorn"/>},
         {text:'Personalización',path:'Styles',value:'',type:'accesibility',icon:<i className="fa-solid fa-palette"/>},
@@ -47,7 +48,7 @@ export function Settings(){
     return(
         <div className="Settings">
             <div className="asideMenu">
-                <SearchBar placeholder={'Buscar'}/>
+                <SearchBar placeholder={'Buscar ajustes'}/>
                 <UserCard name={userInfo.user_name} desc={userInfo.user_mail} imgSrc={userInfo.img} onClick={()=>{
                     handleNavigate('account')
                 }}/>
@@ -69,6 +70,8 @@ export function Settings(){
                         <Route path="Security" element={<SecuritySettings/>} />
                         <Route path="Devices" element={<DevicesSettings/>} />
                         <Route path="System/*" element={<SystemSettings/>} />
+                        <Route path="policy" element={<ServicePolicy/>} />
+                        <Route path="resetSettings" element={<NoAccess title={'Seccion aún no disponible'} description={'Pronto habilitaremos esta nueva sección'} noExit={true} />} />
                     </Routes>
                 </div>
             </div>

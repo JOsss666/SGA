@@ -11,6 +11,12 @@ const RELATION_TYPES = {
 
 const THIRD_PARTY_PRODUCT_TAX_OPERATIONS = ['purchase', 'sell'];
 const THIRD_PARTY_PRODUCT_TAX_ROLES = ['tax', 'withholding'];
+const THIRD_PARTY_PRODUCT_TAX_SCOPES = [
+    ['purchase', 'tax'],
+    ['purchase', 'withholding'],
+    ['sell', 'tax'],
+    ['sell', 'withholding']
+];
 
 const performedByFrom = (info) => info.user ?? info.userName ?? info.performed_by ?? 'api';
 
@@ -30,7 +36,7 @@ const normalizeCategoryList = (value) => normalizeIdList(value);
 const normalizeOperationType = (value) => {
     const operationType = `${value ?? ''}`.trim().toLowerCase();
     if (!THIRD_PARTY_PRODUCT_TAX_OPERATIONS.includes(operationType)) {
-        throw new Error(`operation_type inválido: ${value}. Valores permitidos: purchase, sell.`);
+        throw productRelationError(`operation_type inválido: ${value}. Valores permitidos: purchase, sell.`);
     }
     return operationType;
 };
@@ -38,9 +44,53 @@ const normalizeOperationType = (value) => {
 const normalizeTaxRole = (value) => {
     const taxRole = `${value ?? ''}`.trim().toLowerCase();
     if (!THIRD_PARTY_PRODUCT_TAX_ROLES.includes(taxRole)) {
-        throw new Error(`tax_role inválido: ${value}. Valores permitidos: tax, withholding.`);
+        throw productRelationError(`tax_role inválido: ${value}. Valores permitidos: tax, withholding.`);
     }
     return taxRole;
+};
+
+const productRelationError = (message, statusCode = 400, code = 'INVALID_THIRD_PARTY_PRODUCT_RELATION') => {
+    const error = new Error(message);
+    error.statusCode = statusCode;
+    error.code = code;
+    return error;
+};
+
+const parsePositiveId = (value, fieldName) => {
+    const parsed = Number(value);
+    if (!Number.isSafeInteger(parsed) || parsed <= 0) {
+        throw productRelationError(`${fieldName} debe ser un entero positivo válido.`);
+    }
+    return parsed;
+};
+
+const normalizeDateOnly = (value, fieldName) => {
+    if (value === undefined || value === null || value === '') return null;
+    if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        throw productRelationError(`${fieldName} debe tener formato YYYY-MM-DD.`);
+    }
+    const parsed = new Date(`${value}T00:00:00.000Z`);
+    if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) {
+        throw productRelationError(`${fieldName} no es una fecha válida.`);
+    }
+    return value;
+};
+
+const validateThirdPartyProductScope = async (client, companyId, thirdPartyId, productId) => {
+    const result = await client.query(`
+        SELECT tp.id AS third_party_id, ps.id AS product_id
+        FROM "Ecosystem".thirdparties tp
+        JOIN "Inventory"."products&services" ps
+          ON ps.company_id = tp.company_id
+        WHERE tp.company_id = $1
+          AND tp.id = $2
+          AND ps.id = $3
+        LIMIT 1;
+    `, [companyId, thirdPartyId, productId]);
+
+    if (!result.rows[0]) {
+        throw productRelationError('El tercero o el producto no existe en la compañía indicada.', 404, 'THIRD_PARTY_PRODUCT_NOT_FOUND');
+    }
 };
 
 const normalizeThirdPartyProductTaxRelation = (info) => {
@@ -534,6 +584,37 @@ productsServicesService.registerThirdPartyProductTaxRelation = async (info) => {
 
     return withTransaction(async (client) => {
         const insertedRows = [];
+        const productAssociations = new Map();
+        for (const row of rows) {
+            const key = `${row.company_id}:${row.third_party_id}:${row.product_id}`;
+            const association = productAssociations.get(key) ?? row;
+            if (row.third_party_reference != null) association.third_party_reference = row.third_party_reference;
+            productAssociations.set(key, association);
+        }
+        for (const association of productAssociations.values()) {
+            await validateThirdPartyProductScope(
+                client,
+                association.company_id,
+                association.third_party_id,
+                association.product_id
+            );
+            await client.query(`
+                INSERT INTO "Fiscal".third_party_products
+                    (company_id, third_party_id, product_id, third_party_reference, is_active, created_by)
+                VALUES ($1, $2, $3, $4, true, $5)
+                ON CONFLICT ON CONSTRAINT uq_third_party_product
+                DO UPDATE SET
+                    third_party_reference = COALESCE(EXCLUDED.third_party_reference, "Fiscal".third_party_products.third_party_reference),
+                    is_active = true,
+                    updated_at = now();
+            `, [
+                association.company_id,
+                association.third_party_id,
+                association.product_id,
+                association.third_party_reference ?? null,
+                association.created_by
+            ]);
+        }
 
         for (const row of rows) {
             const result = await client.query(`
@@ -602,6 +683,273 @@ productsServicesService.registerThirdPartyProductTaxRelation = async (info) => {
             status: 'OK',
             relations: insertedRows
         };
+    });
+};
+
+/**
+ * Crea o modifica la asociación tercero-producto y su referencia externa.
+ * La operación es parcial: los campos ausentes conservan su valor actual.
+ */
+productsServicesService.updateThirdPartyProductAssociation = async (info) => {
+    const companyId = parsePositiveId(info.company_id, 'company_id');
+    const thirdPartyId = parsePositiveId(info.third_party_id ?? info.thirdParty_id, 'third_party_id');
+    const productId = parsePositiveId(info.product_id ?? info.productId, 'product_id');
+    const hasReference = Object.prototype.hasOwnProperty.call(info, 'third_party_reference')
+        || Object.prototype.hasOwnProperty.call(info, 'thirdPartyReference');
+    const rawReference = info.third_party_reference ?? info.thirdPartyReference;
+    if (hasReference && rawReference !== null && typeof rawReference !== 'string') {
+        throw productRelationError('third_party_reference debe ser texto o null.');
+    }
+    const reference = typeof rawReference === 'string' ? (rawReference.trim() || null) : null;
+    if (info.is_active !== undefined && typeof info.is_active !== 'boolean') {
+        throw productRelationError('is_active debe ser booleano.');
+    }
+    if (!hasReference && info.is_active === undefined) {
+        throw productRelationError('Envía al menos third_party_reference o is_active para actualizar.');
+    }
+
+    return withTransaction(async (client) => {
+        await validateThirdPartyProductScope(client, companyId, thirdPartyId, productId);
+        const result = await client.query(`
+            INSERT INTO "Fiscal".third_party_products
+                (company_id, third_party_id, product_id, third_party_reference, is_active, created_by)
+            VALUES ($1, $2, $3, CASE WHEN $4::boolean THEN $5::text ELSE NULL END, COALESCE($6::boolean, true), $7)
+            ON CONFLICT ON CONSTRAINT uq_third_party_product
+            DO UPDATE SET
+                third_party_reference = CASE WHEN $4::boolean THEN EXCLUDED.third_party_reference ELSE "Fiscal".third_party_products.third_party_reference END,
+                is_active = COALESCE($6::boolean, "Fiscal".third_party_products.is_active),
+                updated_at = now()
+            RETURNING *;
+        `, [
+            companyId,
+            thirdPartyId,
+            productId,
+            hasReference,
+            reference,
+            info.is_active ?? null,
+            performedByFrom(info)
+        ]);
+        const association = result.rows[0];
+
+        // La referencia también se mantiene en la tabla fiscal anterior para que
+        // los consumidores existentes sigan leyendo el mismo valor.
+        let referencedTaxRelations = 0;
+        let disabledTaxRelations = 0;
+        if (hasReference) {
+            const synced = await client.query(`
+                UPDATE "Fiscal".third_party_product_tax_relations
+                SET third_party_reference = $4, updated_at = now()
+                WHERE company_id = $1
+                  AND third_party_id = $2
+                  AND product_id = $3
+                  AND third_party_reference IS DISTINCT FROM $4
+                RETURNING id;
+            `, [companyId, thirdPartyId, productId, reference]);
+            referencedTaxRelations = synced.rowCount;
+        }
+        if (info.is_active === false) {
+            const disabled = await client.query(`
+                UPDATE "Fiscal".third_party_product_tax_relations
+                SET is_active = false, updated_at = now()
+                WHERE company_id = $1
+                  AND third_party_id = $2
+                  AND product_id = $3
+                  AND is_active = true
+                RETURNING id;
+            `, [companyId, thirdPartyId, productId]);
+            disabledTaxRelations = disabled.rowCount;
+        }
+
+        await auditEvent({
+            client,
+            companyId,
+            eventType: 'third_party_product.updated',
+            entitySchema: 'Fiscal',
+            entityTable: 'third_party_products',
+            entityId: association.id,
+            payload: {
+                association,
+                referenced_tax_relations: referencedTaxRelations,
+                disabled_tax_relations: disabledTaxRelations
+            },
+            performedBy: performedByFrom(info)
+        });
+
+        return { status: 'OK', product: association };
+    });
+};
+
+/**
+ * Agrega o modifica impuestos y retenciones de un producto para un tercero.
+ * Para sincronizar una lista completa, replace:true desactiva lógicamente las
+ * relaciones activas omitidas; nunca se eliminan físicamente.
+ */
+productsServicesService.updateThirdPartyProductTaxRelations = async (info) => {
+    const companyId = parsePositiveId(info.company_id, 'company_id');
+    const thirdPartyId = parsePositiveId(info.third_party_id ?? info.thirdParty_id, 'third_party_id');
+    const productId = parsePositiveId(info.product_id ?? info.productId, 'product_id');
+    if (!Array.isArray(info.relations)) {
+        throw productRelationError('relations debe ser una lista; envía [] para retirar todas las relaciones activas.');
+    }
+    if (info.replace !== undefined && typeof info.replace !== 'boolean') {
+        throw productRelationError('replace debe ser booleano.');
+    }
+    if (info.relations.length === 0 && info.replace !== true) {
+        throw productRelationError('Envía al menos una relación o usa replace:true para desactivar todas.');
+    }
+
+    const seenKeys = new Set();
+    const relations = info.relations.map((relation, index) => {
+        if (!relation || typeof relation !== 'object' || Array.isArray(relation)) {
+            throw productRelationError(`relations[${index}] debe ser un objeto.`);
+        }
+        const normalized = {
+            tax_id: parsePositiveId(relation.tax_id ?? relation.taxId, `relations[${index}].tax_id`),
+            operation_type: normalizeOperationType(relation.operation_type ?? relation.operationType),
+            tax_role: normalizeTaxRole(relation.tax_role ?? relation.taxRole),
+            priority: relation.priority === undefined ? index : Number(relation.priority),
+            valid_from: normalizeDateOnly(relation.valid_from, `relations[${index}].valid_from`),
+            valid_until: normalizeDateOnly(relation.valid_until, `relations[${index}].valid_until`),
+            notes: relation.notes,
+            valid_from_provided: Object.prototype.hasOwnProperty.call(relation, 'valid_from'),
+            valid_until_provided: Object.prototype.hasOwnProperty.call(relation, 'valid_until'),
+            notes_provided: Object.prototype.hasOwnProperty.call(relation, 'notes')
+        };
+        if (!Number.isSafeInteger(normalized.priority) || normalized.priority < 0) {
+            throw productRelationError(`relations[${index}].priority debe ser un entero no negativo.`);
+        }
+        if (relation.notes !== undefined && relation.notes !== null && typeof relation.notes !== 'string') {
+            throw productRelationError(`relations[${index}].notes debe ser texto o null.`);
+        }
+        if (normalized.valid_from && normalized.valid_until && normalized.valid_until < normalized.valid_from) {
+            throw productRelationError(`relations[${index}].valid_until debe ser igual o posterior a valid_from.`);
+        }
+        const key = `${normalized.operation_type}:${normalized.tax_role}:${normalized.tax_id}`;
+        if (seenKeys.has(key)) throw productRelationError(`La relación ${key} está duplicada.`);
+        seenKeys.add(key);
+        return normalized;
+    });
+
+    return withTransaction(async (client) => {
+        await validateThirdPartyProductScope(client, companyId, thirdPartyId, productId);
+        const associationResult = await client.query(`
+            SELECT third_party_reference
+            FROM "Fiscal".third_party_products
+            WHERE company_id = $1
+              AND third_party_id = $2
+              AND product_id = $3
+              AND is_active = true
+            FOR UPDATE;
+        `, [companyId, thirdPartyId, productId]);
+        if (!associationResult.rows[0]) {
+            throw productRelationError('El producto no está asociado activamente al tercero.', 404, 'THIRD_PARTY_PRODUCT_NOT_FOUND');
+        }
+
+        const taxIds = [...new Set(relations.map(relation => relation.tax_id))];
+        if (taxIds.length > 0) {
+            const taxResult = await client.query(`
+                SELECT id, "isRetention"
+                FROM "Ecosystem".taxes
+                WHERE company_id = $1 AND id = ANY($2::bigint[])
+                FOR KEY SHARE;
+            `, [companyId, taxIds]);
+            const taxesById = new Map(taxResult.rows.map(tax => [Number(tax.id), tax]));
+            if (taxesById.size !== taxIds.length) {
+                throw productRelationError('Una o más tasas no existen en la compañía indicada.', 422, 'INVALID_TAX_RELATION');
+            }
+            for (const relation of relations) {
+                const tax = taxesById.get(relation.tax_id);
+                if (Boolean(tax.isRetention) !== (relation.tax_role === 'withholding')) {
+                    throw productRelationError(`El impuesto ${relation.tax_id} no coincide con el rol ${relation.tax_role}.`, 422, 'TAX_ROLE_MISMATCH');
+                }
+            }
+        }
+
+        if (info.replace === true) {
+            for (const [operationType, taxRole] of THIRD_PARTY_PRODUCT_TAX_SCOPES) {
+                const taxIdsInScope = relations
+                    .filter(relation => relation.operation_type === operationType && relation.tax_role === taxRole)
+                    .map(relation => relation.tax_id);
+                await client.query(`
+                    UPDATE "Fiscal".third_party_product_tax_relations
+                    SET is_active = false, updated_at = now()
+                    WHERE company_id = $1
+                      AND third_party_id = $2
+                      AND product_id = $3
+                      AND operation_type = $4::"Fiscal".third_party_product_tax_operation
+                      AND tax_role = $5::"Fiscal".third_party_product_tax_role
+                      AND is_active = true
+                      AND NOT (tax_id = ANY($6::bigint[]));
+                `, [companyId, thirdPartyId, productId, operationType, taxRole, taxIdsInScope]);
+            }
+        }
+
+        const reference = associationResult.rows[0].third_party_reference;
+        const savedRelations = [];
+        for (const relation of relations) {
+            const saved = await client.query(`
+                INSERT INTO "Fiscal".third_party_product_tax_relations (
+                    company_id, third_party_id, product_id, tax_id,
+                    operation_type, tax_role, is_active, priority,
+                    valid_from, valid_until, notes, third_party_reference, created_by
+                ) VALUES (
+                    $1, $2, $3, $4,
+                    $5::"Fiscal".third_party_product_tax_operation,
+                    $6::"Fiscal".third_party_product_tax_role,
+                    true, $7, $8, $9, $10, $11, $12
+                )
+                ON CONFLICT ON CONSTRAINT uq_third_party_product_tax_relation
+                DO UPDATE SET
+                    is_active = true,
+                    priority = EXCLUDED.priority,
+                    valid_from = CASE WHEN $13::boolean THEN EXCLUDED.valid_from ELSE "Fiscal".third_party_product_tax_relations.valid_from END,
+                    valid_until = CASE WHEN $14::boolean THEN EXCLUDED.valid_until ELSE "Fiscal".third_party_product_tax_relations.valid_until END,
+                    notes = CASE WHEN $15::boolean THEN EXCLUDED.notes ELSE "Fiscal".third_party_product_tax_relations.notes END,
+                    third_party_reference = EXCLUDED.third_party_reference,
+                    updated_at = now()
+                RETURNING *;
+            `, [
+                companyId,
+                thirdPartyId,
+                productId,
+                relation.tax_id,
+                relation.operation_type,
+                relation.tax_role,
+                relation.priority,
+                relation.valid_from,
+                relation.valid_until,
+                relation.notes ?? null,
+                reference,
+                performedByFrom(info),
+                relation.valid_from_provided,
+                relation.valid_until_provided,
+                relation.notes_provided
+            ]);
+            savedRelations.push(saved.rows[0]);
+        }
+
+        await auditEvent({
+            client,
+            companyId,
+            eventType: 'third_party_product_tax_relations.synchronized',
+            entitySchema: 'Fiscal',
+            entityTable: 'third_party_product_tax_relations',
+            entityId: savedRelations[0]?.id ?? null,
+            payload: { third_party_id: thirdPartyId, product_id: productId, replace: info.replace === true, relations: savedRelations },
+            performedBy: performedByFrom(info)
+        });
+
+        const activeRelations = await client.query(`
+            SELECT *
+            FROM "Fiscal".third_party_product_tax_relations
+            WHERE company_id = $1
+              AND third_party_id = $2
+              AND product_id = $3
+              AND is_active = true
+            ORDER BY operation_type, tax_role, priority, id;
+        `, [companyId, thirdPartyId, productId]);
+
+        return { status: 'OK', relations: activeRelations.rows };
     });
 };
 

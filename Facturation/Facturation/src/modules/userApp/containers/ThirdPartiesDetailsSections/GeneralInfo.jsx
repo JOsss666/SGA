@@ -100,13 +100,17 @@ export function GeneralInfo({info,reloadFun}){
                     <SelectOptions disabled={disabled} defaultValue={{text:'NIT',value:info.indentification_type}} action={setIndentification_type} options={['CC','NIT','CE','PAS']} value={indentification_type}/>
                 </div>
                 <FormInput action={setIndentification_number} title={'Número de documento'} placeholder={'132...'} disabled={disabled} type={'number'} value={indentification_number}/>
+                <FormInput action={()=>{}} title={'Dígito de verificación'} placeholder={'-'} disabled={disabled} type={'number'} value={indentification_number}/>
                 <FormInput action={setmail} title={'Correo electronico'} placeholder={'...@gmail.com'} disabled={disabled} type={'mail'} value={mail}/>
                 <FormInput action={setPhone} title={'Número telefonico'} placeholder={'numero telefonico'} disabled={disabled} value={phone}/>
                 <FormInput action={setCountry} title={'País'} placeholder={'Pais de origen o de registro'} disabled={disabled} value={country}/>
                 <FormInput action={setCity} title={'Ciudad'} placeholder={'Ciudad o departamento'} disabled={disabled} value={city}/>
                 <FormInput action={setAddress} title={'Dirección'} placeholder={'Cll - Cra... '} disabled={disabled} required={false} value={address}/>
                 {formInfo != info && can_edit &&(
-                    <FormButton text={'Guardar Cambios'} disabled={disabled} />
+                    <div className="optionsRow">
+                        <FormButton negative={true} text={'Cancelar'} disabled={disabled} />
+                        <FormButton text={'Guardar Cambios'} disabled={disabled} />                        
+                    </div>
                 )}
             </form>
             <div className="aditionalInfo">
