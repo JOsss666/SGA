@@ -1,0 +1,122 @@
+@import '../../containers/UserApp.css';
+
+.AiAddHandler{
+    position: absolute;
+    width: 100%;
+    max-height: min(58vh, 34rem);
+    background-color: var(--menuAside);
+    bottom: calc(100% + 1.2vh);
+    left: 0;
+    border-radius: 2.4vh;
+    padding: 1.2vh;
+    outline: solid .1vh var(--inputsBorder);
+    border: solid .1vh var(--inputsBorder);
+    animation: appearAiAddHandler .18s both;
+    z-index: 40;
+    overflow: hidden;
+}
+
+.AiAddHandler .aiAddHandlerContent{
+    max-height: min(58vh, 34rem);
+    padding: .8vh .2vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.AiAddHandler .aiAddHandlerGroup{
+    display: flex;
+    flex-direction: column;
+    padding: .6vh 0;
+}
+
+.AiAddHandler .aiAddHandlerGroup h3{
+    margin: .8vh 1.2vh .5vh;
+    color: var(--descriptionText);
+    font-size: clamp(.75rem, 1.5vh, .9rem);
+    font-weight: 500;
+}
+
+.AiAddHandler .aiAddHandlerOption{
+    width: 100%;
+    min-height: 5.8vh;
+    display: flex;
+    align-items: center;
+    gap: 1.4vh;
+    padding: 1vh 1.3vh;
+    border: 0;
+    border-radius: 1.4vh;
+    background: transparent;
+    color: var(--mainText);
+    text-align: left;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.AiAddHandler .aiAddHandlerOption:hover,
+.AiAddHandler .aiAddHandlerOption:focus-visible{
+    background-color: var(--cardHover);
+    outline: none;
+}
+.AiAddHandler .aiAddHandlerOption:hover{
+    padding-left:1vh;
+}
+
+.AiAddHandler .aiAddHandlerOption > i{
+    width: 3vh;
+    flex: 0 0 3vh;
+    color: var(--descriptionText);
+    text-align: center;
+    font-size: clamp(1rem, 2vh, 1.25rem);
+}
+
+.AiAddHandler .aiAddHandlerOption > span{
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .2vh;
+}
+
+.AiAddHandler .aiAddHandlerOption strong{
+    color: var(--mainText);
+    font-size: clamp(.88rem, 1.75vh, 1rem);
+    font-weight: 500;
+}
+
+.AiAddHandler .aiAddHandlerOption small{
+    color: var(--descriptionText);
+    font-size: clamp(.75rem, 1.45vh, .88rem);
+}
+
+.AiAddHandler .aiAddHandlerOption:disabled{
+    cursor: not-allowed;
+    opacity: .48;
+}
+
+.AiAddHandler .aiAddHandlerEmpty{
+    min-height: 14vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1vh;
+    padding: 2vh;
+    color: var(--descriptionText);
+    text-align: center;
+}
+
+@keyframes appearAiAddHandler{
+    from{
+        opacity: 0;
+        transform: translateY(1.2vh) scale(.985);
+    }
+    to{
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .AiAddHandler{
+        animation: none;
+    }
+}
