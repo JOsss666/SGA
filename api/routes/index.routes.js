@@ -32,8 +32,18 @@ import { requireTrustedOrigin } from '../middleware/requireTrustedOrigin.js';
 import { requireCompanyAccess } from '../middleware/requireCompanyAccess.js';
 import supplierDelegationController from '../controllers/supplierDelegationController.js';
 import externalAccesThirdPartyController from '../controllers/externalThirdPartyAccesController.js';
+import { createAdjustment, deleteTemplate, listTemplates, saveTemplate } from '../controllers/accountingAdjustmentController.js';
 
 const router = express.Router();
+
+router.post('/contability/accounting-adjustments', express.json({ limit: '256kb' }),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess, createAdjustment, sessionErrorHandler);
+router.post('/contability/accounting-adjustment-templates/list', express.json({ limit: '16kb' }),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess, listTemplates, sessionErrorHandler);
+router.post('/contability/accounting-adjustment-templates', express.json({ limit: '256kb' }),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess, saveTemplate, sessionErrorHandler);
+router.delete('/contability/accounting-adjustment-templates/:id', express.json({ limit: '16kb' }),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess, deleteTemplate, sessionErrorHandler);
 
 // temporal folder for chunks
 const CHUNKS_DIR = path.join(process.cwd(), "chunks");

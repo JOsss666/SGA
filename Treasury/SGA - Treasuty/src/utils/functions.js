@@ -103,7 +103,7 @@ export async function parseToXlsx(info = [], download, columns, name, options = 
         : Object.keys(info[0] || {}).map(key => ({ header: key, key }));
 
     const columnKeys = normalizedColumns.map(col => col.key);
-    const tableStartRow = options.startRow || 5;
+    const tableStartRow = options.startRow || (options.taxId || options.documentDate ? 6 : 5);
     const reportColumnCount = Math.max(normalizedColumns.length, 4);
 
     // 1. Añadir Título y Metadatos (Filas superiores)
@@ -118,7 +118,11 @@ export async function parseToXlsx(info = [], download, columns, name, options = 
     // Espacio antes de la tabla
     const startRow = tableStartRow;
 
-    if (options.companyName || options.reportName || options.period) {
+    if (options.taxId || options.documentDate) {
+        worksheet.getCell('A2').value = options.taxId ? `NIT: ${options.taxId}` : "";
+        worksheet.getCell('A3').value = options.reportName || name || "Informe SGA";
+        worksheet.getCell('A4').value = options.documentDate ? `Fecha del documento: ${options.documentDate}` : "";
+    } else if (options.companyName || options.reportName || options.period) {
         worksheet.getCell('A2').value = options.reportName || name || "Informe SGA";
         worksheet.getCell('A3').value = options.period ? `Periodo: ${options.period}` : "";
     }
@@ -158,6 +162,39 @@ export async function parseToXlsx(info = [], download, columns, name, options = 
         });
     });
 
+    if (options.observations !== undefined || options.preparedBy) {
+        const observationsTitleRow = startRow + info.length + 2;
+        const observationsValueRow = observationsTitleRow + 1;
+        const preparedByRow = observationsValueRow + 2;
+        const mergedRange = `A${observationsTitleRow}:${String.fromCharCode(64 + reportColumnCount)}${observationsTitleRow}`;
+        const observationRange = `A${observationsValueRow}:${String.fromCharCode(64 + reportColumnCount)}${observationsValueRow}`;
+        const preparedByRange = `A${preparedByRow}:${String.fromCharCode(64 + reportColumnCount)}${preparedByRow}`;
+
+        worksheet.mergeCells(mergedRange);
+        worksheet.mergeCells(observationRange);
+        worksheet.mergeCells(preparedByRange);
+
+        const observationsTitleCell = worksheet.getCell(`A${observationsTitleRow}`);
+        observationsTitleCell.value = 'OBSERVACIONES';
+        observationsTitleCell.font = { bold: true };
+        observationsTitleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'EAF4F0' } };
+
+        const observationsCell = worksheet.getCell(`A${observationsValueRow}`);
+        observationsCell.value = options.observations || 'Sin observaciones.';
+        observationsCell.alignment = { vertical: 'top', wrapText: true };
+        observationsCell.border = {
+            top: { style: 'thin', color: { argb: '9ABDAC' } },
+            left: { style: 'thin', color: { argb: '9ABDAC' } },
+            bottom: { style: 'thin', color: { argb: '9ABDAC' } },
+            right: { style: 'thin', color: { argb: '9ABDAC' } }
+        };
+        worksheet.getRow(observationsValueRow).height = 48;
+
+        const preparedByCell = worksheet.getCell(`A${preparedByRow}`);
+        preparedByCell.value = `Preparado por: ${options.preparedBy || 'No registrado'}`;
+        preparedByCell.font = { italic: true };
+    }
+
     // 5. Ajustar ancho de columnas automáticamente
     worksheet.columns.forEach((column, index) => {
         column.width = normalizedColumns[index]?.width || 20;
@@ -172,6 +209,100 @@ export async function parseToXlsx(info = [], download, columns, name, options = 
     } else {
         return blob;
     }
+}
+
+export function downloadAccountingAdjustmentPdf({ companyName, taxId, documentDate, observations, preparedBy, rows = [] }) {
+    const pdf = new jsPDF('l', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 12;
+    const contentWidth = pageWidth - (margin * 2);
+    const columns = [
+        { key: 'linea', label: '#', width: 8 }, { key: 'codigo_cuenta', label: 'Código cuenta', width: 32 },
+        { key: 'nombre_cuenta', label: 'Nombre cuenta', width: 39 }, { key: 'descripcion', label: 'Descripción', width: 43 },
+        { key: 'identificacion_tercero', label: 'ID tercero', width: 28 }, { key: 'nombre_tercero', label: 'Nombre tercero', width: 39 },
+        { key: 'centro_costo', label: 'CC', width: 28 }, { key: 'debito', label: 'Débito', width: 28 }, { key: 'credito', label: 'Crédito', width: 28 }
+    ];
+    let y = margin;
+
+    const drawDocumentHeader = () => {
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(16);
+        pdf.text(companyName || 'Compañía', margin, y);
+        y += 7;
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(11);
+        pdf.text(`NIT: ${taxId || 'No registrado'}`, margin, y);
+        y += 6;
+        pdf.setFontSize(11);
+        pdf.text('Comprobante de ajuste contable', margin, y);
+        y += 6;
+        pdf.setFontSize(10);
+        pdf.text(`Fecha del documento: ${documentDate || ''}`, margin, y);
+        y += 11;
+    };
+
+    const drawTableHeader = () => {
+        let x = margin;
+        pdf.setFillColor(8, 116, 91);
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(8);
+        columns.forEach(column => {
+            pdf.setFillColor(8, 116, 91);
+            pdf.rect(x, y, column.width, 7, 'F');
+            pdf.text(column.label, x + 1.5, y + 4.5);
+            x += column.width;
+        });
+        pdf.setTextColor(0, 0, 0);
+        y += 7;
+    };
+
+    const newPageWithTable = () => {
+        pdf.addPage();
+        y = margin;
+        drawDocumentHeader();
+        drawTableHeader();
+    };
+
+    drawDocumentHeader();
+    drawTableHeader();
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(7.5);
+    rows.forEach(row => {
+        const values = columns.map(column => String(row[column.key] ?? ''));
+        const cellLines = values.map((value, index) => pdf.splitTextToSize(value, columns[index].width - 3));
+        const rowHeight = Math.max(7, ...cellLines.map(lines => lines.length * 3.4 + 2));
+        if (y + rowHeight > pageHeight - 20) newPageWithTable();
+        let x = margin;
+        cellLines.forEach((lines, index) => {
+            pdf.rect(x, y, columns[index].width, rowHeight);
+            pdf.text(lines, x + 1.5, y + 4);
+            x += columns[index].width;
+        });
+        y += rowHeight;
+    });
+
+    const observationLines = pdf.splitTextToSize(observations || 'Sin observaciones.', contentWidth - 4);
+    const observationHeight = Math.max(22, observationLines.length * 4 + 10);
+    if (y + observationHeight + 16 > pageHeight - margin) {
+        pdf.addPage();
+        y = margin;
+    } else y += 7;
+    pdf.setFillColor(234, 244, 240);
+    pdf.rect(margin, y, contentWidth, 7, 'F');
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9);
+    pdf.text('OBSERVACIONES', margin + 2, y + 4.5);
+    y += 7;
+    pdf.rect(margin, y, contentWidth, observationHeight);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.text(observationLines, margin + 2, y + 5);
+    y += observationHeight + 8;
+    pdf.setFont('helvetica', 'italic');
+    pdf.text(`Preparado por: ${preparedBy || 'No registrado'}`, margin, y);
+    pdf.save('Comprobante de ajuste contable.pdf');
 }
 
 export async function parseCashBoxeToXlsx(data,title) {
