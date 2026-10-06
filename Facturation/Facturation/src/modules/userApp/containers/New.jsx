@@ -21,6 +21,7 @@ import { FormNewThirdPartyDelegation } from "./forms/FormNewThirdPartyDelegation
 import { postInfo } from "../../../utils/functions";
 import './New.css'
 import { FormNewParameterDocument } from "./forms/FormNewParameterDocument";
+import { FormAccountingAdjustment } from "./forms/formAccountingAdjustment";
 
 export function New(){
     const {userConfig,appInfo,userInfo, appConfig} = useAppInfo();
@@ -88,6 +89,8 @@ export function New(){
         {text:'Nota débito o crédito',children:<FormNewENote/>,icon:<i className="fa-solid fa-note-sticky"/>},
 
         {text:'Compra',children:<FormNewPurchase/>,icon:<i className="fa-solid fa-cart-shopping"/>},
+
+        {text:'Crear ajuste contable',children:<FormAccountingAdjustment/>,icon:<i className="fa-solid fa-scale-balanced"/>},
 
         ...(userConfig?.access?.sections?.reports?.documents?.ThirdPartyDelegation === true ? [
             {text:'Asignación a proveedor', children:<FormNewThirdPartyDelegation instnacePreInfo={{}}/>,icon:<i className="bi bi-person-bounding-box"/>},
