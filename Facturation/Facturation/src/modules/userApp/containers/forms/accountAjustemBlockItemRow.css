@@ -54,26 +54,33 @@
     width: auto;
 }
 
+.accountAjustemBlockItemRow .FacturationFormInput label{
+    display: none;
+}
+
 .accountAjustemBlockItemRow .FacturationFormInput .inputContainer input,
 .accountAjustemBlockItemRow .FacturationSearchinList .SlistC input {
     box-sizing: border-box;
     width: 100%;
     min-width: 0;
-    padding: 0.8vh 1vh;
-    border: 0.1vh solid var(--inputsBorder);
-    border-radius: 0.6vh;
-    box-shadow: none;
-    color: var(--mainText);
-    background: var(--inputsBg);
-    font-size: clamp(12px, 1.55vh, 15px) !important;
+    padding-left: 1vh;
+    font-size: clamp(1.8px,1.8vh,18px);
+    padding-right: 2vw;
 }
 
-.accountAjustemBlockItemRow .FacturationFormInput .inputContainer input:focus-visible,
-.accountAjustemBlockItemRow .FacturationSearchinList .SlistC input:focus-visible,
-.accountAjustemBlockItemRow .FormButton:focus-visible {
-    outline: 0.2vh solid var(--mainText);
-    outline-offset: 0.1vh;
+.accountAjustemBlockItemRow .FacturationSearchinList .clearSelectedOptionBtn {
+    top: 50%;
+    transform: translateY(-50%);
 }
+
+.accountAjustemBlockItemRow .FacturationSearchinList .SlistC .listElementsContainer {
+    z-index: 100;
+}
+
+.accountAjustemBlockItemRow .FacturationSearchinList .listElementsContainer li{
+    font-size: clamp(1.8px,1.8vh,18px);
+}
+
 
 .accountAjustemBlockItemRow .accountAjustemBlockItemRowNumber {
     color: var(--descriptionText);

@@ -21,7 +21,7 @@
     min-height: 4.5vh;
     color: var(--descriptionText);
     background: var(--translucidMenu);
-    font-size: clamp(11px, 1.45vh, 14px);
+    font-size: clamp(1.8px, 1.8vh, 18px);
     font-weight: 500;
 }
 

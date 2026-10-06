@@ -5,6 +5,8 @@ export function AccountAjustemBlockItems({
     lines,
     accounts,
     thirdParties,
+    getAccounts,
+    getThirdParties,
     costCenters,
     totals,
     createLine,
@@ -55,6 +57,8 @@ export function AccountAjustemBlockItems({
                         index={index}
                         accounts={accounts}
                         thirdParties={thirdParties}
+                        getAccounts={getAccounts}
+                        getThirdParties={getThirdParties}
                         costCenters={costCenters}
                         onChange={(field, value) => updateLine(line.key, field, value)}
                         onInsert={() => insertLine(index)}

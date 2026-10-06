@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAlert, useAppInfo, useNotifications } from '../../../../context/context';
 import { ButtonDownload } from '../../components/ButtonDownload';
 import { BoldTitle } from '../../components/BoldTitle';
@@ -7,6 +7,7 @@ import { FormButton } from '../../components/FormButton';
 import { FormInput } from '../../components/FormInput';
 import { LabelValue } from '../../components/LabelValue';
 import { AccountAjustemBlockItems } from './accountAjustemBlockItems';
+import { AccounAdjusmentTemplates } from './accounAdjusmentTemplates';
 import { downloadAccountingAdjustmentPdf, postInfo } from '../../../../utils/functions';
 import { urlSer } from '../../../../App';
 import './formAccountingAdjustment.css';
@@ -22,6 +23,19 @@ const emptyLine = () => ({
 });
 
 const amount = value => Number(value || 0);
+
+const dateInputValue = value => {
+    if (!value) return '';
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
 
 const accountOptions = rows => {
     const normalizedRows = rows.filter(row => row.code !== undefined && row.code !== null);
@@ -60,22 +74,22 @@ const costCenterOptions = rows => rows.map(row => ({
 
 export function FormAccountingAdjustment({ reloadFun }) {
     const { appInfo, userInfo } = useAppInfo();
-    const { popOutAlert } = useAlert();
+    const { popInAlert, popOutAlert } = useAlert();
     const { addNotification } = useNotifications();
     const [accounts, setAccounts] = useState([]);
     const [thirdParties, setThirdParties] = useState([]);
     const [costCenters, setCostCenters] = useState([]);
     const [lines, setLines] = useState(() => Array.from({ length: 5 }, emptyLine));
     const [docDate, setDocDate] = useState(() => new Date().toISOString().slice(0, 10));
+    const [createdDate] = useState(() => dateInputValue(new Date()));
+    const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [description, setDescription] = useState('');
     const [attached, setAttached] = useState([]);
     const [templates, setTemplates] = useState([]);
-    const [templateName, setTemplateName] = useState('');
-    const [templatesOpen, setTemplatesOpen] = useState(false);
-    const [templateSaveOpen, setTemplateSaveOpen] = useState(false);
+    const templateNameRef = useRef('');
+    const templateSaveAlertIdRef = useRef(null);
     const [message, setMessage] = useState('');
     const [saving, setSaving] = useState(false);
-    const [exportOpen, setExportOpen] = useState(false);
 
     const totals = useMemo(() => lines.reduce((current, line) => ({
         debit: current.debit + amount(line.debit),
@@ -85,37 +99,53 @@ export function FormAccountingAdjustment({ reloadFun }) {
     const balanced = totals.debit > 0 && Math.abs(totals.debit - totals.credit) < 0.001;
     const notify = (type, title, detail) => addNotification({ type, title, description: detail });
 
+    const getAccounts = useCallback(async () => {
+        const response = await postInfo('/getAccountsPlan', {
+            company_id: appInfo.company_id,
+            accountPlanId: appInfo.accountPlanId,
+            accountPlanType: appInfo.accountPlanType,
+        });
+        const options = accountOptions(response?.[1]?.[1] ?? []);
+        setAccounts(options);
+        return options;
+    }, [appInfo.accountPlanId, appInfo.accountPlanType, appInfo.company_id]);
+
+    const getThirdParties = useCallback(async () => {
+        const response = await postInfo('/getThirdParties', { company_id: appInfo.company_id });
+        const options = thirdPartyOptions(response?.[1] ?? []);
+        setThirdParties(options);
+        return options;
+    }, [appInfo.company_id]);
+
+    const getTemplates = useCallback(async () => {
+        const response = await postInfo('/contability/accounting-adjustment-templates/list', {
+            company_id: appInfo.company_id,
+        });
+        const loadedTemplates = response?.templates ?? [];
+        setTemplates(loadedTemplates);
+        return loadedTemplates;
+    }, [appInfo.company_id]);
+
     const loadRequirements = useCallback(async () => {
         const [accountResult, thirdPartyResult, costCenterResult, templateResult] = await Promise.allSettled([
-            postInfo('/getAccountsPlan', {
-                company_id: appInfo.company_id,
-                accountPlanId: appInfo.accountPlanId,
-                accountPlanType: appInfo.accountPlanType,
-            }),
-            postInfo('/getThirdParties', { company_id: appInfo.company_id }),
+            getAccounts(),
+            getThirdParties(),
             postInfo('/getCostCenters', { company_id: appInfo.company_id }),
-            postInfo('/contability/accounting-adjustment-templates/list', {
-                company_id: appInfo.company_id,
-            }),
+            getTemplates(),
         ]);
 
-        const accountResponse = accountResult.status === 'fulfilled' ? accountResult.value : null;
-        const thirdPartyResponse = thirdPartyResult.status === 'fulfilled' ? thirdPartyResult.value : null;
         const costCenterResponse = costCenterResult.status === 'fulfilled' ? costCenterResult.value : null;
-        const templateResponse = templateResult.status === 'fulfilled' ? templateResult.value : null;
-        const accountRows = accountResponse?.[1]?.[1] ?? [];
-        const thirdPartyRows = thirdPartyResponse?.[1] ?? [];
         const costCenterRows = costCenterResponse?.[1] ?? [];
 
-        setAccounts(accountOptions(accountRows));
-        setThirdParties(thirdPartyOptions(thirdPartyRows));
         setCostCenters(costCenterOptions(costCenterRows));
-        setTemplates(templateResponse?.templates ?? []);
+        if (templateResult.status === 'rejected') setTemplates([]);
 
-        if (!accountRows.length || !thirdPartyRows.length) {
+        const accountOptionsLoaded = accountResult.status === 'fulfilled' ? accountResult.value : [];
+        const thirdPartyOptionsLoaded = thirdPartyResult.status === 'fulfilled' ? thirdPartyResult.value : [];
+        if (!accountOptionsLoaded.length || !thirdPartyOptionsLoaded.length) {
             setMessage('No fue posible cargar las cuentas o terceros. Verifica la configuración de la compañía.');
         }
-    }, [appInfo.accountPlanId, appInfo.accountPlanType, appInfo.company_id]);
+    }, [appInfo.company_id, getAccounts, getTemplates, getThirdParties]);
 
     useEffect(() => {
         loadRequirements();
@@ -173,8 +203,9 @@ export function FormAccountingAdjustment({ reloadFun }) {
     };
 
     const saveTemplate = async () => {
-        if (!templateName.trim()) {
-            setMessage('Indica un nombre para la plantilla.');
+        const templateName = templateNameRef.current.trim();
+        if (!templateName) {
+            notify('error', 'Nombre requerido', 'Indica un nombre para la plantilla.');
             return;
         }
 
@@ -188,16 +219,19 @@ export function FormAccountingAdjustment({ reloadFun }) {
                 ...current.filter(item => item.id !== response.template.id),
                 response.template,
             ].sort((first, second) => first.name.localeCompare(second.name)));
-            setTemplateName('');
+            setSelectedTemplate(response.template);
+            templateNameRef.current = '';
             notify('aproved', 'Plantilla guardada', 'Podrás reutilizarla en nuevos comprobantes.');
+            popOutAlert(templateSaveAlertIdRef.current);
         } catch (error) {
-            setMessage(error?.message ?? 'No fue posible guardar la plantilla.');
+            notify('error', 'No fue posible guardar la plantilla', error?.message ?? 'Inténtalo de nuevo.');
         }
     };
 
     const applyTemplate = template => {
         setLines(template.lines.map(line => ({ ...line, key: crypto.randomUUID() })));
         setDescription(template.description || '');
+        setSelectedTemplate(template);
         setMessage(`Plantilla “${template.name}” aplicada. Define la fecha antes de guardar.`);
     };
 
@@ -214,8 +248,11 @@ export function FormAccountingAdjustment({ reloadFun }) {
 
             if (!response.ok) throw new Error('No fue posible eliminar la plantilla.');
             setTemplates(current => current.filter(item => item.id !== template.id));
+            setSelectedTemplate(current => current?.id === template.id ? null : current);
+            return true;
         } catch (error) {
-            setMessage(error.message);
+            notify('error', 'No fue posible eliminar la plantilla', error.message);
+            return false;
         }
     };
 
@@ -273,53 +310,37 @@ export function FormAccountingAdjustment({ reloadFun }) {
 
             <form onSubmit={save}>
                 <div className="formAccountingAdjustmentMeta">
-                    <FormInput title="Fecha del comprobante" type="date" value={docDate} action={setDocDate} required />
-                    <FormInput title="Ultima modificación" type="date" value={docDate} disabled={true} />
-                    <FormInput title="Fecha de creación" type="date" value={docDate} disabled={true} />
+                    <FormInput title="Fecha comprobante" type="date" value={docDate} action={setDocDate} required />
+                    <FormInput
+                        title="Última modificación"
+                        type="date"
+                        value={dateInputValue(selectedTemplate?.updated_at ?? selectedTemplate?.created_at)}
+                        disabled
+                    />
+                    <FormInput title="Fecha de creación" type="date" value={createdDate} disabled />
+                    <ButtonDownload
+                            info={downloadRows}
+                            columns={exportColumns}
+                            formats={["xlsx", "csv", "pdf"]}
+                            formatHandlers={{
+                                pdf: () => downloadAccountingAdjustmentPdf({
+                                    ...accountingAdjustmentDownloadOptions(),
+                                    rows: downloadRows,
+                                }),
+                            }}
+                            xlsxOptions={accountingAdjustmentDownloadOptions}
+                            title="Comprobante de ajuste contable"
+                        />
                 </div>
 
                 {message && <p className="formAccountingAdjustmentMessage" role="alert">{message}</p>}
-
-                <div className="formAccountingAdjustmentTableToolbar">
-                    <strong>Detalle contable</strong>
-                    <div className="formAccountingAdjustmentExport">
-                        <FormButton
-                            type="button"
-                            className="formAccountingAdjustmentDownload"
-                            text="Descargar"
-                            ariaLabel="Elegir formato de descarga"
-                            ariaExpanded={exportOpen}
-                            onClick={() => setExportOpen(current => !current)}
-                        >
-                            <i className="fa-solid fa-arrow-down" aria-hidden="true" />
-                        </FormButton>
-
-                        {exportOpen && (
-                            <div className="formAccountingAdjustmentExportMenu">
-                                <ButtonDownload
-                                    info={downloadRows}
-                                    columns={exportColumns}
-                                    xlsxOptions={accountingAdjustmentDownloadOptions}
-                                    title="Comprobante de ajuste contable"
-                                    text="Excel"
-                                />
-                                <FormButton
-                                    type="button"
-                                    text="PDF"
-                                    onClick={() => downloadAccountingAdjustmentPdf({
-                                        ...accountingAdjustmentDownloadOptions(),
-                                        rows: downloadRows,
-                                    })}
-                                />
-                            </div>
-                        )}
-                    </div>
-                </div>
 
                 <AccountAjustemBlockItems
                     lines={lines}
                     accounts={accounts}
                     thirdParties={thirdParties}
+                    getAccounts={getAccounts}
+                    getThirdParties={getThirdParties}
                     costCenters={costCenters}
                     totals={totals}
                     createLine={emptyLine}
@@ -327,20 +348,18 @@ export function FormAccountingAdjustment({ reloadFun }) {
                 />
 
                 <section className="formAccountingAdjustmentBelowTotals">
-                    <section className="formAccountingAdjustmentObservation">
-                        <BoldTitle text="Observaciones" />
+                    <div className="docComplement">
                         <FormInput
                             hideLabel
                             textArea
                             value={description}
                             action={setDescription}
-                            placeholder="Campo opcional para explicar el ajuste"
+                            placeholder="Descripción: Ej. Campo opcional para explicar el ajuste"
                             required={false}
                         />
-                    </section>
+                    </div>
 
-                    <section className="formAccountingAdjustmentAttachments">
-                        <BoldTitle text="Archivos adjuntos" />
+                    <div className="docComplement">
                         <FileInput
                             category="files"
                             action={setAttached}
@@ -365,62 +384,56 @@ export function FormAccountingAdjustment({ reloadFun }) {
                                 </li>
                             ))}
                         </ul>
-                    </section>
+                    </div>
                 </section>
 
-                <div className="formAccountingAdjustmentActions">
-                    <FormButton
-                        type="button"
-                        negative
-                        text="Limpiar"
-                        onClick={event => {
-                            event.preventDefault();
-                            clean();
-                        }}
-                    />
-                </div>
-
                 <section className="formAccountingAdjustmentTemplates">
+
                     <div className="formAccountingAdjustmentTemplateActions">
                         <FormButton
                             type="button"
+                            negative
+                            text="Limpiar"
+                            onClick={event => {
+                                event.preventDefault();
+                                clean();
+                            }}
+                        />
+                        <FormButton
+                            type="button"
                             text="Plantillas recurrentes"
-                            ariaExpanded={templatesOpen}
-                            onClick={() => setTemplatesOpen(current => !current)}
+                            onClick={() => popInAlert(
+                                <AccounAdjusmentTemplates
+                                    templates={templates}
+                                    loadTemplates={getTemplates}
+                                    onApply={applyTemplate}
+                                    onDelete={deleteTemplate}
+                                />,
+                            )}
                         />
                         <FormButton
                             type="button"
                             text="Guardar plantilla"
-                            ariaExpanded={templateSaveOpen}
-                            onClick={() => setTemplateSaveOpen(current => !current)}
+                            onClick={() => {
+                                templateNameRef.current = '';
+                                templateSaveAlertIdRef.current = popInAlert(
+                                    <div className="formAccountingAdjustmentTemplateSave">
+                                        <BoldTitle text="Guardar plantilla" />
+                                        <FormInput
+                                            hideLabel
+                                            ariaLabel="Nombre de la plantilla"
+                                            action={value => {
+                                                templateNameRef.current = value;
+                                            }}
+                                            placeholder="Nombre de plantilla"
+                                        />
+                                        <FormButton type="button" text="Confirmar guardado" onClick={saveTemplate} />
+                                    </div>,
+                                );
+                            }}
                         />
                     </div>
 
-                    {templateSaveOpen && (
-                        <div className="formAccountingAdjustmentTemplateSave">
-                            <FormInput
-                                hideLabel
-                                ariaLabel="Nombre de la plantilla"
-                                value={templateName}
-                                action={setTemplateName}
-                                placeholder="Nombre de plantilla"
-                            />
-                            <FormButton type="button" text="Confirmar guardado" onClick={saveTemplate} />
-                        </div>
-                    )}
-
-                    {templatesOpen && (templates.length ? (
-                        <ul>
-                            {templates.map(template => (
-                                <li key={template.id}>
-                                    <FormButton type="button" text={template.name} onClick={() => applyTemplate(template)} />
-                                    <FormButton type="button" negative text="Eliminar" onClick={() => deleteTemplate(template)} />
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="formAccountingAdjustmentTemplateEmpty">No hay plantillas guardadas.</p>
-                    ))}
                 </section>
 
                 <div className="formAccountingAdjustmentFooter">

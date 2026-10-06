@@ -1,7 +1,11 @@
+import { useAlert } from '../../../../context/context';
 import { FormButton } from '../../components/FormButton';
 import { FormInput } from '../../components/FormInput';
+import { NewElementSelect } from '../../components/NewElementSelect';
 import { SearchinList } from '../../components/SearchInList';
+import { FormNewThirdParties } from './FormNewThirdParties';
 import './accountAjustemBlockItemRow.css';
+import { TreeFormNewAccount } from './TreeFormNewAccount';
 
 export function AccountAjustemBlockItemRow({
     line,
@@ -12,9 +16,12 @@ export function AccountAjustemBlockItemRow({
     onChange,
     onInsert,
     onDuplicate,
+    getAccounts,
+    getThirdParties,
     onRemove,
 }) {
     const lineNumber = index + 1;
+    const {popInAlert} = useAlert();
 
     return (
         <div className="accountAjustemBlockItemRow">
@@ -34,6 +41,14 @@ export function AccountAjustemBlockItemRow({
                 title={`Código de cuenta línea ${lineNumber}`}
                 placeHolder="Código o nombre"
                 list={accounts}
+                specialOption={
+                    <NewElementSelect title={'Crear cuenta'} onClick={() => {
+                        const fatherAccount = accounts.find(account => String(account.value) === String(line.account_id));
+                        popInAlert(fatherAccount
+                            ? <TreeFormNewAccount fatherInfo={fatherAccount} reloadINfo={getAccounts} />
+                            : <span>Selecciona primero la cuenta que quieres usar como cuenta padre.</span>);
+                    }}/>
+                }
                 action={value => onChange('account_id', value)}
             />
 
@@ -47,8 +62,13 @@ export function AccountAjustemBlockItemRow({
 
             <SearchinList
                 title={`Nombre de tercero línea ${lineNumber}`}
-                placeHolder="Buscar tercero por nombre"
+                placeHolder="Buscar tercero"
                 list={thirdParties}
+                specialOption={
+                    <NewElementSelect title="Crear nuevo tercero" onClick={() => {
+                        popInAlert(<FormNewThirdParties quickCreation reloadFun={getThirdParties} />);
+                    }}/>
+                }
                 action={value => onChange('thirdParty_id', value)}
                 canClear
             />
@@ -77,7 +97,7 @@ export function AccountAjustemBlockItemRow({
 
             <SearchinList
                 title={`Centro de costo línea ${lineNumber}`}
-                placeHolder="Seleccionar CC"
+                placeHolder="Centro de costo"
                 list={costCenters}
                 action={value => onChange('costCenter_id', value)}
                 canClear

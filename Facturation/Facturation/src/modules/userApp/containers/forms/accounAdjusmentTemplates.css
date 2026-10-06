@@ -1,0 +1,161 @@
+.accounAdjusmentTemplates {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+    width: min(58vw, 720px);
+    max-width: calc(100vw - 12vh);
+    min-width: min(420px, calc(100vw - 12vh));
+    color: var(--mainText);
+}
+
+.accounAdjusmentTemplates .BoldTitle {
+    margin: 0;
+    font-size: clamp(24px, 3.5vh, 36px);
+    font-weight: 500;
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesSearch {
+    display: flex;
+    align-items: center;
+    gap: 1vh;
+    min-height: 5.5vh;
+    padding: 0 1.5vh;
+    border: 0.1vh solid var(--inputsBorder);
+    border-radius: 1vh;
+    background: var(--inputsBg);
+    color: var(--descriptionText);
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesSearch i {
+    flex: 0 0 auto;
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesSearch input {
+    width: 100%;
+    min-width: 0;
+    min-height: 5vh;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--mainText);
+    font-size: clamp(14px, 1.8vh, 18px);
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesSearch:focus-within {
+    outline: 0.2vh solid var(--mainText);
+    outline-offset: 0.1vh;
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesMessage {
+    margin: 0;
+    color: var(--descriptionText);
+    font-size: clamp(14px, 1.8vh, 18px);
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesList {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    max-height: 62vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.2vh;
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesCard {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1.4vh 6vh 1.4vh 1.4vh;
+    border: 0.1vh solid var(--inputsBorder);
+    border-radius: 1vh;
+    background: var(--inputsBg);
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesSelect {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8vh;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--mainText);
+    text-align: left;
+    cursor: pointer;
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesSelect strong {
+    display: block;
+    max-width: 100%;
+    font-size: clamp(16px, 2vh, 20px);
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesSelect time {
+    color: var(--descriptionText);
+    font-size: clamp(12px, 1.5vh, 15px);
+    font-weight: 400;
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesSelect span {
+    display: block;
+    max-width: 100%;
+    color: var(--descriptionText);
+    font-size: clamp(14px, 1.7vh, 17px);
+    overflow-wrap: anywhere;
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesSelect:hover {
+    color: var(--sectionTitle);
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesSelect:focus-visible,
+.accounAdjusmentTemplates .accounAdjusmentTemplatesDelete:focus-visible {
+    outline: 0.2vh solid var(--mainText);
+    outline-offset: 0.2vh;
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesDelete {
+    position: absolute;
+    top: 50%;
+    right: 1vh;
+    display: grid;
+    place-items: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    transform: translateY(-50%);
+    border: 0;
+    border-radius: 0.8vh;
+    background: transparent;
+    color: var(--descriptionText);
+    cursor: pointer;
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesDelete:hover {
+    background: var(--iconHover);
+    color: var(--mainText);
+}
+
+.accounAdjusmentTemplates .accounAdjusmentTemplatesDelete:disabled {
+    cursor: wait;
+}
+
+@media (max-width: 760px) {
+    .accounAdjusmentTemplates {
+        width: calc(100vw - 12vh);
+        min-width: 0;
+    }
+
+    .accounAdjusmentTemplates .accounAdjusmentTemplatesCard {
+        padding-right: 6vh;
+    }
+}

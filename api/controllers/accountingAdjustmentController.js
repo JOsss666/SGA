@@ -42,7 +42,7 @@ export const saveTemplate = async (req, res, next) => {
         const result = await queryDataBase(`INSERT INTO "Ecosystem".accounting_adjustment_templates
             (company_id, name, lines, description, created_by) VALUES ($1, $2, $3::jsonb, $4, $5)
             ON CONFLICT (company_id, name) DO UPDATE SET lines = EXCLUDED.lines, description = EXCLUDED.description, updated_at = now()
-            RETURNING id, name, lines, description`, [req.auth.companyId, name, JSON.stringify(voucher.lines), voucher.description, req.auth.userId]);
+            RETURNING id, name, lines, description, created_at, updated_at`, [req.auth.companyId, name, JSON.stringify(voucher.lines), voucher.description, req.auth.userId]);
         res.status(201).json({ template: result.rows[0] });
     } catch (error) {
         if (error.statusCode === 400) return res.status(400).json({ message: error.message });
