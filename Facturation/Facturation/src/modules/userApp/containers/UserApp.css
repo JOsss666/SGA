@@ -119,6 +119,11 @@
     margin: auto 2vh;
 }
 
+.UserApp .headApp .UserCard img{
+    height: 5vh;
+    width: 5vh;
+}
+
 .UserApp .headApp .BigTitle{
     margin: auto 2vh;
     width: 25%;
