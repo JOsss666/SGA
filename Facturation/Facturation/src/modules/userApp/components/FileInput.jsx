@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {uploadFiles} from '../../../utils/functions'
 import './FileInput.css'
 import { useAppInfo } from "../../../context/context";
@@ -11,6 +11,8 @@ export function FileInput({
     children,
     multiple,
     includeFiles = false,
+    value,
+    appendOnMultiple = false,
     category = 'others',   // carpeta destino en R2: assets | files | thirdPartiesDocs | others
     storeId,               // opcional: sube bajo la tienda en vez del nivel compañía
 }){
@@ -18,6 +20,10 @@ export function FileInput({
     const inRef = useRef();
     const [loading,setLoading] = useState(false);
     const [urls,setUrls] = useState([]);
+
+    useEffect(() => {
+        if (Array.isArray(value)) setUrls(value);
+    }, [value]);
 
     const uplF = async(files)=>{
         setDisabled?.(true);
@@ -40,19 +46,27 @@ export function FileInput({
                 }))
                 : res.urls;
 
-            if(multiple){
+            if(multiple && appendOnMultiple){
+                action(current => [...(Array.isArray(current) ? current : []), ...actionValues]);
+            }else if(multiple){
                 action(actionValues);
             }else{
                 action([actionValues[0]]);
             }
         }
-        setUrls(res.urls)
+        setUrls(current => appendOnMultiple ? [...current, ...res.urls] : res.urls)
         setLoading(false);
         setDisabled?.(false);
     }
 
     return(
         <div className="FileInput">
+            <input disabled={disabled} ref={inRef} type="file" hidden multiple={multiple} onChange={(event)=>{
+                if(action != undefined){
+                    uplF(inRef.current.files)
+                    event.currentTarget.value = '';
+                }
+            }}/>
             {!loading && urls.length == 0 && (
                 <>
                     <div className="spaceInput" onClick={()=>{
@@ -63,11 +77,6 @@ export function FileInput({
                         )}
                         <strong>{placeholder? placeholder:'Seleccionar archivo'}</strong>
                     </div>
-                    <input disabled={disabled} ref={inRef} type="file" hidden multiple={multiple} onChange={(e)=>{
-                        if(action != undefined){
-                            uplF(inRef.current.files)
-                        }
-                    }}/>
                 </>
             )}
             {loading && (
@@ -86,6 +95,7 @@ export function FileInput({
                             </li>
                         ))}
                     </ul>
+                    {multiple && appendOnMultiple && <button type="button" className="fileInputAddMore" onClick={()=>inRef.current.click()}>Adjuntar otro archivo</button>}
                 </div>
             )}
         </div>
