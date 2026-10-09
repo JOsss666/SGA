@@ -13,6 +13,8 @@ import { useReactToPrint } from "react-to-print";
 import { parseCashBoxeToXlsx } from "../../../../utils/functions";
 import { useParams } from "react-router-dom";
 import { ProcessStatusAlert } from "../Alerts/ProcessStatusAlert";
+import { InvoiceVisualRepresentation } from "../Alerts/documents render/InvoiceVisualRepresentation";
+import { DocumentPreview } from "../Alerts/DocumentPreview";
 
 export function CashRegisterReport({shift_id}){
 
@@ -267,7 +269,8 @@ export function CashRegisterReport({shift_id}){
                                                 }}>{`${element.process_code}#${element.instance_serial}`}</strong>
                                             )}
                                             <strong className="idHolder" onClick={()=>{
-                                                window.open(`https://facturation.sga360.co/preview/Document/${params.company_key}/${element.doc_id}`,'_blank','noopener,noreferrer')
+                                                popInAlert(<DocumentPreview data={element}/>)
+                                                //window.open(`https://facturation.sga360.co/preview/Document/${params.company_key}/${element.doc_id}`,'_blank','noopener,noreferrer')
                                             }}>
                                                 {`${element.doc_type}#${element.ownSerial}`}
                                             </strong>
