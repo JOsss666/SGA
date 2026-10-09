@@ -406,7 +406,12 @@ export async function parseCashBoxeToXlsx(data,title) {
     // 5. Descarga
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-    saveAs(blob, `${name}_${new Date().getTime()}.xlsx`);
+    const fileName = String(title || 'Informe de cierre de caja')
+        .replace(/[<>:"\/\\|?*\u0000-\u001F]/g, '-')
+        .replace(/\s+/g, ' ')
+        .replace(/[. ]+$/g, '')
+        .trim() || 'Informe de cierre de caja';
+    saveAs(blob, `${fileName}.xlsx`);
 }
 
 // Descarga el informe de liquidaciones de caja por periodo (ej. mensual).
@@ -946,6 +951,10 @@ export const arrayToTree = (flatArray, rootIdValue = null) => {
 export async function newElectronicInvoide(info){
     let res = await postInfo('/electronicFacturation/invoice',info);
     return(res)
+}
+
+export async function newElectronicSellInvoiceReemision(info){
+    return await postInfo('/electronicFacturation/sellinvoiceReemision', info);
 }
 
 export async function newElectronicNote(info){

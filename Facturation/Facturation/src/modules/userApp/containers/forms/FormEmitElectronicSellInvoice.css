@@ -13,6 +13,20 @@
     gap: 1vh;
 }
 
+.FormEmitElectronicSellInvoice form .invoicePreview{
+    margin: 1vh auto;
+}
+
+.FormEmitElectronicSellInvoice form .invoicePreview .InvoiceVisualRepresentation{
+    margin: auto;
+}
+
+.FormEmitElectronicSellInvoice form .parameters{
+    display: flex;
+    gap: 2vh;
+    flex-wrap: wrap;
+}
+
 .FormEmitElectronicSellInvoice .InvoiceInfo{
     height: fit-content;
     margin: 0 auto;
@@ -24,6 +38,51 @@
 
 .FormEmitElectronicSellInvoice .InvoiceInfo .InvoiceVisualRepresentation{
     border-radius: 2vh;
+}
+
+.FormEmitElectronicSellInvoice .reemisionElectronicCard {
+    display: flex;
+    align-items: center;
+    gap: 1.2vh;
+    width: 100%;
+    margin: 1vh auto 0;
+    padding: 1.2vh;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: 1.2vh;
+    background: var(--bg);
+    color: var(--mainText);
+    text-align: left;
+}
+
+.FormEmitElectronicSellInvoice .reemisionElectronicCard > i {
+    flex: 0 0 auto;
+    margin: auto 1vh;
+    color: #c52b2b;
+    font-size: 3vh;
+    text-align: center;
+}
+
+.FormEmitElectronicSellInvoice .reemisionElectronicCard > div:not(.MoreOptions) {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.FormEmitElectronicSellInvoice .reemisionElectronicCard strong,
+.FormEmitElectronicSellInvoice .reemisionElectronicCard span {
+    overflow: hidden;
+    font-size: clamp(1.8px, 1.8vh, 18px);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.FormEmitElectronicSellInvoice .reemisionElectronicCard strong {
+    font-weight: 500;
+}
+
+.FormEmitElectronicSellInvoice .reemisionElectronicCard span {
+    color: var(--descriptionText);
 }
 
 .FormEmitElectronicSellInvoice form .actionsForn{

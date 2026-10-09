@@ -517,6 +517,16 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
 
     router.post('/electronicFacturation/invoice', electronicFacturationController.newInvoice);
 
+    router.post(
+        '/electronicFacturation/sellinvoiceReemision',
+        express.json({ limit: '256kb', strict: true }),
+        requireTrustedOrigin,
+        authenticateSession,
+        requireCompanyAccess,
+        electronicFacturationController.sellinvoiceReemision,
+        sessionErrorHandler
+    );
+
     router.get('/electronicFacturation/taxes', electronicFacturationController.getTaxes);
 
     router.post('/electronicFacturation/getDocuments',electronicFacturationController.getDocuments);
