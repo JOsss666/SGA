@@ -56,6 +56,7 @@ export function AccountAjustemBlockItemRow({
                 hideLabel
                 required={false}
                 ariaLabel={`Descripción línea ${lineNumber}`}
+                placeholder={'Ej: Motivo ajuste'}
                 value={line.description}
                 action={value => onChange('description', value)}
             />
@@ -81,6 +82,7 @@ export function AccountAjustemBlockItemRow({
                 min="0"
                 step="0.01"
                 value={line.debit}
+                placeholder={0}
                 action={value => onChange('debit', value)}
             />
 
@@ -91,6 +93,7 @@ export function AccountAjustemBlockItemRow({
                 type="number"
                 min="0"
                 step="0.01"
+                placeholder={0}
                 value={line.credit}
                 action={value => onChange('credit', value)}
             />
@@ -107,12 +110,14 @@ export function AccountAjustemBlockItemRow({
                 <FormButton
                     type="button"
                     ariaLabel={`Duplicar línea ${lineNumber}`}
+                    title={`Duplicar línea ${lineNumber}`}
                     onClick={onDuplicate}
                 >
                     <i className="fa-regular fa-copy" aria-hidden="true" />
                 </FormButton>
                 <FormButton
                     type="button"
+                    title={`Eliminar línea ${lineNumber}`}
                     ariaLabel={`Eliminar línea ${lineNumber}`}
                     onClick={onRemove}
                 >

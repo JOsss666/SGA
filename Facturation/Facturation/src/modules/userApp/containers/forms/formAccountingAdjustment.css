@@ -100,28 +100,35 @@
     min-width: 0;
     margin: 2vh auto;
     width: 48%;
-    height: 15vh;
+    min-height: 15vh;
+    height: auto;
 }
 
 .formAccountingAdjustment .formAccountingAdjustmentBelowTotals .docComplement .FacturationFormInput{
+    display: flex;
+    flex: 1;
     height: 100%;
+    min-height: 0;
 }
 
 .formAccountingAdjustment .formAccountingAdjustmentBelowTotals .docComplement .FacturationFormInput .inputContainer{
+    flex: 1;
     height: 100%;
+    min-height: 0;
 }
 
 .formAccountingAdjustment .formAccountingAdjustmentBelowTotals .docComplement .FacturationFormInput textarea{
     box-sizing: border-box;
+    flex: 1;
     height: 100%;
     min-height: 0;
+    resize: none;
 }
 
 .formAccountingAdjustment .formAccountingAdjustmentBelowTotals .docComplement .FileInput{
-    box-sizing: border-box;
-    flex: 1;
-    min-height: 0;
-    height: 100%;
+    flex: 0 0 auto;
+    min-height: 15vh;
+    height: auto;
 }
 
 .formAccountingAdjustment .formAccountingAdjustmentBelowTotals .docComplement .FacturationFormInput label{
@@ -131,9 +138,13 @@
 .formAccountingAdjustment .formAccountingAdjustmentMeta{
     margin-bottom: 2vh;
     gap: 1vw;
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
 }
 
-.formAccountingAdjustment .formAccountingAdjustmentMeta .FacturationFormInput label {
+.formAccountingAdjustment .formAccountingAdjustmentMeta .FacturationFormInput label,
+.formAccountingAdjustment .formAccountingAdjustmentMeta .FacturationSearchinList label {
     margin-bottom: 1vh;
     padding: 0;
     font-size: clamp(1.8px, 1.8vh, 18px);
@@ -144,27 +155,55 @@
     color: var(--mainText);
 }
 
-.formAccountingAdjustment .formAccountingAdjustmentMeta > .FacturationFormInput:nth-child(2),
-.formAccountingAdjustment .formAccountingAdjustmentMeta > .FacturationFormInput:nth-child(3),
-.formAccountingAdjustment .formAccountingAdjustmentMeta > .FacturationFormInput:nth-child(1) {
+.formAccountingAdjustment .formAccountingAdjustmentMeta > .FacturationFormInput {
     flex: 0 0 fit-content;
     width: fit-content;
     max-width: 100%;
 }
 
-.formAccountingAdjustment .formAccountingAdjustmentMeta > .FacturationFormInput:nth-child(2) input,
-.formAccountingAdjustment .formAccountingAdjustmentMeta > .FacturationFormInput:nth-child(3) input,
-.formAccountingAdjustment .formAccountingAdjustmentMeta > .FacturationFormInput:nth-child(1) input {
+.formAccountingAdjustment .formAccountingAdjustmentMeta > .FacturationFormInput input {
     width: fit-content;
     min-width: 13ch;
     max-width: 100%;
 }
 
-.formAccountingAdjustment .formAccountingAdjustmentMeta > .FacturationFormInput:nth-child(2) input:disabled,
-.formAccountingAdjustment .formAccountingAdjustmentMeta > .FacturationFormInput:nth-child(3) input:disabled {
+.formAccountingAdjustment .formAccountingAdjustmentMeta > .FacturationFormInput input:disabled {
     color: var(--mainText);
     -webkit-text-fill-color: var(--mainText);
     opacity: 1;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta > .formAccountingAdjustmentStore {
+    flex: 1 1 15rem;
+    min-width: min(100%, 13rem);
+    max-width: min(100%, 22rem);
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta > .formAccountingAdjustmentBussines {
+    flex: 1 1 15rem;
+    min-width: min(100%, 13rem);
+    max-width: min(100%, 22rem);
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta > .formAccountingAdjustmentConcept {
+    flex: 1 1 15rem;
+    min-width: min(100%, 13rem);
+    max-width: min(100%, 22rem);
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta .formAccountingAdjustmentStore .FacturationSearchinList,
+.formAccountingAdjustment .formAccountingAdjustmentMeta .formAccountingAdjustmentBussines .FacturationSearchinList,
+.formAccountingAdjustment .formAccountingAdjustmentMeta .formAccountingAdjustmentConcept .FacturationSearchinList {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentStoreError {
+    display: block;
+    margin: 0.3rem 0.5rem;
+    color: var(--mainText);
+    font-size: clamp(12px, 1.5vh, 15px);
 }
 
 .formAccountingAdjustment .formAccountingAdjustmentMeta .ButtonDownload{
@@ -197,6 +236,13 @@
     padding: 1vh;
     border: 0.1vh solid var(--inputsBorder);
     color: var(--mainText);
+    background-color: var(--cardHover);
+    border-radius: 1vh;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMessage i{
+    margin: auto 0;
+    margin-right: 1vh;
 }
 
 .formAccountingAdjustment .formAccountingAdjustmentTableToolbar {

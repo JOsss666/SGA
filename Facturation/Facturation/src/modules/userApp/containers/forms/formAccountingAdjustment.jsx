@@ -6,6 +6,7 @@ import { FileInput } from '../../components/FileInput';
 import { FormButton } from '../../components/FormButton';
 import { FormInput } from '../../components/FormInput';
 import { LabelValue } from '../../components/LabelValue';
+import { SearchinList } from '../../components/SearchInList';
 import { AccountAjustemBlockItems } from './accountAjustemBlockItems';
 import { AccounAdjusmentTemplates } from './accounAdjusmentTemplates';
 import { downloadAccountingAdjustmentPdf, postInfo } from '../../../../utils/functions';
@@ -73,12 +74,18 @@ const costCenterOptions = rows => rows.map(row => ({
 }));
 
 export function FormAccountingAdjustment({ reloadFun }) {
-    const { appInfo, userInfo } = useAppInfo();
+    const { appInfo, userInfo, userConfig } = useAppInfo();
     const { popInAlert, popOutAlert } = useAlert();
     const { addNotification } = useNotifications();
     const [accounts, setAccounts] = useState([]);
     const [thirdParties, setThirdParties] = useState([]);
     const [costCenters, setCostCenters] = useState([]);
+    const [stores, setStores] = useState([]);
+    const [businesses, setBusinesses] = useState([]);
+    const [concepts, setConcepts] = useState([]);
+    const [storeId, setStoreId] = useState('');
+    const [bussinesId, setBussinesId] = useState('');
+    const [conceptId, setConceptId] = useState('');
     const [lines, setLines] = useState(() => Array.from({ length: 5 }, emptyLine));
     const [docDate, setDocDate] = useState(() => new Date().toISOString().slice(0, 10));
     const [createdDate] = useState(() => dateInputValue(new Date()));
@@ -89,6 +96,15 @@ export function FormAccountingAdjustment({ reloadFun }) {
     const templateNameRef = useRef('');
     const templateSaveAlertIdRef = useRef(null);
     const [message, setMessage] = useState('');
+    const [storeError, setStoreError] = useState('');
+    const [storeLoadError, setStoreLoadError] = useState('');
+    const [bussinesError, setBussinesError] = useState('');
+    const [bussinesLoadError, setBussinesLoadError] = useState('');
+    const [conceptError, setConceptError] = useState('');
+    const [conceptLoadError, setConceptLoadError] = useState('');
+    const [loadingStores, setLoadingStores] = useState(false);
+    const [loadingBusinesses, setLoadingBusinesses] = useState(false);
+    const [loadingConcepts, setLoadingConcepts] = useState(false);
     const [saving, setSaving] = useState(false);
 
     const totals = useMemo(() => lines.reduce((current, line) => ({
@@ -117,6 +133,105 @@ export function FormAccountingAdjustment({ reloadFun }) {
         return options;
     }, [appInfo.company_id]);
 
+    const getStores = useCallback(async () => {
+        setLoadingStores(true);
+        setStoreLoadError('');
+        try {
+            const storeAccess = userConfig?.access?.stores;
+            const allowedStores = storeAccess?.overAll === true
+                ? undefined
+                : storeAccess
+                    ? (Array.isArray(storeAccess.enabled) ? storeAccess.enabled : [])
+                    : undefined;
+            const response = await postInfo('/getStores', {
+                company_id: appInfo.company_id,
+                allowedStores,
+            });
+            if (!response?.[0]) throw new Error('No fue posible consultar las tiendas disponibles.');
+
+            const options = (response[1] ?? []).map(store => ({
+                value: store.id,
+                text: store.name,
+                selectedText: store.name,
+            }));
+            setStores(options);
+            if (!options.length) setStoreLoadError('No tienes tiendas disponibles para esta compañía.');
+            return options;
+        } catch (error) {
+            setStores([]);
+            setStoreLoadError(error?.message ?? 'No fue posible cargar las tiendas.');
+            return [];
+        } finally {
+            setLoadingStores(false);
+        }
+    }, [appInfo.company_id, userConfig]);
+
+    const getBusinesses = useCallback(async () => {
+        setLoadingBusinesses(true);
+        setBussinesLoadError('');
+        try {
+            const businessAccess = userConfig?.access?.bussines;
+            const allowedBussines = businessAccess?.overAll === true
+                ? undefined
+                : businessAccess
+                    ? (Array.isArray(businessAccess.enabled) ? businessAccess.enabled : [])
+                    : undefined;
+            const response = await postInfo('/getBussines', {
+                company_id: appInfo.company_id,
+                allowedBussines,
+            });
+            if (!response?.[0]) throw new Error('No fue posible consultar los negocios disponibles.');
+
+            const options = (response[1] ?? []).map(business => ({
+                value: business.id,
+                text: business.name,
+                selectedText: business.name,
+            }));
+            setBusinesses(options);
+            if (!options.length) setBussinesLoadError('No tienes negocios disponibles para esta compañía.');
+            return options;
+        } catch (error) {
+            setBusinesses([]);
+            setBussinesLoadError(error?.message ?? 'No fue posible cargar los negocios.');
+            return [];
+        } finally {
+            setLoadingBusinesses(false);
+        }
+    }, [appInfo.company_id, userConfig]);
+
+    const getConcepts = useCallback(async () => {
+        setLoadingConcepts(true);
+        setConceptLoadError('');
+        try {
+            const conceptAccess = userConfig?.access?.sections?.concepts;
+            const allowedConcepts = conceptAccess?.overAll === true
+                ? undefined
+                : conceptAccess
+                    ? (Array.isArray(conceptAccess.enabled) ? conceptAccess.enabled : [])
+                    : undefined;
+            const response = await postInfo('/getConcepts', {
+                company_id: appInfo.company_id,
+                allowedConcepts,
+            });
+            if (!response?.[0]) throw new Error('No fue posible consultar los conceptos disponibles.');
+
+            const options = (response[1] ?? []).map(concept => ({
+                value: concept.id,
+                text: `SGA#${concept.id} ${concept.name}`,
+                selectedText: concept.name,
+            }));
+            setConcepts(options);
+            if (!options.length) setConceptLoadError('No hay conceptos disponibles para esta compañía.');
+            return options;
+        } catch (error) {
+            setConcepts([]);
+            setConceptLoadError(error?.message ?? 'No fue posible cargar los conceptos.');
+            return [];
+        } finally {
+            setLoadingConcepts(false);
+        }
+    }, [appInfo.company_id, userConfig]);
+
     const getTemplates = useCallback(async () => {
         const response = await postInfo('/contability/accounting-adjustment-templates/list', {
             company_id: appInfo.company_id,
@@ -127,11 +242,14 @@ export function FormAccountingAdjustment({ reloadFun }) {
     }, [appInfo.company_id]);
 
     const loadRequirements = useCallback(async () => {
-        const [accountResult, thirdPartyResult, costCenterResult, templateResult] = await Promise.allSettled([
+        const [accountResult, thirdPartyResult, costCenterResult, templateResult, conceptResult] = await Promise.allSettled([
             getAccounts(),
             getThirdParties(),
             postInfo('/getCostCenters', { company_id: appInfo.company_id }),
             getTemplates(),
+            getConcepts(),
+            getStores(),
+            getBusinesses(),
         ]);
 
         const costCenterResponse = costCenterResult.status === 'fulfilled' ? costCenterResult.value : null;
@@ -142,10 +260,13 @@ export function FormAccountingAdjustment({ reloadFun }) {
 
         const accountOptionsLoaded = accountResult.status === 'fulfilled' ? accountResult.value : [];
         const thirdPartyOptionsLoaded = thirdPartyResult.status === 'fulfilled' ? thirdPartyResult.value : [];
+        if (conceptResult.status === 'fulfilled' && conceptResult.value.length === 1) {
+            setConceptId(String(conceptResult.value[0].value));
+        }
         if (!accountOptionsLoaded.length || !thirdPartyOptionsLoaded.length) {
             setMessage('No fue posible cargar las cuentas o terceros. Verifica la configuración de la compañía.');
         }
-    }, [appInfo.company_id, getAccounts, getTemplates, getThirdParties]);
+    }, [appInfo.company_id, getAccounts, getBusinesses, getConcepts, getStores, getTemplates, getThirdParties]);
 
     useEffect(() => {
         loadRequirements();
@@ -153,6 +274,9 @@ export function FormAccountingAdjustment({ reloadFun }) {
 
     const payload = () => ({
         company_id: appInfo.company_id,
+        store_id: storeId,
+        bussines_id: bussinesId,
+        concept_id: conceptId,
         doc_date: docDate,
         description,
         attached,
@@ -170,6 +294,19 @@ export function FormAccountingAdjustment({ reloadFun }) {
 
     const save = async event => {
         event.preventDefault();
+
+        if (!storeId) {
+            setStoreError('Selecciona la tienda del comprobante.');
+            return;
+        }
+        if (!bussinesId) {
+            setBussinesError('Selecciona el negocio del comprobante.');
+            return;
+        }
+        if (!conceptId) {
+            setConceptError('Selecciona el concepto del comprobante.');
+            return;
+        }
 
         if (!canSave) {
             setMessage('Completa al menos dos líneas y verifica que débitos y créditos sean iguales.');
@@ -318,6 +455,60 @@ export function FormAccountingAdjustment({ reloadFun }) {
                         disabled
                     />
                     <FormInput title="Fecha de creación" type="date" value={createdDate} disabled />
+                    <div className="formAccountingAdjustmentStore">
+                        <SearchinList
+                            title="Tienda"
+                            placeHolder={loadingStores ? 'Cargando tiendas…' : 'Seleccione la tienda'}
+                            list={stores}
+                            value={storeId}
+                            action={value => {
+                                setStoreId(value);
+                                setStoreError('');
+                            }}
+                            disabled={loadingStores || saving || stores.length === 0}
+                        />
+                        {(storeError || storeLoadError) && (
+                            <span className="formAccountingAdjustmentStoreError" role="alert">
+                                {storeError || storeLoadError}
+                            </span>
+                        )}
+                    </div>
+                    <div className="formAccountingAdjustmentBussines">
+                        <SearchinList
+                            title="Negocio"
+                            placeHolder={loadingBusinesses ? 'Cargando negocios…' : 'Seleccione el negocio'}
+                            list={businesses}
+                            value={bussinesId}
+                            action={value => {
+                                setBussinesId(value);
+                                setBussinesError('');
+                            }}
+                            disabled={loadingBusinesses || saving || businesses.length === 0}
+                        />
+                        {(bussinesError || bussinesLoadError) && (
+                            <span className="formAccountingAdjustmentStoreError" role="alert">
+                                {bussinesError || bussinesLoadError}
+                            </span>
+                        )}
+                    </div>
+                    <div className="formAccountingAdjustmentConcept">
+                        <SearchinList
+                            title="Concepto"
+                            placeHolder={loadingConcepts ? 'Cargando conceptos…' : 'Seleccione el concepto'}
+                            list={concepts}
+                            value={conceptId}
+                            action={value => {
+                                setConceptId(value);
+                                setConceptError('');
+                            }}
+                            disabled={loadingConcepts || saving || concepts.length === 0}
+                        />
+                        {(conceptError || conceptLoadError) && (
+                            <span className="formAccountingAdjustmentStoreError" role="alert">
+                                {conceptError || conceptLoadError}
+                            </span>
+                        )}
+                    </div>
                     <ButtonDownload
                             info={downloadRows}
                             columns={exportColumns}
@@ -333,7 +524,10 @@ export function FormAccountingAdjustment({ reloadFun }) {
                         />
                 </div>
 
-                {message && <p className="formAccountingAdjustmentMessage" role="alert">{message}</p>}
+                {message && <p className="formAccountingAdjustmentMessage" role="alert">
+                    <i className="bi bi-chat"/>
+                    {message}
+                </p>}
 
                 <AccountAjustemBlockItems
                     lines={lines}
@@ -368,22 +562,6 @@ export function FormAccountingAdjustment({ reloadFun }) {
                             multiple
                             placeholder="Adjuntar uno o varios soportes"
                         />
-                        <ul>
-                            {attached.map((file, index) => (
-                                <li key={`${file.url || file}-${index}`}>
-                                    <a href={file.url || file} target="_blank" rel="noreferrer">
-                                        Soporte {index + 1}
-                                    </a>
-                                    <FormButton
-                                        type="button"
-                                        negative
-                                        className="formAccountingAdjustmentRemoveAttachment"
-                                        text="Quitar"
-                                        onClick={() => setAttached(current => current.filter((_, fileIndex) => fileIndex !== index))}
-                                    />
-                                </li>
-                            ))}
-                        </ul>
                     </div>
                 </section>
 

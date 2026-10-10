@@ -36,7 +36,10 @@ export const listTemplates = async (req, res, next) => {
 export const saveTemplate = async (req, res, next) => {
     try {
         if (!sameCompany(req)) return forbidden(res);
-        const voucher = validateAccountingAdjustment({ ...req.body, doc_date: '2000-01-01' });
+        const voucher = validateAccountingAdjustment(
+            { ...req.body, doc_date: '2000-01-01' },
+            { requireHeaderCostCenter: false, requireConcept: false },
+        );
         const name = String(req.body.name ?? '').trim();
         if (!name || name.length > 120) return res.status(400).json({ message: 'El nombre de la plantilla es obligatorio y máximo de 120 caracteres.' });
         const result = await queryDataBase(`INSERT INTO "Ecosystem".accounting_adjustment_templates

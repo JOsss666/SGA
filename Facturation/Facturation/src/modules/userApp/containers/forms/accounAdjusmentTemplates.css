@@ -140,6 +140,11 @@
     cursor: pointer;
 }
 
+.accounAdjusmentTemplates .accounAdjusmentTemplatesDelete i{
+    font-size: clamp(2px,2vh,20px);
+    color: var(--mainText);
+}
+
 .accounAdjusmentTemplates .accounAdjusmentTemplatesDelete:hover {
     background: var(--iconHover);
     color: var(--mainText);
