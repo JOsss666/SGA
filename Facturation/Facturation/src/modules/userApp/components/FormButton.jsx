@@ -1,9 +1,22 @@
 
 import './FormButton.css'
 
-export function FormButton({disabled,text,children,onClick,loading,negative, className, type, ariaLabel, ariaExpanded}){
+export function FormButton({
+        disabled,
+        text,
+        children,
+        onClick,
+        loading,
+        negative,
+        className,
+        type,
+        ariaLabel,
+        ariaExpanded,
+        title
+    }){
+
     return(
-        <button type={type} aria-label={ariaLabel} aria-expanded={ariaExpanded} disabled={disabled} className={`FormButton ${negative? "negativeButton":""} ${className}`} onClick={onClick}>
+        <button title={title} type={type} aria-label={ariaLabel} aria-expanded={ariaExpanded} disabled={disabled} className={`FormButton ${negative? "negativeButton":""} ${className}`} onClick={onClick}>
             {text}
             {!loading && children}
             {loading && (
