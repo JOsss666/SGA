@@ -52,9 +52,56 @@ export function ProductLinkFiscalConditionsCard({
     const [loading, setLoading] = useState(false);
     const [products, setProducts] = useState([]);
     const [relationsByProduct, setRelationsByProduct] = useState({});
-    const [selectedProducts, setSelectedProducts] = useState([]);
-    const [selectedRelations, setSelectedRelations] = useState(value);
-    const [referencesByProduct, setReferencesByProduct] = useState({});
+    const selectedRelations = value;
+
+    const selectedProducts = useMemo(() => {
+        const productsById = new Map();
+        associatedProducts.forEach((association) => {
+            const productId = association.product_id ?? association.id;
+            if (productId == null) return;
+
+            productsById.set(String(productId), {
+                ...association,
+                id:productId,
+                name:association.product_name ?? association.name ?? `Producto ${productId}`,
+                code:association.product_code ?? association.code ?? '',
+                img:association.product_img ?? association.img ?? ''
+            });
+        });
+
+        value.forEach((relation) => {
+            const productId = relation.product_id;
+            if (productId == null || productsById.has(String(productId))) return;
+
+            productsById.set(String(productId), {
+                id:productId,
+                name:relation.product_name ?? `Producto ${productId}`,
+                code:relation.product_code ?? '',
+                img:relation.product_img ?? ''
+            });
+        });
+
+        return [...productsById.values()];
+    }, [associatedProducts, value]);
+
+    const referencesByProduct = useMemo(() => {
+        const references = associatedProducts.reduce((result, association) => {
+            const productId = association.product_id ?? association.id;
+            const reference = association.third_party_reference ?? association.thirdPartyReference;
+            if (productId != null && reference != null) result[productId] = reference;
+            return result;
+        }, {});
+
+        value.forEach((relation) => {
+            const productId = relation.product_id;
+            const reference = relation.third_party_reference ?? relation.thirdPartyReference;
+            if (productId != null && reference && !references[productId]) {
+                references[productId] = reference;
+            }
+        });
+
+        return references;
+    }, [associatedProducts, value]);
 
     const referenceLabel = info?.type === 'client'
         ? 'Referencia cliente'
@@ -116,55 +163,6 @@ export function ProductLinkFiscalConditionsCard({
         }
     };
 
-    useEffect(() => {
-        setSelectedRelations(value);
-    }, [value]);
-
-    useEffect(() => {
-        const productsById = new Map();
-        associatedProducts.forEach((association) => {
-            const productId = association.product_id ?? association.id;
-            if (productId == null) return;
-
-            productsById.set(String(productId), {
-                ...association,
-                id:productId,
-                name:association.product_name ?? association.name ?? `Producto ${productId}`,
-                code:association.product_code ?? association.code ?? '',
-                img:association.product_img ?? association.img ?? ''
-            });
-        });
-
-        value.forEach((relation) => {
-            const productId = relation.product_id;
-            if (productId == null || productsById.has(String(productId))) return;
-
-            productsById.set(String(productId), {
-                id:productId,
-                name:relation.product_name ?? `Producto ${productId}`,
-                code:relation.product_code ?? '',
-                img:relation.product_img ?? ''
-            });
-        });
-
-        setSelectedProducts([...productsById.values()].map((relationProduct) => (
-            relationProduct
-        )));
-        setReferencesByProduct(value.reduce((references, relation) => {
-            const productId = relation.product_id;
-            const reference = relation.third_party_reference ?? relation.thirdPartyReference;
-            if (productId != null && reference && !references[productId]) {
-                references[productId] = reference;
-            }
-            return references;
-        }, associatedProducts.reduce((references, association) => {
-            const productId = association.product_id ?? association.id;
-            const reference = association.third_party_reference ?? association.thirdPartyReference;
-            if (productId != null && reference != null) references[productId] = reference;
-            return references;
-        }, {})));
-    }, [associatedProducts, value]);
-
     const addProduct = (product) => {
         if (!product?.id) return;
         if (selectedProducts.some((item) => String(item.id) === String(product.id))) return;
@@ -181,42 +179,38 @@ export function ProductLinkFiscalConditionsCard({
         }));
 
         const nextProducts = [...selectedProducts, product];
-        setSelectedProducts(nextProducts);
         productsAction?.(nextProducts);
-        setReferencesByProduct((prev) => ({...prev, [product.id]:prev[product.id] ?? ''}));
-        setSelectedRelations((prev) => {
-            const existing = new Set(prev.map((relation) => (
-                `${relation.product_id}-${relation.operation_type}-${relation.tax_role}-${relation.tax_id}`
-            )));
-            const relationsToAdd = defaultRelations.filter((relation) => (
-                !existing.has(`${relation.product_id}-${relation.operation_type}-${relation.tax_role}-${relation.tax_id}`)
-            ));
-            return [...prev, ...relationsToAdd];
-        });
+        const existing = new Set(selectedRelations.map((relation) => (
+            `${relation.product_id}-${relation.operation_type}-${relation.tax_role}-${relation.tax_id}`
+        )));
+        const relationsToAdd = defaultRelations.filter((relation) => (
+            !existing.has(`${relation.product_id}-${relation.operation_type}-${relation.tax_role}-${relation.tax_id}`)
+        ));
+        if (relationsToAdd.length > 0) action?.([...selectedRelations, ...relationsToAdd]);
     };
 
     const removeProduct = (productId) => {
         const nextProducts = selectedProducts.filter((product) => String(product.id) !== String(productId));
-        setSelectedProducts(nextProducts);
         productsAction?.(nextProducts);
-        setSelectedRelations((prev) => prev.filter((relation) => String(relation.product_id) !== String(productId)));
-        setReferencesByProduct((prev) => {
-            const next = {...prev};
-            delete next[productId];
-            return next;
-        });
+        action?.(selectedRelations.filter((relation) => String(relation.product_id) !== String(productId)));
     };
 
     const updateProductReference = (productId, reference) => {
-        setReferencesByProduct((prev) => ({...prev, [productId]:reference}));
-        const nextProducts = selectedProducts.map((product) => (
-            String(product.id) === String(productId)
-                ? {...product, third_party_reference:reference}
-                : product
-        ));
-        setSelectedProducts(nextProducts);
+        const nextProducts = associatedProducts.some((product) => (
+            String(product.product_id ?? product.id) === String(productId)
+        ))
+            ? associatedProducts.map((product) => (
+                String(product.product_id ?? product.id) === String(productId)
+                    ? {...product, third_party_reference:reference}
+                    : product
+            ))
+            : [...associatedProducts, {
+                ...selectedProducts.find((product) => String(product.id) === String(productId)),
+                id:productId,
+                third_party_reference:reference
+            }];
         productsAction?.(nextProducts);
-        setSelectedRelations((prev) => prev.map((relation) => (
+        action?.(selectedRelations.map((relation) => (
             relation.product_id === productId
                 ? {...relation, third_party_reference:reference}
                 : relation
@@ -225,30 +219,29 @@ export function ProductLinkFiscalConditionsCard({
 
     const toggleRelation = (relation) => {
         const relationKey = `${relation.product_id}-${relation.operation_type}-${relation.tax_role}-${relation.tax_id}`;
-        setSelectedRelations((prev) => {
-            const exists = prev.some((item) => (
+        const exists = selectedRelations.some((item) => (
                 `${item.product_id}-${item.operation_type}-${item.tax_role}-${item.tax_id}` === relationKey
             ));
 
-            if (exists) {
-                return prev.filter((item) => (
+        if (exists) {
+            action?.(selectedRelations.filter((item) => (
                     `${item.product_id}-${item.operation_type}-${item.tax_role}-${item.tax_id}` !== relationKey
-                ));
-            }
+                )));
+            return;
+        }
 
-            return [
-                ...prev,
-                {
-                    company_id: companyId,
-                    product_id: relation.product_id,
-                    tax_id: relation.tax_id,
-                    operation_type: relation.operation_type,
-                    tax_role: relation.tax_role,
-                    priority: prev.length,
-                    third_party_reference: referencesByProduct[relation.product_id] ?? ''
-                }
-            ];
-        });
+        action?.([
+            ...selectedRelations,
+            {
+                company_id: companyId,
+                product_id: relation.product_id,
+                tax_id: relation.tax_id,
+                operation_type: relation.operation_type,
+                tax_role: relation.tax_role,
+                priority: selectedRelations.length,
+                third_party_reference: referencesByProduct[relation.product_id] ?? ''
+            }
+        ]);
     };
 
     const renderOperation = (product, operationType) => {
@@ -325,10 +318,6 @@ export function ProductLinkFiscalConditionsCard({
     useEffect(() => {
         getRequiredData();
     }, [companyId, readOnly]);
-
-    useEffect(() => {
-        action?.(selectedRelations);
-    }, [selectedRelations]);
 
     return (
         <div className="ProductLinkFiscalConditionsCard">
