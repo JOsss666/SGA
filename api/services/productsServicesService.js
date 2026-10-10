@@ -780,6 +780,40 @@ productsServicesService.updateThirdPartyProductAssociation = async (info) => {
 };
 
 /**
+ * Lista las asociaciones activas de productos de un tercero, incluso cuando
+ * todavía no tienen impuestos o retenciones configurados.
+ */
+productsServicesService.getThirdPartyProductAssociations = async (info) => {
+    const companyId = parsePositiveId(info.company_id, 'company_id');
+    const thirdPartyId = parsePositiveId(info.third_party_id ?? info.thirdParty_id, 'third_party_id');
+
+    return useDataBase(`
+        SELECT
+            tpp.id AS association_id,
+            tpp.company_id,
+            tpp.third_party_id,
+            tpp.product_id,
+            tpp.third_party_reference,
+            tpp.is_active,
+            ps.name AS product_name,
+            ps.code AS product_code,
+            ps.img AS product_img,
+            ps.type AS product_type
+        FROM "Fiscal".third_party_products tpp
+        JOIN "Ecosystem".thirdparties tp
+            ON tp.id = tpp.third_party_id
+           AND tp.company_id = tpp.company_id
+        JOIN "Inventory"."products&services" ps
+            ON ps.id = tpp.product_id
+           AND ps.company_id = tpp.company_id
+        WHERE tpp.company_id = $1
+          AND tpp.third_party_id = $2
+          AND tpp.is_active = true
+        ORDER BY ps.name ASC, ps.id ASC;
+    `, [companyId, thirdPartyId], 1);
+};
+
+/**
  * Agrega o modifica impuestos y retenciones de un producto para un tercero.
  * Para sincronizar una lista completa, replace:true desactiva lógicamente las
  * relaciones activas omitidas; nunca se eliminan físicamente.

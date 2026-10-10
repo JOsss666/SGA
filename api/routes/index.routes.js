@@ -245,6 +245,16 @@ router.post('/inventory/createThirdPartyProductTaxRelation',inventoryController.
 router.post('/inventory/updateThirdPartyProductTaxRelation',inventoryController.updateThirdPartyProductTaxRelation);
 
 router.post(
+    '/inventory/getThirdPartyProductAssociations',
+    express.json({ limit: '32kb', strict: true }),
+    requireTrustedOrigin,
+    authenticateSession,
+    requireCompanyAccess,
+    inventoryController.getThirdPartyProductAssociations,
+    sessionErrorHandler
+);
+
+router.post(
     '/inventory/updateThirdPartyProductAssociation',
     express.json({ limit: '128kb', strict: true }),
     requireTrustedOrigin,

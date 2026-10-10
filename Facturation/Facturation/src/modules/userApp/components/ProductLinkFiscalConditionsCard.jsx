@@ -44,7 +44,9 @@ export function ProductLinkFiscalConditionsCard({
     disabled,
     readOnly = false,
     value = [],
-    action
+    associatedProducts = [],
+    action,
+    productsAction
 }) {
     const [open, setOpen] = useState(readOnly);
     const [loading, setLoading] = useState(false);
@@ -115,9 +117,24 @@ export function ProductLinkFiscalConditionsCard({
     };
 
     useEffect(() => {
-        if (!readOnly) return;
+        setSelectedRelations(value);
+    }, [value]);
 
+    useEffect(() => {
         const productsById = new Map();
+        associatedProducts.forEach((association) => {
+            const productId = association.product_id ?? association.id;
+            if (productId == null) return;
+
+            productsById.set(String(productId), {
+                ...association,
+                id:productId,
+                name:association.product_name ?? association.name ?? `Producto ${productId}`,
+                code:association.product_code ?? association.code ?? '',
+                img:association.product_img ?? association.img ?? ''
+            });
+        });
+
         value.forEach((relation) => {
             const productId = relation.product_id;
             if (productId == null || productsById.has(String(productId))) return;
@@ -131,8 +148,7 @@ export function ProductLinkFiscalConditionsCard({
         });
 
         setSelectedProducts([...productsById.values()].map((relationProduct) => (
-            products.find(product => String(product.id) === String(relationProduct.id))
-                ?? relationProduct
+            relationProduct
         )));
         setReferencesByProduct(value.reduce((references, relation) => {
             const productId = relation.product_id;
@@ -141,12 +157,17 @@ export function ProductLinkFiscalConditionsCard({
                 references[productId] = reference;
             }
             return references;
-        }, {}));
-    }, [readOnly, value, products]);
+        }, associatedProducts.reduce((references, association) => {
+            const productId = association.product_id ?? association.id;
+            const reference = association.third_party_reference ?? association.thirdPartyReference;
+            if (productId != null && reference != null) references[productId] = reference;
+            return references;
+        }, {})));
+    }, [associatedProducts, value]);
 
     const addProduct = (product) => {
         if (!product?.id) return;
-        if (selectedProducts.some((item) => item.id === product.id)) return;
+        if (selectedProducts.some((item) => String(item.id) === String(product.id))) return;
 
         const productRelations = relationsByProduct[product.id] ?? [];
         const defaultRelations = productRelations.map((relation, index) => ({
@@ -159,7 +180,9 @@ export function ProductLinkFiscalConditionsCard({
             third_party_reference: referencesByProduct[product.id] ?? ''
         }));
 
-        setSelectedProducts((prev) => [...prev, product]);
+        const nextProducts = [...selectedProducts, product];
+        setSelectedProducts(nextProducts);
+        productsAction?.(nextProducts);
         setReferencesByProduct((prev) => ({...prev, [product.id]:prev[product.id] ?? ''}));
         setSelectedRelations((prev) => {
             const existing = new Set(prev.map((relation) => (
@@ -173,8 +196,10 @@ export function ProductLinkFiscalConditionsCard({
     };
 
     const removeProduct = (productId) => {
-        setSelectedProducts((prev) => prev.filter((product) => product.id !== productId));
-        setSelectedRelations((prev) => prev.filter((relation) => relation.product_id !== productId));
+        const nextProducts = selectedProducts.filter((product) => String(product.id) !== String(productId));
+        setSelectedProducts(nextProducts);
+        productsAction?.(nextProducts);
+        setSelectedRelations((prev) => prev.filter((relation) => String(relation.product_id) !== String(productId)));
         setReferencesByProduct((prev) => {
             const next = {...prev};
             delete next[productId];
@@ -184,6 +209,13 @@ export function ProductLinkFiscalConditionsCard({
 
     const updateProductReference = (productId, reference) => {
         setReferencesByProduct((prev) => ({...prev, [productId]:reference}));
+        const nextProducts = selectedProducts.map((product) => (
+            String(product.id) === String(productId)
+                ? {...product, third_party_reference:reference}
+                : product
+        ));
+        setSelectedProducts(nextProducts);
+        productsAction?.(nextProducts);
         setSelectedRelations((prev) => prev.map((relation) => (
             relation.product_id === productId
                 ? {...relation, third_party_reference:reference}
@@ -274,7 +306,7 @@ export function ProductLinkFiscalConditionsCard({
                                     <label className="relationOption" key={relationKey}>
                                         <input
                                             type="checkbox"
-                                            disabled={disabled}
+                                            disabled={disabled || loading}
                                             checked={selectedRelationsKeys.has(relationKey)}
                                             onChange={() => toggleRelation(relation)}
                                         />
@@ -346,7 +378,8 @@ export function ProductLinkFiscalConditionsCard({
                                 {!readOnly && <button
                                     type="button"
                                     title={`Quitar ${product.name}`}
-                                    disabled={disabled}
+                                    aria-label={`Quitar ${product.name} de los productos asociados`}
+                                    disabled={disabled || loading}
                                     onClick={() => removeProduct(product.id)}
                                 >
                                     <i className="fa-solid fa-trash" />
@@ -366,7 +399,7 @@ export function ProductLinkFiscalConditionsCard({
                                 <FormInput
                                     title={referenceLabel}
                                     placeholder={'Como el proveedor llama este item, puede ser util para completar con la IA y demas.'}
-                                    disabled={disabled}
+                                    disabled={disabled || loading}
                                     textArea={true}
                                     value={referencesByProduct[product.id] ?? ''}
                                     action={(reference) => updateProductReference(product.id,reference)}
