@@ -107,22 +107,39 @@ export function SearchinList({
             return;
         }
 
+        // Reduce un valor (primitivo u objeto) a su identificador comparable.
+        // Se contemplan las llaves de id más usadas en SGA para que el match funcione
+        // tanto si recibes el id suelto como el registro completo.
         const comparableValue = currentValue => {
             if(currentValue && typeof currentValue === 'object'){
                 return currentValue.id
                     ?? currentValue.thirdParty_id
                     ?? currentValue.product_id
+                    ?? currentValue.store_id
+                    ?? currentValue.bussines_id
+                    ?? currentValue.costCenter_id
+                    ?? currentValue.concept_id
+                    ?? currentValue.cashBox_id
                     ?? currentValue.value;
             }
             return currentValue;
         };
 
+        const target = String(comparableValue(selectedValue));
         const selectedElement = list.find(element => {
             const optionValue = element.value !== undefined ? element.value : element.text;
-            return String(comparableValue(optionValue)) === String(comparableValue(selectedValue));
+            return String(comparableValue(optionValue)) === target;
         });
 
-        setInputValue(selectedElement?.text ?? defaultValue.text ?? '');
+        // Fallback de texto cuando la opción no está en la lista (lista aún sin cargar
+        // o filtrada por accesos): se usa el texto explícito de defaultValue o, si el
+        // value es el propio registro, su nombre/etiqueta. Así, en edición, el campo no
+        // se ve vacío cuando la opción no aparece en la lista.
+        const fallbackText = (selectedValue && typeof selectedValue === 'object')
+            ? (selectedValue.text ?? selectedValue.name ?? selectedValue.label ?? '')
+            : '';
+
+        setInputValue(selectedElement?.text ?? defaultValue.text ?? fallbackText);
     }, [value, selectedOption, defaultValue.value, defaultValue.text, list, noActVal]);
 
     return(
