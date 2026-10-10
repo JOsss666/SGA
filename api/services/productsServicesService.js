@@ -325,11 +325,11 @@ productsServicesService.update = async (info) => {
                 units = COALESCE($4, units),
                 entry_concept = COALESCE($5, entry_concept),
                 exit_concept = COALESCE($6, exit_concept),
-                taxed = COALESCE($7, taxed),
+                taxed = COALESCE($7::boolean, taxed),
                 tax_id = CASE
-                    WHEN $7 = false THEN NULL
-                    WHEN $8 IS NULL THEN tax_id
-                    ELSE $8
+                    WHEN $7::boolean = false THEN NULL
+                    WHEN $8::bigint IS NULL THEN tax_id
+                    ELSE $8::bigint
                 END,
                 img = COALESCE($9, img),
                 type = COALESCE($10, type),
