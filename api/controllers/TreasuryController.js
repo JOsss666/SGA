@@ -132,6 +132,113 @@ treasuryController.getThirdPartyPortfolio = (req,res)=>{
     })
 }
 
+treasuryController.getThirdPartyPayables = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let values = [];
+        let whereClauses = [];
+
+        whereClauses.push(`"Treasury".accounts_payable.company_id = $1`);
+        values.push(info.company_id);
+
+        if (info.thirdParty_id != undefined) {
+            whereClauses.push(`$${values.length + 1} = "Ecosystem".documents."thirdParty_id"`);
+            values.push(info.thirdParty_id);
+        }
+
+        if (info.store_id != undefined) {
+            whereClauses.push(`$${values.length + 1} = ANY("Ecosystem".documents.store_id)`);
+            values.push(info.store_id);
+        }
+
+        if(info.id != undefined){
+            whereClauses.push(`"Treasury".accounts_payable.id = $${values.length +1}`);
+            values.push(info.id)
+        }
+
+        // Dates Filters
+            if (info.start_date) {
+                values.push(info.start_date);
+                whereClauses.push(
+                    `"Treasury".accounts_payable.created_at >= $${values.length}`
+                );
+            }
+
+            if (info.end_date) {
+                values.push(info.end_date);
+                whereClauses.push(
+                    `"Treasury".accounts_payable.created_at < $${values.length}::date + INTERVAL '1 day'`
+                );
+            }
+
+
+        const whereQuery = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(" AND ")}`
+            : "";
+            let sentence = `
+                SELECT
+                    "Treasury".accounts_payable.company_id,
+                    "Treasury".accounts_payable."thirdParty_id",
+                    "Treasury".accounts_payable.document_id,
+                    "Treasury".accounts_payable.id,
+                    "Treasury".accounts_payable.total,
+                    "Treasury".accounts_payable.paid_amount,
+                    "Treasury".accounts_payable.pending_amount,
+                    "Treasury".accounts_payable.due_date,
+                    "Treasury".accounts_payable.created_at,
+                    "Treasury".accounts_payable.updated_at,
+                    "Ecosystem".docs_instances.instance_id,
+                    "Ecosystem".documents.store_id,
+                    "Ecosystem".documents.id AS doc_id,
+                    "Ecosystem".documents."thirdParty_id",
+                    "Ecosystem".documents.document_type AS doc_type,
+                    "Ecosystem".documents."ownSerial",
+                    "Ecosystem".stores.name AS store_name,
+                    "Process".process_instance.process_id,
+                    "Process".process_instance."ownSerial" AS instance_serial,
+                    "Process".processes.code AS process_code
+                FROM
+                    "Treasury".accounts_payable
+                LEFT JOIN
+                    "Ecosystem".documents
+                ON
+                    "Treasury".accounts_payable.document_id = "Ecosystem".documents.id
+                LEFT JOIN
+                    "Ecosystem".stores
+                ON
+                    "Ecosystem".documents.store_id = "Ecosystem".stores.id
+                LEFT JOIN
+                    "Ecosystem".docs_instances
+                ON
+                    "Ecosystem".documents.id = "Ecosystem".docs_instances.doc_id
+                LEFT JOIN
+                    "Process".process_instance
+                ON
+                    "Ecosystem".docs_instances.instance_id = "Process".process_instance.id
+                LEFT JOIN
+                    "Process".processes
+                ON
+                    "Process".process_instance.process_id = "Process".processes.id
+                ${whereQuery}
+                ORDER BY
+                    "Treasury".accounts_payable.created_at DESC
+                ;
+            `;
+
+        let consulta = await useDataBase(sentence,values,1);
+        res.writeHead(200,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(consulta));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 treasuryController.newPendingAccount = async(info,element)=>{
     let res = {}
     let senInsBreafcase = `

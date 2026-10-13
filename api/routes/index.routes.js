@@ -389,7 +389,9 @@ router.post('/treasury/getCompanyAdvances',treasuryController.getCompanyAdvances
 
 router.post('/treasury/getTreasury',controller.getAccounts); //PENDIENTE IMPLEMENTAR 
 
-router.post('/treasury/getThirdPartyPortfolio',treasuryController.getThirdPartyPortfolio); //PENDIENTE IMPLEMENTAR 
+router.post('/treasury/getThirdPartyPortfolio',treasuryController.getThirdPartyPortfolio); //PENDIENTE IMPLEMENTAR
+
+router.post('/treasury/getThirdPartyPayables',treasuryController.getThirdPartyPayables);
 
 // SGA Facturation
 
