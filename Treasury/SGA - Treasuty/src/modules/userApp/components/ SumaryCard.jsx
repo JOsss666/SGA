@@ -3,7 +3,7 @@ import './SumaryCard.css'
 
 export function SumaryCard({title,desc,value,percent,onClick,currency}){
     return(
-        <div className="SumaryCard">
+        <div className="SumaryCard" onClick={onClick}>
             <div className="head">
                 <h6>{title}</h6>
                 <span>{desc}</span>

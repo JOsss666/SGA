@@ -577,7 +577,7 @@ export function FormNewProduct({info,update,reloadFun,forUpdate=false,productId}
                             </FileInput>
                         </div>
                         {(forUpdate || info.type == undefined) && (
-                            <SearchinList title={'Tipo de producto o servicio'} placeHolder={'Producto'} action={setType_product} list={productTypeOptions} defaultValue={getSelectedOption(productTypeOptions,type_product)} disabled={disabled}/>
+                            <SearchinList title={'Tipo de producto o servicio'} placeHolder={'Producto'} action={setType_product} list={productTypeOptions} value={type_product} defaultValue={getSelectedOption(productTypeOptions,type_product)} disabled={disabled}/>
                         )}
                         <FormInput title={'Código'} action={setCode} placeholder={'SKU#....'} value={code} disabled={disabled}/>
                         <FormInput title={'Nombre'} action={setName} placeholder={'Nombre de tu producto'} value={name} disabled={disabled}/>
@@ -588,7 +588,7 @@ export function FormNewProduct({info,update,reloadFun,forUpdate=false,productId}
                             <NewElementSelect title={'Crear nueva categoría'} onClick={()=>{
                                 popInAlert(<FormNewCategory/>)
                             }}/>
-                        } disabled={disabled} defaultValue={getSelectedOption(categories,category_id)}/>
+                        } disabled={disabled} value={category_id} defaultValue={getSelectedOption(categories,category_id)}/>
                         <FormInput title={'Descripción'} action={setDescription} value={description} placeholder={'Descripción del producto'} disabled={disabled} textArea={true}/>
                     </section>
                 )}
@@ -598,7 +598,7 @@ export function FormNewProduct({info,update,reloadFun,forUpdate=false,productId}
                         <div className="tagSection">
                             <TagIndicator title={'📦 Parametrización Inventario'} type={'suspended'}/>
                         </div>
-                        <SearchinList title={'Unidades de medida'} action={setUnits} placeHolder={'Seleccione unidad'} list={meassureUnits} disabled={disabled} defaultValue={getSelectedOption(meassureUnits,units)}/>
+                        <SearchinList title={'Unidades de medida'} action={setUnits} placeHolder={'Seleccione unidad'} list={meassureUnits} disabled={disabled} value={units} defaultValue={getSelectedOption(meassureUnits,units)}/>
                         <div className="accessSwitch">
                             <h6>Es Inventariable?</h6>
                             <SwitchOption action={setInventariable} value={inventariable} disabled={disabled}/>
@@ -610,8 +610,8 @@ export function FormNewProduct({info,update,reloadFun,forUpdate=false,productId}
                                 <FormInput title={'Stock maximo'} action={setMaxStock} placeholder={'0 unidades'} value={maxStock} disabled={disabled}/>
                             </>
                         )}
-                        <FormInput title={'Disponible a partir de'} action={setAvailableDate} value={availableDate} type={'date'} disabled={disabled}/>
-                        <FormInput title={'Disponible hasta'} action={setAviableUntil} value={aviableUnitl} type={'date'} disabled={disabled}/>
+                        <FormInput title={'Disponible a partir de'} action={setAvailableDate} value={availableDate ? String(availableDate).slice(0,10) : ''} type={'date'} disabled={disabled}/>
+                        <FormInput title={'Disponible hasta'} action={setAviableUntil} value={aviableUnitl ? String(aviableUnitl).slice(0,10) : ''} type={'date'} required={false} disabled={disabled}/>
                     </section>
                 )}
                 {/* Stage for purchase -- Etapa para configurar la Compra*/}
@@ -620,14 +620,14 @@ export function FormNewProduct({info,update,reloadFun,forUpdate=false,productId}
                         <div className="tagSection">
                             <TagIndicator title={'📑 Parametrización Compras'} type={'suspended'}/>
                         </div>
-                        <SearchinList title={'Proveedor por defecto'} action={setDefaultSupplier} placeHolder={'Seleccione el proveedor'} list={ThirdParties} disabled={disabled} defaultValue={getSelectedOption(ThirdParties,defaultSupplier)}/>
-                        <SearchinList title={'Concepto de compra'} action={setPurchaseConcept} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled} defaultValue={getSelectedOption(concepts,purchaseConcept)}/>
+                        <SearchinList title={'Proveedor por defecto'} action={setDefaultSupplier} placeHolder={'Seleccione el proveedor'} list={ThirdParties} disabled={disabled} value={defaultSupplier} defaultValue={getSelectedOption(ThirdParties,defaultSupplier)}/>
+                        <SearchinList title={'Concepto de compra'} action={setPurchaseConcept} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled} value={purchaseConcept} defaultValue={getSelectedOption(concepts,purchaseConcept)}/>
                         <div className="accessSwitch">
                             <h6>Compra gravada con impuestos</h6>
                             <SwitchOption action={setPurchaseTaxed} value={purchaseTaxed} disabled={disabled}/>
                         </div>
                         {purchaseTaxed && (
-                            <SearchinList title={'Impuesto asociado a la compra'} action={setPurchaseTax_id} placeHolder={'Seleccione el impuesto'} list={purchaseTaxes} disabled={disabled} defaultValue={getSelectedOption(purchaseTaxes,purchaseTax_id)}/>
+                            <SearchinList title={'Impuesto asociado a la compra'} action={setPurchaseTax_id} placeHolder={'Seleccione el impuesto'} list={purchaseTaxes} disabled={disabled} value={purchaseTax_id} defaultValue={getSelectedOption(purchaseTaxes,purchaseTax_id)}/>
                         )}
                         <div className="withholdingsContainer">
                             <SearchinList
@@ -655,13 +655,13 @@ export function FormNewProduct({info,update,reloadFun,forUpdate=false,productId}
                         <div className="tagSection">
                             <TagIndicator title={'💶 Parametrización Ventas'} type={'suspended'}/>
                         </div>
-                        <SearchinList title={'Concepto de venta'} action={setSellConcept} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled} defaultValue={getSelectedOption(concepts,sellConcept)}/>
+                        <SearchinList title={'Concepto de venta'} action={setSellConcept} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled} value={sellConcept} defaultValue={getSelectedOption(concepts,sellConcept)}/>
                         <div className="accessSwitch">
                             <h6>Venta gravada con impuestos</h6>
                             <SwitchOption action={setTaxed} value={taxed} disabled={disabled}/>
                         </div>
                         {taxed && (
-                            <SearchinList title={'Impuesto asociado a la venta'} action={setTax_id} placeHolder={'Seleccione el impuesto'} list={sellTaxes} disabled={disabled} defaultValue={getSelectedOption(sellTaxes,tax_id)}/>
+                            <SearchinList title={'Impuesto asociado a la venta'} action={setTax_id} placeHolder={'Seleccione el impuesto'} list={sellTaxes} disabled={disabled} value={tax_id} defaultValue={getSelectedOption(sellTaxes,tax_id)}/>
                         )}
                         <div className="withholdingsContainer">
                             <SearchinList

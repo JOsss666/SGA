@@ -8,9 +8,10 @@
 }
 
 .SearchinList label{
-    margin-bottom: 1.5vh;
+    margin-bottom: 2vh;
+    padding-left: 2vh;
     font-size: clamp(1px,2.5vh,20px);
-    font-weight: 500;
+    font-weight: 400;
     color: var(--mainText);
 }
 
@@ -23,14 +24,20 @@
 .SearchinList .SlistC input{
     width:100%;
     padding: 1vh 2vh;
-    border-radius: .5vh;
+    border-radius: 1vh;
     border: hidden;
     outline: solid .1vh var(--inputsBorder);
-    box-shadow: 0 .4vh 1vh var(--translucidMenu);
+    box-shadow: 0 0vh 1vh var(--translucidMenu);
     color: var(--descriptionText);
     background-color: var(--inputsBg);
     z-index: 5;
     font-size: clamp(2.2px,2.2vh,22px);
+    transition: .3s;
+}
+
+.SearchinList .SlistC input:focus{
+    color: var(--mainText);
+    outline: solid .2vh #155DFC;
 }
 
 .SearchinList .SlistC .listElementsContainer{
@@ -78,9 +85,9 @@
 }
 
 .SearchinList .SlistC .listElementsContainer li:hover{
-    background-color: var(--iconHover);
+    background-color: #007AFF;
     padding-left: 3vh;
-    color: var(--mainText);
+    color: #fff;
 }
 
 .SearchinList .SlistC .listElementsContainer .focused-item{

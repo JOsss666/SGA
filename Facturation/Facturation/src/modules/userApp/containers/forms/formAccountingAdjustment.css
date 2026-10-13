@@ -1,0 +1,470 @@
+.formAccountingAdjustment {
+    --accountingAdjustmentButtonBg: var(--mainText);
+    --accountingAdjustmentButtonText: var(--bg);
+    display: flex;
+    flex-direction: column;
+    width: min(82vw);
+    height: fit-content;
+    max-height: none;
+    min-width: 0;
+    color: var(--mainText);
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2vh;
+    padding: 1.5vh 0;
+    border-bottom: 0.1vh solid var(--inputsBorder);
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentHeader > div:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5vh;
+    min-width: 0;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentHeaderActions {
+    display: flex;
+    align-items: center;
+    gap: 1vh;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentHeader .BoldTitle {
+    font-weight: 500;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentHeader .formAccountingAdjustmentHeaderActions{
+    display: flex;
+    gap: 1vh;
+    width: fit-content;
+    margin: auto;
+    margin-right: 0;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentHeader .formAccountingAdjustmentHeaderActions span{
+    font-size: clamp(1.8px,1.8vh,18px);
+    color: var(--descriptionText);
+    margin-right: 1vh;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentHeader .formAccountingAdjustmentHeaderActions strong{
+    font-size: clamp(2.2px,2.2vh,22px);
+    color: var(--mainText);
+    font-weight: 500;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentClose {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+}
+
+.formAccountingAdjustment form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+    height: fit-content;
+    overflow: visible;
+    padding: 1.5vh 0.5vh;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta,
+.formAccountingAdjustment .formAccountingAdjustmentBelowTotals,
+.formAccountingAdjustment .formAccountingAdjustmentTemplateActions,
+.formAccountingAdjustment .formAccountingAdjustmentFooter,
+.formAccountingAdjustment .formAccountingAdjustmentActions {
+    display: flex;
+    gap: 1vh;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentTemplateActions{
+    margin: 2vh auto;
+    width: 100%;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentBelowTotals{
+    align-items: stretch;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentBelowTotals .docComplement{
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    margin: 2vh auto;
+    width: 48%;
+    min-height: 15vh;
+    height: auto;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentBelowTotals .docComplement .FacturationFormInput{
+    display: flex;
+    flex: 1;
+    height: 100%;
+    min-height: 0;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentBelowTotals .docComplement .FacturationFormInput .inputContainer{
+    flex: 1;
+    height: 100%;
+    min-height: 0;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentBelowTotals .docComplement .FacturationFormInput textarea{
+    box-sizing: border-box;
+    flex: 1;
+    height: 100%;
+    min-height: 0;
+    resize: none;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentBelowTotals .docComplement .FileInput{
+    flex: 0 0 auto;
+    min-height: 15vh;
+    height: auto;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentBelowTotals .docComplement .FacturationFormInput label{
+    display: none;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta{
+    margin-bottom: 2vh;
+    gap: 1vw;
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta .FacturationFormInput label,
+.formAccountingAdjustment .formAccountingAdjustmentMeta .FacturationSearchinList label {
+    margin-bottom: 1vh;
+    padding: 0;
+    font-size: clamp(1.8px, 1.8vh, 18px);
+    padding-left: 2vh;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta .FacturationFormInput input{
+    color: var(--mainText);
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta > .FacturationFormInput {
+    flex: 0 0 fit-content;
+    width: fit-content;
+    max-width: 100%;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta > .FacturationFormInput input {
+    width: fit-content;
+    min-width: 13ch;
+    max-width: 100%;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta > .FacturationFormInput input:disabled {
+    color: var(--mainText);
+    -webkit-text-fill-color: var(--mainText);
+    opacity: 1;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta > .formAccountingAdjustmentStore {
+    flex: 1 1 15rem;
+    min-width: min(100%, 13rem);
+    max-width: min(100%, 22rem);
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta > .formAccountingAdjustmentBussines {
+    flex: 1 1 15rem;
+    min-width: min(100%, 13rem);
+    max-width: min(100%, 22rem);
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta > .formAccountingAdjustmentConcept {
+    flex: 1 1 15rem;
+    min-width: min(100%, 13rem);
+    max-width: min(100%, 22rem);
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta .formAccountingAdjustmentStore .FacturationSearchinList,
+.formAccountingAdjustment .formAccountingAdjustmentMeta .formAccountingAdjustmentBussines .FacturationSearchinList,
+.formAccountingAdjustment .formAccountingAdjustmentMeta .formAccountingAdjustmentConcept .FacturationSearchinList {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentStoreError {
+    display: block;
+    margin: 0.3rem 0.5rem;
+    color: var(--mainText);
+    font-size: clamp(12px, 1.5vh, 15px);
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMeta .ButtonDownload{
+    width: fit-content;
+    margin: auto;
+    margin-right: 0;
+    position: relative;
+}
+
+.formAccountingAdjustment .FacturationFormInput,
+.formAccountingAdjustment .FacturationSearchinList {
+    min-width: 0;
+}
+
+.formAccountingAdjustment .FacturationFormInput .inputContainer input,
+.formAccountingAdjustment .FacturationFormInput .inputContainer textarea,
+.formAccountingAdjustment .FacturationSearchinList .SlistC input {
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.formAccountingAdjustment .FacturationFormInput .inputContainer textarea {
+    min-height: 8vh;
+    height: 8vh;
+}
+
+
+.formAccountingAdjustment .formAccountingAdjustmentMessage {
+    margin: 0;
+    padding: 1vh;
+    border: 0.1vh solid var(--inputsBorder);
+    color: var(--mainText);
+    background-color: var(--cardHover);
+    border-radius: 1vh;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentMessage i{
+    margin: auto 0;
+    margin-right: 1vh;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentTableToolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 4.5vh;
+    gap: 1vh;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentTableToolbar > strong {
+    font-size: clamp(14px, 1.8vh, 18px);
+    font-weight: 500;
+}
+
+
+.formAccountingAdjustment .FormButton i,
+.formAccountingAdjustment .ButtonDownload i {
+    margin: 0;
+}
+
+.formAccountingAdjustment .ButtonDownload .downloadMenu {
+    height: fit-content;
+    top: 100%;
+    width: 100%;
+    left: 0;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentActions {
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentObservation {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8vh;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentObservation .BoldTitle {
+    font-size: clamp(14px, 1.8vh, 18px);
+    font-weight: 500;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentObservation .FacturationFormInput {
+    min-width: 0;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentObservation .FacturationFormInput .inputContainer textarea,
+.formAccountingAdjustment .formAccountingAdjustmentAttachments .FileInput {
+    box-sizing: border-box;
+    min-height: 14vh;
+    height: 14vh;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentAttachments .FileInput {
+    padding: 2vh;
+    border: none;
+    border-radius: 2vh;
+    box-shadow: none;
+}
+
+
+.formAccountingAdjustment .formAccountingAdjustmentAttachments ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5vh;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentAttachments li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1vh;
+    min-width: 0;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentAttachments .fileInputAddMore {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    min-width: 20vh;
+    min-height: 44px;
+    padding: 0.8vh 1.4vh;
+    border: none;
+    border-radius: 0.6vh;
+    color: var(--accountingAdjustmentButtonText);
+    background: var(--accountingAdjustmentButtonBg);
+    font-size: clamp(12px, 1.55vh, 15px);
+    font-weight: 500;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentAttachments .formAccountingAdjustmentRemoveAttachment {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 10vh;
+    min-height: 44px;
+    padding: 0.7vh 1.2vh;
+    font-size: clamp(12px, 1.5vh, 15px);
+}
+
+.AlertContainer .formAccountingAdjustmentTemplateSave {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5vh;
+    width: min(420px, calc(100vw - 12vh));
+    max-width: 100%;
+    min-width: 0;
+}
+
+.AlertContainer .formAccountingAdjustmentTemplateSave .BoldTitle {
+    margin: 0;
+}
+
+.AlertContainer .formAccountingAdjustmentTemplateSave .FacturationFormInput {
+    min-width: 0;
+}
+
+.AlertContainer .formAccountingAdjustmentTemplateSave .FormButton {
+    align-self: flex-end;
+    min-height: 44px;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentActions .FormButton,
+.formAccountingAdjustment .formAccountingAdjustmentTemplateActions .FormButton {
+    flex: 0 0 auto;
+    width: auto;
+    min-height: 44px;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentTemplates {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    width: 100%;
+    min-width: 0;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentAttachments .BoldTitle {
+    font-size: clamp(14px, 1.8vh, 18px);
+    font-weight: 500;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentFooter {
+    justify-content: flex-end;
+    padding-top: 1vh;
+}
+
+.formAccountingAdjustment .formAccountingAdjustmentFooter .FormButton {
+    width: auto;
+    min-width: 18vh;
+    min-height: 44px;
+}
+
+@media (max-width: 760px) {
+    .formAccountingAdjustment {
+        width: 94vw;
+        max-height: none;
+    }
+
+    .formAccountingAdjustment .formAccountingAdjustmentHeader,
+    .formAccountingAdjustment .formAccountingAdjustmentMeta{
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .formAccountingAdjustment .formAccountingAdjustmentHeader .LabelValue {
+        min-width: 0;
+    }
+
+    .formAccountingAdjustment .formAccountingAdjustmentHeaderActions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .formAccountingAdjustment .formAccountingAdjustmentTableToolbar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 1vh;
+    }
+
+    .formAccountingAdjustment .formAccountingAdjustmentTemplateActions {
+        flex-wrap: wrap;
+    }
+
+    .formAccountingAdjustment .formAccountingAdjustmentTemplateActions .FormButton {
+        flex: 1 1 180px;
+    }
+
+    .formAccountingAdjustment .formAccountingAdjustmentFooter {
+        flex-wrap: wrap;
+    }
+
+    .formAccountingAdjustment .formAccountingAdjustmentFooter .FormButton {
+        flex: 1 1 150px;
+        min-width: 0;
+    }
+}
+
+@media print {
+    .formAccountingAdjustment .formAccountingAdjustmentActions,
+    .formAccountingAdjustment .formAccountingAdjustmentBelowTotals,
+    .formAccountingAdjustment .formAccountingAdjustmentTemplates,
+    .formAccountingAdjustment .formAccountingAdjustmentFooter,
+    .formAccountingAdjustment .formAccountingAdjustmentClose,
+    .formAccountingAdjustment .accountAjustemBlockItemRowInsert,
+    .formAccountingAdjustment .accountAjustemBlockItemRowActions {
+        display: none;
+    }
+
+    .formAccountingAdjustment {
+        width: 100%;
+        max-height: none;
+    }
+
+    .formAccountingAdjustment form {
+        overflow: visible;
+        height: fit-content;
+    }
+}

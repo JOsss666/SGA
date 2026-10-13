@@ -21,6 +21,7 @@ import { FormNewThirdPartyDelegation } from "./forms/FormNewThirdPartyDelegation
 import { postInfo } from "../../../utils/functions";
 import './New.css'
 import { FormNewParameterDocument } from "./forms/FormNewParameterDocument";
+import { FormAccountingAdjustment } from "./forms/formAccountingAdjustment";
 
 export function New(){
     const {userConfig,appInfo,userInfo, appConfig} = useAppInfo();
@@ -88,6 +89,8 @@ export function New(){
         {text:'Nota débito o crédito',children:<FormNewENote/>,icon:<i className="fa-solid fa-note-sticky"/>},
 
         {text:'Compra',children:<FormNewPurchase/>,icon:<i className="fa-solid fa-cart-shopping"/>},
+
+        {text:'Crear ajuste contable',children:<FormAccountingAdjustment/>,icon:<i className="fa-solid fa-scale-balanced"/>},
 
         ...(userConfig?.access?.sections?.reports?.documents?.ThirdPartyDelegation === true ? [
             {text:'Asignación a proveedor', children:<FormNewThirdPartyDelegation instnacePreInfo={{}}/>,icon:<i className="bi bi-person-bounding-box"/>},
@@ -167,7 +170,7 @@ export function New(){
         <div className="New">
             <BoldTitle text={'Crear nuevo'}/>
             <DescriptionSpan text={'Crea todo lo que necesites en un solo click'}/>
-            {!disabled && (
+            {disabled && (
                 <div className="gridOptions">
                     {paramDocs.map((element,index)=>(
                          <span key={index} onClick={()=>{
@@ -187,7 +190,7 @@ export function New(){
                     ))}
                 </div>
             )}
-            {disabled && (
+            {!disabled && (
                 <>
                     <NoResults title={messgeDisabled} img={'https://uxwing.com/wp-content/themes/uxwing/download/signs-and-symbols/stop-blocked-icon.png'}/>
                     {userConfig.access != undefined && (userConfig.access.services.personalized['custom-modules'])["z&j_clicksControl"].access && (

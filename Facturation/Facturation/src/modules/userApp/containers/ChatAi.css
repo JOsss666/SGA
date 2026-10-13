@@ -191,6 +191,7 @@
 
 .ChatAi .chatAiInput{
     flex: 0 0 auto;
+    position: relative;
     margin: 1vh auto 0;
     border-radius: 2vh;
     display: flex;
@@ -277,112 +278,6 @@
 }
 
 
-.ChatAi .addOptions{
-    position: absolute;
-    min-height: 30%;
-    width: 100%;
-    background-color: #303030;
-    bottom: 0;
-    left: 0;
-    border-top-left-radius:3vh;
-    border-top-right-radius: 3vh;
-    padding: 2vh 1vh;
-    box-shadow: 0 -.4vh 1vh #0005;
-    animation-name: appearAddOptions;
-    animation-duration: .5s;
-    animation-fill-mode: both;
-    z-index: 20;
-}
-
-.ChatAi .addOptions .closeAddOp{
-    position: absolute;
-    top: 2vh;
-    right: 2vh;
-    background-color: #838383;
-    height: 3.5vh;
-    width: 3.5vh;
-    display: flex;
-    border-radius: 100%;
-}
-
-.ChatAi .addOptions .closeAddOp i{
-    margin: auto;
-    font-size: clamp(2.5px,2.5vh,25px);
-    cursor: pointer;
-}
-
-.ChatAi .addOptions ul{
-    display: flex;
-    flex-direction: column;
-}
-
-.ChatAi .addOptions .DespleList{
-    background-color: #303030;
-    outline: none;
-    color: #fff;
-    width: 100%;
-    padding: 1vh 0;
-    padding-bottom: 0;
-}
-.ChatAi .addOptions .DespleList:hover{
-    background-color: #444;
-}
-
-.ChatAi .addOptions .DespleList h6{
-    font-weight: 400;
-    font-size: clamp(2.5px,2.5vh,25px);
-    color: #fff !important;
-}
-
-.ChatAi .addOptions .DespleList h6 i{
-    margin-right: 3vh;
-}
-
-.ChatAi .addOptions .DespleList span{
-    font-size: clamp(2.5px,2.5vh,25px);
-    margin-top: .5vh;
-    color: #ddd !important;
-}
-
-.ChatAi .addOptions .DespleList span:hover{
-    background-color: #DFF2FE;
-    color: #21BCFF !important;
-}
-
-.ChatAi .CardTitleLogo{
-    padding: 1vh;
-    padding-left: 7vh;
-    cursor: pointer;
-    color: #fff;
-    border-radius: 1vh;
-}
-
-.ChatAi .CardTitleLogo:hover{
-    background-color: #444;
-}
-
-.ChatAi .CardTitleLogo i{
-    position: absolute;
-    left: 2.5vh;
-}
-
-.ChatAi .attachedHolder{
-    width: 100%;
-    padding: 1vh;
-    flex-wrap: wrap;
-    gap: 1vh;
-    border-radius: 3vh;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    color: #fff;
-    display: flex;
-}
-
-.ChatAi .attachedHolder .AttachedCard{
-    margin: auto 0;
-    margin-right: 1vh;
-}
-
 .ChatAi .spaceChatAi .MainTitleAi{
     margin-bottom: 2vh;
 }
@@ -468,15 +363,6 @@
 
     100%{
         right: -120%;
-    }
-}
-
-@keyframes appearAddOptions {
-    0%{
-        bottom: -50%;
-    }
-    100%{
-        bottom: 0%;
     }
 }
 

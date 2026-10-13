@@ -271,6 +271,8 @@ export function UserApp(){
                             <Route path='/modules/*' element={<Modules/>}/>
                             <Route path='/banks/*' element={<Banks/>}/>
                             <Route path='/briefcases' element={<BriefCases/>}/>
+                            <Route path='/briefcases/payableAccounts' element={<span><PathLocation/>Cuentas por pagar</span>}/>
+                            <Route path='/briefcases/receivableAccounts' element={<span><PathLocation/>Cuentas por cobrar</span>}/>
                             <Route path='/services' element={<Services/>}/>
                             <Route path='/cashBoxes' element={<CashBoxes/>}/>
                                 <Route path='/cashBoxes/:cashBox_id' element={<CashBoxesDeetail/>}/>

@@ -73,24 +73,128 @@ export function NotificationsProvider({children}){
 
 export function AiAssistanProvider({children}){
     const [visibleChatAi,setVisibleChatAi] = useState(false);
-    const [loading,setLoading] = useState();
+    const [aiStatus,setAiStatus] = useState({
+        active:false,
+        loading:false,
+        task:null,
+        process:null,
+        completed:false,
+        success:null,
+        result:null,
+        error:null,
+        startedAt:null,
+        finishedAt:null
+    });
     const [usedTokens,setUsedTokens] = useState(0);
     const {userInfo} = useAppInfo();
     const [chat,setChat] = useState([]);
+
+    const startAiTask = useCallback(({task = null, process = null} = {}) => {
+        setAiStatus({
+            active:true,
+            loading:true,
+            task,
+            process,
+            completed:false,
+            success:null,
+            result:null,
+            error:null,
+            startedAt:new Date().toISOString(),
+            finishedAt:null
+        });
+    }, []);
+
+    const completeAiTask = useCallback((result = null) => {
+        setAiStatus(current => ({
+            ...current,
+            active:false,
+            loading:false,
+            completed:true,
+            success:true,
+            result,
+            error:null,
+            finishedAt:new Date().toISOString()
+        }));
+    }, []);
+
+    const updateAiTask = useCallback((changes) => {
+        setAiStatus(current => ({
+            ...current,
+            ...changes
+        }));
+    }, []);
+
+    const failAiTask = useCallback((error) => {
+        setAiStatus(current => ({
+            ...current,
+            active:false,
+            loading:false,
+            completed:true,
+            success:false,
+            result:null,
+            error:error?.message ?? String(error ?? 'La tarea de IA falló.'),
+            finishedAt:new Date().toISOString()
+        }));
+    }, []);
+
+    const cancelAiTask = useCallback(() => {
+        setAiStatus(current => ({
+            ...current,
+            active:false,
+            loading:false,
+            completed:true,
+            success:false,
+            result:null,
+            error:'La tarea fue cancelada.',
+            finishedAt:new Date().toISOString()
+        }));
+    }, []);
+
+    const resetAiTask = useCallback(() => {
+        setAiStatus({
+            active:false,
+            loading:false,
+            task:null,
+            process:null,
+            completed:false,
+            success:null,
+            result:null,
+            error:null,
+            startedAt:null,
+            finishedAt:null
+        });
+    }, []);
+
+    // Compatibilidad con los consumidores existentes que controlan `loading`.
+    const setLoading = useCallback((value) => {
+        setAiStatus(current => {
+            const nextLoading = typeof value === 'function' ? value(current.loading) : value;
+            return {
+                ...current,
+                loading:Boolean(nextLoading),
+                active:Boolean(nextLoading),
+                ...(nextLoading ? {
+                    completed:false,
+                    success:null,
+                    result:null,
+                    error:null,
+                    startedAt:current.startedAt ?? new Date().toISOString(),
+                    finishedAt:null
+                } : {})
+            };
+        });
+    }, []);
 
     const addMessage = (newMessage) => {
         setChat(prev => [...prev, newMessage]);
     };
 
     const sendPrompt = async(text,attached,onlyResponse)=>{
-        setLoading(true)
-        if(!onlyResponse){
-            setVisibleChatAi(true);
-                addMessage({
-                    text:text,
-                    user_id:userInfo.user_id,
-                    user_name:userInfo.user_name
-                })
+        // `onlyResponse` es una petición silenciosa en segundo plano (p. ej. el
+        // "Resumen IA" de la home). No debe activar el estado de carga visible
+        // del chat ni propagar errores que dejen el botón de enviar bloqueado.
+        if(onlyResponse){
+            try{
                 let res = (await sendAiRequest({
                     destination: AI_DESTINATIONS.CONTROLLER,
                     target: '/processAiRequest',
@@ -98,32 +202,43 @@ export function AiAssistanProvider({children}){
                     companyId: userInfo.company_id
                 })).data
                 if(res.AI_response[0]){
-                    addMessage({
-                        children:JSON.parse(res.AI_response[1]),
-                        user_id:0
-                        })
-                    }else{
-                        addMessage({
-                            text:`❌ Error, hubo un problema al intentar procesar tu solicitud, intentalo de nuevo.`,
-                            user_id:0,
-                            user_name:'Asistente AI'
-                        })
+                    return([true,JSON.parse(res.AI_response[1])])
                 }
-        }else{
+                return([false,[]])
+            }catch(error){
+                return([false,[]])
+            }
+        }
+
+        setLoading(true)
+        try{
+            setVisibleChatAi(true);
+            addMessage({
+                text:text,
+                user_id:userInfo.user_id,
+                user_name:userInfo.user_name
+            })
             let res = (await sendAiRequest({
                 destination: AI_DESTINATIONS.CONTROLLER,
                 target: '/processAiRequest',
                 content: { text, attached, userInfo },
                 companyId: userInfo.company_id
             })).data
-            console.log(res.AI_response)
             if(res.AI_response[0]){
-                return([true,JSON.parse(res.AI_response[1])])
+                addMessage({
+                    children:JSON.parse(res.AI_response[1]),
+                    user_id:0
+                })
             }else{
-                return([false,[]])
+                addMessage({
+                    text:`❌ Error, hubo un problema al intentar procesar tu solicitud, intentalo de nuevo.`,
+                    user_id:0,
+                    user_name:'Asistente AI'
+                })
             }
+        } finally {
+            setLoading(false)
         }
-        setLoading(false)
     }
 
     const value = {
@@ -135,8 +250,22 @@ export function AiAssistanProvider({children}){
         sendPrompt,
         visibleChatAi,
         setVisibleChatAi,
-        loading,
-        setLoading
+        aiStatus,
+        active:aiStatus.active,
+        task:aiStatus.task,
+        process:aiStatus.process,
+        completed:aiStatus.completed,
+        success:aiStatus.success,
+        result:aiStatus.result,
+        error:aiStatus.error,
+        loading:aiStatus.loading,
+        setLoading,
+        startAiTask,
+        updateAiTask,
+        completeAiTask,
+        failAiTask,
+        cancelAiTask,
+        resetAiTask
     }
 
     useEffect(()=>{

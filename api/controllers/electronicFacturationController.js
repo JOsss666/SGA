@@ -1,8 +1,7 @@
 import { useDataBase } from '../app.js';
 import dotenv from 'dotenv';
 import factusService from '../services/factusService.js';
-import electronicProviderCredentialsService from '../services/electronicProviderCredentialsService.js';
-import sessionRepository from '../repositories/sessionRepository.js';
+import sellInvoiceService from '../services/sellInvoiceService.js';
 
 dotenv.config();
 
@@ -27,62 +26,15 @@ const getEnvironmentFromInfo = (info = {}) => (
     ?? info.document?.electronic_environment
 );
 
-const resolveEnvironmentFromInfo = async (info = {}) => (
-    getEnvironmentFromInfo(info)
-    ?? await electronicProviderCredentialsService.getPreferredEnvironment({
-        company_id: getCompanyIdFromInfo(info),
-        provider: 'factus'
-    })
-    ?? DEFAULT_FACTUS_ENVIRONMENT
-);
+const resolveEnvironmentFromInfo = async (info = {}) => sellInvoiceService.resolveElectronicEnvironment({
+    company_id: getCompanyIdFromInfo(info),
+    environment: getEnvironmentFromInfo(info)
+});
 
-const parseRoleConfig = (roleConfig) => {
-    if (!roleConfig) return null;
-    try {
-        return typeof roleConfig === 'string' ? JSON.parse(roleConfig) : roleConfig;
-    } catch {
-        return null;
-    }
-};
-
-// Busca electronicFacturation.numberingRanges sin depender de una ruta fija.
-const findNumberingPolicy = (obj) => {
-    if (!obj || typeof obj !== 'object') return undefined;
-    if (obj.electronicFacturation?.numberingRanges) return obj.electronicFacturation.numberingRanges;
-    for (const key of Object.keys(obj)) {
-        const found = findNumberingPolicy(obj[key]);
-        if (found) return found;
-    }
-    return undefined;
-};
-
-// Devuelve la lista blanca de rangos de numeración de facturas autorizados para
-// el rol del usuario. `null` = sin restricción (rol con overAll o sin config).
-const resolveInvoiceNumberingPolicy = async (info = {}) => {
-    const userId = parseInt(info.user_id);
-    const companyId = parseInt(getCompanyIdFromInfo(info));
-    if (!Number.isInteger(userId) || userId <= 0) return { allowedRangeIds: null };
-    if (!Number.isInteger(companyId) || companyId <= 0) return { allowedRangeIds: null };
-
-    const membership = await sessionRepository.findMembership(userId, companyId);
-    const config = parseRoleConfig(membership?.role_config);
-    const numberingRanges = config?.services?.sga?.electronicFacturation?.numberingRanges
-        ?? findNumberingPolicy(config);
-    const enabled = Array.isArray(numberingRanges?.enabled) ? numberingRanges.enabled : [];
-
-    // La lista `enabled` es autoritativa: si tiene elementos, solo esos rangos aplican.
-    if (enabled.length > 0) {
-        return { allowedRangeIds: enabled };
-    }
-
-    // Sin lista blanca: overAll o ausencia de config => sin restricción.
-    if (!numberingRanges || numberingRanges.overAll === true) {
-        return { allowedRangeIds: null };
-    }
-
-    // overAll:false y enabled vacío => ningún rango autorizado.
-    return { allowedRangeIds: [] };
-};
+const resolveInvoiceNumberingPolicy = async (info = {}) => sellInvoiceService.resolveInvoiceNumberingPolicy({
+    user_id: info.user_id,
+    company_id: getCompanyIdFromInfo(info)
+});
 
 const resolveElectronicDocumentContext = async (info = {}) => {
     const billNumber = `${info.bill_numer ?? info.bill_number ?? info.number ?? ''}`.trim();
@@ -508,6 +460,53 @@ electronicFacturationController.newInvoice = (req,res)=>{
     })
 }
 
+// Reemite únicamente la factura electrónica de un documento de venta ya creado.
+// El contenido fiscal sale de los registros persistidos, no del estado del formulario.
+electronicFacturationController.sellinvoiceReemision = async (req, res, next) => {
+    try {
+        const info = req.body ?? {};
+        const docId = Number(info.doc_id);
+        const companyId = Number(req.auth?.companyId);
+        const userId = Number(req.auth?.userId);
+
+        if (!Number.isSafeInteger(docId) || docId <= 0) {
+            return res.status(400).json({ status: 'Error', message: 'doc_id debe ser un identificador válido.' });
+        }
+        if (!Number.isSafeInteger(companyId) || companyId <= 0 || !Number.isSafeInteger(userId) || userId <= 0) {
+            return res.status(401).json({ status: 'Error', message: 'Se requiere una sesión y compañía activas.' });
+        }
+
+        const result = await sellInvoiceService.reemitElectronicInvoice({
+            doc_id: docId,
+            company_id: companyId,
+            user_id: userId,
+            numbering_range_id: info.numbering_range_id
+        });
+
+        if (result.alreadyLinked) {
+            return res.status(409).json({
+                status: 'AlreadyIssued',
+                message: 'Este documento ya tiene una factura electrónica asociada.',
+                electronicDocument: result.linked
+            });
+        }
+
+        return res.status(200).json({
+            ...result.providerResponse,
+            sga_id: { id: result.linked.id },
+            electronicDocument: result.linked
+        });
+    } catch (error) {
+        if (next && (error.statusCode === 401 || error.statusCode === 403)) return next(error);
+        console.error('Error reemitiendo factura electrónica:', error.message);
+        return res.status(error.statusCode ?? 500).json({
+            status: 'Error',
+            message: error.message,
+            errors: error.details,
+            providerAccepted: error.providerAccepted === true
+        });
+    }
+};
 
 electronicFacturationController.registerEFactDocument = async(info)=>{
     let sentence = `

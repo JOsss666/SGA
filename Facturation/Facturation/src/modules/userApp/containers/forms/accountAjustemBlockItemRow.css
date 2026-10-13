@@ -1,0 +1,108 @@
+.accountAjustemBlockItemRow {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    min-height: 6.5vh;
+    border-bottom: 0.1vh solid var(--inputsBorder);
+}
+
+.accountAjustemBlockItemRow > * {
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    min-width: 0;
+    padding: 0.55vh;
+}
+
+.accountAjustemBlockItemRow > :nth-child(1),
+.accountAjustemBlockItemRow > :nth-child(2) {
+    flex: 0 0 3.5%;
+    text-align: center;
+}
+
+.accountAjustemBlockItemRow > :nth-child(3) {
+    flex-basis: 13.5%;
+}
+
+.accountAjustemBlockItemRow > :nth-child(4) {
+    flex-basis: 19.5%;
+}
+
+.accountAjustemBlockItemRow > :nth-child(5) {
+    flex-basis: 17.5%;
+}
+
+.accountAjustemBlockItemRow > :nth-child(6),
+.accountAjustemBlockItemRow > :nth-child(7),
+.accountAjustemBlockItemRow > :nth-child(8) {
+    flex-basis: 11.5%;
+}
+
+.accountAjustemBlockItemRow > :nth-child(9) {
+    flex: 0 0 8%;
+}
+
+.accountAjustemBlockItemRow .FacturationSearchinList {
+    padding: 0.55vh;
+}
+
+.accountAjustemBlockItemRow .FacturationSearchinList label {
+    display: none;
+}
+
+.accountAjustemBlockItemRow .FacturationFormInput {
+    width: auto;
+}
+
+.accountAjustemBlockItemRow .FacturationFormInput label{
+    display: none;
+}
+
+.accountAjustemBlockItemRow .FacturationFormInput .inputContainer input,
+.accountAjustemBlockItemRow .FacturationSearchinList .SlistC input {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding-left: 1vh;
+    font-size: clamp(1.8px,1.8vh,18px);
+    padding-right: 2vw;
+}
+
+.accountAjustemBlockItemRow .FacturationSearchinList .clearSelectedOptionBtn {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.accountAjustemBlockItemRow .FacturationSearchinList .SlistC .listElementsContainer {
+    z-index: 100;
+}
+
+.accountAjustemBlockItemRow .FacturationSearchinList .listElementsContainer li{
+    font-size: clamp(1.8px,1.8vh,18px);
+}
+
+
+.accountAjustemBlockItemRow .accountAjustemBlockItemRowNumber {
+    color: var(--descriptionText);
+    font-size: clamp(12px, 1.6vh, 16px);
+    font-variant-numeric: tabular-nums;
+}
+
+.accountAjustemBlockItemRow .accountAjustemBlockItemRowInsert .FormButton,
+.accountAjustemBlockItemRow .accountAjustemBlockItemRowActions .FormButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+}
+
+.accountAjustemBlockItemRow .accountAjustemBlockItemRowActions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5vh;
+}

@@ -516,6 +516,37 @@ inventoryController.updateThirdPartyProductAssociation = async (req, res) => (
     )
 );
 
+inventoryController.getThirdPartyProductAssociations = async (req, res) => {
+    try {
+        const info = req.body;
+        if (!info || typeof info !== 'object' || Array.isArray(info)) {
+            return res.status(400).json({ status: 'Error', code: 'INVALID_REQUEST_BODY', message: 'El cuerpo debe ser un objeto JSON.' });
+        }
+
+        const companyId = Number(req.auth?.companyId);
+        if (!Number.isSafeInteger(companyId) || companyId <= 0) {
+            return res.status(401).json({ status: 'Error', code: 'MISSING_COMPANY_CONTEXT', message: 'Se requiere una compañía activa.' });
+        }
+        if (Number(info.company_id) !== companyId) {
+            return res.status(403).json({ status: 'Error', code: 'COMPANY_CONTEXT_MISMATCH', message: 'La compañía solicitada no coincide con la sesión.' });
+        }
+
+        const result = await productsServicesService.getThirdPartyProductAssociations({
+            ...info,
+            company_id: companyId
+        });
+        return res.status(200).json(result);
+    } catch (error) {
+        const statusCode = Number(error?.statusCode) || 500;
+        if (statusCode >= 500) console.error('Error en getThirdPartyProductAssociations:', error);
+        return res.status(statusCode).json({
+            status: 'Error',
+            code: error?.code || 'GET_THIRD_PARTY_PRODUCT_ASSOCIATIONS_FAILED',
+            message: statusCode >= 500 ? 'No fue posible cargar los productos asociados.' : error.message
+        });
+    }
+};
+
 inventoryController.updateThirdPartyProductTaxRelations = async (req, res) => (
     runAuthenticatedThirdPartyProductUpdate(
         req,

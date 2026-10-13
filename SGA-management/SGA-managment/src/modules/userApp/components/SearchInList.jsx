@@ -1,14 +1,27 @@
 import { useEffect, useRef, useState } from 'react'
 import './SearchInList.css'
 
-export function SearchinList({title, placeHolder, list, disabled, action, children, specialOption, noActVal,canClear}){
+export function SearchinList({
+    title,
+    placeHolder,
+    list = [],
+    disabled,
+    action,
+    children,
+    specialOption,
+    noActVal,
+    canClear,
+    defaultValue = {},
+    value,
+    disabledPlaceholder
+}){
     
     const [searchValue, setSearchValue] = useState('');
+    const [inputValue, setInputValue] = useState(defaultValue.text ?? '');
+    const [selectedOption, setSelectedOption] = useState(defaultValue.value);
     const [visibleList, setVisibleList] = useState(false);
-    const [selectedOption, setSelectedOption] = useState(noActVal ? undefined : "");
     const [focusedIndex, setFocusedIndex] = useState(-1);
     
-    const inRef = useRef();
     const listE = useRef(); // Referencia al contenedor <ul>
 
     const filteredList = list.filter(element => 
@@ -37,16 +50,19 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
                 }
             }
         }
-    }, [focusedIndex, visibleList]); 
+    }, [focusedIndex, visibleList, specialOption]);
     // ----------------------------------
 
     const handleSelect = (element) => {
+        const optionValue = element.value !== undefined ? element.value : element.text;
+
         if(!noActVal){
-            inRef.current.value = element.text;
-            setSelectedOption(element.value !== undefined ? element.value : element.text);
-        } else {
-            if(action) action(element.value !== undefined ? element.value : element.text);
+            setInputValue(element.text);
+            setSearchValue('');
+            setSelectedOption(optionValue);
         }
+
+        if(action) action(optionValue);
         setVisibleList(false);
         setFocusedIndex(-1);
     };
@@ -55,10 +71,9 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
         setFocusedIndex(-1);
         setVisibleList(false);
         setSearchValue('');
-        setSelectedOption(undefined); // o "" según tu lógica
-        if (inRef.current) {
-            inRef.current.value = "";
-        }
+        setInputValue('');
+        setSelectedOption('');
+        if(action && !noActVal) action('');
     };
 
     const handleKeyDown = (e) => {
@@ -80,12 +95,52 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
         }
     };
 
-    useEffect(() => {
-        console.log(selectedOption)
-        if(selectedOption !== undefined && action !== undefined){
-            action(selectedOption);
+    useEffect(()=>{
+        if(noActVal) return;
+
+        const isControlled = value !== undefined;
+        const selectedValue = isControlled
+            ? value
+            : selectedOption ?? defaultValue.value;
+        if(selectedValue === undefined || selectedValue === null || selectedValue === ''){
+            setInputValue('');
+            return;
         }
-    }, [selectedOption]);
+
+        // Reduce un valor (primitivo u objeto) a su identificador comparable.
+        // Se contemplan las llaves de id más usadas en SGA para que el match funcione
+        // tanto si recibes el id suelto como el registro completo.
+        const comparableValue = currentValue => {
+            if(currentValue && typeof currentValue === 'object'){
+                return currentValue.id
+                    ?? currentValue.thirdParty_id
+                    ?? currentValue.product_id
+                    ?? currentValue.store_id
+                    ?? currentValue.bussines_id
+                    ?? currentValue.costCenter_id
+                    ?? currentValue.concept_id
+                    ?? currentValue.cashBox_id
+                    ?? currentValue.value;
+            }
+            return currentValue;
+        };
+
+        const target = String(comparableValue(selectedValue));
+        const selectedElement = list.find(element => {
+            const optionValue = element.value !== undefined ? element.value : element.text;
+            return String(comparableValue(optionValue)) === target;
+        });
+
+        // Fallback de texto cuando la opción no está en la lista (lista aún sin cargar
+        // o filtrada por accesos): se usa el texto explícito de defaultValue o, si el
+        // value es el propio registro, su nombre/etiqueta. Así, en edición, el campo no
+        // se ve vacío cuando la opción no aparece en la lista.
+        const fallbackText = (selectedValue && typeof selectedValue === 'object')
+            ? (selectedValue.text ?? selectedValue.name ?? selectedValue.label ?? '')
+            : '';
+
+        setInputValue(selectedElement?.text ?? defaultValue.text ?? fallbackText);
+    }, [value, selectedOption, defaultValue.value, defaultValue.text, list, noActVal]);
 
     return(
         <div className="SearchinList" onClick={()=>{
@@ -98,15 +153,15 @@ export function SearchinList({title, placeHolder, list, disabled, action, childr
             {title && <label>{title}</label>}
             <div className="SlistC">
                 <input 
-                    ref={inRef} 
                     type="text"
-                    placeholder={disabled ? "Sin opciones disponibles" : placeHolder} 
+                    value={inputValue}
+                    placeholder={disabled ? (disabledPlaceholder ?? "Sin opciones disponibles") : placeHolder}
                     disabled={disabled} 
                     onFocus={() => setVisibleList(true)}
                     onKeyDown={handleKeyDown}
                     onChange={(e) => {
+                        setInputValue(e.target.value);
                         setSearchValue(e.target.value);
-                        setSelectedOption('');
                         setFocusedIndex(-1);
                     }}
                 />
