@@ -124,7 +124,7 @@ export function BriefCases() {
                 {/* Total cuentas por cobrar */}
                 <SumaryCard title={'Cuentas por cobrar'} desc={'Valor total cuentas por cobrar'} value={moneyFormat(1000000)} percent={2} currency={'COP'} onClick={()=>handleNavigate('payableAccounts')}/>
                 {/* Total cuentas por pagar */}
-                <SumaryCard title={'Cuentas por pagar'} desc={'Valor total cuentas por pagar'} value={moneyFormat(1000000)} percent={2} currency={'COP'} onClick={()=>handleNavigate('receivableAccounts')}/>
+                <SumaryCard title={'Cuentas por pagar'} desc={'Valor total cuentas por pagar'} value={moneyFormat(1000000)} percent={2} currency={'COP'} onClick={() => handleNavigate('payableAccounts')}/>
                 {/* Cartera vencida por cobrar */}
                 <SumaryCard title={'Cobros Vencidos'} desc={'Valor total cartera por cobrar vencida'} value={moneyFormat(1000000)} percent={2} currency={'COP'}/>
                 {/* Cartera vencida por pagar */}

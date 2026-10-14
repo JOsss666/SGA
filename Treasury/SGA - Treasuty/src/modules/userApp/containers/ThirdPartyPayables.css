@@ -1,0 +1,121 @@
+.sgaTreasury .thirdPartyPayables {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    min-height: 100%;
+    padding: 2vh 3vw 3vh;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.sgaTreasury .thirdPartyPayablesHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.sgaTreasury .thirdPartyPayablesHeader > div {
+    display: flex;
+    flex-direction: column;
+    gap: .7vh;
+}
+
+.sgaTreasury .thirdPartyPayablesCount {
+    padding: .6rem .9rem;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: 999px;
+    color: var(--descriptionText);
+    background: var(--inputsBg);
+    white-space: nowrap;
+}
+
+.sgaTreasury .thirdPartyPayablesToolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.sgaTreasury .thirdPartyPayablesToolbar > .SearchBar {
+    width: min(32rem, 100%);
+}
+
+.sgaTreasury .thirdPartyPayablesToolbar > .SearchBar input {
+    width: 100%;
+}
+
+.sgaTreasury .thirdPartyPayablesDownloads {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: .75rem;
+}
+
+.sgaTreasury .thirdPartyPayablesDownloads .ButtonDownload {
+    width: auto;
+}
+
+.sgaTreasury .thirdPartyPayablesDownloads .ButtonDownload .buttonDownloadDefault,
+.sgaTreasury .thirdPartyPayablesDownloads .ButtonDownload .buttonDownloadLoading,
+.sgaTreasury .thirdPartyPayablesDownloads .ButtonDownload .buttonDownloadSuccess {
+    width: auto;
+    min-width: 7rem;
+    padding: .8rem 1rem;
+}
+
+.sgaTreasury .thirdPartyPayablesTable {
+    width: 100%;
+    min-width: 0;
+}
+
+.sgaTreasury .thirdPartyPayablesTable .universalTable {
+    height: 58vh;
+}
+
+.sgaTreasury .thirdPartyPayablesError {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .8rem 1rem;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: .8rem;
+    color: var(--mainText);
+    background: var(--lightGradient4);
+}
+
+.sgaTreasury .thirdPartyPayablesError button {
+    padding: .6rem .9rem;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: .6rem;
+    color: var(--mainText);
+    background: var(--inputsBg);
+    cursor: pointer;
+}
+
+@media (max-width: 720px) {
+    .sgaTreasury .thirdPartyPayables {
+        padding: 2vh 2vh 3vh;
+    }
+
+    .sgaTreasury .thirdPartyPayablesHeader,
+    .sgaTreasury .thirdPartyPayablesToolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .sgaTreasury .thirdPartyPayablesDownloads {
+        width: 100%;
+    }
+
+    .sgaTreasury .thirdPartyPayablesDownloads .ButtonDownload {
+        flex: 1;
+    }
+
+    .sgaTreasury .thirdPartyPayablesDownloads .ButtonDownload .buttonDownloadDefault,
+    .sgaTreasury .thirdPartyPayablesDownloads .ButtonDownload .buttonDownloadLoading,
+    .sgaTreasury .thirdPartyPayablesDownloads .ButtonDownload .buttonDownloadSuccess {
+        width: 100%;
+    }
+}
