@@ -122,7 +122,7 @@ export function BriefCases() {
 
             <div className="briefCasesSummary" aria-label="Resumen de cartera">
                 {/* Total cuentas por cobrar */}
-                <SumaryCard title={'Cuentas por cobrar'} desc={'Valor total cuentas por cobrar'} value={moneyFormat(1000000)} percent={2} currency={'COP'} onClick={()=>handleNavigate('payableAccounts')}/>
+                <SumaryCard title={'Cuentas por cobrar'} desc={'Valor total cuentas por cobrar'} value={moneyFormat(1000000)} percent={2} currency={'COP'} onClick={()=>handleNavigate('receivableAccounts')}/>
                 {/* Total cuentas por pagar */}
                 <SumaryCard title={'Cuentas por pagar'} desc={'Valor total cuentas por pagar'} value={moneyFormat(1000000)} percent={2} currency={'COP'} onClick={() => handleNavigate('payableAccounts')}/>
                 {/* Cartera vencida por cobrar */}
