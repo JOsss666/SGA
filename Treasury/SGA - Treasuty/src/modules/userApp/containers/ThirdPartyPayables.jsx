@@ -3,7 +3,6 @@ import { jsPDF } from 'jspdf';
 import { useAppInfo } from '../../../context/context';
 import { moneyFormat, parseToXlsx, postInfo } from '../../../utils/functions';
 import { BoldTitle } from '../components/BoldTitle';
-import { ButtonDownload } from '../components/ButtonDownload';
 import { DescriptionSpan } from '../components/DescriptionSpan';
 import { PathLocation } from '../components/PathLocation';
 import { SearchBar } from '../components/SearchBar';
@@ -43,7 +42,8 @@ const parseAmount = (value) => {
     return Number.isFinite(amount) ? amount : 0;
 };
 
-const formatCurrency = (value) => `$ ${moneyFormat(parseAmount(value).toFixed(2))}`;
+const formatCurrency = (value) =>
+    `$ ${moneyFormat(parseAmount(value).toFixed(2))}`;
 
 const formatDate = (value) => {
     if (!value) return '—';
@@ -68,11 +68,12 @@ const rowRenderers = {
     due_date: DateCell
 };
 
-const getExportRows = (rows) => rows.map((row) => ({
-    ...row,
-    created_at: formatDate(row.created_at),
-    due_date: formatDate(row.due_date)
-}));
+const getExportRows = (rows) =>
+    rows.map((row) => ({
+        ...row,
+        created_at: formatDate(row.created_at),
+        due_date: formatDate(row.due_date)
+    }));
 
 export function ThirdPartyPayables() {
     const { appInfo } = useAppInfo();
@@ -81,6 +82,7 @@ export function ThirdPartyPayables() {
     const [searchValue, setSearchValue] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [showDownloadMenu, setShowDownloadMenu] = useState(false);
 
     const loadPayables = useCallback(async () => {
         const companyId = appInfo?.company_id;
@@ -104,7 +106,6 @@ export function ThirdPartyPayables() {
                 throw new Error('La respuesta del servidor no tiene el formato esperado.');
             }
 
-            // El endpoint devuelve [true, filas] o [false, []] cuando no hay datos.
             setRows(Array.isArray(response[1]) ? response[1] : []);
         } catch (loadError) {
             console.error('Error al cargar cuentas por pagar:', loadError);
@@ -120,30 +121,40 @@ export function ThirdPartyPayables() {
     }, [loadPayables]);
 
     const downloadXlsx = async () => {
-        const exportRows = getExportRows(filteredRows);
-        await parseToXlsx(exportRows, true, exportColumns, 'Cuentas_por_pagar', {
-            reportName: 'Cuentas por pagar'
-        });
+        await parseToXlsx(
+            getExportRows(filteredRows),
+            true,
+            exportColumns,
+            'Cuentas_por_pagar',
+            { reportName: 'Cuentas por pagar' }
+        );
     };
 
     const downloadPdf = () => {
-        const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
+        const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4'
+        });
         const margin = 10;
         const rowHeight = 8;
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
         const columnWidth = (pageWidth - margin * 2) / exportColumns.length;
 
         const fitText = (value, maxWidth) => {
             let text = String(value ?? '—').replace(/\s+/g, ' ');
+
             while (text.length > 1 && pdf.getTextWidth(text) > maxWidth) {
                 text = `${text.slice(0, -2)}…`;
             }
+
             return text;
         };
 
         const drawHeader = () => {
-            let y = 10;
+            let y = margin;
+
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(13);
             pdf.text('Cuentas por pagar', margin, y);
@@ -156,7 +167,11 @@ export function ThirdPartyPayables() {
             exportColumns.forEach((column, index) => {
                 const x = margin + index * columnWidth;
                 pdf.rect(x, y, columnWidth, rowHeight, 'F');
-                pdf.text(fitText(column.header, columnWidth - 3), x + 1.5, y + 5.2);
+                pdf.text(
+                    fitText(column.header, columnWidth - 3),
+                    x + 1.5,
+                    y + 5.2
+                );
             });
 
             pdf.setTextColor(0, 0, 0);
@@ -166,7 +181,7 @@ export function ThirdPartyPayables() {
 
         let y = drawHeader();
 
-        filteredRows.forEach((row) => {
+        getExportRows(filteredRows).forEach((row) => {
             if (y + rowHeight > pageHeight - margin) {
                 pdf.addPage();
                 y = drawHeader();
@@ -174,15 +189,21 @@ export function ThirdPartyPayables() {
 
             exportColumns.forEach((column, index) => {
                 const x = margin + index * columnWidth;
-                const value = ['total', 'paid_amount', 'pending_amount'].includes(column.key)
+                const value = [
+                    'total',
+                    'paid_amount',
+                    'pending_amount'
+                ].includes(column.key)
                     ? formatCurrency(row[column.key])
-                    : ['created_at', 'due_date'].includes(column.key)
-                        ? formatDate(row[column.key])
-                        : row[column.key];
+                    : row[column.key];
 
                 pdf.setDrawColor(210, 215, 220);
                 pdf.rect(x, y, columnWidth, rowHeight);
-                pdf.text(fitText(value, columnWidth - 3), x + 1.5, y + 5.2);
+                pdf.text(
+                    fitText(value, columnWidth - 3),
+                    x + 1.5,
+                    y + 5.2
+                );
             });
 
             y += rowHeight;
@@ -200,6 +221,7 @@ export function ThirdPartyPayables() {
                     <BoldTitle text="Cuentas por pagar" />
                     <DescriptionSpan text="Consulta las obligaciones pendientes registradas para la empresa." />
                 </div>
+
                 <span className="thirdPartyPayablesCount">
                     {rows.length} registros
                 </span>
@@ -211,16 +233,52 @@ export function ThirdPartyPayables() {
                     value={searchValue}
                     action={setSearchValue}
                 />
-                <div className="thirdPartyPayablesDownloads">
-                    <ButtonDownload text="PDF" onDownload={downloadPdf} />
-                    <ButtonDownload text="XLSX" onDownload={downloadXlsx} />
+
+                <div className="thirdPartyPayablesDownload">
+                    <button
+                        type="button"
+                        className="thirdPartyPayablesDownloadButton"
+                        aria-expanded={showDownloadMenu}
+                        onClick={() => setShowDownloadMenu((current) => !current)}
+                    >
+                        Descargar
+                        <i className="fa-solid fa-arrow-down" aria-hidden="true" />
+                    </button>
+
+                    {showDownloadMenu && (
+                        <div className="thirdPartyPayablesDownloadMenu">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowDownloadMenu(false);
+                                    downloadXlsx();
+                                }}
+                            >
+                                <i className="fa-regular fa-file-excel" aria-hidden="true" />
+                                XLSX
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowDownloadMenu(false);
+                                    downloadPdf();
+                                }}
+                            >
+                                <i className="fa-regular fa-file-pdf" aria-hidden="true" />
+                                PDF
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {error && (
                 <div className="thirdPartyPayablesError" role="alert">
                     <span>{error}</span>
-                    <button type="button" onClick={loadPayables}>Reintentar</button>
+                    <button type="button" onClick={loadPayables}>
+                        Reintentar
+                    </button>
                 </div>
             )}
 
@@ -231,7 +289,9 @@ export function ThirdPartyPayables() {
                     searchValue={searchValue}
                     loading={loading}
                     disabled={loading}
-                    getRowKey={(row, index) => row.id ?? row.document_id ?? `${row.thirdParty_id}-${index}`}
+                    getRowKey={(row, index) =>
+                        row.id ?? row.document_id ?? `${row.thirdParty_id}-${index}`
+                    }
                     rowProps={{ renderers: rowRenderers }}
                     onFilteredResultsChange={setFilteredRows}
                     emptyMessage="No hay cuentas por pagar para mostrar"
