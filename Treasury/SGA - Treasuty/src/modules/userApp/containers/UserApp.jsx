@@ -56,6 +56,7 @@ import { AiPet } from '../components/AiPet';
 import { Banks } from '../pages/Banks';
 import { BriefCases } from '../pages/BriefCases';
 import { ThirdPartyPayables } from './ThirdPartyPayables';
+import { ThirdPartyReceivables } from './ThirdPartyReceivables';
 
 export function UserApp(){
 
@@ -273,7 +274,7 @@ export function UserApp(){
                             <Route path='/banks/*' element={<Banks/>}/>
                             <Route path='/briefcases' element={<BriefCases/>}/>
                             <Route path='/briefcases/payableAccounts' element={<ThirdPartyPayables />} />
-                            <Route path='/briefcases/receivableAccounts' element={<span><PathLocation/>Cuentas por cobrar</span>}/>
+                            <Route path='/briefcases/receivableAccounts' element={<ThirdPartyReceivables />} />
                             <Route path='/services' element={<Services/>}/>
                             <Route path='/cashBoxes' element={<CashBoxes/>}/>
                                 <Route path='/cashBoxes/:cashBox_id' element={<CashBoxesDeetail/>}/>
