@@ -7,7 +7,7 @@ import { ShareDocuments } from "./ShareDocument";
 import { ChatSpace } from "../ChatSpace";
 import { OpCard } from "../../components/OpCard";
 import { DocumentCard } from "../../components/DocumentCard";
-import { SellInvoiceRender } from "./documents render/SellInvoiceRender";
+import { DocumentRender } from "./documents render/DocumentRender";
 import { formatDate } from "../../../../utils/functions";
 import { PreviewLinkedDocument } from "./documents render/PreviewLinkedDocuments";
 
@@ -98,7 +98,7 @@ export function DocumentPreview({data}){
                 )}
             </header>
             <div className="spaceDoc">
-                <SellInvoiceRender id={info.doc_id}/>
+                <DocumentRender id={info.doc_id} docType={info.doc_type} />
             </div>
         </div>
     )
