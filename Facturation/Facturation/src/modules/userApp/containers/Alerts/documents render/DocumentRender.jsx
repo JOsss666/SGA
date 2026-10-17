@@ -7,6 +7,8 @@ import { AccountPannel } from "./AccountPannel";
 import { InvoiceVisualRepresentation } from "./InvoiceVisualRepresentation";
 import { ClientOrderDesign } from "../ClientOrderDesign";
 import { CashReceiptDesign } from "../CashReceiptDesign";
+import { ClientOrderRepresentation } from "./ClientOrderRepresentation";
+import { CashReceiptRepresentation } from "./CashReceiptRepresentation";
 import { AccountingAdjustmentDesign } from "../AccountingAdjustmentDesign";
 import { PurchaseInvoiceDesign } from "../PurchaseInvoiceDesign";
 
@@ -26,6 +28,19 @@ export function DocumentRender({ id, docType }) {
                 return <PurchaseInvoiceDesign id={id} noShare={true} />;
             default:
                 return <SellInvoiceDesign id={id} noShare={true} />;
+        }
+    };
+
+    const renderDocumentRepresentation = () => {
+        switch (docType) {
+            case "Sell Invoice":
+                return <InvoiceVisualRepresentation id={id} />;
+            case "Client Order":
+                return <ClientOrderRepresentation id={id} />;
+            case "Cash Recipt":
+                return <CashReceiptRepresentation id={id} />;
+            default:
+                return renderDocumentDesign();
         }
     };
 
@@ -56,17 +71,17 @@ export function DocumentRender({ id, docType }) {
 
             <div className="spaceRender">
                 {selectedType === "Representación" &&
-                    (docType === "Sell Invoice" ? (
-                        <InvoiceVisualRepresentation id={id} />
-                    ) : (
-                        renderDocumentDesign()
-                    ))}
+                    renderDocumentRepresentation()}
 
-                {selectedType === "Contabilización" && <AccountPannel id={id} />}
+                {selectedType === "Contabilización" && (
+                    <AccountPannel id={id} />
+                )}
 
                 {selectedType === "Imprimible" && renderDocumentDesign()}
 
-                {selectedType === "online" && <PreviewDocument doc_id={id} />}
+                {selectedType === "online" && (
+                    <PreviewDocument doc_id={id} />
+                )}
             </div>
         </div>
     );
