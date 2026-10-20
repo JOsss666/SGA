@@ -441,6 +441,7 @@ export function AppInfoProvider({children}){
         {text:'Panel Principal',path:'mainPanel',icon:<i className="bi bi-grid-1x2"/>,action:handleNavigate},
         {text:'Bancos',path:'banks',icon:<i className="bi bi-bank"/>,action:handleNavigate},
         {text:'Cartera',path:'briefcases',icon:<i className="bi bi-wallet2"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
+        {text:'Anticipos y saldos a favor',path:'briefcases/advances',icon:<i className="bi bi-piggy-bank"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
         {text:'Cajas POS',path:'CashBoxes',icon:<i className="ti ti-cash-register"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
         {text:'Compras - Gastos',path:'transfers',icon:<i className="bi bi-bag"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
         {text:'Administración Cuentas',path:'transfers',icon:<i className="fa-solid fa-book-bookmark"/>,img:<img src='https://res.cloudinary.com/djjxugmni/image/upload/v1761579581/ChatGPT_Image_27_oct_2025_10_28_59_3_juwusq.png'/>,action:handleNavigate},
