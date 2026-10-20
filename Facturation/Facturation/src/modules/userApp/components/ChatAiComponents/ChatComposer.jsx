@@ -1,4 +1,5 @@
 import { useEffect, useImperativeHandle, useRef } from 'react';
+import { AttachedCard } from '../AttachedCard';
 import './ChatComposer.css';
 
 const MAX_HEIGHT_VH = 18;
@@ -15,7 +16,10 @@ export function ChatComposer({
     disabled,
     placeholder,
     maxLength,
-    inputRef
+    inputRef,
+    attachments = [],
+    onRemoveAttachment,
+    onKeyDown
 }) {
     const textAreaRef = useRef();
 
@@ -35,6 +39,12 @@ export function ChatComposer({
     }, [value]);
 
     const handleKeyDown = event => {
+        if (onKeyDown?.(event)) return;
+        if (event.key === 'Backspace' && !value && attachments.length > 0) {
+            event.preventDefault();
+            onRemoveAttachment?.(attachments[attachments.length - 1].name);
+            return;
+        }
         if (event.key !== 'Enter' || event.shiftKey) return;
         event.preventDefault();
         if (disabled || !value.trim()) return;
@@ -43,18 +53,45 @@ export function ChatComposer({
 
     const remaining = maxLength != null ? maxLength - value.length : null;
     const showCounter = remaining != null && remaining <= maxLength * 0.1;
+    const imageAttachments = attachments.filter(attachment => attachment.type === 'image');
+    const inlineAttachments = attachments.filter(attachment => attachment.type !== 'image');
 
     return (
         <div className="ChatComposer">
-            <textarea
-                ref={textAreaRef}
-                rows={1}
-                value={value}
-                maxLength={maxLength}
-                placeholder={placeholder}
-                onChange={event => onChange?.(event.target.value)}
-                onKeyDown={handleKeyDown}
-            />
+            {imageAttachments.length > 0 && (
+                <div className="composerImages" aria-label="Imágenes adjuntas">
+                    {imageAttachments.map(attachment => (
+                        <AttachedCard
+                            info={attachment}
+                            deleteAct={onRemoveAttachment}
+                            key={attachment.name}
+                        />
+                    ))}
+                </div>
+            )}
+            <div className="composerInputRow">
+                {inlineAttachments.map(attachment => (
+                    <span
+                        className={`composerAttachment ${attachment.loading ? 'composerAttachmentLoading' : ''}`}
+                        key={attachment.name}
+                        title={attachment.label || attachment.name}
+                    >
+                        <i className={`fa-solid ${attachment.icon || 'fa-paperclip'}`} aria-hidden="true"/>
+                        <span>{attachment.label || attachment.name}</span>
+                        {attachment.loading && <i className="fa-solid fa-spinner fa-spin" aria-hidden="true"/>}
+                    </span>
+                ))}
+                <textarea
+                    ref={textAreaRef}
+                    rows={1}
+                    value={value}
+                    disabled={disabled}
+                    maxLength={maxLength}
+                    placeholder={placeholder}
+                    onChange={event => onChange?.(event.target.value)}
+                    onKeyDown={handleKeyDown}
+                />
+            </div>
             {showCounter && (
                 <span className={`composerCounter ${remaining <= 0 ? 'composerCounterFull' : ''}`}>
                     {remaining.toLocaleString('es-CO')}

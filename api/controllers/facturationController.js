@@ -524,7 +524,7 @@ facturationController.getTransactionsOfCashRecord = (req, res) => {
                     "Ecosystem".contable_accounts.code AS account_code,
                     "Ecosystem".transactions.doc_type,
                     "Ecosystem".transactions.doc_id,
-                    "Ecosystem".documents.instance_id,
+                    "Process".process_instance.id AS instance_id,
                     "Ecosystem".documents."ownSerial",
                     "Process".process_instance."ownSerial" AS instance_serial,
                     "Process".processes.code AS process_code,

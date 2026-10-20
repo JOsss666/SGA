@@ -55,6 +55,9 @@ import { SearchResultsPannel } from './Alerts/SearchResultsPannel';
 import { AiPet } from '../components/AiPet';
 import { Banks } from '../pages/Banks';
 import { BriefCases } from '../pages/BriefCases';
+import { ThirdPartyPayables } from './ThirdPartyPayables';
+import { ThirdPartyReceivables } from './ThirdPartyReceivables';
+import { ThirdPartyAdvances } from './ThirdPartyAdvances';
 
 export function UserApp(){
 
@@ -271,6 +274,9 @@ export function UserApp(){
                             <Route path='/modules/*' element={<Modules/>}/>
                             <Route path='/banks/*' element={<Banks/>}/>
                             <Route path='/briefcases' element={<BriefCases/>}/>
+                            <Route path='/briefcases/payableAccounts' element={<ThirdPartyPayables />} />
+                            <Route path='/briefcases/receivableAccounts' element={<ThirdPartyReceivables />} />
+                            <Route path='/briefcases/advances' element={<ThirdPartyAdvances />} />
                             <Route path='/services' element={<Services/>}/>
                             <Route path='/cashBoxes' element={<CashBoxes/>}/>
                                 <Route path='/cashBoxes/:cashBox_id' element={<CashBoxesDeetail/>}/>

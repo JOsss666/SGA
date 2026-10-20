@@ -1,73 +1,202 @@
 import { useEffect, useRef, useState } from 'react'
 import './SearchInList.css'
 
-export function SearchinList({title,placeHolder,list,disabled,action,children,specialOption,noActVal}){
+export function SearchinList({
+    title,
+    placeHolder,
+    list = [],
+    disabled,
+    action,
+    children,
+    specialOption,
+    noActVal,
+    canClear,
+    defaultValue = {},
+    value,
+    disabledPlaceholder
+}){
     
-    const [searchValue,setSearchValue] = useState('');
-    const [visibleList,setVisibleList] = useState(true);
-    const [selectedOption,setSelectedOption] = useState(noActVal? undefined:"");
-    const inRef = useRef();
-    const listE = useRef();
+    const [searchValue, setSearchValue] = useState('');
+    const [inputValue, setInputValue] = useState(defaultValue.text ?? '');
+    const [selectedOption, setSelectedOption] = useState(defaultValue.value);
+    const [visibleList, setVisibleList] = useState(false);
+    const [focusedIndex, setFocusedIndex] = useState(-1);
+    
+    const listE = useRef(); // Referencia al contenedor <ul>
 
-    useEffect(()=>{
-        if(inRef.current != undefined){
-            inRef.current.addEventListener('focus', () => {
-                setVisibleList(false)
-            });
-            if(list.length == 0){
-                disabled = true;
-                setVisibleList(true);
-                inRef.current.placeHolder = "Sin opciones disponibles";
+    const filteredList = list.filter(element => 
+        !searchValue || element.text.toLowerCase().includes(searchValue.toLowerCase())
+    );
+
+    // --- LÓGICA DE SCROLL AUTOMÁTICO ---
+    useEffect(() => {
+        if (focusedIndex >= 0 && listE.current) {
+            const listContainer = listE.current;
+            const focusedElement = listContainer.children[focusedIndex + (specialOption ? 1 : 0)];
+
+            if (focusedElement) {
+                const containerTop = listContainer.scrollTop;
+                const containerBottom = containerTop + listContainer.offsetHeight;
+                const elementTop = focusedElement.offsetTop;
+                const elementBottom = elementTop + focusedElement.offsetHeight;
+
+                // Si el elemento está por debajo del scroll visible
+                if (elementBottom > containerBottom) {
+                    listContainer.scrollTop = elementBottom - listContainer.offsetHeight;
+                } 
+                // Si el elemento está por encima del scroll visible
+                else if (elementTop < containerTop) {
+                    listContainer.scrollTop = elementTop;
+                }
             }
         }
-    },[inRef])
+    }, [focusedIndex, visibleList, specialOption]);
+    // ----------------------------------
 
-    const filterOptions = (value) => {
-        if (!searchValue) return true; 
-            return value.toLowerCase().includes(searchValue.toLowerCase());
-    }
+    const handleSelect = (element) => {
+        const optionValue = element.value !== undefined ? element.value : element.text;
 
+        if(!noActVal){
+            setInputValue(element.text);
+            setSearchValue('');
+            setSelectedOption(optionValue);
+        }
+
+        if(action) action(optionValue);
+        setVisibleList(false);
+        setFocusedIndex(-1);
+    };
+
+    const clearSelection = () => {
+        setFocusedIndex(-1);
+        setVisibleList(false);
+        setSearchValue('');
+        setInputValue('');
+        setSelectedOption('');
+        if(action && !noActVal) action('');
+    };
+
+    const handleKeyDown = (e) => {
+        if (!visibleList) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setFocusedIndex(prev => (prev < filteredList.length - 1 ? prev + 1 : prev));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setFocusedIndex(prev => (prev > 0 ? prev - 1 : prev));
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (focusedIndex >= 0) handleSelect(filteredList[focusedIndex]);
+            if(focusedIndex <= 0) setVisibleList(true);
+            setVisibleList(false);
+        } else if (e.key === 'Escape') {
+            setVisibleList(false);
+        }
+    };
 
     useEffect(()=>{
-        if(action != undefined){
-            action(selectedOption);
+        if(noActVal) return;
+
+        const isControlled = value !== undefined;
+        const selectedValue = isControlled
+            ? value
+            : selectedOption ?? defaultValue.value;
+        if(selectedValue === undefined || selectedValue === null || selectedValue === ''){
+            setInputValue('');
+            return;
         }
-    },[selectedOption])
+
+        // Reduce un valor (primitivo u objeto) a su identificador comparable.
+        // Se contemplan las llaves de id más usadas en SGA para que el match funcione
+        // tanto si recibes el id suelto como el registro completo.
+        const comparableValue = currentValue => {
+            if(currentValue && typeof currentValue === 'object'){
+                return currentValue.id
+                    ?? currentValue.thirdParty_id
+                    ?? currentValue.product_id
+                    ?? currentValue.store_id
+                    ?? currentValue.bussines_id
+                    ?? currentValue.costCenter_id
+                    ?? currentValue.concept_id
+                    ?? currentValue.cashBox_id
+                    ?? currentValue.value;
+            }
+            return currentValue;
+        };
+
+        const target = String(comparableValue(selectedValue));
+        const selectedElement = list.find(element => {
+            const optionValue = element.value !== undefined ? element.value : element.text;
+            return String(comparableValue(optionValue)) === target;
+        });
+
+        // Fallback de texto cuando la opción no está en la lista (lista aún sin cargar
+        // o filtrada por accesos): se usa el texto explícito de defaultValue o, si el
+        // value es el propio registro, su nombre/etiqueta. Así, en edición, el campo no
+        // se ve vacío cuando la opción no aparece en la lista.
+        const fallbackText = (selectedValue && typeof selectedValue === 'object')
+            ? (selectedValue.text ?? selectedValue.name ?? selectedValue.label ?? '')
+            : '';
+
+        setInputValue(selectedElement?.text ?? defaultValue.text ?? fallbackText);
+    }, [value, selectedOption, defaultValue.value, defaultValue.text, list, noActVal]);
 
     return(
-        <div className="SearchinList">  
-            {title && (
-                <label htmlFor="">{title}</label>
-            )}
+        <div className="SearchinList" onClick={()=>{
+            setVisibleList(true)
+        }} onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+                setVisibleList(false);
+            }
+        }}>  
+            {title && <label>{title}</label>}
             <div className="SlistC">
-                <input ref={inRef} type="text" placeholder={placeHolder} disabled={disabled} onChange={()=>{
-                    setSearchValue(inRef.current.value)
-                    setSelectedOption('')
-                }}/>
-                <ul ref={listE} hidden={visibleList} className="listElementsContainer">
-                    {specialOption}
-                    {list.length > 0 && list.map((element,index)=>(
-                        <li hidden={!filterOptions(element.text)} onClick={()=>{
-                            if(!noActVal){
-                                inRef.current.value = element.text
-                                if(element.value != undefined){
-                                    setSelectedOption(element.value);
-                                }else{
-                                    setSelectedOption(element.text);
-                                }
-                            }else{
-                                if(action != null){
-                                    if(element.value != undefined){
-                                    action(element.value);
-                                    }else{
-                                        action(element.text);
-                                    }
-                                }
-                            }
-                            setVisibleList(true);
-                        }} key={index}>{element.text}</li>
-                    ))}
-                </ul>
+                <input 
+                    type="text"
+                    value={inputValue}
+                    placeholder={disabled ? (disabledPlaceholder ?? "Sin opciones disponibles") : placeHolder}
+                    disabled={disabled} 
+                    onFocus={() => setVisibleList(true)}
+                    onKeyDown={handleKeyDown}
+                    onChange={(e) => {
+                        setInputValue(e.target.value);
+                        setSearchValue(e.target.value);
+                        setFocusedIndex(-1);
+                    }}
+                />
+                {canClear && (
+                    <i 
+                        className="fa-solid fa-xmark clearSelectedOptionBtn"
+                        onClick={(e)=>{
+                            e.stopPropagation(); // 🔥 CLAVE
+                            clearSelection();
+                        }}
+                    />
+                )}
+                {visibleList && (
+                    <ul ref={listE} className="listElementsContainer">
+                        <div onMouseDown={(e)=>{
+                            e.preventDefault();
+                        }}>
+                            {specialOption}
+                        </div>
+                        {filteredList.map((element, index) => (
+                            <li 
+                                className={focusedIndex === index ? 'focused-item' : ''}
+                                onMouseDown={(e) => {
+                                    e.preventDefault(); // Evita que el input pierda el foco inmediatamente
+                                    handleSelect(element);
+                                }}
+                                key={index}
+                                // Opcional: sincronizar el foco del mouse con el teclado
+                                onMouseEnter={() => setFocusedIndex(index)}
+                            >
+                                {element.text}
+                            </li>
+                        ))}
+                    </ul>
+                )}
             </div>
             {children}
         </div>

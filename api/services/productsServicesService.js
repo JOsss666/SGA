@@ -325,11 +325,11 @@ productsServicesService.update = async (info) => {
                 units = COALESCE($4, units),
                 entry_concept = COALESCE($5, entry_concept),
                 exit_concept = COALESCE($6, exit_concept),
-                taxed = COALESCE($7, taxed),
+                taxed = COALESCE($7::boolean, taxed),
                 tax_id = CASE
-                    WHEN $7 = false THEN NULL
-                    WHEN $8 IS NULL THEN tax_id
-                    ELSE $8
+                    WHEN $7::boolean = false THEN NULL
+                    WHEN $8::bigint IS NULL THEN tax_id
+                    ELSE $8::bigint
                 END,
                 img = COALESCE($9, img),
                 type = COALESCE($10, type),
@@ -777,6 +777,40 @@ productsServicesService.updateThirdPartyProductAssociation = async (info) => {
 
         return { status: 'OK', product: association };
     });
+};
+
+/**
+ * Lista las asociaciones activas de productos de un tercero, incluso cuando
+ * todavía no tienen impuestos o retenciones configurados.
+ */
+productsServicesService.getThirdPartyProductAssociations = async (info) => {
+    const companyId = parsePositiveId(info.company_id, 'company_id');
+    const thirdPartyId = parsePositiveId(info.third_party_id ?? info.thirdParty_id, 'third_party_id');
+
+    return useDataBase(`
+        SELECT
+            tpp.id AS association_id,
+            tpp.company_id,
+            tpp.third_party_id,
+            tpp.product_id,
+            tpp.third_party_reference,
+            tpp.is_active,
+            ps.name AS product_name,
+            ps.code AS product_code,
+            ps.img AS product_img,
+            ps.type AS product_type
+        FROM "Fiscal".third_party_products tpp
+        JOIN "Ecosystem".thirdparties tp
+            ON tp.id = tpp.third_party_id
+           AND tp.company_id = tpp.company_id
+        JOIN "Inventory"."products&services" ps
+            ON ps.id = tpp.product_id
+           AND ps.company_id = tpp.company_id
+        WHERE tpp.company_id = $1
+          AND tpp.third_party_id = $2
+          AND tpp.is_active = true
+        ORDER BY ps.name ASC, ps.id ASC;
+    `, [companyId, thirdPartyId], 1);
 };
 
 /**

@@ -1,4 +1,4 @@
-import { useDataBase } from "../app.js";
+import { useDataBase, withTransaction } from "../app.js";
 import encryptionService from "./encryptionService.js";
 import electronicProviderCredentialsService from "./electronicProviderCredentialsService.js";
 
@@ -311,44 +311,45 @@ const saveNumberingRanges = async (credential, ranges) => {
             JSON.stringify(range)
         ];
 
-        await useDataBase(`
-            INSERT INTO "Facturation".electronic_provider_numbering_ranges (
-                credential_id,
-                company_id,
-                provider,
-                environment,
-                provider_range_id,
-                document_name,
-                document_code,
-                prefix,
-                current_number,
-                from_number,
-                to_number,
-                valid_from,
-                valid_until,
-                is_active,
-                expires_at,
-                raw_payload
-            )
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
-            ON CONFLICT (credential_id, company_id, provider_range_id)
-            DO UPDATE SET
-                company_id = EXCLUDED.company_id,
-                provider = EXCLUDED.provider,
-                environment = EXCLUDED.environment,
-                document_name = EXCLUDED.document_name,
-                document_code = EXCLUDED.document_code,
-                prefix = EXCLUDED.prefix,
-                current_number = EXCLUDED.current_number,
-                from_number = EXCLUDED.from_number,
-                to_number = EXCLUDED.to_number,
-                valid_from = EXCLUDED.valid_from,
-                valid_until = EXCLUDED.valid_until,
-                is_active = EXCLUDED.is_active,
-                expires_at = EXCLUDED.expires_at,
-                raw_payload = EXCLUDED.raw_payload,
-                updated_at = now();
-        `, values, 2);
+        await withTransaction(async (client) => {
+            const cacheKey = `factus-range:${credential.id}:${companyId}:${providerRangeId}`;
+            await client.query(
+                'SELECT pg_advisory_xact_lock(hashtextextended($1, 0))',
+                [cacheKey]
+            );
+
+            const updateResult = await client.query(`
+                UPDATE "Facturation".electronic_provider_numbering_ranges
+                SET provider = $3,
+                    environment = $4,
+                    document_name = $6,
+                    document_code = $7,
+                    prefix = $8,
+                    current_number = $9,
+                    from_number = $10,
+                    to_number = $11,
+                    valid_from = $12,
+                    valid_until = $13,
+                    is_active = $14,
+                    expires_at = $15,
+                    raw_payload = $16,
+                    updated_at = now()
+                WHERE credential_id = $1
+                  AND company_id = $2
+                  AND provider_range_id = $5;
+            `, values);
+
+            if (updateResult.rowCount === 0) {
+                await client.query(`
+                    INSERT INTO "Facturation".electronic_provider_numbering_ranges (
+                        credential_id, company_id, provider, environment, provider_range_id,
+                        document_name, document_code, prefix, current_number, from_number,
+                        to_number, valid_from, valid_until, is_active, expires_at, raw_payload
+                    )
+                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16);
+                `, values);
+            }
+        });
     }
 
     return ranges;

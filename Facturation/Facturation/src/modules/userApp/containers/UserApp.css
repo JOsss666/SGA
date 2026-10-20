@@ -119,6 +119,11 @@
     margin: auto 2vh;
 }
 
+.UserApp .headApp .UserCard img{
+    height: 5vh;
+    width: 5vh;
+}
+
 .UserApp .headApp .BigTitle{
     margin: auto 2vh;
     width: 25%;
@@ -277,6 +282,12 @@
 .UserApp .asideMenuApp .activeMenusHolder{
     box-shadow: 0 .4vh 1vh #3333;
     min-width: 18vw;
+}
+
+.UserApp .AiPet{
+    position: fixed;
+    bottom: 2dvh;
+    right: 2dvh;
 }
 
 .UserApp .bodyApp{

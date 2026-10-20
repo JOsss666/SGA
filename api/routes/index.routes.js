@@ -32,8 +32,18 @@ import { requireTrustedOrigin } from '../middleware/requireTrustedOrigin.js';
 import { requireCompanyAccess } from '../middleware/requireCompanyAccess.js';
 import supplierDelegationController from '../controllers/supplierDelegationController.js';
 import externalAccesThirdPartyController from '../controllers/externalThirdPartyAccesController.js';
+import { createAdjustment, deleteTemplate, listTemplates, saveTemplate } from '../controllers/accountingAdjustmentController.js';
 
 const router = express.Router();
+
+router.post('/contability/accounting-adjustments', express.json({ limit: '256kb' }),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess, createAdjustment, sessionErrorHandler);
+router.post('/contability/accounting-adjustment-templates/list', express.json({ limit: '16kb' }),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess, listTemplates, sessionErrorHandler);
+router.post('/contability/accounting-adjustment-templates', express.json({ limit: '256kb' }),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess, saveTemplate, sessionErrorHandler);
+router.delete('/contability/accounting-adjustment-templates/:id', express.json({ limit: '16kb' }),
+    requireTrustedOrigin, authenticateSession, requireCompanyAccess, deleteTemplate, sessionErrorHandler);
 
 // temporal folder for chunks
 const CHUNKS_DIR = path.join(process.cwd(), "chunks");
@@ -235,6 +245,16 @@ router.post('/inventory/createThirdPartyProductTaxRelation',inventoryController.
 router.post('/inventory/updateThirdPartyProductTaxRelation',inventoryController.updateThirdPartyProductTaxRelation);
 
 router.post(
+    '/inventory/getThirdPartyProductAssociations',
+    express.json({ limit: '32kb', strict: true }),
+    requireTrustedOrigin,
+    authenticateSession,
+    requireCompanyAccess,
+    inventoryController.getThirdPartyProductAssociations,
+    sessionErrorHandler
+);
+
+router.post(
     '/inventory/updateThirdPartyProductAssociation',
     express.json({ limit: '128kb', strict: true }),
     requireTrustedOrigin,
@@ -369,7 +389,9 @@ router.post('/treasury/getCompanyAdvances',treasuryController.getCompanyAdvances
 
 router.post('/treasury/getTreasury',controller.getAccounts); //PENDIENTE IMPLEMENTAR 
 
-router.post('/treasury/getThirdPartyPortfolio',treasuryController.getThirdPartyPortfolio); //PENDIENTE IMPLEMENTAR 
+router.post('/treasury/getThirdPartyPortfolio',treasuryController.getThirdPartyPortfolio); //PENDIENTE IMPLEMENTAR
+
+router.post('/treasury/getThirdPartyPayables',treasuryController.getThirdPartyPayables);
 
 // SGA Facturation
 
@@ -506,6 +528,16 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
     router.post('/electronicFacturation/providerCredentials/:id/disable', electronicProviderCredentialsController.disable);
 
     router.post('/electronicFacturation/invoice', electronicFacturationController.newInvoice);
+
+    router.post(
+        '/electronicFacturation/sellinvoiceReemision',
+        express.json({ limit: '256kb', strict: true }),
+        requireTrustedOrigin,
+        authenticateSession,
+        requireCompanyAccess,
+        electronicFacturationController.sellinvoiceReemision,
+        sessionErrorHandler
+    );
 
     router.get('/electronicFacturation/taxes', electronicFacturationController.getTaxes);
 

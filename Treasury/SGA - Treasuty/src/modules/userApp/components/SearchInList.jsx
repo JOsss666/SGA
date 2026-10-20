@@ -12,7 +12,10 @@ export function SearchinList({
     noActVal,
     canClear,
     defaultValue = {},
-    value
+    value,
+    multiple = false,
+    keepOpenOnMultiple = false,
+    disabledPlaceholder
 }){
     
     const [searchValue, setSearchValue] = useState('');
@@ -55,8 +58,22 @@ export function SearchinList({
     const handleSelect = (element) => {
         const optionValue = element.value !== undefined ? element.value : element.text;
 
+        if (multiple) {
+            const selectedValues = Array.isArray(value) ? value.map(String) : [];
+            const nextValues = selectedValues.includes(String(optionValue))
+                ? selectedValues.filter(selected => selected !== String(optionValue))
+                : [...selectedValues, String(optionValue)];
+            if (action) action(nextValues);
+            setSearchValue('');
+            // Los filtros con selección múltiple pueden seguir agregándose sin
+            // obligar a abrir el listado después de cada elección.
+            setVisibleList(keepOpenOnMultiple);
+            setFocusedIndex(-1);
+            return;
+        }
+
         if(!noActVal){
-            setInputValue(element.text);
+            setInputValue(element.selectedText ?? element.text);
             setSearchValue('');
             setSelectedOption(optionValue);
         }
@@ -72,7 +89,7 @@ export function SearchinList({
         setSearchValue('');
         setInputValue('');
         setSelectedOption('');
-        if(action && !noActVal) action('');
+        if(action && !noActVal) action(multiple ? [] : '');
     };
 
     const handleKeyDown = (e) => {
@@ -97,6 +114,15 @@ export function SearchinList({
     useEffect(()=>{
         if(noActVal) return;
 
+        if (multiple) {
+            const selectedValues = Array.isArray(value) ? value.map(String) : [];
+            const selectedLabels = list
+                .filter(element => selectedValues.includes(String(element.value !== undefined ? element.value : element.text)))
+                .map(element => element.text);
+            setInputValue(selectedLabels.join(', '));
+            return;
+        }
+
         const isControlled = value !== undefined;
         const selectedValue = isControlled
             ? value
@@ -106,23 +132,39 @@ export function SearchinList({
             return;
         }
 
+        // Reduce un valor (primitivo u objeto) a su identificador comparable.
+        // Se contemplan las llaves de id más usadas en SGA para que el match funcione
+        // tanto si recibes el id suelto como el registro completo.
         const comparableValue = currentValue => {
             if(currentValue && typeof currentValue === 'object'){
                 return currentValue.id
                     ?? currentValue.thirdParty_id
                     ?? currentValue.product_id
+                    ?? currentValue.store_id
+                    ?? currentValue.bussines_id
+                    ?? currentValue.costCenter_id
+                    ?? currentValue.concept_id
+                    ?? currentValue.cashBox_id
                     ?? currentValue.value;
             }
             return currentValue;
         };
 
+        const target = String(comparableValue(selectedValue));
         const selectedElement = list.find(element => {
             const optionValue = element.value !== undefined ? element.value : element.text;
-            return String(comparableValue(optionValue)) === String(comparableValue(selectedValue));
+            return String(comparableValue(optionValue)) === target;
         });
 
-        setInputValue(selectedElement?.text ?? defaultValue.text ?? '');
-    }, [value, selectedOption, defaultValue.value, defaultValue.text, list, noActVal]);
+        // Fallback de texto cuando la opción no está en la lista (lista aún sin cargar
+        // o filtrada por accesos): se usa el texto explícito de defaultValue o, si el
+        // value es el propio registro, su nombre/etiqueta.
+        const fallbackText = (selectedValue && typeof selectedValue === 'object')
+            ? (selectedValue.text ?? selectedValue.name ?? selectedValue.label ?? '')
+            : '';
+
+        setInputValue(selectedElement?.text ?? defaultValue.text ?? fallbackText);
+    }, [value, selectedOption, defaultValue.value, defaultValue.text, list, noActVal, multiple]);
 
     return(
         <div className="FacturationSearchinList" onClick={()=>{
@@ -137,7 +179,7 @@ export function SearchinList({
                 <input 
                     type="text"
                     value={inputValue}
-                    placeholder={disabled ? "Sin opciones disponibles" : placeHolder} 
+                    placeholder={disabled ? (disabledPlaceholder ?? "Sin opciones disponibles") : placeHolder}
                     disabled={disabled} 
                     onFocus={() => setVisibleList(true)}
                     onKeyDown={handleKeyDown}

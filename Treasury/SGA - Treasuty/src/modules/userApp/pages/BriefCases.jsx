@@ -10,6 +10,7 @@ import { NormalCard } from '../components/NormalCard';
 import { RangeDate } from '../components/RangeDate';
 import { ButtonDownload } from '../components/ButtonDownload';
 import { SumaryCard } from '../components/ SumaryCard';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const portfolioColumns = [
     { key: 'names', label: 'Tercero', minWidth: '13rem', flex: '1.6 1 13rem', order: 'ASC' },
@@ -53,11 +54,17 @@ const portfolioRenderers = {
 };
 
 export function BriefCases() {
+    const navigate = useNavigate();
+    const params = useParams();
     const { appInfo } = useAppInfo();
     const [portfolio, setPortfolio] = useState([]);
     const [searchValue, setSearchValue] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    const handleNavigate = (path)=>{
+        navigate(`/SGA_treasury/${params.company_key}/${params.user_key}/briefcases/` + path);
+    }
 
     const loadPortfolio = useCallback(async () => {
         setLoading(true);
@@ -115,9 +122,9 @@ export function BriefCases() {
 
             <div className="briefCasesSummary" aria-label="Resumen de cartera">
                 {/* Total cuentas por cobrar */}
-                <SumaryCard title={'Cuentas por cobrar'} desc={'Valor total cuentas por cobrar'} value={moneyFormat(1000000)} percent={2} currency={'COP'}/>
+                <SumaryCard title={'Cuentas por cobrar'} desc={'Valor total cuentas por cobrar'} value={moneyFormat(1000000)} percent={2} currency={'COP'} onClick={()=>handleNavigate('receivableAccounts')}/>
                 {/* Total cuentas por pagar */}
-                <SumaryCard title={'Cuentas por pagar'} desc={'Valor total cuentas por pagar'} value={moneyFormat(1000000)} percent={2} currency={'COP'}/>
+                <SumaryCard title={'Cuentas por pagar'} desc={'Valor total cuentas por pagar'} value={moneyFormat(1000000)} percent={2} currency={'COP'} onClick={() => handleNavigate('payableAccounts')}/>
                 {/* Cartera vencida por cobrar */}
                 <SumaryCard title={'Cobros Vencidos'} desc={'Valor total cartera por cobrar vencida'} value={moneyFormat(1000000)} percent={2} currency={'COP'}/>
                 {/* Cartera vencida por pagar */}
