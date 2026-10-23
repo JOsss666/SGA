@@ -36,14 +36,18 @@ import { createAdjustment, deleteTemplate, listTemplates, saveTemplate } from '.
 
 const router = express.Router();
 
+// Ajuste contable: autenticado por company_id/user_id (header X-SGA-Company-Id o body),
+// igual que el resto de la app y nexo360. No se exige cookie de sesión porque, al estar
+// el frontend y el backend en dominios distintos, la cookie de terceros no viaja
+// cross-site en Safari/Chrome. Se conserva requireTrustedOrigin como protección CSRF.
 router.post('/contability/accounting-adjustments', express.json({ limit: '256kb' }),
-    requireTrustedOrigin, authenticateSession, requireCompanyAccess, createAdjustment, sessionErrorHandler);
+    requireTrustedOrigin, createAdjustment, sessionErrorHandler);
 router.post('/contability/accounting-adjustment-templates/list', express.json({ limit: '16kb' }),
-    requireTrustedOrigin, authenticateSession, requireCompanyAccess, listTemplates, sessionErrorHandler);
+    requireTrustedOrigin, listTemplates, sessionErrorHandler);
 router.post('/contability/accounting-adjustment-templates', express.json({ limit: '256kb' }),
-    requireTrustedOrigin, authenticateSession, requireCompanyAccess, saveTemplate, sessionErrorHandler);
+    requireTrustedOrigin, saveTemplate, sessionErrorHandler);
 router.delete('/contability/accounting-adjustment-templates/:id', express.json({ limit: '16kb' }),
-    requireTrustedOrigin, authenticateSession, requireCompanyAccess, deleteTemplate, sessionErrorHandler);
+    requireTrustedOrigin, deleteTemplate, sessionErrorHandler);
 
 // temporal folder for chunks
 const CHUNKS_DIR = path.join(process.cwd(), "chunks");

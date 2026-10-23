@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1080" viewBox="0 0 1700 1080" role="img" aria-labelledby="title desc">
+  <title id="title">Secuencia propuesta de ingesta y reverso de movimientos</title>
+  <desc id="desc">Un documento envía UMJP al controlador. El servicio verifica idempotencia, escribe transacción, detalles y auditoría, y responde al documento.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#334155"/></marker>
+    <marker id="arrowOpen" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10" fill="none" stroke="#334155" stroke-width="1.5"/></marker>
+    <style>
+      text{font-family:Inter,Arial,sans-serif;fill:#172033}.title{font-size:28px;font-weight:700}.subtitle{font-size:15px;fill:#526078}.participant{fill:#e9f1fb;stroke:#7e9abd;stroke-width:2}.label{font-size:15px;font-weight:700}.life{stroke:#aab7c8;stroke-width:2;stroke-dasharray:7 7}.msg{stroke:#334155;stroke-width:2;marker-end:url(#arrow)}.reply{stroke:#64748b;stroke-width:2;stroke-dasharray:8 6;marker-end:url(#arrowOpen)}.msgtext{font-size:14px}.small{font-size:13px;fill:#526078}.box{fill:#fff;stroke:#94a3b8;stroke-width:2}.alt{fill:#f8fbff;stroke:#456d9d;stroke-width:2}.altlabel{fill:#dce9f8;stroke:#456d9d;stroke-width:1}.footer{font-size:14px;fill:#526078}
+    </style>
+  </defs>
+  <rect width="1700" height="1080" fill="#f4f7fb"/>
+  <text x="52" y="54" class="title">Ingesta y reverso de movimientos</text>
+  <text x="52" y="82" class="subtitle">Flujo propuesto · el posteo es idempotente y la corrección conserva el histórico</text>
+  <g>
+    <rect class="participant" x="40" y="112" width="200" height="64" rx="10"/><text class="label" x="140" y="151" text-anchor="middle">Usuario</text>
+    <rect class="participant" x="310" y="112" width="200" height="64" rx="10"/><text class="label" x="410" y="151" text-anchor="middle">Documento</text>
+    <rect class="participant" x="580" y="112" width="200" height="64" rx="10"/><text class="label" x="680" y="151" text-anchor="middle">Banks Controller</text>
+    <rect class="participant" x="850" y="112" width="200" height="64" rx="10"/><text class="label" x="950" y="142" text-anchor="middle">banksService /</text><text class="label" x="950" y="161" text-anchor="middle">MovementsService</text>
+    <rect class="participant" x="1120" y="112" width="200" height="64" rx="10"/><text class="label" x="1220" y="142" text-anchor="middle">banksAudit</text><text class="label" x="1220" y="161" text-anchor="middle">Service</text>
+    <rect class="participant" x="1390" y="112" width="200" height="64" rx="10"/><text class="label" x="1490" y="142" text-anchor="middle">Esquema Treasury</text><text class="label" x="1490" y="161" text-anchor="middle">(PostgreSQL)</text>
+  </g>
+  <path class="life" d="M140 176v810M410 176v810M680 176v810M950 176v810M1220 176v810M1490 176v810"/>
+  <path class="msg" d="M140 222h270"/><text class="msgtext" x="275" y="211" text-anchor="middle">Confirma documento</text>
+  <path class="msg" d="M410 282h270"/><text class="msgtext" x="545" y="269" text-anchor="middle">UMJP create + details[]</text>
+  <path class="msg" d="M680 342h270"/><text class="msgtext" x="815" y="329" text-anchor="middle">withTransaction + validar</text>
+  <rect class="alt" x="810" y="386" width="730" height="440" rx="8"/>
+  <rect class="altlabel" x="810" y="386" width="315" height="36" rx="6"/><text class="label" x="826" y="410">alt · idempotency_key existente</text>
+  <path class="reply" d="M950 474h-270"/><text class="msgtext" x="810" y="460" text-anchor="middle">Devuelve existente; no duplica</text>
+  <path d="M810 508h730" stroke="#456d9d" stroke-width="1.5" stroke-dasharray="8 6"/>
+  <rect class="altlabel" x="810" y="508" width="160" height="34" rx="6"/><text class="label" x="826" y="531">else · nueva</text>
+  <path class="msg" d="M950 586h540"/><text class="msgtext" x="1220" y="572" text-anchor="middle">INSERT transacción + detalles (currency, direction)</text>
+  <path class="msg" d="M950 646h270"/><text class="msgtext" x="1085" y="633" text-anchor="middle">Registra acción</text>
+  <path class="msg" d="M1220 706h270"/><text class="msgtext" x="1355" y="693" text-anchor="middle">INSERT bank_audit (append-only)</text>
+  <path class="reply" d="M1490 766h-540"/><text class="msgtext" x="1220" y="753" text-anchor="middle">Commit</text>
+  <path class="reply" d="M950 872h-270"/><text class="msgtext" x="810" y="859" text-anchor="middle">OK · saldo por moneda recalculado</text>
+  <path class="reply" d="M680 932h-270"/><text class="msgtext" x="545" y="919" text-anchor="middle">Respuesta al documento</text>
+  <rect class="box" x="250" y="970" width="1200" height="72" rx="10"/><text class="footer" x="850" y="1000" text-anchor="middle">Reverse: crea detalles de dirección inversa enlazados por reverses_detail_id; no borra el movimiento original.</text><text class="footer" x="850" y="1023" text-anchor="middle">Controlador, servicios y tablas son propuestas. La ruta exacta documento → movimiento sigue pendiente.</text>
+</svg>

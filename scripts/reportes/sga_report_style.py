@@ -31,12 +31,14 @@ Requisitos: reportlab (y Pillow solo si se regenera el logo).
 """
 
 import os
+import re
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT, TA_JUSTIFY
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer, Table,
+                                TableStyle, XPreformatted)
 from reportlab.lib.utils import ImageReader
 
 # --------------------------------------------------------------------------- #
@@ -50,6 +52,14 @@ GOOD   = colors.HexColor("#0F8A4D")   # acento positivo (fila total)
 GOODBG = colors.HexColor("#EAF6EF")
 WARN   = colors.HexColor("#B4541A")
 CALLBG = colors.HexColor("#EEF2FB")   # fondo de caja destacada
+
+# Paleta para bloques de código (JSON de ejemplo)
+CODE_BG      = colors.HexColor("#0B0B0F")   # fondo del bloque
+CODE_FG      = "#C9D1D9"                     # texto / puntuación
+CODE_KEY     = "#E6EDF3"                     # claves
+CODE_STR     = "#7EE787"                     # valores string
+CODE_NUM     = "#79C0FF"                     # números / null / booleanos
+CODE_COMMENT = "#8B949E"                     # comentarios //
 
 PAGE_W, PAGE_H = A4
 LMAR = 18 * mm
@@ -82,6 +92,9 @@ _TD  = ParagraphStyle("SGA_TD", parent=_ss["Normal"], fontName="Helvetica",
 _TDb = ParagraphStyle("SGA_TDb", parent=_TD, fontName="Helvetica-Bold")
 _TDr = ParagraphStyle("SGA_TDr", parent=_TD, alignment=2)
 _TDrb= ParagraphStyle("SGA_TDrb", parent=_TDb, alignment=2)
+CODE_STYLE = ParagraphStyle("SGA_CODE", parent=_ss["Normal"], fontName="Courier",
+                            fontSize=7.5, textColor=colors.HexColor(CODE_FG),
+                            leading=10.6)
 
 
 # --------------------------------------------------------------------------- #
@@ -127,6 +140,83 @@ def callout(text, accent=INK, bg=CALLBG):
         ("TOPPADDING", (0, 0), (-1, -1), 10),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
         ("LINEBEFORE", (0, 0), (0, -1), 3, accent),
+    ]))
+    return t
+
+
+# --- Bloque de código (JSON de ejemplo) ------------------------------------ #
+_CODE_NUM_RE = re.compile(r"-?\d+(?:\.\d+)?")
+_CODE_KW_RE = re.compile(r"\b(?:true|false|null)\b")
+
+
+def _code_esc(s):
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def _code_plain(text):
+    """Colorea números, null y booleanos en un tramo fuera de strings/comentarios."""
+    s = _code_esc(text)
+    s = _CODE_NUM_RE.sub(lambda m: '<font color="%s">%s</font>' % (CODE_NUM, m.group(0)), s)
+    s = _CODE_KW_RE.sub(lambda m: '<font color="%s">%s</font>' % (CODE_NUM, m.group(0)), s)
+    return s
+
+
+def _code_hl_line(line):
+    """Resalta una línea: claves, strings, números y comentarios // de fin de línea."""
+    segs, i, n, start, in_str = [], 0, len(line), 0, False
+    while i < n:
+        ch = line[i]
+        if in_str:
+            if ch == '"' and line[i - 1] != "\\":
+                j = i + 1
+                while j < n and line[j] == " ":
+                    j += 1
+                kind = "key" if (j < n and line[j] == ":") else "str"
+                segs.append((kind, line[start:i + 1]))
+                in_str, i, start = False, i + 1, i + 1
+                continue
+            i += 1
+            continue
+        if ch == '"':
+            if start < i:
+                segs.append(("plain", line[start:i]))
+            in_str, start = True, i
+            i += 1
+            continue
+        if ch == "/" and i + 1 < n and line[i + 1] == "/":
+            if start < i:
+                segs.append(("plain", line[start:i]))
+            segs.append(("comment", line[i:]))
+            start = i = n
+            break
+        i += 1
+    if start < n:
+        segs.append(("plain", line[start:n]))
+
+    out = []
+    for kind, text in segs:
+        if kind == "key":
+            out.append('<font color="%s">%s</font>' % (CODE_KEY, _code_esc(text)))
+        elif kind == "str":
+            out.append('<font color="%s">%s</font>' % (CODE_STR, _code_esc(text)))
+        elif kind == "comment":
+            out.append('<font color="%s">%s</font>' % (CODE_COMMENT, _code_esc(text)))
+        else:
+            out.append(_code_plain(text))
+    return "".join(out)
+
+
+def code(src):
+    """Bloque de código con fondo oscuro y resaltado básico (ideal para JSON de ejemplo)."""
+    body = "\n".join(_code_hl_line(ln) for ln in src.replace("\t", "  ").split("\n"))
+    para = XPreformatted(body, CODE_STYLE)
+    t = Table([[para]], colWidths=[PAGE_W - LMAR - RMAR])
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), CODE_BG),
+        ("LEFTPADDING", (0, 0), (-1, -1), 10),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+        ("TOPPADDING", (0, 0), (-1, -1), 8),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
     ]))
     return t
 

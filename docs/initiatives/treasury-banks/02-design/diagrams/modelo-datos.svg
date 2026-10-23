@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="1560" viewBox="0 0 1180 1560" role="img" aria-labelledby="title desc">
+  <title id="title">Modelo de datos propuesto para Tesorería</title>
+  <desc id="desc">Seis entidades nuevas conectadas en cadena: instituciones, bancos, cuentas, transacciones, detalles y auditoría.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#64748b"/></marker>
+    <style>
+      text{font-family:Inter,Arial,sans-serif;fill:#172033}.title{font-size:30px;font-weight:700}.subtitle{font-size:16px;fill:#526078}.entity{font-size:21px;font-weight:700;fill:#fff}.tag{font-size:13px;font-weight:700;fill:#dbeafe}.field{font-size:16px}.note{font-size:14px;fill:#526078}.card{fill:#fff;stroke:#b8c6da;stroke-width:2}.header{fill:#1e4f91}.line{stroke:#64748b;stroke-width:3;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1180" height="1560" fill="#f4f7fb"/>
+  <text x="54" y="58" class="title">Modelo de datos · Tesorería</text>
+  <text x="54" y="88" class="subtitle">Propuesta de entidades y relaciones · el saldo se deriva por cuenta y moneda</text>
+  <g transform="translate(285 116)"><rect class="card" width="610" height="174" rx="14"/><path class="header" d="M14 0h582a14 14 0 0 1 14 14v46H0V14A14 14 0 0 1 14 0z"/><text x="24" y="29" class="entity">BANK_INSTITUTIONS</text><text x="24" y="49" class="tag">Catálogo compartido ERP</text><text x="24" y="91" class="field">PK institution_id · code · name · scope</text><text x="24" y="122" class="note">scope: erp_global | company_private</text></g>
+  <path d="M590 292v38" class="line"/><text x="610" y="317" class="note">1 institución → 0..N bancos</text>
+  <g transform="translate(285 340)"><rect class="card" width="610" height="174" rx="14"/><path class="header" d="M14 0h582a14 14 0 0 1 14 14v46H0V14A14 14 0 0 1 14 0z"/><text x="24" y="29" class="entity">BANKS</text><text x="24" y="49" class="tag">Agrupador por empresa</text><text x="24" y="91" class="field">PK bank_id · company_id · FK institution_id</text><text x="24" y="122" class="note">defaults: herencia · no almacena account_id contable</text></g>
+  <path d="M590 516v38" class="line"/><text x="610" y="541" class="note">1 banco → 0..N cuentas</text>
+  <g transform="translate(285 564)"><rect class="card" width="610" height="174" rx="14"/><path class="header" d="M14 0h582a14 14 0 0 1 14 14v46H0V14A14 14 0 0 1 14 0z"/><text x="24" y="29" class="entity">BANK_ACCOUNTS</text><text x="24" y="49" class="tag">Cuenta bancaria y puente contable</text><text x="24" y="91" class="field">PK bank_account_id · FK bank_id · account_number</text><text x="24" y="122" class="note">account_id contable · currency_policy · inheritance</text></g>
+  <path d="M590 740v38" class="line"/><text x="610" y="765" class="note">1 cuenta → 0..N transacciones</text>
+  <g transform="translate(285 788)"><rect class="card" width="610" height="174" rx="14"/><path class="header" d="M14 0h582a14 14 0 0 1 14 14v46H0V14A14 14 0 0 1 14 0z"/><text x="24" y="29" class="entity">BANK_TRANSACTIONS</text><text x="24" y="49" class="tag">Registro de operación documental</text><text x="24" y="91" class="field">PK transaction_id · FK bank_account_id · company_id</text><text x="24" y="122" class="note">idempotency_key · operation · origin · created_at</text></g>
+  <path d="M590 964v38" class="line"/><text x="610" y="989" class="note">1 transacción → 1..N detalles</text>
+  <g transform="translate(285 1012)"><rect class="card" width="610" height="174" rx="14"/><path class="header" d="M14 0h582a14 14 0 0 1 14 14v46H0V14A14 14 0 0 1 14 0z"/><text x="24" y="29" class="entity">BANK_TRANSACTION_DETAILS</text><text x="24" y="49" class="tag">Importe y moneda viven en el detalle</text><text x="24" y="91" class="field">PK detail_id · FK transaction_id · currency · amount</text><text x="24" y="122" class="note">direction · concept · reverses_detail_id</text></g>
+  <path d="M590 1188v38" class="line"/><text x="610" y="1213" class="note">1 detalle → 0..N eventos de auditoría</text>
+  <g transform="translate(285 1236)"><rect class="card" width="610" height="174" rx="14"/><path class="header" d="M14 0h582a14 14 0 0 1 14 14v46H0V14A14 14 0 0 1 14 0z"/><text x="24" y="29" class="entity">BANK_AUDIT</text><text x="24" y="49" class="tag">Bitácora append-only</text><text x="24" y="91" class="field">PK audit_id · FK transaction_id · FK detail_id</text><text x="24" y="122" class="note">actor_user_id · operation · created_at</text></g>
+  <text x="54" y="1480" class="note">Todas las entidades son propuestas. Las claves y cardinalidades deben confirmarse en diseño técnico.</text>
+</svg>
