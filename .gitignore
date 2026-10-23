@@ -38,3 +38,16 @@ coverage/
 
 # Local DB backups (contain sensitive data — never commit)
 db/backups/
+
+# Agentes de flujo de trabajo e instalaciones locales de skills
+.agents/workFlowAgents/
+.agents/skills/archify/
+.agents/skills/sga-feature-planner
+.agents/skills/sga-feature-docs-diagrams
+.agents/skills/sga-feature-execution-planner
+.agents/skills/sga-feature-orchestrator
+.claude/skills/archify
+.claude/skills/sga-feature-planner
+.claude/skills/sga-feature-docs-diagrams
+.claude/skills/sga-feature-execution-planner
+.claude/skills/sga-feature-orchestrator

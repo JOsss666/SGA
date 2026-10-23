@@ -274,6 +274,7 @@ export function FormAccountingAdjustment({ reloadFun }) {
 
     const payload = () => ({
         company_id: appInfo.company_id,
+        user_id: userInfo.user_id,
         store_id: storeId,
         bussines_id: bussinesId,
         concept_id: conceptId,
