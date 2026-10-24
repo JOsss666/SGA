@@ -84,10 +84,24 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const [e_invoiceDescription,set_eInvoiceDescription] = useState('');
     const [attached,setAttached] = useState('-');
         // Instances control
-        const [instance_id,setInstance_id] = useState([]);
-        const [selectedInstances, setSelectedInstances] = useState([]);
-        const [instanceOwnSerial,setInstanceOwnSerial] = useState();
-        const [step_id,setStep_id] = useState();
+    const [instance_id,setInstance_id] = useState(() => {
+        const providedInstanceId = InfoParams?.instance_id;
+        if (providedInstanceId == null || providedInstanceId === '') return [];
+        return Array.isArray(providedInstanceId) ? providedInstanceId : [providedInstanceId];
+    });
+    const [selectedInstances, setSelectedInstances] = useState(() => {
+        if (Array.isArray(InfoParams?.instances) && InfoParams.instances.length) return InfoParams.instances;
+        const instanceIds = Array.isArray(InfoParams?.instance_id)
+            ? InfoParams.instance_id
+            : [InfoParams?.instance_id];
+        return instanceIds.filter(id => id != null && id !== '').map(id => ({
+            id,
+            step_id: InfoParams?.step_id,
+            ownSerial: InfoParams?.instanceOwnSerial ?? InfoParams?.ownSerial
+        }));
+    });
+    const [instanceOwnSerial,setInstanceOwnSerial] = useState(InfoParams?.instanceOwnSerial ?? InfoParams?.ownSerial);
+    const [step_id,setStep_id] = useState(InfoParams?.step_id);
     const [concept_id,setConcept_id] = useState();
     const [conceptAccount_id,setConcept_account_id] = useState();
     const [cashBox_id,setCashBox_id] = useState();
@@ -219,15 +233,17 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             }
 
             // Filtro para busqueda de Instancias de Procesos
-            if(!userConfig.access.process_instances.overAll){
-                if(userConfig.access.process_instances.enabled.length > 1){
-                    await getInstances(userConfig.access.process_instances.enabled,undefined);
+            if (InfoParams?.instance_id == null || InfoParams.instance_id === '') {
+                if(!userConfig.access.process_instances.overAll){
+                    if(userConfig.access.process_instances.enabled.length > 1){
+                        await getInstances(userConfig.access.process_instances.enabled,undefined);
+                    }else{
+                        temInfo.instance_id = userConfig.access.process_instances.enabled[0]
+                        setInstance_id(userConfig.access.process_instances.enabled[0])
+                    }
                 }else{
-                    temInfo.instance_id = userConfig.access.process_instances.enabled[0]
-                    setInstance_id(userConfig.access.process_instances.enabled[0])
+                    await getInstances()
                 }
-            }else{
-                await getInstances()
             }
 
             // Rangos de numeración de factura electrónica permitidos para el rol
@@ -1300,6 +1316,14 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
         }
     },[instance_id])
 
+    useEffect(() => {
+        const providedInstanceId = Array.isArray(InfoParams?.instance_id)
+            ? InfoParams.instance_id[0]
+            : InfoParams?.instance_id;
+        if (providedInstanceId == null || providedInstanceId === '') return;
+        getDocuments(providedInstanceId);
+    }, [InfoParams?.instance_id]);
+
 
     useEffect(()=>{
         if(documents.length > 0){
@@ -1426,7 +1450,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                     {info.costCenter_id == undefined && (
                         <SearchinList action={setCostCenter_id} title={'Centro de costo'} placeHolder={'Seleccione el centro de costo'} list={costCenters} disabled={disabled}/>
                     )}
-                    <SearchinList action={handleThirdPartyChange} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdparties} disabled={disabled} specialOption={
+                    <SearchinList value={thirdParty_id} action={handleThirdPartyChange} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdparties} disabled={disabled || InfoParams?.thirdParty_id != undefined} specialOption={
                         <NewElementSelect title={'Crear nuevo'} onClick={()=>{
                             popInAlert(<FormNewThirdParties reloadFun={getThirdParties} quickCreation={true}/>)
                         }}/>
