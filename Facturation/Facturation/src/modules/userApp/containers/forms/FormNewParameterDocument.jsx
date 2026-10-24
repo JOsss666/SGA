@@ -156,7 +156,11 @@ function normalizeTemplate(source) {
             throw new Error(`El componente ${field.component} no está registrado.`);
         }
         keys.add(field.key);
-        return { visible: true, disabled: false, required: false, ...template.config.fieldDefaults, ...field };
+        const normalizedField = { visible: true, disabled: false, required: false, ...template.config.fieldDefaults, ...field };
+        return {
+            ...normalizedField,
+            required: field.required ?? field.props?.required ?? template.config.fieldDefaults?.required ?? false
+        };
     });
 
     return { ...template, config: { ...template.config, fields } };
@@ -212,7 +216,7 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
     const { popOutAlert} = useAlert();
     // Sin default: si el proceso (u otro padre) no envía paramdoc_id, el form
     // resuelve solo cuál abrir a partir de las plantillas habilitadas.
-    const paramdocId = params?.paramdoc_id ?? null;
+    const paramdocId = params?.paramdoc_id ?? params?.document_id ?? params?.id ?? null;
     // Cliente impuesto por el proceso (tercero de la instancia). Si llega, el campo de
     // cliente se fija a este valor y se oculta para no permitir un tercero que no cuadre.
     const lockedClientId = params?.thirdParty_id ?? params?.client_id ?? params?.clientId ?? null;
