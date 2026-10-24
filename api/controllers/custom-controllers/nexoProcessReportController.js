@@ -19,6 +19,7 @@ export const createNexoProcessReportHandler = ({ useDataBase }) => async (req, r
                 COALESCE(document.instance_id, document_instance.instance_id) AS instance_id,
                 document."ownSerial" AS reference,
                 document.description AS product,
+                COALESCE(document.total, 0) AS "orderTotal",
                 document.created_at AS "createdAt",
                 document.created_at AT TIME ZONE (${companyTimeZoneSql('$1')}) AS created_at_local,
                 ${companyTimeZoneSql('$1')} AS business_time_zone,

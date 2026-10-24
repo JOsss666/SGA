@@ -20,6 +20,7 @@ const columns = [
     { key: "deliveryAt", label: "Fecha de entrega", flex: "0 0 11rem", minWidth: "11rem" },
     { key: "providers", label: "Proveedores", flex: "0 0 14rem", minWidth: "14rem" },
     { key: "productionStates", label: "Estado producción", flex: "0 0 16rem", minWidth: "16rem" },
+    { key: "orderTotal", label: "Total", flex: "0 0 20rem", minWidth: "20rem" },
 ];
 
 const shortDate = (value) => value ? new Intl.DateTimeFormat("es-CO", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(value)) : "Sin fecha";
@@ -76,7 +77,10 @@ const buildProviders = (order) => {
     return providers.length > 0 ? providers : ["Sin asignar"];
 };
 
-export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIndicator, SearchBar, CheckSquare, FormButton, search, setSearch, orders, total, selectedOrderIds, onToggleOrder, onBulkAssign, onOpen, onOpenProcess, onFilteredResultsChange }) {
+export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIndicator, SearchBar, CheckSquare, FormButton, search, setSearch, orders, total, totalValue, selectedOrderIds, onToggleOrder, onBulkAssign, onOpen, onOpenProcess, onFilteredResultsChange }) {
+    const reportColumns = useMemo(() => columns.map((column) => column.key === "orderTotal"
+        ? { ...column, label: `Valor ($ ${new Intl.NumberFormat("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(totalValue) || 0)})` }
+        : column), [totalValue]);
     const results = useMemo(() => orders.map((order) => {
         const productionTags = buildProductionTags(order);
         return {
@@ -116,6 +120,7 @@ export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIn
             })}
         </div>,
         providers: ({ value }) => <span>{(value || []).join(", ")}</span>,
+        orderTotal: ({ value }) => <span>$ {new Intl.NumberFormat("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value) || 0)}</span>,
         createdAt: ({ info }) => <span>{shortDate(info.createdAt)}</span>,
         deliveryAt: ({ info }) => <span>{shortDate(info.deliveryAt)}</span>,
         commitment: ({ value }) => {
@@ -127,6 +132,6 @@ export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIn
 
     return <section className="processAdministrationTable">
         {selectedOrderIds.length > 0 && <div className="processAdministrationTableBulk"><span>{selectedOrderIds.length} orden{selectedOrderIds.length > 1 ? 'es' : ''} seleccionada{selectedOrderIds.length > 1 ? 's' : ''}: gestione los proveedores por cada ítem o componente.</span><FormButton text={`Asignar ${selectedOrderIds.length} órdenes`} onClick={onBulkAssign}/></div>}
-        <div className="sgaTreasury"><UniversalTable columns={columns} results={results} onFilteredResultsChange={onFilteredResultsChange} searchValue={search} Row={UniversalRow} getRowKey={(order) => order.id} selectedRows={selectedOrderIds} rowHeight={76} height="min(56vh, 580px)" rowProps={{ renderers }} /></div>
+        <div className="sgaTreasury"><UniversalTable columns={reportColumns} results={results} onFilteredResultsChange={onFilteredResultsChange} searchValue={search} Row={UniversalRow} getRowKey={(order) => order.id} selectedRows={selectedOrderIds} rowHeight={76} height="min(56vh, 580px)" rowProps={{ renderers }} /></div>
     </section>;
 }

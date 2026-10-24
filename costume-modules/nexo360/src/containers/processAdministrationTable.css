@@ -84,6 +84,15 @@
     gap: .45vh;
 }
 
+.processAdministrationTable .universalTableHeaderCell:last-child .universalTableSortButton {
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.processAdministrationTable .universalRowCell[data-column-key="orderTotal"] > span {
+    text-align: right;
+}
+
 .processAdministrationTable .universalRowCell b,
 .processAdministrationTable .universalRowCell small {
     display: block;
