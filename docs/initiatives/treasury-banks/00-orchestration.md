@@ -15,20 +15,17 @@
 
 ## Publicación en Notion (tablero: SGA - WorkFlow - Development · collection://27a8a604-4642-81c0-8bd1-000bd8adf457)
 
-8 tareas creadas (coarse, cubren todo el feature). No se tocó ninguna tarea existente.
+Revisión final: **30 tareas granulares numeradas (TBANK 0.1 … 4.5)** por petición del usuario (más específicas, no agrupadas). Las 8 tareas coarse previas (TBANKS-01..08) se movieron a Papelera (reversibles).
 
-| ID | Tarea | Módulo | URL |
-|---|---|---|---|
-| TBANKS-01 | Decisiones e investigación previa | Back-end | https://app.notion.com/p/4028a604464281e9bf83e8c3f2cb32e6 |
-| TBANKS-02 | Esquema de datos (migración aditiva) | Back-end | https://app.notion.com/p/4028a604464281219e8aed8ae22b1ded |
-| TBANKS-03 | API y servicios (CRUD + parametrización) | Back-end | https://app.notion.com/p/4028a604464281b7bb5cf6b309c43431 |
-| TBANKS-04 | Ingesta UMJP + saldo por moneda + reverse + auditoría | Back-end | https://app.notion.com/p/4028a60446428198986fc498cc827b95 |
-| TBANKS-05 | Informes/estadísticas por día comercial | Back-end | https://app.notion.com/p/4028a60446428103b033da16362cfea4 |
-| TBANKS-06 | FE: navegación + Mis bancos + Info General + parametrización | Tesorería | https://app.notion.com/p/4028a60446428150b7cdef20a417e51b |
-| TBANKS-07 | FE: Movimientos + Acciones (documentos) + Informes | Tesorería | https://app.notion.com/p/4028a604464281c9ac87ec4990777f15 |
-| TBANKS-08 | Integración documento→UMJP + pruebas | Back-end | https://app.notion.com/p/4028a6044642818496f1ff59b3247a45 |
+- **Etapa 0 (decisiones/investigación):** TBANK 0.1–0.2. 0.1 asignada a José Murillo.
+- **Etapa 1 (BD y migraciones):** TBANK 1.1–1.7 — **todas asignadas a José Murillo** (6c524b3b-28a0-4511-8106-31acd9b3027e).
+- **Etapa 2 (API/servicios):** TBANK 2.1–2.9.
+- **Etapa 3 (Frontend/Tesorería):** TBANK 3.1–3.7.
+- **Etapa 4 (integración + pruebas):** TBANK 4.1–4.5.
 
-Tareas de bancos preexistentes (NO modificadas; posible solape a revisar): "Volver funcional la sección de Bancos (Mis bancos)", "Crear Sección de Bancos" (x2), "Crear Seccion de BankDetails", "Crear Sección de Conciliación bancaria".
+Estado: todas "Sin empezar"; Estado tarea "Sin empezar" para 0.1/0.2 (disponibles) y "Pendiente de desarrollos" para el resto (bloqueadas por predecesora). ID/dependencias/criterios en el cuerpo de cada página.
+
+Tareas de bancos preexistentes (NO modificadas): "Volver funcional la sección de Bancos (Mis bancos)", "Crear Sección de Bancos" (x2), "Crear Seccion de BankDetails", "Crear Sección de Conciliación bancaria". Dos están "Pagada"/asignadas y una es de Conciliación (fuera de alcance), por lo que no se archivó ninguna.
 
 ## Decisiones y bloqueos vigentes
 
