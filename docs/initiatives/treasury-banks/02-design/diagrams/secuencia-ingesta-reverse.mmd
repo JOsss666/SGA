@@ -1,0 +1,22 @@
+sequenceDiagram
+    actor U as Usuario
+    participant DOC as Documento (ventas/compras/POS)
+    participant API as Banks Controller (/treasury/banks/*)
+    participant SVC as banksService / banksMovementsService
+    participant AUD as banksAuditService
+    participant DB as Esquema "Treasury" (PostgreSQL)
+
+    U->>DOC: Confirma documento
+    DOC->>API: UMJP (operation=create, idempotency_key, details[])
+    API->>SVC: withTransaction(normaliza UMJP)
+    alt idempotency_key ya registrada
+        SVC-->>API: no duplica (devuelve existente)
+    else nueva
+        SVC->>DB: INSERT bank_transactions + details (currency, direction)
+        SVC->>AUD: registra acción
+        AUD->>DB: INSERT bank_audit (append-only)
+        DB-->>SVC: commit
+    end
+    API-->>DOC: OK (saldo por moneda recalculado)
+
+    Note over API,DB: Deshacer = operation "reverse": detalles inversos + reverses_detail_id. No borra; el saldo se recompone.

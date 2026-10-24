@@ -17,7 +17,7 @@ import { SearchBar } from "../../../../Facturation/Facturation/src/modules/userA
 import { RangeDate } from "../../../../Treasury/SGA - Treasuty/src/modules/userApp/components/RangeDate";
 import { ProcessStatusAlert } from "../../../../Facturation/Facturation/src/modules/userApp/containers/Alerts/ProcessStatusAlert";
 
-const exportColumns = ["reference", "clientName", "processName", "processInstanceName", "processStage", "deliveryAt", "createdAt", "status", "paramDocReference"];
+const exportColumns = ["reference", "clientName", "processName", "processInstanceName", "processStage", "deliveryAt", "createdAt", "status", "paramDocReference", "orderTotal"];
 
 // El rango de fechas del informe se evalúa sobre la fecha de creación de la orden.
 const withinCreatedRange = (createdAt, { minDate, maxDate }) => {
@@ -36,6 +36,7 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
     const [filteredRows, setFilteredRows] = useState([]);
     const [selectionNotice, setSelectionNotice] = useState("");
     const [dateRange, setDateRange] = useState({ minDate: "", maxDate: "" });
+    const visibleTotal = filteredRows.reduce((sum, order) => sum + (Number(order.orderTotal) || 0), 0);
     const visibleOrders = useMemo(
         () => report.filteredOrders.filter((order) => withinCreatedRange(order.createdAt, dateRange)),
         [report.filteredOrders, dateRange]
@@ -81,6 +82,6 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
         {selectionNotice && <div className="processAdministrationReportNotice" role="alert"><i className="fa-solid fa-circle-exclamation" aria-hidden="true" />{selectionNotice}</div>}
         {report.loading
             ? <LoadingSpace />
-            : <ProcessAdministrationTable UniversalTable={UniversalTable} UniversalRow={UniversalRow} TagIndicator={TagIndicator} SearchBar={SearchBar} CheckSquare={CheckSquare} FormButton={FormButton} search={report.search} setSearch={report.setSearch} orders={visibleOrders} onFilteredResultsChange={setFilteredRows} total={report.orders.length} selectedOrderIds={selectedOrderIds} onToggleOrder={toggleOrder} onBulkAssign={openBulkAssignment} onOpen={openClientOrder} onOpenProcess={openProcess} />}
+            : <ProcessAdministrationTable UniversalTable={UniversalTable} UniversalRow={UniversalRow} TagIndicator={TagIndicator} SearchBar={SearchBar} CheckSquare={CheckSquare} FormButton={FormButton} search={report.search} setSearch={report.setSearch} orders={visibleOrders} onFilteredResultsChange={setFilteredRows} totalValue={visibleTotal} total={report.orders.length} selectedOrderIds={selectedOrderIds} onToggleOrder={toggleOrder} onBulkAssign={openBulkAssignment} onOpen={openClientOrder} onOpenProcess={openProcess} />}
     </main>;
 }

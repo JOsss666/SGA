@@ -1,0 +1,55 @@
+erDiagram
+    BANK_INSTITUTIONS ||--o{ BANKS : "seleccionada por"
+    BANKS ||--o{ BANK_ACCOUNTS : "agrupa"
+    BANK_ACCOUNTS ||--o{ BANK_TRANSACTIONS : "registra"
+    BANK_TRANSACTIONS ||--|{ BANK_TRANSACTION_DETAILS : "compone"
+    BANK_TRANSACTION_DETAILS ||--o{ BANK_AUDIT : "audita"
+
+    BANK_INSTITUTIONS {
+        uuid institution_id PK
+        string code
+        string name
+        string scope "erp_global | company_private"
+    }
+    BANKS {
+        uuid bank_id PK
+        uuid company_id
+        uuid institution_id FK
+        json defaults "herencia a cuentas"
+        null account_id "NO apunta a cuenta contable"
+    }
+    BANK_ACCOUNTS {
+        uuid bank_account_id PK
+        uuid bank_id FK
+        string account_number
+        uuid account_id "PUENTE a cuenta contable (externo)"
+        json currency_policy "allowed + primary"
+        json inheritance "overrides"
+    }
+    BANK_TRANSACTIONS {
+        uuid transaction_id PK
+        uuid bank_account_id FK
+        uuid company_id
+        string idempotency_key
+        string operation "create | modify | reverse"
+        json origin "documento"
+        timestamptz created_at "UTC"
+        json context "store, tz, business_date"
+    }
+    BANK_TRANSACTION_DETAILS {
+        uuid detail_id PK
+        uuid transaction_id FK
+        string currency "la moneda vive AQUI"
+        numeric amount
+        string direction "in | out"
+        string concept
+        uuid reverses_detail_id "para deshacer"
+    }
+    BANK_AUDIT {
+        uuid audit_id PK
+        uuid transaction_id FK
+        uuid detail_id FK
+        uuid actor_user_id
+        string operation
+        timestamptz created_at
+    }

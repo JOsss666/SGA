@@ -84,10 +84,24 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const [e_invoiceDescription,set_eInvoiceDescription] = useState('');
     const [attached,setAttached] = useState('-');
         // Instances control
-        const [instance_id,setInstance_id] = useState([]);
-        const [selectedInstances, setSelectedInstances] = useState([]);
-        const [instanceOwnSerial,setInstanceOwnSerial] = useState();
-        const [step_id,setStep_id] = useState();
+    const [instance_id,setInstance_id] = useState(() => {
+        const providedInstanceId = InfoParams?.instance_id;
+        if (providedInstanceId == null || providedInstanceId === '') return [];
+        return Array.isArray(providedInstanceId) ? providedInstanceId : [providedInstanceId];
+    });
+    const [selectedInstances, setSelectedInstances] = useState(() => {
+        if (Array.isArray(InfoParams?.instances) && InfoParams.instances.length) return InfoParams.instances;
+        const instanceIds = Array.isArray(InfoParams?.instance_id)
+            ? InfoParams.instance_id
+            : [InfoParams?.instance_id];
+        return instanceIds.filter(id => id != null && id !== '').map(id => ({
+            id,
+            step_id: InfoParams?.step_id,
+            ownSerial: InfoParams?.instanceOwnSerial ?? InfoParams?.ownSerial
+        }));
+    });
+    const [instanceOwnSerial,setInstanceOwnSerial] = useState(InfoParams?.instanceOwnSerial ?? InfoParams?.ownSerial);
+    const [step_id,setStep_id] = useState(InfoParams?.step_id);
     const [concept_id,setConcept_id] = useState();
     const [conceptAccount_id,setConcept_account_id] = useState();
     const [cashBox_id,setCashBox_id] = useState();
@@ -219,15 +233,17 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
             }
 
             // Filtro para busqueda de Instancias de Procesos
-            if(!userConfig.access.process_instances.overAll){
-                if(userConfig.access.process_instances.enabled.length > 1){
-                    await getInstances(userConfig.access.process_instances.enabled,undefined);
+            if (InfoParams?.instance_id == null || InfoParams.instance_id === '') {
+                if(!userConfig.access.process_instances.overAll){
+                    if(userConfig.access.process_instances.enabled.length > 1){
+                        await getInstances(userConfig.access.process_instances.enabled,undefined);
+                    }else{
+                        temInfo.instance_id = userConfig.access.process_instances.enabled[0]
+                        setInstance_id(userConfig.access.process_instances.enabled[0])
+                    }
                 }else{
-                    temInfo.instance_id = userConfig.access.process_instances.enabled[0]
-                    setInstance_id(userConfig.access.process_instances.enabled[0])
+                    await getInstances()
                 }
-            }else{
-                await getInstances()
             }
 
             // Rangos de numeración de factura electrónica permitidos para el rol
@@ -358,6 +374,44 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
                 return prev.filter((_, index) => index !== blockIndex);
             });
         };
+
+const isAreaUnit = (unit) => ['mm2', 'cm2', 'm2', 'km2', 'in2', 'ft2', 'yd2', 'm2_sheet']
+    .includes(String(unit ?? '').trim().toLowerCase());
+
+const getAreaLengthUnit = (areaUnit) => ({
+    mm2: 'mm', cm2: 'cm', m2: 'm', km2: 'km',
+    in2: 'in', ft2: 'ft', yd2: 'yd', m2_sheet: 'm'
+})[String(areaUnit ?? '').trim().toLowerCase()] ?? '';
+
+const calculateArea = (width, height) => {
+    if (width === '' || height === '' || width == null || height == null) return 0;
+    const parsedWidth = Number(width);
+    const parsedHeight = Number(height);
+    return Number.isFinite(parsedWidth) && Number.isFinite(parsedHeight) && parsedWidth > 0 && parsedHeight > 0
+        ? parsedWidth * parsedHeight
+        : 0;
+};
+
+const handleEditAreaDimension = (blockIndex, itemIndex, key, value) => {
+    setItemBlocks(prev => prev.map((block, bIdx) => {
+        if (bIdx !== blockIndex) return block;
+        return {
+            ...block,
+            items: block.items.map((item, iIdx) => {
+                if (iIdx !== itemIndex) return item;
+                const updatedItem = { ...item, [key]: value };
+                updatedItem.units = calculateArea(
+                    key === 'areaWidth' ? value : item.areaWidth,
+                    key === 'areaHeight' ? value : item.areaHeight
+                );
+                if (!updatedItem.manualPrice) {
+                    updatedItem.unit_value = getEffectivePrice(item, updatedItem.units);
+                }
+                return updatedItem;
+            })
+        };
+    }));
+};
 
 const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
     setItemBlocks(prev =>
@@ -751,7 +805,12 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             res[1].forEach(element => {
                 C.push({
                     text:`${element.code} ${element.name}`,
-                    value:element
+                    value:{
+                        ...element,
+                        areaWidth: '',
+                        areaHeight: '',
+                        units: isAreaUnit(element.unit_measure) ? 0 : element.units
+                    }
                 })
             });
             setProductsAndServices(C)
@@ -1257,6 +1316,14 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
         }
     },[instance_id])
 
+    useEffect(() => {
+        const providedInstanceId = Array.isArray(InfoParams?.instance_id)
+            ? InfoParams.instance_id[0]
+            : InfoParams?.instance_id;
+        if (providedInstanceId == null || providedInstanceId === '') return;
+        getDocuments(providedInstanceId);
+    }, [InfoParams?.instance_id]);
+
 
     useEffect(()=>{
         if(documents.length > 0){
@@ -1383,7 +1450,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                     {info.costCenter_id == undefined && (
                         <SearchinList action={setCostCenter_id} title={'Centro de costo'} placeHolder={'Seleccione el centro de costo'} list={costCenters} disabled={disabled}/>
                     )}
-                    <SearchinList action={handleThirdPartyChange} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdparties} disabled={disabled} specialOption={
+                    <SearchinList value={thirdParty_id} action={handleThirdPartyChange} title={'Cliente'} placeHolder={'Seleccione el cliente'} list={thirdparties} disabled={disabled || InfoParams?.thirdParty_id != undefined} specialOption={
                         <NewElementSelect title={'Crear nuevo'} onClick={()=>{
                             popInAlert(<FormNewThirdParties reloadFun={getThirdParties} quickCreation={true}/>)
                         }}/>
@@ -1427,19 +1494,20 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                                      {element.docInfo == undefined && element.items.map((element,index)=>(
                                         <div className="itemRow" key={index}>
                                             <UserCard imgSrc={element.img} name={element.name}/>
-                                            <strong className="valueItemRow rowInputItem">
-                                                <FormInput 
-                                                    title={'unidades'}
-                                                    type={'number'}
-                                                    min={0}
-                                                    placeholder={0}
-                                                    required={true}
-                                                    value={element.units || ''}
-                                                    action={(value) => {
-                                                        handleEditItemDetail(index_block, index, 'units', value);
-                                                    }}
-                                                />
-                                            </strong>
+                                            {isAreaUnit(element.unit_measure) ? (
+                                                <div className="areaDimensionFields">
+                                                    <div className="areaDimensionInput">
+                                                        <FormInput title={`Ancho (${getAreaLengthUnit(element.unit_measure)})`} type="number" step="any" min="0.000001" required value={element.areaWidth ?? ''} disabled={disabled} action={(value) => handleEditAreaDimension(index_block, index, 'areaWidth', value)} />
+                                                    </div>
+                                                    <div className="areaDimensionInput">
+                                                        <FormInput title={`Alto (${getAreaLengthUnit(element.unit_measure)})`} type="number" step="any" min="0.000001" required value={element.areaHeight ?? ''} disabled={disabled} action={(value) => handleEditAreaDimension(index_block, index, 'areaHeight', value)} />
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <strong className="valueItemRow rowInputItem">
+                                                    <FormInput title="Unidades" type="number" min={0} placeholder={0} required value={element.units || ''} disabled={disabled} action={(value) => handleEditItemDetail(index_block, index, 'units', value)} />
+                                                </strong>
+                                            )}
 
                                             <strong className="valueItemRow rowInputItem">
                                                 <FormInput 

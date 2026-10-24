@@ -25,12 +25,22 @@ function money(value) {
 
 function normalizePresets(presets) {
     if (!Array.isArray(presets) || !presets.length || presets.length > 1000) fail('items debe contener entre 1 y 1000 presets.');
-    return presets.map((preset, index) => ({
-        id: id(preset?.preset_id ?? preset?.id, `items[${index}].id`),
-        units: decimal(preset?.units, `items[${index}].units`, true),
-        description: preset?.description ?? ''
-    }));
+    return presets.map((preset, index) => {
+        const hasWidth = preset?.areaWidth !== undefined && preset.areaWidth !== null && preset.areaWidth !== '';
+        const hasHeight = preset?.areaHeight !== undefined && preset.areaHeight !== null && preset.areaHeight !== '';
+        if (hasWidth !== hasHeight) fail(`items[${index}] debe incluir ancho y alto juntos.`);
+        return {
+            id: id(preset?.preset_id ?? preset?.id, `items[${index}].id`),
+            units: decimal(preset?.units, `items[${index}].units`, true),
+            areaWidth: hasWidth ? decimal(preset.areaWidth, `items[${index}].areaWidth`, true) : null,
+            areaHeight: hasHeight ? decimal(preset.areaHeight, `items[${index}].areaHeight`, true) : null,
+            description: preset?.description ?? ''
+        };
+    });
 }
+
+const isAreaUnit = unit => ['mm2', 'cm2', 'm2', 'km2', 'in2', 'ft2', 'yd2', 'm2_sheet']
+    .includes(String(unit ?? '').trim().toLowerCase());
 
 // Modo products: los ítems ya son productos con su valor unitario diligenciado en
 // el formulario. No se expanden presets ni se leen precios de componentValues.
@@ -47,7 +57,8 @@ function normalizeProducts(products) {
 /**
  * paramDoc: company_id, store_id, thirdParty_id, created_by, description, attached e
  * instancias opcionales. El manejo de items depende del modo:
- *  - Presets: items [{ id|preset_id, units }] + componentValues { [product_id]: unit_value }.
+ *  - Presets: items [{ id|preset_id, units, areaWidth?, areaHeight? }] + componentValues { [product_id]: unit_value }.
+ *    Si un componente usa área, units se multiplica por ancho y alto antes de expandirlo.
  *    Los precios salen del config; los presets se expanden en sus productos-componente.
  *  - Products: items [{ product_id|id, units, unit_value, sell_desc }] SIN componentValues.
  *    El valor unitario lo trae cada ítem desde el formulario.
@@ -60,6 +71,7 @@ export function createNexo360Service({ withTransaction, registerDocument, regist
         const transform = async connection => {
             const result = await connection.query(`
                 SELECT preset.id AS preset_id, relation.product_id, relation.units,
+                    product.units AS unit_measure,
                     product.id AS available_product_id
                 FROM "Inventory".presets preset
                 LEFT JOIN "Inventory"."presetsProductRelations" relation ON relation.preset_id = preset.id
@@ -73,9 +85,17 @@ export function createNexo360Service({ withTransaction, registerDocument, regist
                 if (!components.length || components.some(row => !row.available_product_id)) {
                     fail(`El preset ${preset.id} no está disponible, está vacío o contiene productos no disponibles para la compañía.`, 422);
                 }
+                const areaComponents = components.filter(component => isAreaUnit(component.unit_measure));
+                if (areaComponents.length && (!preset.areaWidth || !preset.areaHeight)) {
+                    fail(`El preset ${preset.id} contiene productos por área y requiere ancho y alto.`, 422);
+                }
                 return components.map(component => ({
                     preset_id: preset.id, product_id: String(component.product_id), service_id: String(component.product_id),
-                    units: decimal(Number(component.units) * preset.units, 'Cantidad resultante', true),
+                    units: decimal(
+                        Number(component.units) * preset.units
+                            * (isAreaUnit(component.unit_measure) ? preset.areaWidth * preset.areaHeight : 1),
+                        'Cantidad resultante', true
+                    ),
                     description: preset.description
                 }));
             });

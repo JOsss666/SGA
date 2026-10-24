@@ -264,6 +264,36 @@
     min-height: 0;
     flex: 1 1 auto;
     overflow: auto;
+    /* Barra de scroll siempre visible (en macOS las overlay se ocultan sin trackpad).
+       Tamaño en px para que no crezca desproporcionada en pantallas grandes. */
+    scrollbar-width: thin;
+    scrollbar-color: var(--descriptionText) transparent;
+}
+
+.sgaTreasury .universalTable .universalTableBody::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.sgaTreasury .universalTable .universalTableBody::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sgaTreasury .universalTable .universalTableBody::-webkit-scrollbar-thumb {
+    background: var(--descriptionText);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 999px;
+}
+
+.sgaTreasury .universalTable .universalTableBody::-webkit-scrollbar-thumb:hover {
+    background: var(--chatAccent);
+    border-width: 1px;
+    background-clip: padding-box;
+}
+
+.sgaTreasury .universalTable .universalTableBody::-webkit-scrollbar-corner {
+    background: transparent;
 }
 
 .sgaTreasury .universalTable .universalTableBodyContent {
@@ -283,9 +313,13 @@
 }
 
 .sgaTreasury .universalTable .universalTableEmpty {
+    position: sticky;
+    left: 0;
     display: flex;
+    width: 100%;
     min-height: 18vh;
     padding: 3vh;
+    box-sizing: border-box;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -296,6 +330,30 @@
 
 .sgaTreasury .universalTable .universalTableEmpty i {
     font-size: 3.2vh;
+}
+
+.sgaTreasury .universalTable .universalTableClearFilters {
+    display: inline-flex;
+    align-items: center;
+    gap: .8vh;
+    margin-top: .5vh;
+    padding: .9vh 1.6vh;
+    border: .1vh solid var(--inputsBorder);
+    border-radius: .7vh;
+    color: var(--mainText);
+    background: var(--inputsBg);
+    cursor: pointer;
+    font-size: clamp(.72rem, 1.4vh, .86rem);
+}
+
+.sgaTreasury .universalTable .universalTableClearFilters:hover {
+    border-color: var(--chatAccent);
+    background: var(--cardHover);
+}
+
+.sgaTreasury .universalTable .universalTableClearFilters i {
+    font-size: clamp(2px, 1.8vh, 18px);
+    color: var(--descriptionText);
 }
 
 .sgaTreasury .universalTable .universalTableFooter {

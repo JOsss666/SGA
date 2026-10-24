@@ -24,7 +24,11 @@ export function validateParameterPayload(payload, config) {
     if (!config.destiny || payload.destiny !== config.destiny) fail('El destino no corresponde a la plantilla autorizada.', 403);
     if (!Array.isArray(config.fields)) fail('La plantilla no tiene fields configurados.', 422);
     for (const field of config.fields) {
-        const rules = { ...config.fieldDefaults, ...field };
+        const rules = {
+            ...config.fieldDefaults,
+            ...field,
+            required: field.required ?? field.props?.required ?? config.fieldDefaults?.required ?? false
+        };
         if (rules.visible === false || rules.disabled || rules.readOnly) continue;
         const special = field.specialProps ?? field.propEspecial ?? {};
         const key = special.blockKey ?? special.collectionKey ?? field.key;

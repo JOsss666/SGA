@@ -73,6 +73,7 @@ export function UniversalTable({
     const tableRef = useRef(null);
     const bodyRef = useRef(null);
     const headerRef = useRef(null);
+    const filterMenuRef = useRef(null);
 
     const [contentWidths, setContentWidths] = useState({});
     useLayoutEffect(() => {
@@ -107,16 +108,39 @@ export function UniversalTable({
     }, [disabled, loading]);
 
     useEffect(() => {
-        const closeFilterWithEscape = (event) => {
-            if (event.key === 'Escape') {
-                setOpenFilterKey(null);
-                setFilterMenuPosition(null);
-            }
+        if (!openFilterKey) return undefined;
+
+        const handleKeyDown = (event) => {
+            if (event.key !== 'Escape') return;
+            // Esc limpia el filtro de la columna abierta (quedan todos seleccionados) y la cierra.
+            setColumnFilters((currentFilters) => {
+                if (!Object.hasOwn(currentFilters, openFilterKey)) return currentFilters;
+                const nextFilters = { ...currentFilters };
+                delete nextFilters[openFilterKey];
+                return nextFilters;
+            });
+            setFilterSearchValue('');
+            setOpenFilterKey(null);
+            setFilterMenuPosition(null);
         };
 
-        window.addEventListener('keydown', closeFilterWithEscape);
-        return () => window.removeEventListener('keydown', closeFilterWithEscape);
-    }, []);
+        const handlePointerDown = (event) => {
+            const menu = filterMenuRef.current;
+            if (menu && menu.contains(event.target)) return;
+            // Dejar que el botón de filtro gestione su propio toggle.
+            if (event.target.closest?.('.universalTableFilterButton')) return;
+            // Clic afuera: cerrar conservando el filtro aplicado.
+            setOpenFilterKey(null);
+            setFilterMenuPosition(null);
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('mousedown', handlePointerDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('mousedown', handlePointerDown);
+        };
+    }, [openFilterKey]);
 
     const columnValueOptions = useMemo(() => Object.fromEntries(
         visibleColumns.map((column) => [
@@ -217,6 +241,34 @@ export function UniversalTable({
             else nextFilters[columnKey] = [];
             return nextFilters;
         });
+    };
+
+    // La búsqueda de la card filtra en vivo: deja seleccionados solo los valores cuya
+    // etiqueta coincide con el texto; al vaciarla vuelven a quedar todos seleccionados.
+    const applyFilterSearchSelection = (columnKey, searchText) => {
+        const allOptions = columnValueOptions[columnKey] ?? [];
+        const normalizedSearch = normalizeText(searchText);
+        setColumnFilters((currentFilters) => {
+            const nextFilters = { ...currentFilters };
+            if (!normalizedSearch) {
+                delete nextFilters[columnKey];
+                return nextFilters;
+            }
+            const matchingValues = allOptions
+                .filter((option) => normalizeText(option.label).includes(normalizedSearch))
+                .map((option) => option.value);
+            if (matchingValues.length === allOptions.length) delete nextFilters[columnKey];
+            else nextFilters[columnKey] = matchingValues;
+            return nextFilters;
+        });
+    };
+
+    const hasActiveFilters = Object.keys(columnFilters).length > 0;
+
+    const clearAllFilters = () => {
+        setColumnFilters({});
+        setOpenFilterKey(null);
+        setFilterMenuPosition(null);
     };
 
     const renderRow = (result, index) => {
@@ -332,6 +384,7 @@ export function UniversalTable({
             {openFilterKey && filterMenuPosition && (
                 <div
                     className="universalTableFilterMenu"
+                    ref={filterMenuRef}
                     style={filterMenuPosition}
                     role="dialog"
                     aria-label={`Filtros de ${visibleColumns.find((column) => column.key === openFilterKey)?.label}`}
@@ -357,7 +410,11 @@ export function UniversalTable({
                             type="search"
                             value={filterSearchValue}
                             disabled={disabled || loading}
-                            onChange={(event) => setFilterSearchValue(event.target.value)}
+                            onChange={(event) => {
+                                const nextSearch = event.target.value;
+                                setFilterSearchValue(nextSearch);
+                                applyFilterSearchSelection(openFilterKey, nextSearch);
+                            }}
                             placeholder="Buscar valor…"
                             autoFocus
                         />
@@ -402,13 +459,6 @@ export function UniversalTable({
                 <div className="universalTableBodyContent" style={{ minWidth: `${minimumTableWidth}px` }}>
                     {loading && <UniversalTableLoadingShader columns={rowColumns} />}
 
-                    {!loading && filteredResults.length === 0 && (
-                        <div className="universalTableEmpty" role="status">
-                            <i className="bi bi-inbox" aria-hidden="true" />
-                            <p>{emptyMessage}</p>
-                        </div>
-                    )}
-
                     {!loading && filteredResults.length > 0 && (
                         <div
                             className="universalTableVirtualSpace"
@@ -428,6 +478,27 @@ export function UniversalTable({
                         </div>
                     )}
                 </div>
+
+                {/* Estado vacío como hermano fijado al viewport (sticky) para que se vea
+                    sin importar el scroll horizontal. El contenedor de arriba conserva su
+                    min-width, así el body sigue desplazándose y los filtros del encabezado
+                    quedan alcanzables aun sin filas. */}
+                {!loading && filteredResults.length === 0 && (
+                    <div className="universalTableEmpty" role="status">
+                        <i className="bi bi-inbox" aria-hidden="true" />
+                        <p>{emptyMessage}</p>
+                        {hasActiveFilters && (
+                            <button
+                                type="button"
+                                className="universalTableClearFilters"
+                                onClick={clearAllFilters}
+                            >
+                                <i className="bi bi-funnel" aria-hidden="true" />
+                                Quitar filtros
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
 
             <footer className="universalTableFooter" aria-live="polite">

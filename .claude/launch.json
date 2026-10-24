@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "facturation-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "Facturation/Facturation", "run", "dev"],
+      "port": 5173
+    }
+  ]
+}
