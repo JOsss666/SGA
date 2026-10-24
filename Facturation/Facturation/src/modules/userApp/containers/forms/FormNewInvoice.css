@@ -149,6 +149,24 @@
     font-size: clamp(2px,2vh,20px);
 }
 
+.FormNewInvoice .itemBlock .gridItems .areaDimensionFields{
+    display: flex;
+    flex: 1 1 35%;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1vh 1vw;
+    min-width: 15rem;
+}
+
+.FormNewInvoice .itemBlock .gridItems .areaDimensionInput{
+    flex: 1 1 7rem;
+    min-width: 0;
+}
+
+.FormNewInvoice .itemBlock .gridItems .areaDimensionInput .FacturationFormInput{
+    width: 100%;
+}
+
 .FormNewInvoice form .FileInput{
     height: fit-content;
 }
@@ -192,6 +210,11 @@
 
     .FormNewInvoice .itemBlock .gridItems .rowInputItem .FacturationFormInput{
         width: 72dvw;
+    }
+
+    .FormNewInvoice .itemBlock .gridItems .areaDimensionFields{
+        width: 100%;
+        min-width: 0;
     }
 
     .FormNewInvoice .itemBlock .gridItems .valueItemRow{

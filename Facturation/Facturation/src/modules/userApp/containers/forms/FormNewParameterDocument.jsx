@@ -300,7 +300,12 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
     useEffect(() => {
         if (!document) return undefined;
         let active = true;
-        const requirements = [...new Set(document.config.fields.map(field => field.requirements).filter(Boolean))];
+        const itemSelector = document.config.fields.find(isItemBlockSelector);
+        const itemSelectorRequirement = itemSelector?.requirements ?? (itemSelector ? "products" : null);
+        const requirements = [...new Set([
+            ...document.config.fields.map(field => field.requirements).filter(Boolean),
+            itemSelectorRequirement
+        ].filter(Boolean))];
 
         async function loadCatalogs() {
             if (!requirements.length) return;
@@ -369,10 +374,17 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
     const productsAndServices = useMemo(() => {
         if (!itemBlock) return [];
         const selector = itemBlock.selector;
-        const options = selector.requirements
-            ? catalogs[selector.requirements] ?? []
+        const requirement = selector.requirements ?? "products";
+        const options = requirement
+            ? catalogs[requirement] ?? []
             : normalizeOptions(selector.options);
-        return options.map(option => ({ text: option.text, value: option.data ?? option }));
+        return options.map(option => {
+            const product = option.data ?? option;
+            const text = requirement === "products"
+                ? [product.code, option.text, product.unit_measure].filter(Boolean).join(" · ")
+                : option.text;
+            return { text, value: product };
+        });
     }, [itemBlock, catalogs]);
 
     // Adaptador entre el modelo de ItemsList (blocks[].items[]) y el modelo plano
@@ -689,7 +701,9 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
                                     <ItemsList
                                         title={itemBlock.title}
                                         visibleItemTotal={false}
-                                        itemUnitsLabel={document.config.itemsLabel}
+                                        itemUnitsLabel={itemBlock.selector.requirements === 'presets'
+                                            ? 'Unidades'
+                                            : document.config.itemsLabel}
                                         hasBudget={getSpecialProps(itemBlock.selector).hasBudget}
                                         blocks={[{ docInfo: undefined, items: values[itemBlock.blockKey] ?? [] }]}
                                         setItems={setItemBlockItems}

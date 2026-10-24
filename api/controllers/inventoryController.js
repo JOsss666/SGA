@@ -241,6 +241,7 @@ inventoryController.getComercialProducts = (req,res)=>{
                 ps.img,
                 ps.name,
                 ps.code,
+                ps.units AS unit_measure,
                 ac.name AS tax_name,
                 t.base AS tax_base,
                 t.rate AS tax_rate,
@@ -286,6 +287,7 @@ inventoryController.getComercialProducts = (req,res)=>{
                 ps.img,      -- <--- ESTA FALTABA
                 ps.name, 
                 ps.code, 
+                ps.units,
                 ac.name, 
                 t.base, 
                 t.rate,
@@ -333,13 +335,20 @@ inventoryController.getPresets = async (req,res)=>{
                 '[]'::jsonb AS price_tiers,
                 COALESCE(
                     jsonb_agg(
-                        jsonb_build_object('product_id', r.product_id, 'units', r.units)
+                        jsonb_build_object(
+                            'product_id', r.product_id,
+                            'units', r.units,
+                            'name', component.name,
+                            'unit_measure', component.units
+                        )
                     ) FILTER (WHERE r.product_id IS NOT NULL),
                     '[]'::jsonb
                 ) AS components
             FROM "Inventory".presets p
             LEFT JOIN "Inventory"."presetsProductRelations" r
                 ON r.preset_id = p.id
+            LEFT JOIN "Inventory"."products&services" component
+                ON component.id = r.product_id AND component.company_id = p.company_id
             WHERE p.company_id = $1
               AND p.is_active = true
             GROUP BY p.id, p.name, p.description

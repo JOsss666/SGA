@@ -71,11 +71,27 @@
 
 .ItemsList .itemBlock .gridItems .itemRow{
     display: flex;
+    flex-direction: column;
     width: 100%;
-    gap: 2vw;
+    gap: vh;
     padding: 1vh;
     border-radius: 1vh;
     border-bottom: .2vh dashed var(--inputsBorder);
+}
+
+.ItemsList .itemBlock .gridItems .itemInfo{
+    margin-bottom: 1vh;
+}
+
+.ItemsList .itemBlock .gridItems .itemINputs{
+    display: flex;
+    gap: 1vh;
+    align-items: center;
+}
+
+.ItemsList .itemBlock .gridItems .itemINputsWithPresetArea{
+    flex-wrap: wrap;
+    align-items: flex-end;
 }
 
 .ItemsList .itemBlock .gridItems .itemRow:hover{
@@ -95,8 +111,35 @@
 }
 
 .ItemsList .itemBlock .gridItems .rowInputItem .FacturationFormInput{
+    width: 7.5vw;
+    min-width: 0;
+}
+
+.ItemsList .itemBlock .gridItems .areaDimensionFields{
+    display: flex;
+    flex: 0 0 14vw;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1vh 2vw;
+    width: 14vw;
+    min-width: 0;
+}
+
+.ItemsList .itemBlock .gridItems .areaDimensionInput{
+    flex: 0 0 6vw;
     width: 6vw;
     min-width: 0;
+}
+
+.ItemsList .itemBlock .gridItems .areaDimensionInput .FacturationFormInput{
+    width: 100%;
+    min-width: 0;
+}
+
+.ItemsList .itemBlock .gridItems .areaDimensionInput .FacturationFormInput label{
+    font-weight: 400;
+    color: var(--descriptionText);
+    font-size: clamp(2px,2vh,20px);
 }
 
 .ItemsList .itemBlock .gridItems .itemRow .descriptionRow{
@@ -141,6 +184,25 @@
 
     .ItemsList .itemBlock .gridItems .rowInputItem .FacturationFormInput{
         width: 72dvw;
+    }
+
+    .ItemsList .itemBlock .gridItems .areaDimensionFields{
+        flex: 0 0 auto;
+        width: 100%;
+        min-width: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1vh;
+    }
+
+    .ItemsList .itemBlock .gridItems .areaDimensionInput{
+        flex: 0 0 auto;
+        width: 72dvw;
+    }
+
+    .ItemsList .itemBlock .gridItems .areaDimensionInput .FacturationFormInput{
+        width: 72dvw;
+        min-width: 0;
     }
 
     .ItemsList .itemBlock .gridItems .valueItemRow{

@@ -247,16 +247,49 @@ export function FormNewPurchase({InfoParams,reloadFun}){
 
     // Control de ítems de la compra
 
+        const isAreaUnit = (unit) => ['mm2', 'cm2', 'm2', 'km2', 'in2', 'ft2', 'yd2', 'm2_sheet']
+            .includes(String(unit ?? '').trim().toLowerCase());
+
+        const getAreaLengthUnit = (areaUnit) => ({
+            mm2: 'mm', cm2: 'cm', m2: 'm', km2: 'km',
+            in2: 'in', ft2: 'ft', yd2: 'yd', m2_sheet: 'm'
+        })[String(areaUnit ?? '').trim().toLowerCase()] ?? '';
+
+        const calculateArea = (width, height) => {
+            if (width === '' || height === '' || width == null || height == null) return 0;
+            const parsedWidth = Number(width);
+            const parsedHeight = Number(height);
+            return Number.isFinite(parsedWidth) && Number.isFinite(parsedHeight) && parsedWidth > 0 && parsedHeight > 0
+                ? parsedWidth * parsedHeight
+                : 0;
+        };
+
         const handleAddItem = (element) => {
             if(element.name == undefined) return;
             // El producto trae unit_cost y units como texto ("unit"): inicializamos
             // valores numéricos para que los cálculos de impuestos no den NaN.
+            const unitMeasure = element.unit_measure ?? element.units;
             updateItems(prev => [...prev, {
                 ...element,
+                unit_measure: unitMeasure,
+                areaWidth: '',
+                areaHeight: '',
                 manualPrice:false,
                 unit_value: Number(element.unit_cost) || 0,
-                units: 1
+                units: isAreaUnit(unitMeasure) ? 0 : 1
             }]);
+        };
+
+        const handleEditAreaDimension = (index, key, value) => {
+            updateItems(prev => prev.map((item, idx) => {
+                if (idx !== index) return item;
+                const updatedItem = { ...item, [key]: value };
+                updatedItem.units = calculateArea(
+                    key === 'areaWidth' ? value : item.areaWidth,
+                    key === 'areaHeight' ? value : item.areaHeight
+                );
+                return updatedItem;
+            }));
         };
 
         const handleEditItemDetail = (index, key, value) => {
@@ -1092,19 +1125,20 @@ export function FormNewPurchase({InfoParams,reloadFun}){
                                 {items.map((element,index)=>(
                                     <div className="itemRow" key={index}>
                                         <UserCard imgSrc={element.img} name={element.name}/>
-                                        <strong className="valueItemRow rowInputItem">
-                                            <FormInput
-                                                title={'Unidades'}
-                                                type={'number'}
-                                                min={0}
-                                                required={true}
-                                                value={element.units != undefined ? element.units: 0}
-                                                placeholder={element.units != undefined ? element.units: 0}
-                                                action={(value) => {
-                                                    handleEditItemDetail(index, 'units', value);
-                                                }}
-                                            />
-                                        </strong>
+                                        {isAreaUnit(element.unit_measure) ? (
+                                            <div className="areaDimensionFields">
+                                                <div className="areaDimensionInput">
+                                                    <FormInput title={`Ancho (${getAreaLengthUnit(element.unit_measure)})`} type="number" step="any" min="0.000001" required value={element.areaWidth ?? ''} disabled={disabled} action={(value) => handleEditAreaDimension(index, 'areaWidth', value)} />
+                                                </div>
+                                                <div className="areaDimensionInput">
+                                                    <FormInput title={`Alto (${getAreaLengthUnit(element.unit_measure)})`} type="number" step="any" min="0.000001" required value={element.areaHeight ?? ''} disabled={disabled} action={(value) => handleEditAreaDimension(index, 'areaHeight', value)} />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <strong className="valueItemRow rowInputItem">
+                                                <FormInput title="Unidades" type="number" min={0} required value={element.units ?? 0} placeholder={element.units ?? 0} disabled={disabled} action={(value) => handleEditItemDetail(index, 'units', value)} />
+                                            </strong>
+                                        )}
                                         <strong className="valueItemRow rowInputItem">
                                             <FormInput
                                                 title={'Val unidad'}
