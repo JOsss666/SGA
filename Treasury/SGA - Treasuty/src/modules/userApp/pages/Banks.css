@@ -9,36 +9,55 @@
 .sgaTreasury .banks .headSection {
     display: flex;
     flex-direction: column;
-    gap: .8vh;
+    gap: 0.8vh;
 }
 
-.banks .filtersContainer{
+.sgaTreasury .banks .filtersContainer {
     display: flex;
-    gap: 1vh;
     align-items: center;
+    gap: 16px;
     padding: 1vh 0;
     margin: 2vh 0;
 }
 
-.banks .filtersContainer .SearchBar input{
-    width: 10vw;
-    margin: auto 0;
-    transition: .3s;
+.sgaTreasury .banks .filtersContainer > .SearchBar {
+    flex: 1;
+    min-width: 220px;
+    max-width: 540px;
 }
 
-.banks .filtersContainer .SearchBar input:focus{
-    width: 25vw;
-    outline: solid .1vh #155DFC;
+.sgaTreasury .banks .filtersContainer > .SearchBar input {
+    box-sizing: border-box;
+    width: 100%;
 }
 
-.banks .filtersContainer .rangeInputs{
+.sgaTreasury .banks .filtersContainer > button.FormButton.banksCreateButton {
+    flex: 0 0 auto;
+    width: fit-content !important;
+    min-width: 150px;
+    padding: 1.2vh 2vh;
+    white-space: nowrap;
+}
+
+.sgaTreasury .banks .banksCards {
     display: flex;
-    gap: .5vh;
-    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 20px;
 }
 
-.banks .filtersContainer .FormButton{
-    width: fit-content;
-    text-wrap: nowrap;
-    padding: 1.5vh 2vh;
+.sgaTreasury .banks .banksEmpty {
+    color: #737373;
+}
+
+@media (max-width: 640px) {
+    .sgaTreasury .banks .filtersContainer {
+        flex-wrap: wrap;
+    }
+
+    .sgaTreasury .banks .filtersContainer > .SearchBar {
+        flex-basis: 100%;
+        max-width: none;
+    }
 }
