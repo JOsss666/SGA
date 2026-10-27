@@ -21,34 +21,77 @@ export function ItemsList({
     blocks = [],
     setItems,
     itemUnitsLabel,
-    visibleItemTotal,
     disabled = false,
     productsAndServices = [],
+    visibleItemTotal,
+    hasBudget,
     onDeleteInstance,
     title = 'Productos y servicios',
 }) {
 
+    const isAreaUnit = (unit) => ['mm2', 'cm2', 'm2', 'km2', 'in2', 'ft2', 'yd2', 'm2_sheet']
+        .includes(String(unit ?? '').trim().toLowerCase());
+
+    const getAreaLengthUnit = (areaUnit) => ({
+        mm2: 'mm', cm2: 'cm', m2: 'm', km2: 'km',
+        in2: 'in', ft2: 'ft', yd2: 'yd', m2_sheet: 'm'
+    })[String(areaUnit ?? '').trim().toLowerCase()] ?? '';
+
+    const getPresetAreaUnit = (item) => item.is_preset
+        ? item.components?.find(component => isAreaUnit(component.unit_measure))?.unit_measure ?? ''
+        : '';
+
+    const calculateArea = (width, height) => {
+        if (width === '' || height === '' || width == null || height == null) return 0;
+        const parsedWidth = Number(width);
+        const parsedHeight = Number(height);
+        return Number.isFinite(parsedWidth) && Number.isFinite(parsedHeight) && parsedWidth > 0 && parsedHeight > 0
+            ? parsedWidth * parsedHeight
+            : 0;
+    };
+
+    const getItemTotals = (item) => {
+        const numberOrZero = value => Number.isFinite(Number(value)) ? Number(value) : 0;
+        const total = numberOrZero(item.units) * numberOrZero(item.unit_value);
+        const taxRate = Math.max(0, numberOrZero(item.tax_rate));
+        const subTotal = total / (1 + taxRate / 100);
+        return { subTotal, taxes: total - subTotal, total };
+    };
+
     // Precio efectivo según escalas de cantidad (price_tiers) del producto.
     const getEffectivePrice = (product, quantity) => {
-        const qty = parseInt(quantity) || 0;
-        if (!product.price_tiers || product.price_tiers.length === 0) {
-            return product.unit_price || 0;
+        const parsedQuantity = Number(quantity);
+        const qty = Number.isFinite(parsedQuantity) ? parsedQuantity : 0;
+        const tiers = (Array.isArray(product.price_tiers) ? product.price_tiers : [])
+            .map(tier => ({ min_qty: Number(tier.min_qty) || 0, price: Number(tier.price) }))
+            .filter(tier => Number.isFinite(tier.price))
+            .sort((a, b) => a.min_qty - b.min_qty);
+
+        if (tiers.length === 0) {
+            const fallbackPrice = Number(product.unit_value ?? product.unit_price);
+            return Number.isFinite(fallbackPrice) ? fallbackPrice : 0;
         }
-        const applicableTier = [...product.price_tiers]
-            .sort((a, b) => b.min_qty - a.min_qty)
-            .find(tier => qty >= tier.min_qty);
-        return applicableTier
-            ? applicableTier.price
-            : [...product.price_tiers].sort((a, b) => a.min_qty - b.min_qty)[0].price;
+
+        const applicableTier = [...tiers].reverse().find(tier => qty >= tier.min_qty);
+        return (applicableTier ?? tiers[0]).price;
     };
 
     // Agregar producto/servicio: siempre al primer bloque (bloque manual).
     const handleAddItem = (element) => {
         if (element?.name == undefined) return;
+        const unitMeasure = element.unit_measure ?? element.units;
         setItems(prev =>
             prev.map((block, index) =>
                 index === 0
-                    ? { ...block, items: [...block.items, { ...element, manualPrice: false }] }
+                    ? { ...block, items: [...block.items, {
+                        ...element,
+                        unit_measure: unitMeasure,
+                        areaWidth: '',
+                        areaHeight: '',
+                        units: isAreaUnit(unitMeasure) ? 0 : element.units,
+                        unit_value: getEffectivePrice(element, element.units ?? 0),
+                        manualPrice: false
+                    }] }
                     : block
             )
         );
@@ -63,10 +106,20 @@ export function ItemsList({
                 const updatedItems = block.items.map((item, iIdx) => {
                     if (iIdx !== itemIndex) return item;
 
-                    const textFields = ['description', 'sell_desc'];
+                    const textFields = ['description', 'sell_desc', 'areaWidth', 'areaHeight'];
                     const updatedValue = textFields.includes(key) ? value : Number(value);
 
                     let updatedItem = { ...item, [key]: updatedValue };
+
+                    if ((key === 'areaWidth' || key === 'areaHeight') && isAreaUnit(item.unit_measure)) {
+                        updatedItem.units = calculateArea(
+                            key === 'areaWidth' ? value : item.areaWidth,
+                            key === 'areaHeight' ? value : item.areaHeight
+                        );
+                        if (!updatedItem.manualPrice) {
+                            updatedItem.unit_value = getEffectivePrice(item, updatedItem.units);
+                        }
+                    }
 
                     // Marcar precio manual cuando el usuario lo edita directamente.
                     if (key === 'unit_value') {
@@ -147,82 +200,202 @@ export function ItemsList({
 
                         <div className="gridItems">
                             {/* Items provenientes de un documento/orden: solo lectura. */}
-                            {block.docInfo != undefined && block.items.map((item, index) => (
+                            {block.docInfo != undefined && block.items.map((item, index) => {
+                                const { subTotal, taxes, total } = getItemTotals(item);
+                                return (
                                 <div className="itemRow" key={index}>
                                     <UserCard imgSrc={item.service_img} name={item.service_name} />
                                     <strong className="valueItemRow">{itemUnitsLabel ?? 'Unidades'}: {item.units}</strong>
-                                    <strong className="valueItemRow">Val unidad: {moneyFormat(item.unit_value)}</strong>
                                     {visibleItemTotal == undefined && visibleItemTotal != false && (
-                                        <strong className="valueItemRow">
-                                            Total: {moneyFormat(parseFloat(item.units) * parseFloat(item.unit_value))}
-                                        </strong>
+                                        <>
+                                            <strong className="valueItemRow">Val unidad: {moneyFormat(item.unit_value)}</strong>
+                                            <strong className="valueItemRow">Sub-total: {moneyFormat(subTotal)}</strong>
+                                            <strong className="valueItemRow">Impuestos: {moneyFormat(taxes)}</strong>
+                                            <strong className="valueItemRow">Total: {moneyFormat(total)}</strong>
+                                        </>
                                     )}
 
-                                    
+
                                 </div>
-                            ))}
+                                );
+                            })}
 
                             {/* Items manuales: editables y eliminables. */}
-                            {block.docInfo == undefined && block.items.map((item, index) => (
+                            {block.docInfo == undefined && block.items.map((item, index) => {
+                                const { subTotal, taxes, total } = getItemTotals(item);
+                                const presetAreaUnit = getPresetAreaUnit(item);
+                                return (
                                 <div className="itemRow" key={index}>
-                                    <UserCard imgSrc={item.img} name={item.name} />
+                                    <div className="itemInfo">
+                                        <UserCard imgSrc={item.img} name={item.name} />
+                                    </div>
 
-                                    <strong className="valueItemRow rowInputItem">
-                                        <FormInput
-                                            title={itemUnitsLabel ?? 'Unidades'}
-                                            type={'number'}
-                                            step="any"
-                                            min={0}
-                                            placeholder={0}
-                                            required={true}
-                                            value={item.units || ''}
-                                            disabled={disabled}
-                                            action={(value) => editProperty(index_block, index, 'units', value)}
-                                        />
-                                    </strong>
-
-                                    {false && (
-                                         <strong className="valueItemRow rowInputItem">
+                                    <div className={`itemINputs${presetAreaUnit ? ' itemINputsWithPresetArea' : ''}`}>
+                                        <strong className="valueItemRow rowInputItem descriptionRow">
                                             <FormInput
-                                                title={'Val unidad'}
+                                                title={'Descripción'}
+                                                type={'text'}
+                                                required={false}
+                                                defaultValue={item.sell_desc ?? ''}
+                                                placeholder={'Cod #...'}
+                                                disabled={disabled}
+                                                action={(value) => editProperty(index_block, index, 'sell_desc', value)}
+                                            />
+                                        </strong>
+                                        {isAreaUnit(item.unit_measure) ? (
+                                            <div className="areaDimensionFields">
+                                                <div className="areaDimensionInput">
+                                                    <FormInput
+                                                        title={`Ancho (${getAreaLengthUnit(item.unit_measure)})`}
+                                                        type="number"
+                                                        step="any"
+                                                        min="0.000001"
+                                                        placeholder={0}
+                                                        required={true}
+                                                        value={item.areaWidth ?? ''}
+                                                        disabled={disabled}
+                                                        action={(value) => editProperty(index_block, index, 'areaWidth', value)}
+                                                    />
+                                                </div>
+                                                <div className="areaDimensionInput">
+                                                    <FormInput
+                                                        title={`Alto (${getAreaLengthUnit(item.unit_measure)})`}
+                                                        type="number"
+                                                        step="any"
+                                                        min="0.000001"
+                                                        placeholder={0}
+                                                        required={true}
+                                                        value={item.areaHeight ?? ''}
+                                                        disabled={disabled}
+                                                        action={(value) => editProperty(index_block, index, 'areaHeight', value)}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                            <strong className="valueItemRow rowInputItem">
+                                                <FormInput
+                                                    title={itemUnitsLabel ?? 'Unidades'}
+                                                    type={'number'}
+                                                    step="any"
+                                                    min={0}
+                                                    placeholder={0}
+                                                    required={true}
+                                                    value={item.units || ''}
+                                                    disabled={disabled}
+                                                    action={(value) => editProperty(index_block, index, 'units', value)}
+                                                />
+                                            </strong>
+                                            {presetAreaUnit && (
+                                                <div className="areaDimensionFields">
+                                                    <div className="areaDimensionInput">
+                                                        <FormInput
+                                                            title={`Ancho (${getAreaLengthUnit(presetAreaUnit)})`}
+                                                            type="number"
+                                                            step="any"
+                                                            min="0.000001"
+                                                            placeholder={0}
+                                                            required={true}
+                                                            value={item.areaWidth ?? ''}
+                                                            disabled={disabled}
+                                                            action={(value) => editProperty(index_block, index, 'areaWidth', value)}
+                                                        />
+                                                    </div>
+                                                    <div className="areaDimensionInput">
+                                                        <FormInput
+                                                            title={`Alto (${getAreaLengthUnit(presetAreaUnit)})`}
+                                                            type="number"
+                                                            step="any"
+                                                            min="0.000001"
+                                                            placeholder={0}
+                                                            required={true}
+                                                            value={item.areaHeight ?? ''}
+                                                            disabled={disabled}
+                                                            action={(value) => editProperty(index_block, index, 'areaHeight', value)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                            </>
+                                        )}
+
+                                        {visibleItemTotal !== false && (
+                                            <>
+                                            <strong className="valueItemRow rowInputItem">
+                                            <FormInput
+                                                title={'Val unitario'}
                                                 type={'number'}
                                                 step={0.01}
                                                 min={0}
                                                 required={false}
-                                                defaultValue={item.unit_value}
+                                                value={item.unit_value ?? ''}
                                                 placeholder={item.unit_value ?? 0}
-                                                disabled={disabled}
-                                                action={(value) => editProperty(index_block, index, 'unit_value', value)}
+                                                disabled={true}
                                             />
-                                        </strong>
-                                    )}
+                                            </strong>
 
-                                    <strong className="valueItemRow rowInputItem">
-                                        <FormInput
-                                            title={'Descripción item'}
-                                            type={'text'}
-                                            required={false}
-                                            defaultValue={item.sell_desc ?? ''}
-                                            placeholder={'Cod #...'}
-                                            disabled={disabled}
-                                            action={(value) => editProperty(index_block, index, 'sell_desc', value)}
-                                        />
-                                    </strong>
 
-                                    <strong className="valueItemRow">
-                                        Total: {moneyFormat(parseFloat(item.units) * parseFloat(item.unit_value))}
-                                    </strong>
+                                            <div className="valueItemRow rowInputItem">
+                                            <FormInput
+                                                title={'Sub-total'}
+                                                type={'text'}
+                                                required={false}
+                                                value={moneyFormat(subTotal)}
+                                                disabled={true}
+                                            />
+                                            </div>
 
-                                    {!disabled && (
-                                        <span
-                                            className="deleteItem"
-                                            onClick={() => handleDeleteItem(index_block, index)}
-                                        >
-                                            <i className="fa-solid fa-xmark" />
-                                        </span>
-                                    )}
+                                            <div className="valueItemRow rowInputItem">
+                                            <FormInput
+                                                title={'Impuestos'}
+                                                type={'text'}
+                                                required={false}
+                                                value={moneyFormat(taxes)}
+                                                disabled={true}
+                                            />
+                                            </div>
+
+                                            <div className="valueItemRow rowInputItem">
+                                            <FormInput
+                                                title={'Total'}
+                                                type={'text'}
+                                                required={false}
+                                                value={moneyFormat(total)}
+                                                disabled={true}
+                                            />
+                                            </div>
+
+
+                                            {hasBudget && (
+                                                <strong className="valueItemRow rowInputItem">
+                                                <FormInput
+                                                    title={'Costo'}
+                                                    type={'number'}
+                                                    step={0.01}
+                                                    min={0}
+                                                    required={false}
+                                                    defaultValue={item.bugetCost}
+                                                    placeholder={item.bugetCost ?? 0}
+                                                    disabled={disabled}
+                                                    action={(value) => editProperty(index_block, index, 'bugetCost', value)}
+                                                />
+                                                </strong>
+                                            )}
+                                            </>
+                                        )}
+                                        {!disabled && (
+                                            <span
+                                                className="deleteItem"
+                                                onClick={() => handleDeleteItem(index_block, index)}
+                                            >
+                                                <i className="fa-solid fa-xmark" />
+                                            </span>
+                                        )}
+
+                                    </div>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         {/* Buscador para agregar productos/servicios al bloque manual. */}
