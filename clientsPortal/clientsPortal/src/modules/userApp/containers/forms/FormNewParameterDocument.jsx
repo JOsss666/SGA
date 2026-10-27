@@ -317,7 +317,12 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
     useEffect(() => {
         if (!document) return undefined;
         let active = true;
-        const requirements = [...new Set(document.config.fields.map(field => field.requirements).filter(Boolean))];
+        const itemSelector = document.config.fields.find(isItemBlockSelector);
+        const itemSelectorRequirement = itemSelector?.requirements ?? (itemSelector ? "products" : null);
+        const requirements = [...new Set([
+            ...document.config.fields.map(field => field.requirements).filter(Boolean),
+            itemSelectorRequirement
+        ].filter(Boolean))];
 
         async function loadCatalogs() {
             if (!requirements.length) return;
@@ -326,7 +331,21 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
             try {
                 const entries = await Promise.all(requirements.map(async requirement => {
                     if (requirement === "products") {
-                        const response = await postInfo("/inventory/getComercialProducts", { company_id: appInfo.company_id });
+                        let listId;
+                        if (userInfo.user_id != null && Number(userInfo.user_id) !== 0) {
+                            const thirdPartyResponse = await postInfo("/getThirdParties", {
+                                company_id: appInfo.company_id,
+                                id: userInfo.user_id,
+                                comercialInfo: true,
+                                limit: 1
+                            });
+                            const thirdParties = asList(unwrapResponse(thirdPartyResponse));
+                            listId = thirdParties[0]?.thirdPartyPricesList_id;
+                        }
+                        const response = await postInfo("/inventory/getComercialProducts", {
+                            company_id: appInfo.company_id,
+                            ...(listId != null ? { list_id: listId } : {})
+                        });
                         return [requirement, normalizeOptions(unwrapResponse(response))];
                     }
 
@@ -353,7 +372,7 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
 
         loadCatalogs();
         return () => { active = false; };
-    }, [appInfo.company_id, document]);
+    }, [appInfo.company_id, document, userInfo.user_id]);
 
     const visibleFields = useMemo(() => document?.config.fields.filter(field => field.visible !== false) ?? [], [document]);
     const itemBlock = useMemo(() => getItemBlockDefinition(visibleFields), [visibleFields]);
@@ -384,10 +403,17 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
     const productsAndServices = useMemo(() => {
         if (!itemBlock) return [];
         const selector = itemBlock.selector;
-        const options = selector.requirements
-            ? catalogs[selector.requirements] ?? []
+        const requirement = selector.requirements ?? "products";
+        const options = requirement
+            ? catalogs[requirement] ?? []
             : normalizeOptions(selector.options);
-        return options.map(option => ({ text: option.text, value: option.data ?? option }));
+        return options.map(option => {
+            const product = option.data ?? option;
+            const text = requirement === "products"
+                ? [product.code, option.text, product.unit_measure].filter(Boolean).join(" · ")
+                : option.text;
+            return { text, value: product };
+        });
     }, [itemBlock, catalogs]);
 
     // Adaptador entre el modelo de ItemsList (blocks[].items[]) y el modelo plano
@@ -713,7 +739,9 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
                                     <ItemsList
                                         title={itemBlock.title}
                                         visibleItemTotal={false}
-                                        itemUnitsLabel={document.config.itemsLabel}
+                                        itemUnitsLabel={itemBlock.selector.requirements === 'presets'
+                                            ? 'Unidades'
+                                            : document.config.itemsLabel}
                                         blocks={[{ docInfo: undefined, items: values[itemBlock.blockKey] ?? [] }]}
                                         setItems={setItemBlockItems}
                                         disabled={loadingCatalogs || submitting}
