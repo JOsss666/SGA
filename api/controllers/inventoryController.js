@@ -22,25 +22,22 @@ const sendJson = (res, statusCode, payload) => {
     res.end(JSON.stringify(payload));
 };
 
-const runAuthenticatedThirdPartyProductUpdate = async (req, res, serviceMethod, label) => {
+const runThirdPartyProductUpdate = async (req, res, serviceMethod, label) => {
     try {
         const info = req.body;
         if (!info || typeof info !== 'object' || Array.isArray(info)) {
             return res.status(400).json({ status: 'Error', code: 'INVALID_REQUEST_BODY', message: 'El cuerpo debe ser un objeto JSON.' });
         }
 
-        const companyId = Number(req.auth?.companyId);
+        const companyId = Number(info.company_id);
         if (!Number.isSafeInteger(companyId) || companyId <= 0) {
-            return res.status(401).json({ status: 'Error', code: 'MISSING_COMPANY_CONTEXT', message: 'Se requiere una compañía activa.' });
-        }
-        if (Number(info.company_id) !== companyId) {
-            return res.status(403).json({ status: 'Error', code: 'COMPANY_CONTEXT_MISMATCH', message: 'La compañía solicitada no coincide con la sesión.' });
+            return res.status(400).json({ status: 'Error', code: 'INVALID_COMPANY_ID', message: 'Se requiere un company_id válido.' });
         }
 
         const result = await serviceMethod({
             ...info,
             company_id: companyId,
-            performed_by: req.auth?.userName ?? req.auth?.userId ?? 'api'
+            performed_by: 'api'
         });
         return res.status(200).json(result);
     } catch (error) {
@@ -517,7 +514,7 @@ inventoryController.getThirdPartyProductTaxRelations = async (req,res)=>{
 }
 
 inventoryController.updateThirdPartyProductAssociation = async (req, res) => (
-    runAuthenticatedThirdPartyProductUpdate(
+    runThirdPartyProductUpdate(
         req,
         res,
         productsServicesService.updateThirdPartyProductAssociation,
@@ -532,12 +529,9 @@ inventoryController.getThirdPartyProductAssociations = async (req, res) => {
             return res.status(400).json({ status: 'Error', code: 'INVALID_REQUEST_BODY', message: 'El cuerpo debe ser un objeto JSON.' });
         }
 
-        const companyId = Number(req.auth?.companyId);
+        const companyId = Number(info.company_id);
         if (!Number.isSafeInteger(companyId) || companyId <= 0) {
-            return res.status(401).json({ status: 'Error', code: 'MISSING_COMPANY_CONTEXT', message: 'Se requiere una compañía activa.' });
-        }
-        if (Number(info.company_id) !== companyId) {
-            return res.status(403).json({ status: 'Error', code: 'COMPANY_CONTEXT_MISMATCH', message: 'La compañía solicitada no coincide con la sesión.' });
+            return res.status(400).json({ status: 'Error', code: 'INVALID_COMPANY_ID', message: 'Se requiere un company_id válido.' });
         }
 
         const result = await productsServicesService.getThirdPartyProductAssociations({
@@ -557,7 +551,7 @@ inventoryController.getThirdPartyProductAssociations = async (req, res) => {
 };
 
 inventoryController.updateThirdPartyProductTaxRelations = async (req, res) => (
-    runAuthenticatedThirdPartyProductUpdate(
+    runThirdPartyProductUpdate(
         req,
         res,
         productsServicesService.updateThirdPartyProductTaxRelations,
