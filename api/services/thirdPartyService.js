@@ -545,6 +545,18 @@ thirdPartyService.update = async (info) => {
             table: '"Ecosystem".thirdparties', idColumn: 'id', id, companyId,
             updates: generalUpdates
         });
+        if (
+            taxResult.rows.length > 0
+            && generalUpdates.some(({ column }) => ['indentification_number', 'indentification_type'].includes(column))
+        ) {
+            // La columna dv la calcula trigger_auto_dv al actualizar la tabla fiscal.
+            // Hacemos este UPDATE después del NIT para que el trigger lea el valor nuevo.
+            await client.query(`
+                UPDATE "Ecosystem"."thirdPartyTaxInfo"
+                SET "dv" = "dv"
+                WHERE "thirdParty_id" = $1 AND company_id = $2;
+            `, [id, companyId]);
+        }
         await applyChangedFields(client, {
             table: '"Ecosystem"."thirdPartyComercialInfo"', idColumn: 'thirdParty_id', id, companyId,
             updates: commercialUpdates

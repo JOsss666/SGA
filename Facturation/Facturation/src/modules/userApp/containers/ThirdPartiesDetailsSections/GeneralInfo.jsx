@@ -28,7 +28,6 @@ export function GeneralInfo({info,reloadFun}){
     const [second_surname,setSecond_surname] = useState(info.names != undefined? info.second_surname:'');
     const [indentification_type,setIndentification_type] = useState(info.indentification_type != undefined? info.indentification_type:'');
     const [indentification_number,setIndentification_number] = useState(info.indentification_number != undefined? info.indentification_number:'');
-    const [dv,setDv] = useState(info.dv);
     const [mail,setmail] = useState(info.mail != undefined? info.mail:'');
     const [phone,setPhone] = useState(info.phone != undefined? info.phone:'');
     const [country,setCountry] = useState(info.country != undefined? info.country:'');
@@ -39,7 +38,7 @@ export function GeneralInfo({info,reloadFun}){
     const editableFields = [
         'corporative_name', 'first_name', 'second_name', 'first_surname',
         'second_surname', 'indentification_type', 'indentification_number',
-        'dv', 'mail', 'phone', 'country', 'city', 'address', 'type'
+        'mail', 'phone', 'country', 'city', 'address', 'type'
     ];
 
     const formInfo = {
@@ -52,7 +51,6 @@ export function GeneralInfo({info,reloadFun}){
         second_surname,
         indentification_type,
         indentification_number,
-        dv,
         mail,
         phone,
         country,
@@ -121,7 +119,7 @@ export function GeneralInfo({info,reloadFun}){
                     <SelectOptions disabled={disabled} defaultValue={{text:'NIT',value:info.indentification_type}} action={setIndentification_type} options={['CC','NIT','CE','PAS']} value={indentification_type}/>
                 </div>
                 <FormInput action={setIndentification_number} title={'Número de documento'} placeholder={'132...'} disabled={disabled} type={'number'} value={indentification_number}/>
-                <FormInput action={()=>{}} title={'Dígito de verificación'} placeholder={'-'} disabled={true} type={'number'} value={dv}/>
+                <FormInput action={()=>{}} title={'Dígito de verificación'} placeholder={'-'} disabled={true} type={'number'} value={info.dv ?? ''}/>
                 <FormInput action={setmail} title={'Correo electronico'} placeholder={'...@gmail.com'} disabled={disabled} type={'mail'} value={mail}/>
                 <FormInput action={setPhone} title={'Número telefonico'} placeholder={'numero telefonico'} disabled={disabled} value={phone}/>
                 <FormInput action={setCountry} title={'País'} placeholder={'Pais de origen o de registro'} disabled={disabled} value={country}/>
