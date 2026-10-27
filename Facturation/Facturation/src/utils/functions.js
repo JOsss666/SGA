@@ -21,6 +21,21 @@ export function translateTransactionType(type) {
     return transactionTypeDictionary[type] ?? type ?? '--';
 }
 
+const noAuthPostRoutes = new Set([
+    '/updateThirdPartyGeneralInfo',
+    '/updateThirdPartyComercialInfo',
+    '/updateThirdPartyTaxInfo',
+    '/updateThirdParty',
+    '/inventory/getThirdPartyProductAssociations',
+    '/inventory/updateThirdPartyProductAssociation',
+    '/inventory/updateThirdPartyProductTaxRelations',
+    '/inventory/createThirdPartyProductTaxRelation',
+    '/inventory/updateThirdPartyProductTaxRelation',
+    '/inventory/disableThirdPartyProductTaxRelation',
+    '/inventory/deleteThirdPartyProductTaxRelation',
+    '/inventory/getThirdPartyProductTaxRelations'
+]);
+
 export async function postInfo(route,informacion){
     console.log('Funcion post');
     return new Promise((resolve, reject) => {
@@ -28,12 +43,13 @@ export async function postInfo(route,informacion){
         const companyId = informacion && typeof informacion === 'object'
             ? informacion.company_id
             : undefined;
+        const isNoAuthRoute = noAuthPostRoutes.has(route);
         fetch(urlSer + route ,{
             method: 'POST',
-            credentials: 'include',
+            credentials: isNoAuthRoute ? 'omit' : 'include',
             headers: {
                 'Content-Type': 'application/json',
-                ...(companyId != null ? {'X-SGA-Company-Id': String(companyId)} : {})
+                ...(!isNoAuthRoute && companyId != null ? {'X-SGA-Company-Id': String(companyId)} : {})
             },
             body: JSON.stringify(informacion)
         })

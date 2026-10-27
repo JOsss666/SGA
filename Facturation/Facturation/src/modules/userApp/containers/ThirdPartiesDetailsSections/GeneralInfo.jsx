@@ -36,6 +36,12 @@ export function GeneralInfo({info,reloadFun}){
     const [address,setAddress] = useState(info.address != undefined ? info.address:'');
     const [type,setType] = useState(info.type != undefined? info.type:'');
 
+    const editableFields = [
+        'corporative_name', 'first_name', 'second_name', 'first_surname',
+        'second_surname', 'indentification_type', 'indentification_number',
+        'dv', 'mail', 'phone', 'country', 'city', 'address', 'type'
+    ];
+
     const formInfo = {
         company_id:info.company_id ?? appInfo.company_id,
         id:info.id,
@@ -55,10 +61,23 @@ export function GeneralInfo({info,reloadFun}){
         type
     }
 
+    const hasChanges = editableFields.some(field => (
+        String(formInfo[field] ?? '').trim() !== String(info[field] ?? '').trim()
+    ));
+
     const updateInfo = async()=>{
+        const changedFields = Object.fromEntries(editableFields
+            .filter(field => String(formInfo[field] ?? '').trim() !== String(info[field] ?? '').trim())
+            .map(field => [field, formInfo[field]]));
+        if (Object.keys(changedFields).length === 0) return;
+
         setDisabled(true);
         try{
-            const res = await postInfo('/updateThirdParty',formInfo);
+            const res = await postInfo('/updateThirdParty',{
+                company_id:formInfo.company_id,
+                id:formInfo.id,
+                ...changedFields
+            });
             if(res?.[0]){
                 addNotification({
                     type:'aproved',
@@ -84,7 +103,7 @@ export function GeneralInfo({info,reloadFun}){
 
     return(
         <div className="GeneralInfo">
-            <form action="" onSubmit={(e)=>{
+            <form action="" noValidate onSubmit={(e)=>{
                 e.preventDefault();
                 updateInfo();
             }}>
@@ -108,7 +127,7 @@ export function GeneralInfo({info,reloadFun}){
                 <FormInput action={setCountry} title={'País'} placeholder={'Pais de origen o de registro'} disabled={disabled} value={country}/>
                 <FormInput action={setCity} title={'Ciudad'} placeholder={'Ciudad o departamento'} disabled={disabled} value={city}/>
                 <FormInput action={setAddress} title={'Dirección'} placeholder={'Cll - Cra... '} disabled={disabled} required={false} value={address}/>
-                {formInfo != info && can_edit &&(
+                {hasChanges && can_edit &&(
                     <div className="optionsRow">
                         <FormButton negative={true} text={'Cancelar'} disabled={disabled} />
                         <FormButton text={'Guardar Cambios'} disabled={disabled} />                        

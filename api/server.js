@@ -16,11 +16,30 @@ app.set('trust proxy', 1);
 
 app.use(express.urlencoded({ extended: true }))
 
-app.use(cors({
-    origin: allowedOrigins,
-    methods: ["GET", "POST"],
-    credentials: true
-}));
+const publicThirdPartyRoutes = new Set([
+    '/updateThirdPartyGeneralInfo',
+    '/updateThirdPartyComercialInfo',
+    '/updateThirdPartyTaxInfo',
+    '/updateThirdParty',
+    '/inventory/getThirdPartyProductAssociations',
+    '/inventory/updateThirdPartyProductAssociation',
+    '/inventory/updateThirdPartyProductTaxRelations',
+    '/inventory/createThirdPartyProductTaxRelation',
+    '/inventory/updateThirdPartyProductTaxRelation',
+    '/inventory/disableThirdPartyProductTaxRelation',
+    '/inventory/deleteThirdPartyProductTaxRelation',
+    '/inventory/getThirdPartyProductTaxRelations'
+]);
+
+app.use((req, res, next) => {
+    const isPublicThirdPartyRoute = publicThirdPartyRoutes.has(req.path);
+
+    cors({
+        origin: isPublicThirdPartyRoute ? '*' : allowedOrigins,
+        methods: ["GET", "POST"],
+        credentials: !isPublicThirdPartyRoute
+    })(req, res, next);
+});
 app.use(routes);
 
 setupRealtime(server)

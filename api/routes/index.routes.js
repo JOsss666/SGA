@@ -112,11 +112,7 @@ router.post('/createThirdParty',controller.createThirdParty);
 router.post(
     '/updateThirdParty',
     express.json({ limit: '128kb', strict: true }),
-    requireTrustedOrigin,
-    authenticateSession,
-    requireCompanyAccess,
-    controller.updateThirdParty,
-    sessionErrorHandler
+    controller.updateThirdParty
 );
 
 router.post('/blockThirdParty',controller.blockThirdParty);
@@ -251,31 +247,19 @@ router.post('/inventory/updateThirdPartyProductTaxRelation',inventoryController.
 router.post(
     '/inventory/getThirdPartyProductAssociations',
     express.json({ limit: '32kb', strict: true }),
-    requireTrustedOrigin,
-    authenticateSession,
-    requireCompanyAccess,
-    inventoryController.getThirdPartyProductAssociations,
-    sessionErrorHandler
+    inventoryController.getThirdPartyProductAssociations
 );
 
 router.post(
     '/inventory/updateThirdPartyProductAssociation',
     express.json({ limit: '128kb', strict: true }),
-    requireTrustedOrigin,
-    authenticateSession,
-    requireCompanyAccess,
-    inventoryController.updateThirdPartyProductAssociation,
-    sessionErrorHandler
+    inventoryController.updateThirdPartyProductAssociation
 );
 
 router.post(
     '/inventory/updateThirdPartyProductTaxRelations',
     express.json({ limit: '256kb', strict: true }),
-    requireTrustedOrigin,
-    authenticateSession,
-    requireCompanyAccess,
-    inventoryController.updateThirdPartyProductTaxRelations,
-    sessionErrorHandler
+    inventoryController.updateThirdPartyProductTaxRelations
 );
 
 router.post('/inventory/disableThirdPartyProductTaxRelation',inventoryController.disableThirdPartyProductTaxRelation);

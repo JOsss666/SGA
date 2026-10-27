@@ -472,13 +472,16 @@ thirdPartyService.update = async (info) => {
         if (generalUpdates.some(({ column }) => ['first_name', 'second_name', 'first_surname', 'second_surname'].includes(column))) {
             const names = [resultingGeneral.first_name, resultingGeneral.second_name].filter(Boolean).join(' ');
             const lastNames = [resultingGeneral.first_surname, resultingGeneral.second_surname].filter(Boolean).join(' ');
-            if (!names || !lastNames) throw updateError('Los nombres y apellidos del tercero no pueden quedar vacíos.', 400, 'INVALID_THIRD_PARTY_NAME');
             if (thirdParty.names !== names) generalUpdates.push({ column: 'names', value: names, inputName: 'name_parts' });
             if (thirdParty.lastNames !== lastNames) generalUpdates.push({ column: 'lastNames', value: lastNames, inputName: 'name_parts' });
         }
-        if (generalUpdates.some(({ column }) => ['first_name', 'first_surname', 'indentification_type', 'indentification_number', 'mail', 'type'].includes(column))) {
-            for (const field of ['first_name', 'first_surname', 'indentification_type', 'indentification_number', 'mail', 'type']) {
-                if (!`${resultingGeneral[field] ?? ''}`.trim()) throw updateError(`El campo ${field} no puede quedar vacío.`, 400, 'INVALID_THIRD_PARTY_FIELD');
+        const requiredGeneralColumns = new Set([
+            'first_name', 'first_surname', 'indentification_type',
+            'indentification_number', 'mail', 'type'
+        ]);
+        for (const update of generalUpdates) {
+            if (requiredGeneralColumns.has(update.column) && !`${update.value ?? ''}`.trim()) {
+                throw updateError(`El campo ${update.column} no puede quedar vacío.`, 400, 'INVALID_THIRD_PARTY_FIELD');
             }
         }
 

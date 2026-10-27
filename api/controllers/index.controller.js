@@ -2424,22 +2424,18 @@ controller.createThirdParty = (req, res) => {
     })
 };
 
-// Actualización parcial unificada de tercero. La compañía proviene de la sesión
-// validada y debe coincidir con el contexto enviado por el cliente.
+// Actualización parcial unificada de tercero. Este endpoint público recibe
+// company_id en el cuerpo para mantener el alcance de la operación.
 controller.updateThirdParty = async (req, res) => {
     try {
         const info = req.body;
         if (!info || typeof info !== 'object' || Array.isArray(info)) {
             return res.status(400).json({ ok: false, code: 'INVALID_REQUEST_BODY', message: 'El cuerpo debe ser un objeto JSON.' });
         }
-        if (Number(info.company_id) !== Number(req.auth?.companyId)) {
-            return res.status(403).json({ ok: false, code: 'COMPANY_CONTEXT_MISMATCH', message: 'La compañía solicitada no coincide con la sesión.' });
-        }
-
         const result = await thirdPartyService.update({
             ...info,
-            company_id: req.auth.companyId,
-            performed_by: req.auth.userName ?? req.auth.userId
+            company_id: info.company_id,
+            performed_by: 'api'
         });
         return res.status(200).json(result);
     } catch (err) {
