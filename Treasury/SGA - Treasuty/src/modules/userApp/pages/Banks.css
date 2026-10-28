@@ -48,7 +48,7 @@
 }
 
 .sgaTreasury .banks .banksEmpty {
-    color: #737373;
+    color: var(--descriptionText);
 }
 
 @media (max-width: 640px) {

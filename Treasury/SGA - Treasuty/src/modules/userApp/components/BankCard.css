@@ -7,9 +7,10 @@
     flex-direction: column;
     gap: 18px;
     padding: 18px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--inputsBorder);
     border-radius: 20px;
-    background: #f4f4f5;
+    background: var(--cardHover);
+    color: var(--mainText);
 }
 
 .sgaTreasury .bankCardHeader {
@@ -22,9 +23,9 @@
     min-width: 105px;
     padding: 9px 14px;
     border-radius: 999px;
-    background: #d1d5db;
-    color: #374151;
-    font-size: 13px;
+    background: var(--iconHover);
+    color: var(--mainText);
+    font-size: clamp(10px, 1.3vh, 13px);
     font-weight: 600;
 }
 
@@ -35,8 +36,8 @@
     height: 40px;
     place-items: center;
     border-radius: 50%;
-    background: #e5e7eb;
-    color: #374151;
+    background: var(--iconHover);
+    color: var(--mainText);
 }
 
 .sgaTreasury .bankCardNotificationCount {
@@ -48,23 +49,23 @@
     height: 18px;
     padding: 0 4px;
     place-items: center;
-    border: 2px solid #f4f4f5;
+    border: 2px solid var(--cardHover);
     border-radius: 999px;
-    background: #2563eb;
-    color: #fff;
-    font-size: 11px;
+    background: var(--chatAccent);
+    color: var(--mainText);
+    font-size: clamp(9px, 1.1vh, 11px);
     font-weight: 700;
 }
 
 .sgaTreasury .bankCardContent h3 {
-    margin: 0 0 6px;
-    color: #171717;
-    font-size: 21px;
+    margin: 0 0 0.8vh;
+    color: var(--mainText);
+    font-size: clamp(16px, 2.1vh, 21px);
 }
 
 .sgaTreasury .bankCardContent p {
     margin: 0;
-    color: #404040;
+    color: var(--descriptionText);
     line-height: 1.4;
 }
 
@@ -86,21 +87,21 @@
 .sgaTreasury .bankCardFavorite {
     width: 40px;
     flex: 0 0 40px;
-    background: #e5e7eb;
-    color: #404040;
-    font-size: 17px;
+    background: var(--iconHover);
+    color: var(--mainText);
+    font-size: clamp(14px, 1.7vh, 17px);
 }
 
 .sgaTreasury .bankCardDetails {
     flex: 1;
-    background: #171717;
-    color: #fff;
-    font-size: 14px;
+    background: var(--mainText);
+    color: var(--bg);
+    font-size: clamp(12px, 1.4vh, 14px);
     font-weight: 500;
 }
 
 .sgaTreasury .bankCardDetails:hover {
-    background: #333;
+    background: var(--descriptionText);
 }
 
 .sgaTreasury .bankCardOptions .MoreOptions .ButtonMenu {
@@ -108,23 +109,30 @@
     width: 40px;
     height: 40px;
     border-radius: 6px;
-    background: #171717;
+    background: var(--mainText);
 }
 
 .sgaTreasury .bankCardOptions .MoreOptions .ButtonMenu i {
     margin: auto;
-    color: #fff;
-    font-size: 16px;
+    color: var(--bg);
+    font-size: clamp(14px, 1.6vh, 16px);
 }
 
 .sgaTreasury .bankCardOptions .MoreOptions .ButtonMenu:hover {
-    background: #333;
+    background: var(--descriptionText);
 }
 
 .sgaTreasury .bankCardOptions .MoreOptions .options {
     z-index: 20;
     width: 210px;
+    border: 1px solid var(--inputsBorder);
     border-radius: 10px;
+    background: var(--inputsBg);
+    color: var(--mainText);
+}
+
+.sgaTreasury .bankCardOptions .MoreOptions .options li:hover {
+    background: var(--cardHover);
 }
 
 @media (max-width: 640px) {
@@ -132,59 +140,4 @@
         flex-basis: 100%;
         max-width: none;
     }
-}
-
-/* Modo oscuro */
-:root.dark .sgaTreasury .banksCards .bankCard {
-    background: #191919;
-    border-color: #2c2c2c;
-}
-
-:root.dark .sgaTreasury .bankCardLabel {
-    background: #303036;
-    color: #e6eef6;
-}
-
-:root.dark .sgaTreasury .bankCardContent h3 {
-    color: #fff;
-}
-
-:root.dark .sgaTreasury .bankCardContent p {
-    color: #c4c4c4;
-}
-
-:root.dark .sgaTreasury .bankCardNotifications {
-    background: #27272a;
-    color: #e6eef6;
-}
-
-:root.dark .sgaTreasury .bankCardNotificationCount {
-    border-color: #191919;
-}
-
-:root.dark .sgaTreasury .bankCardFavorite {
-    background: #27272a;
-    color: #e6eef6;
-}
-
-:root.dark .sgaTreasury .bankCardDetails,
-:root.dark .sgaTreasury .bankCardOptions .MoreOptions .ButtonMenu {
-    background: #27272a;
-    color: #fff;
-}
-
-:root.dark .sgaTreasury .bankCardDetails:hover,
-:root.dark .sgaTreasury .bankCardOptions .MoreOptions .ButtonMenu:hover {
-    background: #3f3f46;
-}
-
-:root.dark .sgaTreasury .bankCardOptions .MoreOptions .options,
-:root.dark .sgaTreasury .bankCardOptions .MoreOptions .options li {
-    background: #232327;
-    color: #e6eef6;
-    border-color: #3a3a3a;
-}
-
-:root.dark .sgaTreasury .bankCardOptions .MoreOptions .options li:hover {
-    background: #303036;
 }
