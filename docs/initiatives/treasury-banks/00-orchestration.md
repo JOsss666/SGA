@@ -12,6 +12,7 @@
 | 1 — Planeación | `01-planning/feature-plan.md` | v1 | Aprobada ("Procede") | — |
 | 2 — Diseño/diagramas | `02-design/feature-design.md`, `02-design/README.md`, `02-design/diagrams/*` (mmd+svg+png) | v1 | Aprobada ("continua etapa 3") | — |
 | 3 — Ejecución (tareas) | `03-execution/task-plan.md` | v1 | Aprobada y PUBLICADA en Notion (8 tareas coarse TBANKS-01..08) | Usuario: "publicar las 22 completas" + "agrupadas al estilo tablero" |
+| 2 — Adenda: estructura BD implementada | `02-design/estructura-bd-implementada.md`, `02-design/diagrams/bd-implementada-*` (mmd+svg) | v1 (2026-10-27) | BORRADOR — esperando revisión | Pedido del usuario tras aplicar migraciones 0032–0038 (commit 7d37ecb0) |
 
 ## Publicación en Notion (tablero: SGA - WorkFlow - Development · collection://27a8a604-4642-81c0-8bd1-000bd8adf457)
 
