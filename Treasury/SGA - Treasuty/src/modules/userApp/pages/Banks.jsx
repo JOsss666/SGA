@@ -4,6 +4,7 @@ import { DescriptionSpan } from "../components/DescriptionSpan";
 import { FormButton } from "../components/FormButton";
 import { SearchBar } from "../components/SearchBar";
 import { BankCard } from "../components/BankCard";
+import { BankDetails } from "./BankDetails";
 import "./Banks.css";
 
 const banksData = [
@@ -41,13 +42,23 @@ const banksData = [
 
 export function Banks() {
     const [searchValue, setSearchValue] = useState("");
+    const [selectedBank, setSelectedBank] = useState(null);
+
+    if (selectedBank) {
+        return (
+            <BankDetails
+                info={selectedBank}
+                onBack={() => setSelectedBank(null)}
+            />
+        );
+    }
 
     const searchText = searchValue.trim().toLocaleLowerCase("es");
 
-    const filteredBanks = banksData.filter((bank) => (
+    const filteredBanks = banksData.filter((bank) =>
         bank.title.toLocaleLowerCase("es").includes(searchText) ||
         bank.description.toLocaleLowerCase("es").includes(searchText)
-    ));
+    );
 
     return (
         <div className="banks">
@@ -74,7 +85,11 @@ export function Banks() {
             <div className="banksCards">
                 {filteredBanks.length > 0 ? (
                     filteredBanks.map((bank) => (
-                        <BankCard key={bank.id} info={bank} />
+                        <BankCard
+                            key={bank.id}
+                            info={bank}
+                            onDetails={() => setSelectedBank(bank)}
+                        />
                     ))
                 ) : (
                     <p className="banksEmpty">

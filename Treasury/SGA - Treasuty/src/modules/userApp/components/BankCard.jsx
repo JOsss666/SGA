@@ -1,7 +1,7 @@
 import { MoreOptions } from "./MoreOptions";
 import "./BankCard.css";
 
-export function BankCard({ info }) {
+export function BankCard({ info, onDetails }) {
     const { title, description, notifications = 0 } = info;
 
     const options = [
@@ -57,6 +57,7 @@ export function BankCard({ info }) {
                 <button
                     type="button"
                     className="bankCardDetails"
+                    onClick={onDetails}
                 >
                     Ver detalles
                 </button>
