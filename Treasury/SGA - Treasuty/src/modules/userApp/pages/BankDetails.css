@@ -1,0 +1,663 @@
+.sgaTreasury .bankDetails {
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 100%;
+    padding: 2vh 3vw;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.sgaTreasury .bankDetailsBreadcrumb {
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    border: 1px solid #dedede;
+    border-radius: 8px;
+    background: transparent;
+    color: #737373;
+    cursor: pointer;
+}
+
+.sgaTreasury .bankDetailsBreadcrumb strong {
+    color: #262626;
+    font-weight: 500;
+}
+
+.sgaTreasury .bankDetailsAccountHeader {
+    display: flex;
+    min-height: 185px;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 28px;
+    border-radius: 12px;
+    background: #f1f1f1;
+}
+
+.sgaTreasury .bankDetailsCarouselButton {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: #dedede;
+    color: #555;
+    cursor: pointer;
+}
+
+.sgaTreasury .bankDetailsCarouselButton:hover:not(:disabled) {
+    background: #d0d0d0;
+}
+
+.sgaTreasury .bankDetailsCarouselButton:disabled {
+    cursor: default;
+    opacity: 0.55;
+}
+
+.sgaTreasury .bankDetailsAccountSummary {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 7px;
+    text-align: center;
+}
+
+.sgaTreasury .bankDetailsAccountSummary > span {
+    color: #262626;
+    font-size: 21px;
+    font-weight: 600;
+}
+
+.sgaTreasury .bankDetailsAccountSummary h1 {
+    margin: 0;
+    color: #171717;
+    font-size: clamp(25px, 3vw, 38px);
+}
+
+.sgaTreasury .bankDetailsAccountSummary p {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: #262626;
+    font-size: 16px;
+}
+
+.sgaTreasury .bankDetailsShowNumber {
+    padding: 2px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.sgaTreasury .bankDetailsCarouselIndicators {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 2px;
+    padding: 5px 8px;
+    border-radius: 20px;
+    background: #666;
+}
+
+.sgaTreasury .bankDetailsCarouselIndicators button {
+    width: 9px;
+    height: 9px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #aaa;
+    cursor: pointer;
+}
+
+.sgaTreasury .bankDetailsCarouselIndicators button[aria-current="true"] {
+    background: #fff;
+}
+
+.sgaTreasury .bankDetailsTabs {
+    display: flex;
+    min-height: 48px;
+    align-items: stretch;
+    gap: 24px;
+    overflow-x: auto;
+    border-bottom: 1px solid #dedede;
+}
+
+.sgaTreasury .bankDetailsTabs button {
+    flex: 0 0 auto;
+    padding: 0 8px 10px;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: #262626;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.sgaTreasury .bankDetailsTabs button.active {
+    border-bottom-color: #3478f6;
+    color: #3478f6;
+    font-weight: 600;
+}
+
+.sgaTreasury .bankDetailsSection {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.sgaTreasury .bankDetailsToolbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.sgaTreasury .bankDetailsToolbar > .SearchBar,
+.sgaTreasury .bankDetailsAccountsToolbar > .SearchBar {
+    flex: 0 1 360px;
+    min-width: 200px;
+}
+
+.sgaTreasury .bankDetailsDateFilters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #737373;
+}
+
+.sgaTreasury .bankDetailsDateFilters input,
+.sgaTreasury .bankDetailsAccountsToolbar select {
+    box-sizing: border-box;
+    min-height: 42px;
+    padding: 8px 10px;
+    border: 1px solid #dedede;
+    border-radius: 8px;
+    background: #fff;
+    color: #262626;
+}
+
+.sgaTreasury .bankDetailsDateFilters input {
+    width: 145px;
+}
+
+.sgaTreasury .bankDetailsToolbarActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.sgaTreasury .bankDetailsToolbarActions > .ButtonDownload {
+    width: auto;
+    flex: 0 0 auto;
+}
+
+.sgaTreasury .bankDetailsToolbarActions > .ButtonDownload > button {
+    width: auto;
+    min-height: 42px;
+    padding: 10px 16px;
+    white-space: nowrap;
+}
+
+.sgaTreasury .bankDetailsNewButton {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: #3478f6;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.sgaTreasury .bankDetailsNewButton:hover {
+    background: #2563eb;
+}
+
+.sgaTreasury .bankDetailsAccountsToolbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.sgaTreasury .bankDetailsAccountsToolbar select {
+    min-width: 140px;
+    cursor: pointer;
+}
+
+.sgaTreasury .bankDetailsAccountsToolbar > .bankDetailsNewButton {
+    margin-left: auto;
+}
+
+.sgaTreasury .bankDetailsAccounts {
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.sgaTreasury .bankAccountCard {
+    display: flex;
+    box-sizing: border-box;
+    width: min(100%, 340px);
+    min-height: 190px;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    background: #f4f4f5;
+}
+
+.sgaTreasury .bankAccountCardHeading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.sgaTreasury .bankAccountCardHeading h3 {
+    overflow: hidden;
+    margin: 0;
+    color: #171717;
+    font-size: 19px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sgaTreasury .bankAccountCardHeading > span {
+    color: #525252;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.sgaTreasury .bankAccountCardDescription {
+    min-height: 38px;
+    margin: 0;
+    color: #404040;
+    line-height: 1.35;
+}
+
+.sgaTreasury .bankAccountCardBalance {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sgaTreasury .bankAccountCardBalance strong {
+    color: #171717;
+    font-size: 23px;
+    font-weight: 500;
+}
+
+.sgaTreasury .bankAccountCardBalance button {
+    padding: 3px;
+    border: 0;
+    background: transparent;
+    color: #525252;
+    cursor: pointer;
+}
+
+.sgaTreasury .bankAccountCardActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.sgaTreasury .bankAccountFavorite,
+.sgaTreasury .bankAccountDetails {
+    height: 40px;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.sgaTreasury .bankAccountFavorite {
+    width: 40px;
+    flex: 0 0 40px;
+    background: #e5e7eb;
+    color: #525252;
+    font-size: 17px;
+}
+
+.sgaTreasury .bankAccountFavorite.favorite {
+    color: #e11d48;
+}
+
+.sgaTreasury .bankAccountDetails {
+    flex: 1;
+    background: #3478f6;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.sgaTreasury .bankAccountDetails:hover {
+    background: #2563eb;
+}
+
+.sgaTreasury .bankAccountOptions .MoreOptions .ButtonMenu {
+    display: flex;
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    background: #171717;
+}
+
+.sgaTreasury .bankAccountOptions .MoreOptions .ButtonMenu i {
+    margin: auto;
+    color: #fff;
+    font-size: 16px;
+}
+
+.sgaTreasury .bankAccountOptions .MoreOptions .ButtonMenu:hover {
+    background: #333;
+}
+
+.sgaTreasury .bankAccountOptions .MoreOptions .options {
+    z-index: 20;
+    width: 210px;
+    border-radius: 10px;
+}
+
+.sgaTreasury .bankDetailsGeneral {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px 28px;
+    padding: 16px;
+}
+
+.sgaTreasury .bankDetailsField {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sgaTreasury .bankDetailsField span {
+    color: #525252;
+    font-size: 14px;
+}
+
+.sgaTreasury .bankDetailsField input,
+.sgaTreasury .bankDetailsField select {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid #e2e2e2;
+    border-radius: 8px;
+    background: #fff;
+    color: #737373;
+    font-size: 14px;
+}
+
+.sgaTreasury .bankDetailsField input::placeholder {
+    color: #a3a3a3;
+}
+
+.sgaTreasury .bankDetailsField select:disabled {
+    opacity: 1;
+}
+
+.sgaTreasury .bankDetailsNoAccounts {
+    color: #737373;
+}
+
+.sgaTreasury .bankDetailsEmpty {
+    min-height: 180px;
+    align-items: center;
+    justify-content: center;
+    color: #737373;
+}
+
+.sgaTreasury .bankDetailsEmpty i {
+    font-size: 30px;
+}
+
+.sgaTreasury .bankDetailsEmpty p {
+    margin: 0;
+}
+
+@media (max-width: 1000px) {
+    .sgaTreasury .bankDetailsToolbar,
+    .sgaTreasury .bankDetailsAccountsToolbar {
+        flex-wrap: wrap;
+    }
+
+    .sgaTreasury .bankDetailsToolbarActions {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 900px) {
+    .sgaTreasury .bankDetailsGeneral {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .sgaTreasury .bankDetailsTabs {
+        gap: 14px;
+    }
+}
+
+@media (max-width: 600px) {
+    .sgaTreasury .bankDetails {
+        padding: 16px;
+    }
+
+    .sgaTreasury .bankDetailsAccountHeader {
+        min-height: 150px;
+        padding: 18px 12px;
+    }
+
+    .sgaTreasury .bankDetailsCarouselButton {
+        width: 34px;
+        height: 34px;
+        flex-basis: 34px;
+    }
+
+    .sgaTreasury .bankDetailsAccountSummary > span {
+        font-size: 17px;
+    }
+
+    .sgaTreasury .bankDetailsGeneral {
+        grid-template-columns: 1fr;
+    }
+
+    .sgaTreasury .bankDetailsToolbar,
+    .sgaTreasury .bankDetailsAccountsToolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .sgaTreasury .bankDetailsToolbar > .SearchBar,
+    .sgaTreasury .bankDetailsAccountsToolbar > .SearchBar {
+        width: 100%;
+        max-width: none;
+        flex-basis: auto;
+    }
+
+    .sgaTreasury .bankDetailsDateFilters input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .sgaTreasury .bankDetailsToolbarActions {
+        width: 100%;
+        justify-content: space-between;
+        margin-left: 0;
+    }
+
+    .sgaTreasury .bankDetailsToolbarActions > .ButtonDownload {
+        flex: 1;
+    }
+
+    .sgaTreasury .bankDetailsAccountsToolbar select {
+        width: 100%;
+    }
+
+    .sgaTreasury .bankDetailsAccountsToolbar > .bankDetailsNewButton {
+        margin-left: 0;
+    }
+
+    .sgaTreasury .bankAccountCard {
+        width: 100%;
+    }
+}
+
+/* Modo oscuro */
+:root.dark .sgaTreasury .bankDetailsBreadcrumb {
+    border-color: #3a3a3a;
+    color: #aaa;
+}
+
+:root.dark .sgaTreasury .bankDetailsBreadcrumb strong,
+:root.dark .sgaTreasury .bankDetailsAccountSummary > span,
+:root.dark .sgaTreasury .bankDetailsAccountSummary h1,
+:root.dark .sgaTreasury .bankDetailsAccountSummary p {
+    color: #f5f5f5;
+}
+
+:root.dark .sgaTreasury .bankDetailsAccountHeader {
+    background: #191919;
+}
+
+:root.dark .sgaTreasury .bankDetailsCarouselButton {
+    background: #303036;
+    color: #eee;
+}
+
+:root.dark .sgaTreasury .bankDetailsCarouselButton:hover:not(:disabled) {
+    background: #414149;
+}
+
+:root.dark .sgaTreasury .bankDetailsTabs {
+    border-color: #363636;
+}
+
+:root.dark .sgaTreasury .bankDetailsTabs button {
+    color: #ddd;
+}
+
+:root.dark .sgaTreasury .bankDetailsTabs button.active {
+    color: #6ea0ff;
+}
+
+:root.dark .sgaTreasury .bankDetailsDateFilters {
+    color: #aaa;
+}
+
+:root.dark .sgaTreasury .bankDetailsDateFilters input,
+:root.dark .sgaTreasury .bankDetailsAccountsToolbar select {
+    border-color: #3a3a3a;
+    background: #191919;
+    color: #eee;
+}
+
+:root.dark .sgaTreasury .bankDetailsNewButton {
+    background: #3478f6;
+    color: #fff;
+}
+
+:root.dark .sgaTreasury .bankDetailsNewButton:hover {
+    background: #2563eb;
+}
+
+:root.dark .sgaTreasury .bankDetailsField span {
+    color: #bbb;
+}
+
+:root.dark .sgaTreasury .bankDetailsField input,
+:root.dark .sgaTreasury .bankDetailsField select {
+    border-color: #3a3a3a;
+    background: #191919;
+    color: #ccc;
+}
+
+:root.dark .sgaTreasury .bankDetailsField input::placeholder {
+    color: #888;
+}
+
+:root.dark .sgaTreasury .bankAccountCard {
+    border-color: #2c2c2c;
+    background: #191919;
+}
+
+:root.dark .sgaTreasury .bankAccountCardHeading h3,
+:root.dark .sgaTreasury .bankAccountCardBalance strong {
+    color: #f5f5f5;
+}
+
+:root.dark .sgaTreasury .bankAccountCardHeading > span,
+:root.dark .sgaTreasury .bankAccountCardDescription,
+:root.dark .sgaTreasury .bankAccountCardBalance button {
+    color: #ccc;
+}
+
+:root.dark .sgaTreasury .bankAccountFavorite {
+    background: #303036;
+    color: #ddd;
+}
+
+:root.dark .sgaTreasury .bankAccountFavorite.favorite {
+    color: #fb7185;
+}
+
+:root.dark .sgaTreasury .bankAccountDetails {
+    background: #3478f6;
+    color: #fff;
+}
+
+:root.dark .sgaTreasury .bankAccountDetails:hover {
+    background: #2563eb;
+}
+
+:root.dark .sgaTreasury .bankAccountOptions .MoreOptions .ButtonMenu {
+    background: #27272a;
+}
+
+:root.dark .sgaTreasury .bankAccountOptions .MoreOptions .ButtonMenu:hover {
+    background: #3f3f46;
+}
+
+:root.dark .sgaTreasury .bankAccountOptions .MoreOptions .options,
+:root.dark .sgaTreasury .bankAccountOptions .MoreOptions .options li {
+    border-color: #3a3a3a;
+    background: #232327;
+    color: #e6eef6;
+}
+
+:root.dark .sgaTreasury .bankAccountOptions .MoreOptions .options li:hover {
+    background: #303036;
+}
+
+:root.dark .sgaTreasury .bankDetailsNoAccounts,
+:root.dark .sgaTreasury .bankDetailsEmpty {
+    color: #aaa;
+}
+.sgaTreasury .bankDetailsToolbarActions > .ButtonDownload > button,
+.sgaTreasury .bankDetailsToolbarActions > .bankDetailsNewButton {
+    box-sizing: border-box;
+    display: inline-flex;
+    height: 42px;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    font-size: 14px;
+    line-height: 1;
+}
