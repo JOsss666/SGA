@@ -123,11 +123,13 @@
 
 .sgaTreasury .bankDetailsTabs {
     display: flex;
-    min-height: 48px;
+    height: fit-content;
+    padding: 1vh 2vh;
     align-items: stretch;
-    gap: 24px;
+    gap: 2vw;
     overflow-x: auto;
     border-bottom: 1px solid var(--inputsBorder);
+    margin-bottom: 1vh;
 }
 
 .sgaTreasury .bankDetailsTabs button {
@@ -137,7 +139,7 @@
     border-bottom: 3px solid transparent;
     background: transparent;
     color: var(--mainText);
-    font-size: clamp(12px, 1.5vh, 15px);
+    font-size: clamp(2px, 2vh, 20px);
     cursor: pointer;
 }
 
@@ -173,10 +175,8 @@
     color: var(--descriptionText);
 }
 
-.sgaTreasury .bankDetailsDateFilters input,
 .sgaTreasury .bankDetailsAccountsToolbar select {
     box-sizing: border-box;
-    min-height: 42px;
     padding: 8px 10px;
     border: 1px solid var(--inputsBorder);
     border-radius: 8px;
@@ -184,8 +184,9 @@
     color: var(--mainText);
 }
 
-.sgaTreasury .bankDetailsDateFilters input {
-    width: 145px;
+.sgaTreasury .bankDetailsDateFilters .FacturationFormInput {
+    min-width: 0;
+    flex: 1;
 }
 
 .sgaTreasury .bankDetailsToolbarActions {
@@ -200,32 +201,9 @@
     flex: 0 0 auto;
 }
 
-.sgaTreasury .bankDetailsToolbarActions > .ButtonDownload > button,
-.sgaTreasury .bankDetailsToolbarActions > .bankDetailsNewButton {
-    box-sizing: border-box;
-    display: inline-flex;
-    height: 42px;
-    min-height: 42px;
-    align-items: center;
-    justify-content: center;
-    padding: 0 16px;
-    font-size: clamp(12px, 1.4vh, 14px);
-    line-height: 1;
-    white-space: nowrap;
-}
-
-.sgaTreasury .bankDetailsNewButton {
-    gap: 10px;
-    border: 0;
-    border-radius: 8px;
-    background: var(--chatAccent);
-    color: var(--bg);
-    cursor: pointer;
-}
-
-.sgaTreasury .bankDetailsNewButton:hover {
-    background: var(--mainText);
-    color: var(--bg);
+.sgaTreasury .bankDetailsNewButtonContainer {
+    display: flex;
+    flex: 0 0 auto;
 }
 
 .sgaTreasury .bankDetailsAccountsToolbar {
@@ -234,12 +212,13 @@
     gap: 14px;
 }
 
-.sgaTreasury .bankDetailsAccountsToolbar select {
-    min-width: 140px;
-    cursor: pointer;
+.sgaTreasury .bankDetailsAccountsToolbar > .SelectOptions {
+    flex: 0 0 auto;
 }
 
-.sgaTreasury .bankDetailsAccountsToolbar > .bankDetailsNewButton {
+.sgaTreasury .bankDetailsAccountsToolbar > .ButtonDownload {
+    width: auto;
+    flex: 0 0 auto;
     margin-left: auto;
 }
 
@@ -402,20 +381,14 @@
     font-size: clamp(11px, 1.4vh, 14px);
 }
 
-.sgaTreasury .bankDetailsField input,
+.sgaTreasury .bankDetailsField > .FacturationFormInput {
+    min-width: 0;
+}
+
 .sgaTreasury .bankDetailsField select {
-    box-sizing: border-box;
-    width: 100%;
-    min-height: 38px;
-    padding: 8px 10px;
     border: 1px solid var(--inputsBorder);
     border-radius: 8px;
     background: var(--inputsBg);
-    color: var(--descriptionText);
-    font-size: clamp(11px, 1.4vh, 14px);
-}
-
-.sgaTreasury .bankDetailsField input::placeholder {
     color: var(--descriptionText);
 }
 
@@ -500,26 +473,13 @@
         flex-basis: auto;
     }
 
-    .sgaTreasury .bankDetailsDateFilters input {
-        width: 100%;
-        min-width: 0;
-    }
-
     .sgaTreasury .bankDetailsToolbarActions {
         width: 100%;
         justify-content: space-between;
         margin-left: 0;
     }
 
-    .sgaTreasury .bankDetailsToolbarActions > .ButtonDownload {
-        flex: 1;
-    }
-
-    .sgaTreasury .bankDetailsAccountsToolbar select {
-        width: 100%;
-    }
-
-    .sgaTreasury .bankDetailsAccountsToolbar > .bankDetailsNewButton {
+    .sgaTreasury .bankDetailsAccountsToolbar > .ButtonDownload {
         margin-left: 0;
     }
 

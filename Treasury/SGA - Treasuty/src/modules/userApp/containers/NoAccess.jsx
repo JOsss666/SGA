@@ -4,7 +4,7 @@ import { BoldTitle } from "../components/BoldTitle"
 import { DescriptionSpan } from "../components/DescriptionSpan"
 import './NoAccess.css'
 
-export function NoAccess({title,description,img,noExit,noRedirect}){
+export function NoAccess({title,description,img,noExit,noRedirect,goOut=true,message}){
 
     const {appInfo} = useAppInfo()
     const navigate = useNavigate();
@@ -23,9 +23,9 @@ export function NoAccess({title,description,img,noExit,noRedirect}){
             <img src={img? img:"https://cdnmain.sga360.co/static/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.webp"}/>
             <div className="descriptionMessage">
                 <BoldTitle text={title? title:'No tiene acceso a este modulo'}/>
-                <DescriptionSpan text={description? description:`${appInfo.legal_name} ha limitado su acceso al modulo de Facturación`}/>
+                <DescriptionSpan text={message || description || `${appInfo.legal_name} ha limitado su acceso al modulo de Facturación`}/>
             </div>
-            {!noRedirect && !noExit && (
+            {goOut && !noRedirect && !noExit && (
                 <span className="redirect" onClick={()=>{
                     handleRedirect();
                 }}>
@@ -33,7 +33,7 @@ export function NoAccess({title,description,img,noExit,noRedirect}){
                     Salir de este modulo
                 </span>
             )}
-            {!noRedirect && noExit && (
+            {goOut && !noRedirect && noExit && (
                 <span className="redirect" onClick={()=>{
                     handleGoHome();
                 }}>
@@ -41,7 +41,7 @@ export function NoAccess({title,description,img,noExit,noRedirect}){
                     Salir de esta sección
                 </span>
             )}
-            {noRedirect && (
+            {goOut && noRedirect && (
                 <span className="redirect"/>
             )}
         </div>

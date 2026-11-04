@@ -1,8 +1,12 @@
 import { useMemo, useState } from "react";
 import { ButtonDownload } from "../components/ButtonDownload";
 import { MoreOptions } from "../components/MoreOptions";
+import { FormInput } from "../components/FormInput";
+import { FormButton } from "../components/FormButton";
+import { SelectOptions } from "../components/SelectOptions";
 import { SearchBar } from "../components/SearchBar";
 import { UniversalTable } from "../containers/universalTable";
+import { NoAccess } from "../containers/NoAccess";
 import "./BankDetails.css";
 
 const tabs = [
@@ -28,6 +32,14 @@ const downloadColumns = movementColumns.map(({ key, label }) => ({
     header: label,
     width: 20,
 }));
+
+const accountDownloadColumns = [
+    { key: "name", header: "Cuenta", width: 24 },
+    { key: "type", header: "Tipo", width: 22 },
+    { key: "number", header: "Número", width: 18 },
+    { key: "description", header: "Descripción", width: 48 },
+    { key: "balance", header: "Saldo", width: 20, type: "number" },
+];
 
 const mockMovements = [
     {
@@ -113,7 +125,7 @@ export function BankDetails({ info, onBack }) {
     const [showAccountNumber, setShowAccountNumber] = useState(false);
     const [movementSearch, setMovementSearch] = useState("");
     const [accountSearch, setAccountSearch] = useState("");
-    const [accountType, setAccountType] = useState("Todas");
+    const [accountType, setAccountType] = useState("Todas las cuentas");
     const [accountOrder, setAccountOrder] = useState("A-Z");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
@@ -158,7 +170,8 @@ export function BankDetails({ info, onBack }) {
                     .includes(normalizedSearch);
 
                 const matchesType =
-                    accountType === "Todas" || account.type === accountType;
+                    accountType === "Todas las cuentas" ||
+                    account.type === accountType;
 
                 return matchesSearch && matchesType;
             })
@@ -352,22 +365,22 @@ export function BankDetails({ info, onBack }) {
                         />
 
                         <div className="bankDetailsDateFilters">
-                            <input
+                            <FormInput
                                 type="date"
-                                aria-label="Fecha inicial"
+                                ariaLabel="Fecha inicial"
                                 value={startDate}
-                                onChange={(event) =>
-                                    setStartDate(event.target.value)
-                                }
+                                hideLabel
+                                required={false}
+                                action={setStartDate}
                             />
                             <span>–</span>
-                            <input
+                            <FormInput
                                 type="date"
-                                aria-label="Fecha final"
+                                ariaLabel="Fecha final"
                                 value={endDate}
-                                onChange={(event) =>
-                                    setEndDate(event.target.value)
-                                }
+                                hideLabel
+                                required={false}
+                                action={setEndDate}
                             />
                         </div>
 
@@ -379,16 +392,18 @@ export function BankDetails({ info, onBack }) {
                                 text="Descargar movimientos"
                             />
 
-                            <button
-                                className="bankDetailsNewButton"
-                                type="button"
-                            >
-                                Nuevo
-                                <i
-                                    className="fa-solid fa-plus"
-                                    aria-hidden="true"
-                                />
-                            </button>
+                            <div className="bankDetailsNewButtonContainer">
+                                <FormButton
+                                    className="bankDetailsNewButton"
+                                    type="button"
+                                    text="Nuevo"
+                                >
+                                    <i
+                                        className="fa-solid fa-plus"
+                                        aria-hidden="true"
+                                    />
+                                </FormButton>
+                            </div>
                         </div>
                     </div>
 
@@ -405,7 +420,7 @@ export function BankDetails({ info, onBack }) {
             {activeTab === "Información general" && (
                 <section className="bankDetailsSection bankDetailsGeneral">
                     {generalInformation.map((field) => (
-                        <label className="bankDetailsField" key={field.label}>
+                        <div className="bankDetailsField" key={field.label}>
                             <span>{field.label}</span>
 
                             {field.options ? (
@@ -420,14 +435,17 @@ export function BankDetails({ info, onBack }) {
                                     ))}
                                 </select>
                             ) : (
-                                <input
+                                <FormInput
+                                    ariaLabel={field.label}
                                     type="text"
                                     value={field.value}
                                     placeholder={field.placeholder ?? ""}
+                                    hideLabel
                                     readOnly
+                                    required={false}
                                 />
                             )}
-                        </label>
+                        </div>
                     ))}
                 </section>
             )}
@@ -441,39 +459,30 @@ export function BankDetails({ info, onBack }) {
                             action={setAccountSearch}
                         />
 
-                        <select
-                            aria-label="Filtrar cuentas por tipo"
-                            value={accountType}
-                            onChange={(event) =>
-                                setAccountType(event.target.value)
-                            }
-                        >
-                            <option value="Todas">Todas las cuentas</option>
-                            <option value="Cuenta corriente">Corriente</option>
-                            <option value="Cuenta de ahorros">Ahorros</option>
-                        </select>
+                        <SelectOptions
+                            title="Tipo"
+                            options={[
+                                "Todas las cuentas",
+                                "Cuenta corriente",
+                                "Cuenta de ahorros",
+                            ]}
+                            defaultValue={{ value: accountType }}
+                            action={setAccountType}
+                        />
 
-                        <select
-                            aria-label="Ordenar cuentas"
-                            value={accountOrder}
-                            onChange={(event) =>
-                                setAccountOrder(event.target.value)
-                            }
-                        >
-                            <option value="A-Z">Orden: A - Z</option>
-                            <option value="Z-A">Orden: Z - A</option>
-                        </select>
+                        <SelectOptions
+                            title="Orden"
+                            options={["A-Z", "Z-A"]}
+                            defaultValue={{ value: accountOrder }}
+                            action={setAccountOrder}
+                        />
 
-                        <button
-                            className="bankDetailsNewButton"
-                            type="button"
-                        >
-                            Nueva
-                            <i
-                                className="fa-solid fa-plus"
-                                aria-hidden="true"
-                            />
-                        </button>
+                        <ButtonDownload
+                            info={visibleAccounts}
+                            columns={accountDownloadColumns}
+                            title={`Cuentas_bancarias_${info?.title ?? "Banco"}`}
+                            text="Descargar cuentas"
+                        />
                     </div>
 
                     <div className="bankDetailsAccounts">
@@ -503,11 +512,12 @@ export function BankDetails({ info, onBack }) {
                 "Cuentas Bancarias",
             ].includes(activeTab) && (
                 <section className="bankDetailsSection bankDetailsEmpty">
-                    <i
-                        className="fa-regular fa-folder-open"
-                        aria-hidden="true"
+                    <NoAccess
+                        goOut={false}
+                        img="https://cdnmain.sga360.co/static/Gemini_Generated_Image_fx4nzmfx4nzmfx4n-2_fizk0g.webp"
+                        title="Sección en desarrollo"
+                        message="Sección en desarrollo, estará disponible pronto."
                     />
-                    <p>Esta sección estará disponible próximamente.</p>
                 </section>
             )}
         </section>

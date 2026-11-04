@@ -11,11 +11,6 @@
     background: var(--cardHover);
     color: var(--mainText);
     cursor: pointer;
-    transition: .3s;
-}
-
-.sgaTreasury .banksCards .bankCard:hover{
-    transform: scale(.95);
 }
 
 .sgaTreasury .bankCardHeader {
