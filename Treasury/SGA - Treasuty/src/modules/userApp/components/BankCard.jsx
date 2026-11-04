@@ -22,7 +22,7 @@ export function BankCard({ info, onDetails }) {
     return (
         <article className="bankCard">
             <div className="bankCardHeader">
-                <span className="bankCardLabel">Banco</span>
+                <span className="bankCardLabel">Bancolombia</span>
 
                 <div
                     className="bankCardNotifications"

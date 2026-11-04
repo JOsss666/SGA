@@ -39,12 +39,13 @@
     white-space: nowrap;
 }
 
-.sgaTreasury .banks .banksCards {
+.sgaTreasury .banks .banksCards{
     display: flex;
-    width: 100%;
     flex-wrap: wrap;
-    align-items: stretch;
-    gap: 20px;
+    gap: 2vw;
+    height: fit-content;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .sgaTreasury .banks .banksEmpty {
