@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { BoldTitle } from "../components/BoldTitle";
 import { DescriptionSpan } from "../components/DescriptionSpan";
 import { FormButton } from "../components/FormButton";
@@ -42,16 +43,17 @@ const banksData = [
 
 export function Banks() {
     const [searchValue, setSearchValue] = useState("");
-    const [selectedBank, setSelectedBank] = useState(null);
+    const navigate = useNavigate();
+    const params = useParams();
+    const { bank_id: bankId } = useParams();
 
-    if (selectedBank) {
-        return (
-            <BankDetails
-                info={selectedBank}
-                onBack={() => setSelectedBank(null)}
-            />
-        );
+    const handlenavigate = (path)=>{
+        navigate(`/SGA_treasury/${params.company_key}/${params.user_key}/` + path);
     }
+
+    const selectedBank = banksData.find(
+        (bank) => String(bank.id) === bankId
+    );
 
     const searchText = searchValue.trim().toLocaleLowerCase("es");
 
@@ -88,7 +90,7 @@ export function Banks() {
                         <BankCard
                             key={bank.id}
                             info={bank}
-                            onDetails={() => setSelectedBank(bank)}
+                            onDetails={() => handlenavigate(`/banks/${bank.id}`)}
                         />
                     ))
                 ) : (

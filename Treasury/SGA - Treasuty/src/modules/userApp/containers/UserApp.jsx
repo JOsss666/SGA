@@ -58,6 +58,7 @@ import { BriefCases } from '../pages/BriefCases';
 import { ThirdPartyPayables } from './ThirdPartyPayables';
 import { ThirdPartyReceivables } from './ThirdPartyReceivables';
 import { ThirdPartyAdvances } from './ThirdPartyAdvances';
+import { BankDetails } from '../pages/BankDetails';
 
 export function UserApp(){
 
@@ -272,7 +273,8 @@ export function UserApp(){
                             <Route path='/myBussines/Units/:store_id/:cellar_id' element={<CellarDetail/>}/>
                             <Route path='/controlPanel/' element={<span>controlPanel</span>}/>
                             <Route path='/modules/*' element={<Modules/>}/>
-                            <Route path='/banks/*' element={<Banks/>}/>
+                            <Route path='/banks' element={<Banks/>}/>
+                            <Route path='/banks/:bank_id' element={<BankDetails/>}/>
                             <Route path='/briefcases' element={<BriefCases/>}/>
                             <Route path='/briefcases/payableAccounts' element={<ThirdPartyPayables />} />
                             <Route path='/briefcases/receivableAccounts' element={<ThirdPartyReceivables />} />
