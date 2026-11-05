@@ -35,7 +35,20 @@
     gap: 16px;
     padding: 22px 28px;
     border-radius: 12px;
-    background: var(--cardHover);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background-color: var(--cardHover);
+}
+
+.sgaTreasury .bankDetailsAccountHeader::before {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    z-index: -1;
+    background: var(--illustrationBg) center / cover no-repeat;
+    filter: blur(.2vh);
+    opacity: 0.9;
 }
 
 .sgaTreasury .bankDetailsCarouselButton {

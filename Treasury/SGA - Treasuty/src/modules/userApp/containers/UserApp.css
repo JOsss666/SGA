@@ -30,6 +30,7 @@
     --accountingAdjustmentButtonBg:#08745B;
     --accountingAdjustmentButtonText:#FFFFFF;
     --noticeLike:#FB2C36;
+    --illustrationBg:url('https://cdnmain.sga360.co/static/IllustrationBgLight.jpg');
 }
 
 :root.dark {
@@ -61,6 +62,7 @@
     --accountingAdjustmentButtonBg:#159375;
     --accountingAdjustmentButtonText:#FFFFFF;
     --noticeLike:#FB2C36;
+    --illustrationBg:url('https://cdnmain.sga360.co/static/IllustrationBgDark.jpg');
 }
 
 .UserApp{

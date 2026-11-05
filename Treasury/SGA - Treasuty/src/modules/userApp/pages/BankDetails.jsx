@@ -8,6 +8,7 @@ import { SearchBar } from "../components/SearchBar";
 import { UniversalTable } from "../containers/universalTable";
 import { NoAccess } from "../containers/NoAccess";
 import "./BankDetails.css";
+import { PathLocation } from "../components/PathLocation";
 
 const tabs = [
     "Movimientos",
@@ -264,15 +265,7 @@ export function BankDetails({ info, onBack }) {
 
     return (
         <section className="bankDetails">
-            <button
-                className="bankDetailsBreadcrumb"
-                type="button"
-                onClick={onBack}
-            >
-                <span>Bancos</span>
-                <i className="fa-solid fa-chevron-right" aria-hidden="true" />
-                <strong>{info?.title ?? "Banco"}</strong>
-            </button>
+            <PathLocation/>
 
             <header className="bankDetailsAccountHeader">
                 <button
