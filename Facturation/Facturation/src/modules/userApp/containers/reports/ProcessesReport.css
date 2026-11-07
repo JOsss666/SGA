@@ -14,10 +14,15 @@
 
 .ProcessesReport .SpaceReport{
     width: 100%;
-    min-height: 60vh;
+    min-height: 70vh;
     display: flex;
     flex-direction: column;
 }
+
+.ProcessesReport .SpaceReport .TableReportProcesses{
+    height: inherit;
+}
+
 
 @media (max-width:500px) {
     .ProcessesReport .SpaceReport{
