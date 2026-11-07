@@ -54,10 +54,8 @@
 .ParameterDocumentPreview .previewField > label,
 .ParameterDocumentPreview .previewCollection > label,
 .ParameterDocumentPreview .previewFiles > label{
-    display: block;
-    margin-bottom: 1vh;
     font-weight: 500;
-    opacity: .85;
+    color: var(--mainText);
     font-size: clmap(2px,2.5vh,25px);
 }
 
@@ -77,6 +75,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 1vh;
+    margin-top: 2vh;
 }
 
 .ParameterDocumentPreview .previewFileChip{
