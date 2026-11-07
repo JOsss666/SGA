@@ -14,6 +14,7 @@ const columns = [
     { key: "processIdentifier", label: "Proceso", flex: "0 0 9rem", minWidth: "9rem" },
     { key: "processInstanceName", label: "Nombre del proceso", flex: "0 0 14rem", minWidth: "14rem" },
     { key: "paramDocReference", label: "Referencia", flex: "0 0 18rem", minWidth: "18rem" },
+    { key: "deliveryAddress", label: "Dirección de entrega", flex: "0 0 18rem", minWidth: "18rem" },
     { key: "processStage", label: "Etapa proceso", flex: "0 0 13rem", minWidth: "13rem" },
     { key: "commitment", label: "Compromiso", flex: "0 0 11rem", minWidth: "11rem" },
     { key: "createdAt", label: "Fecha de creación", flex: "0 0 11rem", minWidth: "11rem" },
@@ -77,7 +78,7 @@ const buildProviders = (order) => {
     return providers.length > 0 ? providers : ["Sin asignar"];
 };
 
-export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIndicator, SearchBar, CheckSquare, FormButton, search, setSearch, orders, total, totalValue, selectedOrderIds, onToggleOrder, onBulkAssign, onOpen, onOpenProcess, onFilteredResultsChange }) {
+export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIndicator, SearchBar, CheckSquare, FormButton, loading, search, setSearch, orders, total, totalValue, selectedOrderIds, onToggleOrder, onBulkAssign, onOpen, onOpenProcess, onFilteredResultsChange }) {
     const reportColumns = useMemo(() => columns.map((column) => column.key === "orderTotal"
         ? { ...column, label: `Valor ($ ${new Intl.NumberFormat("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(totalValue) || 0)})` }
         : column), [totalValue]);
@@ -127,11 +128,12 @@ export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIn
             const tag = commitmentTag[value] || commitmentTag["Sin fecha"];
             return <TagIndicator title={value} type={tag.type} icon={null} desc={`Compromiso: ${value}`} />;
         },
+        deliveryAddress: ({ value }) => <span title={value}>{value || "—"}</span>,
         paramDocReference: ({ value }) => <span title={value}>{value || "—"}</span>
     };
 
     return <section className="processAdministrationTable">
         {selectedOrderIds.length > 0 && <div className="processAdministrationTableBulk"><span>{selectedOrderIds.length} orden{selectedOrderIds.length > 1 ? 'es' : ''} seleccionada{selectedOrderIds.length > 1 ? 's' : ''}: gestione los proveedores por cada ítem o componente.</span><FormButton text={`Asignar ${selectedOrderIds.length} órdenes`} onClick={onBulkAssign}/></div>}
-        <div className="sgaTreasury"><UniversalTable columns={reportColumns} results={results} onFilteredResultsChange={onFilteredResultsChange} searchValue={search} Row={UniversalRow} getRowKey={(order) => order.id} selectedRows={selectedOrderIds} rowHeight={76} height="min(56vh, 580px)" rowProps={{ renderers }} /></div>
+        <div className="sgaTreasury"><UniversalTable columns={reportColumns} results={results} loading={loading} onFilteredResultsChange={onFilteredResultsChange} searchValue={search} Row={UniversalRow} getRowKey={(order) => order.id} selectedRows={selectedOrderIds} rowHeight={76} rowProps={{ renderers }} /></div>
     </section>;
 }

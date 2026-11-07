@@ -4,7 +4,6 @@ import { UniversalRow } from '../../../../Treasury/SGA - Treasuty/src/modules/us
 import { UniversalTable } from '../../../../Treasury/SGA - Treasuty/src/modules/userApp/containers/universalTable';
 import { FormNewThirdPartyDelegation } from '../../../../Facturation/Facturation/src/modules/userApp/containers/forms/FormNewThirdPartyDelegation';
 import { CheckSquare } from '../../../../Facturation/Facturation/src/modules/userApp/components/CheckSquare';
-import { LoadingSpace } from '../../../../Facturation/Facturation/src/modules/userApp/containers/LoadingSpace';
 import { DocumentPreview } from '../../../../Facturation/Facturation/src/modules/userApp/containers/Alerts/DocumentPreview';
 import { ButtonDownload } from '../../../../Facturation/Facturation/src/modules/userApp/components/ButtonDownload';
 import { useMemo, useState } from "react";
@@ -17,7 +16,7 @@ import { SearchBar } from "../../../../Facturation/Facturation/src/modules/userA
 import { RangeDate } from "../../../../Treasury/SGA - Treasuty/src/modules/userApp/components/RangeDate";
 import { ProcessStatusAlert } from "../../../../Facturation/Facturation/src/modules/userApp/containers/Alerts/ProcessStatusAlert";
 
-const exportColumns = ["reference", "clientName", "processName", "processInstanceName", "processStage", "deliveryAt", "createdAt", "status", "paramDocReference", "orderTotal"];
+const exportColumns = ["reference", "clientName", "processName", "processInstanceName", "processStage", "deliveryAt", "deliveryAddress", "createdAt", "status", "paramDocReference", "orderTotal"];
 
 // El rango de fechas del informe se evalúa sobre la fecha de creación de la orden.
 const withinCreatedRange = (createdAt, { minDate, maxDate }) => {
@@ -68,7 +67,7 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
         <header className="processAdministrationReportHeader">
             <div>
                 <PathLocation/>
-                <BoldTitle text={'Administración de procesos'}/>
+                <BoldTitle text={'Administración de procesos 4K 360'}/>
             </div>
         </header>
         <div className="settingsReport">
@@ -80,8 +79,6 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
         </div>
         {report.notice && <div className="processAdministrationReportNotice" role="status"><i className="fa-solid fa-circle-info" aria-hidden="true" />{report.notice}</div>}
         {selectionNotice && <div className="processAdministrationReportNotice" role="alert"><i className="fa-solid fa-circle-exclamation" aria-hidden="true" />{selectionNotice}</div>}
-        {report.loading
-            ? <LoadingSpace />
-            : <ProcessAdministrationTable UniversalTable={UniversalTable} UniversalRow={UniversalRow} TagIndicator={TagIndicator} SearchBar={SearchBar} CheckSquare={CheckSquare} FormButton={FormButton} search={report.search} setSearch={report.setSearch} orders={visibleOrders} onFilteredResultsChange={setFilteredRows} totalValue={visibleTotal} total={report.orders.length} selectedOrderIds={selectedOrderIds} onToggleOrder={toggleOrder} onBulkAssign={openBulkAssignment} onOpen={openClientOrder} onOpenProcess={openProcess} />}
+        <ProcessAdministrationTable UniversalTable={UniversalTable} UniversalRow={UniversalRow} TagIndicator={TagIndicator} SearchBar={SearchBar} CheckSquare={CheckSquare} FormButton={FormButton} loading={report.loading} search={report.search} setSearch={report.setSearch} orders={visibleOrders} onFilteredResultsChange={setFilteredRows} totalValue={visibleTotal} total={report.orders.length} selectedOrderIds={selectedOrderIds} onToggleOrder={toggleOrder} onBulkAssign={openBulkAssignment} onOpen={openClientOrder} onOpenProcess={openProcess} />
     </main>;
 }

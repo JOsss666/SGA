@@ -4,12 +4,26 @@
     flex-direction: column;
 }
 
+.processAdministrationReport .processAdministrationReportHeader{
+    padding-left: 2vh;
+}
+
+.processAdministrationReport .processAdministrationReportHeader .PathLocation{
+    margin-left: -1vh;
+}
+
 .processAdministrationReport .settingsReport{
     display: flex;
     gap: 2vh;
     width: 100%;
-    padding: 1vh;
+    padding: 1vh 0;
     align-items: center;
+    margin: 1vh;
+}
+
+.processAdministrationReport .settingsReport .SearchBar{
+    position: relative;
+    top: -.5vh;
 }
 
 /* El RangeDate va envuelto en .sgaTreasury (su CSS está scopeado ahí); este
@@ -17,4 +31,26 @@
 .processAdministrationReport .settingsReport > .sgaTreasury{
     display: flex;
     align-items: center;
+}
+
+.processAdministrationReport .processAdministrationTable{
+    display: flex;
+    height: 65vh;
+    min-height: 0;
+    max-height: 65vh;
+    flex-direction: column;
+}
+
+.processAdministrationReport .processAdministrationTable > .sgaTreasury{
+    display: flex;
+    min-height: 0;
+    max-height: inherit;
+    flex: 1 1 auto;
+}
+
+.processAdministrationReport .processAdministrationTable .universalTable{
+    height: 100%;
+    min-height: 0;
+    max-height: inherit;
+    box-sizing: border-box;
 }

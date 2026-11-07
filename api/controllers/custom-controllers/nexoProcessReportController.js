@@ -49,6 +49,7 @@ export const createNexoProcessReportHandler = ({ useDataBase }) => async (req, r
                 parent_process.step_name AS "processStage",
                 parent_process.delivery_date AS "deliveryAt",
                 paramdoc.reference AS "paramDocReference",
+                paramdoc.delivery_address AS "deliveryAddress",
                 COALESCE(subprocess.subprocesses, '[]'::json) AS "subprocesses"
             FROM "Ecosystem".documents document
             LEFT JOIN LATERAL (
@@ -130,7 +131,9 @@ export const createNexoProcessReportHandler = ({ useDataBase }) => async (req, r
             LEFT JOIN LATERAL (
                 -- Referencia del paramDoc (JSON Parametrization) del que nació la
                 -- orden: se vincula por documents_group (main_doc_id = paramDoc).
-                SELECT paramdoc_doc."specialConfig"->'values'->>'reference' AS reference
+                SELECT
+                    paramdoc_doc."specialConfig"->'values'->>'reference' AS reference,
+                    paramdoc_doc."specialConfig"->'values'->>'install_location' AS delivery_address
                 FROM "Ecosystem".documents_group dg
                 JOIN "Ecosystem".documents paramdoc_doc ON paramdoc_doc.id = dg.main_doc_id
                     AND paramdoc_doc.document_type = 'JSON Parametrization'
