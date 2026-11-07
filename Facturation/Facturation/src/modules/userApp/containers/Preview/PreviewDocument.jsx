@@ -9,8 +9,8 @@ import { MoreOptions } from "../../components/MoreOptions";
 import { useParams } from "react-router-dom";
 import { LoadingAppDataPage } from "../LoadingAppDataPage";
 import { PreviewFile } from "./PreviewFile";
-import { ParameterDocumentPreview } from "./ParameterDocumentPreview";
 import { getElectronicDocumentOptions } from "../../components/ElectronicDocumentCard";
+import { ParameterDocumentPreview } from "./ParameterDocumentPreview";
 
 export function PreviewDocument({doc_id}){
 
@@ -25,10 +25,9 @@ export function PreviewDocument({doc_id}){
     const [thirdParyInfo, setThirdPartyInfo] = useState({});
     const [id,setId] = useState(doc_id? doc_id:params.doc_id);
     const [attachedTransactions,setAttachedTransactions] = useState([]);
-    // Preview de documentos parametrizados (JSON Parametrization): plantilla + valores.
+    const [electronicInvoices,setElectronicInvoices] = useState([]);
     const [paramTemplate,setParamTemplate] = useState(null);
     const [paramValues,setParamValues] = useState({});
-    const [electronicInvoices,setElectronicInvoices] = useState([]);
 
     // Control
     const [loading,setLoading] = useState(true);
@@ -130,27 +129,6 @@ export function PreviewDocument({doc_id}){
         setLoading(false);
     }
 
-    // Documentos parametrizados: los valores diligenciados viven en specialConfig, y la
-    // plantilla (títulos/orden/item-blocks) se resuelve read-only por company_key + doc_id.
-    const getParamDocTemplate = async()=>{
-        let specialConfig = docInfo.specialConfig;
-        if(typeof specialConfig === 'string'){
-            try{ specialConfig = JSON.parse(specialConfig); }catch{ specialConfig = null; }
-        }
-        setParamValues(specialConfig?.values ?? {});
-        try{
-            const res = await postInfo('/externalAccess/getParamDocTemplate',{
-                company_key: appInfo.company_key ?? params.company_key,
-                doc_id: docInfo.id
-            });
-            if(res?.status === 'OK'){
-                setParamTemplate(res.data);
-            }
-        }catch(error){
-            console.error('No fue posible cargar la plantilla del documento parametrizado:', error);
-        }
-    }
-
     const getThirdParties = async()=>{
         let res = await postInfo('/getThirdParties',{company_id:appInfo.company_id, id:docInfo.thirdParty_id});
         if(res[0]){
@@ -195,6 +173,29 @@ export function PreviewDocument({doc_id}){
         setLoading(false);
     }
     
+
+    // Documentos parametrizados: los valores diligenciados viven en specialConfig,
+    // pero las etiquetas/orden de los campos están en la plantilla original. Se
+    // resuelve la plantilla por company_key + doc_id (endpoint read-only) para
+    // renderizar el preview "tal cual" lo llenó el usuario.
+    const getParamDocTemplate = async()=>{
+        let specialConfig = docInfo.specialConfig;
+        if(typeof specialConfig === 'string'){
+            try{ specialConfig = JSON.parse(specialConfig); }catch{ specialConfig = null; }
+        }
+        setParamValues(specialConfig?.values ?? {});
+        try{
+            const res = await postInfo('/externalAccess/getParamDocTemplate',{
+                company_key: appInfo.company_key ?? params.company_key,
+                doc_id: docInfo.id
+            });
+            if(res?.status === 'OK'){
+                setParamTemplate(res.data);
+            }
+        }catch(error){
+            console.error('No fue posible cargar la plantilla del documento parametrizado:', error);
+        }
+    }
 
     const getAttachedServices = async()=>{
         let res = await postInfo('/getServiceMovements',{
@@ -314,11 +315,6 @@ const getSellInvoiceServices = async(instance_id)=>{
                     ))}
                 </div>
             )}
-                    {docInfo.document_type == 'JSON Parametrization' && paramTemplate && (
-                        <div className="detailsDocument">
-                            <ParameterDocumentPreview template={paramTemplate} values={paramValues}/>
-                        </div>
-                    )}
                     {docInfo.document_type == 'Sell Invoice' && (
                         <div className="detailsDocument">
                             {attachedServices.map((element,index)=>(
@@ -376,7 +372,13 @@ const getSellInvoiceServices = async(instance_id)=>{
                         </div>
                     )}
 
-                    <div className="attachedDocuments"> 
+                    {docInfo.document_type == 'JSON Parametrization' && paramTemplate && (
+                        <div className="detailsDocument">
+                            <ParameterDocumentPreview template={paramTemplate} values={paramValues}/>
+                        </div>
+                    )}
+
+                    <div className="attachedDocuments">
                         <h6>Archivos adjuntos</h6>
                         <div className="attachedDocumentsGrid">
                             {attachedFiles.map((element,index)=>(

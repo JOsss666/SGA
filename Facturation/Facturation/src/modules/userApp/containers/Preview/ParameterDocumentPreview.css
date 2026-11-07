@@ -9,6 +9,12 @@
     max-width: 70dvw;
 }
 
+.ParameterDocumentPreview .BoldTitle{
+    padding-left: 2vh;
+    margin-top: 2vh;
+    margin-bottom: 1vh;
+}
+
 .ParameterDocumentPreview .previewFieldsGrid{
     display: flex;
     flex-wrap: wrap;
