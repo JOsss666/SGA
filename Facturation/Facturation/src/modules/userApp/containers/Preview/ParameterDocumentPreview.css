@@ -47,13 +47,18 @@
     width: 100%;
 }
 
+.ParameterDocumentPreview .previewFiles {
+    padding-left: 2vh;
+}
+
 .ParameterDocumentPreview .previewField > label,
 .ParameterDocumentPreview .previewCollection > label,
 .ParameterDocumentPreview .previewFiles > label{
     display: block;
     margin-bottom: 1vh;
-    font-weight: 600;
+    font-weight: 500;
     opacity: .85;
+    font-size: clmap(2px,2.5vh,25px);
 }
 
 .ParameterDocumentPreview .previewEmpty{
@@ -66,7 +71,6 @@
     flex-direction: column;
     gap: .5vh;
     margin: 0;
-    padding-left: 2vh;
 }
 
 .ParameterDocumentPreview .previewFileChips{
@@ -79,16 +83,13 @@
     display: inline-flex;
     align-items: center;
     gap: .5vh;
-    padding: .6vh 1.2vh;
+    padding: 1vh;
     border-radius: 8px;
-    background: rgba(127,127,127,.12);
+    background-color: var(--chatAccent);
     text-decoration: none;
-    color: inherit;
+    color: #fff;
     font-size: .9rem;
-}
-
-.ParameterDocumentPreview .previewFileChip:hover{
-    background: rgba(127,127,127,.2);
+    cursor: pointer;
 }
 
 @media (max-width: 900px){
