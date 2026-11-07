@@ -16,7 +16,7 @@ import { SearchBar } from "../../../../Facturation/Facturation/src/modules/userA
 import { RangeDate } from "../../../../Treasury/SGA - Treasuty/src/modules/userApp/components/RangeDate";
 import { ProcessStatusAlert } from "../../../../Facturation/Facturation/src/modules/userApp/containers/Alerts/ProcessStatusAlert";
 
-const exportColumns = ["reference", "clientName", "processName", "processInstanceName", "processStage", "deliveryAt", "deliveryAddress", "createdAt", "status", "paramDocReference", "orderTotal"];
+const exportColumns = ["reference", "clientName", "storeName", "storeCode", "city", "processName", "processInstanceName", "processStage", "deliveryAt", "deliveryAddress", "createdAt", "status", "paramDocReference", "orderTotal"];
 
 // El rango de fechas del informe se evalúa sobre la fecha de creación de la orden.
 const withinCreatedRange = (createdAt, { minDate, maxDate }) => {

@@ -1,51 +1,97 @@
 
-.TagIndicator{
-    padding: .5vh 1.5vh;
-    border-radius: 2vh;
+.TagIndicator.TagIndicator{
+    --tagBackground: var(--tagNeutralBg);
+    --tagForeground: var(--tagNeutralText);
     display: flex;
-    background-color: #DEE5E5;
     width: fit-content;
+    max-width: 100%;
     height: fit-content;
+    padding: .5vh;
+    border: .1vh solid color-mix(in srgb, var(--tagForeground) 16%, transparent);
+    border-radius: .8vh;
+    background-color: var(--tagBackground);
+    color: var(--tagForeground);
+    align-items: center;
+    line-height: 2vh;
 }
 
-.TagIndicator h5{
-    font-size: clamp(2.2px,2vh,22px);
+.TagIndicator.TagIndicator h5{
+    min-width: 0;
+    margin: 0;
+    color: inherit;
+    font-size: clamp(1.8px,1.6vh,16px);
     font-weight: 500;
-    color: #00022E;
+    line-height: inherit;
+    overflow-wrap: anywhere;
 }
 
-.active_color{
-    background-color: #CBFBF1;
+.TagIndicator.TagIndicator .tagIndicatorIcon{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 2vh;
+    height: 2vh;
 }
 
-.active_color h5{
-    color: #1F7A55;
+.TagIndicator.TagIndicator i{
+    flex-shrink: 0;
+    color: inherit;
+    font-size: 1em;
+    line-height: 1;
+    margin-right: .75vh;
 }
 
-.disabled_color{
-    background-color: #FFBBAD;
+.TagIndicator.active_color,
+.TagIndicator.success_color,
+.TagIndicator.green_color{
+    --tagBackground: var(--tagGreenBg);
+    --tagForeground: var(--tagGreenText);
 }
 
-.suspended_color{
-    background-color: #FBF5B9;
+.TagIndicator.failed_color,
+.TagIndicator.cancelled_color,
+.TagIndicator.canceled_color,
+.TagIndicator.disabled_color{
+    --tagBackground: var(--tagRedBg);
+    --tagForeground: var(--tagRedText);
 }
 
-.indicator_color{
-    background-color: #DBEAFE;
+.TagIndicator.pending_color,
+.TagIndicator.warning_color,
+.TagIndicator.suspended_color{
+    --tagBackground: var(--tagAmberBg);
+    --tagForeground: var(--tagAmberText);
 }
 
-.indicator_color h5{
-    color: #155DFC;
+.TagIndicator.indicator_color,
+.TagIndicator.blue_color,
+.TagIndicator.in_progress_color,
+.TagIndicator.inProgress_color{
+    --tagBackground: var(--tagBlueBg);
+    --tagForeground: var(--tagBlueText);
 }
 
-
-.category_color{
-    background-color: #BFB6F3;
+.TagIndicator.category_color,
+.TagIndicator.purple_color,
+.TagIndicator.submitted_color{
+    --tagBackground: var(--tagPurpleBg);
+    --tagForeground: var(--tagPurpleText);
 }
 
-.TagIndicator i{
-    font-size: clamp(2px,2vh,20px);
-    margin: auto;
-    margin-left: .7vh;
-    cursor: pointer;
+.TagIndicator.info_color{
+    --tagBackground: var(--tagInfoBg);
+    --tagForeground: var(--tagInfoText);
+}
+
+.TagIndicator.in_review_color,
+.TagIndicator.inReview_color,
+.TagIndicator.review_color{
+    --tagBackground: var(--tagYellowBg);
+    --tagForeground: var(--tagYellowText);
+}
+
+.TagIndicator.expired_color{
+    --tagBackground: var(--tagNeutralBg);
+    --tagForeground: var(--tagNeutralText);
 }

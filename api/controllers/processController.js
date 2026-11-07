@@ -1043,7 +1043,10 @@ processController.getProcessInstancesWithReferences = (req,res)=>{
                 ) AS total_steps,
                 -- Referencias del paramDoc ligadas a los documentos de la instancia.
                 COALESCE(process_references.references_text, '') AS references_text,
-                COALESCE(process_references.references_list, '[]'::json) AS references_list
+                COALESCE(process_references.references_list, '[]'::json) AS references_list,
+                COALESCE(process_references.store_names, '') AS store_names,
+                COALESCE(process_references.store_codes, '') AS store_codes,
+                COALESCE(process_references.cities, '') AS cities
             FROM
                 "Process".process_instance
             LEFT JOIN
@@ -1065,17 +1068,28 @@ processController.getProcessInstancesWithReferences = (req,res)=>{
             LEFT JOIN LATERAL (
                 SELECT
                     STRING_AGG(DISTINCT refs.reference, ', ' ORDER BY refs.reference) AS references_text,
-                    JSON_AGG(DISTINCT refs.reference) AS references_list
+                    JSON_AGG(DISTINCT refs.reference) AS references_list,
+                    STRING_AGG(DISTINCT refs.store_name, ', ' ORDER BY refs.store_name) AS store_names,
+                    STRING_AGG(DISTINCT refs.store_code, ', ' ORDER BY refs.store_code) AS store_codes,
+                    STRING_AGG(DISTINCT refs.city, ', ' ORDER BY refs.city) AS cities
                 FROM "Ecosystem".docs_instances link
                 JOIN "Ecosystem".documents linked_doc
                     ON linked_doc.id = link.doc_id
                 LEFT JOIN LATERAL (
                     -- (a) el documento adjunto es en sí un paramDoc (JSON Parametrization)
-                    SELECT linked_doc."specialConfig"->'values'->>'reference' AS reference
+                    SELECT
+                        linked_doc."specialConfig"->'values'->>'reference' AS reference,
+                        linked_doc."specialConfig"->'values'->>'storeName' AS store_name,
+                        linked_doc."specialConfig"->'values'->>'storeCode' AS store_code,
+                        linked_doc."specialConfig"->'values'->>'city' AS city
                     WHERE linked_doc.document_type = 'JSON Parametrization'
                     UNION
                     -- (b) el paramDoc principal del grupo del documento adjunto
-                    SELECT paramdoc_doc."specialConfig"->'values'->>'reference' AS reference
+                    SELECT
+                        paramdoc_doc."specialConfig"->'values'->>'reference' AS reference,
+                        paramdoc_doc."specialConfig"->'values'->>'storeName' AS store_name,
+                        paramdoc_doc."specialConfig"->'values'->>'storeCode' AS store_code,
+                        paramdoc_doc."specialConfig"->'values'->>'city' AS city
                     FROM "Ecosystem".documents_group dg
                     JOIN "Ecosystem".documents paramdoc_doc
                         ON paramdoc_doc.id = dg.main_doc_id

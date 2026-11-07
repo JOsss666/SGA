@@ -14,20 +14,36 @@ async function fetchAttachment(file) {
     return response.blob();
 }
 
+export function openAttachmentInNewTab(file) {
+    const url = getAttachmentUrl(file);
+    const opened = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!opened) throw new Error('El navegador bloqueó la apertura del archivo. Permite las ventanas emergentes e inténtalo de nuevo.');
+    return 'Archivo abierto en una pestaña nueva.';
+}
+
 export async function downloadAttachment(file) {
-    const blob = await fetchAttachment(file);
-    const objectUrl = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = objectUrl;
-    link.download = file.name || `archivo-${file.id}`;
-    document.body.appendChild(link);
+    const url = getAttachmentUrl(file);
     try {
-        link.click();
-    } finally {
-        link.remove();
-        setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+        const blob = await fetchAttachment(file);
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = file.name || `archivo-${file.id}`;
+        document.body.appendChild(link);
+        try {
+            link.click();
+        } finally {
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+        }
+        return 'Descarga iniciada. Revisa las descargas de tu navegador.';
+    } catch (downloadError) {
+        // El host del archivo puede impedir la descarga directa por CORS.
+        // Como respaldo, abrimos el enlace en una pestaña nueva para guardarlo desde allí.
+        const opened = window.open(url, '_blank', 'noopener,noreferrer');
+        if (!opened) throw downloadError;
+        return 'No se pudo descargar directamente; abrimos el archivo en una pestaña nueva para guardarlo desde allí.';
     }
-    return 'Descarga iniciada. Revisa las descargas de tu navegador.';
 }
 
 export async function shareAttachment(file) {

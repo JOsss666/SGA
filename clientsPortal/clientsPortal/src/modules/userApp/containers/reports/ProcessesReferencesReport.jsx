@@ -11,7 +11,6 @@ import { LabelValue } from "../../components/LabelValue";
 import { PathLocation } from "../../components/PathLocation";
 import { SearchBar } from "../../components/SearchBar";
 import { SelectOptions } from "../../components/SelectOptions";
-import { LoadingSpace } from "../LoadingSpace";
 import { FilterReports } from "./FilterReports";
 import { TableReportProcessesReferences } from "../TableReportProcessesReferences";
 import "./ReportDocuments.css";
@@ -48,6 +47,9 @@ export function ProcessesReferencesReport(){
         "Nombre Proceso",
         "Proceso",
         "Referencias",
+        "Tienda",
+        "Código",
+        "Ciudad",
         "Etapa",
         "Avance",
         "Fecha de entrega",
@@ -115,6 +117,12 @@ export function ProcessesReferencesReport(){
             "Proceso": element?.process_name || "",
 
             "Referencias": referencesText(element),
+
+            "Tienda": element?.store_names || "",
+
+            "Código": element?.store_codes || "",
+
+            "Ciudad": element?.cities || "",
 
             "Etapa": element?.step_name || "",
 
@@ -296,24 +304,12 @@ export function ProcessesReferencesReport(){
 
             <div className="SpaceReport">
 
-                {!loading && (
-
-                    <TableReportProcessesReferences
-                        searchValue={searchValue}
-                        settingsReport={settingsReport}
-                        info={info}
-                    />
-
-                )}
-
-                {loading && (
-
-                    <LoadingSpace
-                        title={"Cargando información"}
-                        description={"Esto no debe tardar mucho..."}
-                    />
-
-                )}
+                <TableReportProcessesReferences
+                    searchValue={searchValue}
+                    settingsReport={settingsReport}
+                    info={info}
+                    loading={loading}
+                />
 
             </div>
 

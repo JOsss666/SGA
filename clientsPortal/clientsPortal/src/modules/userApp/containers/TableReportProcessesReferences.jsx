@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useAlert } from '../../../context/context';
 import { ProgressBar } from '../components/ProgressBar';
+import { TagIndicator } from '../components/TagIndicator';
 import { ProcessStatusAlert } from './Alerts/ProcessStatusAlert';
 import { formatDate } from '../../../utils/functions';
 import { UniversalTable } from './universalTable';
@@ -15,6 +16,9 @@ const PROCESS_COLUMNS = [
     { key: 'name', label: 'Nombre' },
     { key: 'process_name', label: 'Proceso' },
     { key: 'references', label: 'Referencias', minWidth: '12rem' },
+    { key: 'storeNames', label: 'Tienda', minWidth: '12rem' },
+    { key: 'storeCodes', label: 'Código', minWidth: '10rem' },
+    { key: 'cities', label: 'Ciudad', minWidth: '10rem' },
     { key: 'step_name', label: 'Etapa' },
     { key: 'progress', label: 'Avance', minWidth: '9rem' },
     { key: 'delivery_date', label: 'Fecha de entrega' },
@@ -23,13 +27,29 @@ const PROCESS_COLUMNS = [
     { key: 'status', label: 'Estado' }
 ];
 
+const statusTagType = (status) => {
+    const normalizedStatus = String(status ?? '').trim().toLowerCase();
+    if (['active', 'activo', 'open', 'en proceso'].includes(normalizedStatus)) return 'active';
+    if (['pending', 'pendiente', 'por asignar'].includes(normalizedStatus)) return 'pending';
+    if (['cancelled', 'canceled', 'cancelado'].includes(normalizedStatus)) return 'cancelled';
+    if (['completed', 'complete', 'closed', 'cerrado', 'finalizado'].includes(normalizedStatus)) return 'success';
+    if (['failed', 'fallido', 'error'].includes(normalizedStatus)) return 'failed';
+    if (['disabled', 'inactivo'].includes(normalizedStatus)) return 'disabled';
+    if (['expired', 'vencido'].includes(normalizedStatus)) return 'expired';
+    return 'info';
+};
+
 // Celdas que necesitan un elemento React (el resto usa el render por defecto).
 const PROCESS_RENDERERS = {
     progress: ({ value }) => <ProgressBar progress={value} />,
     references: ({ value }) => <span title={value}>{value || '—'}</span>,
+    storeNames: ({ value }) => <span title={value}>{value || '—'}</span>,
+    storeCodes: ({ value }) => <span title={value}>{value || '—'}</span>,
+    cities: ({ value }) => <span title={value}>{value || '—'}</span>,
     delivery_date: ({ value }) => <span>{formatDate(value)}</span>,
     updated_at: ({ value }) => <span>{formatDate(value)}</span>,
-    start_date: ({ value }) => <span>{formatDate(value)}</span>
+    start_date: ({ value }) => <span>{formatDate(value)}</span>,
+    status: ({ value }) => <TagIndicator title={value || 'Sin estado'} type={statusTagType(value)} desc={`Estado: ${value || 'Sin estado'}`} />
 };
 
 const computeProgress = (instance) => {
@@ -55,6 +75,9 @@ const toRow = (instance) => ({
     name: instance.name ?? '',
     process_name: instance.process_name,
     references: referencesText(instance),
+    storeNames: instance.store_names ?? '',
+    storeCodes: instance.store_codes ?? '',
+    cities: instance.cities ?? '',
     step_name: instance.step_name,
     progress: computeProgress(instance),
     delivery_date: instance.delivery_date,
@@ -84,6 +107,7 @@ export function TableReportProcessesReferences({ settingsReport, info = [], sear
                 loading={loading}
                 getRowKey={(row) => row.id}
                 rowProps={rowProps}
+                height={"70vh"}
                 emptyMessage="No hay procesos para mostrar"
             />
         </div>

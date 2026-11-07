@@ -11,6 +11,9 @@ const columns = [
     { key: "select", label: "Seleccionar", flex: "0 0 7rem", minWidth: "7rem", sortable: false, filterable: false },
     { key: "order", label: "Orden de cliente", flex: "0 0 11rem", minWidth: "11rem", filterable: false },
     { key: "clientName", label: "Cliente", flex: "0 0 12rem", minWidth: "12rem" },
+    { key: "storeName", label: "Tienda", flex: "0 0 14rem", minWidth: "14rem" },
+    { key: "storeCode", label: "Código", flex: "0 0 10rem", minWidth: "10rem" },
+    { key: "city", label: "Ciudad", flex: "0 0 12rem", minWidth: "12rem" },
     { key: "processIdentifier", label: "Proceso", flex: "0 0 9rem", minWidth: "9rem" },
     { key: "processInstanceName", label: "Nombre del proceso", flex: "0 0 14rem", minWidth: "14rem" },
     { key: "paramDocReference", label: "Referencia", flex: "0 0 18rem", minWidth: "18rem" },
@@ -105,6 +108,9 @@ export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIn
             <small>{info.itemsCount} ítem{info.itemsCount === 1 ? "" : "s"}</small>
         </button>,
         clientName: ({ value }) => <span>{value || "Sin cliente"}</span>,
+        storeName: ({ value }) => <span title={value}>{value || "—"}</span>,
+        storeCode: ({ value }) => <span title={value}>{value || "—"}</span>,
+        city: ({ value }) => <span title={value}>{value || "—"}</span>,
         processIdentifier: ({ info }) => info.parentInstanceId
             ? <button type="button" className="processAdministrationTableProcess" onClick={() => onOpenProcess?.(info.parentInstanceId)}>{info.processIdentifier}</button>
             : <span>{info.processIdentifier}</span>,

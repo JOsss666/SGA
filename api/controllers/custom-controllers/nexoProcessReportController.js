@@ -49,6 +49,9 @@ export const createNexoProcessReportHandler = ({ useDataBase }) => async (req, r
                 parent_process.step_name AS "processStage",
                 parent_process.delivery_date AS "deliveryAt",
                 paramdoc.reference AS "paramDocReference",
+                paramdoc.store_name AS "storeName",
+                paramdoc.store_code AS "storeCode",
+                paramdoc.city AS city,
                 paramdoc.delivery_address AS "deliveryAddress",
                 COALESCE(subprocess.subprocesses, '[]'::json) AS "subprocesses"
             FROM "Ecosystem".documents document
@@ -133,6 +136,9 @@ export const createNexoProcessReportHandler = ({ useDataBase }) => async (req, r
                 -- orden: se vincula por documents_group (main_doc_id = paramDoc).
                 SELECT
                     paramdoc_doc."specialConfig"->'values'->>'reference' AS reference,
+                    paramdoc_doc."specialConfig"->'values'->>'storeName' AS store_name,
+                    paramdoc_doc."specialConfig"->'values'->>'storeCode' AS store_code,
+                    paramdoc_doc."specialConfig"->'values'->>'city' AS city,
                     paramdoc_doc."specialConfig"->'values'->>'install_location' AS delivery_address
                 FROM "Ecosystem".documents_group dg
                 JOIN "Ecosystem".documents paramdoc_doc ON paramdoc_doc.id = dg.main_doc_id

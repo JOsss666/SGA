@@ -50,27 +50,6 @@ export function ParameterDocumentPreview({ template, values = {} }) {
         </div>;
     };
 
-    const renderFile = (field) => {
-        const rawValue = values[field.key];
-        const files = Array.isArray(rawValue) ? rawValue : rawValue ? [rawValue] : [];
-        return <div className="previewField previewFiles" key={field.key}>
-            <label>{field.title ?? field.key}</label>
-            {files.length === 0
-                ? <span className="previewEmpty">Sin archivos</span>
-                : <div className="previewFileChips">
-                    {files.map((file, index) => {
-                        const url = file?.url ?? (typeof file === "string" ? file : null);
-                        const name = file?.name ?? `Archivo ${index + 1}`;
-                        return url
-                            ? <a className="previewFileChip" href={url} target="_blank" rel="noopener noreferrer" key={index}>
-                                <i className="fa-solid fa-paperclip" /> {name}
-                            </a>
-                            : <span className="previewFileChip" key={index}><i className="fa-solid fa-paperclip" /> {name}</span>;
-                    })}
-                </div>}
-        </div>;
-    };
-
     const renderSearch = (field) => {
         const options = normalizeOptions(field.options);
         const value = values[field.key];
@@ -103,7 +82,7 @@ export function ParameterDocumentPreview({ template, values = {} }) {
 
     const renderField = (field) => {
         if (getSpecialProps(field).action === "addToCollection") return renderCollection(field);
-        if (field.component === "FileInput") return renderFile(field);
+        if (field.component === "FileInput" || field.key?.toLowerCase() === "artworkfiles") return null;
         if (field.component === "SearchinList" && !isItemBlockSelector(field)) return renderSearch(field);
         return renderScalar(field);
     };

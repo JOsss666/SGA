@@ -43,6 +43,9 @@ for (const req of [
                 assert.equal(mode, 1);
                 assert.match(sql, /WHERE document.company_id = \$1/);
                 assert.match(sql, /document.document_type = 'Client Order'/);
+                assert.match(sql, /'storeName' AS store_name/);
+                assert.match(sql, /'storeCode' AS store_code/);
+                assert.match(sql, /'city' AS city/);
                 return rows;
             }
         });
