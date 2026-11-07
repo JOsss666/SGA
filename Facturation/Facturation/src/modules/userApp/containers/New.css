@@ -3,6 +3,8 @@
     flex-direction: column;
     padding: 2vh;
     padding-left: 4vh;
+    overflow-y: auto;
+    max-height: 90vh;
 }
 
 .New .DescriptionSpan{

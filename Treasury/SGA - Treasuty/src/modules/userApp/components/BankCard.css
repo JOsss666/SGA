@@ -1,0 +1,158 @@
+.sgaTreasury .banksCards .bankCard {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 25vh;
+    width: 20vw;
+    gap: 1vh;
+    padding: 2vh;
+    border: 1px solid var(--inputsBorder);
+    border-radius: 20px;
+    background: var(--cardHover);
+    color: var(--mainText);
+    cursor: pointer;
+}
+
+.sgaTreasury .bankCardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1vh;
+}
+
+.sgaTreasury .bankCardLabel {
+    width: fit-content;
+    padding: 1vh 2vh;
+    border-radius: 4vh;
+    background: var(--bg);
+    color: var(--mainText);
+    font-size: clamp(10px, 2vh, 20px);
+    font-weight: 600;
+}
+
+.sgaTreasury .bankCardNotifications {
+    position: relative;
+    display: flex;
+    width: 5vh;
+    height: 5vh;
+    border-radius: 50%;
+    background: var(--bg);
+    color: var(--mainText);
+    cursor: pointer;
+}
+
+.sgaTreasury .bankCardNotifications i{
+    margin: auto;
+    font-size: clamp(3px,2.5vh,25px);
+}
+
+.sgaTreasury .bankCardNotificationCount {
+    position: absolute;
+    top: -1vh;
+    right: -1vh;
+    display: grid;
+    width: 3vh;
+    height: 3vh;
+    padding: 0 4px;
+    place-items: center;
+    border: .1vh solid var(--bg);
+    border-radius: 999px;
+    background: var(--noticeLike);
+    color: #fff;
+    font-size: clamp(1.6px, 1.6vh, 16px);
+    font-weight: 700;
+}
+
+.sgaTreasury .bankCardContent h3 {
+    margin: 0 0 0.8vh;
+    color: var(--mainText);
+    font-size: clamp(16px, 3vh, 30px);
+    letter-spacing: -.08vh;
+    font-weight: 700;
+}
+
+.sgaTreasury .bankCardContent p {
+    margin: 0;
+    color: var(--descriptionText);
+    line-height: 1.4;
+}
+
+.sgaTreasury .bankCardActions {
+    display: flex;
+    align-items: center;
+    gap: 1vh;
+    margin-top: auto;
+}
+
+.sgaTreasury .bankCardFavorite,
+.sgaTreasury .bankCardDetails {
+    padding: 1vh .5vh;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.sgaTreasury .bankCardFavorite {
+    width: 4vh;
+    display: flex;
+    background: var(--bg);
+}
+
+.sgaTreasury .bankCardFavorite i{
+    color: var(--mainText);
+    font-size: clamp(2.2px, 2.2vh, 22px);
+    margin: auto;
+}
+
+.sgaTreasury .bankCardDetails {
+    background: var(--chatAccent);
+    color: #fff;
+    font-weight: 500;
+    font-size: clamp(2px,2vh,20px);
+    padding: 1vh 2vh;
+    width: fit-content;
+    margin: auto;
+    margin-right: 0;
+}
+
+.sgaTreasury .bankCardDetails:hover {
+    background: var(--descriptionText);
+}
+
+.sgaTreasury .bankCardOptions .MoreOptions .ButtonMenu {
+    display: flex;
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    background: var(--mainText);
+}
+
+.sgaTreasury .bankCardOptions .MoreOptions .ButtonMenu i {
+    margin: auto;
+    color: var(--bg);
+    font-size: clamp(14px, 2vh, 20px);
+}
+
+.sgaTreasury .bankCardOptions .MoreOptions .ButtonMenu:hover {
+    background: var(--descriptionText);
+}
+
+.sgaTreasury .bankCardOptions .MoreOptions .options {
+    z-index: 20;
+    width: 210px;
+    border: 1px solid var(--inputsBorder);
+    border-radius: 10px;
+    background: var(--inputsBg);
+    color: var(--mainText);
+}
+
+.sgaTreasury .bankCardOptions .MoreOptions .options li:hover {
+    background: var(--cardHover);
+}
+
+@media (max-width: 640px) {
+    .sgaTreasury .banksCards .bankCard {
+        flex-basis: 100%;
+        max-width: none;
+    }
+}

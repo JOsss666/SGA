@@ -107,7 +107,9 @@ export function ItemsList({
                     if (iIdx !== itemIndex) return item;
 
                     const textFields = ['description', 'sell_desc', 'areaWidth', 'areaHeight'];
-                    const updatedValue = textFields.includes(key) ? value : Number(value);
+                    const updatedValue = key === 'unit_value' && value === ''
+                        ? ''
+                        : textFields.includes(key) ? value : Number(value);
 
                     let updatedItem = { ...item, [key]: updatedValue };
 
@@ -326,8 +328,9 @@ export function ItemsList({
                                                 step={0.01}
                                                 min={0}
                                                 required={false}
-                                                value={item.unit_value ?? ''}
-                                                placeholder={item.unit_value ?? 0}
+                                                value={item.unit_value == null || item.unit_value === '' || Number(item.unit_value) === 0
+                                                    ? ''
+                                                    : item.unit_value}
                                                 disabled={disabled}
                                                 action={(value) => editProperty(index_block, index, 'unit_value', value)}
                                             />

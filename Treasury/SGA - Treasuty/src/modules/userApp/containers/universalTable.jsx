@@ -195,9 +195,13 @@ export function UniversalTable({
         overscan: 7
     });
 
-    const minimumTableWidth = Math.max(fitColumnsToContent
-        ? Object.values(contentWidths).reduce((sum, width) => sum + width, 0)
-        : visibleColumns.length * 150, 620);
+    const minimumTableWidth = fitColumnsToContent
+        ? `${Math.max(Object.values(contentWidths).reduce((sum, width) => sum + width, 0), 620)}px`
+        : visibleColumns.length === 0
+            ? '620px'
+            : `max(620px, calc(${visibleColumns.map((column) => (
+                column.flex?.match(/^0\s+0\s+(.+)$/)?.[1] ?? column.minWidth ?? '8rem'
+            )).join(' + ')}))`;
     const optionsForOpenColumn = useMemo(
         () => openFilterKey ? columnValueOptions[openFilterKey] ?? [] : [],
         [columnValueOptions, openFilterKey]
@@ -331,7 +335,7 @@ export function UniversalTable({
                 <div
                     className="universalTableHeader"
                     role="row"
-                    style={{ minWidth: `${minimumTableWidth}px` }}
+                    style={{ minWidth: minimumTableWidth }}
                 >
                     {visibleColumns.map((column) => {
                         const isFiltered = Object.hasOwn(columnFilters, column.key);
@@ -456,7 +460,7 @@ export function UniversalTable({
                 role="rowgroup"
                 onScroll={syncHeaderScroll}
             >
-                <div className="universalTableBodyContent" style={{ minWidth: `${minimumTableWidth}px` }}>
+                <div className="universalTableBodyContent" style={{ minWidth: minimumTableWidth }}>
                     {loading && <UniversalTableLoadingShader columns={rowColumns} />}
 
                     {!loading && filteredResults.length > 0 && (

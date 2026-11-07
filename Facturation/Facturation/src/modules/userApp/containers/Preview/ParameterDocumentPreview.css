@@ -9,6 +9,12 @@
     max-width: 70dvw;
 }
 
+.ParameterDocumentPreview .BoldTitle{
+    padding-left: 2vh;
+    margin-top: 2vh;
+    margin-bottom: 1vh;
+}
+
 .ParameterDocumentPreview .previewFieldsGrid{
     display: flex;
     flex-wrap: wrap;
@@ -41,13 +47,16 @@
     width: 100%;
 }
 
+.ParameterDocumentPreview .previewFiles {
+    padding-left: 2vh;
+}
+
 .ParameterDocumentPreview .previewField > label,
 .ParameterDocumentPreview .previewCollection > label,
 .ParameterDocumentPreview .previewFiles > label{
-    display: block;
-    margin-bottom: 1vh;
-    font-weight: 600;
-    opacity: .85;
+    font-weight: 500;
+    color: var(--mainText);
+    font-size: clmap(2px,2.5vh,25px);
 }
 
 .ParameterDocumentPreview .previewEmpty{
@@ -60,29 +69,26 @@
     flex-direction: column;
     gap: .5vh;
     margin: 0;
-    padding-left: 2vh;
 }
 
 .ParameterDocumentPreview .previewFileChips{
     display: flex;
     flex-wrap: wrap;
     gap: 1vh;
+    margin-top: 2vh;
 }
 
 .ParameterDocumentPreview .previewFileChip{
     display: inline-flex;
     align-items: center;
     gap: .5vh;
-    padding: .6vh 1.2vh;
+    padding: 1vh;
     border-radius: 8px;
-    background: rgba(127,127,127,.12);
+    background-color: var(--chatAccent);
     text-decoration: none;
-    color: inherit;
+    color: #fff;
     font-size: .9rem;
-}
-
-.ParameterDocumentPreview .previewFileChip:hover{
-    background: rgba(127,127,127,.2);
+    cursor: pointer;
 }
 
 @media (max-width: 900px){

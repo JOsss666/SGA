@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useAlert } from '../../../context/context';
 import { ProgressBar } from '../components/ProgressBar';
+import { TagIndicator } from '../components/TagIndicator';
 import { ProcessStatusAlert } from './Alerts/ProcessStatusAlert';
 import { formatDate } from '../../../utils/functions';
 import { UniversalTable } from './universalTable';
@@ -24,11 +25,24 @@ const PROCESS_COLUMNS = [
 ];
 
 // Celdas que necesitan un elemento React (el resto usa el render por defecto).
+const statusTagType = (status) => {
+    const normalizedStatus = String(status ?? '').trim().toLowerCase();
+    if (['active', 'activo', 'open', 'en proceso'].includes(normalizedStatus)) return 'active';
+    if (['pending', 'pendiente', 'por asignar'].includes(normalizedStatus)) return 'pending';
+    if (['cancelled', 'canceled', 'cancelado'].includes(normalizedStatus)) return 'cancelled';
+    if (['completed', 'complete', 'closed', 'cerrado', 'finalizado'].includes(normalizedStatus)) return 'success';
+    if (['failed', 'fallido', 'error'].includes(normalizedStatus)) return 'failed';
+    if (['disabled', 'inactivo'].includes(normalizedStatus)) return 'disabled';
+    if (['expired', 'vencido'].includes(normalizedStatus)) return 'expired';
+    return 'info';
+};
+
 const PROCESS_RENDERERS = {
     progress: ({ value }) => <ProgressBar progress={value} />,
     delivery_date: ({ value }) => <span>{formatDate(value)}</span>,
     updated_at: ({ value }) => <span>{formatDate(value)}</span>,
-    start_date: ({ value }) => <span>{formatDate(value)}</span>
+    start_date: ({ value }) => <span>{formatDate(value)}</span>,
+    status: ({ value }) => <TagIndicator title={value || 'Sin estado'} type={statusTagType(value)} desc={`Estado: ${value || 'Sin estado'}`} />
 };
 
 const computeProgress = (instance) => {
@@ -72,6 +86,7 @@ export function TableReportProcesses({ settingsReport, info = [], searchValue = 
                 results={rows}
                 searchValue={searchValue}
                 loading={loading}
+                height="75vh"
                 getRowKey={(row) => row.id}
                 rowProps={rowProps}
                 emptyMessage="No hay procesos para mostrar"

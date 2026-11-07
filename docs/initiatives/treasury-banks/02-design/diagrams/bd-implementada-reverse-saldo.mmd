@@ -1,0 +1,6 @@
+flowchart LR
+    A["Movimiento A (create)<br/>+100 COP in · +5 USD in"] -- deshace --> B["Movimiento B (reverse)<br/>100 COP out<br/>reverses_detail_id → detalle de 100 COP"]
+    A -.-> AU[("bank_audit<br/>append-only")]
+    B -.-> AU
+    A --> V1["Saldo: COP 100 · USD 5"]
+    B --> V2["Saldo: COP 0 · USD 5"]

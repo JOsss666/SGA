@@ -181,9 +181,11 @@ export function PreviewFile({id}){
                                 <div className="moreOptC"><MoreOptions options={actions}/></div>
                             )}
                         </div>
-                        <button type="button" className="previewAction" title="Cerrar previsualización" aria-label="Cerrar previsualización" onClick={popOutAlert}>
-                            <i className="fa-solid fa-xmark"/>
-                        </button>
+                        {false && (
+                            <button type="button" className="previewAction" title="Cerrar previsualización" aria-label="Cerrar previsualización" onClick={popOutAlert}>
+                                <i className="fa-solid fa-xmark"/>
+                            </button>
+                        )}
                     </div>
                     <div className="contentContainer">
                         <div className="fileC">

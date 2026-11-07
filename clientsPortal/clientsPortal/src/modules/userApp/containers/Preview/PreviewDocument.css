@@ -5,6 +5,7 @@
     overflow-y: auto;
     min-width: 60dvw;
     width: fit-content;
+    max-width: 80vw;
     background-color: var(--bg);
     padding: 2vh 4vh;
     display: flex;

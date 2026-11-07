@@ -147,7 +147,6 @@
        para que el tag se vea realmente más pequeño con la fuente ya reducida. */
     padding: .2em .55em !important;
     gap: .3em !important;
-    border-radius: .5em !important;
 }
 
 /* Cada tag de subproceso es clickeable (abre su ProcessStatusAlert). */

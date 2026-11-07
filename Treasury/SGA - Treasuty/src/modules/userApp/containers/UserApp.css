@@ -28,7 +28,9 @@
     --chatAccent:#3C83F7;
     --chatBubbleBorder:#EEF1F5;
     --accountingAdjustmentButtonBg:#08745B;
-    --accountingAdjustmentButtonText:#FFFFFF
+    --accountingAdjustmentButtonText:#FFFFFF;
+    --noticeLike:#FB2C36;
+    --illustrationBg:url('https://cdnmain.sga360.co/static/IllustrationBgLight.jpg');
 }
 
 :root.dark {
@@ -58,7 +60,9 @@
     --chatAccent:#5B9CFF;
     --chatBubbleBorder:#2A2A2E;
     --accountingAdjustmentButtonBg:#159375;
-    --accountingAdjustmentButtonText:#FFFFFF
+    --accountingAdjustmentButtonText:#FFFFFF;
+    --noticeLike:#FB2C36;
+    --illustrationBg:url('https://cdnmain.sga360.co/static/IllustrationBgDark.jpg');
 }
 
 .UserApp{
