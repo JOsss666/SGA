@@ -1,73 +1,79 @@
-.TagIndicator{
+.TagIndicator.TagIndicator{
     --tagBackground: var(--tagNeutralBg);
     --tagForeground: var(--tagNeutralText);
-    display: inline-flex;
-    align-items: center;
-    gap: .5em;
+    display: flex;
     width: fit-content;
     max-width: 100%;
     height: fit-content;
-    padding: .45em .7em;
-    border-radius: .65em;
+    padding: .5vh;
+    border: .1vh solid color-mix(in srgb, var(--tagForeground) 16%, transparent);
+    border-radius: .8vh;
     background-color: var(--tagBackground);
     color: var(--tagForeground);
-    font-size: clamp(.75rem, 2vh, 1rem);
-    line-height: 1.3;
-    vertical-align: middle;
+    align-items: center;
+    line-height: 2vh;
 }
 
-.TagIndicator h5{
+.TagIndicator.TagIndicator h5{
     min-width: 0;
     margin: 0;
     color: inherit;
-    font-size: inherit;
-    font-weight: 650;
+    font-size: clamp(1.8px,1.6vh,16px);
+    font-weight: 500;
     line-height: inherit;
     overflow-wrap: anywhere;
 }
 
-.TagIndicator .tagIndicatorIcon{
+.TagIndicator.TagIndicator .tagIndicatorIcon{
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
-    width: 1.45em;
-    height: 1.45em;
-    border-radius: .5em;
-    background-color: color-mix(in srgb, var(--tagForeground) 15%, transparent);
+    width: 2vh;
+    height: 2vh;
 }
 
-.TagIndicator i{
+.TagIndicator.TagIndicator i{
     flex-shrink: 0;
     color: inherit;
     font-size: 1em;
     line-height: 1;
+    margin-right: .75vh;
 }
 
 .TagIndicator.active_color,
+.TagIndicator.success_color,
 .TagIndicator.green_color{
     --tagBackground: var(--tagGreenBg);
     --tagForeground: var(--tagGreenText);
 }
 
+.TagIndicator.failed_color,
+.TagIndicator.cancelled_color,
+.TagIndicator.canceled_color,
 .TagIndicator.disabled_color{
     --tagBackground: var(--tagRedBg);
     --tagForeground: var(--tagRedText);
 }
 
+.TagIndicator.pending_color,
+.TagIndicator.warning_color,
 .TagIndicator.suspended_color{
     --tagBackground: var(--tagAmberBg);
     --tagForeground: var(--tagAmberText);
 }
 
 .TagIndicator.indicator_color,
-.TagIndicator.blue_color{
+.TagIndicator.blue_color,
+.TagIndicator.in_progress_color,
+.TagIndicator.inProgress_color{
     --tagBackground: var(--tagBlueBg);
     --tagForeground: var(--tagBlueText);
 }
 
 .TagIndicator.category_color,
-.TagIndicator.purple_color{
+.TagIndicator.purple_color,
+.TagIndicator.submitted_color{
     --tagBackground: var(--tagPurpleBg);
     --tagForeground: var(--tagPurpleText);
 }
@@ -75,4 +81,16 @@
 .TagIndicator.info_color{
     --tagBackground: var(--tagInfoBg);
     --tagForeground: var(--tagInfoText);
+}
+
+.TagIndicator.in_review_color,
+.TagIndicator.inReview_color,
+.TagIndicator.review_color{
+    --tagBackground: var(--tagYellowBg);
+    --tagForeground: var(--tagYellowText);
+}
+
+.TagIndicator.expired_color{
+    --tagBackground: var(--tagNeutralBg);
+    --tagForeground: var(--tagNeutralText);
 }

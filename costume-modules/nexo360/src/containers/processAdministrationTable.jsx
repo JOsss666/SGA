@@ -48,14 +48,14 @@ const commitmentStatus = (value) => {
 const commitmentTag = {
     "A tiempo": { type: "active", icon: "fa-solid fa-circle-check" },
     "Cerca de vencer": { type: "suspended", icon: "fa-solid fa-clock" },
-    "Vencido": { type: "disabled", icon: "fa-solid fa-triangle-exclamation" },
+    "Vencido": { type: "failed", icon: "fa-solid fa-circle-xmark" },
     "Sin fecha": { type: "info", icon: "fa-solid fa-circle-question" }
 };
 
 const productionStateTag = (state) => {
     const normalized = String(state).toLowerCase();
-    if (normalized.includes("por asignar")) return { type: "suspended", icon: "fa-solid fa-hourglass-half" };
-    if (["cerrado", "terminad", "facturad", "entregad", "completad"].some((word) => normalized.includes(word))) return { type: "active", icon: "fa-solid fa-circle-check" };
+    if (normalized.includes("por asignar")) return { type: "pending", icon: "fa-solid fa-triangle-exclamation" };
+    if (["cerrado", "terminad", "facturad", "entregad", "completad"].some((word) => normalized.includes(word))) return { type: "success", icon: "fa-solid fa-circle-check" };
     if (normalized.includes("asignado")) return { type: "blue", icon: "fa-solid fa-user-check" };
     return { type: "indicator", icon: "fa-solid fa-gears" };
 };
@@ -113,7 +113,7 @@ export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIn
         productionStates: ({ info }) => <div className="processAdministrationTags">
             {(info.productionTags || []).map((tag, index) => {
                 const style = productionStateTag(tag.name);
-                const chip = <TagIndicator title={tag.name} type={style.type} icon={null} desc={`Subproceso: ${tag.name}`} />;
+                const chip = <TagIndicator title={tag.name} type={style.type} icon={style.icon} desc={`Subproceso: ${tag.name}`} />;
                 // Cada tag abre el ProcessStatusAlert de SU subproceso; "Por asignar" no tiene instancia.
                 return tag.instance_id
                     ? <button type="button" key={`${tag.name}-${tag.instance_id}`} className="processAdministrationTagButton" onClick={() => onOpenProcess?.(tag.instance_id)}>{chip}</button>
@@ -126,7 +126,7 @@ export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIn
         deliveryAt: ({ info }) => <span>{shortDate(info.deliveryAt)}</span>,
         commitment: ({ value }) => {
             const tag = commitmentTag[value] || commitmentTag["Sin fecha"];
-            return <TagIndicator title={value} type={tag.type} icon={null} desc={`Compromiso: ${value}`} />;
+            return <TagIndicator title={value} type={tag.type} icon={tag.icon} desc={`Compromiso: ${value}`} />;
         },
         deliveryAddress: ({ value }) => <span title={value}>{value || "—"}</span>,
         paramDocReference: ({ value }) => <span title={value}>{value || "—"}</span>
