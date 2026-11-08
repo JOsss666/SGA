@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cuenta de cobro</title>
+<!--
+  Cuenta de cobro · estilo SGA360°
+  Uso: abrir este archivo en el navegador (el logo se lee de assets/sga_logo.png),
+  editar los campos directamente sobre el documento y pulsar "Generar PDF"
+  (en el diálogo de impresión elegir "Guardar como PDF", sin encabezados/pies).
+  Paleta y tipografía equivalentes a sga_report_style.py.
+-->
+<style>
+  :root{
+    --ink:#0B0B0F; --mute:#5B5F66; --line:#E3E5E9; --soft:#F5F6F8;
+    --good:#0F8A4D; --goodbg:#EAF6EF; --callbg:#EEF2FB; --warn:#B4541A;
+  }
+  *{box-sizing:border-box}
+  html{background:#d9dbe0}
+  body{margin:0;font-family:Helvetica,Arial,sans-serif;color:var(--ink);font-size:10pt;line-height:1.45}
+
+  /* ---------- barra de herramientas (no se imprime) ---------- */
+  .toolbar{position:sticky;top:0;z-index:10;background:var(--ink);color:#fff;
+    display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 18px}
+  .toolbar span{font-size:12px;opacity:.75}
+  .toolbar .btns{display:flex;gap:8px}
+  .btn{font:600 13px Helvetica,Arial,sans-serif;border:1px solid #fff;background:transparent;color:#fff;
+    padding:7px 14px;border-radius:6px;cursor:pointer}
+  .btn:hover{background:rgba(255,255,255,.14)}
+  .btn.primary{background:#fff;color:var(--ink)}
+  .btn.primary:hover{background:#e8e8ec}
+  .btn:focus-visible{outline:2px solid #7aa7ff;outline-offset:2px}
+
+  /* ---------- hoja A4 ---------- */
+  .page{width:210mm;min-height:297mm;margin:18px auto;background:#fff;padding:14mm 18mm 20mm;
+    box-shadow:0 2px 14px rgba(0,0,0,.18);position:relative}
+  header.doc-head{display:flex;justify-content:space-between;align-items:flex-start;
+    border-bottom:1.4pt solid var(--ink);padding-bottom:4mm;margin-bottom:6mm}
+  .doc-head h1{margin:0;font-size:16pt;line-height:1.2}
+  .doc-head .sub{color:var(--mute);font-size:9.5pt;margin-top:1mm}
+  .brand{display:flex;align-items:center;gap:3mm;font-weight:700;font-size:13pt}
+  .brand img{width:11mm;height:11mm;object-fit:contain}
+
+  h2{font-size:12.5pt;margin:7mm 0 2.5mm;line-height:1.2}
+  .callout{background:var(--callbg);border-left:3px solid var(--ink);padding:3.5mm 4.5mm;font-size:10.5pt}
+
+  /* ---------- campos editables ---------- */
+  [contenteditable],input,select{font:inherit;color:inherit}
+  [contenteditable]{outline:none;border-radius:3px;min-width:2ch;display:inline-block;padding:0 2px}
+  [contenteditable]:empty::before{content:attr(data-ph);color:#9aa0a8}
+  [contenteditable]:hover,[contenteditable]:focus,input:hover,input:focus,select:hover{background:#FFF8D6}
+  [contenteditable]:focus,input:focus{box-shadow:0 0 0 1.5px #c9a400}
+  input,select{border:0;background:transparent;padding:0 2px;width:100%;border-radius:3px}
+  input[type=number]::-webkit-inner-spin-button{display:none}
+  input[type=number]{-moz-appearance:textfield;appearance:textfield}
+
+  /* ---------- datos de las partes ---------- */
+  .parties{display:grid;grid-template-columns:1fr 1fr;gap:5mm}
+  .card{border:.5pt solid var(--line);padding:3.5mm 4mm}
+  .card h3{margin:0 0 2mm;font-size:8.6pt;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+  .card .name{font-weight:700;font-size:11pt;display:block}
+  .row{display:flex;gap:2mm;font-size:9.5pt;align-items:baseline}
+  .row b{color:var(--mute);font-weight:400;min-width:19mm;flex:none;font-size:8.8pt}
+  .row [contenteditable]{flex:1}
+  .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm;margin-bottom:5mm}
+  .meta .card{padding:2.5mm 4mm}
+  .meta .v{font-weight:700;font-size:11pt;display:block}
+
+  /* ---------- tabla de ítems ---------- */
+  table{border-collapse:collapse;width:100%}
+  th{background:var(--ink);color:#fff;font-size:9pt;text-align:left;padding:2.1mm 2.4mm}
+  td{border:.5pt solid var(--line);padding:1.8mm 2.4mm;font-size:9pt;vertical-align:middle}
+  tbody tr:nth-child(even){background:var(--soft)}
+  .r{text-align:right}.c{text-align:center}
+  td input{text-align:right}
+  td.qty input{text-align:center}
+  td.act{border:0;background:#fff!important;width:7mm;padding:0 0 0 2mm}
+  .del{border:0;background:transparent;color:#b00020;font-size:15px;cursor:pointer;line-height:1}
+  .add{margin-top:3mm;font:600 12px Helvetica,Arial,sans-serif;border:1px dashed #9aa0a8;background:#fff;
+    color:var(--mute);padding:6px 12px;border-radius:6px;cursor:pointer}
+  .add:hover{background:var(--soft)}
+  tr{break-inside:avoid}
+
+  /* ---------- totales ---------- */
+  .totals{margin-left:auto;width:88mm;margin-top:4mm}
+  .totals .t{display:flex;justify-content:space-between;align-items:center;padding:1.7mm 2.4mm;
+    border-bottom:.5pt solid var(--line);font-size:9.5pt}
+  .totals .t.total{background:var(--goodbg);border-top:1pt solid var(--good);border-bottom:0;font-weight:700;font-size:11pt}
+  .totals .pct{width:11mm;display:inline-block;text-align:right}
+  .totals .lbl{display:flex;align-items:center;gap:1.5mm}
+  .letters{margin-top:4mm}
+
+  .sign{display:grid;grid-template-columns:1fr 1fr;gap:14mm;margin-top:18mm;break-inside:avoid}
+  .sign .line{border-top:.8pt solid var(--ink);padding-top:1.5mm;font-size:9pt}
+  .sign small{color:var(--mute);display:block}
+  .note{font-size:8.6pt;color:var(--mute);margin-top:5mm}
+
+  footer.doc-foot{position:absolute;left:18mm;right:18mm;bottom:8mm;border-top:.8pt solid var(--line);
+    padding-top:2mm;font-size:8pt;color:var(--mute);display:flex;justify-content:space-between}
+
+  /* ---------- impresión / PDF ---------- */
+  @page{size:A4;margin:0}
+  @media print{
+    html,body{background:#fff}
+    .toolbar,.add,.del,td.act,.noprint{display:none!important}
+    .page{margin:0;box-shadow:none;width:auto;min-height:297mm}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    [contenteditable]:hover,[contenteditable]:focus,input:hover,input:focus{background:transparent;box-shadow:none}
+    [contenteditable]:empty::before{content:""}
+    .optional.empty{display:none}
+  }
+  @media (max-width:820px){
+    .page{width:100%;margin:0;padding:14px}
+    .parties,.meta,.sign{grid-template-columns:1fr}
+    .totals{width:100%}
+    footer.doc-foot{position:static;margin-top:20px}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span>Edita los campos directamente sobre el documento · los cambios se guardan en este navegador</span>
+  <div class="btns">
+    <button class="btn" id="btnReset" type="button">Nueva cuenta</button>
+    <button class="btn primary" id="btnPdf" type="button">Generar PDF</button>
+  </div>
+</div>
+
+<main class="page" id="doc">
+  <header class="doc-head">
+    <div>
+      <h1>Cuenta de cobro</h1>
+      <div class="sub">N.º <span contenteditable data-f="numero" data-ph="000"></span> · <span contenteditable data-f="ciudad" data-ph="Ciudad"></span>, <span contenteditable data-f="fecha_txt" data-ph="fecha"></span></div>
+    </div>
+    <div class="brand"><span>SGA360°</span><img src="assets/sga_logo.png" alt="" onerror="this.style.display='none'"></div>
+  </header>
+
+  <div class="meta">
+    <div class="card"><h3>Fecha de emisión</h3><input type="date" id="fecha" data-f="fecha"></div>
+    <div class="card"><h3>Fecha de vencimiento</h3><input type="date" data-f="vence"></div>
+    <div class="card"><h3>Referencia / Periodo</h3><span class="v" contenteditable data-f="periodo" data-ph="Ej. Octubre 2026"></span></div>
+  </div>
+
+  <div class="parties">
+    <section class="card">
+      <h3>Cobrador (quien presta el servicio)</h3>
+      <span class="name" contenteditable data-f="c_nombre" data-ph="Nombre o razón social"></span>
+      <div class="row"><b>CC / NIT</b><span contenteditable data-f="c_doc" data-ph="Documento"></span></div>
+      <div class="row"><b>Dirección</b><span contenteditable data-f="c_dir" data-ph="Dirección"></span></div>
+      <div class="row"><b>Teléfono</b><span contenteditable data-f="c_tel" data-ph="Teléfono"></span></div>
+      <div class="row"><b>Correo</b><span contenteditable data-f="c_mail" data-ph="correo@dominio.com"></span></div>
+    </section>
+    <section class="card">
+      <h3>Debe a (cliente)</h3>
+      <span class="name" contenteditable data-f="d_nombre" data-ph="Nombre o razón social"></span>
+      <div class="row"><b>NIT / CC</b><span contenteditable data-f="d_doc" data-ph="Documento"></span></div>
+      <div class="row"><b>Dirección</b><span contenteditable data-f="d_dir" data-ph="Dirección"></span></div>
+      <div class="row"><b>Teléfono</b><span contenteditable data-f="d_tel" data-ph="Teléfono"></span></div>
+      <div class="row"><b>Correo</b><span contenteditable data-f="d_mail" data-ph="correo@dominio.com"></span></div>
+    </section>
+  </div>
+
+  <h2>Concepto</h2>
+  <div class="callout" contenteditable data-f="concepto" data-ph="Descripción general del servicio o trabajo realizado."></div>
+
+  <h2>Detalle</h2>
+  <table>
+    <thead>
+      <tr><th style="width:6%">#</th><th>Descripción</th><th class="c" style="width:11%">Cant.</th>
+          <th class="r" style="width:19%">Valor unitario</th><th class="r" style="width:19%">Valor total</th><th class="noprint" style="width:7mm;background:#fff"></th></tr>
+    </thead>
+    <tbody id="items"></tbody>
+  </table>
+  <button class="add" id="btnAdd" type="button">+ Agregar ítem</button>
+
+  <div class="totals">
+    <div class="t"><span>Subtotal</span><span id="subtotal">$0</span></div>
+    <div class="t"><span class="lbl">Descuento <input class="pct" type="number" min="0" max="100" step="0.01" data-f="p_desc" value="0">%</span><span id="desc">-$0</span></div>
+    <div class="t"><span class="lbl">IVA <input class="pct" type="number" min="0" max="100" step="0.01" data-f="p_iva" value="0">%</span><span id="iva">$0</span></div>
+    <div class="t"><span class="lbl">Retención <input class="pct" type="number" min="0" max="100" step="0.01" data-f="p_ret" value="0">%</span><span id="ret">-$0</span></div>
+    <div class="t total"><span>Total a pagar</span><span id="total">$0</span></div>
+  </div>
+
+  <div class="callout letters"><b>Son:</b> <span id="enLetras">cero pesos</span></div>
+
+  <p class="note optional" id="notaWrap"><span contenteditable data-f="nota" data-ph="Observaciones (opcional). Ej.: No responsable de IVA."></span></p>
+
+  <div class="sign">
+    <div><div style="height:12mm"></div><div class="line"><span contenteditable data-f="c_nombre_firma" data-ph="Nombre del cobrador"></span><small>Firma · CC/NIT <span id="firmaDoc"></span></small></div></div>
+    <div><div style="height:12mm"></div><div class="line">Recibido por<small>Nombre, firma y fecha</small></div></div>
+  </div>
+
+  <footer class="doc-foot"><span>Cuenta de cobro · Confidencial</span><span id="footN"></span></footer>
+</main>
+
+<script>
+(function(){
+  var KEY='sga_cuenta_cobro_v1';
+  var $=function(s,r){return (r||document).querySelector(s)};
+  var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+  var fmt=new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0});
+  var money=function(n){return fmt.format(Math.round(n||0)).replace(/ /g,'')};
+
+  /* ---------- número a letras (es-CO) ---------- */
+  var U=['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve','veinte','veintiuno','veintidós','veintitrés','veinticuatro','veinticinco','veintiséis','veintisiete','veintiocho','veintinueve'];
+  var D=['','','','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa'];
+  var C=['','ciento','doscientos','trescientos','cuatrocientos','quinientos','seiscientos','setecientos','ochocientos','novecientos'];
+  function lt1000(n){
+    if(n===0)return'';
+    if(n===100)return'cien';
+    var c=Math.floor(n/100),r=n%100,s=C[c];
+    if(r>0){ s+=(s?' ':''); s+= r<30?U[r]:D[Math.floor(r/10)]+(r%10?' y '+U[r%10]:''); }
+    return s;
+  }
+  function words(n){
+    if(n===0)return'cero';
+    var parts=[],mill=Math.floor(n/1e6),mil=Math.floor((n%1e6)/1000),resto=n%1000;
+    if(mill){ parts.push(mill===1?'un millón':(words(mill).replace(/uno$/,'un'))+' millones'); }
+    if(mil){ parts.push(mil===1?'mil':lt1000(mil).replace(/uno$/,'un')+' mil'); }
+    if(resto){ parts.push(lt1000(resto)); }
+    return parts.join(' ').trim();
+  }
+  function enLetras(n){
+    n=Math.round(n);
+    var w=words(n); if(n>=1e6&&n%1e6===0)w+=' de';
+    return (w.charAt(0).toUpperCase()+w.slice(1))+' pesos m/cte';
+  }
+
+  /* ---------- ítems ---------- */
+  var tbody=$('#items');
+  function addRow(d){
+    d=d||{};
+    var tr=document.createElement('tr');
+    tr.innerHTML=
+      '<td class="c idx"></td>'+
+      '<td><span contenteditable data-ph="Descripción del ítem" style="display:block">'+(d.desc||'')+'</span></td>'+
+      '<td class="qty"><input type="number" min="0" step="any" value="'+(d.qty==null?1:d.qty)+'"></td>'+
+      '<td><input type="number" min="0" step="any" value="'+(d.price||'')+'" placeholder="0"></td>'+
+      '<td class="r tot">$0</td>'+
+      '<td class="act"><button class="del" type="button" title="Quitar ítem" aria-label="Quitar ítem">×</button></td>';
+    tbody.appendChild(tr);
+    return tr;
+  }
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+  /* ---------- cálculo ---------- */
+  function calc(){
+    var sub=0;
+    $$('tr',tbody).forEach(function(tr,i){
+      var ins=$$('input',tr), q=parseFloat(ins[0].value)||0, p=parseFloat(ins[1].value)||0, t=q*p;
+      $('.idx',tr).textContent=i+1; $('.tot',tr).textContent=money(t); sub+=t;
+    });
+    var pd=parseFloat($('[data-f=p_desc]').value)||0, pi=parseFloat($('[data-f=p_iva]').value)||0, pr=parseFloat($('[data-f=p_ret]').value)||0;
+    var desc=sub*pd/100, base=sub-desc, iva=base*pi/100, ret=base*pr/100, total=base+iva-ret;
+    $('#subtotal').textContent=money(sub); $('#desc').textContent='-'+money(desc);
+    $('#iva').textContent=money(iva); $('#ret').textContent='-'+money(ret); $('#total').textContent=money(total);
+    $('#enLetras').textContent=enLetras(total);
+  }
+
+  /* ---------- persistencia ---------- */
+  function collect(){
+    var o={f:{},items:[]};
+    $$('[data-f]').forEach(function(el){ o.f[el.dataset.f]= el.tagName==='INPUT'?el.value:el.textContent; });
+    $$('tr',tbody).forEach(function(tr){ var ins=$$('input',tr);
+      o.items.push({desc:$('[contenteditable]',tr).textContent,qty:ins[0].value,price:ins[1].value}); });
+    return o;
+  }
+  function save(){ try{localStorage.setItem(KEY,JSON.stringify(collect()))}catch(e){} }
+  function apply(o){
+    $$('[data-f]').forEach(function(el){
+      var v=o.f[el.dataset.f]; if(v==null)return;
+      if(el.tagName==='INPUT')el.value=v; else el.textContent=v;
+    });
+    tbody.innerHTML=''; (o.items.length?o.items:[{}]).forEach(function(d){addRow({desc:esc(d.desc),qty:d.qty,price:d.price})});
+  }
+  function load(){ try{var s=localStorage.getItem(KEY); return s?JSON.parse(s):null}catch(e){return null} }
+
+  /* ---------- fecha ---------- */
+  var MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  function fechaTxt(iso){ if(!iso)return''; var p=iso.split('-'); return parseInt(p[2],10)+' de '+MESES[parseInt(p[1],10)-1]+' de '+p[0]; }
+  function today(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+
+  function sync(){
+    var fi=$('#fecha'); if(fi.value) $('[data-f=fecha_txt]').textContent=fechaTxt(fi.value);
+    var nm=$('[data-f=c_nombre]').textContent, dc=$('[data-f=c_doc]').textContent;
+    var firma=$('[data-f=c_nombre_firma]'); if(!firma.dataset.touched) firma.textContent=nm;
+    $('#firmaDoc').textContent=dc;
+    $('#footN').textContent='Cuenta de cobro N.º '+($('[data-f=numero]').textContent||'—');
+    $('#notaWrap').classList.toggle('empty',!$('[data-f=nota]').textContent.trim());
+    document.title='Cuenta de cobro '+($('[data-f=numero]').textContent||'')+' - '+($('[data-f=d_nombre]').textContent||'');
+    calc();
+  }
+
+  /* ---------- eventos ---------- */
+  document.addEventListener('input',function(e){
+    if(e.target.dataset&&e.target.dataset.f==='c_nombre_firma')e.target.dataset.touched='1';
+    sync(); save();
+  });
+  tbody.addEventListener('click',function(e){
+    if(e.target.classList.contains('del')){ if($$('tr',tbody).length>1)e.target.closest('tr').remove(); else{ $$('input',tbody)[1].value=''; $('[contenteditable]',tbody).textContent=''; } sync(); save(); }
+  });
+  $('#btnAdd').onclick=function(){ addRow({}); sync(); save(); $$('tr',tbody).pop().querySelector('[contenteditable]').focus(); };
+  $('#btnPdf').onclick=function(){ sync(); window.print(); };
+  $('#btnReset').onclick=function(){
+    if(!confirm('¿Empezar una cuenta nueva? Se conservarán los datos del cobrador y el cliente.'))return;
+    var o=collect(); var keep={};
+    ['c_nombre','c_doc','c_dir','c_tel','c_mail','c_nombre_firma','ciudad'].forEach(function(k){keep[k]=o.f[k]});
+    var n=parseInt(o.f.numero,10); keep.numero=isNaN(n)?'':String(n+1);
+    keep.fecha=today(); keep.p_desc=keep.p_iva=keep.p_ret='0';
+    apply({f:keep,items:[]}); sync(); save();
+  };
+
+  /* ---------- arranque ---------- */
+  var saved=load();
+  if(saved){ apply(saved); }
+  else{
+    $('#fecha').value=today(); addRow({});
+  }
+  if(!$('#fecha').value)$('#fecha').value=today();
+  sync();
+})();
+</script>
+</body>
+</html>

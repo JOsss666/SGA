@@ -169,6 +169,12 @@ export function New(){
     return(
         <div className="New">
             <BoldTitle text={'Crear nuevo'}/>
+            <span onClick={async()=>{
+                let res = await postInfo('/inventory/getPresets',{
+                    company_id:appInfo.company_id
+                })
+                console.log('Productos: ',res);
+            }}>Accion</span>
             <DescriptionSpan text={'Crea todo lo que necesites en un solo click'}/>
             {!disabled && (
                 <div className="gridOptions">

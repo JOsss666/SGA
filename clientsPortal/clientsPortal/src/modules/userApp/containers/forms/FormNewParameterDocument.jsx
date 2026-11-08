@@ -351,6 +351,7 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
 
                     if (requirement === "presets") {
                         const response = await postInfo("/inventory/getPresets", { company_id: appInfo.company_id });
+                        console.log('Presets: ',response)
                         return [requirement, normalizeOptions(unwrapResponse(response))];
                     }
 
