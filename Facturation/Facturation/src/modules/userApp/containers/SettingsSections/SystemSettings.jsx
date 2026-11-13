@@ -5,6 +5,7 @@ import { SettingsGroup } from "../../components/SettingsGroup";
 
 import './AccountSettings.css'
 import { ElectronicFacturationSettingsControl } from "./ElectronicFacturationSettingsControl";
+import { McpSettings } from './McpSettings';
 
 export function SystemSettings(){
     const navigate = useNavigate();
@@ -14,6 +15,7 @@ export function SystemSettings(){
     const formatted = now.toLocaleString('es-CO');
 
     const handleNavigate = (path)=>{
+        console.log('navegando a: ',path)
         navigate(`/SGA_management/${params.company_key}/${params.user_key}/settings/System/${path}`)
     }
 
@@ -25,6 +27,7 @@ export function SystemSettings(){
             `${appConfig.system.software["version-name"]}    V_${appConfig.system.software["version"]}`,
             type:'system',icon:<i class="fa-solid fa-code"/>},
         {text:'Integraciones',path:'Devices',value:'',type:'functionality',icon:<i className="fa-solid fa-plug"/>},
+        {text:'MCP',path:'mcp',value:'',type:'functionality',icon:<i className="bi bi-hdd-stack"/>},
         {text:'Automatizaciones',path:'ActivityRegister',value:'',type:'system',icon:<i className="fa-solid fa-robot"/>}
     ]
 
@@ -42,11 +45,12 @@ export function SystemSettings(){
             <Routes>
                 <Route path="" element={
                     <>
-                    <SettingsGroup options={sec1}/>
+                    <SettingsGroup options={sec1} onClick={handleNavigate}/>
                     <SettingsGroup options={secF} onClick={handleNavigate}/>
                     <SettingsGroup options={sec2}/>
                     </>
                 }/>
+                <Route path='mcp/*' element={<McpSettings/>}/>
                 <Route path="e_fact/*" element={<ElectronicFacturationSettingsControl/>}/>
             </Routes>
         </div>

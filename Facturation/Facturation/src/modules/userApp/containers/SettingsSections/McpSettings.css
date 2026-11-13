@@ -1,0 +1,62 @@
+@import '../UserApp.css';
+
+.McpSettings{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    width: 100%;
+    overflow-y: auto;
+    padding-bottom: 10vh;
+    height: 80vh;
+}
+
+.McpSettings .mainTtl{
+    display: flex;
+    gap: 2vw;
+    align-items: center;
+}
+
+.McpSettings .credentials{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.McpSettings .mcpActions{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1vh;
+    margin-top: 2vh;
+}
+
+/* FormButton ocupa el 100% por defecto; aquí se ajusta al contenido y se
+   conservan los colores originales (azul primario / fondo de input). */
+.McpSettings .FormButton.mcpButton{
+    width: auto;
+    padding: 1.2vh 2.5vh;
+    min-height: 40px;
+    outline: solid .1vh var(--inputsBorder);
+    color: #fff;
+}
+
+.McpSettings .FormButton.mcpButton.primary{
+    background-color: #155DFC;
+    outline-color: #155DFC;
+    color: #fff;
+}
+
+.McpSettings .FormButton.mcpButton:focus{
+    background-color: var(--inputsBg);
+    color: var(--mainText);
+    outline: solid .2vh #155DFC;
+}
+
+.McpSettings .FormButton.mcpButton.primary:focus{
+    background-color: #155DFC;
+}
+
+.McpSettings .FormButton.mcpButton:disabled{
+    opacity: .5;
+    cursor: not-allowed;
+    transform: none;
+}
