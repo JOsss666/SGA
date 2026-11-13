@@ -34,6 +34,7 @@ import { requireCompanyAccess } from '../middleware/requireCompanyAccess.js';
 import supplierDelegationController from '../controllers/supplierDelegationController.js';
 import externalAccesThirdPartyController from '../controllers/externalThirdPartyAccesController.js';
 import { createAdjustment, deleteTemplate, listTemplates, saveTemplate } from '../controllers/accountingAdjustmentController.js';
+import { activateDocument, cancelDocument, editDocument } from '../controllers/documentActionsController.js';
 
 const router = express.Router();
 
@@ -49,6 +50,15 @@ router.post('/contability/accounting-adjustment-templates', express.json({ limit
     requireTrustedOrigin, saveTemplate, sessionErrorHandler);
 router.delete('/contability/accounting-adjustment-templates/:id', express.json({ limit: '16kb' }),
     requireTrustedOrigin, deleteTemplate, sessionErrorHandler);
+
+// Acciones sobre documentos. Mismo esquema de identificación que el ajuste contable.
+// Las reglas de qué se permite viven en services/documentPolicy.js (hoy permisiva).
+router.post('/documents/activate', express.json({ limit: '16kb' }),
+    requireTrustedOrigin, activateDocument, sessionErrorHandler);
+router.post('/documents/cancel', express.json({ limit: '16kb' }),
+    requireTrustedOrigin, cancelDocument, sessionErrorHandler);
+router.post('/documents/edit', express.json({ limit: '256kb' }),
+    requireTrustedOrigin, editDocument, sessionErrorHandler);
 
 // temporal folder for chunks
 const CHUNKS_DIR = path.join(process.cwd(), "chunks");
