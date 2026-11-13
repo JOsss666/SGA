@@ -139,7 +139,7 @@ export function ProcessAdministrationTable({ UniversalTable, UniversalRow, TagIn
     };
 
     return <section className="processAdministrationTable">
-        {selectedOrderIds.length > 0 && <div className="processAdministrationTableBulk"><span>{selectedOrderIds.length} orden{selectedOrderIds.length > 1 ? 'es' : ''} seleccionada{selectedOrderIds.length > 1 ? 's' : ''}: gestione los proveedores por cada ítem o componente.</span><FormButton text={`Asignar ${selectedOrderIds.length} órdenes`} onClick={onBulkAssign}/></div>}
+        {selectedOrderIds.length > 0 && <div className="processAdministrationTableBulk"><span>{selectedOrderIds.length} orden{selectedOrderIds.length > 1 ? 'es' : ''} seleccionada{selectedOrderIds.length > 1 ? 's' : ''}.</span><FormButton text="Acciones" onClick={onBulkAssign}/></div>}
         <div className="sgaTreasury"><UniversalTable columns={reportColumns} results={results} loading={loading} onFilteredResultsChange={onFilteredResultsChange} searchValue={search} Row={UniversalRow} getRowKey={(order) => order.id} selectedRows={selectedOrderIds} rowHeight={76} rowProps={{ renderers }} /></div>
     </section>;
 }

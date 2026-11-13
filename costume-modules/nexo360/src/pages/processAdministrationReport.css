@@ -54,3 +54,15 @@
     max-height: inherit;
     box-sizing: border-box;
 }
+
+ .actionsAlert{
+    flex-direction: column;
+    display: flex;
+    padding: 1vh;
+    width: fit-content;
+    gap: 1vh;
+}
+
+.actionsAlert .DescriptionSpan{
+    margin-bottom: 2vh;
+}
