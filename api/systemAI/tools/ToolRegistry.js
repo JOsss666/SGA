@@ -7,6 +7,9 @@ import purchasesTool from './definitions/getFacturationPurchases.tool.js';
 import processInstancesTool from './definitions/getProcessProcessInstances.tool.js';
 import getDocumentsTool from './definitions/getDocumentsTool.js';
 import getThirdPartiesTool from './definitions/getThirdParties.tool.js';
+import createSellInvoiceTool from './definitions/createSellInvoice.tool.js';
+import createCashReceiptTool from './definitions/createCashReceipt.tool.js';
+import getDocumentOptionsTool from './definitions/getDocumentOptions.tool.js';
 
 // Executors
 import executeSellInvoices from './executors/getFacturationSellInvoices.executor.js';
@@ -15,6 +18,9 @@ import executeProcessInstances from './executors/getProcessProcessInstances.exec
 import executeGetAccountability from './executors/getAccountability.executor.js';
 import executeGetDocuments from './executors/getDocuments.tool.js';
 import executeGetThirdParties from './executors/getThirdParties.executor.js';
+import executeCreateSellInvoice from './executors/createSellInvoice.executor.js';
+import executeCreateCashReceipt from './executors/createCashReceipt.executor.js';
+import executeGetDocumentOptions from './executors/getDocumentOptions.executor.js';
 
 const JSON_SCHEMA_TYPES = new Set(['object', 'array', 'string', 'integer', 'number', 'boolean', 'null']);
 
@@ -103,7 +109,10 @@ const toolRegistry = new ToolRegistry([
     { tool: processInstancesTool, execute: executeProcessInstances },
     {tool:getAccountabilityTool,execute:executeGetAccountability},
     {tool:getDocumentsTool,execute:executeGetDocuments},
-    {tool:getThirdPartiesTool,execute:executeGetThirdParties}
+    {tool:getThirdPartiesTool,execute:executeGetThirdParties},
+    {tool:getDocumentOptionsTool,execute:executeGetDocumentOptions},
+    {tool:createSellInvoiceTool,execute:executeCreateSellInvoice},
+    {tool:createCashReceiptTool,execute:executeCreateCashReceipt}
 ]);
 
 export { ToolRegistry };
