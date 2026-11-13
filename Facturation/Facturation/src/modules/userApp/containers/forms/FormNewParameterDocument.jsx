@@ -233,6 +233,8 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
     const [fieldErrors, setFieldErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
     const [submitFeedback, setSubmitFeedback] = useState(null); // { type: 'ok' | 'error', message }
+    // Lista de precios del cliente: { status: 'idle' | 'loading' | 'ready' | 'none' | 'error', id }
+    const [priceList, setPriceList] = useState({ status: 'idle', id: null });
 
     useEffect(() => {
         let active = true;
@@ -348,6 +350,32 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
         field.visible !== false && !(lockedClientId != null && isClientField(field))) ?? [], [document, lockedClientId]);
     const itemBlock = useMemo(() => getItemBlockDefinition(visibleFields), [visibleFields]);
     const referenceFields = useMemo(() => document?.config.fields.filter(isReferenceField) ?? [], [document]);
+
+    // Lista de precios del cliente: se consulta al elegir el cliente (o de inmediato si el
+    // proceso ya lo impuso) y solo cuando los ítems son presets, que son los que se valoran con ella.
+    const usesPriceList = itemBlock?.selector.requirements === 'presets';
+    const clientField = document?.config.fields.find(isClientField);
+    const selectedClientId = String(lockedClientId ?? values[clientField?.key] ?? values.client_id ?? values.clientId ?? "");
+    useEffect(() => {
+        if (!usesPriceList || !selectedClientId || !appInfo.company_id) {
+            setPriceList({ status: 'idle', id: null });
+            return undefined;
+        }
+        let active = true;
+        setPriceList({ status: 'loading', id: null });
+        postInfo('/inventory/getThirdPartyPricesList', {
+            company_id: appInfo.company_id,
+            thirdParty_id: selectedClientId
+        }).then(response => {
+            if (!active) return;
+            const rows = asList(unwrapResponse(response));
+            const found = rows.find(row => row?.priceList_id != null)?.priceList_id;
+            setPriceList(found != null ? { status: 'ready', id: String(found) } : { status: 'none', id: null });
+        }).catch(() => {
+            if (active) setPriceList({ status: 'error', id: null });
+        });
+        return () => { active = false; };
+    }, [usesPriceList, selectedClientId, appInfo.company_id]);
 
     // Recalcula los campos reference cada vez que cambian los valores. Solo escribe
     // cuando el string resultante cambia, así el efecto no entra en bucle (los
@@ -535,7 +563,8 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
         paramdoc_id: document.id ?? paramdocId,
         paramDoc_id: document.id ?? paramdocId,
         destiny: document.config.destiny,
-        values: { ...values }
+        // priceList_id: lista del cliente consultada al elegirlo; el backend la revalida contra el cliente.
+        values: { ...values, ...(priceList.id ? { priceList_id: priceList.id } : {}) }
     });
 
     const handleSubmit = async event => {
@@ -729,9 +758,12 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
                         </ul>}
                     </div>
                 ) : null}
+                {usesPriceList && priceList.status === 'loading' ? <p>Cargando lista de precios del cliente…</p> : null}
+                {usesPriceList && priceList.status === 'none' ? <p role="alert">El cliente no tiene lista de precios asignada.</p> : null}
+                {usesPriceList && priceList.status === 'error' ? <p role="alert">No se pudo consultar la lista de precios del cliente.</p> : null}
                 <FormButton
                     text={submitting ? "Guardando documento…" : document.config.submit?.label ?? "Guardar documento"}
-                    disabled={loadingCatalogs || submitting}
+                    disabled={loadingCatalogs || submitting || (usesPriceList && priceList.status === 'loading')}
                     loading={submitting}
                 />
             </form>

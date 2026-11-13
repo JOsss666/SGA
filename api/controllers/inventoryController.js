@@ -550,6 +550,34 @@ inventoryController.getThirdPartyProductAssociations = async (req, res) => {
     }
 };
 
+inventoryController.getThirdPartyPricesList = async(req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        let info = JSON.parse(data);
+        let sentence = `
+            SELECT
+                "priceList_id"
+            FROM 
+                "Inventory"."thirdparties_pricesList"        
+            WHERE
+                company_id = $1 AND "thirdParty_id" = $2 ;
+        `;
+        let results = await useDataBase(sentence,[
+            info.company_id,
+            info.thirdParty_id
+        ],1);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(results));
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 inventoryController.updateThirdPartyProductTaxRelations = async (req, res) => (
     runThirdPartyProductUpdate(
         req,

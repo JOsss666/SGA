@@ -239,6 +239,8 @@ router.post('/inventory/deleteProduct',inventoryController.deleteProduct);
 
 router.post('/inventory/getProductTaxRelations',inventoryController.getProductTaxRelations);
 router.post('/inventory/getPurchaseRelations',inventoryController.getProductPurchaseRelations);
+router.post('/inventory/getThirdPartyPricesList',inventoryController.getThirdPartyPricesList);
+
 
 router.post('/inventory/createThirdPartyProductTaxRelation',inventoryController.createThirdPartyProductTaxRelation);
 
