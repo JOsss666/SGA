@@ -173,10 +173,10 @@ export function DocumentPreview({data}){
                                     {
                                         title:'Proceso',
                                         actions:[
-                                            {icon:<i className="bi bi-x-circle"/>,name:'Cancelar proceso'},
-                                            {icon:<i className="bi bi-arrow-up"/>,name:'Avanzar proceso'},
-                                            {icon:<i className="bi bi-arrow-down"/>,name:'Retrocede proceso'},
-                                            {icon:<i className="bi bi-pen"/>,name:'Editar proceso'},
+                                            {icon:<i className="bi bi-x-circle"/>,name:'Cancelar proceso',disabled:true},
+                                            {icon:<i className="bi bi-arrow-up"/>,name:'Avanzar proceso',disabled:true},
+                                            {icon:<i className="bi bi-arrow-down"/>,name:'Retrocede proceso',disabled:true},
+                                            {icon:<i className="bi bi-pen"/>,name:'Editar proceso',disabled:true},
                                         ]
                                     }
                                 ))
