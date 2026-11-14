@@ -79,14 +79,54 @@
     border-bottom: .2vh dashed var(--inputsBorder);
 }
 
+.ItemsList .itemBlock .gridItems .documentItemRow{
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
 .ItemsList .itemBlock .gridItems .itemInfo{
     margin-bottom: 1vh;
+}
+
+.ItemsList .itemBlock .gridItems .documentItemRow .itemInfo{
+    flex: 0 0 22%;
+    min-width: 12rem;
+    margin-bottom: 0;
+}
+
+.ItemsList .itemBlock .gridItems .documentItemRow .itemInfo .UserCard{
+    width: 100%;
 }
 
 .ItemsList .itemBlock .gridItems .itemINputs{
     display: flex;
     gap: 1vh;
     align-items: center;
+}
+
+.ItemsList .itemBlock .gridItems .documentItemRow .itemINputs{
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    min-width: 0;
+}
+
+.ItemsList .itemBlock .gridItems .documentItemRow .itemINputs > .valueItemRow{
+    flex: 1 1 7.5rem;
+    width: auto;
+    min-width: 0;
+    text-align: left;
+}
+
+.ItemsList .itemBlock .gridItems .documentItemRow .FacturationFormInput{
+    width: 100%;
+    min-width: 0;
+}
+
+.ItemsList .itemBlock .gridItems .documentItemRow input:disabled{
+    cursor: not-allowed;
+    opacity: .85;
 }
 
 .ItemsList .itemBlock .gridItems .itemINputsWithPresetArea{
@@ -180,6 +220,20 @@
 
     .ItemsList .itemBlock .gridItems .itemRow{
         flex-direction: column;
+    }
+
+    .ItemsList .itemBlock .gridItems .documentItemRow{
+        flex-direction: column;
+    }
+
+    .ItemsList .itemBlock .gridItems .documentItemRow .itemInfo{
+        flex: 0 0 auto;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .ItemsList .itemBlock .gridItems .documentItemRow .itemINputs{
+        width: 100%;
     }
 
     .ItemsList .itemBlock .gridItems .rowInputItem .FacturationFormInput{

@@ -1,0 +1,292 @@
+.facturationOrderPreview{
+    width: min(100%, 70rem);
+    margin: 0 auto;
+    padding: clamp(1rem, 3vw, 2.25rem);
+    color: var(--documentPaperText);
+    background: var(--documentPaper);
+    border: 1px solid var(--documentPaperBorder);
+    border-radius: .35rem;
+    box-shadow: 0 .5rem 1.5rem var(--chatBubbleShadow);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: .78rem;
+}
+
+.facturationOrderPreview .facturationOrderPreviewHeader{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 10rem;
+    margin-bottom: 1.25rem;
+}
+
+.facturationOrderPreview .facturationOrderPreviewLogo,
+.facturationOrderPreview .facturationOrderPreviewQr{
+    display: flex;
+    flex: 0 0 7rem;
+    align-items: center;
+    justify-content: center;
+    min-height: 7rem;
+}
+
+.facturationOrderPreview .facturationOrderPreviewLogo img{
+    display: block;
+    width: min(100%, 7rem);
+    height: auto;
+}
+
+.facturationOrderPreview .facturationOrderPreviewCompany{
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: .16rem;
+    padding-top: .4rem;
+    text-align: center;
+}
+
+.facturationOrderPreview .facturationOrderPreviewCompany strong{
+    font-size: .8rem;
+    line-height: 1.35;
+}
+
+.facturationOrderPreview .facturationOrderPreviewCompany p{
+    max-width: 32rem;
+    margin: .4rem 0 0;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.facturationOrderPreview .facturationOrderPreviewCompany span{
+    line-height: 1.3;
+}
+
+.facturationOrderPreview .facturationOrderPreviewQr{
+    position: relative;
+    flex-direction: column;
+    gap: .4rem;
+}
+
+.facturationOrderPreview .facturationOrderPreviewQr svg{
+    display: block;
+    width: 6.5rem;
+    height: 6.5rem;
+}
+
+.facturationOrderPreview .facturationOrderPreviewQrPlaceholder svg{
+    filter: blur(.35rem);
+    opacity: .45;
+}
+
+.facturationOrderPreview .facturationOrderPreviewQrPlaceholder span{
+    max-width: 7rem;
+    color: var(--documentPaperText);
+    font-size: .66rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.facturationOrderPreview .facturationOrderPreviewDetails{
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    margin: .75rem 0 2rem;
+}
+
+.facturationOrderPreview .facturationOrderPreviewParty,
+.facturationOrderPreview .facturationOrderPreviewDates{
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+.facturationOrderPreview .facturationOrderPreviewParty{
+    flex: 1 1 58%;
+}
+
+.facturationOrderPreview .facturationOrderPreviewDates{
+    flex: 1 1 42%;
+}
+
+.facturationOrderPreview .facturationOrderPreviewParty div,
+.facturationOrderPreview .facturationOrderPreviewDates div{
+    display: flex;
+    min-height: 1.5rem;
+    border: 1px solid var(--documentPaperBorder);
+    border-bottom: 0;
+}
+
+.facturationOrderPreview .facturationOrderPreviewParty div:last-child,
+.facturationOrderPreview .facturationOrderPreviewDates div:last-child{
+    border-bottom: 1px solid var(--documentPaperBorder);
+}
+
+.facturationOrderPreview .facturationOrderPreviewParty dt,
+.facturationOrderPreview .facturationOrderPreviewDates dt{
+    flex: 0 0 7rem;
+    padding: .28rem .4rem;
+    background: var(--documentPaperHeader);
+    font-weight: 700;
+}
+
+.facturationOrderPreview .facturationOrderPreviewParty dd,
+.facturationOrderPreview .facturationOrderPreviewDates dd{
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    padding: .28rem .4rem;
+    overflow-wrap: anywhere;
+}
+
+.facturationOrderPreview .facturationOrderPreviewTableWrapper{
+    width: 100%;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+}
+
+.facturationOrderPreview .facturationOrderPreviewItemsTable{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.facturationOrderPreview .facturationOrderPreviewItemsTable th,
+.facturationOrderPreview .facturationOrderPreviewItemsTable td{
+    padding: .42rem .5rem;
+    border: 1px solid var(--documentPaperBorder);
+    text-align: right;
+    vertical-align: top;
+}
+
+.facturationOrderPreview .facturationOrderPreviewItemsTable th{
+    background: var(--documentPaperHeader);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.facturationOrderPreview .facturationOrderPreviewItemsTable th:first-child,
+.facturationOrderPreview .facturationOrderPreviewItemsTable td:first-child{
+    text-align: center;
+}
+
+.facturationOrderPreview .facturationOrderPreviewItemsTable td:nth-child(2),
+.facturationOrderPreview .facturationOrderPreviewItemsTable td:nth-child(3){
+    text-align: left;
+}
+
+.facturationOrderPreview .facturationOrderPreviewItemsTable td small{
+    display: block;
+    margin-top: .2rem;
+    opacity: .75;
+}
+
+.facturationOrderPreview .facturationOrderPreviewBottom{
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--documentPaperBorder);
+}
+
+.facturationOrderPreview .facturationOrderPreviewObservations,
+.facturationOrderPreview .facturationOrderPreviewTotals{
+    min-width: 0;
+}
+
+.facturationOrderPreview .facturationOrderPreviewObservations{
+    flex: 1 1 60%;
+    border-right: 1px solid var(--documentPaperBorder);
+}
+
+.facturationOrderPreview .facturationOrderPreviewTotals{
+    flex: 1 1 40%;
+}
+
+.facturationOrderPreview .facturationOrderPreviewObservations h2,
+.facturationOrderPreview .facturationOrderPreviewTotals h2{
+    margin: 0;
+    padding: .5rem;
+    background: var(--documentPaperHeader);
+    border-bottom: 1px solid var(--documentPaperBorder);
+    font-size: .8rem;
+    text-align: center;
+}
+
+.facturationOrderPreview .facturationOrderPreviewObservations p{
+    margin: 0;
+    padding: .75rem;
+    white-space: pre-wrap;
+}
+
+.facturationOrderPreview .facturationOrderPreviewTotalHead,
+.facturationOrderPreview .facturationOrderPreviewTotals > div:not(h2){
+    display: flex;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .34rem .5rem;
+    border-bottom: 1px solid var(--documentPaperBorder);
+}
+
+.facturationOrderPreview .facturationOrderPreviewTotalHead{
+    justify-content: space-around;
+    font-weight: 700;
+}
+
+.facturationOrderPreview .facturationOrderPreviewInvoiceTotal{
+    font-weight: 700;
+}
+
+.facturationOrderPreview.facturationOrderPreviewLoading,
+.facturationOrderPreview.facturationOrderPreviewError{
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    color: var(--mainText);
+}
+
+@media (max-width: 720px){
+    .facturationOrderPreview .facturationOrderPreviewHeader{
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: .75rem;
+    }
+
+    .facturationOrderPreview .facturationOrderPreviewLogo,
+    .facturationOrderPreview .facturationOrderPreviewQr{
+        flex-basis: 5rem;
+        min-height: 5rem;
+    }
+
+    .facturationOrderPreview .facturationOrderPreviewLogo img{
+        width: 5rem;
+    }
+
+    .facturationOrderPreview .facturationOrderPreviewQr svg{
+        width: 4.5rem;
+        height: 4.5rem;
+    }
+
+    .facturationOrderPreview .facturationOrderPreviewDetails,
+    .facturationOrderPreview .facturationOrderPreviewBottom{
+        flex-direction: column;
+    }
+
+    .facturationOrderPreview .facturationOrderPreviewObservations{
+        min-height: 5rem;
+        border-right: 0;
+        border-bottom: 1px solid var(--documentPaperBorder);
+    }
+}
+
+@media (max-width: 520px){
+    .facturationOrderPreview{
+        padding: .75rem;
+        font-size: .68rem;
+    }
+
+    .facturationOrderPreview .facturationOrderPreviewParty dt,
+    .facturationOrderPreview .facturationOrderPreviewDates dt{
+        flex-basis: 6rem;
+    }
+
+    .facturationOrderPreview .facturationOrderPreviewItemsTable{
+        min-width: 42rem;
+    }
+}

@@ -44,7 +44,11 @@
     --chatReceivedBubble:#ffffff;
     --chatBubbleShadow:0 .3vh 1.4vh #0000000f;
     --chatAccent:#3C83F7;
-    --chatBubbleBorder:#EEF1F5
+    --chatBubbleBorder:#EEF1F5;
+    --documentPaper:#fff;
+    --documentPaperText:#334155;
+    --documentPaperBorder:#cbd5e1;
+    --documentPaperHeader:#e2e8f0
 }
 
 :root.dark {
@@ -90,7 +94,11 @@
     --chatReceivedBubble:#1C1C1F;
     --chatBubbleShadow:0 .3vh 1.4vh #00000040;
     --chatAccent:#5B9CFF;
-    --chatBubbleBorder:#2A2A2E
+    --chatBubbleBorder:#2A2A2E;
+    --documentPaper:#fff;
+    --documentPaperText:#334155;
+    --documentPaperBorder:#cbd5e1;
+    --documentPaperHeader:#e2e8f0
 }
 
 .UserApp{

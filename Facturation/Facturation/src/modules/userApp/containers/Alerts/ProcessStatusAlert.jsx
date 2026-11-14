@@ -6,7 +6,7 @@ import { useAlert, useAppInfo, useNotifications } from "../../../../context/cont
 import { FormInput } from "../../components/FormInput";
 import { LoadingSpace } from "../LoadingSpace";
 import { SelectTpeNewDoc } from "../forms/SelectTypeNewDoc";
-import { PreviewDocument } from "../Preview/PreviewDocument";
+import { DocumentPreview } from "./DocumentPreview";
 import { FormNewThirdPartyDelegation } from "../forms/FormNewThirdPartyDelegation";
 import { SubProcessCard } from "../../components/SubProcessCard";
 
@@ -330,7 +330,8 @@ export function ProcessStatusAlert({instance_id,reloadFun}){
                                                             instnacePreInfo={{instance_id:info.id}}
                                                             reloadFun={getInstanceInfo}
                                                         />
-                                                        : <PreviewDocument doc_id={doc.doc_id}/>
+                                                        // DocumentPreview espera doc_type; el adjunto trae document_type.
+                                                        : <DocumentPreview data={{...doc, doc_type:doc.document_type}}/>
                                                     );
                                                 }}>
                                                     <i className="fa-solid fa-file-circle-check"/>

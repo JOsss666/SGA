@@ -22,6 +22,7 @@ import { postInfo } from "../../../utils/functions";
 import './New.css'
 import { FormNewParameterDocument } from "./forms/FormNewParameterDocument";
 import { FormAccountingAdjustment } from "./forms/formAccountingAdjustment";
+import { FormNewFacturationOrder } from "../components/FormNewFacturationOrder";
 
 export function New(){
     const {userConfig,appInfo,userInfo, appConfig} = useAppInfo();
@@ -85,6 +86,8 @@ export function New(){
             [{ text: 'Crear recibo de caja', children: <FormNewCashRecipt />, icon: <i className="fa-solid fa-receipt" /> }] : []),
         
         {text:'Factura de venta',children:<FormNewInvoice/>,icon:<i className="fa-solid fa-file-invoice"/>},
+
+        {text:'Orden de facturación',children:<FormNewFacturationOrder/>,icon:<i className="bi bi-receipt-cutoff"/>},
 
         {text:'Nota débito o crédito',children:<FormNewENote/>,icon:<i className="fa-solid fa-note-sticky"/>},
 
@@ -170,8 +173,9 @@ export function New(){
         <div className="New">
             <BoldTitle text={'Crear nuevo'}/>
             <span onClick={async()=>{
-                let res = await postInfo('/inventory/getPresets',{
-                    company_id:appInfo.company_id
+                let res = await postInfo('/inventory/getThirdPartyPricesList',{
+                    company_id:appInfo.company_id,
+                    thirdParty_id:215
                 })
                 console.log('Productos: ',res);
             }}>Accion</span>

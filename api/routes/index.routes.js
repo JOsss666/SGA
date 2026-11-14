@@ -410,6 +410,8 @@ router.post('/facturation/newNote',facturationController.newNote);
 
 router.post('/facturation/newClientOrder',facturationController.newClientOrder);
 
+router.post('/facturation/newFacturationOrder',facturationController.newFacturationOrder);
+
 router.post('/facturation/getCashBoxes',facturationController.getCashBoxes);
 
 router.post('/facturation/getRegisterShift',facturationController.getRegisterShift);

@@ -1,0 +1,128 @@
+.FormNewFacturationOrder{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding: 1vh;
+    width: 80vw;
+}
+
+.FormNewFacturationOrder form{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2vh;
+    margin: 2vh auto;
+    width: 100%;
+}
+
+.FormNewFacturationOrder .facturationOrderDateField{
+    flex: 0 1 20vw;
+    min-width: 16rem;
+    max-width: 24rem;
+}
+
+.FormNewFacturationOrder .facturationOrderDateField .FacturationFormInput{
+    width: 100%;
+    min-width: 0;
+}
+
+.FormNewFacturationOrder form .noItemsSelected{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding: 3vh 0;
+    align-items: center;
+    background-color: var(--cardHover);
+    border-radius: 1vh;
+    border: dashed .1vh var(--inputsBorder);
+}
+
+.FormNewFacturationOrder form .noItemsSelected i{
+    margin: auto;
+    margin-bottom: 0;
+    font-size: clamp(3px,4vh,40px);
+    color: var(--descriptionText);
+}
+
+.FormNewFacturationOrder form .noItemsSelected h6{
+    margin: auto;
+    margin-top: 0;
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 400;
+    color: var(--descriptionText);
+}
+
+.FormNewFacturationOrder .facturationOrderItemsLoading{
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    width: 100%;
+    margin: .5rem 0;
+    color: var(--descriptionText);
+}
+
+.FormNewFacturationOrder .facturationOrderItemsLoading i{
+    color: var(--mainText);
+}
+
+.FormNewFacturationOrder .facturationOrderSummary{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 1vh;
+}
+
+.FormNewFacturationOrder .facturationOrderSummaryRows{
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 34rem);
+    color: var(--mainText);
+    margin: auto;
+    margin-right: 2vh;
+}
+
+.FormNewFacturationOrder .facturationOrderSummaryRow{
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: .45rem 0;
+    border-bottom: .1vh solid var(--inputsBorder);
+    margin-bottom: .5vh;
+    font-size: clamp(2px,2vh,20px);
+    color: var(--mainText);
+}
+
+.FormNewFacturationOrder .facturationOrderSummaryTotal{
+    font-weight: 400;
+}
+
+.FormNewFacturationOrder .facturationOrderSummaryDue{
+    border-bottom: 0;
+    font-weight: 400;
+}
+
+.FormNewFacturationOrder form .actionsForm{
+    display: flex;
+    gap: 2vw;  
+    margin: auto;
+    margin-right: 0;
+    width: 50%;
+}
+
+.FormNewFacturationOrder .facturationOrderPreviewButton,
+.FormNewFacturationOrder .facturationOrderPreviewButton:hover,
+.FormNewFacturationOrder .facturationOrderPreviewButton:focus,
+.FormNewFacturationOrder .facturationOrderPreviewButton:focus-visible,
+.FormNewFacturationOrder .facturationOrderPreviewButton:disabled{
+    background-color: var(--chatAccent);
+    color: #fff;
+}
+
+@media (max-width: 640px){
+    .FormNewFacturationOrder .facturationOrderDateField{
+        flex: 1 1 100%;
+        min-width: 0;
+        max-width: none;
+    }
+}
