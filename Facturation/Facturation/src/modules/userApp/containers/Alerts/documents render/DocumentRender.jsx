@@ -10,6 +10,7 @@ import { CashReceiptDesign } from "../CashReceiptDesign";
 import { CashReceiptRepresentation } from "./CashReceiptRepresentation";
 import { AccountingAdjustmentDesign } from "../AccountingAdjustmentDesign";
 import { PurchaseInvoiceDesign } from "../PurchaseInvoiceDesign";
+import { ClientOrderPreview } from "../ClientOrderPreview";
 import { FacturationOrderPreview } from "../../../components/facturationOrderPreview";
 
 export function DocumentRender({ id, docType }) {
@@ -35,8 +36,10 @@ export function DocumentRender({ id, docType }) {
         switch (docType) {
             case "Sell Invoice":
                 return <InvoiceVisualRepresentation id={id} />;
+            case "Facturation Order":
+                return <FacturationOrderPreview documentId={id} documentType="Facturation Order" />;
             case "Client Order":
-                return <FacturationOrderPreview documentId={id} documentType="Client Order" />;
+                return <ClientOrderPreview doc_id={id} />;
             case "Cash Recipt":
                 return <CashReceiptRepresentation id={id} />;
             case "JSON Parametrization":

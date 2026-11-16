@@ -12,8 +12,6 @@ destacadas).
 | `ejemplo_informe_cierres.py` | Ejemplo completo. Cópialo como punto de partida. |
 | `assets/sga_logo.png` | Logo que se incrusta en el encabezado. |
 
-| `cuenta_de_cobro.html` | Cuenta de cobro editable en el navegador; botón "Generar PDF" (sin dependencias). |
-
 ## Requisitos
 
 Solo necesita **reportlab**:

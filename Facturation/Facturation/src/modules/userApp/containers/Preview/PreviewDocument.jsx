@@ -1,7 +1,7 @@
 import { useEffect,useState } from "react";
 import { BoldTitle } from "../../components/BoldTitle";
 import './PreviewDocument.css'
-import { postInfo } from "../../../../utils/functions";
+import { moneyFormat, postInfo } from "../../../../utils/functions";
 import { useAlert, useAppInfo, useNotifications } from "../../../../context/context";
 import { DescriptionSpan } from "../../components/DescriptionSpan";
 import { UserCard } from "../../components/UserCard";
@@ -96,6 +96,7 @@ export function PreviewDocument({doc_id}){
         "Inventory Consume": "Consumo de Inventario",
         "Production Order": "Orden de Producción",
         "Client Order": "Pedido de Cliente",
+        "Facturation Order": "Orden de Facturación",
         "Purchase Document": "Documento de Compra",
         "Transaction": "Transacción",
         "Portfolio Adjustment": "Ajuste de Cartera",
@@ -254,6 +255,9 @@ const getSellInvoiceServices = async(instance_id)=>{
                 case "Client Order": 
                 getAttachedServices();
                 break;
+                case "Facturation Order":
+                getAttachedServices();
+                break;
                 case "Sell Invoice":
                 getSellInvoiceServices(docInfo.instance_id);
                 break;
@@ -287,10 +291,10 @@ const getSellInvoiceServices = async(instance_id)=>{
                     {docInfo.description && (
                     <DescriptionSpan text={`Descripción: ${docInfo.description}`}/>
                     )}
-                    {docInfo.document_type == 'Client Order' && (
-                        <div className="detailsDocument">
+                    {['Client Order','Facturation Order'].includes(docInfo.document_type) && (
+                        <div className="detailsDocument clientOrderOnlineDetails">
                             {attachedServices.length > 0 && attachedServices.map((element,index)=>(
-                        <div className="serviceDescriptionCard" key={index}>
+                        <div className="serviceDescriptionCard clientOrderOnlineCard" key={index}>
                             <UserCard
                                 imgSrc={element.service_img}
                                 name={element.service_name}
@@ -304,15 +308,29 @@ const getSellInvoiceServices = async(instance_id)=>{
 
                         <div className="jobDesc">
                             <span>Descripción</span>
-                            <strong>{element.description}</strong>
+                            <strong>{element.description || element.service_name || '--'}</strong>
                         </div>
 
                         <div className="jobDesc">
-                            <span>Fecha</span>
-                        <strong>{(element.created_at).substring(0,10)}</strong>
-                            </div>
+                            <span>Valor unitario</span>
+                            <strong>$ {moneyFormat(Number(element.unit_value) || 0)}</strong>
+                        </div>
+
+                        <div className="jobDesc">
+                            <span>Impuesto</span>
+                            <strong>{element.tax_name || (Number(element.tax_rate) ? `${element.tax_rate}%` : 'Exento')}</strong>
+                        </div>
+
+                        <div className="jobDesc">
+                            <span>Total</span>
+                            <strong>$ {moneyFormat(Number(element.total) || (Number(element.units) || 0) * (Number(element.unit_value) || 0))}</strong>
+                        </div>
                         </div>
                     ))}
+                            <div className="clientOrderOnlineTotal">
+                                <span>Total de la orden</span>
+                                <strong>$ {moneyFormat(attachedServices.reduce((sum, item) => sum + (Number(item.total) || (Number(item.units) || 0) * (Number(item.unit_value) || 0)), 0))}</strong>
+                            </div>
                 </div>
             )}
                     {docInfo.document_type == 'Sell Invoice' && (

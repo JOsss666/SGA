@@ -1,5 +1,8 @@
 .facturationOrderPreview{
+    position: relative;
+    min-width: 0;
     width: min(100%, 70rem);
+    box-sizing: border-box;
     margin: 0 auto;
     padding: clamp(1rem, 3vw, 2.25rem);
     color: var(--documentPaperText);
@@ -13,11 +16,22 @@
 
 .facturationOrderPreview .facturationOrderPreviewHeader{
     display: flex;
+    position: relative;
     align-items: flex-start;
     justify-content: space-between;
     gap: 1.5rem;
+    top: auto;
+    right: auto;
+    left: auto;
+    z-index: auto;
+    width: 100%;
     min-height: 10rem;
     margin-bottom: 1.25rem;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    backdrop-filter: none;
 }
 
 .facturationOrderPreview .facturationOrderPreviewLogo,

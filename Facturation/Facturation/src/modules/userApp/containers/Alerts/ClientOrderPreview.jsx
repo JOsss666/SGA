@@ -11,7 +11,7 @@ import { printCashRecipt } from '../../../../utils/functions';
 import JsBarcode from 'jsbarcode';
 import { useRef } from 'react';
 
-export function ClientOrderPreview(){
+export function ClientOrderPreview({doc_id}){
 
     // requirements
     const {appInfo} = useAppInfo();
@@ -36,6 +36,7 @@ export function ClientOrderPreview(){
     const barcodeRef = useRef();
     const [stage,setStage] = useState(0);
     const [loading,setLoading] = useState(false);
+    const [loadError,setLoadError] = useState('');
     const [disabled,setDisabled] = useState(false);
     const [barcodeBase64, setBarcodeBase64] = useState(null);
 
@@ -145,10 +146,36 @@ export function ClientOrderPreview(){
         getAttachedDocuments();
     },[instance_id])
 
+    // En la vista de una orden concreta se resuelve el documento por su ID;
+    // el flujo de selección conserva sus getters originales.
     useEffect(()=>{
+        if(doc_id){
+            setLoading(true);
+            setLoadError('');
+            postInfo('/getDocuments',{
+                company_id:appInfo.company_id,
+                id:doc_id,
+                allowedTypes:['Client Order']
+            }).then(res=>{
+                if(res?.[0] && res[1]?.[0]){
+                    handleSelectDoc(res[1][0]);
+                }else{
+                    setStage(0);
+                    setclientOrders([]);
+                    setLoadError('No se encontró la orden de cliente seleccionada.');
+                }
+            }).catch(error=>{
+                console.error('No fue posible cargar la orden de cliente:',error);
+                setStage(0);
+                setLoadError('No fue posible cargar la orden de cliente.');
+            }).finally(()=>setLoading(false));
+            return;
+        }
         getInstances();
         getAttachedDocuments();
-    },[])
+        // Estos getters son estables respecto al company_id del documento.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[doc_id,appInfo.company_id])
 
 
     useEffect(()=>{
@@ -182,7 +209,9 @@ export function ClientOrderPreview(){
 
     const qrUrl = `https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${docInfo.id}`;
     const qrUrlProcess = `https://facturation.sga360.co/preview/Process/${appInfo.company_key}/${instance_id}`;
+    if(loading && doc_id)return <div className="ClientOrderPreview_loading" role="status">Cargando orden de cliente…</div>;
     if(stage == 0)return(
+        doc_id ? <div className="ClientOrderPreview_loading" role="alert">{loadError || 'No fue posible abrir la orden de cliente.'}</div> :
         <div className="SelectCashRecipt">
             <BoldTitle text={'Seleccione recibo a imprimir'} />  
             <SearchinList title={'Proceso adjunto'} placeHolder={'(Opcional)'} action={handleSelectinstance} list={instances}/>
@@ -191,9 +220,9 @@ export function ClientOrderPreview(){
     )
     if(stage == 1)return(
         <>
-        <span className='CashReciptDesign_goBackBtn' onClick={()=>{
+        {!doc_id && <span className='CashReciptDesign_goBackBtn' onClick={()=>{
             setStage(0);
-        }}><i className="fa-solid fa-arrow-left"/>Volver</span>
+        }}><i className="fa-solid fa-arrow-left"/>Volver</span>}
         <div className="CashReciptDesign_suitElectronOptions">
             {isElectron && (
                 <ButtonMenu title={"Imprimir"} noRotate={true} onClick={async()=>{

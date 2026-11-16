@@ -129,8 +129,9 @@ export function FacturationOrderPreview({ data, documentId, documentType = 'Clie
         || getCustomerName(thirdPartyInfo);
     const customerDocument = [thirdPartyInfo.indentification_type, thirdPartyInfo.indentification_number]
         .filter(Boolean).join(' ');
-    const savedClientOrder = Boolean(documentId) && documentType === 'Client Order';
+    const savedDocument = Boolean(documentId);
     const qrValue = `https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${documentId}`;
+    const documentLabel = documentType === 'Client Order' ? 'Orden de cliente' : 'Orden de facturación';
 
     return (
         <article className="facturationOrderPreview">
@@ -140,7 +141,7 @@ export function FacturationOrderPreview({ data, documentId, documentType = 'Clie
                 </div>
                 <div className="facturationOrderPreviewCompany">
                     <strong>FACTURA ELECTRÓNICA DE VENTA</strong>
-                    <strong>{savedClientOrder ? `NÚMERO ${docInfo.ownSerial || docInfo.id}` : 'SIMULACIÓN DE FACTURACIÓN'}</strong>
+                    <strong>{savedDocument ? `NÚMERO ${docInfo.ownSerial || docInfo.id}` : 'SIMULACIÓN DE FACTURACIÓN'}</strong>
                     {(appInfo.tax_regime || appInfo.tax_responsibilities) && (
                         <p>{appInfo.tax_regime || appInfo.tax_responsibilities}</p>
                     )}
@@ -152,9 +153,9 @@ export function FacturationOrderPreview({ data, documentId, documentType = 'Clie
                     {appInfo.company_mail && <span>{appInfo.company_mail}</span>}
                     {appInfo.address && <span>{appInfo.address}</span>}
                 </div>
-                <div className={`facturationOrderPreviewQr ${savedClientOrder ? '' : 'facturationOrderPreviewQrPlaceholder'}`}>
-                    <QRCodeSVG value={savedClientOrder ? qrValue : 'PREVISUALIZACION-SIN-DOCUMENTO'} size={104} level="M" />
-                    {!savedClientOrder && <span>QR disponible al guardar</span>}
+                <div className={`facturationOrderPreviewQr ${savedDocument ? '' : 'facturationOrderPreviewQrPlaceholder'}`}>
+                    <QRCodeSVG value={savedDocument ? qrValue : 'PREVISUALIZACION-SIN-DOCUMENTO'} size={104} level="M" />
+                    {!savedDocument && <span>QR disponible al guardar</span>}
                 </div>
             </header>
 
@@ -169,8 +170,8 @@ export function FacturationOrderPreview({ data, documentId, documentType = 'Clie
                 </dl>
                 <dl className="facturationOrderPreviewDates">
                     <div><dt>Fecha de generación:</dt><dd>{formatDate(docInfo.doc_date || docInfo.created_at || new Date())}</dd></div>
-                    <div><dt>Fecha de validación:</dt><dd>{savedClientOrder ? formatDate(docInfo.updated_at || docInfo.doc_date || docInfo.created_at) : 'Pendiente'}</dd></div>
-                    <div><dt>Documento:</dt><dd>{savedClientOrder ? 'Orden de cliente' : 'Prefactura'}</dd></div>
+                    <div><dt>Fecha de validación:</dt><dd>{savedDocument ? formatDate(docInfo.updated_at || docInfo.doc_date || docInfo.created_at) : 'Pendiente'}</dd></div>
+                    <div><dt>Documento:</dt><dd>{savedDocument ? documentLabel : 'Prefactura'}</dd></div>
                 </dl>
             </section>
 
