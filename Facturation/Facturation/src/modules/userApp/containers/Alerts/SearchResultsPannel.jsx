@@ -17,6 +17,13 @@ import { FormNewUser } from "../forms/FormNewUser";
 import { FormNewThirdParties } from "../forms/FormNewThirdParties";
 import { FormSelectMachine } from "../../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormSelectMachine";
 import { FormClicksControl } from "../../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormClicksControl";
+import { FormNewParameterDocument } from "../forms/FormNewParameterDocument";
+import { FormNewFacturationOrder } from "../../components/FormNewFacturationOrder";
+import { FormAccountingAdjustment } from "../forms/formAccountingAdjustment";
+import { FormNewThirdPartyDelegation } from "../forms/FormNewThirdPartyDelegation";
+import { CashReciptDesign } from "./CashReciptDesign";
+import { ClientOrderPreview } from "./ClientOrderPreview";
+import { SellInvoiceDesign } from "./SellInvoiceDesing";
 import './SearchResultsPannel.css'
 
 const SECTIONS_RESULTS_LIMIT = 5;
@@ -72,9 +79,34 @@ export function SearchResultsPannel({searchValue}){
     const [disabled,setDisabled] = useState(false);
     const [search,setSearch] = useState(searchValue ?? "");
     const [searchResults,setSearchResults] = useState([]);
+    const [paramDocs,setParamDocs] = useState([]);
+    const [paramDocsLoaded,setParamDocsLoaded] = useState(false);
     const [categoryPages,setCategoryPages] = useState({sections:1, actions:1});
     const [categoryHasMore,setCategoryHasMore] = useState({});
     const [loadingMore,setLoadingMore] = useState({});
+
+    useEffect(()=>{
+        if(!appInfo?.company_id || !userInfo?.user_id) return;
+
+        let isCurrent = true;
+        setParamDocsLoaded(false);
+        postInfo('/getParamDocsOptions',{
+            company_id:appInfo.company_id,
+            user_id:userInfo.user_id
+        }).then(response=>{
+            if(!isCurrent) return;
+            setParamDocs(Array.isArray(response) && response[0] !== false && Array.isArray(response[1])
+                ? response[1]
+                : []
+            );
+        }).catch(()=>{
+            if(isCurrent) setParamDocs([]);
+        }).finally(()=>{
+            if(isCurrent) setParamDocsLoaded(true);
+        });
+
+        return ()=>{ isCurrent = false; };
+    },[appInfo?.company_id,userInfo?.user_id]);
 
     // Getters
     const searchF = async(search)=>{
@@ -263,37 +295,39 @@ export function SearchResultsPannel({searchValue}){
         }))
     ];
 
-    const sectionCanCreate = (sectionName) => (
-        userConfig?.access?.sections?.[sectionName]?.can_create !== false
-    );
-    const canCreateDocuments = sectionCanCreate('newDocument');
-    const canCreateThirdParties = sectionCanCreate('thirdparties');
-    const canCreateUsers = sectionCanCreate('users');
-    const canCreateCashReceipts = sectionCanCreate('cashBoxes') && canCreateDocuments;
-
-    const actionsCatalog = userConfig?.access?.sections?.new?.overAll ? [
-        ...(canCreateDocuments ? [
-            {text:'Crear orden de trabajo', description:'Iniciar un nuevo proceso', icon:<i className="fa-solid fa-bell-concierge"/>, children:<FormSelectNewProcess/>},
-            {text:'Crear orden de cliente', description:'Registrar una nueva orden de cliente', icon:<i className="fa-regular fa-file"/>, children:<FormNewClientOrder canRepeatServices={true}/>}
+    const actionsCatalog = paramDocsLoaded ? [
+        {text:'Nuevo proceso', group:'Procesos', icon:<i className="fa-solid fa-code-merge"/>, children:<FormSelectNewProcess/>},
+        ...paramDocs.map(element=>({
+            text:element.name,
+            description:element.description,
+            group:'Documentos',
+            icon:<i className="bi bi-file-earmark-code-fill"/>,
+            children:<FormNewParameterDocument params={element}/>
+        })),
+        {text:'Nueva orden de cliente', group:'Documentos', icon:<i className="fa-regular fa-file"/>, children:<FormNewClientOrder canRepeatServices={true}/>},
+        {text:'Factura de venta POS', group:'Documentos', icon:<i className="fa-solid fa-file-invoice"/>, children:<FormNewInvoice/>},
+        ...(userConfig?.access?.sections?.cashBoxes?.overAll || userConfig?.access?.sections?.cashBoxes?.enabled?.length > 0 ? [
+            {text:'Recibo de caja', group:'Documentos', icon:<i className="fa-solid fa-receipt"/>, children:<FormNewCashRecipt/>}
         ] : []),
-        ...(userConfig?.access?.sections?.cashBoxes?.overAll && canCreateCashReceipts ? [
-            {text:'Crear recibo de caja', description:'Registrar un ingreso de caja', icon:<i className="fa-solid fa-receipt"/>, children:<FormNewCashRecipt/>}
+        {text:'Factura de Compra', group:'Documentos', icon:<i className="fa-solid fa-cart-shopping"/>, children:<FormNewPurchase/>},
+        {text:'Nota débito o crédito', group:'Documentos', icon:<i className="fa-solid fa-note-sticky"/>, children:<FormNewENote/>},
+        {text:'Orden de facturación', group:'Documentos', icon:<i className="bi bi-receipt-cutoff"/>, children:<FormNewFacturationOrder/>},
+        {text:'Orden de compra', group:'Documentos', icon:<i className="bi bi-receipt-cutoff"/>, children:<FormNewFacturationOrder/>},
+        {text:'Ajuste contable', group:'Documentos', icon:<i className="fa-solid fa-scale-balanced"/>, children:<FormAccountingAdjustment/>},
+        ...(userConfig?.access?.sections?.reports?.documents?.ThirdPartyDelegation === true ? [
+            {text:'Asignación a proveedor', group:'Documentos', icon:<i className="bi bi-person-bounding-box"/>, children:<FormNewThirdPartyDelegation instnacePreInfo={{}}/>}
         ] : []),
-        ...(canCreateDocuments ? [
-            {text:'Crear factura de venta', description:'Generar una nueva factura', icon:<i className="fa-solid fa-file-invoice"/>, children:<FormNewInvoice/>},
-            {text:'Crear compra', description:'Registrar una factura o documento de compra', icon:<i className="fa-solid fa-cart-shopping"/>, children:<FormNewPurchase/>},
-            {text:'Crear nota débito o crédito', description:'Generar una nota para un documento', icon:<i className="fa-solid fa-note-sticky"/>, children:<FormNewENote/>}
+        ...(userConfig?.access?.sections?.users?.overAll ? [
+            {text:'Usuario', group:'Sistema', icon:<i className="fa-solid fa-person-circle-plus"/>, children:<FormNewUser/>}
         ] : []),
-        ...(userConfig?.access?.sections?.users?.overAll && canCreateUsers ? [
-            {text:'Crear usuario', description:'Agregar un usuario a la compañía', icon:<i className="fa-solid fa-person-circle-plus"/>, children:<FormNewUser/>}
-        ] : []),
-        ...(canCreateThirdParties ? [
-            {text:'Crear tercero', description:'Registrar un cliente, proveedor u otro tercero', icon:<i className="fa-regular fa-user"/>, children:<FormNewThirdParties/>}
-        ] : []),
+        {text:'Tercero', group:'Sistema', icon:<i className="fa-regular fa-user"/>, children:<FormNewThirdParties quickCreation={!userConfig?.access?.sections?.thirdparties?.can_create}/>},
         ...(appConfig?.access?.services?.personalized?.['custom-modules']?.['z&j_clicksControl']?.access ? [
-            {text:'Crear reporte de uso de maquinaria', description:'Registrar movimientos de maquinaria', icon:<i className="fa-solid fa-tractor"/>, children:<FormSelectMachine appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} popOutAlert={popOutAlert}/>},
-            {text:'Registrar clicks', description:'Crear el registro diario de clicks', icon:<i className="fa-solid fa-arrow-pointer"/>, children:<FormClicksControl appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} popOutAlert={popOutAlert}/>}
-        ] : [])
+            {text:'Reporte uso maquinaria', group:'Sistema', icon:<i className="fa-solid fa-tractor"/>, children:<FormSelectMachine appInfo={appInfo} userConfig={userConfig} popOutAlert={popOutAlert} userInfo={userInfo}/>},
+            {text:'Registro de clicks', group:'Sistema', icon:<i className="fa-solid fa-arrow-pointer"/>, children:<FormClicksControl appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} popOutAlert={popOutAlert}/>}
+        ] : []),
+        {text:'Imprimir recibos', group:'Sistema', icon:<i className="fa-solid fa-print"/>, children:<CashReciptDesign/>},
+        {text:'Imprimir órdenes de cliente', group:'Sistema', icon:<i className="fa-solid fa-print"/>, children:<ClientOrderPreview/>},
+        {text:'Imprimir factura de venta', group:'Sistema', icon:<i className="fa-solid fa-print"/>, children:<SellInvoiceDesign/>}
     ] : [];
 
     const searchTerm = normalizeSearchText(search);
