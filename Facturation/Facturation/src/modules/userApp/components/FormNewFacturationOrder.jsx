@@ -24,8 +24,6 @@ const getLocalDate = () => {
     return `${date.getFullYear()}-${month}-${day}`;
 };
 
-// `clientOrders`: ids de órdenes de cliente a precargar (p. ej. desde el informe de administración
-// de procesos). Todas deben ser de un mismo cliente: la orden de facturación se crea por cliente.
 export function FormNewFacturationOrder({clientOrders} = {}){
     const {appInfo,userInfo,userConfig} = useAppInfo();
     const {addNotification} = useNotifications();
@@ -376,7 +374,6 @@ export function FormNewFacturationOrder({clientOrders} = {}){
     };
 
     const resetForm = () => {
-        // Se conserva el cliente para poder crear otra orden; se limpia lo demás.
         setInfo(previous => ({
             ...previous,
             selectedDocs:[],
