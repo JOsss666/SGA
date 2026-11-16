@@ -255,3 +255,27 @@
     cursor: wait;
     opacity: 0.6;
 }
+
+.FormNewInvoice form .actionsForm{
+    display: flex;
+    gap: 2vw;
+    margin: auto;
+    margin-right: 0;
+    width: 50%;
+}
+
+.FormNewInvoice .facturationOrderPreviewButton,
+.FormNewInvoice .facturationOrderPreviewButton:hover,
+.FormNewInvoice .facturationOrderPreviewButton:focus,
+.FormNewInvoice .facturationOrderPreviewButton:focus-visible,
+.FormNewInvoice .facturationOrderPreviewButton:disabled{
+    background-color: var(--chatAccent);
+    color: #fff;
+}
+
+@media (max-width: 640px){
+    .FormNewInvoice form .actionsForm{
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}

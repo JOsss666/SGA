@@ -211,12 +211,12 @@ inventoryController.getComercialProducts = (req,res)=>{
 
         if(info.list_id != undefined){
             values.push(info.list_id)
-            whereClauses.push(`pi."priceList_id" = ${values.length}`)
+            whereClauses.push(`pi."priceList_id" = $${values.length}`)
         }
 
         if(info.id != undefined){
             values.push(info.id);
-            whereClauses.push(`ps.id = ${values.length}`);
+            whereClauses.push(`ps.id = $${values.length}`);
         }
 
         if(info.allowedItems != undefined){

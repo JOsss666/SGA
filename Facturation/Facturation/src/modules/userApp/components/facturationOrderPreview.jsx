@@ -207,7 +207,7 @@ export function FacturationOrderPreview({ data, documentId, documentType = 'Clie
             <section className="facturationOrderPreviewBottom">
                 <div className="facturationOrderPreviewObservations">
                     <h2>Observaciones</h2>
-                    <p>{docInfo.description || 'Sin observaciones'}</p>
+                    <p>{(data?.observations ?? docInfo.description) || 'Sin observaciones'}</p>
                 </div>
                 <div className="facturationOrderPreviewTotals">
                     <h2>Totales</h2>
