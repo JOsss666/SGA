@@ -24,7 +24,9 @@ const getLocalDate = () => {
     return `${date.getFullYear()}-${month}-${day}`;
 };
 
-export function FormNewFacturationOrder(){
+// `clientOrders`: ids de órdenes de cliente a precargar (p. ej. desde el informe de administración
+// de procesos). Todas deben ser de un mismo cliente: la orden de facturación se crea por cliente.
+export function FormNewFacturationOrder({clientOrders} = {}){
     const {appInfo,userInfo,userConfig} = useAppInfo();
     const {addNotification} = useNotifications();
     const {popInAlert} = useAlert();
@@ -181,6 +183,7 @@ export function FormNewFacturationOrder(){
                 getThirdParties(),
                 getStores(allowedStores)
             ]);
+            await preloadClientOrders(allowedInstances);
         }catch(error){
             console.error('Error al cargar datos de la orden de facturación:',error);
             notifyError('Ocurrió un error consultando los datos del formulario.');
@@ -188,6 +191,43 @@ export function FormNewFacturationOrder(){
             setLoading(false);
             setDisabled(false);
         }
+    };
+
+    const preloadClientOrders = async (allowedInstances) => {
+        const ids = [...new Set((Array.isArray(clientOrders) ? clientOrders : [])
+            .map(id => `${id ?? ''}`).filter(Boolean))];
+        if(ids.length === 0) return;
+
+        const res = await postInfo('/getDocuments',{
+            company_id:appInfo.company_id,
+            allowedIds:ids,
+            allowedTypes:['Client Order']
+        });
+        const found = res?.[0] ? res[1] : [];
+        // getDocuments puede repetir un documento si tiene varios procesos: se deduplica.
+        const unique = [...new Map(found.map(document => [`${document.id}`,document])).values()];
+        const available = unique.filter(document => !['cancelled','disabled'].includes(`${document.status}`));
+
+        if(available.length === 0){
+            notifyError('No se encontraron órdenes de cliente disponibles entre las seleccionadas.');
+            return;
+        }
+        const clientIds = [...new Set(available.map(document => `${document.thirdParty_id}`))];
+        if(clientIds.length > 1){
+            notifyError(`Las órdenes seleccionadas pertenecen a ${clientIds.length} clientes distintos. Selecciona órdenes de un solo cliente.`);
+            return;
+        }
+        if(available.length < ids.length){
+            notifyError(`${ids.length - available.length} de las órdenes seleccionadas no están disponibles (canceladas o inexistentes) y no se incluyeron.`);
+        }
+
+        const thirdPartyId = available[0].thirdParty_id;
+        setInfo(previous => ({...previous,thirdParty_id:thirdPartyId}));
+        await Promise.all([
+            getDocuments(thirdPartyId),
+            getProcessInstances(thirdPartyId,allowedInstances)
+        ]);
+        await addDocuments(available);
     };
 
     const handleThirdPartySelect = async (thirdParty) => {
@@ -434,6 +474,7 @@ export function FormNewFacturationOrder(){
                         title={'Cliente'}
                         placeHolder={'Selecciona un cliente'}
                         list={thirdParties}
+                        value={info.thirdParty_id ?? undefined}
                         action={handleThirdPartySelect}
                         disabled={disabled || loadingItems}
                     />

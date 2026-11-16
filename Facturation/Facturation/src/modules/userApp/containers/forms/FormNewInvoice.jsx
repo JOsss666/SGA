@@ -21,7 +21,9 @@ import { SwitchOption } from "../../components/SwitchOption";
 import { UserCard } from "../../components/UserCard";
 import { executeDocumentAction } from "../../../../utils/DocumentsControl";
 
-export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
+// `clientOrders`: ids de órdenes de cliente a precargar como documentos de la factura (p. ej. desde
+// el informe de administración de procesos). Deben ser de un solo tercero.
+export function FormNewInvoice({InfoParams,reloadFun,process_instance_id,clientOrders}){
 
     // Requieremnets
     const [docRules,setDocRules] = useState([]);
@@ -487,6 +489,43 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             docInfo: element,
             items: attachedItems
         });
+    }
+
+    const preloadClientOrders = async()=>{
+        const ids = [...new Set((Array.isArray(clientOrders) ? clientOrders : [])
+            .map(id => `${id ?? ''}`).filter(Boolean))];
+        if(ids.length === 0) return;
+
+        const res = await postInfo('/getDocuments',{
+            company_id:appInfo.company_id,
+            allowedIds:ids,
+            allowedTypes:['Client Order']
+        });
+        const found = res?.[0] ? res[1] : [];
+        // getDocuments repite el documento si tiene varios procesos: se deduplica.
+        const available = [...new Map(found
+            .filter(document => !['cancelled','disabled'].includes(`${document.status}`))
+            .map(document => [`${document.id}`,document])).values()];
+
+        if(available.length === 0){
+            addNotification({type:'error',title:'Sin órdenes disponibles',description:'No se encontraron órdenes de cliente disponibles entre las seleccionadas.'});
+            return;
+        }
+        const clientIds = [...new Set(available.map(document => `${document.thirdParty_id}`))];
+        if(clientIds.length > 1){
+            addNotification({type:'error',title:'Varios terceros',description:`Las órdenes seleccionadas pertenecen a ${clientIds.length} terceros distintos. Selecciona órdenes de uno solo.`});
+            return;
+        }
+        if(available.length < ids.length){
+            addNotification({type:'error',title:'Órdenes no disponibles',description:`${ids.length - available.length} de las órdenes seleccionadas no están disponibles y no se incluyeron.`});
+        }
+
+        const thirdPartyId = available[0].thirdParty_id;
+        setThirdParty_id(thirdPartyId);
+        await getThirdParties(thirdPartyId,1);
+        for(const document of available){
+            await handleAddDocument(document);
+        }
     }
 
     // Simulación de la factura con los ítems actuales (mismo componente que la orden de facturación).
@@ -1451,7 +1490,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
 
     useEffect(()=>{
         getDocumentRules();
-        handleUserConfig();
+        handleUserConfig().then(preloadClientOrders);
     },[])
 
     useEffect(()=>{

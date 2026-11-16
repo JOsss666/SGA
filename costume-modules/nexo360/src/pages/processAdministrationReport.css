@@ -66,3 +66,11 @@
 .actionsAlert .DescriptionSpan{
     margin-bottom: 2vh;
 }
+/* El ancho del aviso no debe superar al del panel de acciones: width 0 + min-width 100%
+   hace que lo dicte el resto de hijos del contenedor (fit-content). */
+.actionsAlert .WarningForm{
+    width: 0;
+    min-width: 100%;
+    margin: 0 0 1vh;
+    box-sizing: border-box;
+}
