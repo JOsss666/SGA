@@ -9,6 +9,7 @@ import { DocumentPreview } from '../../../../Facturation/Facturation/src/modules
 import { ButtonDownload } from '../../../../Facturation/Facturation/src/modules/userApp/components/ButtonDownload';
 import { ActionsPannel } from '../../../../Facturation/Facturation/src/modules/userApp/components/actionsPannel';
 import { FormNewInvoice } from '../../../../Facturation/Facturation/src/modules/userApp/containers/forms/FormNewInvoice';
+import { FormNewPurchaseOrder } from '../../../../Facturation/Facturation/src/modules/userApp/containers/forms/FormNewPurchaseOrder';
 import { FormNewFacturationOrder } from '../../../../Facturation/Facturation/src/modules/userApp/components/FormNewFacturationOrder';
 import { useMemo, useState } from "react";
 import { ProcessAdministrationTable } from "../containers/processAdministrationTable";
@@ -79,6 +80,18 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
         />);
     };
 
+    // La compra es a un proveedor: las órdenes pueden ser de cualquier cliente (sin bloqueo por tercero).
+    const openPurchaseOrder = () => {
+        if (report.isDemo) {
+            setSelectionNotice("No es posible generar órdenes de compra con órdenes demostrativas. El servidor local aún debe publicar el informe NEXO 360 con IDs reales de Client Order.");
+            return;
+        }
+        const selectedOrders = report.orders.filter(({ id }) => selectedOrderIds.includes(id));
+        popInAlert(<FormNewPurchaseOrder
+            clientOrders={selectedOrders.map((order) => order.doc_id || order.documentId || order.id)}
+        />);
+    };
+
     const openFacturationOrder = () => {
         if (report.isDemo) {
             setSelectionNotice("No es posible generar órdenes de facturación con órdenes demostrativas. El servidor local aún debe publicar el informe NEXO 360 con IDs reales de Client Order.");
@@ -110,7 +123,7 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
                     actions: [
                         { icon: <i className="bi bi-receipt" />, name: 'Facturar', action: openInvoice, disabled: multipleClients },
                         { icon: <i className="bi bi-file-earmark-text" />, name: 'Generar orden de facturación', action: openFacturationOrder, disabled: multipleClients },
-                        { icon: <i className="bi bi-cash-coin" />, name: 'Generar orden de compra', disabled: true }
+                        { icon: <i className="bi bi-cash-coin" />, name: 'Generar orden de compra', action: openPurchaseOrder }
                     ]
                 },
                 {

@@ -21,7 +21,9 @@ const getCustomerName = thirdParty => thirdParty.names
         .filter(Boolean).join(' ')
     || '--';
 
-export function FacturationOrderPreview({ data, documentId, documentType = 'Client Order' }) {
+// `variant`: 'sale' (prefactura al cliente) o 'purchase' (orden de compra al proveedor).
+// Comparten diseño; solo cambian los textos del encabezado y de las etiquetas.
+export function FacturationOrderPreview({ data, documentId, documentType = 'Client Order', variant = 'sale' }) {
     const { appInfo } = useAppInfo();
     const [docInfo, setDocInfo] = useState(data?.docInfo ?? {});
     const [thirdPartyInfo, setThirdPartyInfo] = useState({});
@@ -131,7 +133,11 @@ export function FacturationOrderPreview({ data, documentId, documentType = 'Clie
         .filter(Boolean).join(' ');
     const savedDocument = Boolean(documentId);
     const qrValue = `https://facturation.sga360.co/preview/Document/${appInfo.company_key}/${documentId}`;
-    const documentLabel = documentType === 'Client Order' ? 'Orden de cliente' : 'Orden de facturación';
+    const isPurchase = variant === 'purchase';
+    const documentLabel = documentType === 'Client Order'
+        ? 'Orden de cliente'
+        : (isPurchase ? 'Orden de compra' : 'Orden de facturación');
+    const expectedDate = data?.expectedDate || docInfo.specialConfig?.expected_date;
 
     return (
         <article className="facturationOrderPreview">
@@ -140,8 +146,8 @@ export function FacturationOrderPreview({ data, documentId, documentType = 'Clie
                     <img src="https://cdnmain.sga360.co/static/LOGO%20SGA.png" alt="SGA 360" />
                 </div>
                 <div className="facturationOrderPreviewCompany">
-                    <strong>FACTURA ELECTRÓNICA DE VENTA</strong>
-                    <strong>{savedDocument ? `NÚMERO ${docInfo.ownSerial || docInfo.id}` : 'SIMULACIÓN DE FACTURACIÓN'}</strong>
+                    <strong>{isPurchase ? 'ORDEN DE COMPRA' : 'FACTURA ELECTRÓNICA DE VENTA'}</strong>
+                    <strong>{savedDocument ? `NÚMERO ${docInfo.ownSerial || docInfo.id}` : (isPurchase ? 'SIMULACIÓN DE ORDEN DE COMPRA' : 'SIMULACIÓN DE FACTURACIÓN')}</strong>
                     {(appInfo.tax_regime || appInfo.tax_responsibilities) && (
                         <p>{appInfo.tax_regime || appInfo.tax_responsibilities}</p>
                     )}
@@ -162,7 +168,7 @@ export function FacturationOrderPreview({ data, documentId, documentType = 'Clie
             <section className="facturationOrderPreviewDetails" aria-label="Datos del cliente y la orden">
                 <dl className="facturationOrderPreviewParty">
                     <div><dt>CC/NIT:</dt><dd>{customerDocument || '--'}</dd></div>
-                    <div><dt>Cliente:</dt><dd>{customerName}</dd></div>
+                    <div><dt>{isPurchase ? 'Proveedor:' : 'Cliente:'}</dt><dd>{customerName}</dd></div>
                     <div><dt>País:</dt><dd>{thirdPartyInfo.country || '--'}</dd></div>
                     <div><dt>Municipio:</dt><dd>{thirdPartyInfo.city || thirdPartyInfo.municipality || '--'}</dd></div>
                     <div><dt>Dirección:</dt><dd>{thirdPartyInfo.address || '--'}</dd></div>
@@ -170,15 +176,17 @@ export function FacturationOrderPreview({ data, documentId, documentType = 'Clie
                 </dl>
                 <dl className="facturationOrderPreviewDates">
                     <div><dt>Fecha de generación:</dt><dd>{formatDate(docInfo.doc_date || docInfo.created_at || new Date())}</dd></div>
-                    <div><dt>Fecha de validación:</dt><dd>{savedDocument ? formatDate(docInfo.updated_at || docInfo.doc_date || docInfo.created_at) : 'Pendiente'}</dd></div>
-                    <div><dt>Documento:</dt><dd>{savedDocument ? documentLabel : 'Prefactura'}</dd></div>
+                    {isPurchase
+                        ? <div><dt>Entrega esperada:</dt><dd>{expectedDate ? formatDate(expectedDate) : '--'}</dd></div>
+                        : <div><dt>Fecha de validación:</dt><dd>{savedDocument ? formatDate(docInfo.updated_at || docInfo.doc_date || docInfo.created_at) : 'Pendiente'}</dd></div>}
+                    <div><dt>Documento:</dt><dd>{savedDocument ? documentLabel : (isPurchase ? 'Borrador' : 'Prefactura')}</dd></div>
                 </dl>
             </section>
 
             <div className="facturationOrderPreviewTableWrapper">
                 <table className="facturationOrderPreviewItemsTable">
                     <thead><tr>
-                        <th>#</th><th>Código</th><th>Descripción</th><th>Val. Unit</th>
+                        <th>#</th><th>Código</th><th>Descripción</th><th>{isPurchase ? 'Costo unit.' : 'Val. Unit'}</th>
                         <th>Cantidad</th><th>Descuento</th><th>Impuesto</th><th>Val. Ítem</th>
                     </tr></thead>
                     <tbody>
@@ -187,7 +195,7 @@ export function FacturationOrderPreview({ data, documentId, documentType = 'Clie
                             const unitValue = Number(item.unit_value ?? item.value) || 0;
                             const discount = Number(item.discount_value ?? item.discount) || 0;
                             const total = Math.max(0, units * unitValue - discount);
-                            const description = item.facturation_description || item.description || item.service_name || item.product_name || `Ítem ${index + 1}`;
+                            const description = item.facturation_description || item.description || item.service_name || item.product_name || item.name || `Ítem ${index + 1}`;
                             return <tr key={item.id ?? `${item.service_id ?? item.product_id}-${index}`}>
                                 <td>{index + 1}</td>
                                 <td>{item.code || item.service_code || item.product_code || item.service_id || item.product_id || '--'}</td>
@@ -199,7 +207,7 @@ export function FacturationOrderPreview({ data, documentId, documentType = 'Clie
                                 <td>{currency(total)}</td>
                             </tr>;
                         })}
-                        {items.length === 0 && <tr><td colSpan="8">No hay ítems incluidos en esta prefactura.</td></tr>}
+                        {items.length === 0 && <tr><td colSpan="8">{isPurchase ? 'No hay ítems incluidos en esta orden de compra.' : 'No hay ítems incluidos en esta prefactura.'}</td></tr>}
                     </tbody>
                 </table>
             </div>
@@ -219,7 +227,7 @@ export function FacturationOrderPreview({ data, documentId, documentType = 'Clie
                     ))}
                     <div><span>Descuento global (-)</span><span>{currency(summary.discount)}</span></div>
                     <div><span>Recargo global (+)</span><span>{currency(0)}</span></div>
-                    <div className="facturationOrderPreviewInvoiceTotal"><strong>Total factura</strong><strong>{currency(summary.total)}</strong></div>
+                    <div className="facturationOrderPreviewInvoiceTotal"><strong>{isPurchase ? 'Total orden' : 'Total factura'}</strong><strong>{currency(summary.total)}</strong></div>
                 </div>
             </section>
         </article>

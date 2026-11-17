@@ -1,0 +1,173 @@
+.FormNewPurchaseOrder{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding: 1vh;
+    width: 80vw;
+    max-width: 100%;
+}
+
+.FormNewPurchaseOrder form{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2vh;
+    margin: 2vh auto;
+    width: 100%;
+}
+
+.FormNewPurchaseOrder .purchaseOrderDateField{
+    flex: 0 1 20vw;
+    min-width: 16rem;
+    max-width: 24rem;
+}
+
+.FormNewPurchaseOrder .purchaseOrderDateField .FacturationFormInput{
+    width: 100%;
+    min-width: 0;
+}
+
+.FormNewPurchaseOrder .purchaseOrderPriceListInfo{
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    width: 100%;
+    color: var(--descriptionText);
+    font-size: clamp(2px,1.8vh,18px);
+}
+
+.FormNewPurchaseOrder form .noItemsSelected{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding: 3vh 0;
+    align-items: center;
+    background-color: var(--cardHover);
+    border-radius: 1vh;
+    border: dashed .1vh var(--inputsBorder);
+}
+
+.FormNewPurchaseOrder form .noItemsSelected i{
+    margin: auto;
+    margin-bottom: 0;
+    font-size: clamp(3px,4vh,40px);
+    color: var(--descriptionText);
+}
+
+.FormNewPurchaseOrder form .noItemsSelected h6{
+    margin: auto;
+    margin-top: 0;
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 400;
+    color: var(--descriptionText);
+}
+
+.FormNewPurchaseOrder .purchaseOrderSummary{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 1vh;
+}
+
+.FormNewPurchaseOrder .purchaseOrderSummaryRows{
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 34rem);
+    color: var(--mainText);
+    margin: auto;
+    margin-right: 2vh;
+}
+
+.FormNewPurchaseOrder .purchaseOrderSummaryRow{
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: .45rem 0;
+    border-bottom: .1vh solid var(--inputsBorder);
+    margin-bottom: .5vh;
+    font-size: clamp(2px,2vh,20px);
+    color: var(--mainText);
+}
+
+.FormNewPurchaseOrder .purchaseOrderSummaryTotal{
+    border-bottom: 0;
+}
+
+.FormNewPurchaseOrder form .actionsForm{
+    display: flex;
+    gap: 2vw;
+    margin: auto;
+    margin-right: 0;
+    width: 50%;
+}
+
+@media (max-width: 640px){
+    .FormNewPurchaseOrder{
+        width: 100%;
+    }
+
+    .FormNewPurchaseOrder .purchaseOrderDateField{
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+
+    .FormNewPurchaseOrder form .actionsForm{
+        width: 100%;
+    }
+}
+
+.FormNewPurchaseOrder .purchaseOrderSources{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1vh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.FormNewPurchaseOrder .purchaseOrderSource{
+    display: flex;
+    align-items: center;
+    gap: 1vh;
+    padding: .5vh 1.5vh;
+    background-color: var(--inputsBg);
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 2vh;
+    color: var(--mainText);
+    font-size: clamp(2px,1.8vh,18px);
+}
+
+.FormNewPurchaseOrder .purchaseOrderSource button{
+    display: flex;
+    align-items: center;
+    padding: .4vh;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    color: var(--descriptionText);
+    cursor: pointer;
+}
+
+.FormNewPurchaseOrder .purchaseOrderSource button:hover:not(:disabled){
+    background-color: var(--settingsHover);
+}
+
+.FormNewPurchaseOrder .purchaseOrderSource button:focus-visible{
+    outline: solid .2vh var(--chatAccent);
+}
+
+.FormNewPurchaseOrder .purchaseOrderSource button:disabled{
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.FormNewPurchaseOrder .purchaseOrderPreviewButton,
+.FormNewPurchaseOrder .purchaseOrderPreviewButton:hover,
+.FormNewPurchaseOrder .purchaseOrderPreviewButton:focus,
+.FormNewPurchaseOrder .purchaseOrderPreviewButton:focus-visible,
+.FormNewPurchaseOrder .purchaseOrderPreviewButton:disabled{
+    background-color: var(--chatAccent);
+    color: #fff;
+}

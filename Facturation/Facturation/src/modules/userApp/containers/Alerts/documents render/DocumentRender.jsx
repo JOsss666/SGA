@@ -12,6 +12,7 @@ import { AccountingAdjustmentDesign } from "../AccountingAdjustmentDesign";
 import { PurchaseInvoiceDesign } from "../PurchaseInvoiceDesign";
 import { ClientOrderPreview } from "../ClientOrderPreview";
 import { FacturationOrderPreview } from "../../../components/facturationOrderPreview";
+import { PurchaseOrderPreview } from "../../../components/purchaseOrderPreview";
 
 export function DocumentRender({ id, docType }) {
     const [disabled] = useState(false);
@@ -38,6 +39,8 @@ export function DocumentRender({ id, docType }) {
                 return <InvoiceVisualRepresentation id={id} />;
             case "Facturation Order":
                 return <FacturationOrderPreview documentId={id} documentType="Facturation Order" />;
+            case "Purchase Order":
+                return <PurchaseOrderPreview documentId={id} />;
             case "Client Order":
                 return <ClientOrderPreview doc_id={id} />;
             case "Cash Recipt":

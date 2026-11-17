@@ -19,6 +19,7 @@ import { FormSelectMachine } from "../../../../../../../costume-modules/zjSAS.S/
 import { FormClicksControl } from "../../../../../../../costume-modules/zjSAS.S/src/containers/forms/FormClicksControl";
 import { FormNewParameterDocument } from "../forms/FormNewParameterDocument";
 import { FormNewFacturationOrder } from "../../components/FormNewFacturationOrder";
+import { FormNewPurchaseOrder } from "../forms/FormNewPurchaseOrder";
 import { FormAccountingAdjustment } from "../forms/formAccountingAdjustment";
 import { FormNewThirdPartyDelegation } from "../forms/FormNewThirdPartyDelegation";
 import { CashReciptDesign } from "./CashReciptDesign";
@@ -312,7 +313,7 @@ export function SearchResultsPannel({searchValue}){
         {text:'Factura de Compra', group:'Documentos', icon:<i className="fa-solid fa-cart-shopping"/>, children:<FormNewPurchase/>},
         {text:'Nota débito o crédito', group:'Documentos', icon:<i className="fa-solid fa-note-sticky"/>, children:<FormNewENote/>},
         {text:'Orden de facturación', group:'Documentos', icon:<i className="bi bi-receipt-cutoff"/>, children:<FormNewFacturationOrder/>},
-        {text:'Orden de compra', group:'Documentos', icon:<i className="bi bi-receipt-cutoff"/>, children:<FormNewFacturationOrder/>},
+        {text:'Orden de compra', group:'Documentos', icon:<i className="bi bi-receipt-cutoff"/>, children:<FormNewPurchaseOrder/>},
         {text:'Ajuste contable', group:'Documentos', icon:<i className="fa-solid fa-scale-balanced"/>, children:<FormAccountingAdjustment/>},
         ...(userConfig?.access?.sections?.reports?.documents?.ThirdPartyDelegation === true ? [
             {text:'Asignación a proveedor', group:'Documentos', icon:<i className="bi bi-person-bounding-box"/>, children:<FormNewThirdPartyDelegation instnacePreInfo={{}}/>}

@@ -23,6 +23,7 @@ import './New.css'
 import { FormNewParameterDocument } from "./forms/FormNewParameterDocument";
 import { FormAccountingAdjustment } from "./forms/formAccountingAdjustment";
 import { FormNewFacturationOrder } from "../components/FormNewFacturationOrder";
+import { FormNewPurchaseOrder } from "./forms/FormNewPurchaseOrder";
 import { NewOptions } from "../components/newOptions";
 
 export function New(){
@@ -128,7 +129,7 @@ export function New(){
             id:'new-purchase-order',
             text:'Orden de compra',
             icon:<i className="bi bi-receipt-cutoff" />,
-            action:() => popInAlert(<FormNewFacturationOrder />)
+            action:() => popInAlert(<FormNewPurchaseOrder />)
         },
         {
             id:'new-accounting-adjustment',
