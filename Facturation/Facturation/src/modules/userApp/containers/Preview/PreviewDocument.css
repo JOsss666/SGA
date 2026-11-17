@@ -95,6 +95,21 @@
     margin: auto 4vh;
 } 
 
+.PreviewDocument .detailsDocument .clientOrderOnlineCard .jobDesc{
+    flex: 1 1 7rem;
+    min-width: 5rem;
+    margin: auto .75rem;
+}
+
+.PreviewDocument .clientOrderOnlineTotal{
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .75rem 0 0;
+    border-top: 1px solid var(--inputsBorder);
+    color: var(--mainText);
+}
+
 .PreviewDocument .detailsDocument .serviceDescriptionCard .jobDesc span{
     font-size: clamp(2.2px,2.2vh,22px);
     color: var(--descriptionText);
@@ -305,8 +320,7 @@
 
     .PreviewDocument .detailsDocument .serviceDescriptionCard{
         flex-wrap: wrap;
-        flex-direction: column;
-        gap: 2vh;
+        gap: 1rem;
     }
 
     .PreviewDocument .detailsDocument .UserCard{
@@ -315,6 +329,11 @@
 
     .PreviewDocument .detailsDocument .UserCard strong{
         font-size: clamp(2px,2vh,20px);
+    }
+
+    .PreviewDocument .detailsDocument .clientOrderOnlineCard .jobDesc{
+        flex: 1 1 8rem;
+        margin: 0;
     }
 
     .PreviewDocument .attachedDocuments{

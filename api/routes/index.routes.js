@@ -24,6 +24,7 @@ import searchController from '../controllers/searchController.js';
 import companyTimeZoneController from '../controllers/companyTimeZoneController.js';
 import integrationRouter from './integration.routes.js';
 import { systemAIRouter } from '../systemAI/index.js';
+import mcpSettingsRouter from '../systemAI/mcp/mcpSettings.routes.js';
 import sessionRouter from './session.routes.js';
 import sessionAuthController from '../controllers/sessionAuthController.js';
 import { authenticateSession } from '../middleware/authenticateSession.js';
@@ -33,6 +34,7 @@ import { requireCompanyAccess } from '../middleware/requireCompanyAccess.js';
 import supplierDelegationController from '../controllers/supplierDelegationController.js';
 import externalAccesThirdPartyController from '../controllers/externalThirdPartyAccesController.js';
 import { createAdjustment, deleteTemplate, listTemplates, saveTemplate } from '../controllers/accountingAdjustmentController.js';
+import { activateDocument, cancelDocument, editDocument } from '../controllers/documentActionsController.js';
 
 const router = express.Router();
 
@@ -49,6 +51,15 @@ router.post('/contability/accounting-adjustment-templates', express.json({ limit
 router.delete('/contability/accounting-adjustment-templates/:id', express.json({ limit: '16kb' }),
     requireTrustedOrigin, deleteTemplate, sessionErrorHandler);
 
+// Acciones sobre documentos. Mismo esquema de identificación que el ajuste contable.
+// Las reglas de qué se permite viven en services/documentPolicy.js (hoy permisiva).
+router.post('/documents/activate', express.json({ limit: '16kb' }),
+    requireTrustedOrigin, activateDocument, sessionErrorHandler);
+router.post('/documents/cancel', express.json({ limit: '16kb' }),
+    requireTrustedOrigin, cancelDocument, sessionErrorHandler);
+router.post('/documents/edit', express.json({ limit: '256kb' }),
+    requireTrustedOrigin, editDocument, sessionErrorHandler);
+
 // temporal folder for chunks
 const CHUNKS_DIR = path.join(process.cwd(), "chunks");
 const upload = multer({ dest: CHUNKS_DIR });
@@ -56,6 +67,7 @@ const upload = multer({ dest: CHUNKS_DIR });
 // API máquina-a-máquina para integraciones empresariales.
 router.use('/api/integrations/v1', integrationRouter);
 router.use('/api/system-ai/v1', systemAIRouter);
+router.use('/api/mcp/v1/settings', mcpSettingsRouter);
 router.use('/api/auth/v1', sessionRouter);
 
 
@@ -237,8 +249,12 @@ router.post('/inventory/disableProduct',inventoryController.disableProduct);
 
 router.post('/inventory/deleteProduct',inventoryController.deleteProduct);
 
+router.post('/inventory/getThirdPartyPricesList',inventoryController.getThirdPartyPricesList);
+
 router.post('/inventory/getProductTaxRelations',inventoryController.getProductTaxRelations);
+
 router.post('/inventory/getPurchaseRelations',inventoryController.getProductPurchaseRelations);
+router.post('/inventory/getPurchaseProducts',inventoryController.getPurchaseProducts);
 
 router.post('/inventory/createThirdPartyProductTaxRelation',inventoryController.createThirdPartyProductTaxRelation);
 
@@ -394,6 +410,9 @@ router.post('/facturation/newPurchase',facturationController.newPurchase);
 router.post('/facturation/newNote',facturationController.newNote);
 
 router.post('/facturation/newClientOrder',facturationController.newClientOrder);
+
+router.post('/facturation/newFacturationOrder',facturationController.newFacturationOrder);
+router.post('/facturation/newPurchaseOrder',facturationController.newPurchaseOrder);
 
 router.post('/facturation/getCashBoxes',facturationController.getCashBoxes);
 

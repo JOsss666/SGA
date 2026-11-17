@@ -7,10 +7,12 @@ import { AccountPannel } from "./AccountPannel";
 import { InvoiceVisualRepresentation } from "./InvoiceVisualRepresentation";
 import { ClientOrderDesign } from "../ClientOrderDesign";
 import { CashReceiptDesign } from "../CashReceiptDesign";
-import { ClientOrderRepresentation } from "./ClientOrderRepresentation";
 import { CashReceiptRepresentation } from "./CashReceiptRepresentation";
 import { AccountingAdjustmentDesign } from "../AccountingAdjustmentDesign";
 import { PurchaseInvoiceDesign } from "../PurchaseInvoiceDesign";
+import { ClientOrderPreview } from "../ClientOrderPreview";
+import { FacturationOrderPreview } from "../../../components/facturationOrderPreview";
+import { PurchaseOrderPreview } from "../../../components/purchaseOrderPreview";
 
 export function DocumentRender({ id, docType }) {
     const [disabled] = useState(false);
@@ -35,10 +37,17 @@ export function DocumentRender({ id, docType }) {
         switch (docType) {
             case "Sell Invoice":
                 return <InvoiceVisualRepresentation id={id} />;
+            case "Facturation Order":
+                return <FacturationOrderPreview documentId={id} documentType="Facturation Order" />;
+            case "Purchase Order":
+                return <PurchaseOrderPreview documentId={id} />;
             case "Client Order":
-                return <ClientOrderRepresentation id={id} />;
+                return <ClientOrderPreview doc_id={id} />;
             case "Cash Recipt":
                 return <CashReceiptRepresentation id={id} />;
+            case "JSON Parametrization":
+                // Los documentos parametrizados solo se muestran con su plantilla en PreviewDocument.
+                return <PreviewDocument doc_id={id} />;
             default:
                 return renderDocumentDesign();
         }

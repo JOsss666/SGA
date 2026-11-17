@@ -6,6 +6,7 @@ import { SearchinList } from "../../components/SearchInList";
 import { FormInput } from "../../components/FormInput";
 import { InputFiles } from "../../components/InputFiles";
 import { FormButton } from "../../components/FormButton";
+import { FacturationOrderPreview } from "../../components/facturationOrderPreview";
 import './FormNewCashRecipt.css'
 import './FormNewInvoice.css'
 import { FileInput } from "../../components/FileInput";
@@ -20,7 +21,9 @@ import { SwitchOption } from "../../components/SwitchOption";
 import { UserCard } from "../../components/UserCard";
 import { executeDocumentAction } from "../../../../utils/DocumentsControl";
 
-export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
+// `clientOrders`: ids de órdenes de cliente a precargar como documentos de la factura (p. ej. desde
+// el informe de administración de procesos). Deben ser de un solo tercero.
+export function FormNewInvoice({InfoParams,reloadFun,process_instance_id,clientOrders}){
 
     // Requieremnets
     const [docRules,setDocRules] = useState([]);
@@ -35,6 +38,7 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id}){
     const [bussines,setBussines] = useState([]);
     const [costCenters,setCostCenters] = useState([]);
     const [concepts,setConcepts] = useState([]);
+    const [facturationOrders,setFacturationOrders] = useState([]);
     const [documents,setDocuments] = useState([{
         docInfo:{},
         items:[]
@@ -487,6 +491,75 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
         });
     }
 
+    const preloadClientOrders = async()=>{
+        const ids = [...new Set((Array.isArray(clientOrders) ? clientOrders : [])
+            .map(id => `${id ?? ''}`).filter(Boolean))];
+        if(ids.length === 0) return;
+
+        const res = await postInfo('/getDocuments',{
+            company_id:appInfo.company_id,
+            allowedIds:ids,
+            allowedTypes:['Client Order']
+        });
+        const found = res?.[0] ? res[1] : [];
+        // getDocuments repite el documento si tiene varios procesos: se deduplica.
+        const available = [...new Map(found
+            .filter(document => !['cancelled','disabled'].includes(`${document.status}`))
+            .map(document => [`${document.id}`,document])).values()];
+
+        if(available.length === 0){
+            addNotification({type:'error',title:'Sin órdenes disponibles',description:'No se encontraron órdenes de cliente disponibles entre las seleccionadas.'});
+            return;
+        }
+        const clientIds = [...new Set(available.map(document => `${document.thirdParty_id}`))];
+        if(clientIds.length > 1){
+            addNotification({type:'error',title:'Varios terceros',description:`Las órdenes seleccionadas pertenecen a ${clientIds.length} terceros distintos. Selecciona órdenes de uno solo.`});
+            return;
+        }
+        if(available.length < ids.length){
+            addNotification({type:'error',title:'Órdenes no disponibles',description:`${ids.length - available.length} de las órdenes seleccionadas no están disponibles y no se incluyeron.`});
+        }
+
+        const thirdPartyId = available[0].thirdParty_id;
+        setThirdParty_id(thirdPartyId);
+        await getThirdParties(thirdPartyId,1);
+        for(const document of available){
+            await handleAddDocument(document);
+        }
+    }
+
+    // Simulación de la factura con los ítems actuales (mismo componente que la orden de facturación).
+    const handlePreview = () => {
+        const previewItems = itemBlocks.flatMap(block => block.items.map(item => ({
+            ...item,
+            sourceDocument:block.docInfo?.ownSerial || block.docInfo?.id
+        })));
+        if(!thirdParty_id){
+            addNotification({type:'error',title:'Selecciona un cliente',description:'Para previsualizar la factura debes seleccionar un cliente.'});
+            return;
+        }
+        if(previewItems.length === 0){
+            addNotification({type:'error',title:'Agrega ítems',description:'La previsualización necesita al menos un producto, servicio o documento.'});
+            return;
+        }
+        popInAlert(<FacturationOrderPreview data={{
+            docInfo:{...info},
+            // Observaciones = descripción de la factura electrónica (no la interna).
+            observations:e_invoiceDescription,
+            thirdParty_id,
+            items:previewItems,
+            sourceDocuments:itemBlocks.map(block => block.docInfo).filter(Boolean)
+        }} />);
+    };
+
+    // Una orden de facturación se carga igual que una orden de cliente: bloque con sus ítems
+    // (services_movement.doc_id) y su proceso asociado. Se evita cargar dos veces la misma orden.
+    const handleAddFacturationOrder = async(element)=>{
+        if(element?.id == undefined) return;
+        if(itemBlocks.some(block => block.docInfo?.id === element.id)) return;
+        await handleAddDocument(element);
+    }
+
     // Getters of info
 
         // Get Document Rules
@@ -662,6 +735,39 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             
         }
     }
+
+    // `instance_id` es parámetro (como en getDocuments): sin él, el estado `instance_id` es un
+    // arreglo y se enviaría `[]` al backend, que lo castea a bigint y falla.
+    const getFacturationOrders = async(instance_id)=>{
+        let res = await postInfo('/getDocuments',{
+            company_id:appInfo.company_id,
+            instance_id,
+            thirdParty_id,
+            status:'active',
+            allowedTypes:['Facturation Order']
+        })
+        console.log('Ordenes de facturación: ',res);
+        if(res[0]){
+            if(instance_id == undefined){
+                let C = []
+                res[1].forEach(element => {
+                    C.push({
+                        text:`${element.document_type}#${element.ownSerial} - ${element.total}`,
+                        value:element
+                    })
+                });
+                setFacturationOrders(C);
+            }else{
+                for (const element of res[1]) {
+                    let attachedItems = await getAttachedServices(element.id);
+                    handleAddBlock({
+                        docInfo: element,
+                        items: attachedItems
+                    });
+                }
+            }
+        }
+    };
     
     const getConcepts = async()=>{
         let res = await postInfo('/getConcepts',{
@@ -1297,6 +1403,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
         if(thirdPartyInfo.id != undefined){
             // Update of crefit conditions of thirdParty
             getProductsAndServices();
+            getFacturationOrders();
             setAbleCredit(thirdPartyInfo.credit != undefined ? thirdPartyInfo.credit:0);
             setAviableCredit(thirdPartyInfo.aviable_credit != undefined? thirdPartyInfo.aviableCredit:0);
             
@@ -1383,7 +1490,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
 
     useEffect(()=>{
         getDocumentRules();
-        handleUserConfig();
+        handleUserConfig().then(preloadClientOrders);
     },[])
 
     useEffect(()=>{
@@ -1461,6 +1568,9 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                     <SearchinList action={handleAddDocument} noActVal={true} title={'Documentos'} placeHolder={'Seleccione el documento'} list={documents} disabled={thirdParty_id != undefined? disabled:true}/>
                     {info.concept_id == undefined && (
                         <SearchinList action={handleConceptChange} title={'Concepto'} placeHolder={'Seleccione el concepto'} list={concepts} disabled={disabled}/>
+                    )}
+                    {facturationOrders.length > 0 && (
+                        <SearchinList action={handleAddFacturationOrder} noActVal={true} title={'Ordenes de facturación'} placeHolder={'Seleccione el documento (Opcional)'} list={facturationOrders} disabled={thirdParty_id != undefined? disabled:true}/>
                     )}
                     {info.cashBox_id == undefined && cashBoxes.length != 0 && (
                         <SearchinList action={handleCashBoxChange} title={'Caja'} placeHolder={'Seleccione la caja'} list={cashBoxes} disabled={disabled}/>
@@ -1611,7 +1721,11 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                     <FormInput title={'Descripción (Interna)'} textArea={true} placeholder={'Descripción'} action={setDescription} disabled={disabled}/>
                     <FormInput title={'Descripción (Factura electrónica)'} textArea={true} placeholder={'Anotación o descripción de la factura de venta electronica'} action={set_eInvoiceDescription} disabled={disabled} />
                     <FileInput category="files" action={setAttached} placeholder={'Adjuntar comprobante'} disabled={disabled} setDisabled={setDisabled} multiple={true}/>
-                    <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor ingresado no es valido':'Crear factura de venta'} disabled={disabledToSubmit || disabled || Boolean(advancePayments.error)} loading={loading}/>
+                    <div className="actionsForm">
+                        <FormButton className="facturationOrderPreviewButton" text={'Previsualizar'} disabled={disabled || loading} onClick={handlePreview} type="button" children={<i className="bi bi-eye"/>}/>
+                        <FormButton text={'Cancelar'} negative={true} disabled={disabled} onClick={()=>popOutAlert()} type="button"/>
+                        <FormButton className={disabledByValue? 'disabledByValueBtn':''} text={disabledByValue? 'El valor ingresado no es valido':'Crear factura de venta'} disabled={disabledToSubmit || disabled || Boolean(advancePayments.error)} loading={loading}/>
+                    </div>
                 </form>
             )}
             {loading && (

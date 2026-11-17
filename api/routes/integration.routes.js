@@ -7,6 +7,7 @@ import {
     authenticateIntegration,
     requireScope
 } from '../middleware/integrationAuth.js';
+import mcpRouter from '../systemAI/mcp/mcp.routes.js';
 import zjIntegrationController from '../controllers/custom-controllers/zjIntegrationController.js';
 
 const integrationRouter = express.Router();
@@ -107,6 +108,8 @@ integrationRouter.post(
     integrationTokenRateLimit,
     integrationAuthController.issueToken
 );
+
+integrationRouter.use('/mcp', mcpRouter);
 
 integrationRouter.get(
     '/handshake',

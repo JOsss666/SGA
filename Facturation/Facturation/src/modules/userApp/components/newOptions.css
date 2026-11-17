@@ -1,0 +1,64 @@
+.newOptions{
+    display: flex;
+    gap: 1vh;
+    flex-direction: column;
+}
+
+.newOptions h2{
+    font-size: clamp(2.5px,2.5vh,25px);
+    font-weight: 500;
+    color: var(--mainText);
+    transition: .3s;
+    margin-bottom: 1vh;
+}
+
+.newOptions .newOptionsList{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    padding-left: 1vw;
+    list-style: none;
+    border-left: solid .3vh var(--inputsBorder);
+    transition: .3s;
+}
+
+.newOptions .newOptionsList .newOptionsItem{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    transition: .3s;
+}
+
+.newOptions .newOptionsList .newOptionsItem .newOptionsAction:hover .newOptionsIcon i{
+    color: var(--chatAccent);
+}
+
+.newOptions .newOptionsList .newOptionsItem .newOptionsAction:hover{
+    color: var(--chatAccent);
+    margin-left: 1vh;
+}
+
+.newOptions .newOptionsList .newOptionsItem .newOptionsAction{
+    background-color: var(--bg);
+    padding: 1vh;
+    border: none;
+    cursor: pointer;
+    font-size: clamp(2px,2.2vh,22px);
+    display: flex;
+    gap: .5vw;
+    transition: .3s;
+    color: var(--mainText);
+}
+
+.newOptions .newOptionsList .newOptionsItem .newOptionsAction .newOptionsIcon{
+    color: var(--descriptionText);
+    margin: auto 0;
+    width: 1.5vw;
+    transition: .3s;
+    display: flex;
+}
+
+.newOptions .newOptionsList .newOptionsItem .newOptionsAction .newOptionsIcon i{
+    margin: auto;
+    margin-left: 0;
+}

@@ -1,0 +1,52 @@
+@import '../containers/UserApp.css';
+
+.KeyRow{
+    display: flex;
+    align-items: flex-end;
+    gap: 1vh;
+    width: 100%;
+}
+
+.KeyRow .FacturationFormInput{
+    min-width: 0;
+    width: 30%;
+}
+
+.KeyRow .FacturationFormInput input{
+    font-family: monospace;
+    text-overflow: ellipsis;
+}
+
+.KeyRow .KeyRowActions{
+    display: flex;
+    gap: 1vh;
+}
+
+.KeyRow .itemAction{
+    display: grid;
+    place-items: center;
+    width: 5vh;
+    height: 5vh;
+    min-width: 36px;
+    min-height: 36px;
+    border: hidden;
+    border-radius: 1vh;
+    outline: solid .1vh var(--inputsBorder);
+    background-color: var(--inputsBg);
+    color: var(--descriptionText);
+    cursor: pointer;
+    transition: .3s;
+}
+
+.KeyRow .itemAction:hover:not(:disabled){
+    color: var(--mainText);
+    outline-color: #155DFC;
+}
+
+.KeyRow .itemAction:focus-visible{
+    outline: solid .2vh #155DFC;
+}
+
+.KeyRow .itemAction:disabled{
+    cursor: not-allowed;
+}

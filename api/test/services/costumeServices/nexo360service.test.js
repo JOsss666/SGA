@@ -8,12 +8,21 @@ const payload = () => ({
     componentValues: { 10: 5, 11: 2 }, instance_id: 1000
 });
 
-function fixture({ components, scope, instance, failure } = {}) {
+function fixture({ components, scope, instance, failure, prices, unassigned } = {}) {
     const events = [];
     const writes = [];
     const client = {
         async query(sql, values) {
             assert.equal(values[0], '7', 'Cada lectura debe delimitar la compañía');
+            if (sql.includes('thirdparties_pricesList')) {
+                assert.deepEqual(values, ['7', '212', '24']);
+                return { rows: unassigned ? [] : [{ '?column?': 1 }] };
+            }
+            if (sql.includes('priceList_items')) {
+                assert.equal(values[1], '24');
+                assert.ok(sql.includes('unit_price'));
+                return { rows: prices ?? [{ product_id: 10, unit_price: '7.5' }, { product_id: 11, unit_price: '20' }] };
+            }
             if (sql.includes('AS store_ok')) return { rows: [scope ?? { store_ok: true, third_party_ok: true, user_ok: true }] };
             if (sql.includes('process_instance')) return { rows: [instance ?? { id: 1000, thirdParty_id: 212, step_id: 70 }] };
             assert.ok(sql.includes('preset.company_id = $1'));
@@ -135,6 +144,35 @@ test('propaga fallos de cada escritura para que withTransaction revierta la oper
         assert.deepEqual(events, ['BEGIN', 'ROLLBACK']);
         assert.equal(writes.length, ['document', 'items', 'instances'].indexOf(failure) + 1);
     }
+});
+
+test('con priceList_id cobra unit_price de la lista e ignora componentValues', async () => {
+    const { service, writes } = fixture();
+    const order = await service.generateClientOrder({ ...payload(), priceList_id: 24, componentValues: { 10: 999, 11: 999 } });
+    assert.deepEqual(order.items.map(item => item.unit_value), [7.5, 20, 7.5]);
+    assert.deepEqual(order.items.map(item => item.total), [45, 20, 15]);
+    assert.equal(order.total, 80);
+    assert.equal(writes[0][1].total, 80);
+});
+
+test('con priceList_id funciona sin componentValues y falla si un componente no tiene precio', async () => {
+    const ok = fixture();
+    const result = await ok.service.generateClientOrder({ ...payload(), priceList_id: '24', componentValues: undefined });
+    assert.equal(result.total, 80);
+    const missing = fixture({ prices: [{ product_id: 10, unit_price: '7.5' }] });
+    await assert.rejects(
+        missing.service.generateClientOrder({ ...payload(), priceList_id: 24 }),
+        { statusCode: 422, message: /sin precio en la lista 24: 11/ }
+    );
+    assert.deepEqual(missing.writes, []);
+    assert.deepEqual(missing.events, ['BEGIN', 'ROLLBACK']);
+});
+
+test('rechaza una lista de precios que no está asignada al cliente de la orden', async () => {
+    const { service, writes, events } = fixture({ unassigned: true });
+    await assert.rejects(service.generateClientOrder({ ...payload(), priceList_id: 24 }), { statusCode: 422, message: /no está asignada/ });
+    assert.deepEqual(writes, []);
+    assert.deepEqual(events, ['BEGIN', 'ROLLBACK']);
 });
 
 test('permite importes cero explícitos y órdenes sin instancia', async () => {

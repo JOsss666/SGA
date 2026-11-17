@@ -51,3 +51,7 @@ db/backups/
 .claude/skills/sga-feature-docs-diagrams
 .claude/skills/sga-feature-execution-planner
 .claude/skills/sga-feature-orchestrator
+
+# Material local de cuentas de cobro
+scripts/reportes/assets/firma.png
+scripts/reportes/cuenta_de_cobro*

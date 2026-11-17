@@ -23,6 +23,7 @@ export const createNexoProcessReportHandler = ({ useDataBase }) => async (req, r
                 document.created_at AS "createdAt",
                 document.created_at AT TIME ZONE (${companyTimeZoneSql('$1')}) AS created_at_local,
                 ${companyTimeZoneSql('$1')} AS business_time_zone,
+                document."thirdParty_id" AS "thirdPartyId",
                 COALESCE(parent_process.client_name, customer.names) AS "clientName",
                 store.name AS store,
                 COALESCE(document.status, 'active') AS document_status,

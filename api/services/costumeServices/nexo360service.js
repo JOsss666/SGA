@@ -113,7 +113,13 @@ export function createNexo360Service({ withTransaction, registerDocument, regist
         const componentValues = paramDoc.componentValues;
         // El config decide el modo: con componentValues -> presets (precios del config);
         // sin componentValues -> products (el ítem ya trae su unit_value del formulario).
-        const usePresets = componentValues != null && typeof componentValues === 'object' && !Array.isArray(componentValues);
+        // Con priceList_id (la del cliente, consultada por el formulario) el precio sale de
+        // "Inventory"."priceList_items".unit_price; componentValues queda como modo legado
+        // cuando no llega lista.
+        const priceListId = paramDoc.priceList_id == null || paramDoc.priceList_id === ''
+            ? null : id(paramDoc.priceList_id, 'priceList_id');
+        const usePresets = priceListId != null
+            || (componentValues != null && typeof componentValues === 'object' && !Array.isArray(componentValues));
         const presets = usePresets ? normalizePresets(paramDoc.items) : null;
         const productItems = usePresets ? null : normalizeProducts(paramDoc.items);
         const requestedInstances = Array.isArray(paramDoc.instances) && paramDoc.instances.length
@@ -152,9 +158,37 @@ export function createNexo360Service({ withTransaction, registerDocument, regist
             info.step_id = info.instances[0]?.step_id;
             if (usePresets) {
                 const components = await transformPresets(presets, { company_id: info.company_id, client });
+                // Precio por unidad del producto-componente desde la lista (sin escalones,
+                // descuentos ni vigencia por ahora): una fila por producto, la de menor
+                // tier_min_quantity y, en empate, la más reciente.
+                const listPrices = new Map();
+                if (priceListId) {
+                    // El id viene del navegador: solo vale si está asignada a este cliente en la compañía.
+                    const assigned = await client.query(`
+                        SELECT 1 FROM "Inventory"."thirdparties_pricesList"
+                        WHERE company_id = $1 AND "thirdParty_id" = $2 AND "priceList_id" = $3
+                        LIMIT 1;
+                    `, [info.company_id, info.thirdParty_id, priceListId]);
+                    if (!assigned.rows.length) fail(`La lista de precios ${priceListId} no está asignada a este cliente.`, 422);
+                    const productIds = [...new Set(components.map(component => component.product_id))];
+                    const priced = await client.query(`
+                        SELECT DISTINCT ON ("product&service_id") "product&service_id" AS product_id, unit_price
+                        FROM "Inventory"."priceList_items"
+                        WHERE company_id = $1 AND "priceList_id" = $2 AND "product&service_id" = ANY($3::bigint[])
+                        ORDER BY "product&service_id", tier_min_quantity ASC, id DESC;
+                    `, [info.company_id, priceListId, productIds]);
+                    priced.rows.forEach(row => listPrices.set(String(row.product_id), row.unit_price));
+                    const unpriced = productIds.filter(productId => !listPrices.has(productId));
+                    if (unpriced.length) {
+                        fail(`Productos sin precio en la lista ${priceListId}: ${unpriced.join(', ')}.`, 422);
+                    }
+                }
                 info.items = components.map(component => {
-                    const value = Object.hasOwn(componentValues, component.product_id) ? componentValues[component.product_id] : undefined;
-                    const unit_value = money(decimal(value, `componentValues[${component.product_id}]`));
+                    const value = priceListId
+                        ? listPrices.get(component.product_id)
+                        : Object.hasOwn(componentValues, component.product_id) ? componentValues[component.product_id] : undefined;
+                    const unit_value = money(decimal(value, priceListId
+                        ? `unit_price[${component.product_id}]` : `componentValues[${component.product_id}]`));
                     return { ...component, unit_value, total: money(component.units * unit_value) };
                 });
             } else {
@@ -222,6 +256,8 @@ export function createNexo360Service({ withTransaction, registerDocument, regist
             ...orderContext,
             items: values.items,
             componentValues: context.componentValues,
+            // La lista la consulta el formulario según el cliente; generateClientOrder la revalida.
+            priceList_id: values.priceList_id,
             attached: values.artworkFiles ?? [],
             description: values.description ?? ''
         }, { client });

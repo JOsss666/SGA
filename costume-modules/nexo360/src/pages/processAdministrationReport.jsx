@@ -1,3 +1,4 @@
+import { WarningForm } from '../../../../Facturation/Facturation/src/modules/userApp/components/WarningForm';
 import { FormButton } from '../../../../Facturation/Facturation/src/modules/userApp/components/FormButton';
 import { TagIndicator } from '../../../../Facturation/Facturation/src/modules/userApp/components/TagIndicator';
 import { UniversalRow } from '../../../../Treasury/SGA - Treasuty/src/modules/userApp/components/universalRow';
@@ -6,6 +7,10 @@ import { FormNewThirdPartyDelegation } from '../../../../Facturation/Facturation
 import { CheckSquare } from '../../../../Facturation/Facturation/src/modules/userApp/components/CheckSquare';
 import { DocumentPreview } from '../../../../Facturation/Facturation/src/modules/userApp/containers/Alerts/DocumentPreview';
 import { ButtonDownload } from '../../../../Facturation/Facturation/src/modules/userApp/components/ButtonDownload';
+import { ActionsPannel } from '../../../../Facturation/Facturation/src/modules/userApp/components/actionsPannel';
+import { FormNewInvoice } from '../../../../Facturation/Facturation/src/modules/userApp/containers/forms/FormNewInvoice';
+import { FormNewPurchaseOrder } from '../../../../Facturation/Facturation/src/modules/userApp/containers/forms/FormNewPurchaseOrder';
+import { FormNewFacturationOrder } from '../../../../Facturation/Facturation/src/modules/userApp/components/FormNewFacturationOrder';
 import { useMemo, useState } from "react";
 import { ProcessAdministrationTable } from "../containers/processAdministrationTable";
 import { useProcessAdministrationReport } from "../hooks/useProcessAdministrationReport";
@@ -15,6 +20,7 @@ import { BoldTitle } from "../../../../Facturation/Facturation/src/modules/userA
 import { SearchBar } from "../../../../Facturation/Facturation/src/modules/userApp/components/SearchBar";
 import { RangeDate } from "../../../../Treasury/SGA - Treasuty/src/modules/userApp/components/RangeDate";
 import { ProcessStatusAlert } from "../../../../Facturation/Facturation/src/modules/userApp/containers/Alerts/ProcessStatusAlert";
+import { DescriptionSpan } from '../../../zjSAS.S/src/components/DescriptionSpan';
 
 const exportColumns = ["reference", "clientName", "storeName", "storeCode", "city", "processName", "processInstanceName", "processStage", "deliveryAt", "deliveryAddress", "createdAt", "status", "paramDocReference", "orderTotal"];
 
@@ -63,6 +69,76 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
         />);
     };
 
+    const openInvoice = () => {
+        if (report.isDemo) {
+            setSelectionNotice("No es posible facturar órdenes demostrativas. El servidor local aún debe publicar el informe NEXO 360 con IDs reales de Client Order.");
+            return;
+        }
+        const selectedOrders = report.orders.filter(({ id }) => selectedOrderIds.includes(id));
+        popInAlert(<FormNewInvoice
+            clientOrders={selectedOrders.map((order) => order.doc_id || order.documentId || order.id)}
+        />);
+    };
+
+    // La compra es a un proveedor: las órdenes pueden ser de cualquier cliente (sin bloqueo por tercero).
+    const openPurchaseOrder = () => {
+        if (report.isDemo) {
+            setSelectionNotice("No es posible generar órdenes de compra con órdenes demostrativas. El servidor local aún debe publicar el informe NEXO 360 con IDs reales de Client Order.");
+            return;
+        }
+        const selectedOrders = report.orders.filter(({ id }) => selectedOrderIds.includes(id));
+        popInAlert(<FormNewPurchaseOrder
+            clientOrders={selectedOrders.map((order) => order.doc_id || order.documentId || order.id)}
+        />);
+    };
+
+    const openFacturationOrder = () => {
+        if (report.isDemo) {
+            setSelectionNotice("No es posible generar órdenes de facturación con órdenes demostrativas. El servidor local aún debe publicar el informe NEXO 360 con IDs reales de Client Order.");
+            return;
+        }
+        const selectedOrders = report.orders.filter(({ id }) => selectedOrderIds.includes(id));
+        popInAlert(<FormNewFacturationOrder
+            clientOrders={selectedOrders.map((order) => order.doc_id || order.documentId || order.id)}
+        />);
+    };
+
+    // Panel de acciones sobre las órdenes seleccionadas. Las acciones sin `action` quedan
+    // visibles pero deshabilitadas hasta que se conecten.
+    const openActionsPannel = () => {
+        // Las acciones de documentos (facturar, cobro, orden de facturación) se hacen por tercero.
+        const selectedOrders = report.orders.filter(({ id }) => selectedOrderIds.includes(id));
+        const clientKeys = new Set(selectedOrders.map((order) => `${order.thirdPartyId ?? order.clientName ?? ''}`));
+        const multipleClients = clientKeys.size > 1;
+        return popInAlert(
+        <div className="actionsAlert">
+            <BoldTitle text={'Acciones ordenes'}/>
+            <DescriptionSpan text={`Se han seleccionado ${selectedOrderIds.length} ordenes.`}/>
+            {multipleClients && (
+                <WarningForm tittle={'Varios terceros seleccionados'} desc={`Tienes seleccionadas órdenes de ${clientKeys.size} terceros distintos. Las acciones de órdenes están bloqueadas: selecciona órdenes de un solo tercero.`}/>
+            )}
+            <ActionsPannel actions={[
+                {
+                    title: 'Ordenes',
+                    actions: [
+                        { icon: <i className="bi bi-receipt" />, name: 'Facturar', action: openInvoice, disabled: multipleClients },
+                        { icon: <i className="bi bi-file-earmark-text" />, name: 'Generar orden de facturación', action: openFacturationOrder, disabled: multipleClients },
+                        { icon: <i className="bi bi-cash-coin" />, name: 'Generar orden de compra', action: openPurchaseOrder }
+                    ]
+                },
+                {
+                    title: 'Procesos',
+                    actions: [
+                        { icon: <i className="bi bi-people" />, name: 'Asignar a proveedores', action: openBulkAssignment },
+                        { icon: <i className="bi bi-arrow-up" />, name: 'Avanzar', disabled: true },
+                        { icon: <i className="bi bi-x-circle" />, name: 'Cancelar', disabled: true }
+                    ]
+                }
+            ]} />
+        </div>
+        );
+    };
+
     return <main className="processAdministrationReport ReportDocument">
         <header className="processAdministrationReportHeader">
             <div>
@@ -79,6 +155,6 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
         </div>
         {report.notice && <div className="processAdministrationReportNotice" role="status"><i className="fa-solid fa-circle-info" aria-hidden="true" />{report.notice}</div>}
         {selectionNotice && <div className="processAdministrationReportNotice" role="alert"><i className="fa-solid fa-circle-exclamation" aria-hidden="true" />{selectionNotice}</div>}
-        <ProcessAdministrationTable UniversalTable={UniversalTable} UniversalRow={UniversalRow} TagIndicator={TagIndicator} SearchBar={SearchBar} CheckSquare={CheckSquare} FormButton={FormButton} loading={report.loading} search={report.search} setSearch={report.setSearch} orders={visibleOrders} onFilteredResultsChange={setFilteredRows} totalValue={visibleTotal} total={report.orders.length} selectedOrderIds={selectedOrderIds} onToggleOrder={toggleOrder} onBulkAssign={openBulkAssignment} onOpen={openClientOrder} onOpenProcess={openProcess} />
+        <ProcessAdministrationTable UniversalTable={UniversalTable} UniversalRow={UniversalRow} TagIndicator={TagIndicator} SearchBar={SearchBar} CheckSquare={CheckSquare} FormButton={FormButton} loading={report.loading} search={report.search} setSearch={report.setSearch} orders={visibleOrders} onFilteredResultsChange={setFilteredRows} totalValue={visibleTotal} total={report.orders.length} selectedOrderIds={selectedOrderIds} onToggleOrder={toggleOrder} onBulkAssign={openActionsPannel} onOpen={openClientOrder} onOpenProcess={openProcess} />
     </main>;
 }

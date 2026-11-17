@@ -22,6 +22,9 @@ import { postInfo } from "../../../utils/functions";
 import './New.css'
 import { FormNewParameterDocument } from "./forms/FormNewParameterDocument";
 import { FormAccountingAdjustment } from "./forms/formAccountingAdjustment";
+import { FormNewFacturationOrder } from "../components/FormNewFacturationOrder";
+import { FormNewPurchaseOrder } from "./forms/FormNewPurchaseOrder";
+import { NewOptions } from "../components/newOptions";
 
 export function New(){
     const {userConfig,appInfo,userInfo, appConfig} = useAppInfo();
@@ -75,125 +78,153 @@ export function New(){
         setDisabled(!hasCompletedClicks[0]);
     }
 
-    const options = [
-        { text: 'Crear nuevo proceso', children: <FormSelectNewProcess />, icon: <i className="fa-solid fa-code-merge"/>},
-        { text: 'Crear nueva orden de cliente', children: <FormNewClientOrder canRepeatServices={true} />, icon: <i className="fa-regular fa-file" /> },
-        
-        // Simplificado con optional chaining
+    const processOptions = [
+        {
+            id:'new-process',
+            text:'Nuevo proceso',
+            icon:<i className="fa-solid fa-code-merge" />,
+            action:() => popInAlert(<FormSelectNewProcess />)
+        }
+    ];
+
+    const documentOptions = [
+        {
+            id:'new-client-order',
+            text:'Nueva orden de cliente',
+            icon:<i className="fa-regular fa-file" />,
+            action:() => popInAlert(<FormNewClientOrder canRepeatServices={true} />)
+        },
+        {
+            id:'new-sell-invoice',
+            text:'Factura de venta POS',
+            icon:<i className="fa-solid fa-file-invoice" />,
+            action:() => popInAlert(<FormNewInvoice />)
+        },
         ...(userConfig?.access?.sections?.cashBoxes?.overAll ||
-            userConfig?.access?.sections?.cashBoxes?.enabled?.length > 0 ?
-            [{ text: 'Crear recibo de caja', children: <FormNewCashRecipt />, icon: <i className="fa-solid fa-receipt" /> }] : []),
-        
-        {text:'Factura de venta',children:<FormNewInvoice/>,icon:<i className="fa-solid fa-file-invoice"/>},
+            userConfig?.access?.sections?.cashBoxes?.enabled?.length > 0 ? [{
+                id:'new-cash-receipt',
+                text:'Recibo de caja',
+                icon:<i className="fa-solid fa-receipt" />,
+                action:() => popInAlert(<FormNewCashRecipt />)
+            }] : []),
+        {
+            id:'new-purchase',
+            text:'Factura de Compra',
+            icon:<i className="fa-solid fa-cart-shopping" />,
+            action:() => popInAlert(<FormNewPurchase />)
+        },
+        {
+            id:'new-debit-credit-note',
+            text:'Nota débito o crédito',
+            icon:<i className="fa-solid fa-note-sticky" />,
+            action:() => popInAlert(<FormNewENote />)
+        },
+        {
+            id:'new-facturation-order',
+            text:'Orden de facturación',
+            icon:<i className="bi bi-receipt-cutoff" />,
+            action:() => popInAlert(<FormNewFacturationOrder />)
+        },
+        {
+            id:'new-purchase-order',
+            text:'Orden de compra',
+            icon:<i className="bi bi-receipt-cutoff" />,
+            action:() => popInAlert(<FormNewPurchaseOrder />)
+        },
+        {
+            id:'new-accounting-adjustment',
+            text:'Ajuste contable',
+            icon:<i className="fa-solid fa-scale-balanced" />,
+            action:() => popInAlert(<FormAccountingAdjustment />)
+        },
+        ...(userConfig?.access?.sections?.reports?.documents?.ThirdPartyDelegation === true ? [{
+            id:'new-third-party-delegation',
+            text:'Asignación a proveedor',
+            icon:<i className="bi bi-person-bounding-box" />,
+            action:() => popInAlert(<FormNewThirdPartyDelegation instnacePreInfo={{}} />)
+        }] : [])
+    ];
 
-        {text:'Nota débito o crédito',children:<FormNewENote/>,icon:<i className="fa-solid fa-note-sticky"/>},
+    const systemOptions = [
+        ...(userConfig?.access?.sections?.users?.overAll ? [{
+            id:'new-user',
+            text:'Usuario',
+            icon:<i className="fa-solid fa-person-circle-plus" />,
+            action:() => popInAlert(<FormNewUser />)
+        }] : []),
+        {
+            id:'new-third-party',
+            text:'Tercero',
+            icon:<i className="fa-regular fa-user" />,
+            action:() => popInAlert(<FormNewThirdParties quickCreation={!userConfig?.access?.sections?.thirdparties?.can_create} />)
+        },
+        {
+            id:'print-cash-receipt',
+            text:'Imprimir recibos',
+            icon:<i className="fa-solid fa-print" />,
+            action:() => popInAlert(<CashReciptDesign />)
+        },
+        {
+            id:'print-client-order',
+            text:'Imprimir órdenes de cliente',
+            icon:<i className="fa-solid fa-print" />,
+            action:() => popInAlert(<ClientOrderPreview />)
+        },
+        {
+            id:'print-sell-invoice',
+            text:'Imprimir factura de venta',
+            icon:<i className="fa-solid fa-print" />,
+            action:() => popInAlert(<SellInvoiceDesign />)
+        }
+    ];
 
-        {text:'Compra',children:<FormNewPurchase/>,icon:<i className="fa-solid fa-cart-shopping"/>},
-
-        {text:'Crear ajuste contable',children:<FormAccountingAdjustment/>,icon:<i className="fa-solid fa-scale-balanced"/>},
-
-        ...(userConfig?.access?.sections?.reports?.documents?.ThirdPartyDelegation === true ? [
-            {text:'Asignación a proveedor', children:<FormNewThirdPartyDelegation instnacePreInfo={{}}/>,icon:<i className="bi bi-person-bounding-box"/>},
-        ] : []),
-
-        ...(userConfig?.access?.sections?.users?.overAll ?
-            [{ text: 'Crear usuario', children: <FormNewUser />, icon: <i className="fa-solid fa-person-circle-plus" /> }] : []),
-        
-        { text: 'Crear tercero', children: <FormNewThirdParties quickCreation={!userConfig?.access?.sections?.thirdparties?.can_create} />, icon: <i className="fa-regular fa-user" /> },
-
-        // CORRECCIÓN: Acceso seguro a módulos personalizados
+    const companyOptions = [
+        ...paramDocs.map(element => ({
+            id:`parameter-document-${element.id}`,
+            text:element.name,
+            icon:<i className="bi bi-file-earmark-code-fill" />,
+            action:() => popInAlert(<FormNewParameterDocument params={element} />)
+        })),
         ...(appConfig?.access?.services?.personalized?.['custom-modules']?.['z&j_clicksControl']?.access ? [
-            { 
-                text: 'Crear reporte uso maquinaria', 
-                children: <FormSelectMachine appInfo={appInfo} userConfig={userConfig} popOutAlert={popOutAlert} userInfo={userInfo} />, 
-                icon: <i className="fa-solid fa-tractor" /> 
+            {
+                id:'machine-use-report',
+                text:'Reporte uso maquinaria',
+                icon:<i className="fa-solid fa-tractor" />,
+                action:() => popInAlert(<FormSelectMachine appInfo={appInfo} userConfig={userConfig} popOutAlert={popOutAlert} userInfo={userInfo} />)
             },
-            { 
-                text: 'Registro de clicks', 
-                children: <FormClicksControl appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} popOutAlert={popOutAlert} />, 
-                icon: <i className="fa-solid fa-arrow-pointer" /> 
+            {
+                id:'click-registration',
+                text:'Registro de clicks',
+                icon:<i className="fa-solid fa-arrow-pointer" />,
+                action:() => popInAlert(<FormClicksControl appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} popOutAlert={popOutAlert} />)
             }
-        ] : []),
-        //{text:'Crear orden de trabajo',children:<SelectTpeNewDoc/>,icon:<i className="fa-solid fa-bell-concierge"/>},
-        //{text:'Crear orden de trabajo',children:<ProcessStatusAlert/>,icon:<i className="fa-solid fa-bell-concierge"/>},
-        //{text:'Crear nuevo documento',children:<SelectTpeNewDoc/>,icon:<i className="fa-regular fa-file"/>},
-
-        {text:'Imprimir recibos',children:<CashReciptDesign/>,icon:<i className="fa-solid fa-print"/>},
-        /*
-        {text:'Imprimir Facturas',children:
-            <NoAccess 
-                noRedirect={true} 
-                title={'Formulario no disponible'} 
-                description={'Formulario en mantenimiento, pronto estara disponible.'}
-            />,
-            icon:<i className="fa-solid fa-print"/>},
-        */
-        {text:'Imprimir Ordes de cliente',children:<ClientOrderPreview/>,icon:<i className="fa-solid fa-print"/>},
-        //{text:'Factura de prueba',children:<FormInvoice/>,icon:<i className="fa-solid fa-print"/>},
-        
-        {text:'Imprimir Factura de venta',children:<SellInvoiceDesign/>,icon:<i className="fa-solid fa-print"/>},
-        /*
-        {text:'Opciones de factura electronica',children:<div style={{
-            paddingTop:'8vh',
-            display:'flex',
-            gap:'1vh',
-            flexDirection:'column'
-        }}>
-            <FormButton text={'Obtener rangos Númericos'} onClick={()=>{
-                getNumberingRangesElectronicInvoices({})
-            }}></FormButton>
-            <FormButton text={'Mostrar token actual'} onClick={()=>{
-                showActualToken({})
-            }}></FormButton>
-            <FormButton text={'Obtener Impuestos'} onClick={()=>{
-                showAPITaxes({})
-            }}></FormButton>
-            <FormButton text={'Generar factura de prueba'} onClick={()=>{
-                newElectronicInvoide({
-                    type:'invoice'
-                })
-            }}></FormButton>
-        </div>},
-        /**/
-        //{text:'Crear metodo de pago',children:<FormNewPaymentMethod/>,icon:<i className="fa-regular fa-credit-card"/>},
-        //{text:'Crear Concepto',children:<FormNewConcept/>,icon:<i className="fa-solid fa-scale-balanced"/>},
-        //{text:'Crear Producto',children:<FormNewProduct/>,icon:<i className="fa-solid fa-shirt"/>},
-        //{text:'Crear Impuesto',children:<FormNewTax/>,icon:<i className="fa-solid fa-coins"/>},
-        //{text:'Crear Tienda',children:<FormNewStore/>,icon:<i className="fa-solid fa-store"/>},
-        //{text:'Crear Centro de costo',children:<FormNewCostCenter/>,icon:<i className="fa-solid fa-folder-tree"/>},
-        //{text:'Crear Bodega',children:<FormNewCellar/>,icon:<i className="fa-solid fa-dolly"/>},
-        //{text:'Crear línea de negocio',children:<FormNewBussines/>,icon:<i className="fa-solid fa-briefcase"/>},
-        //{text:'Crear lista de precios',children:<CreatePricesList/>,icon:<i className="fa-regular fa-file-excel"/>},   
-    ]
+        ] : [])
+    ];
 
     return(
         <div className="New">
             <BoldTitle text={'Crear nuevo'}/>
             <DescriptionSpan text={'Crea todo lo que necesites en un solo click'}/>
             {!disabled && (
-                <div className="gridOptions">
-                    {paramDocs.map((element,index)=>(
-                         <span key={index} onClick={()=>{
-                            popInAlert(<FormNewParameterDocument params={element}/>)
-                        }}>
-                            <i className="bi bi-file-earmark-code-fill"/>
-                            {`Crear ${element.name}`}
-                        </span>
-                    ))}
-                    {options.map((element,index)=>(
-                        <span key={index} onClick={()=>{
-                            popInAlert(element.children)
-                        }}>
-                            {element.icon}
-                            {element.text}
-                        </span>
-                    ))}
+                <div className="newOptionsCategories">
+                    <section className="newOptionsCategory" aria-labelledby="newOptionsProcessesTitle">
+                        <NewOptions options={processOptions} title={'Procesos'}/>
+                    </section>
+                    <section className="newOptionsCategory" aria-labelledby="newOptionsDocumentsTitle">
+                        <NewOptions options={documentOptions} title={'Documentos'} />
+                    </section>
+                    <section className="newOptionsCategory" aria-labelledby="newOptionsSystemTitle">
+                        <NewOptions options={systemOptions} title={'Sistema'}/>
+                    </section>
+                    <section className="newOptionsCategory" aria-label={appInfo?.legal_name || 'Personalizado'}>
+                        <NewOptions options={companyOptions} title={appInfo?.legal_name || 'Personalizado'}/>
+                    </section>
                 </div>
             )}
             {disabled && (
                 <>
                     <NoResults title={messgeDisabled} img={'https://uxwing.com/wp-content/themes/uxwing/download/signs-and-symbols/stop-blocked-icon.png'}/>
-                    {userConfig.access != undefined && (userConfig.access.services.personalized['custom-modules'])["z&j_clicksControl"].access && (
+                    {userConfig?.access?.services?.personalized?.['custom-modules']?.['z&j_clicksControl']?.access && (
                         <span className="createOption" onClick={()=>{
                             popInAlert(<FormClicksControl appInfo={appInfo} userConfig={userConfig} userInfo={userInfo} popOutAlert={popOutAlert} reloadFun={verifyClicksControlZ} />)
                         }}>

@@ -76,8 +76,13 @@ class ToolExecutor {
                 details: { missing }
             });
         }
-        if (tool.operation !== 'read') {
-            throw new SystemAIError('Este ejecutor solo permite tools de lectura.', {
+        // Las escrituras exigen un contexto que las habilite expresamente (solo
+        // el MCP con scopes de escritura) y que la tool declare permisos.
+        const writeAllowed = tool.operation === 'write'
+            && context.allowWrites === true
+            && (tool.permissions || []).length > 0;
+        if (tool.operation !== 'read' && !writeAllowed) {
+            throw new SystemAIError('Este contexto solo permite tools de lectura.', {
                 statusCode: 403,
                 code: 'AI_TOOL_WRITE_NOT_ALLOWED'
             });

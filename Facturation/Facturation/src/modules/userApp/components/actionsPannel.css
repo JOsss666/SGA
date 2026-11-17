@@ -1,0 +1,94 @@
+.actionsPannel{
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    width: 20vw;
+    max-width: 100%;
+}
+
+.actionsPannel .actionsPannelSection{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.actionsPannel .actionsPannelTitle{
+    margin: 0;
+    padding: 0 1vh;
+    font-size: clamp(2px,1.9vh,18px);
+    font-weight: 500;
+    color: var(--sectionTitle);
+}
+
+.actionsPannel .actionsPannelList{
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--inputsBg);
+    border: solid .1vh var(--inputsBorder);
+    border-radius: 2vh;
+}
+
+.actionsPannel .actionsPannelItem{
+    display: flex;
+    align-items: center;
+    gap: 2vh;
+    width: 100%;
+    padding: 1.6vh 2vh;
+    background: none;
+    border: none;
+    border-bottom: solid .1vh var(--inputsBorder);
+    color: var(--mainText);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.actionsPannel .actionsPannelItem:last-child{
+    border-bottom: none;
+}
+
+.actionsPannel .actionsPannelItem:hover:not(:disabled){
+    background-color: var(--settingsHover);
+}
+
+.actionsPannel .actionsPannelItem:focus-visible{
+    outline: solid .2vh var(--chatAccent);
+    outline-offset: -.2vh;
+}
+
+.actionsPannel .actionsPannelItem:disabled{
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.actionsPannel .actionsPannelIcon{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 3vh;
+    font-size: clamp(2px,2.4vh,24px);
+    color: var(--mainText);
+}
+
+.actionsPannel .actionsPannelName{
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: clamp(2px,2vh,20px);
+}
+
+.actionsPannel .actionsPannelChevron{
+    flex-shrink: 0;
+    font-size: clamp(2px,1.8vh,18px);
+    color: var(--descriptionText);
+}
+
+@media (max-width: 600px){
+    .actionsPannel{
+        width: 100%;
+    }
+}

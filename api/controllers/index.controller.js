@@ -2134,6 +2134,14 @@ controller.getDocuments = (req,res)=>{
             values.push(info.allowedTypes);
         }
 
+        // Las órdenes de facturación se consumen en el formulario de factura por estado
+        // (solo las activas). Se restringe a este tipo para no alterar a los demás consumidores,
+        // que históricamente envían `status` sin que este endpoint lo aplique.
+        if(info.status != undefined && Array.isArray(info.allowedTypes) && info.allowedTypes.includes('Facturation Order')){
+            whereClauses.push(`"Ecosystem".documents.status = $${values.length + 1}::comercial_state`);
+            values.push(info.status);
+        }
+
         if(info.instance_id != undefined){
             whereClauses.push(`"Ecosystem".docs_instances.instance_id = $${values.length +1}`);
             values.push(info.instance_id);

@@ -205,20 +205,71 @@ export function ItemsList({
                             {block.docInfo != undefined && block.items.map((item, index) => {
                                 const { subTotal, taxes, total } = getItemTotals(item);
                                 return (
-                                <div className="itemRow" key={index}>
-                                    <UserCard imgSrc={item.service_img} name={item.service_name} />
-                                    <strong className="valueItemRow">{itemUnitsLabel ?? 'Unidades'}: {item.units}</strong>
-                                    <strong className="valueItemRow">Val unidad: {moneyFormat(item.unit_value)}</strong>
-                                    {visibleItemTotal == undefined && visibleItemTotal != false && (
-                                        <>
-                                            <strong className="valueItemRow">Sub-total: {moneyFormat(subTotal)}</strong>
-                                            <strong className="valueItemRow">Impuestos: {moneyFormat(taxes)}</strong>
-                                            <strong className="valueItemRow">Total: {moneyFormat(total)}</strong>
-                                        </>
-                                    )}
-
-                                    
-                                </div>
+                                    <div className="itemRow documentItemRow" key={index}>
+                                        <div className="itemInfo">
+                                            <UserCard imgSrc={item.service_img} name={item.service_name} />
+                                        </div>
+                                        <div className="itemINputs">
+                                            <strong className="valueItemRow rowInputItem">
+                                                <FormInput
+                                                    title={itemUnitsLabel ?? 'Unidades'}
+                                                    type="number"
+                                                    required={false}
+                                                    value={item.units ?? 0}
+                                                    disabled={true}
+                                                />
+                                            </strong>
+                                            <strong className="valueItemRow rowInputItem">
+                                                <FormInput
+                                                    title={'Val unidad'}
+                                                    type="number"
+                                                    required={false}
+                                                    value={item.unit_value ?? 0}
+                                                    disabled={true}
+                                                />
+                                            </strong>
+                                            <strong className="valueItemRow rowInputItem">
+                                                <FormInput
+                                                    title={'Desc. fac'}
+                                                    type="text"
+                                                    required={false}
+                                                    value={item.facturation_description ?? item.description ?? ''}
+                                                    disabled={true}
+                                                />
+                                            </strong>
+                                            {visibleItemTotal == undefined && visibleItemTotal != false && (
+                                                <>
+                                                    <div className="valueItemRow rowInputItem">
+                                                        <FormInput
+                                                            title={'Sub-total'}
+                                                            type="text"
+                                                            required={false}
+                                                            value={moneyFormat(subTotal)}
+                                                            disabled={true}
+                                                        />
+                                                    </div>
+                                                    <div className="valueItemRow rowInputItem">
+                                                        <FormInput
+                                                            title={'Impuestos'}
+                                                            type="text"
+                                                            required={false}
+                                                            value={moneyFormat(taxes)}
+                                                            disabled={true}
+                                                        />
+                                                    </div>
+                                                    <div className="valueItemRow rowInputItem">
+                                                        <FormInput
+                                                            title={'Total'}
+                                                            type="text"
+                                                            required={false}
+                                                            value={moneyFormat(total)}
+                                                            disabled={true}
+                                                        />
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
                                 );
                             })}
 
