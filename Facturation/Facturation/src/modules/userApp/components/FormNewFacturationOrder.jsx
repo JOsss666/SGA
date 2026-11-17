@@ -373,7 +373,7 @@ export function FormNewFacturationOrder({clientOrders} = {}){
         }} />);
     };
 
-    const resetForm = () => {
+    const resetForm = () => {g
         setInfo(previous => ({
             ...previous,
             selectedDocs:[],
