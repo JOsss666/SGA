@@ -50,7 +50,12 @@ export function PricesListDetails(){
             return codeMatch || nameMatch || descMatch || costMatch || valueMatch;
         });
     }, [searchVal, listItems]);
-    
+
+    // La tabla recibe la lista FILTRADA y reporta el índice dentro de esa lista. Con una búsqueda
+    // activa ese índice no coincide con el de `listItems`, y la edición caía en otras filas.
+    // Se traduce al índice real mediante la referencia del elemento.
+    const toRealIndex = (filteredIndex) => listItems.indexOf(filteredListItems[filteredIndex]);
+
     // info
     const [products,setProducts] = useState([]);
 
@@ -290,8 +295,16 @@ export function PricesListDetails(){
                     <TablePricesList columns={columns} info={filteredListItems} products={products}
                         functions={{
                             addListItem,
-                            deleteListItem,
-                            updateListItem
+                            deleteListItem:(filteredIndex,id) => {
+                                const realIndex = toRealIndex(filteredIndex);
+                                if(realIndex < 0) return;
+                                return deleteListItem(realIndex,id);
+                            },
+                            updateListItem:(filteredIndex,property,value) => {
+                                const realIndex = toRealIndex(filteredIndex);
+                                if(realIndex < 0) return;
+                                return updateListItem(realIndex,property,value);
+                            }
                         }}
                     />
                 )}
