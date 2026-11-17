@@ -14,7 +14,10 @@ export const allowedOrigins = Object.freeze([
     'https://treasury.sga360.co',
     // External connections
     'https://suppliers.sga360.co',
-    'https://clients.sga360.co'
+    'https://clients.sga360.co',
+    // Despliegues en Render de los portales externos
+    'https://clients-portal-bulx.onrender.com',
+    'https://suppliers-portal.onrender.com'
 ]);
 
 export default allowedOrigins;
