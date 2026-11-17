@@ -550,6 +550,94 @@ inventoryController.getThirdPartyProductAssociations = async (req, res) => {
     }
 };
 
+// Catálogo para ÓRDENES DE COMPRA: el precio es el `cost` pactado, no el precio de venta.
+//  - Con `list_id`: solo el costo de esa lista (la del proveedor).
+//  - Sin `list_id`: el costo de la lista más reciente que tenga costo para el producto.
+//  - Los productos sin costo en ninguna lista también salen (price_tiers vacío) para poder digitarlo a mano.
+inventoryController.getPurchaseProducts = (req,res)=>{
+    let data = '';
+    req.on('data',chunk=>{
+        data += chunk;
+    })
+    req.on('end',async()=>{
+        try{
+            const info = JSON.parse(data);
+            const isId = value => /^[1-9][0-9]*$/.test(String(value ?? ''));
+            if(!isId(info.company_id)){
+                res.writeHead(400,{'Content-Type':'application/json'});
+                return res.end(JSON.stringify([false,{message:'Se requiere un company_id válido.'}]));
+            }
+            if(info.list_id != null && info.list_id !== '' && !isId(info.list_id)){
+                res.writeHead(400,{'Content-Type':'application/json'});
+                return res.end(JSON.stringify([false,{message:'La lista de precios no es válida.'}]));
+            }
+            const values = [info.company_id, info.list_id || null];
+            const whereClauses = [`ps.company_id = $1`, `ps.status = 'active'`];
+
+            if(Array.isArray(info.allowedItems) && info.allowedItems.length > 0){
+                values.push(info.allowedItems);
+                whereClauses.push(`ps.id = ANY($${values.length}::bigint[])`);
+            }
+
+            const sentence = `
+                SELECT
+                    ps.id AS product_id,
+                    ps.img,
+                    ps.name,
+                    ps.code,
+                    ps.type,
+                    ps.units AS unit_measure,
+                    ac.name AS tax_name,
+                    t.base AS tax_base,
+                    t.rate AS tax_rate,
+                    t.account_id AS tax_account,
+                    t.id AS tax_id,
+                    c_exit.account_id AS exit_account,
+                    c_entry.account_id AS entry_account,
+                    pl."priceList_id" AS price_list_id,
+                    COALESCE(pl.tiers, '[]'::jsonb) AS price_tiers
+                FROM "Inventory"."products&services" ps
+                LEFT JOIN "Ecosystem".taxes AS t ON ps.tax_id = t.id
+                LEFT JOIN "Ecosystem".contable_accounts AS ac ON t.account_id = ac.id
+                LEFT JOIN "Ecosystem".concepts AS c_exit ON ps.exit_concept = c_exit.id
+                LEFT JOIN "Ecosystem".concepts AS c_entry ON ps.entry_concept = c_entry.id
+                LEFT JOIN LATERAL (
+                    SELECT
+                        pi."priceList_id",
+                        jsonb_agg(jsonb_build_object(
+                            'min_qty', pi.tier_min_quantity,
+                            'price', pi.cost,
+                            'discount', pi.discount_percent
+                        ) ORDER BY pi.tier_min_quantity) AS tiers
+                    FROM "Inventory"."priceList_items" pi
+                    WHERE pi.company_id = ps.company_id
+                        AND pi."product&service_id" = ps.id
+                        AND pi.cost IS NOT NULL
+                        AND (pi.valid_from <= CURRENT_DATE OR pi.valid_from IS NULL)
+                        AND (pi.valid_to >= CURRENT_DATE OR pi.valid_to IS NULL)
+                        AND ($2::bigint IS NULL OR pi."priceList_id" = $2::bigint)
+                    GROUP BY pi."priceList_id"
+                    ORDER BY pi."priceList_id" DESC
+                    LIMIT 1
+                ) pl ON TRUE
+                WHERE ${whereClauses.join(' AND ')}
+                ORDER BY ps.name ASC, ps.code ASC;
+            `;
+            const consulta = await useDataBase(sentence,values,1);
+            res.writeHead(200,{'Content-Type':'application/json'});
+            res.end(JSON.stringify(consulta));
+        }catch(error){
+            console.error('Error en getPurchaseProducts:',error);
+            res.writeHead(500,{'Content-Type':'application/json'});
+            res.end(JSON.stringify([false,{message:'No se pudieron consultar los productos de compra.'}]));
+        }
+    })
+    req.on('error',(err)=>{
+        res.writeHead(500,{'Content-Type':'text/plain'})
+        res.end(JSON.stringify(err));
+    })
+}
+
 inventoryController.getThirdPartyPricesList = async(req,res)=>{
     let data = '';
     req.on('data',chunk=>{

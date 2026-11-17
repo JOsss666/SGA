@@ -14,7 +14,7 @@ const fail = (message, statusCode = 422) => {
 
 const isId = value => /^[1-9]\d*$/.test(String(value ?? ''));
 
-const uniqueIds = (values, label) => {
+export const uniqueIds = (values, label) => {
     const ids = [...new Set((Array.isArray(values) ? values : [])
         .map(value => (value !== null && typeof value === 'object' ? (value.instance_id ?? value.id) : value))
         .filter(value => value !== undefined && value !== null && value !== '')
@@ -120,7 +120,7 @@ const loadItemTaxRates = async (client, info, items) => {
 
 // Procesos de la orden: los elegidos en el formulario más los de cada orden de cliente.
 // El paso se toma del proceso (no del cliente web) para que no pueda falsearse.
-const resolveProcessInstances = async (client, info, sourceDocIds, selectedInstanceIds) => {
+export const resolveProcessInstances = async (client, info, sourceDocIds, selectedInstanceIds) => {
     const inherited = await client.query(`
         SELECT DISTINCT instance_id
         FROM "Ecosystem".docs_instances

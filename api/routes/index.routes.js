@@ -254,6 +254,7 @@ router.post('/inventory/getThirdPartyPricesList',inventoryController.getThirdPar
 router.post('/inventory/getProductTaxRelations',inventoryController.getProductTaxRelations);
 
 router.post('/inventory/getPurchaseRelations',inventoryController.getProductPurchaseRelations);
+router.post('/inventory/getPurchaseProducts',inventoryController.getPurchaseProducts);
 
 router.post('/inventory/createThirdPartyProductTaxRelation',inventoryController.createThirdPartyProductTaxRelation);
 
@@ -411,6 +412,7 @@ router.post('/facturation/newNote',facturationController.newNote);
 router.post('/facturation/newClientOrder',facturationController.newClientOrder);
 
 router.post('/facturation/newFacturationOrder',facturationController.newFacturationOrder);
+router.post('/facturation/newPurchaseOrder',facturationController.newPurchaseOrder);
 
 router.post('/facturation/getCashBoxes',facturationController.getCashBoxes);
 

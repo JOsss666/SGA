@@ -6,8 +6,10 @@ import cashReceiptService from "../services/cashReceiptService.js";
 import purchaseService from "../services/purchaseService.js";
 import utilsController from "./utilsController.js";
 import { createFacturationOrderService } from "../services/facturationOrderService.js";
+import { createPurchaseOrderService } from "../services/purchaseOrderService.js";
 const facturationController = {};
 const facturationOrderService = createFacturationOrderService({ withTransaction: utilsController.withTransaction });
+const purchaseOrderService = createPurchaseOrderService({ withTransaction: utilsController.withTransaction });
 
 
 facturationController.newClientOrder = (req,res)=>{
@@ -105,6 +107,24 @@ facturationController.newFacturationOrder = (req,res)=>{
             res.end(JSON.stringify({
                 status: "Error",
                 message: statusCode < 500 ? err.message : "No se pudo crear la orden de facturación."
+            }));
+        });
+}
+
+facturationController.newPurchaseOrder = (req,res)=>{
+    utilsController.readJsonBody(req)
+        .then(async(info)=>{
+            const result = await purchaseOrderService.register(info);
+            res.writeHead(200, {'Content-Type':'application/json'});
+            res.end(JSON.stringify(result));
+        })
+        .catch((err)=>{
+            console.error("Error al crear la orden de compra:", err);
+            const statusCode = err.statusCode ?? 500;
+            res.writeHead(statusCode, {'Content-Type':'application/json'});
+            res.end(JSON.stringify({
+                status: "Error",
+                message: statusCode < 500 ? err.message : "No se pudo crear la orden de compra."
             }));
         });
 }
