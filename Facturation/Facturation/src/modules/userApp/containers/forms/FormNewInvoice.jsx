@@ -20,6 +20,7 @@ import { LabelValue } from "../../components/LabelValue";
 import { SwitchOption } from "../../components/SwitchOption";
 import { UserCard } from "../../components/UserCard";
 import { executeDocumentAction } from "../../../../utils/DocumentsControl";
+import { SelectOptions } from "../../components/SelectOptions";
 
 // `clientOrders`: ids de órdenes de cliente a precargar como documentos de la factura (p. ej. desde
 // el informe de administración de procesos). Deben ser de un solo tercero.
@@ -115,6 +116,11 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id,clientO
     const [numberingRangesBlocked,setNumberingRangesBlocked] = useState(false);
     const [shift_id,setShift_id] = useState();
     const [status,setStatus] = useState('active');
+    const [factMode,setFactMode] = useState('');
+    // Modo "Un único ítem": nombre digitado por el usuario; el precio se deriva (bloqueado) del total de los ítems.
+    const [singleItemName,setSingleItemName] = useState('');
+    const [singleItemDescription,setSingleItemDescription] = useState('');
+    const isSingleItemMode = factMode === 'custome';
 
 
     // Control to print
@@ -156,6 +162,36 @@ export function FormNewInvoice({InfoParams,reloadFun,process_instance_id,clientO
                 : 0
         )
     }
+
+    // Modo "Un único ítem": colapsa todos los ítems en una sola línea (cantidad 1, precio = suma de los ítems).
+    // La contabilidad (impuestos/transactionDetails) sigue calculándose por ítem real; solo cambia la presentación.
+    const buildSingleItem = (items) => {
+        let total = 0;
+        let base = 0;
+        items.forEach(item => {
+            const lineTotal = (parseFloat(item.units) || 0) * (parseFloat(item.unit_value) || 0);
+            const rate = parseFloat(item.tax_rate) || 0;
+            total += lineTotal;
+            base += lineTotal / (1 + rate / 100);
+        });
+        // Tasa efectiva: exacta si todos los ítems comparten tasa; ponderada si hay mezcla.
+        const effectiveRate = base > 0 ? ((total / base) - 1) * 100 : 0;
+        const name = singleItemName.trim();
+        const sellDescription = singleItemDescription.trim();
+        return {
+            code: 'ITEM-UNICO',
+            name,
+            service_name: name,
+            sell_desc: sellDescription,
+            // La previsualización muestra facturation_description: mismo formato "nombre + descripción" de la factura electrónica.
+            facturation_description: sellDescription ? `${name} + ${sellDescription}` : name,
+            units: 1,
+            unit_value: total,
+            tax_rate: Number(effectiveRate.toFixed(4)),
+        };
+    };
+    const allInvoiceItems = itemBlocks.flatMap(block => block.items ?? []);
+    const singleItem = buildSingleItem(allInvoiceItems);
 
     // PreProcess functions
 
@@ -530,10 +566,16 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
 
     // Simulación de la factura con los ítems actuales (mismo componente que la orden de facturación).
     const handlePreview = () => {
-        const previewItems = itemBlocks.flatMap(block => block.items.map(item => ({
-            ...item,
-            sourceDocument:block.docInfo?.ownSerial || block.docInfo?.id
-        })));
+        const previewItems = isSingleItemMode
+            ? (allInvoiceItems.length > 0 ? [singleItem] : [])
+            : itemBlocks.flatMap(block => block.items.map(item => ({
+                ...item,
+                sourceDocument:block.docInfo?.ownSerial || block.docInfo?.id
+            })));
+        if(isSingleItemMode && allInvoiceItems.length > 0 && !singleItem.name){
+            addNotification({type:'error',title:'Falta el nombre del ítem',description:'Digita el nombre del ítem único para previsualizar la factura.'});
+            return;
+        }
         if(!thirdParty_id){
             addNotification({type:'error',title:'Selecciona un cliente',description:'Para previsualizar la factura debes seleccionar un cliente.'});
             return;
@@ -1127,7 +1169,7 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             electronInfo,
             totalTaxes,
             taxes,
-            attachedItems
+            attachedItems: isSingleItemMode ? [singleItem] : attachedItems
         }
         await printSellInvoice(infoToPrtint,appInfo,true);
         await printSellInvoice(infoToPrtint,appInfo,false);
@@ -1303,7 +1345,23 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
 
     const handleCreationOfEinvoice = async(doc_id)=>{
         let itemsToFac = [];
-        itemBlocks.forEach(element => {
+        if(isSingleItemMode){
+            itemsToFac.push({
+                "code_reference": singleItem.code,
+                "name": singleItem.sell_desc ? `${singleItem.name} + ${singleItem.sell_desc}` : singleItem.name,
+                "quantity": 1,
+                "discount": 0,
+                "discount_rate": 0,
+                "price": singleItem.unit_value,
+                "tax_rate": `${singleItem.tax_rate.toFixed(2)}`,
+                "unit_measure_id": 70,
+                "standard_code_id": 1,
+                "is_excluded": 0,
+                "tribute_id": 1,
+                "withholding_taxes": []
+            });
+        }
+        else itemBlocks.forEach(element => {
             element.items.forEach(item => {
                 const itemName = `${item.name ?? item.service_name ?? ''}`.trim();
                 const sellDescription = `${item.facturation_description ?? item.sell_desc ?? ''}`.trim();
@@ -1384,6 +1442,18 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
             return;
         }
         setVisibleError(false);
+        if (isSingleItemMode) {
+            if (allInvoiceItems.length === 0) {
+                setError('Error de validación: agrega ítems u órdenes para facturar en un único ítem.');
+                setVisibleError(true);
+                return;
+            }
+            if (!singleItem.name) {
+                setError('Error de validación: digita el nombre del ítem único.');
+                setVisibleError(true);
+                return;
+            }
+        }
         for (const rule of docRules) {
             const res = await executeDocumentAction(rule.action, FormInfo);
 
@@ -1578,8 +1648,58 @@ const handleEditItemDetail = (blockIndex, itemIndex, key, value) => {
                     {e_invoice && numberingRanges.length > 1 && (
                         <SearchinList action={handleNumberingRangeChange} title={'Rango de numeración'} placeHolder={'Seleccione el rango de numeración'} list={numberingRanges} disabled={disabled}/>
                     )}
+                    <div className="facturationModeHeader">
+                        <p className="infoFactMode">
+                            <i className="bi bi-info-circle-fill"/>
+                            <span>Seleccione como quiere facturar el contenido de la factura</span>
+                        </p>
+                        <div className="modeSelector">
+                            <SelectOptions action={setFactMode} objectC={true} title={'Modo'} disabled={disabled} options={[
+                                {text:'Por item',value:'items'},
+                                {text:'Por Presets',value:'presets'},
+                                {text:'Un unico item',value:'custome'},
+                            ]}/>
+                        </div>
+                    </div>
                     <div className="gridItemsContainer">
-                        {itemBlocks?.map((element,index_block)=>(
+                        {isSingleItemMode && (
+                            <div className="itemBlock singleItemBlock">
+                                <div className="headBlock">
+                                    <strong>Ítem único</strong>
+                                    <span>Total: ${moneyFormat(singleItem.unit_value)}</span>
+                                </div>
+                                <div className="gridItems">
+                                    <div className="itemRow">
+                                        <strong className="valueItemRow rowInputItem singleItemName">
+                                            <FormInput
+                                                title={'Nombre del ítem'}
+                                                type={'text'}
+                                                required={true}
+                                                value={singleItemName}
+                                                placeholder={`Agrupa ${allInvoiceItems.length} ${allInvoiceItems.length === 1 ? 'ítem' : 'ítems'}`}
+                                                disabled={disabled}
+                                                action={setSingleItemName}
+                                            />
+                                        </strong>
+                                        <strong className="valueItemRow">Unidades: 1</strong>
+                                        <strong className="valueItemRow">Val unidad: {moneyFormat(singleItem.unit_value)}</strong>
+                                        <strong className="valueItemRow rowInputItem">
+                                            <FormInput
+                                                title={'Desc facturación'}
+                                                type={'text'}
+                                                required={false}
+                                                value={singleItemDescription}
+                                                placeholder={'Cod #...'}
+                                                disabled={disabled}
+                                                action={setSingleItemDescription}
+                                            />
+                                        </strong>
+                                        <strong className="valueItemRow">Total: {moneyFormat(singleItem.unit_value)}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {!isSingleItemMode && itemBlocks?.map((element,index_block)=>(
                             <div key={index_block} className="itemBlock">
                                 <div className="headBlock">
                                     <strong>
