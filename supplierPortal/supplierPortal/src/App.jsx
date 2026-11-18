@@ -8,7 +8,7 @@ import { PreviewDocument } from './modules/userApp/containers/Preview/PreviewDoc
 import { PreviewProcess } from './modules/userApp/containers/Preview/PreviewProcess';
 import { AlertsHolder } from './modules/userApp/containers/AlertsHolder';
 //export const urlSer = 'http://localhost:3000';
-export const urlSer = 'https://sga-2zgp.onrender.com';
+export const urlSer = 'https://api.sga360.co';
 export const isElectron = navigator.userAgent.toLowerCase().includes('electron');
 
 function App() {

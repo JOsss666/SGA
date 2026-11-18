@@ -11,7 +11,7 @@ import { saveAs } from 'file-saver';
 
 
 //export const urlSer = 'http://localhost:3000';
-export const urlSer = 'https://sga-2zgp.onrender.com';
+export const urlSer = 'https://api.sga360.co';
 
 export async function postInfo(route,informacion){
     console.log('Funcion post');
