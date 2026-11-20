@@ -1,5 +1,4 @@
-
-
+import banksController from "../controllers/banksController.js";
 import express from 'express';
 import controller from '../controllers/index.controller.js';
 import processController from '../controllers/processController.js';
@@ -35,6 +34,11 @@ import externalAccesThirdPartyController from '../controllers/externalThirdParty
 import { createAdjustment, deleteTemplate, listTemplates, saveTemplate } from '../controllers/accountingAdjustmentController.js';
 
 const router = express.Router();
+const banksRouteMiddlewares = [
+    requireTrustedOrigin,
+    authenticateSession,
+    requireCompanyAccess,
+];
 
 // Ajuste contable: autenticado por company_id/user_id (header X-SGA-Company-Id o body),
 // igual que el resto de la app y nexo360. No se exige cookie de sesión porque, al estar
@@ -382,6 +386,24 @@ router.post('/treasury/getTreasury',controller.getAccounts); //PENDIENTE IMPLEME
 router.post('/treasury/getThirdPartyPortfolio',treasuryController.getThirdPartyPortfolio); //PENDIENTE IMPLEMENTAR
 
 router.post('/treasury/getThirdPartyPayables',treasuryController.getThirdPartyPayables);
+
+router.post("/treasury/banks/listInstitutions",...banksRouteMiddlewares,banksController.listInstitutions);
+
+router.post("/treasury/banks/createInstitution",...banksRouteMiddlewares,banksController.createInstitution);
+
+router.post("/treasury/banks/listBanks",...banksRouteMiddlewares,banksController.listBanks);
+
+router.post("/treasury/banks/createBank",...banksRouteMiddlewares,banksController.createBank);
+
+router.post("/treasury/banks/listAccounts",...banksRouteMiddlewares,banksController.listAccounts);
+
+router.post("/treasury/banks/createAccount",...banksRouteMiddlewares,banksController.createAccount);
+
+router.post("/treasury/banks/registerMovement",...banksRouteMiddlewares,banksController.registerMovement);
+
+router.post("/treasury/banks/getAccountBalance",...banksRouteMiddlewares,banksController.getAccountBalance);
+
+router.post("/treasury/banks/listMovements",...banksRouteMiddlewares,banksController.listMovements);
 
 // SGA Facturation
 
