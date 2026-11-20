@@ -1,0 +1,29 @@
+%% registerMovement — create y reverse (work.Juan, 2026-11-20)
+%% Pregunta: ¿qué valida y qué escribe el backend al registrar un movimiento, y qué errores devuelve?
+%% Nota: el SVG se dibujó a mano (no hay renderizador Mermaid instalado); si cambia el código, actualizar ambos.
+sequenceDiagram
+    participant C as Cliente
+    participant R as Router + middleware
+    participant K as banksController
+    participant S as ingestMovement
+    participant D as BD Treasury / Ecosystem
+    C->>R: POST /treasury/banks/registerMovement (UMJP)
+    R-->>C: 400/401/403 si falla sesión, origen o compañía
+    R->>K: sesión válida + compañía activa
+    Note over K: company_id del body ≠ sesión → 403. Fija actor.user_id
+    K->>S: withTransaction → BEGIN → ingestMovement
+    Note over S: Normaliza (schema_version 1.0, operation, idempotency_key, origin, actor, created_at UTC, details[])
+    S->>D: ¿existe idempotency_key para la empresa?
+    alt ya existe
+        D-->>K: 200 { idempotent_replay: true }
+    else nueva
+        Note over S,D: create: cuenta activa + moneda permitida (404/400), documento de la empresa (400), account_id en contable_accounts (400)
+        Note over S,D: reverse: originales FOR UPDATE (404), ya revertido (409), misma moneda/monto, dirección opuesta, mismo concepto/cuenta
+        S->>D: INSERT bank_transactions (ON CONFLICT DO NOTHING)
+        S->>D: INSERT bank_transaction_details × n
+        S->>D: INSERT bank_audit × n
+        S-->>K: { transaction_id, idempotent_replay: false, details[] }
+        K->>D: COMMIT
+        K-->>C: 200 { transaction_id, details:[{id, client_detail_id}] }
+    end
+    Note over K,D: Cualquier error → ROLLBACK → statusCode ?? 500
