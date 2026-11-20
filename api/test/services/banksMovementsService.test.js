@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
     getAccountBalance,
     ingestMovement,
+    listMovements,
     normalizeCreateMovement,
     normalizeReverseMovement,
 } from "../../services/banksMovementsService.js";
@@ -89,6 +90,16 @@ const createMockClient = (options = {}) => {
         async query(sql, params = []) {
             const normalizedSql = sql.replace(/\s+/g, " ").trim();
             calls.push({ sql: normalizedSql, params });
+
+            if (
+                normalizedSql.includes(
+                    'FROM "Treasury".bank_transactions AS bt'
+                )
+            ) {
+                return {
+                    rows: options.movementRows ?? [],
+                };
+            }
 
             if (
                 normalizedSql.startsWith(
@@ -783,4 +794,97 @@ test("requiere un cliente válido para consultar el saldo", async () => {
         }),
         /cliente válido de base de datos/
     );
+});
+
+test("lista movimientos de la cuenta filtrando por empresa", async () => {
+    const rows = [
+        {
+            transaction_id: "700",
+            company_id: "7",
+            bank_account_id: "12",
+            operation: "create",
+            description: "Pago de factura",
+            details: [
+                {
+                    id: "500",
+                    detail_id: ORIGINAL_DETAIL_ID,
+                    currency: "COP",
+                    amount: "1000000",
+                    direction: "in",
+                },
+            ],
+        },
+    ];
+    const client = createMockClient({ movementRows: rows });
+
+    const result = await listMovements(client, {
+        company_id: "7",
+        bank_account_id: "12",
+    });
+
+    assert.deepEqual(result, rows);
+
+    const movementQuery = client.calls.find(({ sql }) =>
+        sql.includes('FROM "Treasury".bank_transactions AS bt')
+    );
+
+    assert.ok(movementQuery);
+    assert.deepEqual(movementQuery.params, ["7", "12"]);
+    assert.match(movementQuery.sql, /bt\.company_id = \$1/);
+    assert.match(movementQuery.sql, /bt\.bank_account_id = \$2/);
+});
+
+test("filtra movimientos por fechas UTC cuando se reciben", async () => {
+    const client = createMockClient();
+
+    await listMovements(client, {
+        company_id: "7",
+        bank_account_id: "12",
+        start_date: "2026-11-01T00:00:00Z",
+        end_date: "2026-11-20T00:00:00Z",
+    });
+
+    const movementQuery = client.calls.find(({ sql }) =>
+        sql.includes('FROM "Treasury".bank_transactions AS bt')
+    );
+
+    assert.ok(movementQuery);
+    assert.deepEqual(movementQuery.params, [
+        "7",
+        "12",
+        "2026-11-01T00:00:00.000Z",
+        "2026-11-20T00:00:00.000Z",
+    ]);
+    assert.match(movementQuery.sql, /bt\.created_at >= \$3/);
+    assert.match(movementQuery.sql, /bt\.created_at < \$4/);
+});
+
+test("rechaza un rango de fechas inválido antes de consultar", async () => {
+    const client = createMockClient();
+
+    await assert.rejects(
+        listMovements(client, {
+            company_id: "7",
+            bank_account_id: "12",
+            start_date: "2026-11-20T00:00:00Z",
+            end_date: "2026-11-20T00:00:00Z",
+        }),
+        /end_date debe ser posterior a start_date/
+    );
+
+    assert.equal(client.calls.length, 0);
+});
+
+test("rechaza un identificador inválido antes de consultar movimientos", async () => {
+    const client = createMockClient();
+
+    await assert.rejects(
+        listMovements(client, {
+            company_id: "7",
+            bank_account_id: "abc",
+        }),
+        /bank_account_id debe ser un identificador válido/
+    );
+
+    assert.equal(client.calls.length, 0);
 });
