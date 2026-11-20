@@ -994,3 +994,20 @@ test("requiere un cliente válido para consultar informes", async () => {
         /cliente válido de base de datos/
     );
 });
+test("acepta cuentas contables de la empresa o del plan compartido (company_id 0)", async () => {
+    const client = createMockClient();
+
+    await ingestMovement(
+        client,
+        makePayload({
+            details: [makeDetail({ account_id: "901" })],
+        })
+    );
+
+    const accountQuery = client.calls.find(({ sql }) =>
+        sql.startsWith('SELECT id FROM "Ecosystem".contable_accounts')
+    );
+
+    assert.ok(accountQuery);
+    assert.match(accountQuery.sql, /company_id IN \(0, \$1\)/);
+});

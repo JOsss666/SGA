@@ -459,7 +459,7 @@ const validateAccountingAccountReferences = async (
     const result = await client.query(
         `SELECT id
         FROM "Ecosystem".contable_accounts
-        WHERE company_id = $1
+        WHERE company_id IN (0, $1)
           AND id = ANY($2::bigint[])`,
         [companyId, accountingAccountIds]
     );
@@ -474,7 +474,7 @@ const validateAccountingAccountReferences = async (
 
     if (invalidAccountId) {
         throw createServiceError(
-            `La cuenta contable ${invalidAccountId} no existe o no pertenece a la empresa.`
+            `La cuenta contable ${invalidAccountId} no existe o no pertenece a la empresa ni al plan contable compartido.`
         );
     }
 };

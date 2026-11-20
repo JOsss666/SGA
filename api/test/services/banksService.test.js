@@ -588,3 +588,45 @@ test("rechaza monedas no permitidas por la institución o el banco", async () =>
         /monedas no permitidas/
     );
 });
+test("la cuenta contable puede ser de la empresa o del plan compartido (company_id 0)", async () => {
+    const ledgerQueries = [];
+
+    const client = {
+        async query(sql) {
+            if (sql.includes('FROM "Treasury".banks AS b')) {
+                return {
+                    rows: [
+                        {
+                            id: 4,
+                            defaults: { allowed_currencies: ["COP"] },
+                            institution_parametrization: {
+                                operating_currencies: ["COP"],
+                            },
+                        },
+                    ],
+                };
+            }
+
+            if (sql.includes('FROM "Ecosystem".contable_accounts')) {
+                ledgerQueries.push(sql);
+                return { rows: [{ id: 55 }] };
+            }
+
+            return { rows: [] };
+        },
+    };
+
+    await createAccount(client, {
+        company_id: 7,
+        bank_id: 4,
+        account_number: "123-456",
+        account_id: 55,
+        currency_policy: {
+            allowed_currencies: ["COP"],
+            primary_currency: "COP",
+        },
+    }).catch(() => {});
+
+    assert.equal(ledgerQueries.length, 1);
+    assert.match(ledgerQueries[0], /company_id IN \(0, \$2\)/);
+});

@@ -648,7 +648,7 @@ export async function createAccount(client, info) {
             SELECT id
             FROM "Ecosystem".contable_accounts
             WHERE id = $1
-              AND company_id = $2
+              AND company_id IN (0, $2)
             LIMIT 1;
         `,
         [info.account_id, info.company_id]
@@ -656,7 +656,7 @@ export async function createAccount(client, info) {
 
     if (ledgerAccountResult.rows.length === 0) {
         throw new Error(
-            "La cuenta contable no existe o no pertenece a esta empresa."
+            "La cuenta contable no existe o no pertenece a esta empresa ni al plan contable compartido."
         );
     }
 
