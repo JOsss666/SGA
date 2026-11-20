@@ -208,6 +208,8 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
     const [fieldErrors, setFieldErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
     const [submitFeedback, setSubmitFeedback] = useState(null); // { type: 'ok' | 'error', message }
+    // Lista de precios del cliente: { status: 'idle' | 'loading' | 'ready' | 'none' | 'error', id }
+    const [priceList, setPriceList] = useState({ status: 'idle', id: null });
 
     // Contexto de proceso: si el padre inyecta instance_id (p. ej. desde la cola de docs
     // requeridos de un paso), la orden queda atada a ese proceso y NO se muestra selector.
@@ -378,6 +380,31 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
     const visibleFields = useMemo(() => document?.config.fields.filter(field => field.visible !== false) ?? [], [document]);
     const itemBlock = useMemo(() => getItemBlockDefinition(visibleFields), [visibleFields]);
     const referenceFields = useMemo(() => document?.config.fields.filter(isReferenceField) ?? [], [document]);
+
+    // Lista de precios del cliente (el tercero del acceso): solo aplica a ítems tipo preset,
+    // que son los que se valoran con ella. El backend la revalida contra el cliente.
+    const usesPriceList = itemBlock?.selector.requirements === 'presets';
+    const selectedClientId = String(userInfo.user_id ?? "");
+    useEffect(() => {
+        if (!usesPriceList || !selectedClientId || !appInfo.company_id) {
+            setPriceList({ status: 'idle', id: null });
+            return undefined;
+        }
+        let active = true;
+        setPriceList({ status: 'loading', id: null });
+        postInfo('/inventory/getThirdPartyPricesList', {
+            company_id: appInfo.company_id,
+            thirdParty_id: selectedClientId
+        }).then(response => {
+            if (!active) return;
+            const rows = asList(unwrapResponse(response));
+            const found = rows.find(row => row?.priceList_id != null)?.priceList_id;
+            setPriceList(found != null ? { status: 'ready', id: String(found) } : { status: 'none', id: null });
+        }).catch(() => {
+            if (active) setPriceList({ status: 'error', id: null });
+        });
+        return () => { active = false; };
+    }, [usesPriceList, selectedClientId, appInfo.company_id]);
 
     // Recalcula los campos reference cada vez que cambian los valores. Solo escribe
     // cuando el string resultante cambia, así el efecto no entra en bucle (los
@@ -565,7 +592,8 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
         paramdoc_id: document.id ?? paramdocId,
         paramDoc_id: document.id ?? paramdocId,
         destiny: document.config.destiny,
-        values: { ...values, thirdParty_id: userInfo.user_id }
+        // priceList_id: lista del cliente consultada arriba; el backend la revalida contra el cliente.
+        values: { ...values, thirdParty_id: userInfo.user_id, ...(priceList.id ? { priceList_id: priceList.id } : {}) }
     });
 
     const handleSubmit = async event => {
@@ -759,6 +787,9 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
                         return renderField(field);
                     })}
                 {loadingCatalogs ? <p role="status">Cargando listas...</p> : null}
+                {usesPriceList && priceList.status === 'loading' ? <p>Cargando lista de precios del cliente…</p> : null}
+                {usesPriceList && priceList.status === 'none' ? <p role="alert">El cliente no tiene lista de precios asignada.</p> : null}
+                {usesPriceList && priceList.status === 'error' ? <p role="alert">No se pudo consultar la lista de precios del cliente.</p> : null}
                 {submitFeedback ? (
                     <div role={submitFeedback.type === 'error' ? 'alert' : 'status'} className={`submitFeedback ${submitFeedback.type}`}>
                         <p>{submitFeedback.message}</p>
@@ -769,7 +800,7 @@ export function FormNewParameterDocument({ params, document: initialDocument, on
                 ) : null}
                 <FormButton
                     text={submitting ? "Guardando documento…" : document.config.submit?.label ?? "Guardar documento"}
-                    disabled={loadingCatalogs || submitting}
+                    disabled={loadingCatalogs || submitting || (usesPriceList && priceList.status === 'loading')}
                     loading={submitting}
                 />
             </form>
