@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
     getAccountBalance,
+    getReports,
     ingestMovement,
     listMovements,
     normalizeCreateMovement,
@@ -90,6 +91,17 @@ const createMockClient = (options = {}) => {
         async query(sql, params = []) {
             const normalizedSql = sql.replace(/\s+/g, " ").trim();
             calls.push({ sql: normalizedSql, params });
+
+            if (
+                normalizedSql.includes(
+                    'FROM "Treasury".bank_transactions AS bt'
+                ) &&
+                normalizedSql.includes("AS business_date")
+            ) {
+                return {
+                    rows: options.reportRows ?? [],
+                };
+            }
 
             if (
                 normalizedSql.includes(
@@ -887,4 +899,98 @@ test("rechaza un identificador inválido antes de consultar movimientos", async 
     );
 
     assert.equal(client.calls.length, 0);
+});
+
+test("agrupa el informe por día comercial y moneda", async () => {
+    const rows = [
+        {
+            bank_account_id: "12",
+            business_date: "2026-11-19",
+            currency: "COP",
+            total_in: "1000000",
+            total_out: "250000",
+            net_total: "750000",
+            transaction_count: 2,
+            detail_count: 3,
+        },
+        {
+            bank_account_id: "12",
+            business_date: "2026-11-19",
+            currency: "USD",
+            total_in: "50",
+            total_out: "10",
+            net_total: "40",
+            transaction_count: 1,
+            detail_count: 1,
+        },
+    ];
+    const client = createMockClient({ reportRows: rows });
+
+    const result = await getReports(client, {
+        company_id: "7",
+        bank_account_id: "12",
+    });
+
+    assert.deepEqual(result, rows);
+
+    const reportQuery = client.calls.find(({ sql }) =>
+        sql.includes('FROM "Treasury".bank_transactions AS bt') &&
+        sql.includes("AS business_date")
+    );
+
+    assert.ok(reportQuery);
+    assert.deepEqual(reportQuery.params, ["7", "12"]);
+    assert.match(reportQuery.sql, /bt\.company_id = \$1/);
+    assert.match(reportQuery.sql, /business_date/);
+    assert.match(reportQuery.sql, /currency/);
+    assert.match(reportQuery.sql, /context->>'business_date'/);
+    assert.match(reportQuery.sql, /context->>'time_zone'/);
+    assert.doesNotMatch(reportQuery.sql, /created_at\s*::\s*date/i);
+});
+
+test("filtra el informe por rango de días comerciales", async () => {
+    const client = createMockClient();
+
+    await getReports(client, {
+        company_id: "7",
+        bank_account_id: "12",
+        start_date: "2026-11-01",
+        end_date: "2026-11-19",
+    });
+
+    const reportQuery = client.calls.find(({ sql }) =>
+        sql.includes('FROM "Treasury".bank_transactions AS bt') &&
+        sql.includes("AS business_date")
+    );
+
+    assert.ok(reportQuery);
+    assert.deepEqual(reportQuery.params, [
+        "7",
+        "12",
+        "2026-11-01",
+        "2026-11-19",
+    ]);
+});
+
+test("rechaza fechas inválidas del informe antes de consultar", async () => {
+    const client = createMockClient();
+
+    await assert.rejects(
+        getReports(client, {
+            company_id: "7",
+            start_date: "2026-02-30",
+        }),
+        /start_date debe ser una fecha válida/
+    );
+
+    assert.equal(client.calls.length, 0);
+});
+
+test("requiere un cliente válido para consultar informes", async () => {
+    await assert.rejects(
+        getReports(null, {
+            company_id: "7",
+        }),
+        /cliente válido de base de datos/
+    );
 });

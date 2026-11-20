@@ -371,6 +371,8 @@ router.post('/contability/deleteContableAccount/:id',contabiltyController.delete
 
 // SGA treasury
 
+router.post("/treasury/banks/getReports",...banksRouteMiddlewares,banksController.getReports);
+
 router.post('/treasury/getThirdPartyAdvances',treasuryController.getThirdPartyAdvances);
 
 router.post('/treasury/getCompanyAdvances',treasuryController.getCompanyAdvances);
