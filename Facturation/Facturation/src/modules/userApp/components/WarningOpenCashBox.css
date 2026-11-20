@@ -1,0 +1,24 @@
+
+
+.WarningOpenCashBox{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    align-items: center;
+    width: 50vw;
+}
+
+.WarningOpenCashBox img{
+    height: 20vh;
+    width: 20vh;
+    margin: 1vh auto;
+}
+
+
+.WarningOpenCashBox .actions{
+    width: 100%;
+    display: flex;
+    gap: 2vw;
+    margin-top: 2vh;
+}
+
