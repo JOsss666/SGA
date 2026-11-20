@@ -1,9 +1,11 @@
 import { useId, useState } from 'react';
 import './newOptions.css';
+import { useAlert } from '../../../context/context';
 
 const getSubOptions = option => Array.isArray(option.subOptions) ? option.subOptions : [];
 
-function NewOptionsBranch({ option, index, depth = 0 }) {
+function NewOptionsBranch({ option, index, depth = 0, disabled = false}) {
+    const {popInAlert} = useAlert();
     const [expanded, setExpanded] = useState(false);
     const branchId = useId();
     const subOptions = getSubOptions(option);
@@ -12,17 +14,27 @@ function NewOptionsBranch({ option, index, depth = 0 }) {
 
     return (
         <li className={`newOptionsItem${expanded ? ' newOptionsItemExpanded' : ''}`}>
-            <div className="newOptionsRow" style={{ '--newOptionsDepth': depth }}>
+            <div className={`newOptionsRow ${disabled? 'disabledBranchOption':''}`} style={{ '--newOptionsDepth': depth }}>
                 <button
                     className="newOptionsAction"
                     type="button"
-                    onClick={option.action}
-                    disabled={Boolean(option.disabled)}
+                    onClick={()=>{
+                        if(disabled){
+                            popInAlert(option.warning);
+                            return;
+                        }
+                        else{
+                            option.action();
+                        }
+                    }}
                 >
                     <span className="newOptionsIcon" aria-hidden="true">
                         {option.icon || <i className="bi bi-circle" />}
                     </span>
                     <span className="newOptionsLabel">{label}</span>
+                    {disabled && (
+                        <i className="bi bi-exclamation-circle"/>
+                    )}
                 </button>
                 {hasSubOptions && (
                     <button
@@ -64,6 +76,7 @@ export function NewOptions({ title, options = [], className = '' }) {
                             key={option.id ?? `${option.label ?? option.text ?? 'option'}-${index}`}
                             option={option}
                             index={index}
+                            disabled={option.disabled}
                         />
                     ))}
                 </ul>

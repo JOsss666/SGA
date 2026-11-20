@@ -25,12 +25,14 @@ import { FormAccountingAdjustment } from "./forms/formAccountingAdjustment";
 import { FormNewFacturationOrder } from "../components/FormNewFacturationOrder";
 import { FormNewPurchaseOrder } from "./forms/FormNewPurchaseOrder";
 import { NewOptions } from "../components/newOptions";
+import { WarningOpenCashBox } from "../components/WarningOpenCashBox";
 
 export function New(){
     const {userConfig,appInfo,userInfo, appConfig} = useAppInfo();
     const [paramDocs,setParamDocs] = useState([]);
     const {popInAlert,popOutAlert} = useAlert();
     const [disabled,setDisabled] = useState(false);
+    const [disabledPOS,setDisabledPOS] = useState(false);
     const [messgeDisabled,setMessageDisabled] = useState('')
     const [numberingRangesStatus, setNumberingRangesStatus] = useState('idle');
 
@@ -58,11 +60,13 @@ export function New(){
             setMessageDisabled('Cargando Reporte de clicks...');
             setDisabled(true);
             verifyClicksControlZ();
+            verifyOpenCashBoxes();
         }
     }, [appConfig]);
 
     useEffect(()=>{
         getParamDoc();     
+        verifyOpenCashBoxes();
     },[]) 
 
 
@@ -76,6 +80,15 @@ export function New(){
             
         }
         setDisabled(!hasCompletedClicks[0]);
+    }
+
+    let verifyOpenCashBoxes = async()=>{
+        const hasOpenCashBoxes = await postInfo('/facturation/getCashBoxes',{
+            company_id:appInfo.company_id,
+            status:'open'
+        });
+        console.log('Cajas: ',hasOpenCashBoxes)
+        setDisabledPOS(!hasOpenCashBoxes[0]);
     }
 
     const processOptions = [
@@ -98,14 +111,18 @@ export function New(){
             id:'new-sell-invoice',
             text:'Factura de venta POS',
             icon:<i className="fa-solid fa-file-invoice" />,
-            action:() => popInAlert(<FormNewInvoice />)
+            action:() => popInAlert(<FormNewInvoice />),
+            disabled:disabledPOS,
+            warning:<WarningOpenCashBox name={'Factura de venta POS '}/>
         },
         ...(userConfig?.access?.sections?.cashBoxes?.overAll ||
             userConfig?.access?.sections?.cashBoxes?.enabled?.length > 0 ? [{
                 id:'new-cash-receipt',
                 text:'Recibo de caja',
                 icon:<i className="fa-solid fa-receipt" />,
-                action:() => popInAlert(<FormNewCashRecipt />)
+                action:() => popInAlert(<FormNewCashRecipt />),
+                disabled:disabledPOS,
+                warning:<WarningOpenCashBox name={'Recibo de caja'}/>
             }] : []),
         {
             id:'new-purchase',
