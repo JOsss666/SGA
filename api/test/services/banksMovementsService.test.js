@@ -4,10 +4,14 @@ import {
     getAccountBalance,
     ingestMovement,
     normalizeCreateMovement,
+    normalizeReverseMovement,
 } from "../../services/banksMovementsService.js";
 
+const ORIGINAL_DETAIL_ID = "123e4567-e89b-12d3-a456-426614174000";
+const REVERSE_DETAIL_ID = "123e4567-e89b-12d3-a456-426614174001";
+
 const makeDetail = (overrides = {}) => ({
-    detail_id: "123e4567-e89b-12d3-a456-426614174000",
+    detail_id: ORIGINAL_DETAIL_ID,
     currency: "COP",
     amount: 1000000,
     direction: "in",
@@ -38,17 +42,45 @@ const makePayload = (overrides = {}) => ({
     ...overrides,
 });
 
+const makeReversePayload = (overrides = {}) =>
+    makePayload({
+        idempotency_key: "reverse:venta:FV-00912:v1",
+        operation: "reverse",
+        description: "Reverso de factura FV-00912",
+        details: [
+            makeDetail({
+                detail_id: REVERSE_DETAIL_ID,
+                direction: "out",
+                reverses_detail_id: ORIGINAL_DETAIL_ID,
+            }),
+        ],
+        ...overrides,
+    });
+
+const makeOriginalDetail = (overrides = {}) => ({
+    id: "300",
+    client_detail_id: ORIGINAL_DETAIL_ID,
+    currency: "COP",
+    amount: "1000000",
+    direction: "in",
+    concept: "principal",
+    account_id: null,
+    already_reversed: false,
+    ...overrides,
+});
+
 const createMockClient = (options = {}) => {
     const calls = [];
-    let nextDetailId = 300;
+    let nextDetailId = 500;
+    let nextAuditId = 900;
 
     const bankAccount =
         options.bankAccount === undefined
             ? {
-                currency_policy: {
-                    allowed_currencies: ["COP", "USD"],
-                },
-            }
+                  currency_policy: {
+                      allowed_currencies: ["COP", "USD"],
+                  },
+              }
             : options.bankAccount;
 
     return {
@@ -67,6 +99,18 @@ const createMockClient = (options = {}) => {
                     rows: options.existingTransaction
                         ? [options.existingTransaction]
                         : [],
+                };
+            }
+
+            if (
+                normalizedSql.includes(
+                    'FROM "Treasury".bank_transaction_details AS original_detail'
+                )
+            ) {
+                return {
+                    rows: options.originalDetails ?? [
+                        makeOriginalDetail(),
+                    ],
                 };
             }
 
@@ -96,9 +140,10 @@ const createMockClient = (options = {}) => {
                 )
             ) {
                 return {
-                    rows: options.documentExists === false
-                        ? []
-                        : [{ id: params[0] }],
+                    rows:
+                        options.documentExists === false
+                            ? []
+                            : [{ id: params[0] }],
                 };
             }
 
@@ -127,7 +172,7 @@ const createMockClient = (options = {}) => {
                 return {
                     rows: [
                         {
-                            id: options.insertedTransactionId ?? "500",
+                            id: options.insertedTransactionId ?? "700",
                         },
                     ],
                 };
@@ -141,6 +186,9 @@ const createMockClient = (options = {}) => {
                 if (options.failOnDetailInsert) {
                     const error = new Error("duplicate detail");
                     error.code = "23505";
+                    error.constraint =
+                        options.detailConstraint ??
+                        "bank_transaction_details_client_detail_idx";
                     throw error;
                 }
 
@@ -155,6 +203,22 @@ const createMockClient = (options = {}) => {
             }
 
             if (
+                normalizedSql.startsWith(
+                    'INSERT INTO "Treasury".bank_audit'
+                )
+            ) {
+                if (options.failOnAuditInsert) {
+                    const error = new Error("invalid audit reference");
+                    error.code = "23503";
+                    throw error;
+                }
+
+                return {
+                    rows: [{ id: String(nextAuditId++) }],
+                };
+            }
+
+            if (
                 normalizedSql.includes(
                     'FROM "Treasury".bank_account_balances'
                 )
@@ -164,7 +228,9 @@ const createMockClient = (options = {}) => {
                 };
             }
 
-            throw new Error(`Consulta no simulada en el test: ${normalizedSql}`);
+            throw new Error(
+                `Consulta no simulada en el test: ${normalizedSql}`
+            );
         },
     };
 };
@@ -192,7 +258,7 @@ test("normaliza el UMJP create y mapea detail_id a client_detail_id", () => {
 
     assert.deepEqual(result.details, [
         {
-            client_detail_id: "123e4567-e89b-12d3-a456-426614174000",
+            client_detail_id: ORIGINAL_DETAIL_ID,
             currency: "COP",
             amount: "1000000",
             direction: "in",
@@ -244,13 +310,46 @@ test("rechaza reverse en la normalización de create", () => {
     );
 });
 
-test("crea una transacción y todos sus detalles", async () => {
+test("normaliza un reverse y conserva el UUID externo que referencia", () => {
+    const result = normalizeReverseMovement(makeReversePayload());
+
+    assert.equal(result.transaction.operation, "reverse");
+    assert.equal(result.transaction.company_id, "7");
+    assert.equal(result.transaction.bank_account_id, "12");
+    assert.equal(result.details.length, 1);
+    assert.equal(result.details[0].client_detail_id, REVERSE_DETAIL_ID);
+    assert.equal(
+        result.details[0].reverses_client_detail_id,
+        ORIGINAL_DETAIL_ID
+    );
+    assert.equal(result.details[0].direction, "out");
+});
+
+test("rechaza un reverse sin el UUID del detalle original", () => {
+    assert.throws(
+        () =>
+            normalizeReverseMovement(
+                makeReversePayload({
+                    details: [
+                        makeDetail({
+                            detail_id: REVERSE_DETAIL_ID,
+                            direction: "out",
+                            reverses_detail_id: null,
+                        }),
+                    ],
+                })
+            ),
+        /reverses_detail_id es obligatorio/
+    );
+});
+
+test("crea una transacción, sus detalles y una auditoría por detalle", async () => {
     const client = createMockClient();
     const payload = makePayload({
         details: [
             makeDetail(),
             makeDetail({
-                detail_id: "123e4567-e89b-12d3-a456-426614174001",
+                detail_id: "123e4567-e89b-12d3-a456-426614174002",
                 currency: "USD",
                 amount: 25.5,
                 direction: "out",
@@ -262,7 +361,7 @@ test("crea una transacción y todos sus detalles", async () => {
 
     const result = await ingestMovement(client, payload);
 
-    assert.equal(result.transaction_id, "500");
+    assert.equal(result.transaction_id, "700");
     assert.equal(result.idempotent_replay, false);
     assert.equal(result.details.length, 2);
 
@@ -272,27 +371,55 @@ test("crea una transacción y todos sus detalles", async () => {
     const detailInserts = client.calls.filter(({ sql }) =>
         sql.startsWith('INSERT INTO "Treasury".bank_transaction_details')
     );
+    const auditInserts = client.calls.filter(({ sql }) =>
+        sql.startsWith('INSERT INTO "Treasury".bank_audit')
+    );
 
     assert.equal(transactionInserts.length, 1);
     assert.equal(detailInserts.length, 2);
+    assert.equal(auditInserts.length, 2);
+
     assert.equal(transactionInserts[0].params[0], "7");
     assert.equal(transactionInserts[0].params[1], "12");
     assert.equal(transactionInserts[0].params[2], payload.idempotency_key);
     assert.equal(transactionInserts[0].params[9], payload.description);
-    assert.equal(detailInserts[0].params[1], "500");
+
+    assert.equal(detailInserts[0].params[1], "700");
     assert.equal(detailInserts[0].params[2], payload.details[0].detail_id);
     assert.deepEqual(JSON.parse(detailInserts[1].params[9]), {
         channel: "web",
     });
+
+    for (const audit of auditInserts) {
+        assert.equal(audit.params[0], "7");
+        assert.equal(audit.params[1], "700");
+        assert.equal(audit.params[3], "87");
+        assert.equal(audit.params[4], "create");
+        assert.equal(audit.params[6], "2026-11-18T10:20:00.000Z");
+    }
+
+    assert.deepEqual(
+        auditInserts.map(({ params }) => params[2]),
+        ["500", "501"]
+    );
+
+    assert.equal(
+        JSON.parse(auditInserts[0].params[5]).client_detail_id,
+        payload.details[0].detail_id
+    );
+    assert.equal(
+        JSON.parse(auditInserts[1].params[5]).client_detail_id,
+        payload.details[1].detail_id
+    );
 });
 
-test("una idempotency_key existente devuelve el movimiento sin insertar", async () => {
+test("una idempotency_key existente devuelve el movimiento sin insertar ni auditar", async () => {
     const client = createMockClient({
         existingTransaction: { id: "88" },
         existingDetails: [
             {
                 id: "90",
-                client_detail_id: "123e4567-e89b-12d3-a456-426614174000",
+                client_detail_id: ORIGINAL_DETAIL_ID,
             },
         ],
     });
@@ -305,7 +432,7 @@ test("una idempotency_key existente devuelve el movimiento sin insertar", async 
         details: [
             {
                 id: "90",
-                client_detail_id: "123e4567-e89b-12d3-a456-426614174000",
+                client_detail_id: ORIGINAL_DETAIL_ID,
             },
         ],
     });
@@ -319,6 +446,12 @@ test("una idempotency_key existente devuelve el movimiento sin insertar", async 
     assert.equal(
         client.calls.some(({ sql }) =>
             sql.startsWith('INSERT INTO "Treasury".bank_transaction_details')
+        ),
+        false
+    );
+    assert.equal(
+        client.calls.some(({ sql }) =>
+            sql.startsWith('INSERT INTO "Treasury".bank_audit')
         ),
         false
     );
@@ -413,6 +546,167 @@ test("traduce un error de unicidad del detalle a un mensaje legible", async () =
             assert.match(error.message, /ya existe para esta empresa/);
             return true;
         }
+    );
+});
+
+test("revierte los detalles, enlaza el original y audita la operación reverse", async () => {
+    const client = createMockClient({
+        originalDetails: [makeOriginalDetail({ id: "300" })],
+    });
+
+    const result = await ingestMovement(client, makeReversePayload());
+
+    assert.equal(result.transaction_id, "700");
+    assert.equal(result.idempotent_replay, false);
+    assert.equal(result.details.length, 1);
+
+    const transactionInsert = client.calls.find(({ sql }) =>
+        sql.startsWith('INSERT INTO "Treasury".bank_transactions')
+    );
+    const detailInsert = client.calls.find(({ sql }) =>
+        sql.startsWith('INSERT INTO "Treasury".bank_transaction_details')
+    );
+    const auditInsert = client.calls.find(({ sql }) =>
+        sql.startsWith('INSERT INTO "Treasury".bank_audit')
+    );
+
+    assert.equal(transactionInsert.params[3], "reverse");
+    assert.equal(transactionInsert.params[0], "7");
+    assert.equal(transactionInsert.params[1], "12");
+
+    assert.equal(detailInsert.params[1], "700");
+    assert.equal(detailInsert.params[2], REVERSE_DETAIL_ID);
+    assert.equal(detailInsert.params[3], "COP");
+    assert.equal(detailInsert.params[4], "1000000");
+    assert.equal(detailInsert.params[5], "out");
+    assert.equal(detailInsert.params[8], "300");
+    assert.equal(result.details[0].client_detail_id, REVERSE_DETAIL_ID);
+
+    assert.ok(auditInsert);
+    assert.equal(auditInsert.params[0], "7");
+    assert.equal(auditInsert.params[1], "700");
+    assert.equal(auditInsert.params[2], "500");
+    assert.equal(auditInsert.params[3], "87");
+    assert.equal(auditInsert.params[4], "reverse");
+    assert.equal(auditInsert.params[6], "2026-11-18T10:20:00.000Z");
+
+    const auditPayload = JSON.parse(auditInsert.params[5]);
+    assert.equal(auditPayload.client_detail_id, REVERSE_DETAIL_ID);
+    assert.equal(auditPayload.reverses_detail_id, "300");
+
+    const originalQuery = client.calls.find(({ sql }) =>
+        sql.includes(
+            'FROM "Treasury".bank_transaction_details AS original_detail'
+        )
+    );
+
+    assert.deepEqual(originalQuery.params, [
+        "7",
+        "12",
+        [ORIGINAL_DETAIL_ID],
+    ]);
+});
+
+test("rechaza el reverse si el detalle original no existe para la empresa y cuenta", async () => {
+    const client = createMockClient({ originalDetails: [] });
+
+    await assert.rejects(
+        ingestMovement(client, makeReversePayload()),
+        (error) => {
+            assert.equal(error.statusCode, 404);
+            assert.match(error.message, /detalles originales no existen/);
+            return true;
+        }
+    );
+
+    assert.equal(
+        client.calls.some(({ sql }) =>
+            sql.startsWith('INSERT INTO "Treasury".bank_transactions')
+        ),
+        false
+    );
+});
+
+test("rechaza el reverse si el detalle original ya fue revertido", async () => {
+    const client = createMockClient({
+        originalDetails: [
+            makeOriginalDetail({ already_reversed: true }),
+        ],
+    });
+
+    await assert.rejects(
+        ingestMovement(client, makeReversePayload()),
+        (error) => {
+            assert.equal(error.statusCode, 409);
+            assert.match(error.message, /ya fue revertido/);
+            return true;
+        }
+    );
+
+    assert.equal(
+        client.calls.some(({ sql }) =>
+            sql.startsWith('INSERT INTO "Treasury".bank_transactions')
+        ),
+        false
+    );
+});
+
+test("rechaza un reverse si la dirección no es opuesta a la original", async () => {
+    const client = createMockClient({
+        originalDetails: [makeOriginalDetail()],
+    });
+
+    await assert.rejects(
+        ingestMovement(
+            client,
+            makeReversePayload({
+                details: [
+                    makeDetail({
+                        detail_id: REVERSE_DETAIL_ID,
+                        direction: "in",
+                        reverses_detail_id: ORIGINAL_DETAIL_ID,
+                    }),
+                ],
+            })
+        ),
+        /dirección del reverse debe ser opuesta/
+    );
+
+    assert.equal(
+        client.calls.some(({ sql }) =>
+            sql.startsWith('INSERT INTO "Treasury".bank_transactions')
+        ),
+        false
+    );
+});
+
+test("rechaza un reverse si el monto no coincide con el detalle original", async () => {
+    const client = createMockClient({
+        originalDetails: [makeOriginalDetail()],
+    });
+
+    await assert.rejects(
+        ingestMovement(
+            client,
+            makeReversePayload({
+                details: [
+                    makeDetail({
+                        detail_id: REVERSE_DETAIL_ID,
+                        direction: "out",
+                        amount: 999,
+                        reverses_detail_id: ORIGINAL_DETAIL_ID,
+                    }),
+                ],
+            })
+        ),
+        /monto del reverse no coincide/
+    );
+
+    assert.equal(
+        client.calls.some(({ sql }) =>
+            sql.startsWith('INSERT INTO "Treasury".bank_transactions')
+        ),
+        false
     );
 });
 
