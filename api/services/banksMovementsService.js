@@ -1,4 +1,5 @@
 import { registerMovementAudit } from "./banksAuditService.js";
+import { companyTimeZoneSql } from "./businessTimeZoneService.js";
 
 const createServiceError = (message, statusCode = 400) => {
     const error = new Error(message);
@@ -888,4 +889,256 @@ export async function getAccountBalance(client, info = {}) {
     );
 
     return result.rows;
+}
+
+export async function listMovements(client, info = {}) {
+    if (!client || typeof client.query !== "function") {
+        throw createServiceError(
+            "Se requiere un cliente válido de base de datos.",
+            500
+        );
+    }
+
+    const companyId = normalizeId(info.company_id, "company_id");
+    const bankAccountId = normalizeId(
+        info.bank_account_id,
+        "bank_account_id"
+    );
+
+    const filters = [
+        "bt.company_id = $1",
+        "bt.bank_account_id = $2",
+    ];
+    const values = [companyId, bankAccountId];
+
+    let startDate;
+    let endDate;
+
+    if (info.start_date != null) {
+        startDate = normalizeUtcTimestamp(info.start_date, "start_date");
+        values.push(startDate);
+        filters.push(`bt.created_at >= $${values.length}`);
+    }
+
+    if (info.end_date != null) {
+        endDate = normalizeUtcTimestamp(info.end_date, "end_date");
+        values.push(endDate);
+        filters.push(`bt.created_at < $${values.length}`);
+    }
+
+    if (
+        startDate &&
+        endDate &&
+        Date.parse(startDate) >= Date.parse(endDate)
+    ) {
+        throw createServiceError(
+            "end_date debe ser posterior a start_date."
+        );
+    }
+
+    try {
+        const result = await client.query(
+            `SELECT
+                bt.id AS transaction_id,
+                bt.company_id,
+                bt.bank_account_id,
+                bt.idempotency_key,
+                bt.operation,
+                bt.document_id,
+                bt.origin,
+                bt.context,
+                bt.created_by,
+                bt.created_at,
+                bt.description,
+                COALESCE(
+                    jsonb_agg(
+                        jsonb_build_object(
+                            'id', bd.id,
+                            'detail_id', bd.client_detail_id,
+                            'currency', bd.currency,
+                            'amount', bd.amount,
+                            'direction', bd.direction,
+                            'concept', bd.concept,
+                            'account_id', bd.account_id,
+                            'reverses_detail_id', bd.reverses_detail_id,
+                            'metadata', bd.metadata,
+                            'created_at', bd.created_at
+                        )
+                        ORDER BY bd.id
+                    ) FILTER (WHERE bd.id IS NOT NULL),
+                    '[]'::jsonb
+                ) AS details
+            FROM "Treasury".bank_transactions AS bt
+            LEFT JOIN "Treasury".bank_transaction_details AS bd
+              ON bd.company_id = bt.company_id
+             AND bd.transaction_id = bt.id
+            WHERE ${filters.join(" AND ")}
+            GROUP BY bt.id
+            ORDER BY bt.created_at DESC, bt.id DESC`,
+            values
+        );
+
+        return result.rows;
+    } catch (error) {
+        if (error.statusCode) {
+            throw error;
+        }
+
+        const serviceError = createServiceError(
+            "No fue posible consultar los movimientos bancarios.",
+            500
+        );
+        serviceError.cause = error;
+        throw serviceError;
+    }
+}
+
+const normalizeReportDate = (value, fieldName) => {
+    if (
+        typeof value !== "string" ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(value)
+    ) {
+        throw createServiceError(
+            `${fieldName} debe ser una fecha válida.`
+        );
+    }
+
+    const [year, month, day] = value.split("-").map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+
+    if (
+        date.getUTCFullYear() !== year ||
+        date.getUTCMonth() !== month - 1 ||
+        date.getUTCDate() !== day
+    ) {
+        throw createServiceError(
+            `${fieldName} debe ser una fecha válida.`
+        );
+    }
+
+    return value;
+};
+
+export async function getReports(client, info = {}) {
+    if (!client || typeof client.query !== "function") {
+        throw createServiceError(
+            "Se requiere un cliente válido de base de datos.",
+            500
+        );
+    }
+
+    const companyId = normalizeId(info.company_id, "company_id");
+    const filters = ["bt.company_id = $1"];
+    const values = [companyId];
+
+    if (info.bank_account_id != null) {
+        const bankAccountId = normalizeId(
+            info.bank_account_id,
+            "bank_account_id"
+        );
+
+        values.push(bankAccountId);
+        filters.push(`bt.bank_account_id = $${values.length}`);
+    }
+
+    let startDate;
+    let endDate;
+
+    if (info.start_date != null) {
+        startDate = normalizeReportDate(info.start_date, "start_date");
+    }
+
+    if (info.end_date != null) {
+        endDate = normalizeReportDate(info.end_date, "end_date");
+    }
+
+    if (
+        startDate &&
+        endDate &&
+        startDate > endDate
+    ) {
+        throw createServiceError(
+            "end_date debe ser igual o posterior a start_date."
+        );
+    }
+
+    const businessDateExpression = `COALESCE(
+        NULLIF(bt.context->>'business_date', '')::date,
+        (
+            bt.created_at AT TIME ZONE COALESCE(
+                NULLIF(bt.context->>'time_zone', ''),
+                ${companyTimeZoneSql("$1")}
+            )
+        )::date
+    )`;
+
+    if (startDate) {
+        values.push(startDate);
+        filters.push(
+            `${businessDateExpression} >= $${values.length}::date`
+        );
+    }
+
+    if (endDate) {
+        values.push(endDate);
+        filters.push(
+            `${businessDateExpression} <= $${values.length}::date`
+        );
+    }
+
+    try {
+        const result = await client.query(
+            `SELECT
+                bt.bank_account_id,
+                ${businessDateExpression} AS business_date,
+                bd.currency,
+                SUM(
+                    CASE
+                        WHEN bd.direction = 'in' THEN bd.amount
+                        ELSE 0
+                    END
+                ) AS total_in,
+                SUM(
+                    CASE
+                        WHEN bd.direction = 'out' THEN bd.amount
+                        ELSE 0
+                    END
+                ) AS total_out,
+                SUM(
+                    CASE
+                        WHEN bd.direction = 'in' THEN bd.amount
+                        ELSE -bd.amount
+                    END
+                ) AS net_total,
+                COUNT(DISTINCT bt.id)::int AS transaction_count,
+                COUNT(bd.id)::int AS detail_count
+            FROM "Treasury".bank_transactions AS bt
+            JOIN "Treasury".bank_transaction_details AS bd
+              ON bd.company_id = bt.company_id
+             AND bd.transaction_id = bt.id
+            WHERE ${filters.join(" AND ")}
+            GROUP BY
+                bt.bank_account_id,
+                ${businessDateExpression},
+                bd.currency
+            ORDER BY
+                business_date DESC,
+                bt.bank_account_id ASC,
+                bd.currency ASC`,
+            values
+        );
+
+        return result.rows;
+    } catch (error) {
+        if (error.statusCode) {
+            throw error;
+        }
+
+        const serviceError = createServiceError(
+            "No fue posible consultar los informes bancarios.",
+            500
+        );
+        serviceError.cause = error;
+        throw serviceError;
+    }
 }
