@@ -62,3 +62,14 @@
     margin: auto;
     margin-left: 0;
 }
+
+
+.newOptions .newOptionsList .newOptionsItem .disabledBranchOption i,
+.newOptions .newOptionsList .newOptionsItem .disabledBranchOption button{
+    color: var(--statusError);
+}
+
+.newOptions .newOptionsList .newOptionsItem:hover .disabledBranchOption i,
+.newOptions .newOptionsList .newOptionsItem:hover .disabledBranchOption button{
+    color: var(--statusError) !important;
+}
