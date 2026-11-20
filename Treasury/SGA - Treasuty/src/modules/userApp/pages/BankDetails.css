@@ -181,6 +181,10 @@
     min-width: 200px;
 }
 
+.sgaTreasury .bankDetailsAccountsToolbar .FormButton{
+    width: fit-content;
+}
+
 .sgaTreasury .bankDetailsDateFilters {
     display: flex;
     align-items: center;
