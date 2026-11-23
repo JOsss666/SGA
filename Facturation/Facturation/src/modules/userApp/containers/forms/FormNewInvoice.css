@@ -76,6 +76,47 @@
     gap: 1vh;
 }
 
+.FormNewInvoice .facturationModeHeader{
+    display: flex;
+    padding: 1vh;
+    background-color: var(--chatAccent);
+    align-items: center;
+    border-radius: 1vh;
+    width: 100%;
+    margin-top: 1vh;
+}
+
+.FormNewInvoice .facturationModeHeader .modeSelector{
+    margin: auto;
+    margin-right: 0;
+}
+
+.FormNewInvoice .facturationModeHeader .infoFactMode{
+    display: flex;
+    gap: 1vh;
+    justify-items: center;
+    margin-left: 2vh;
+}
+
+.FormNewInvoice .facturationModeHeader .infoFactMode i{
+    color: #fff;
+    font-size: clamp(2px,2vh,20px);
+}
+
+.FormNewInvoice .facturationModeHeader .infoFactMode span{
+    color: #fff;
+    font-size: clamp(2px,2vh,20px);
+    font-weight: 500;
+}
+
+.FormNewInvoice .singleItemBlock .singleItemName{
+    flex: 1 1 40%;
+    min-width: 0;
+}
+
+.FormNewInvoice .itemBlock.singleItemBlock .gridItems .singleItemName .FacturationFormInput{
+    width: 100%;
+}
 
 .FormNewInvoice .itemBlock .headBlock{
     display: flex;

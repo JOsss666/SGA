@@ -287,6 +287,10 @@ facturationController.getCashBoxes = (req,res)=>{
             values.push(info.allowedCashBoxes);
         }
 
+        if(info.status != undefined){
+            whereClauses.push(`"Treasury".cash_boxes.status = $${values.length +1}`);
+            values.push(info.status);
+        }
 
         const whereQuery = whereClauses.length > 0
             ? `WHERE ${whereClauses.join(" AND ")}`
@@ -401,7 +405,7 @@ facturationController.openCashRegister = (req,res)=>{
                 FROM
                     "Facturation".register_shifts
                 WHERE
-                    company_id = $1 AND cashBox_id = $2 AND status = 'open'
+                    company_id = $1 AND "cashBox_id" = $2 AND status = 'open'
                 ORDER BY id DESC LIMIT 1 ;
             `;
             let v1 = await useDataBase(senV1,[
@@ -417,34 +421,41 @@ facturationController.openCashRegister = (req,res)=>{
                 }));
                 return;
             }
-        let sentence = `
-            INSERT INTO "Facturation".register_shifts(
-                company_id, 
-                user_id,
-                "initialBalance", 
-                "expectedBalance",
-                actual_balance,
-                diference,
-                status,
-                opening_time,
-                "cashBox_id")
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
-        `;
-        let consulta = await useDataBase(sentence,[
-            info.company_id,
-            info.user_id,
-            0,
-            0,
-            0,
-            0,
-            'open',
-            info.opening_time,
-            info.cashBox_id
-        ],2);
+        const rowCount = await utilsController.withTransaction(async (client) => {
+            const inserted = await client.query(`
+                INSERT INTO "Facturation".register_shifts(
+                    company_id,
+                    user_id,
+                    "initialBalance",
+                    "expectedBalance",
+                    actual_balance,
+                    diference,
+                    status,
+                    opening_time,
+                    "cashBox_id")
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+            `,[
+                info.company_id,
+                info.user_id,
+                0,
+                0,
+                0,
+                0,
+                'open',
+                info.opening_time,
+                info.cashBox_id
+            ]);
+            await client.query(`
+                UPDATE "Treasury".cash_boxes
+                SET status = 'open'
+                WHERE id = $1 AND company_id = $2;
+            `,[info.cashBox_id, info.company_id]);
+            return inserted.rowCount;
+        });
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify({
             status:true,
-            message:consulta[1]
+            message:rowCount
         }));
     })
     req.on('error',(err)=>{
@@ -460,21 +471,31 @@ facturationController.closeCashRegister = (req,res)=>{
     })
     req.on('end',async()=>{
         let info = JSON.parse(data);
-        let sentence = `
-            UPDATE 
-                "Facturation".register_shifts
-            SET
-                status = 'closed'
-            WHERE
-                company_id = $1 AND id = $2 ;
-        `;
-        let consulta = await useDataBase(sentence,[
-            info.company_id,
-            info.id
-        ],2);
+        const rowCount = await utilsController.withTransaction(async (client) => {
+            const closed = await client.query(`
+                UPDATE
+                    "Facturation".register_shifts
+                SET
+                    status = 'closed'
+                WHERE
+                    company_id = $1 AND id = $2
+                RETURNING "cashBox_id";
+            `,[
+                info.company_id,
+                info.id
+            ]);
+            for (const row of closed.rows) {
+                await client.query(`
+                    UPDATE "Treasury".cash_boxes
+                    SET status = 'closed'
+                    WHERE id = $1 AND company_id = $2;
+                `,[row.cashBox_id, info.company_id]);
+            }
+            return closed.rowCount;
+        });
         res.writeHead(200,{'Content-Type':'text/plain'})
         res.end(JSON.stringify({
-            status:consulta,
+            status:[true,rowCount],
             message:'Caja cerrada exitosamente'
         }));
     })
