@@ -476,6 +476,8 @@ export function BankDetails({ info, onBack }) {
                             title={`Cuentas_bancarias_${info?.title ?? "Banco"}`}
                             text="Descargar cuentas"
                         />
+
+                        <FormButton text={'Crear nueva +'}/>
                     </div>
 
                     <div className="bankDetailsAccounts">

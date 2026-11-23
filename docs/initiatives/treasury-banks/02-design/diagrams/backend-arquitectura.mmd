@@ -1,0 +1,24 @@
+%% Backend de Bancos implementado — capas y endpoints (work.Juan, 2026-11-20)
+%% Pregunta: ¿qué piezas existen hoy y cómo se conectan, de la petición HTTP a la BD?
+%% Nota: el SVG se dibujó a mano (no hay renderizador Mermaid instalado); si cambia el código, actualizar ambos.
+flowchart TD
+    C["Consumidor (hoy: pruebas por API; sin UI TBANKS verificada)"]:::pending
+    R["Router api/routes/index.routes.js<br/>requireTrustedOrigin → authenticateSession → requireCompanyAccess<br/>10 rutas POST /treasury/banks/*"]
+    K["banksController (createHandler)<br/>readJsonBody · company de sesión · actor · withTransaction · statusCode ?? 500"]
+    S1["banksService<br/>listInstitutions · createInstitution · listBanks · createBank · listAccounts · createAccount"]
+    S2["banksMovementsService<br/>ingestMovement (registerMovement) · getAccountBalance · listMovements · getReports"]
+    A["banksAuditService<br/>registerMovementAudit"]
+    D[("Treasury: bank_institutions · banks · bank_accounts · bank_transactions · bank_transaction_details · bank_audit · vista bank_account_balances")]:::data
+    X[("Ecosystem: documents · contable_accounts · company_settings.time_zone")]:::other
+    C --> R --> K
+    K --> S1
+    K --> S2
+    S2 --> A
+    S1 --> D
+    S2 --> D
+    A --> D
+    S1 -.lee.-> X
+    S2 -.lee.-> X
+    classDef pending stroke-dasharray: 5 5,fill:#f3f3f3,stroke:#8a8a8a
+    classDef data fill:#e9f3ec,stroke:#2f6b46
+    classDef other fill:#f6efe2,stroke:#9a6a1c
