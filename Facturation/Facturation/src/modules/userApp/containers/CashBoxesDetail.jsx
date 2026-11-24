@@ -92,11 +92,17 @@ export function CashBoxesDeetail(){
                 user_id:userInfo.user_id,
                 opening_time:localISOTime
             })
-            if(res.status){
+            if(res.status === true){
                 addNotification({
                     type:'aproved',
                     title:`Se abrio la caja ${info.name} exitosamente`,
                     description:`Se abrio correctamente la caja ${info.name}`
+                })
+            }else{
+                addNotification({
+                    type:'error',
+                    title:`Error al abrir la caja ${info.name}`,
+                    description:res?.message || `No fue posible abrir la caja ${info.name}`
                 })
             }
             setLoading(false);

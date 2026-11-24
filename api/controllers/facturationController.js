@@ -339,8 +339,13 @@ facturationController.getRegisterShift = (req,res)=>{
         values.push(info.company_id);
 
         if(info.id != undefined){
-            whereClauses.push(`i"Facturation".register_shifts.id = $${values.length + 1}`);
+            whereClauses.push(`"Facturation".register_shifts.id = $${values.length + 1}`);
             values.push(info.id);
+        }
+
+        if(info.cashBox_id != undefined){
+            whereClauses.push(`"Facturation".register_shifts."cashBox_id" = $${values.length + 1}`);
+            values.push(info.cashBox_id);
         }
 
         const whereQuery = whereClauses.length > 0
@@ -348,8 +353,8 @@ facturationController.getRegisterShift = (req,res)=>{
             : "";
 
         let sentence = `
-            SELECT 
-                "Facturation".register_shifts.user_id, 
+            SELECT
+                "Facturation".register_shifts.user_id,
                 "Facturation".register_shifts.id, 
                 "Facturation".register_shifts."initialBalance", 
                 "Facturation".register_shifts."expectedBalance", 
@@ -405,18 +410,19 @@ facturationController.openCashRegister = (req,res)=>{
                 FROM
                     "Facturation".register_shifts
                 WHERE
-                    company_id = $1 AND "cashBox_id" = $2 AND status = 'open'
+                    company_id = $1 AND "cashBox_id" = $2
                 ORDER BY id DESC LIMIT 1 ;
             `;
+            // Solo cuenta el ultimo turno de la caja: turnos antiguos sin cerrar
+            // (legacy) no deben bloquear una nueva apertura.
             let v1 = await useDataBase(senV1,[
                 info.company_id,
                 info.cashBox_id
             ],1)
-            console.log(v1)
-            if(v1[0]){
+            if(v1[0] && v1[1]?.[0]?.status === 'open'){
                  res.writeHead(200,{'Content-Type':'text/plain'})
                 res.end(JSON.stringify({
-                    status:'false',
+                    status:false,
                     message:'La caja ya esta abierta y en uso.'
                 }));
                 return;
