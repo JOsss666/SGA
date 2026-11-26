@@ -1,53 +1,59 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import jsPDF from "jspdf";
+import { useAppInfo } from "../../../../Facturation/Facturation/src/context/context";
+import { FormInput } from "../../../../Facturation/Facturation/src/modules/userApp/components/FormInput";
+import { FileInput } from "../../../../Facturation/Facturation/src/modules/userApp/components/FileInput";
+import { SearchinList } from "../../../../Facturation/Facturation/src/modules/userApp/components/SearchInList";
+import { CheckSquare } from "../../../../Facturation/Facturation/src/modules/userApp/components/CheckSquare";
+import { SwitchOption } from "../../../../Facturation/Facturation/src/modules/userApp/components/SwitchOption";
+import { FormButton } from "../../../../Facturation/Facturation/src/modules/userApp/components/FormButton";
+import { postInfo, uploadFiles } from "../../../../Facturation/Facturation/src/utils/functions";
 import "./FormDeliveryOrder.css";
 
-const COMPANY = {
-    name: "4K 360 S.A.S.",
-    nit: "902107038-2",
-    address: "CR 51 A NO. 38 A - 16 SUR",
-    city: "Bogotá, D.C.",
-    phone: "3178788214",
-};
-
-const localDate = () => {
+const getToday = () => {
     const date = new Date();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
 
-    return `${date.getFullYear()}-${month}-${day}`;
+    return [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0"),
+    ].join("-");
 };
 
-const createInitialForm = (delivererName) => ({
-    issueDate: localDate(),
-    deliveryDate: localDate(),
+const createInitialForm = () => ({
+    issueDate: getToday(),
+    deliveryDate: getToday(),
     deliveryTime: "",
     pickupPlace: "",
-    authorizedName: delivererName,
-    authorizedId: "",
-    authorizedPhone: "",
-    vehicleType: "",
+    carrier: "",
     plate: "",
+    driverName: "",
+    driverId: "",
+    phone: "",
+    packages: "",
+    approximateWeight: "",
+    departureTime: "",
+    deliveryType: "Total",
+    goodCondition: false,
+    correctIdentification: false,
+    countVerified: false,
+    hasNovelties: false,
+    evidenceAttached: false,
+    notes: "",
+    delivererName: "",
+    delivererId: "",
+    authorizationName: "",
+    authorizationId: "",
     receiverName: "",
     receiverId: "",
-    notes: "",
 });
-
-const normalizeText = (value) =>
-    String(value ?? "")
-        .trim()
-        .toLocaleLowerCase("es")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
 
 const formatDate = (value) => {
     if (!value) return "—";
 
     const [year, month, day] = String(value).split("-");
 
-    if (!year || !month || !day) return value;
-
-    return `${day}/${month}/${year}`;
+    return year && month && day ? `${day}/${month}/${year}` : value;
 };
 
 const getProductName = (product) =>
@@ -56,44 +62,29 @@ const getProductName = (product) =>
     `Producto #${product?.id ?? "—"}`;
 
 const getProductQuantity = (product) =>
-    product?.units ?? product?.quantity ?? "—";
+    Number(product?.units ?? product?.quantity ?? 0);
 
-function imageFileToPng(file) {
-    return new Promise((resolve, reject) => {
+const readImage = (file) =>
+    new Promise((resolve, reject) => {
         const reader = new FileReader();
 
-        reader.onerror = () => reject(new Error("No se pudo leer la imagen."));
-
-        reader.onload = () => {
-            const image = new Image();
-
-            image.onerror = () =>
-                reject(new Error("No se pudo abrir la imagen adjunta."));
-
-            image.onload = () => {
-                const canvas = document.createElement("canvas");
-                canvas.width = image.naturalWidth;
-                canvas.height = image.naturalHeight;
-
-                const context = canvas.getContext("2d");
-
-                if (!context) {
-                    reject(new Error("No se pudo procesar la imagen adjunta."));
-                    return;
-                }
-
-                context.drawImage(image, 0, 0);
-                resolve(canvas.toDataURL("image/png"));
-            };
-
-            image.src = String(reader.result);
-        };
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () =>
+            reject(new Error("No se pudo leer la imagen adjunta."));
 
         reader.readAsDataURL(file);
     });
-}
 
-function SignatureField({ title, description, value, onChange }) {
+function SignatureField({
+    title,
+    name,
+    nameValue,
+    idValue,
+    onNameChange,
+    onIdChange,
+    signature,
+    onSignatureChange,
+}) {
     const canvasRef = useRef(null);
     const drawingRef = useRef(false);
 
@@ -102,8 +93,8 @@ function SignatureField({ title, description, value, onChange }) {
         const rect = canvas.getBoundingClientRect();
 
         return {
-            x: (event.clientX - rect.left) * (canvas.width / rect.width),
-            y: (event.clientY - rect.top) * (canvas.height / rect.height),
+            x: ((event.clientX - rect.left) / rect.width) * canvas.width,
+            y: ((event.clientY - rect.top) / rect.height) * canvas.height,
         };
     };
 
@@ -121,8 +112,7 @@ function SignatureField({ title, description, value, onChange }) {
     const draw = (event) => {
         if (!drawingRef.current) return;
 
-        const canvas = canvasRef.current;
-        const context = canvas.getContext("2d");
+        const context = canvasRef.current.getContext("2d");
         const point = getPoint(event);
 
         context.lineWidth = 2;
@@ -131,27 +121,26 @@ function SignatureField({ title, description, value, onChange }) {
         context.lineTo(point.x, point.y);
         context.stroke();
 
-        onChange(canvas.toDataURL("image/png"));
+        onSignatureChange(canvasRef.current.toDataURL("image/png"));
     };
 
     const stopDrawing = () => {
         drawingRef.current = false;
     };
 
-    const clear = () => {
+    const clearSignature = () => {
         const canvas = canvasRef.current;
 
         canvas
             .getContext("2d")
             .clearRect(0, 0, canvas.width, canvas.height);
 
-        onChange("");
+        onSignatureChange("");
     };
 
     return (
-        <div className="deliverySignature">
-            <label>{title}</label>
-            {description && <small>{description}</small>}
+        <section className="deliverySignature">
+            <strong>{title}</strong>
 
             <canvas
                 ref={canvasRef}
@@ -162,40 +151,62 @@ function SignatureField({ title, description, value, onChange }) {
                 onPointerMove={draw}
                 onPointerUp={stopDrawing}
                 onPointerCancel={stopDrawing}
-                onPointerLeave={stopDrawing}
             />
 
-            <button type="button" onClick={clear}>
-                Limpiar firma
-            </button>
+            <FormInput
+                title={name}
+                placeholder="Nombre completo"
+                value={nameValue}
+                action={onNameChange}
+                required={false}
+            />
 
-            {value && <span>Firma capturada</span>}
-        </div>
+            <FormInput
+                title="C.C."
+                placeholder="Número de identificación"
+                value={idValue}
+                action={onIdChange}
+                required={false}
+            />
+
+            <FormButton
+                type="button"
+                text="Limpiar firma"
+                onClick={clearSignature}
+            />
+
+            {signature && <small>Firma capturada</small>}
+        </section>
     );
 }
 
-export function FormDeliveryOrder({
-    orders = [],
-    delivererName = "",
-    onCancel,
-    onSubmit,
-}) {
-    const [form, setForm] = useState(() => createInitialForm(delivererName));
+export function FormDeliveryOrder({ orders = [], onCancel }) {
+    const { appInfo, userInfo, userConfig } = useAppInfo();
+
+    const [form, setForm] = useState(createInitialForm);
+    const [deliveredQuantities, setDeliveredQuantities] = useState({});
     const [delivererSignature, setDelivererSignature] = useState("");
+    const [authorizationSignature, setAuthorizationSignature] = useState("");
     const [receiverSignature, setReceiverSignature] = useState("");
     const [attachment, setAttachment] = useState(null);
+    const [supportAttachment, setSupportAttachment] = useState(null);
+    const [stores, setStores] = useState([]);
+    const [storeId, setStoreId] = useState("");
+    const [loadingStores, setLoadingStores] = useState(false);
+    const [storeError, setStoreError] = useState("");
     const [error, setError] = useState("");
     const [saving, setSaving] = useState(false);
 
     const parentInstanceIds = useMemo(
-        () => [
-            ...new Set(
-                orders
-                    .map((order) => order.parentInstanceId)
-                    .filter((id) => id != null)
-                    .map(String)
-            ),
-        ],
+        () =>
+            [
+                ...new Set(
+                    orders
+                        .map((order) => order.parentInstanceId)
+                        .filter((id) => id != null)
+                        .map(String)
+                ),
+            ],
         [orders]
     );
 
@@ -204,544 +215,334 @@ export function FormDeliveryOrder({
         [orders]
     );
 
+    useEffect(() => {
+        let cancelled = false;
+
+        const loadStores = async () => {
+            if (!appInfo?.company_id) return;
+
+            setLoadingStores(true);
+            setStoreError("");
+
+            try {
+                const storeAccess = userConfig?.access?.stores;
+                const allowedStores =
+                    storeAccess?.overAll === true
+                        ? undefined
+                        : storeAccess
+                          ? Array.isArray(storeAccess.enabled)
+                              ? storeAccess.enabled
+                              : []
+                          : undefined;
+
+                const response = await postInfo("/getStores", {
+                    company_id: appInfo.company_id,
+                    allowedStores,
+                });
+
+                if (!response?.[0]) {
+                    throw new Error(
+                        "No fue posible cargar las sedes disponibles."
+                    );
+                }
+
+                const options = (response[1] ?? []).map((store) => ({
+                    value: String(store.id),
+                    text: store.name,
+                }));
+
+                if (!cancelled) {
+                    setStores(options);
+
+                    if (!options.length) {
+                        setStoreError(
+                            "No hay sedes disponibles para esta empresa."
+                        );
+                    }
+                }
+            } catch (loadError) {
+                if (!cancelled) {
+                    setStores([]);
+                    setStoreError(
+                        loadError?.message ??
+                            "No fue posible cargar las sedes."
+                    );
+                }
+            } finally {
+                if (!cancelled) setLoadingStores(false);
+            }
+        };
+
+        loadStores();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [appInfo?.company_id, userConfig]);
+
     const updateField = (key, value) => {
         setForm((current) => ({ ...current, [key]: value }));
     };
 
+    const getQuantityKey = (order, product, index) =>
+        `${order.id}-${product.id ?? index}`;
+
     const buildPdf = async () => {
         const pdf = new jsPDF({
-            orientation: "portrait",
+            orientation: "landscape",
             unit: "mm",
             format: "a4",
         });
 
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
-        const margin = 9;
+        const margin = 10;
         const contentWidth = pageWidth - margin * 2;
+        let y = margin;
 
-        const colors = {
-            black: [17, 17, 17],
-            text: [35, 39, 47],
-            muted: [89, 98, 114],
-            border: [216, 221, 229],
-            light: [248, 250, 252],
-            white: [255, 255, 255],
-        };
-
-        let y = 0;
-
-        const drawHeader = () => {
-            pdf.setTextColor(...colors.black);
-            pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(16);
-            pdf.text("4K 360", margin, 14);
-
-            pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(8.5);
-            pdf.text(COMPANY.name, margin, 20);
-
-            pdf.setFont("helvetica", "normal");
-            pdf.setTextColor(...colors.muted);
-            pdf.setFontSize(7);
-            pdf.text(
-                `NIT ${COMPANY.nit} · ${COMPANY.address}`,
-                margin,
-                25
-            );
-            pdf.text(
-                `${COMPANY.city} · Tel. ${COMPANY.phone}`,
-                margin,
-                29
-            );
-
-            pdf.setTextColor(...colors.black);
+        const addHeader = () => {
             pdf.setFont("helvetica", "bold");
             pdf.setFontSize(15);
-            pdf.text("ORDEN DE ENTREGA", pageWidth - margin, 15, {
-                align: "right",
-            });
+            pdf.setTextColor(30, 50, 75);
+            pdf.text("ORDEN DE ENTREGA AL CLIENTE", margin, y);
 
+            y += 7;
             pdf.setFont("helvetica", "normal");
             pdf.setFontSize(8);
-            pdf.setTextColor(...colors.muted);
+            pdf.setTextColor(80, 90, 105);
             pdf.text(
-                `Emitida: ${formatDate(form.issueDate)}`,
-                pageWidth - margin,
-                21,
-                { align: "right" }
-            );
-            pdf.text(
-                `Entrega: ${formatDate(form.deliveryDate)}${
-                    form.deliveryTime ? ` · ${form.deliveryTime}` : ""
-                }`,
-                pageWidth - margin,
-                26,
-                { align: "right" }
+                `Fecha de emisión: ${formatDate(form.issueDate)}   Fecha de entrega: ${formatDate(form.deliveryDate)}   Hora: ${form.deliveryTime || "—"}`,
+                margin,
+                y
             );
 
-            pdf.setDrawColor(...colors.black);
-            pdf.setLineWidth(0.6);
-            pdf.line(margin, 34, pageWidth - margin, 34);
-
-            y = 39;
-        };
-
-        const newPage = () => {
-            pdf.addPage();
-            drawHeader();
+            y += 4;
+            pdf.setDrawColor(190, 198, 208);
+            pdf.line(margin, y, pageWidth - margin, y);
+            y += 7;
         };
 
         const ensureSpace = (height) => {
-            if (y + height > pageHeight - 12) {
-                newPage();
+            if (y + height > pageHeight - 14) {
+                pdf.addPage();
+                y = margin;
+                addHeader();
             }
         };
 
-        const addSection = (title) => {
-            ensureSpace(9);
-
+        const addSectionTitle = (title) => {
+            ensureSpace(10);
             pdf.setFont("helvetica", "bold");
-            pdf.setTextColor(...colors.black);
             pdf.setFontSize(9);
-            pdf.text(title.toLocaleUpperCase("es"), margin, y + 4);
-
-            pdf.setDrawColor(...colors.border);
-            pdf.setLineWidth(0.25);
-            pdf.line(margin, y + 6, pageWidth - margin, y + 6);
-
-            y += 9;
+            pdf.setTextColor(30, 50, 75);
+            pdf.text(title.toLocaleUpperCase("es"), margin, y);
+            y += 6;
         };
 
-        const addInfoCell = (label, value, x, cellY, width, height = 13) => {
-            pdf.setDrawColor(...colors.border);
-            pdf.setFillColor(...colors.white);
-            pdf.roundedRect(x, cellY, width, height, 1.5, 1.5, "FD");
+        const addInfo = (label, value) => {
+            ensureSpace(6);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(8);
+            pdf.setTextColor(65, 75, 90);
+            pdf.text(`${label}:`, margin, y);
+
+            pdf.setFont("helvetica", "normal");
+            pdf.text(String(value || "—"), margin + 50, y, {
+                maxWidth: contentWidth - 50,
+            });
+
+            y += 5;
+        };
+
+        addHeader();
+        addSectionTitle("Datos de despacho");
+
+        addInfo("Sede de despacho", stores.find((store) => store.value === storeId)?.text);
+        addInfo("Dirección de recogida / origen de despacho", form.pickupPlace);
+        addInfo("Transportadora", form.carrier);
+        addInfo("Placa", form.plate);
+        addInfo("Conductor / retira", form.driverName);
+        addInfo("C.C.", form.driverId);
+        addInfo("Teléfono", form.phone);
+        addInfo("Bultos / cajas", form.packages);
+        addInfo("Peso aproximado", form.approximateWeight);
+        addInfo("Hora de salida", form.departureTime);
+
+        const columnWidths = [12, 28, 25, 82, 38, 28, 24, 28];
+        const headers = [
+            "Ítem",
+            "Proceso SGA",
+            "Código",
+            "Descripción",
+            "Tienda",
+            "Ciudad",
+            "Cant. pedida",
+            "Cant. entregada",
+        ];
+
+        for (const order of orders) {
+            addSectionTitle(`Orden de cliente #${order.reference ?? order.id}`);
+            addInfo("Cliente / tercero", order.clientName);
+            addInfo(
+                "Dirección de recogida / origen de despacho",
+                form.pickupPlace
+            );
+
+            ensureSpace(9);
+            pdf.setFillColor(235, 240, 246);
+            pdf.rect(margin, y - 4, contentWidth, 8, "F");
 
             pdf.setFont("helvetica", "bold");
             pdf.setFontSize(6.5);
-            pdf.setTextColor(...colors.muted);
-            pdf.text(label.toLocaleUpperCase("es"), x + 2, cellY + 4);
+            pdf.setTextColor(40, 50, 65);
 
-            pdf.setFont("helvetica", "normal");
-            pdf.setFontSize(8);
-            pdf.setTextColor(...colors.text);
-
-            const lines = pdf.splitTextToSize(
-                String(value || "—"),
-                width - 4
-            );
-
-            pdf.text(lines.slice(0, 2), x + 2, cellY + 8);
-        };
-
-        const addCompactStrip = (items) => {
-            const gap = 2;
-            const cellWidth =
-                (contentWidth - gap * (items.length - 1)) / items.length;
-            const cellHeight = 13;
-
-            ensureSpace(cellHeight + 2);
-
-            items.forEach((item, index) => {
-                addInfoCell(
-                    item.label,
-                    item.value,
-                    margin + index * (cellWidth + gap),
-                    y,
-                    cellWidth,
-                    cellHeight
-                );
+            let x = margin;
+            headers.forEach((title, index) => {
+                pdf.text(title, x + 1, y, {
+                    maxWidth: columnWidths[index] - 2,
+                });
+                x += columnWidths[index];
             });
 
-            y += cellHeight + 2;
-        };
+            y += 6;
 
-        // Única definición: agrega una imagen como anexo al PDF.
-        const addAttachmentPage = async (file) => {
-            if (!file) return;
-
-            pdf.addPage();
-            drawHeader();
-            y += 2;
-            addSection("Anexo · soporte de la entrega");
-
-            pdf.setFont("helvetica", "normal");
-            pdf.setFontSize(8);
-            pdf.setTextColor(...colors.muted);
-            pdf.text(`Archivo: ${file.name}`, margin, y + 2);
-            y += 8;
-
-            if (!file.type.startsWith("image/")) {
-                pdf.setDrawColor(...colors.border);
-                pdf.roundedRect(
-                    margin,
-                    y,
-                    contentWidth,
-                    22,
-                    1.5,
-                    1.5,
-                    "S"
-                );
-
-                pdf.setTextColor(...colors.muted);
-                pdf.setFontSize(8);
-                pdf.text(
-                    "El archivo adjunto es un PDF y no se combina dentro de la orden. Se indica aquí su nombre como referencia.",
-                    margin + 3,
-                    y + 9,
-                    { maxWidth: contentWidth - 6 }
-                );
-
-                return;
-            }
-
-            const imageData = await imageFileToPng(file);
-            const imageProperties = pdf.getImageProperties(imageData);
-            const maxWidth = contentWidth;
-            const maxHeight = pageHeight - y - 16;
-            const scale = Math.min(
-                maxWidth / imageProperties.width,
-                maxHeight / imageProperties.height
-            );
-            const width = imageProperties.width * scale;
-            const height = imageProperties.height * scale;
-            const x = margin + (contentWidth - width) / 2;
-
-            pdf.setDrawColor(...colors.border);
-            pdf.roundedRect(
-                margin,
-                y,
-                contentWidth,
-                Math.min(height + 6, pageHeight - y - 14),
-                1.5,
-                1.5,
-                "S"
-            );
-
-            pdf.addImage(imageData, "PNG", x, y + 3, width, height);
-        };
-
-        drawHeader();
-
-        addSection("Datos generales");
-
-        const gap = 2;
-        const infoCellWidth = (contentWidth - gap * 3) / 4;
-
-        [
-            { label: "Fecha de emisión", value: formatDate(form.issueDate) },
-            { label: "Fecha de entrega", value: formatDate(form.deliveryDate) },
-            { label: "Hora", value: form.deliveryTime || "—" },
-            { label: "Órdenes incluidas", value: String(orders.length) },
-        ].forEach((item, index) => {
-            addInfoCell(
-                item.label,
-                item.value,
-                margin + index * (infoCellWidth + gap),
-                y,
-                infoCellWidth,
-                13
-            );
-        });
-
-        y += 15;
-
-        pdf.setFillColor(...colors.light);
-        pdf.setDrawColor(...colors.border);
-        pdf.roundedRect(margin, y, contentWidth, 12, 1.5, 1.5, "FD");
-
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(7);
-        pdf.setTextColor(...colors.muted);
-        pdf.text("LUGAR DE RECOGIDA", margin + 3, y + 4);
-
-        pdf.setFont("helvetica", "normal");
-        pdf.setFontSize(8);
-        pdf.setTextColor(...colors.text);
-        pdf.text(
-            pdf.splitTextToSize(
-                form.pickupPlace || "No especificado",
-                contentWidth - 6
-            )[0],
-            margin + 3,
-            y + 9
-        );
-
-        y += 15;
-
-        addSection("Transporte y personas responsables");
-
-        addCompactStrip([
-            {
-                label: "Persona autorizada para entregar",
-                value: form.authorizedName,
-            },
-            { label: "Identificación", value: form.authorizedId },
-            { label: "Teléfono de contacto", value: form.authorizedPhone },
-        ]);
-
-        addCompactStrip([
-            { label: "Tipo de vehículo", value: form.vehicleType },
-            { label: "Placa", value: form.plate },
-            { label: "Persona que recibe", value: form.receiverName },
-            { label: "Identificación de quien recibe", value: form.receiverId },
-        ]);
-
-        addSection(`Productos a entregar · ${orders.length} orden(es)`);
-
-        const productX = margin + 3;
-        const quantityX = pageWidth - margin - 24;
-        const productWidth = quantityX - productX - 4;
-
-        orders.forEach((order) => {
-            const orderNumber = order.reference ?? order.id ?? "—";
-            const productionNumber =
-                order.processCode && order.processOwnSerial
-                    ? `${order.processCode}#${order.processOwnSerial}`
-                    : order.processOwnSerial ?? "—";
             const products = Array.isArray(order.components)
                 ? order.components
                 : [];
 
-            ensureSpace(17);
+            products.forEach((product, index) => {
+                const key = getQuantityKey(order, product, index);
+                const ordered = getProductQuantity(product);
+                const delivered =
+                    deliveredQuantities[key] ?? String(ordered);
 
-            pdf.setFillColor(245, 247, 250);
-            pdf.setDrawColor(...colors.border);
-            pdf.roundedRect(margin, y, contentWidth, 14, 1.5, 1.5, "FD");
+                const description = pdf.splitTextToSize(
+                    getProductName(product),
+                    columnWidths[3] - 2
+                );
+                const rowHeight = Math.max(7, description.length * 3.5 + 2);
 
-            pdf.setTextColor(...colors.black);
-            pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(8);
-            pdf.text(`Orden cliente #${orderNumber}`, margin + 3, y + 5);
+                ensureSpace(rowHeight);
 
-            pdf.setFont("helvetica", "normal");
-            pdf.setFontSize(7);
-            pdf.text(
-                `OP ${productionNumber} · ${
-                    order.clientName || "Tercero sin nombre"
-                }${
-                    order.thirdPartyId
-                        ? ` · ID ${order.thirdPartyId}`
-                        : ""
-                }`,
-                margin + 3,
-                y + 10
-            );
+                const rowValues = [
+                    String(index + 1).padStart(2, "0"),
+                    String(order.processOwnSerial ?? order.processCode ?? "—"),
+                    String(product.code ?? product.productCode ?? "—"),
+                    description,
+                    String(order.storeName ?? order.store ?? "—"),
+                    String(order.city ?? "—"),
+                    String(ordered),
+                    String(delivered),
+                ];
 
-            y += 14;
+                pdf.setFont("helvetica", "normal");
+                pdf.setFontSize(7);
+                pdf.setTextColor(35, 42, 52);
 
-            pdf.setFillColor(...colors.light);
-            pdf.rect(margin, y, contentWidth, 7, "F");
+                x = margin;
+                rowValues.forEach((value, cellIndex) => {
+                    pdf.text(
+                        Array.isArray(value) ? value : String(value),
+                        x + 1,
+                        y + 3,
+                        { maxWidth: columnWidths[cellIndex] - 2 }
+                    );
+                    x += columnWidths[cellIndex];
+                });
 
-            pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(6.5);
-            pdf.setTextColor(...colors.muted);
-            pdf.text("PRODUCTO / DESCRIPCIÓN", productX, y + 4.7);
-            pdf.text("CANT.", quantityX, y + 4.7);
-
-            y += 7;
+                y += rowHeight;
+                pdf.setDrawColor(215, 220, 226);
+                pdf.line(margin, y, pageWidth - margin, y);
+            });
 
             if (!products.length) {
-                ensureSpace(8);
-                pdf.setFont("helvetica", "italic");
-                pdf.setFontSize(7);
-                pdf.setTextColor(...colors.muted);
-                pdf.text(
-                    "El informe no incluyó productos para esta orden.",
-                    productX,
-                    y + 5
-                );
-                y += 8;
-            } else {
-                products.forEach((product) => {
-                    const lines = pdf.splitTextToSize(
-                        getProductName(product),
-                        productWidth
-                    );
-                    const rowHeight = Math.max(7, lines.length * 3.5 + 3);
-
-                    ensureSpace(rowHeight);
-
-                    pdf.setFont("helvetica", "normal");
-                    pdf.setFontSize(7.5);
-                    pdf.setTextColor(...colors.text);
-                    pdf.text(lines, productX, y + 4.5);
-
-                    pdf.setFont("helvetica", "bold");
-                    pdf.text(
-                        String(getProductQuantity(product)),
-                        quantityX,
-                        y + 4.5
-                    );
-
-                    pdf.setDrawColor(...colors.border);
-                    pdf.setLineWidth(0.2);
-                    pdf.line(
-                        margin,
-                        y + rowHeight,
-                        pageWidth - margin,
-                        y + rowHeight
-                    );
-
-                    y += rowHeight;
-                });
+                addInfo("Productos", "No hay detalles de productos disponibles.");
             }
 
             y += 3;
-        });
+        }
 
-        const totalProducts = orders.reduce(
-            (sum, order) =>
-                sum +
-                (Array.isArray(order.components)
-                    ? order.components.length
-                    : 0),
-            0
+        addSectionTitle("Verificación y recepción");
+        addInfo("Tipo de entrega", form.deliveryType);
+        addInfo("Persona autorizada para entregar", form.delivererName);
+        addInfo("Identificación de quien entrega", form.delivererId);
+        addInfo("Nombre de quien recibe", form.receiverName);
+        addInfo("Identificación de quien recibe", form.receiverId);
+        addInfo("Observaciones / novedades", form.notes);
+
+        const checks = [
+            ["Buen estado", form.goodCondition],
+            ["Identificación correcta", form.correctIdentification],
+            ["Conteo verificado", form.countVerified],
+            ["Novedades", form.hasNovelties],
+            ["Evidencia", form.evidenceAttached],
+        ];
+
+        addInfo(
+            "Verificaciones",
+            checks
+                .filter(([, checked]) => checked)
+                .map(([label]) => label)
+                .join(", ") || "Ninguna marcada"
         );
 
-        const totalUnits = orders.reduce(
-            (sum, order) =>
-                sum +
-                (order.components ?? []).reduce((subtotal, product) => {
-                    const quantity = Number(
-                        product.units ?? product.quantity ?? 0
-                    );
+        const signatures = [
+            ["ENTREGA 4K 360", delivererSignature],
+            ["AUTORIZA SALIDA", authorizationSignature],
+            ["RECIBE CLIENTE / TRANSPORTADOR", receiverSignature],
+        ].filter(([, signature]) => signature);
 
-                    return subtotal + (Number.isFinite(quantity) ? quantity : 0);
-                }, 0),
-            0
-        );
+        if (signatures.length) {
+            ensureSpace(48);
+            addSectionTitle("Firmas");
+            let x = margin;
 
-        addCompactStrip([
-            { label: "Órdenes cliente relacionadas", value: orders.length },
-            { label: "Referencias / líneas", value: totalProducts },
-            { label: "Unidades totales", value: totalUnits },
-        ]);
+            signatures.forEach(([label, signature]) => {
+                pdf.setFont("helvetica", "bold");
+                pdf.setFontSize(7);
+                pdf.text(label, x, y);
+                pdf.addImage(signature, "PNG", x, y + 2, 65, 25);
+                x += 88;
+            });
 
-        if (form.notes.trim()) {
-            addSection("Observaciones generales");
+            y += 32;
+        }
 
-            const noteLines = pdf.splitTextToSize(
-                form.notes.trim(),
-                contentWidth - 6
+        if (attachment?.type?.startsWith("image/")) {
+            const imageData = await readImage(attachment);
+            pdf.addPage();
+            y = margin;
+            addHeader();
+            addSectionTitle("Evidencia fotográfica");
+
+            const image = pdf.getImageProperties(imageData);
+            const scale = Math.min(
+                contentWidth / image.width,
+                (pageHeight - y - margin) / image.height
             );
-            const noteHeight = Math.max(14, noteLines.length * 3.6 + 6);
 
-            ensureSpace(noteHeight);
-
-            pdf.setDrawColor(...colors.border);
-            pdf.roundedRect(
+            pdf.addImage(
+                imageData,
+                "PNG",
                 margin,
                 y,
-                contentWidth,
-                noteHeight,
-                1.5,
-                1.5,
-                "S"
+                image.width * scale,
+                image.height * scale
             );
-
-            pdf.setFont("helvetica", "normal");
-            pdf.setFontSize(7.5);
-            pdf.setTextColor(...colors.text);
-            pdf.text(noteLines, margin + 3, y + 5);
-
-            y += noteHeight + 3;
+        } else if (attachment?.name) {
+            addInfo("Archivo de soporte adjunto", attachment.name);
         }
 
-        ensureSpace(37);
-        addSection("Constancia de entrega y recepción");
-
-        const signatureGap = 4;
-        const signatureWidth = (contentWidth - signatureGap) / 2;
-        const signatureHeight = 27;
-
-        const drawSignature = (x, title, name, id, image) => {
-            pdf.setDrawColor(...colors.border);
-            pdf.roundedRect(
-                x,
-                y,
-                signatureWidth,
-                signatureHeight,
-                1.5,
-                1.5,
-                "S"
-            );
-
-            if (image) {
-                pdf.addImage(
-                    image,
-                    "PNG",
-                    x + 3,
-                    y + 1,
-                    signatureWidth - 6,
-                    14
-                );
-            }
-
-            pdf.setDrawColor(150, 150, 150);
-            pdf.line(x + 3, y + 17, x + signatureWidth - 3, y + 17);
-
-            pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(6.5);
-            pdf.setTextColor(...colors.text);
-            pdf.text(title.toLocaleUpperCase("es"), x + 3, y + 21);
-
-            pdf.setFont("helvetica", "normal");
-            pdf.setFontSize(6);
-            pdf.setTextColor(...colors.muted);
-            pdf.text(
-                pdf.splitTextToSize(
-                    `${name || "Nombre: —"}${id ? ` · ID ${id}` : ""}`,
-                    signatureWidth - 6
-                )[0],
-                x + 3,
-                y + 25
-            );
-        };
-
-        drawSignature(
-            margin,
-            "Firma de quien entrega",
-            form.authorizedName,
-            form.authorizedId,
-            delivererSignature
-        );
-
-        drawSignature(
-            margin + signatureWidth + signatureGap,
-            "Firma de quien recibe",
-            form.receiverName,
-            form.receiverId,
-            receiverSignature
-        );
-
-        y += signatureHeight + 4;
-
-        if (attachment) {
-            await addAttachmentPage(attachment);
-        }
-
-        const pageCount = pdf.internal.getNumberOfPages();
+        const pageCount = pdf.getNumberOfPages();
 
         for (let page = 1; page <= pageCount; page += 1) {
             pdf.setPage(page);
-            pdf.setDrawColor(...colors.border);
-            pdf.setLineWidth(0.2);
-            pdf.line(margin, pageHeight - 9, pageWidth - margin, pageHeight - 9);
-
-            pdf.setTextColor(...colors.muted);
-            pdf.setFont("helvetica", "normal");
-            pdf.setFontSize(6.5);
-            pdf.text(
-                "Documento generado localmente · 4K 360 S.A.S.",
-                margin,
-                pageHeight - 5
-            );
+            pdf.setFontSize(7);
+            pdf.setTextColor(110, 118, 128);
             pdf.text(
                 `${page} / ${pageCount}`,
                 pageWidth - margin,
-                pageHeight - 5,
+                pageHeight - 6,
                 { align: "right" }
             );
         }
@@ -754,38 +555,42 @@ export function FormDeliveryOrder({
         setError("");
 
         if (!orders.length) {
-            setError("Selecciona al menos una orden.");
+            setError("Seleccione al menos una orden de cliente.");
             return;
         }
 
-        if (ordersWithoutProcess.length) {
-            setError(
-                "Una o más órdenes no tienen una orden de producción asociada."
-            );
+        if (ordersWithoutProcess.length || !parentInstanceIds.length) {
+            setError("Una o más órdenes no tienen un proceso SGA asociado.");
             return;
         }
 
-        if (!parentInstanceIds.length) {
-            setError("No se encontraron órdenes de producción para entregar.");
+        if (!storeId) {
+            setError("Seleccione la sede de despacho.");
             return;
         }
 
-        if (!form.authorizedName.trim()) {
-            setError(
-                "Escribe el nombre de la persona autorizada para entregar los productos."
-            );
+        if (!form.pickupPlace.trim()) {
+            setError("Indique la dirección de recogida u origen de despacho.");
+            return;
+        }
+
+        if (!form.delivererName.trim()) {
+            setError("Indique quién realiza la entrega.");
             return;
         }
 
         if (!form.receiverName.trim()) {
-            setError(
-                "Escribe el nombre completo de quien recibe físicamente los productos."
-            );
+            setError("Indique quién recibe físicamente los productos.");
             return;
         }
 
         if (!receiverSignature) {
-            setError("Falta la firma de quien recibe la mercancía.");
+            setError("Falta la firma de quien recibe los productos.");
+            return;
+        }
+
+        if (!appInfo?.company_id || !userInfo?.user_id) {
+            setError("No se pudo identificar la empresa o el usuario activo.");
             return;
         }
 
@@ -799,57 +604,103 @@ export function FormDeliveryOrder({
                 type: "application/pdf",
             });
 
-            const payload = {
-                parentInstanceIds,
-                issueDate: form.issueDate,
-                deliveryDate: form.deliveryDate,
-                deliveryTime: form.deliveryTime,
-                pickupPlace: form.pickupPlace,
-                authorizedName: form.authorizedName,
-                authorizedId: form.authorizedId,
-                authorizedPhone: form.authorizedPhone,
-                vehicleType: form.vehicleType,
-                plate: form.plate,
-                receiverName: form.receiverName,
-                receiverId: form.receiverId,
-                notes: form.notes,
-                delivererSignature,
-                receiverSignature,
-                orders: orders.map((order) => ({
-                    clientOrderId: order.doc_id ?? order.id,
-                    clientOrderNumber: order.reference ?? order.id,
-                    parentInstanceId: order.parentInstanceId,
-                    productionOrderNumber: order.processOwnSerial,
-                    thirdPartyId: order.thirdPartyId,
-                    thirdPartyName: order.clientName,
-                    products: (order.components ?? []).map((product) => ({
-                        productId: product.id,
-                        name: getProductName(product),
-                        quantity:
-                            product.units ?? product.quantity ?? null,
-                        provider: product.provider ?? null,
-                        workOrder: product.workOrder ?? null,
-                    })),
-                })),
-            };
+            const pdfUpload = await uploadFiles([pdfFile], {
+                company_id: appInfo.company_id,
+                user_id: userInfo.user_id,
+                store_id: storeId,
+                category: "files",
+            });
 
-            if (onSubmit) {
-                await onSubmit({
-                    payload,
-                    attachment,
-                    pdfFile,
-                    pdfBlob,
-                });
-            } else {
-                pdf.save(fileName);
+            const uploadedPdf = pdfUpload?.urls?.[0];
+            const pdfUrl =
+                typeof uploadedPdf === "string"
+                    ? uploadedPdf
+                    : uploadedPdf?.url;
+
+            if (!pdfUrl) {
+                throw new Error("No se pudo guardar el PDF en SGA.");
             }
-            
-            onCancel?.();
 
+            const attached = [
+                ...(supportAttachment?.url
+                    ? [
+                          {
+                              url: supportAttachment.url,
+                              name: supportAttachment.name,
+                          },
+                      ]
+                    : []),
+                {
+                    url: pdfUrl,
+                    name: fileName,
+                },
+            ];
+
+            const response = await postInfo(
+                "/nexo360/registerDeliveryOrder",
+                {
+                    company_id: appInfo.company_id,
+                    user_id: userInfo.user_id,
+                    store_id: storeId,
+                    attached,
+                    values: {
+                        ...form,
+                        parentInstanceIds,
+                        authorizedName: form.delivererName,
+                        delivererSignature,
+                        authorizationSignature,
+                        receiverSignature,
+                        attachmentName: attachment?.name ?? null,
+                        orders: orders.map((order) => ({
+                            clientOrderId:
+                                order.doc_id ?? order.documentId ?? order.id,
+                            clientOrderNumber: order.reference ?? order.id,
+                            parentInstanceId: order.parentInstanceId,
+                            thirdPartyId: order.thirdPartyId,
+                            thirdPartyName: order.clientName,
+                            products: (order.components ?? []).map(
+                                (product, index) => {
+                                    const key = getQuantityKey(
+                                        order,
+                                        product,
+                                        index
+                                    );
+
+                                    return {
+                                        productId: product.id,
+                                        code:
+                                            product.code ??
+                                            product.productCode ??
+                                            null,
+                                        description: getProductName(product),
+                                        orderedQuantity:
+                                            getProductQuantity(product),
+                                        deliveredQuantity:
+                                            deliveredQuantities[key] ??
+                                            String(
+                                                getProductQuantity(product)
+                                            ),
+                                    };
+                                }
+                            ),
+                        })),
+                    },
+                }
+            );
+
+            if (response?.status !== "OK") {
+                throw new Error(
+                    response?.message ??
+                        "SGA no confirmó el registro de la entrega."
+                );
+            }
+
+            pdf.save(fileName);
+            onCancel?.();
         } catch (submitError) {
             setError(
-                submitError.message ||
-                    "No se pudo generar el PDF de la orden de entrega."
+                submitError?.message ??
+                    "No fue posible registrar la entrega ni descargar el PDF."
             );
         } finally {
             setSaving(false);
@@ -861,148 +712,19 @@ export function FormDeliveryOrder({
             <header className="deliveryOrderHeader">
                 <h2>Nueva orden de entrega</h2>
                 <p>
-                    Completa los datos de transporte y recepción. El PDF se
+                    Complete los datos de despacho y recepción. El PDF se
                     descargará en este dispositivo.
                 </p>
             </header>
 
             <form onSubmit={handleSubmit}>
-                <div className="deliveryOrderGrid">
-                    <label>
-                        Fecha de emisión del documento
-                        <input
-                            type="date"
-                            required
-                            value={form.issueDate}
-                            onChange={(event) =>
-                                updateField("issueDate", event.target.value)
-                            }
-                        />
-                        <small>Fecha en que preparas esta orden.</small>
-                    </label>
-
-                    <label>
-                        Fecha prevista o real de entrega
-                        <input
-                            type="date"
-                            required
-                            value={form.deliveryDate}
-                            onChange={(event) =>
-                                updateField("deliveryDate", event.target.value)
-                            }
-                        />
-                    </label>
-
-                    <label>
-                        Hora de entrega
-                        <input
-                            type="time"
-                            value={form.deliveryTime}
-                            onChange={(event) =>
-                                updateField("deliveryTime", event.target.value)
-                            }
-                        />
-                    </label>
-
-                    <label>
-                        Lugar de recogida de los productos
-                        <input
-                            value={form.pickupPlace}
-                            placeholder="Ejemplo: bodega, dirección o sede"
-                            onChange={(event) =>
-                                updateField("pickupPlace", event.target.value)
-                            }
-                        />
-                    </label>
-
-                    <label>
-                        Persona autorizada para entregar la mercancía
-                        <input
-                            required
-                            value={form.authorizedName}
-                            placeholder="Nombre completo de quien entrega"
-                            onChange={(event) =>
-                                updateField("authorizedName", event.target.value)
-                            }
-                        />
-                    </label>
-
-                    <label>
-                        Documento de identidad de quien entrega
-                        <input
-                            value={form.authorizedId}
-                            placeholder="Cédula u otro documento"
-                            onChange={(event) =>
-                                updateField("authorizedId", event.target.value)
-                            }
-                        />
-                    </label>
-
-                    <label>
-                        Teléfono de contacto de quien entrega
-                        <input
-                            type="tel"
-                            value={form.authorizedPhone}
-                            placeholder="Número de contacto"
-                            onChange={(event) =>
-                                updateField("authorizedPhone", event.target.value)
-                            }
-                        />
-                    </label>
-
-                    <label>
-                        Tipo de vehículo que transporta los productos
-                        <input
-                            value={form.vehicleType}
-                            placeholder="Ejemplo: camión, furgón o camioneta"
-                            onChange={(event) =>
-                                updateField("vehicleType", event.target.value)
-                            }
-                        />
-                    </label>
-
-                    <label>
-                        Placa del vehículo
-                        <input
-                            value={form.plate}
-                            placeholder="Ejemplo: ABC123"
-                            onChange={(event) =>
-                                updateField("plate", event.target.value)
-                            }
-                        />
-                    </label>
-
-                    <label>
-                        Nombre completo de quien recibe los productos
-                        <input
-                            required
-                            value={form.receiverName}
-                            placeholder="Persona que recibe físicamente la mercancía"
-                            onChange={(event) =>
-                                updateField("receiverName", event.target.value)
-                            }
-                        />
-                    </label>
-
-                    <label>
-                        Documento de identidad de quien recibe
-                        <input
-                            value={form.receiverId}
-                            placeholder="Cédula u otro documento"
-                            onChange={(event) =>
-                                updateField("receiverId", event.target.value)
-                            }
-                        />
-                    </label>
-                </div>
-
                 <section className="deliverySelectedOrders">
                     <h3>
-                        Productos seleccionados para entrega ({orders.length})
+                        Órdenes y productos que se entregarán ({orders.length})
                     </h3>
                     <p>
-                        Confirma las órdenes, los clientes o terceros y los
-                        productos incluidos.
+                        Se muestra una tabla por orden de cliente. Revise las
+                        cantidades antes de generar el documento.
                     </p>
 
                     {orders.map((order) => (
@@ -1010,121 +732,363 @@ export function FormDeliveryOrder({
                             className="deliverySelectedOrder"
                             key={`${order.id}-${order.parentInstanceId}`}
                         >
-                            <div className="deliverySelectedOrderHeader">
+                            <header className="deliverySelectedOrderHeader">
                                 <strong>
                                     Orden de cliente #{order.reference ?? order.id}
                                 </strong>
                                 <span>
-                                    OP {order.processCode}#
-                                    {order.processOwnSerial ?? "—"}
+                                    Proceso SGA:{" "}
+                                    {order.processOwnSerial ??
+                                        order.processCode ??
+                                        "—"}
                                 </span>
-                            </div>
+                            </header>
 
                             <p className="deliverySelectedOrderClient">
-                                Cliente o tercero:{" "}
-                                {order.clientName || "Sin nombre"}
-                                {order.thirdPartyId
-                                    ? ` · ID ${order.thirdPartyId}`
-                                    : ""}
+                                Cliente / tercero: {order.clientName || "—"} ·
+                                Tienda: {order.storeName || order.store || "—"} ·
+                                Ciudad: {order.city || "—"}
                             </p>
 
-                            {order.components?.length > 0 ? (
-                                <ul>
-                                    {order.components.map((product, index) => (
-                                        <li
-                                            key={
-                                                product.id ??
-                                                `${order.id}-product-${index}`
-                                            }
-                                        >
-                                            <span>{getProductName(product)}</span>
-                                            <span>
-                                                Cantidad: {getProductQuantity(product)}
-                                            </span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p>
-                                    El informe no incluyó el detalle de productos
-                                    de esta orden.
-                                </p>
-                            )}
+                            <div className="deliveryOrderTableWrap">
+                                <table className="deliveryOrderTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Ítem</th>
+                                            <th>Proceso SGA</th>
+                                            <th>Código</th>
+                                            <th>Descripción</th>
+                                            <th>Tienda</th>
+                                            <th>Ciudad</th>
+                                            <th>Cant. pedida</th>
+                                            <th>Cant. entregada</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {(order.components ?? []).length ? (
+                                            order.components.map(
+                                                (product, index) => {
+                                                    const key = getQuantityKey(
+                                                        order,
+                                                        product,
+                                                        index
+                                                    );
+                                                    const ordered =
+                                                        getProductQuantity(product);
+
+                                                    return (
+                                                        <tr
+                                                            key={`${order.id}-${product.id ?? index}`}
+                                                        >
+                                                            <td>
+                                                                {String(
+                                                                    index + 1
+                                                                ).padStart(2, "0")}
+                                                            </td>
+                                                            <td>
+                                                                {order.processOwnSerial ??
+                                                                    order.processCode ??
+                                                                    "—"}
+                                                            </td>
+                                                            <td>
+                                                                {product.code ??
+                                                                    product.productCode ??
+                                                                    "—"}
+                                                            </td>
+                                                            <td>
+                                                                {getProductName(product)}
+                                                            </td>
+                                                            <td>
+                                                                {order.storeName ??
+                                                                    order.store ??
+                                                                    "—"}
+                                                            </td>
+                                                            <td>
+                                                                {order.city ?? "—"}
+                                                            </td>
+                                                            <td>{ordered}</td>
+                                                            <td>
+                                                                <FormInput
+                                                                    title=""
+                                                                    type="number"
+                                                                    min="0"
+                                                                    step="any"
+                                                                    value={
+                                                                        deliveredQuantities[
+                                                                            key
+                                                                        ] ??
+                                                                        String(
+                                                                            ordered
+                                                                        )
+                                                                    }
+                                                                    action={(value) =>
+                                                                        setDeliveredQuantities(
+                                                                            (current) => ({
+                                                                                ...current,
+                                                                                [key]: value,
+                                                                            })
+                                                                        )
+                                                                    }
+                                                                    required={false}
+                                                                />
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                }
+                                            )
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="8">
+                                                    El informe no incluyó
+                                                    productos para esta orden.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </article>
                     ))}
                 </section>
 
-                <label className="deliveryNotes">
-                    Observaciones generales de la entrega
-                    <textarea
-                        rows="3"
-                        placeholder="Ejemplo: entrega completa, entrega parcial o novedad durante el transporte"
-                        value={form.notes}
-                        onChange={(event) =>
-                            updateField("notes", event.target.value)
+                <div className="deliveryOrderGrid">
+                    <div className="deliveryStoreField">
+                        <SearchinList
+                            title="Sede de despacho"
+                            placeHolder={
+                                loadingStores
+                                    ? "Cargando sedes..."
+                                    : "Seleccione la sede desde donde se despacha"
+                            }
+                            list={stores}
+                            value={storeId}
+                            action={setStoreId}
+                            disabled={loadingStores || stores.length === 0}
+                            canClear
+                        />
+                        {storeError && (
+                            <small className="deliveryFormError">
+                                {storeError}
+                            </small>
+                        )}
+                    </div>
+
+                    <FormInput
+                        title="Fecha de emisión del documento"
+                        type="date"
+                        value={form.issueDate}
+                        action={(value) => updateField("issueDate", value)}
+                    />
+                    <FormInput
+                        title="Fecha prevista o real de entrega"
+                        type="date"
+                        value={form.deliveryDate}
+                        action={(value) => updateField("deliveryDate", value)}
+                    />
+                    <FormInput
+                        title="Hora de entrega"
+                        type="time"
+                        value={form.deliveryTime}
+                        action={(value) => updateField("deliveryTime", value)}
+                        required={false}
+                    />
+                    <FormInput
+                        title="Dirección de recogida / origen de despacho"
+                        placeholder="Dirección, bodega o sede de salida"
+                        value={form.pickupPlace}
+                        action={(value) => updateField("pickupPlace", value)}
+                    />
+                    <FormInput
+                        title="Transportadora"
+                        placeholder="Nombre de la transportadora"
+                        value={form.carrier}
+                        action={(value) => updateField("carrier", value)}
+                        required={false}
+                    />
+                    <FormInput
+                        title="Placa"
+                        placeholder="Placa del vehículo"
+                        value={form.plate}
+                        action={(value) => updateField("plate", value)}
+                        required={false}
+                    />
+                    <FormInput
+                        title="Conductor / retira"
+                        placeholder="Nombre completo de quien retira"
+                        value={form.driverName}
+                        action={(value) => updateField("driverName", value)}
+                        required={false}
+                    />
+                    <FormInput
+                        title="C.C."
+                        placeholder="Identificación de quien retira"
+                        value={form.driverId}
+                        action={(value) => updateField("driverId", value)}
+                        required={false}
+                    />
+                    <FormInput
+                        title="Teléfono"
+                        type="tel"
+                        placeholder="Teléfono de contacto"
+                        value={form.phone}
+                        action={(value) => updateField("phone", value)}
+                        required={false}
+                    />
+                    <FormInput
+                        title="Bultos / cajas"
+                        type="number"
+                        min="0"
+                        step="1"
+                        placeholder="Cantidad de bultos o cajas"
+                        value={form.packages}
+                        action={(value) => updateField("packages", value)}
+                        required={false}
+                    />
+                    <FormInput
+                        title="Peso aproximado"
+                        placeholder="Peso y unidad, por ejemplo 20 kg"
+                        value={form.approximateWeight}
+                        action={(value) =>
+                            updateField("approximateWeight", value)
                         }
+                        required={false}
                     />
-                </label>
-
-                <div className="deliverySignatures">
-                    <SignatureField
-                        title="Firma de quien entrega"
-                        description="Firma la persona autorizada que entrega los productos."
-                        value={delivererSignature}
-                        onChange={setDelivererSignature}
-                    />
-
-                    <SignatureField
-                        title="Firma de quien recibe"
-                        description="Firma la persona que confirma la recepción."
-                        value={receiverSignature}
-                        onChange={setReceiverSignature}
+                    <FormInput
+                        title="Hora de salida"
+                        type="time"
+                        value={form.departureTime}
+                        action={(value) =>
+                            updateField("departureTime", value)
+                        }
+                        required={false}
                     />
                 </div>
 
+                <fieldset className="deliveryChecks">
+                    <legend>Verificación de entrega</legend>
+                    <SwitchOption
+                        state1="Total"
+                        state2="Parcial"
+                        value={form.deliveryType === "Parcial"}
+                        action={(isPartial) =>
+                            updateField(
+                                "deliveryType",
+                                isPartial ? "Parcial" : "Total"
+                            )
+                        }
+                    />
+                    <CheckSquare
+                        title="Buen estado"
+                        checked={form.goodCondition}
+                        action={(value) => updateField("goodCondition", value)}
+                    />
+                    <CheckSquare
+                        title="Identificación correcta"
+                        checked={form.correctIdentification}
+                        action={(value) =>
+                            updateField("correctIdentification", value)
+                        }
+                    />
+                    <CheckSquare
+                        title="Conteo verificado"
+                        checked={form.countVerified}
+                        action={(value) => updateField("countVerified", value)}
+                    />
+                    <CheckSquare
+                        title="Novedades"
+                        checked={form.hasNovelties}
+                        action={(value) => updateField("hasNovelties", value)}
+                    />
+                    <CheckSquare
+                        title="Evidencia"
+                        checked={form.evidenceAttached}
+                        action={(value) =>
+                            updateField("evidenceAttached", value)
+                        }
+                    />
+                </fieldset>
+
+                <FormInput
+                    title="Observaciones / novedades"
+                    textArea
+                    value={form.notes}
+                    placeholder="Describa faltantes, novedades o condiciones de la entrega"
+                    action={(value) => updateField("notes", value)}
+                    required={false}
+                />
+
+                <section className="deliverySignatures">
+                    <SignatureField
+                        title="ENTREGA 4K 360"
+                        name="Nombre / C.C. / cargo"
+                        nameValue={form.delivererName}
+                        idValue={form.delivererId}
+                        onNameChange={(value) =>
+                            updateField("delivererName", value)
+                        }
+                        onIdChange={(value) =>
+                            updateField("delivererId", value)
+                        }
+                        signature={delivererSignature}
+                        onSignatureChange={setDelivererSignature}
+                    />
+                    <SignatureField
+                        title="AUTORIZA SALIDA"
+                        name="Nombre / C.C. / cargo"
+                        nameValue={form.authorizationName}
+                        idValue={form.authorizationId}
+                        onNameChange={(value) =>
+                            updateField("authorizationName", value)
+                        }
+                        onIdChange={(value) =>
+                            updateField("authorizationId", value)
+                        }
+                        signature={authorizationSignature}
+                        onSignatureChange={setAuthorizationSignature}
+                    />
+                    <SignatureField
+                        title="RECIBE CLIENTE / TRANSPORTADOR"
+                        name="Nombre / C.C."
+                        nameValue={form.receiverName}
+                        idValue={form.receiverId}
+                        onNameChange={(value) =>
+                            updateField("receiverName", value)
+                        }
+                        onIdChange={(value) =>
+                            updateField("receiverId", value)
+                        }
+                        signature={receiverSignature}
+                        onSignatureChange={setReceiverSignature}
+                    />
+                </section>
+
                 <div className="deliveryAttachmentOptions">
-                    <label className="deliveryAttachment">
-                        Adjuntar foto o documento de soporte
-                        <small>
-                            Las imágenes se agregan al PDF como anexo. Los PDF
-                            adjuntos se indican por nombre, pero no se combinan.
-                        </small>
-                        <input
-                            type="file"
-                            accept=".pdf,image/*"
-                            onChange={(event) =>
-                                setAttachment(event.target.files?.[0] ?? null)
-                            }
-                        />
-                    </label>
+                    <strong>Adjuntar foto o documento de soporte</strong>
+                    <small>
+                        Las imágenes se agregan al PDF como anexo. Los PDF se
+                        indican por nombre.
+                    </small>
+                    <FileInput
+                        category="files"
+                        accept=".pdf,image/*"
+                        includeFiles
+                        action={(files) => {
+                            const selected = files?.[0] ?? null;
 
-                    <label className="deliveryAttachment">
-                        Tomar foto con la cámara
-                        <small>
-                            En un celular, abre la cámara para fotografiar el
-                            soporte de la entrega.
-                        </small>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            capture="environment"
-                            onChange={(event) =>
-                                setAttachment(event.target.files?.[0] ?? null)
-                            }
-                        />
-                    </label>
-
-                    {attachment && (
-                        <div className="deliveryAttachmentSelected">
-                            Archivo seleccionado: {attachment.name}
-                            <button
-                                type="button"
-                                onClick={() => setAttachment(null)}
-                            >
-                                Quitar archivo
-                            </button>
-                        </div>
-                    )}
+                            setAttachment(selected?.file ?? selected);
+                            setSupportAttachment(
+                                selected?.url
+                                    ? {
+                                          url: selected.url,
+                                          name:
+                                              selected.name ??
+                                              selected.file?.name,
+                                      }
+                                    : null
+                            );
+                        }}
+                        placeholder="Seleccionar archivo"
+                    />
                 </div>
 
                 {error && (
@@ -1134,17 +1098,28 @@ export function FormDeliveryOrder({
                 )}
 
                 <footer className="deliveryOrderActions">
-                    <button type="button" onClick={() => onCancel?.()}>
-                        Cancelar
-                    </button>
-
-                    <button type="submit" disabled={saving || !orders.length}>
-                        {saving ? "Generando PDF…" : "Generar y descargar PDF"}
-                    </button>
+                    <FormButton
+                        type="button"
+                        text="Cancelar"
+                        negative
+                        onClick={onCancel}
+                    />
+                    <FormButton
+                        type="submit"
+                        text={
+                            saving
+                                ? "Registrando entrega..."
+                                : "Registrar y descargar PDF"
+                        }
+                        disabled={
+                            saving ||
+                            !orders.length ||
+                            loadingStores ||
+                            !storeId
+                        }
+                    />
                 </footer>
             </form>
         </section>
     );
 }
-
-

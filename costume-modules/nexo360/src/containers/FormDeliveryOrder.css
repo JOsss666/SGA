@@ -1,245 +1,327 @@
 .FormDeliveryOrder {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-    width: min(80vw, 1100px);
+    gap: 1.25rem;
+    width: min(80vw, 1200px);
     max-height: 88vh;
-    overflow-y: auto;
-    padding: 2rem;
-    color: #111827;
-    background: #fff;
-    border-radius: 16px;
+    overflow: auto;
+    padding: clamp(1rem, 2.5vw, 2rem);
+    box-sizing: border-box;
+    color: var(--mainText);
+    background: var(--bg);
+    border: 1px solid var(--inputsBorder);
+    border-radius: 1rem;
+}
+
+.FormDeliveryOrder *,
+.FormDeliveryOrder *::before,
+.FormDeliveryOrder *::after {
     box-sizing: border-box;
 }
 
-.deliveryOrderHeader h2 {
+.FormDeliveryOrder .deliveryOrderHeader h2 {
     margin: 0;
-    color: #111;
-    font-size: 2rem;
+    color: var(--sectionTitle);
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
     font-weight: 600;
 }
 
-.deliveryOrderHeader p {
+.FormDeliveryOrder .deliveryOrderHeader p {
     margin: 0.5rem 0 0;
-    color: #777;
-    font-size: 1rem;
+    color: var(--descriptionText);
+    line-height: 1.5;
 }
 
 .FormDeliveryOrder form {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.5rem;
+    align-items: flex-start;
+    gap: 1.25rem;
+    width: 100%;
+    min-width: 0;
 }
 
-.deliveryOrderGrid {
+.FormDeliveryOrder .deliveryOrderGrid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    align-items: start;
     gap: 1.1rem 1.25rem;
     width: 100%;
+    min-width: 0;
 }
 
-.deliveryOrderGrid label {
-    display: grid;
-    grid-template-rows: minmax(2.7rem, auto) 44px auto;
-    align-content: start;
+.FormDeliveryOrder .deliveryOrderGrid > *,
+.FormDeliveryOrder .deliveryStoreField {
     min-width: 0;
-    gap: 0.4rem;
-    color: #111;
+}
+
+.FormDeliveryOrder .deliveryStoreField,
+.FormDeliveryOrder .deliveryStoreField .FacturationSearchinList {
+    width: 100%;
+    max-width: 100%;
+}
+
+.FormDeliveryOrder .deliveryOrderGrid .FacturationFormInput {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.FormDeliveryOrder .FacturationFormInput label {
+    margin-bottom: 0.55rem;
+    padding-left: 0;
+    color: var(--mainText);
     font-size: 0.95rem;
     line-height: 1.35;
 }
 
-.deliveryOrderGrid label small {
-    color: #777;
-    font-size: 0.8rem;
-    line-height: 1.35;
-}
-
-.deliveryOrderGrid input,
-.deliveryNotes textarea,
-.deliveryAttachment input {
+.FormDeliveryOrder .FacturationFormInput .inputContainer {
     width: 100%;
     min-width: 0;
-    min-height: 44px;
-    padding: 0.65rem 0.85rem;
-    color: #333;
-    background: #fff;
-    border: 1px solid #d7d7d7;
-    border-radius: 10px;
-    font: inherit;
-    box-sizing: border-box;
+    max-width: 100%;
 }
 
-.deliveryOrderGrid input {
-    height: 44px;
+.FormDeliveryOrder .FacturationFormInput .inputContainer input,
+.FormDeliveryOrder .FacturationFormInput .inputContainer textarea {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    color: var(--descriptionText);
+    background-color: var(--inputsBg);
+    border-color: var(--inputsBorder);
 }
 
-.deliveryOrderGrid input:focus,
-.deliveryNotes textarea:focus,
-.deliveryAttachment input:focus {
-    outline: 2px solid #3b82f6;
-    outline-offset: 1px;
-}
-
-.deliverySelectedOrders {
+.FormDeliveryOrder .deliverySelectedOrders {
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
+    gap: 0.8rem;
     width: 100%;
+    min-width: 0;
     padding: 1rem;
-    background: #f8f9fb;
-    border: 1px solid #dedede;
-    border-radius: 12px;
-    box-sizing: border-box;
+    color: var(--mainText);
+    background: var(--inputsBg);
+    border: 1px solid var(--inputsBorder);
+    border-radius: 0.8rem;
 }
 
-.deliverySelectedOrders h3,
-.deliverySelectedOrders > p {
+.FormDeliveryOrder .deliverySelectedOrders h3,
+.FormDeliveryOrder .deliverySelectedOrders > p {
     margin: 0;
 }
 
-.deliverySelectedOrders h3 {
-    font-size: 1.1rem;
+.FormDeliveryOrder .deliverySelectedOrders h3 {
+    color: var(--sectionTitle);
+    font-size: 1.05rem;
 }
 
-.deliverySelectedOrder {
-    padding: 1rem;
-    background: #fff;
-    border: 1px solid #dedede;
-    border-radius: 10px;
+.FormDeliveryOrder .deliverySelectedOrders > p,
+.FormDeliveryOrder .deliverySelectedOrderClient {
+    color: var(--descriptionText);
+    line-height: 1.45;
 }
 
-.deliverySelectedOrderHeader {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 0.5rem 1rem;
-}
-
-.deliverySelectedOrderClient {
-    margin: 0.5rem 0;
-    color: #656565;
-}
-
-.deliverySelectedOrder ul {
+.FormDeliveryOrder .deliverySelectedOrder {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
-    margin: 0.5rem 0 0;
-    padding-left: 1.25rem;
-}
-
-.deliverySelectedOrder li {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 0.5rem 1rem;
-}
-
-.deliveryNotes {
-    display: flex;
-    flex: 1 1 100%;
-    flex-direction: column;
-    gap: 0.55rem;
-    color: #111;
-    font-size: 0.95rem;
-}
-
-.deliveryNotes textarea {
-    min-height: 90px;
-    resize: vertical;
-}
-
-.deliverySignatures {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    width: 100%;
-}
-
-.deliverySignature {
-    display: flex;
-    flex: 1 1 300px;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.65rem;
     min-width: 0;
+    padding: 0.9rem;
+    background: var(--bg);
+    border: 1px solid var(--inputsBorder);
+    border-radius: 0.65rem;
 }
 
-.deliverySignature label {
-    color: #111;
-    font-size: 0.95rem;
+.FormDeliveryOrder .deliverySelectedOrderHeader {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    color: var(--sectionTitle);
 }
 
-.deliverySignature small,
-.deliveryAttachment small {
-    color: #777;
-    font-size: 0.8rem;
-    line-height: 1.4;
+.FormDeliveryOrder .deliverySelectedOrderClient {
+    margin: 0;
 }
 
-.deliverySignature canvas {
+.FormDeliveryOrder .deliveryOrderTableWrap {
     width: 100%;
-    height: 130px;
-    border: 1px solid #d7d7d7;
-    border-radius: 10px;
-    background: #fff;
-    touch-action: none;
+    min-width: 0;
+    overflow-x: auto;
+    border: 1px solid var(--inputsBorder);
+    border-radius: 0.55rem;
 }
 
-.deliverySignature button,
-.deliveryAttachmentSelected button {
-    align-self: flex-start;
-    padding: 0.4rem 0.7rem;
-    color: #444;
-    background: #f1f1f1;
-    border: 0;
-    border-radius: 7px;
-    cursor: pointer;
+.FormDeliveryOrder .deliveryOrderTable {
+    width: 100%;
+    min-width: 850px;
+    border-collapse: collapse;
+    color: var(--mainText);
+    background: var(--bg);
 }
 
-.deliverySignature span {
-    color: #16834a;
+.FormDeliveryOrder .deliveryOrderTable th,
+.FormDeliveryOrder .deliveryOrderTable td {
+    padding: 0.65rem 0.55rem;
+    border-bottom: 1px solid var(--inputsBorder);
+    text-align: left;
+    vertical-align: middle;
     font-size: 0.85rem;
 }
 
-.deliveryAttachmentOptions {
+.FormDeliveryOrder .deliveryOrderTable th {
+    color: var(--sectionTitle);
+    background: var(--inputsBg);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.FormDeliveryOrder .deliveryOrderTable tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.FormDeliveryOrder .deliveryOrderTable .FacturationFormInput {
+    width: 7rem;
+    min-width: 7rem;
+}
+
+.FormDeliveryOrder .deliveryOrderTable .FacturationFormInput label {
+    display: none;
+}
+
+.FormDeliveryOrder .deliveryOrderTable .FacturationFormInput .inputContainer input {
+    min-height: 2.4rem;
+    padding: 0.4rem 0.5rem;
+}
+
+.FormDeliveryOrder .deliveryChecks {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    gap: 0.8rem 1.25rem;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0.9rem 1rem;
+    color: var(--mainText);
+    border: 1px solid var(--inputsBorder);
+    border-radius: 0.7rem;
+}
+
+.FormDeliveryOrder .deliveryChecks legend {
+    padding: 0 0.35rem;
+    color: var(--sectionTitle);
+    font-weight: 600;
+}
+
+.FormDeliveryOrder .deliveryChecks label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--mainText);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.FormDeliveryOrder .deliveryChecks input {
+    accent-color: var(--chatAccent);
+}
+
+.FormDeliveryOrder > form > .FacturationFormInput,
+.FormDeliveryOrder .deliveryNotes {
+    width: 100%;
+    min-width: 0;
+}
+
+.FormDeliveryOrder .deliverySignatures {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1rem;
     width: 100%;
+    min-width: 0;
 }
 
-.deliveryAttachment {
+.FormDeliveryOrder .deliverySignature {
     display: flex;
-    flex: 1 1 280px;
+    flex-direction: column;
+    gap: 0.65rem;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding: 0.9rem;
+    border: 1px solid var(--inputsBorder);
+    border-radius: 0.7rem;
+    background: var(--inputsBg);
+}
+
+.FormDeliveryOrder .deliverySignature > * {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.FormDeliveryOrder .deliverySignature strong {
+    color: var(--sectionTitle);
+    font-size: 0.9rem;
+}
+
+.FormDeliveryOrder .deliverySignature canvas {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: 7rem;
+    border: 1px dashed var(--inputsBorder);
+    border-radius: 0.5rem;
+    background: var(--bg);
+    touch-action: none;
+}
+
+.FormDeliveryOrder .deliverySignature .FacturationFormInput {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    flex: 0 1 100%;
+}
+
+.FormDeliveryOrder .deliverySignature .FacturationFormInput .inputContainer {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.FormDeliveryOrder .deliverySignature .FacturationFormInput input {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.FormDeliveryOrder .deliverySignature small {
+    color: var(--descriptionText);
+}
+
+.FormDeliveryOrder .deliveryAttachmentOptions {
+    display: flex;
     flex-direction: column;
     gap: 0.55rem;
-    min-width: 0;
-    color: #111;
-    font-size: 0.95rem;
-}
-
-.deliveryAttachment input {
-    height: auto;
-}
-
-.deliveryAttachmentSelected {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.75rem;
     width: 100%;
-    color: #555;
+    min-width: 0;
+    color: var(--mainText);
 }
 
-.deliveryFormError {
-    flex: 1 1 100%;
+.FormDeliveryOrder .deliveryAttachmentOptions > strong {
+    color: var(--sectionTitle);
+}
+
+.FormDeliveryOrder .deliveryAttachmentOptions > small {
+    color: var(--descriptionText);
+    line-height: 1.45;
+}
+
+.FormDeliveryOrder .deliveryFormError {
+    width: 100%;
     margin: 0;
-    color: #b42318;
+    color: var(--statusError);
 }
 
-.deliveryOrderActions {
+.FormDeliveryOrder .deliveryOrderActions {
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
@@ -247,61 +329,109 @@
     padding-top: 0.5rem;
 }
 
-.deliveryOrderActions button {
-    min-width: 150px;
-    min-height: 44px;
-    padding: 0.65rem 1rem;
-    border: 0;
-    border-radius: 9px;
+.FormDeliveryOrder .deliveryOrderActions button,
+.FormDeliveryOrder .deliverySignature button {
+    min-height: 2.6rem;
+    padding: 0.6rem 1rem;
+    color: var(--mainText);
+    background: var(--inputsBg);
+    border: 1px solid var(--inputsBorder);
+    border-radius: 0.55rem;
     font: inherit;
     cursor: pointer;
 }
 
-.deliveryOrderActions button[type="button"] {
-    color: #222;
-    background: #ddd;
+.FormDeliveryOrder .deliveryOrderActions button[type="submit"] {
+    color: var(--bg);
+    background: var(--mainText);
+    border-color: var(--mainText);
 }
 
-.deliveryOrderActions button[type="submit"] {
-    color: #fff;
-    background: #111;
-}
-
-.deliveryOrderActions button:disabled {
-    cursor: not-allowed;
+.FormDeliveryOrder button:disabled {
     opacity: 0.6;
+    cursor: not-allowed;
 }
 
-@media (max-width: 850px) {
+@media (max-width: 900px) {
     .FormDeliveryOrder {
-        width: 92vw;
-        padding: 1.25rem;
+        width: min(94vw, 760px);
     }
 
-    .deliveryOrderGrid {
+    .FormDeliveryOrder .deliveryOrderGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .FormDeliveryOrder .deliverySignatures {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
 @media (max-width: 560px) {
     .FormDeliveryOrder {
-        width: 94vw;
+        width: 96vw;
+        max-height: 92vh;
         padding: 1rem;
     }
 
-    .deliveryOrderGrid {
-        grid-template-columns: minmax(0, 1fr);
+    .FormDeliveryOrder .deliveryOrderGrid,
+    .FormDeliveryOrder .deliverySignatures {
+        grid-template-columns: 1fr;
     }
 
-    .deliveryOrderGrid label {
-        grid-template-rows: auto 44px auto;
-    }
-
-    .deliveryOrderActions {
+    .FormDeliveryOrder .deliveryOrderActions {
         flex-direction: column-reverse;
     }
 
-    .deliveryOrderActions button {
+    .FormDeliveryOrder .deliveryOrderActions button {
         width: 100%;
     }
+}
+
+/* Ajustes de tema para componentes compartidos de SGA. */
+.FormDeliveryOrder .deliveryChecks .CheckSquare span {
+    color: var(--mainText);
+}
+
+.FormDeliveryOrder .deliveryChecks .CheckSquare {
+    align-items: center;
+    padding: 0.25rem;
+}
+
+.FormDeliveryOrder .deliveryChecks .SwitchOption {
+    min-height: 2.6rem;
+    align-items: center;
+    color: var(--mainText);
+    background: var(--inputsBg);
+    border: 1px solid var(--inputsBorder);
+    box-shadow: none;
+}
+
+.FormDeliveryOrder .deliveryChecks .SwitchOption span {
+    color: var(--mainText);
+    font-size: 0.9rem;
+}
+
+.FormDeliveryOrder .deliveryChecks .SwitchOption .switch {
+    background: var(--bg);
+}
+
+.FormDeliveryOrder .deliveryChecks .switchedSwitch {
+    background: var(--chatAccent);
+}
+
+.FormDeliveryOrder .deliveryOrderActions .FormButton,
+.FormDeliveryOrder .deliverySignature .FormButton {
+    min-height: 2.6rem;
+    padding: 0.6rem 1rem;
+    border-radius: 0.55rem;
+}
+
+.FormDeliveryOrder .deliverySelectedOrderHeader,
+.FormDeliveryOrder .deliveryOrderTable th {
+    color: var(--sectionTitle);
+}
+
+.FormDeliveryOrder .deliverySelectedOrderClient,
+.FormDeliveryOrder .deliverySelectedOrders > p {
+    color: var(--descriptionText);
 }

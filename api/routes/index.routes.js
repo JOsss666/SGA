@@ -475,7 +475,9 @@ router.post('/analytics/getProcessStepsCycleTime',AnalyticController.getProcessS
         requireTrustedOrigin,
         nexo360Controller.getProcessAdministrationReport, sessionErrorHandler);
 
-
+    router.post( "/nexo360/registerDeliveryOrder",express.json({ limit: "2mb", strict: true }),
+        requireTrustedOrigin,
+        nexo360Controller.registerDeliveryOrder, sessionErrorHandler);
 
     // EXTERNAL SERVICES
 

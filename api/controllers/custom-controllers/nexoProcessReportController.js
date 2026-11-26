@@ -75,6 +75,7 @@ export const createNexoProcessReportHandler = ({ useDataBase }) => async (req, r
                     JSON_AGG(JSON_BUILD_OBJECT(
                         'id', movement.id,
                         'name', COALESCE(service.name, 'Ítem de producción'),
+                        'units', movement.units,
                         'provider', supplier.names,
                         'workOrder', delegation_document."ownSerial",
                         'status', CASE WHEN assignment.id IS NULL THEN 'Por asignar' ELSE 'Asignado' END
