@@ -271,7 +271,99 @@ export function createNexo360Service({ withTransaction, registerDocument, regist
         `, [doc_id, order.id]);
         return { ...order, instance_id: orderContext.instance_id ?? null, step_instance: orderContext.step_id ?? null, subprocess };
     }
-    return { generateClientOrder, transformPresets, createCaralNexo360Order };
+
+    async function create4KDeliveryOrder({ payload, context, doc_id }, { client }) {
+        const values = payload?.values ?? {};
+        const parentInstanceIds = Array.isArray(values.parentInstanceIds)
+            ? [
+                  ...new Set(
+                      values.parentInstanceIds.map((value, index) =>
+                          id(value, `parentInstanceIds[${index}]`)
+                      )
+                  ),
+              ]
+            : [];
+
+        if (!parentInstanceIds.length || parentInstanceIds.length > 100) {
+            fail(
+                'La orden de entrega debe incluir entre 1 y 100 órdenes de producción.',
+                422
+            );
+        }
+
+        const deliveryNumber = String(values.deliveryNumber ?? '').trim();
+        const deliveredBy = String(values.authorizedName ?? '').trim();
+        const deliveryDate = String(values.deliveryDate ?? '').trim();
+        const deliveryTime = String(values.deliveryTime ?? '').trim();
+
+        if (!deliveryNumber) {
+            fail('El número de la orden de entrega es obligatorio.');
+        }
+        if (!deliveredBy) {
+            fail('El nombre de quien entrega es obligatorio.');
+        }
+        if (!deliveryDate) {
+            fail('La fecha de entrega es obligatoria.');
+        }
+
+        const instanceResult = await client.query(
+            `
+                SELECT
+                    id::text AS instance_id,
+                    step_id::text AS step_id
+                FROM "Process".process_instance
+                WHERE company_id = $1
+                  AND id = ANY($2::bigint[])
+                  AND parent_id IS NULL
+                ORDER BY id;
+            `,
+            [context.company_id, parentInstanceIds]
+        );
+
+        if (instanceResult.rows.length !== parentInstanceIds.length) {
+            fail(
+                'Una o más órdenes de producción no existen para esta empresa.',
+                404
+            );
+        }
+
+        if (instanceResult.rows.some((instance) => !instance.step_id)) {
+            fail(
+                'Una o más órdenes no tienen una etapa de proceso asociada.',
+                409
+            );
+        }
+
+        const linked = await linkDocumentInstances(
+            doc_id,
+            {
+                company_id: context.company_id,
+                instances: instanceResult.rows.map(({ instance_id, step_id }) => ({
+                    instance_id,
+                    step_id,
+                })),
+            },
+            { client }
+        );
+
+        if (linked?.status !== 'OK') {
+            fail('No se pudo vincular la orden de entrega con los procesos.', 500);
+        }
+
+        return {
+            id: doc_id,
+            doc_id,
+            deliveryNumber,
+            deliveredBy,
+            receiverName: String(values.receiverName ?? '').trim() || null,
+            deliveryDate,
+            deliveryTime: deliveryTime || null,
+            linkedInstances: instanceResult.rows.map(({ instance_id }) => instance_id),
+        };
+    }
+    return { generateClientOrder, transformPresets, createCaralNexo360Order, create4KDeliveryOrder };
 }
 
 export default createNexo360Service;
+
+

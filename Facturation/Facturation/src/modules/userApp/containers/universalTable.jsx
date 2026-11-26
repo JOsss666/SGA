@@ -50,6 +50,7 @@ export function UniversalTable({
     height,
     selectedRows = [],
     getRowKey,
+    keepSelectedRowsVisible = false,
     onResultsChange,
     rowProps = {},
     emptyMessage = 'No hay resultados disponibles'
@@ -85,13 +86,15 @@ export function UniversalTable({
 
         const handleKeyDown = (event) => {
             if (event.key !== 'Escape') return;
-            // Esc limpia el filtro de la columna abierta (quedan todos seleccionados) y la cierra.
+
             setColumnFilters((currentFilters) => {
                 if (!Object.hasOwn(currentFilters, openFilterKey)) return currentFilters;
+
                 const nextFilters = { ...currentFilters };
                 delete nextFilters[openFilterKey];
                 return nextFilters;
             });
+
             setFilterSearchValue('');
             setOpenFilterKey(null);
             setFilterMenuPosition(null);
@@ -100,31 +103,50 @@ export function UniversalTable({
         const handlePointerDown = (event) => {
             const menu = filterMenuRef.current;
             if (menu && menu.contains(event.target)) return;
-            // Dejar que el botón de filtro gestione su propio toggle.
             if (event.target.closest?.('.universalTableFilterButton')) return;
-            // Clic afuera: cerrar conservando el filtro aplicado.
+
             setOpenFilterKey(null);
             setFilterMenuPosition(null);
         };
 
         window.addEventListener('keydown', handleKeyDown);
         document.addEventListener('mousedown', handlePointerDown);
+
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('mousedown', handlePointerDown);
         };
     }, [openFilterKey]);
 
-    const columnValueOptions = useMemo(() => Object.fromEntries(
-        visibleColumns.map((column) => [
-            column.key,
-            normalizeColumnValues(column, tableResults)
-        ])
-    ), [tableResults, visibleColumns]);
+    const columnValueOptions = useMemo(
+        () => Object.fromEntries(
+            visibleColumns.map((column) => [
+                column.key,
+                normalizeColumnValues(column, tableResults)
+            ])
+        ),
+        [tableResults, visibleColumns]
+    );
+
+    const isSelectedResult = (result, index) => {
+        const rowKey = getRowKey?.(result, index) ?? result?.id ?? index;
+
+        return selectedRows.some(
+            (selectedId) => String(selectedId) === String(rowKey)
+        );
+    };
 
     const filteredResults = useMemo(() => {
         const normalizedSearch = normalizeText(searchValue);
-        const filtered = tableResults.filter((result) => {
+
+        const filtered = tableResults.filter((result, index) => {
+            if (
+                keepSelectedRowsVisible &&
+                isSelectedResult(result, index)
+            ) {
+                return true;
+            }
+
             const matchesSearch = !normalizedSearch || visibleColumns.some((column) => (
                 normalizeText(result?.[column.key]).includes(normalizedSearch)
             ));
@@ -136,31 +158,59 @@ export function UniversalTable({
             ));
         });
 
-        if (!sortConfig) return filtered;
+        let orderedResults = filtered;
 
-        return [...filtered].sort((firstResult, secondResult) => {
-            const firstValue = firstResult?.[sortConfig.key];
-            const secondValue = secondResult?.[sortConfig.key];
-            const numericFirst = Number(firstValue);
-            const numericSecond = Number(secondValue);
-            const bothAreNumbers = firstValue !== ''
-                && secondValue !== ''
-                && Number.isFinite(numericFirst)
-                && Number.isFinite(numericSecond);
-            const comparison = bothAreNumbers
-                ? numericFirst - numericSecond
-                : String(firstValue ?? '').localeCompare(String(secondValue ?? ''), 'es', { numeric: true });
+        if (sortConfig) {
+            orderedResults = [...filtered].sort((firstResult, secondResult) => {
+                const firstValue = firstResult?.[sortConfig.key];
+                const secondValue = secondResult?.[sortConfig.key];
+                const numericFirst = Number(firstValue);
+                const numericSecond = Number(secondValue);
+                const bothAreNumbers = firstValue !== ''
+                    && secondValue !== ''
+                    && Number.isFinite(numericFirst)
+                    && Number.isFinite(numericSecond);
 
-            return sortConfig.order === 'DESC' ? comparison * -1 : comparison;
-        });
-    }, [columnFilters, searchValue, sortConfig, tableResults, visibleColumns]);
+                const comparison = bothAreNumbers
+                    ? numericFirst - numericSecond
+                    : String(firstValue ?? '').localeCompare(
+                        String(secondValue ?? ''),
+                        'es',
+                        { numeric: true }
+                    );
+
+                return sortConfig.order === 'DESC' ? comparison * -1 : comparison;
+            });
+        }
+
+        if (!keepSelectedRowsVisible) return orderedResults;
+
+        return [
+            ...orderedResults.filter((result, index) => isSelectedResult(result, index)),
+            ...orderedResults.filter((result, index) => !isSelectedResult(result, index))
+        ];
+    }, [
+        columnFilters,
+        searchValue,
+        sortConfig,
+        tableResults,
+        visibleColumns,
+        selectedRows,
+        keepSelectedRowsVisible,
+        getRowKey
+    ]);
 
     // Optional column.total: a React node or a function of all filtered rows
     // (not just the virtualized rows currently on screen).
     const hasTotals = visibleColumns.some((column) => column.total != null);
-    const totals = useMemo(() => visibleColumns.map((column) => (
-        typeof column.total === 'function' ? column.total(filteredResults) : column.total
-    )), [filteredResults, visibleColumns]);
+    const totals = useMemo(
+        () => visibleColumns.map((column) => (
+            typeof column.total === 'function'
+                ? column.total(filteredResults)
+                : column.total
+        )),
+        [filteredResults, visibleColumns]
+    );
 
     useEffect(() => {
         onResultsChange?.(filteredResults);
@@ -174,26 +224,36 @@ export function UniversalTable({
     });
 
     const minimumTableWidth = Math.max(visibleColumns.length * 150, 620);
+
     const optionsForOpenColumn = useMemo(
         () => openFilterKey ? columnValueOptions[openFilterKey] ?? [] : [],
         [columnValueOptions, openFilterKey]
     );
+
     const visibleFilterOptions = useMemo(() => {
         const normalizedFilterSearch = normalizeText(filterSearchValue);
+
         if (!normalizedFilterSearch) return optionsForOpenColumn;
-        return optionsForOpenColumn.filter((option) => normalizeText(option.label).includes(normalizedFilterSearch));
+
+        return optionsForOpenColumn.filter((option) =>
+            normalizeText(option.label).includes(normalizedFilterSearch)
+        );
     }, [filterSearchValue, optionsForOpenColumn]);
 
     const handleSort = (column) => {
         if (disabled || loading || column.sortable === false) return;
+
         setSortConfig((currentSort) => ({
             key: column.key,
-            order: currentSort?.key === column.key && currentSort.order === 'ASC' ? 'DESC' : 'ASC'
+            order: currentSort?.key === column.key && currentSort.order === 'ASC'
+                ? 'DESC'
+                : 'ASC'
         }));
     };
 
     const toggleFilter = (columnKey, value) => {
         const allValues = (columnValueOptions[columnKey] ?? []).map((option) => option.value);
+
         setColumnFilters((currentFilters) => {
             const currentlySelected = Object.hasOwn(currentFilters, columnKey)
                 ? currentFilters[columnKey]
@@ -203,8 +263,11 @@ export function UniversalTable({
                 : [...currentlySelected, value];
             const nextFilters = { ...currentFilters };
 
-            if (nextSelected.length === allValues.length) delete nextFilters[columnKey];
-            else nextFilters[columnKey] = nextSelected;
+            if (nextSelected.length === allValues.length) {
+                delete nextFilters[columnKey];
+            } else {
+                nextFilters[columnKey] = nextSelected;
+            }
 
             return nextFilters;
         });
@@ -213,28 +276,40 @@ export function UniversalTable({
     const setAllColumnValues = (columnKey, selected) => {
         setColumnFilters((currentFilters) => {
             const nextFilters = { ...currentFilters };
-            if (selected) delete nextFilters[columnKey];
-            else nextFilters[columnKey] = [];
+
+            if (selected) {
+                delete nextFilters[columnKey];
+            } else {
+                nextFilters[columnKey] = [];
+            }
+
             return nextFilters;
         });
     };
 
-    // La búsqueda de la card filtra en vivo: deja seleccionados solo los valores cuya
-    // etiqueta coincide con el texto; al vaciarla vuelven a quedar todos seleccionados.
+    // La búsqueda del filtro deja seleccionados los valores coincidentes.
     const applyFilterSearchSelection = (columnKey, searchText) => {
         const allOptions = columnValueOptions[columnKey] ?? [];
         const normalizedSearch = normalizeText(searchText);
+
         setColumnFilters((currentFilters) => {
             const nextFilters = { ...currentFilters };
+
             if (!normalizedSearch) {
                 delete nextFilters[columnKey];
                 return nextFilters;
             }
+
             const matchingValues = allOptions
                 .filter((option) => normalizeText(option.label).includes(normalizedSearch))
                 .map((option) => option.value);
-            if (matchingValues.length === allOptions.length) delete nextFilters[columnKey];
-            else nextFilters[columnKey] = matchingValues;
+
+            if (matchingValues.length === allOptions.length) {
+                delete nextFilters[columnKey];
+            } else {
+                nextFilters[columnKey] = matchingValues;
+            }
+
             return nextFilters;
         });
     };
@@ -249,22 +324,31 @@ export function UniversalTable({
 
     const renderRow = (result, index) => {
         const rowKey = getRowKey?.(result, index) ?? result?.id ?? index;
+
         const sharedProps = {
             ...rowProps,
             info: result,
             columns: visibleColumns,
             disabled,
-            selected: selectedRows.includes(rowKey),
+            selected: selectedRows.some(
+                (selectedId) => String(selectedId) === String(rowKey)
+            ),
             index
         };
 
-        if (isValidElement(Row)) return cloneElement(Row, { ...sharedProps, key: rowKey });
+        if (isValidElement(Row)) {
+            return cloneElement(Row, { ...sharedProps, key: rowKey });
+        }
+
         const RowComponent = Row;
         return <RowComponent {...sharedProps} key={rowKey} />;
     };
 
     const syncHeaderScroll = (event) => {
-        if (headerRef.current) headerRef.current.scrollLeft = event.currentTarget.scrollLeft;
+        if (headerRef.current) {
+            headerRef.current.scrollLeft = event.currentTarget.scrollLeft;
+        }
+
         if (openFilterKey) {
             setOpenFilterKey(null);
             setFilterMenuPosition(null);
@@ -281,11 +365,18 @@ export function UniversalTable({
         const tableRectangle = tableRef.current?.getBoundingClientRect();
         const buttonRectangle = event.currentTarget.getBoundingClientRect();
         const menuWidth = Math.min(288, (tableRectangle?.width ?? 320) - 16);
-        const preferredLeft = buttonRectangle.right - (tableRectangle?.left ?? 0) - menuWidth;
+        const preferredLeft =
+            buttonRectangle.right - (tableRectangle?.left ?? 0) - menuWidth;
 
         setFilterSearchValue('');
         setFilterMenuPosition({
-            left: Math.max(8, Math.min(preferredLeft, (tableRectangle?.width ?? 320) - menuWidth - 8)),
+            left: Math.max(
+                8,
+                Math.min(
+                    preferredLeft,
+                    (tableRectangle?.width ?? 320) - menuWidth - 8
+                )
+            ),
             top: buttonRectangle.bottom - (tableRectangle?.top ?? 0) + 4,
             width: menuWidth
         });
@@ -323,8 +414,14 @@ export function UniversalTable({
                                 }}
                             >
                                 {column.total != null && (
-                                    <span title={typeof totals[index] === 'string' || typeof totals[index] === 'number'
-                                        ? `Total ${column.label}: ${totals[index]}` : undefined}>
+                                    <span
+                                        title={
+                                            typeof totals[index] === 'string' ||
+                                            typeof totals[index] === 'number'
+                                                ? `Total ${column.label}: ${totals[index]}`
+                                                : undefined
+                                        }
+                                    >
                                         {loading ? '—' : totals[index]}
                                     </span>
                                 )}
@@ -332,6 +429,7 @@ export function UniversalTable({
                         ))}
                     </div>
                 )}
+
                 <div
                     className="universalTableHeader"
                     role="row"
@@ -345,7 +443,13 @@ export function UniversalTable({
                             <div
                                 className="universalTableHeaderCell"
                                 role="columnheader"
-                                aria-sort={isSorted ? (sortConfig.order === 'ASC' ? 'ascending' : 'descending') : 'none'}
+                                aria-sort={
+                                    isSorted
+                                        ? sortConfig.order === 'ASC'
+                                            ? 'ascending'
+                                            : 'descending'
+                                        : 'none'
+                                }
                                 key={column.key}
                                 style={{
                                     flex: column.flex ?? '1 1 10rem',
@@ -362,12 +466,15 @@ export function UniversalTable({
                                 >
                                     <span>{column.label}</span>
                                     <i
-                                        className={`${isSorted? 'sortedColumIcon':''} ${isSorted
-                                            ? `fa-solid fa-arrow-${sortConfig.order === 'ASC' ? 'down' : 'up'}-short-wide`
-                                            : 'bi bi-caret-down'}`}
+                                        className={`${isSorted ? 'sortedColumIcon' : ''} ${
+                                            isSorted
+                                                ? `fa-solid fa-arrow-${sortConfig.order === 'ASC' ? 'down' : 'up'}-short-wide`
+                                                : 'bi bi-caret-down'
+                                        }`}
                                         aria-hidden="true"
                                     />
                                 </button>
+
                                 <button
                                     className={`universalTableFilterButton${isFiltered ? ' active' : ''}`}
                                     type="button"
@@ -376,7 +483,7 @@ export function UniversalTable({
                                     aria-expanded={openFilterKey === column.key}
                                     onClick={(event) => openColumnFilter(event, column.key)}
                                 >
-                                    <i className="bi bi-funnel"/>
+                                    <i className="bi bi-funnel" />
                                 </button>
                             </div>
                         );
@@ -394,7 +501,7 @@ export function UniversalTable({
                 >
                     <div className="universalTableFilterMenuHeader">
                         <strong>
-                            <i className="bi bi-funnel"/>
+                            <i className="bi bi-funnel" />
                             Filtrar en {visibleColumns.find((column) => column.key === openFilterKey)?.label}
                         </strong>
                         <button
@@ -408,6 +515,7 @@ export function UniversalTable({
                             <i className="fa-solid fa-xmark" aria-hidden="true" />
                         </button>
                     </div>
+
                     <label>
                         <input
                             type="search"
@@ -422,23 +530,41 @@ export function UniversalTable({
                             autoFocus
                         />
                     </label>
+
                     <div className="universalTableFilterActions">
-                        <button type="button" onClick={() => {
-                            setAllColumnValues(openFilterKey, true)
-                            setFilterSearchValue("")
-                        }}>Reestablecer</button>
-                        <button type="button" onClick={() => setAllColumnValues(openFilterKey, true)}>Todos</button>
-                        <button type="button" onClick={() => setAllColumnValues(openFilterKey, false)}>Ninguno</button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setAllColumnValues(openFilterKey, true);
+                                setFilterSearchValue("");
+                            }}
+                        >
+                            Restablecer
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setAllColumnValues(openFilterKey, true)}
+                        >
+                            Todos
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setAllColumnValues(openFilterKey, false)}
+                        >
+                            Ninguno
+                        </button>
                     </div>
+
                     <div className="universalTableFilterValues">
                         {visibleFilterOptions.map((option) => {
                             const selectedValues = Object.hasOwn(columnFilters, openFilterKey)
                                 ? columnFilters[openFilterKey]
                                 : optionsForOpenColumn.map((item) => item.value);
+
                             return (
                                 <label key={option.value}>
                                     <input
-                                        className='chechBoxValueColumn'
+                                        className="chechBoxValueColumn"
                                         type="checkbox"
                                         checked={selectedValues.includes(option.value)}
                                         disabled={disabled || loading}
@@ -448,6 +574,7 @@ export function UniversalTable({
                                 </label>
                             );
                         })}
+
                         {visibleFilterOptions.length === 0 && <p>No hay valores</p>}
                     </div>
                 </div>
@@ -459,7 +586,10 @@ export function UniversalTable({
                 role="rowgroup"
                 onScroll={syncHeaderScroll}
             >
-                <div className="universalTableBodyContent" style={{ minWidth: `${minimumTableWidth}px` }}>
+                <div
+                    className="universalTableBodyContent"
+                    style={{ minWidth: `${minimumTableWidth}px` }}
+                >
                     {loading && <UniversalTableLoadingShader columns={visibleColumns} />}
 
                     {!loading && filteredResults.length > 0 && (
@@ -475,21 +605,21 @@ export function UniversalTable({
                                     data-index={virtualRow.index}
                                     style={{ transform: `translateY(${virtualRow.start}px)` }}
                                 >
-                                    {renderRow(filteredResults[virtualRow.index], virtualRow.index)}
+                                    {renderRow(
+                                        filteredResults[virtualRow.index],
+                                        virtualRow.index
+                                    )}
                                 </div>
                             ))}
                         </div>
                     )}
                 </div>
 
-                {/* Empty state kept as a sibling pinned to the viewport (sticky) so it
-                    stays visible regardless of horizontal scroll. The content wrapper above
-                    keeps its min-width, so the body remains horizontally scrollable and the
-                    header filters stay reachable even with no rows. */}
                 {!loading && filteredResults.length === 0 && (
                     <div className="universalTableEmpty" role="status">
                         <i className="bi bi-inbox" aria-hidden="true" />
                         <p>{emptyMessage}</p>
+
                         {hasActiveFilters && (
                             <button
                                 type="button"
