@@ -21,6 +21,8 @@ nexo360Controller.getOtpProductionReport =
 nexo360Controller.getProcessAdministrationReport =
     createNexoProcessReportHandler({ useDataBase });
 
+const isValidDatabaseId = (value) => /^[1-9]\d*$/.test(String(value ?? "").trim());
+
 nexo360Controller.registerDeliveryOrder = async (req, res) => {
     try {
         const body = req.body ?? {};
@@ -29,32 +31,59 @@ nexo360Controller.registerDeliveryOrder = async (req, res) => {
         ).trim();
         const userId = String(body.user_id ?? "").trim();
         const storeId = String(body.store_id ?? "").trim();
+        const submittedValues =
+            body.values && typeof body.values === "object"
+                ? body.values
+                : {};
 
-        if (!/^[1-9]\d*$/.test(companyId)) {
+        if (!isValidDatabaseId(companyId)) {
             return res.status(400).json({
                 status: "ERROR",
                 message: "Se requiere una empresa válida.",
             });
         }
 
-        if (!/^[1-9]\d*$/.test(userId)) {
+        if (!isValidDatabaseId(userId)) {
             return res.status(400).json({
                 status: "ERROR",
                 message: "Se requiere un usuario válido.",
             });
         }
 
-        if (!/^[1-9]\d*$/.test(storeId)) {
+        if (!isValidDatabaseId(storeId)) {
             return res.status(400).json({
                 status: "ERROR",
-                message: "Seleccione una sede de despacho.",
+                message: "Seleccione una sede de despacho válida.",
             });
         }
 
-        const submittedValues = body.values ?? {};
-        const description = String(
-            submittedValues.description ?? "Orden de entrega 4K 360"
+        const deliveryNumber = String(
+            submittedValues.deliveryNumber ?? ""
         ).trim();
+
+        const values = {
+            ...submittedValues,
+            deliveryNumber,
+            authorizedName:
+                submittedValues.authorizedName ??
+                submittedValues.delivererName,
+        };
+
+        const compactSpecialConfig = {
+            type: "4KDeliveryOrder",
+            deliveryNumber: deliveryNumber || null,
+            deliveryDate: values.deliveryDate ?? null,
+            deliveryTime: values.deliveryTime ?? null,
+            pickupPlace: values.pickupPlace ?? null,
+            carrier: values.carrier ?? null,
+            plate: values.plate ?? null,
+            delivererName: values.delivererName ?? null,
+            receiverName: values.receiverName ?? null,
+            parentInstanceIds: Array.isArray(values.parentInstanceIds)
+                ? values.parentInstanceIds.map(String)
+                : [],
+            attachmentName: values.attachmentName ?? null,
+        };
 
         const result = await utilsController.withTransaction(async (client) => {
             const document = await utilsController.registerDocument(
@@ -67,14 +96,13 @@ nexo360Controller.registerDeliveryOrder = async (req, res) => {
                     subTotal: 0,
                     total: 0,
                     created_by: userId,
-                    description,
+                    description: `Orden de entrega ${
+                        deliveryNumber || "4K 360"
+                    }`,
                     attached: Array.isArray(body.attached)
                         ? body.attached
                         : [],
-                    specialConfig: {
-                        type: "4KDeliveryOrder",
-                        values: submittedValues,
-                    },
+                    specialConfig: compactSpecialConfig,
                 },
                 { client }
             );
@@ -83,17 +111,11 @@ nexo360Controller.registerDeliveryOrder = async (req, res) => {
                 throw new Error("No se pudo registrar el documento de entrega.");
             }
 
-            // El número de documento usa el serial que genera SGA.
-            // El formulario no tiene que inventar ni enviar uno.
-            const values = {
-                ...submittedValues,
-                deliveryNumber:
-                    submittedValues.deliveryNumber ??
-                    String(document.ownSerial ?? document.id),
-                authorizedName:
-                    submittedValues.authorizedName ??
-                    submittedValues.delivererName,
-            };
+            if (!values.deliveryNumber) {
+                values.deliveryNumber = String(
+                    document.ownSerial ?? document.id
+                );
+            }
 
             const delivery = await nexo360Controller.create4KDeliveryOrder(
                 {

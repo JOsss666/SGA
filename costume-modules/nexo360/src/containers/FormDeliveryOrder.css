@@ -70,7 +70,7 @@
     margin-bottom: 0.55rem;
     padding-left: 0;
     color: var(--mainText);
-    font-size: 0.95rem;
+    font-size: 1rem;
     line-height: 1.35;
 }
 
@@ -434,4 +434,46 @@
 .FormDeliveryOrder .deliverySelectedOrderClient,
 .FormDeliveryOrder .deliverySelectedOrders > p {
     color: var(--descriptionText);
+}
+
+/* Ajustes de inputs y botones de firma solicitados para la entrega. */
+.FormDeliveryOrder .deliverySignature .FacturationFormInput,
+.FormDeliveryOrder .deliverySignature .FacturationFormInput .inputContainer,
+.FormDeliveryOrder .deliverySignature .FacturationFormInput input {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.FormDeliveryOrder .deliverySignature .FormButton,
+.FormDeliveryOrder .deliverySignature button {
+    color: #fff;
+    background: var(--chatAccent);
+    border-color: var(--chatAccent);
+}
+
+
+/* Alinea el selector de sede con los FormInput de la cuadrícula. */
+.FormDeliveryOrder .deliveryStoreField .FacturationSearchinList {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 0;
+}
+
+.FormDeliveryOrder .deliveryStoreField .FacturationSearchinList label {
+    margin: 0 0 0.55rem;
+    padding-left: 0;
+    color: var(--mainText);
+    font-size: 1rem;
+    line-height: 1.35;
+}
+
+.FormDeliveryOrder .deliveryStoreField .SlistC,
+.FormDeliveryOrder .deliveryStoreField .SlistC input {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 }

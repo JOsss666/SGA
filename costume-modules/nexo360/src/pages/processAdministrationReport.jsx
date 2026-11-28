@@ -275,6 +275,12 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
                                     name: "Generar orden de compra",
                                     action: openPurchaseOrder,
                                 },
+                                 
+                                {
+                                    icon: <i className="bi bi-truck" />,
+                                    name: "Crear orden de entrega",
+                                    action: openDeliveryOrder,
+                                },
                             ],
                         },
                         {
@@ -284,11 +290,6 @@ export function ProcessAdministrationReport({ appInfo, useAlert }) {
                                     icon: <i className="bi bi-people" />,
                                     name: "Asignar a proveedores",
                                     action: openBulkAssignment,
-                                },
-                                {
-                                    icon: <i className="bi bi-truck" />,
-                                    name: "Crear orden de entrega",
-                                    action: openDeliveryOrder,
                                 },
                                 {
                                     icon: <i className="bi bi-arrow-up" />,

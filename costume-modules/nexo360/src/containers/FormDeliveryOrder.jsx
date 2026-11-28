@@ -61,8 +61,18 @@ const getProductName = (product) =>
     product?.description ??
     `Producto #${product?.id ?? "—"}`;
 
-const getProductQuantity = (product) =>
-    Number(product?.units ?? product?.quantity ?? 0);
+const getProductQuantity = (product) =>{
+    const rawQuantity =
+        product?.units ??
+        product?.quantity ??
+        product?.orderedUnits ??
+        product?.requestedUnits;
+
+        const quantity = Number(rawQuantity);
+
+         return Number.isFinite(quantity) && quantity >= 0 ? quantity : 0;
+
+};
 
 const readImage = (file) =>
     new Promise((resolve, reject) => {
@@ -163,6 +173,7 @@ function SignatureField({
 
             <FormInput
                 title="C.C."
+                type="number"
                 placeholder="Número de identificación"
                 value={idValue}
                 action={onIdChange}
@@ -376,7 +387,7 @@ export function FormDeliveryOrder({ orders = [], onCancel }) {
             "Descripción",
             "Tienda",
             "Ciudad",
-            "Cant. pedida",
+            "Unidades",
             "Cant. entregada",
         ];
 
@@ -760,7 +771,7 @@ export function FormDeliveryOrder({ orders = [], onCancel }) {
                                             <th>Descripción</th>
                                             <th>Tienda</th>
                                             <th>Ciudad</th>
-                                            <th>Cant. pedida</th>
+                                            <th>Unidades</th>
                                             <th>Cant. entregada</th>
                                         </tr>
                                     </thead>
@@ -921,6 +932,7 @@ export function FormDeliveryOrder({ orders = [], onCancel }) {
                     />
                     <FormInput
                         title="C.C."
+                        type="number"
                         placeholder="Identificación de quien retira"
                         value={form.driverId}
                         action={(value) => updateField("driverId", value)}
@@ -928,7 +940,8 @@ export function FormDeliveryOrder({ orders = [], onCancel }) {
                     />
                     <FormInput
                         title="Teléfono"
-                        type="tel"
+                        type="number"
+                        min="0"
                         placeholder="Teléfono de contacto"
                         value={form.phone}
                         action={(value) => updateField("phone", value)}
@@ -1123,3 +1136,4 @@ export function FormDeliveryOrder({ orders = [], onCancel }) {
         </section>
     );
 }
+
